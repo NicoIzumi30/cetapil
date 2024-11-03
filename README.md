@@ -9,7 +9,7 @@ Dokumentasi ini dibuat bertujuan untuk memudahkan developer dalam melakukan inst
 ![Logo](https://i.postimg.cc/FFqn6Bv0/wp11840910-frieren-wallpapers-1.jpg)
 
 
-## Persyaratan
+## Requirements
 
 - PHP versi 8.2 atau lebih tinggi
 - Composer versi terbaru
