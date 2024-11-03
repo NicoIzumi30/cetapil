@@ -23,7 +23,7 @@ Dokumentasi ini dibuat bertujuan untuk memudahkan developer dalam melakukan inst
 Clone the project
 
 ```bash
-  git clone https://github.com/NicoIzumi30/cetapil.git
+  git clone -b backend-dev https://github.com/NicoIzumi30/cetapil.git
 ```
 Go to the project directory
 ```bash
