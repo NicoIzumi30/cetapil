@@ -1,0 +1,15 @@
+.table {
+ @apply w-full text-sm text-left rtl:text-right text-gray-500 border-spacing-0 border-separate rounded-md;
+}
+
+.table-head {
+	@apply flex gap-2 px-6 py-4 text-white font-bold text-lg items-center;
+}
+
+.table-row {
+	@apply bg-transparent text-white ;
+}
+
+.table-data {
+	@apply px-6 py-4 text-white;
+}

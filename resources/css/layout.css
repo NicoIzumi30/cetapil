@@ -1,0 +1,7 @@
+.icon-menu-container {
+	@apply p-[4px] rounded-md border-2 w-fit bg-[#2271B8] text-white;
+}
+
+.icon-menu {
+	@apply w-[40px];
+}

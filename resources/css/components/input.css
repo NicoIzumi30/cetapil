@@ -1,0 +1,188 @@
+:root {
+	--primary : #0077BD;
+}
+
+.form-control {
+    border-radius: 8px !important;
+    border: 1px solid #0077BD;
+    background: transparent;
+    font-size: 16px !important;
+    padding: 10px !important;
+	color: var(--primary);
+	margin-top: 8px;
+	outline-width: 0;
+}
+
+.form-control::placeholder {
+    color: #CECECE !important;
+    font-size: 16px;
+    font-style: normal;
+    font-weight: 400;
+    line-height: 145.5%;
+}
+
+.input-group .input-search {
+    padding: 10px !important;
+    font-size: 12px !important;
+    border: none !important;
+}
+
+.input-group .input-search::placeholder {
+    color: var(--primary) !important;
+}
+
+.input-group input[type="password"] {
+    background-color: #ffffff;
+}
+
+.input-group input[type="password"]:focus {
+    background-color: #FFF !important;
+    color: #2D2D2D !important;
+}
+
+.input-group input[type="password"]:focus .input-group-text {
+    background-color: #FFF !important;
+    color: #2D2D2D !important;
+}
+
+.input-group .shape {
+    position: absolute;
+    width: 30px;
+    border-bottom: 2px solid red;
+    border-right: 2px solid red;
+    -moz-transform: skew(-45deg);
+    -webkit-transform: skew(-45deg);
+    transform: skew(-45deg);
+}
+
+.input-group.custom-file input {
+    border-top-right-radius: 0 !important;
+    border-bottom-right-radius: 0 !important;
+    align-items: center;
+    cursor: pointer !important;
+}
+
+.input-group.custom-file button {
+    border: 1px solid #0077BD;
+    background: var(--Gradient, linear-gradient(65deg, #0077BD 18.7%, #02659F 77.87%));
+    color: #FFF;
+    font-size: 12px;
+    font-style: normal;
+    font-weight: 700;
+    line-height: 145.5%;
+    vertical-align: middle;
+}
+
+.form-select {
+    border-radius: 8px !important;
+    border: 1px solid #0077BD;
+    background-color: transparent !important;
+    padding: 10px !important;
+	font-size: 16px !important;
+	width: 100%;
+}
+
+.form-select-search {
+    border-radius: 8px !important;
+    border: 1px solid #0077BD;
+    padding: 12px !important;
+    font-size: 14px !important;
+	margin-top: 8px;
+	background-color: rgb(243, 250, 255) !important;
+	appearance: none;
+	width: 100%;
+	outline-width: 0;
+}
+
+.form-input-edit {
+    background-color: #F3FAFF !important;
+}
+
+.default {
+    color: #CECECE !important;
+}
+
+label {
+    color: #2D2D2D !important;
+    font-size: 14px;
+    font-style: normal;
+    font-weight: 700;
+    line-height: 145.5%;
+}
+
+.was-validated .form-control:invalid,
+.form-control.is-invalid {
+    border-color: var(--bs-form-invalid-border-color) !important;
+    padding-right: calc(1.5em + 0.75rem) !important;
+    background-image: url("data:image/svg+xml,%3csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 12 12' width='12' height='12' fill='none' stroke='%23dc3545'%3e%3ccircle cx='6' cy='6' r='4.5'/%3e%3cpath stroke-linejoin='round' d='M5.8 3.6h.4L6 6.5z'/%3e%3ccircle cx='6' cy='8.2' r='.6' fill='%23dc3545' stroke='none'/%3e%3c/svg%3e") !important;
+    background-repeat: no-repeat !important;
+    background-position: right calc(0.375em + 0.1875rem) center !important;
+    background-size: calc(0.75em + 0.375rem) calc(0.75em + 0.375rem) !important;
+}
+
+.form-edit .form-control,
+.form-edit .form-select .form-select-search {
+    background-color: #F3FAFF !important;
+    color: #0077BD !important;
+}
+
+.form-edit .form-control:focus,
+.form-edit .form-select .form-select-search:focus {
+    background-color: #FFF !important;
+    color: #2D2D2D !important;
+}
+
+.form-edit .form-control:focus .input-group-text,
+.form-edit .form-select .form-select-search:focus .input-group-text {
+    background-color: #FFF !important;
+    color: #2D2D2D !important;
+}
+
+.form-edit .form-control::placeholder,
+.form-edit .form-select .form-select-search::placeholder {
+    color: #CECECE !important;
+}
+
+.form-edit .input-group-text {
+    background-color: #F3FAFF !important;
+    color: #0077BD !important;
+}
+
+.form-edit .bg-gradient-primary {
+    background: #F3FAFF !important;
+}
+
+.file-upload {
+    border-radius: 5px;
+    border: 2px dashed #39B5FF;
+    padding: 10px;
+    margin: 30px;
+    background: #EFF9FF;
+}
+
+.file-upload #bulkUpload {
+    cursor: pointer;
+}
+
+.datepicker .input-group {
+    cursor: pointer;
+}
+
+.datepicker .input-group .form-control {
+    cursor: pointer;
+}
+
+.datepicker .form-control {
+    border-right-color: transparent;
+    border-top-right-radius: 0 !important;
+    border-bottom-right-radius: 0 !important;
+}
+
+.datepicker .input-group-text {
+    background: transparent;
+    border-radius: 8px !important;
+    border: 1px solid #0077BD;
+    border-left-color: transparent;
+    border-top-left-radius: 0 !important;
+    border-bottom-left-radius: 0 !important;
+}
