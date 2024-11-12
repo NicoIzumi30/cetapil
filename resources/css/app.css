@@ -3,6 +3,7 @@
 @import "/resources/css/components/input.css";
 @import "/resources/css/components/table.css";
 @import "/resources/css/components/select.css";
+@import "/resources/css/components/dropdown.css";
 
 @tailwind base;
 @tailwind components;

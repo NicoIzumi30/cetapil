@@ -70,24 +70,6 @@
                     </x-section-card>
                     {{-- Area Domisili End --}}
 
-                    {{-- @if (session()->get('auth.data.roles.0.name') !== 'superadmin') --}}
-
-                    {{-- Manajemen Akun --}}
-                    <x-section-card :title="'Manajemen Akun'">
-                        <div>
-                            <div class="grid grid-cols-3 gap-12 ">
-                                {{-- @foreach ($form['permissions'] as $permission) --}}
-                                <x-input.switch>Main Reports</x-input.switch>
-                                <x-input.switch>Menu Produk</x-input.switch>
-                                <x-input.switch>Menu Routing</x-input.switch>
-                                <x-input.switch>Menu Selling</x-input.switch>
-                                <x-input.switch>Menu Pengguna</x-input.switch>
-                                {{-- @endforeach --}}
-                            </div>
-                        </div>
-                    </x-section-card>
-                    {{-- Manajemen Akun End --}}
-
                     {{-- Keamanan Akun --}}
                     <x-section-card :title="'Keamanan Akun'">
                         <div class="mt-3">

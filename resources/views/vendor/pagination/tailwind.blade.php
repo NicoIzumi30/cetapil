@@ -27,21 +27,18 @@
         </div>
 
         <div class="hidden sm:flex-1 sm:flex sm:items-center sm:justify-between">
-            <div>
-                <p class="text-sm text-gray-700 leading-5 dark:text-gray-400">
-                    {!! __('Showing') !!}
-                    @if ($paginator->firstItem())
-                        <span class="font-medium">{{ $paginator->firstItem() }}</span>
-                        {!! __('to') !!}
-                        <span class="font-medium">{{ $paginator->lastItem() }}</span>
-                    @else
-                        {{ $paginator->count() }}
-                    @endif
-                    {!! __('of') !!}
-                    <span class="font-medium">{{ $paginator->total() }}</span>
-                    {!! __('results') !!}
-                </p>
+            <div class="text-lg text-white">
+                Menampilkan <select id="per-page-select" class="bg-white mx-2 text-primary border-1 rounded"
+                    onchange="window.location.href = '{{ request()->url() }}?per_page=' + this.value + '&page=1'">
+                    @foreach ([10, 20, 30, 40, 50] as $size)
+                        <option value="{{ $size }}"
+                            {{ request()->input('per_page', 10) == $size ? 'selected' : '' }}>
+                            {{ $size }}
+                        </option>
+                    @endforeach
+                </select> dari {{ $paginator->total() }} data
             </div>
+
 
             <div>
                 <span class="relative z-0 inline-flex rtl:flex-row-reverse gap-1 shadow-sm rounded-md">
@@ -111,7 +108,7 @@
                         <div class="text-center">
                             <a href="{{ $paginator->url($paginator->lastPage()) }}"
                                 class="inline-block py-2 px-4 bg-transparent text-black font-semibold hover:bg-slate-100 bg-white rounded-md">
-                               Terakhir
+                                Terakhir
                             </a>
                         </div>
                     @endif

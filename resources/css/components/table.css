@@ -1,5 +1,5 @@
 .table {
- @apply w-full text-sm text-left rtl:text-right text-gray-500 border-spacing-0 border-separate rounded-md;
+ @apply w-full text-sm text-left rtl:text-right text-gray-500 border-spacing-0 border-separate rounded-md ;
 }
 
 .table-head {

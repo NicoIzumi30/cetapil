@@ -37,6 +37,7 @@
 	line-height: 32px;
 	padding-right: 33px;
 	height: 100%;
+	color: var(--primary);
 }
 
 .select2-container .select2-dropdown .select2-search {
