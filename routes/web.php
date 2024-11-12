@@ -1,15 +1,15 @@
 <?php
 
+use App\Http\Controllers\Auth\LoginController;
 use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\ProductController;
 
 Route::get('/', function () {
     return view('pages.dashboard.index');
-});
+})->name('dashboard');
 
-Route::get('/login', function () {
-    return view('pages.login');
-});
+Route::get('/login',[LoginController::class,'index'])->name('login');
+Route::post('/login', [LoginController::class, 'login']);
 
 Route::get('/profile', function () {
     return view('pages.profile');
