@@ -7,7 +7,7 @@ use Illuminate\Pagination\LengthAwarePaginator;
 
 class ProductController extends Controller
 {
-    public function index()
+    public function index(Request $request)
     {
         // Create mock data array
         $mockData = collect([
@@ -464,18 +464,25 @@ class ProductController extends Controller
             ],
         ]);
 
-        $perPage = 7; // Number of items per page
+		$perPage = $request->input('per_page', 10);
+        
+        // Validate the per_page parameter to ensure it's one of the allowed values
+        $validPerPage = in_array($perPage, [10, 20, 30, 40, 50]) ? $perPage : 10;
+        
         $currentPage = request()->get('page', 1); // Get current page from URL, default to 1
-        $offset = ($currentPage - 1) * $perPage; // Calculate offset
+        $offset = ($currentPage - 1) * $validPerPage; // Calculate offset
 
-        // Slice the collection
+        // Create paginator instance with dynamic per_page value
         $items = new LengthAwarePaginator(
-            $mockData->slice($offset, $perPage)->values(),
+            $mockData->slice($offset, $validPerPage)->values(),
             $mockData->count(),
-            $perPage,
+            $validPerPage,
             $currentPage,
             ['path' => request()->url()]
         );
+
+        // Append the per_page parameter to pagination links
+        $items->appends(['per_page' => $validPerPage]);
 
         return view('pages.product.index', compact('items'));
     }

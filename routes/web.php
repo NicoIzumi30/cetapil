@@ -23,6 +23,25 @@ Route::get('/routing/create', function () {
     return view('pages.routing.create');
 });
 
+Route::get('/routing/edit', function () {
+    return view('pages.routing.edit');
+});
+
+Route::get('/visibility', function () {
+    return view('pages.visibility.index');
+});
+
+Route::get('/selling', function () {
+    return view('pages.selling.index');
+});
+
+Route::get('/users', function () {
+    return view('pages.users.index');
+});
+
+Route::get('/users/create', function () {
+    return view('pages.users.create');
+});
 
 Route::get('/product', [ProductController::class, 'index'])->name('pages.product.index');
 

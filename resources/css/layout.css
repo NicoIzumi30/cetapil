@@ -1,7 +1,15 @@
 .icon-menu-container {
-	@apply p-[4px] rounded-md border-2 w-fit bg-[#2271B8] text-white;
+	@apply p-[4px] rounded-md w-fit bg-[#2271B8] text-white;
 }
 
 .icon-menu {
-	@apply w-[40px];
+	@apply w-[30px];
+}
+
+.bg-sidebar {
+	background: linear-gradient(173.85deg, #003263 3.73%, #53A2D2 99.57%);
+}
+
+.sidebar-border {
+	background: linear-gradient(90deg, rgba(224, 225, 226, 0) 0%, #E0E1E2 49.52%, rgba(224, 225, 226, 0.15625) 99.04%);
 }

@@ -14,7 +14,4 @@
     .button-info-bg {
         background: linear-gradient(135deg, #53A2D2 0%, #0077BD 100%);
     }
-
-	
-
 </style>

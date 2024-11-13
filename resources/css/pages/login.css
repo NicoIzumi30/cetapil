@@ -92,7 +92,7 @@ input {
 }
 
 .error-message {
-	@apply text-lg text-red-600 text-center hidden;
+	@apply text-lg text-red-600 text-center;
 }
 
 .error-message > span {

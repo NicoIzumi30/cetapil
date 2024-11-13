@@ -1,0 +1,1 @@
+<input type="text" value="Date Range" {{ $attributes->merge(['class' => 'w-fit bg-white mx-0 text-sm font-bold text-primary outline-none text-center rounded-md blue px-1 py-2 hover:bg-lightBlue']) }}/>

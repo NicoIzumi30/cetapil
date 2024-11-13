@@ -7,7 +7,7 @@
 
         {{-- Modal panel --}}
         <div
-            class="inline-block w-full max-w-fit my-8 overflow-hidden text-left align-middle transition-all transform bg-white rounded-lg shadow-xl">
+            class="inline-block w-full max-w-[800px] my-8 overflow-hidden text-left align-middle transition-all transform bg-white rounded-lg shadow-xl">
             {{-- Header --}}
             <div class="flex items-center justify-between p-6 bg-white  mb-4">
                 <h3 class="text-xl font-bold text-black">

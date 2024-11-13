@@ -8,7 +8,7 @@
 @endphp 
 
 <div class="mb-4">
-    <label for="{{ $inputId }}" class="form-label">{{ $title }}</label>
+    <label for="{{ $inputId }}" class="form-label !text-black">{{ $title }}</label>
     <div class="flex items-center gap-4">
         <input 
             id="{{ $inputId }}"  
