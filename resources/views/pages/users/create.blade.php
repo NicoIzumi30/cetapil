@@ -110,18 +110,69 @@
 @push('scripts')
     <script>
         $(document).ready(function() {
-            var map = L.map('user-map-location').setView([51.505, -0.09], 13);
+            // Initialize map
+            var map = L.map('user-map-location').setView([-6.200000, 106.816666], 10); // Centered on Jakarta by default
             L.tileLayer('https://tile.openstreetmap.org/{z}/{x}/{y}.png', {
                 maxZoom: 20,
                 attribution: '&copy; <a href="http://www.openstreetmap.org/copyright">OpenStreetMap</a>'
             }).addTo(map);
 
-			const fullScreenButton = document.querySelector('#fullscreen-button');
-			const mapResize = document.querySelector('#user-map-location');
-			
-			fullScreenButton.addEventListener("click", () => {
-				mapResize.classList.toggle("!h-[400px]");
-			})
-        })
+            // Initialize marker variable
+            let marker;
+
+            // Function to update marker position
+            function updateMarker(latlng) {
+                // Remove existing marker if it exists
+                if (marker) {
+                    marker.remove();
+                }
+
+                // Add new marker
+                marker = L.marker(latlng).addTo(map);
+
+                // Update form fields
+                $('#latitude').val(latlng.lat.toFixed(6));
+                $('#longitude').val(latlng.lng.toFixed(6));
+            }
+
+            // Handle map click events
+            map.on('click', function(e) {
+                updateMarker(e.latlng);
+            });
+
+            // Handle manual coordinate input
+            function handleCoordinateInput() {
+                const lat = parseFloat($('#latitude').val());
+                const lng = parseFloat($('#longitude').val());
+
+                if (!isNaN(lat) && !isNaN(lng)) {
+                    const latlng = L.latLng(lat, lng);
+
+                    // Update marker
+                    updateMarker(latlng);
+
+                    // Center map on new coordinates
+                    map.setView(latlng, map.getZoom());
+                }
+            }
+
+            // Add event listeners to coordinate inputs
+            $('#latitude, #longitude').on('change', handleCoordinateInput);
+
+            // Handle fullscreen toggle
+            const fullScreenButton = document.querySelector('#fullscreen-button');
+            const mapResize = document.querySelector('#user-map-location');
+
+            fullScreenButton.addEventListener("click", () => {
+                mapResize.classList.toggle("!h-[400px]");
+                // Invalidate map size after resize
+                setTimeout(() => {
+                    map.invalidateSize();
+                }, 100);
+            });
+
+            // Optional: Handle initial coordinates if they exist
+            handleCoordinateInput();
+        });
     </script>
 @endpush
