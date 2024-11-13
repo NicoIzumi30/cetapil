@@ -20,6 +20,15 @@
             });
         </script>
     @endif
+    @if (session('success'))
+        <script>
+            Swal.fire({
+                title: "Berhasil",
+                text: "{{ session('success') }}",
+                icon: "success"
+            });
+        </script>
+    @endif
     <div class="login-layout">
         <img class="bg-accent" src="{{ asset('/assets/images/rounded-bg-accent.svg') }}" alt="">
         <div class="bottom-gradient hidden md:block"></div>

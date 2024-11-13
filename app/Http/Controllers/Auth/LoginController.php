@@ -4,6 +4,7 @@ namespace App\Http\Controllers\Auth;
 
 use App\Models\User;
 use Illuminate\Http\Request;
+use App\Http\Requests\LoginRequest;
 use App\Http\Controllers\Controller;
 use Illuminate\Support\Facades\Auth;
 
@@ -13,44 +14,23 @@ class LoginController extends Controller
     {
         return view('pages.login');
     }
-    public function login(Request $request)
+    public function login(LoginRequest $request)
     {
-        $request->validate([
-            'email' => 'required|email',
-            'password' => 'required',
-        ]);
-    
-        // Filter tambahan untuk memastikan user aktif dan tidak di-soft delete
-        $user = User::where('email', $request->email)
-            ->where('active', true)
-            ->whereNull('deleted_at')
-            ->first();
-    
-        if (!$user) {
-            return back()
-                ->withInput($request->only('email'))
-                ->withErrors([
-                    'email' => 'Email atau password yang Anda masukkan salah.',
-                ]);
-        }
-    
-        // Mencoba login
         if (Auth::attempt([
             'email' => $request->email,
             'password' => $request->password,
             'active' => true
-        ])) {
+        ], true)) {
             $request->session()->regenerate();
-            
-            return redirect()->intended('/')
-                ->with('success', 'Berhasil login!');
+            session(['auth.user_id' => Auth::id()]);
+            session()->save();
+
+            return redirect()->intended('/');
         }
-    
-        return back()
-            ->withInput($request->only('email'))
-            ->withErrors([
-                'email' => 'Email atau password yang Anda masukkan salah.',
-            ]);
+
+        return back()->withErrors([
+            'email' => 'Email atau password salah.',
+        ]);
     }
 
 }
