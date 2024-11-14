@@ -68,7 +68,7 @@
                             </div>
                         </div>
                         <div class="relative">
-                            <div class="h-[250px] z-10" id="user-map-location"></div>
+                            <div class="h-[350px] z-10" id="user-map-location"></div>
                             <button id="fullscreen-button"
                                 class="absolute top-3 right-3 rounded-sm w-10 h-10 grid place-items-center bg-white z-50 hover:bg-slate-200">
                                 <svg width="32" height="32" viewBox="0 0 24 24" fill="none"
@@ -168,7 +168,7 @@
             const mapResize = document.querySelector('#user-map-location');
 
             fullScreenButton.addEventListener("click", () => {
-                mapResize.classList.toggle("!h-[400px]");
+                mapResize.classList.toggle("!h-[500px]");
                 // Invalidate map size after resize
                 setTimeout(() => {
                     map.invalidateSize();
