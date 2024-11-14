@@ -32,11 +32,11 @@
                         <div>
                             <label for="role" class="form-label">Jabatan Pengguna</label>
                             <div>
-                                <select id="role" class="form-select-search">
-                                    <option value="" disabled>
+                                <select id="role" class="form-select-search text-primary">
+                                    <option value="" disabled selected>
                                         -- Pilih Jabatan Pengguna --
                                     </option>
-                                    <option value="superadmin" selected>
+                                    <option value="superadmin">
                                         SuperAdmin
                                     </option>
                                     <option value="admin">
@@ -68,8 +68,9 @@
                             </div>
                         </div>
                         <div class="relative">
-                            <div class="h-[250px] z-10" id="user-map-location"></div>
-                            <button id="fullscreen-button" class="absolute top-3 right-3 rounded-sm w-10 h-10 grid place-items-center bg-white z-50 hover:bg-slate-200">
+                            <div class="h-[350px] z-10" id="user-map-location"></div>
+                            <button id="fullscreen-button"
+                                class="absolute top-3 right-3 rounded-sm w-10 h-10 grid place-items-center bg-white z-50 hover:bg-slate-200">
                                 <svg width="32" height="32" viewBox="0 0 24 24" fill="none"
                                     xmlns="http://www.w3.org/2000/svg">
                                     <path
@@ -83,22 +84,24 @@
 
 
                     {{-- Manajemen Akun --}}
-                    <x-section-card :title="'Manajemen Akun'">
-                        <div>
-                            <div class="grid grid-cols-3 gap-12 ">
-                                {{-- @foreach ($form['permissions'] as $permission) --}}
-                                <x-input.switch>Main Reports</x-input.switch>
-                                <x-input.switch>Menu Produk</x-input.switch>
-                                <x-input.switch>Menu Routing</x-input.switch>
-                                <x-input.switch>Menu Selling</x-input.switch>
-                                <x-input.switch>Menu Pengguna</x-input.switch>
-                                {{-- @endforeach --}}
+                    <div id="account-management" class="hidden">
+                        <x-section-card :title="'Manajemen Akun'">
+                            <div>
+                                <div class="grid grid-cols-3 gap-12 ">
+                                    {{-- @foreach ($form['permissions'] as $permission) --}}
+                                    <x-input.switch>Main Reports</x-input.switch>
+                                    <x-input.switch>Menu Produk</x-input.switch>
+                                    <x-input.switch>Menu Routing</x-input.switch>
+                                    <x-input.switch>Menu Selling</x-input.switch>
+                                    <x-input.switch>Menu Pengguna</x-input.switch>
+                                    {{-- @endforeach --}}
+                                </div>
                             </div>
-                        </div>
-                    </x-section-card>
+                        </x-section-card>
+                    </div>
                     {{-- Manajemen Akun End --}}
 
-                    <x-button.info class="w-full mt-20 !text-xl">Simpan Perubahan</x-button.info>
+                    <x-button.info class="w-full mt-20 !text-xl">Konfirmasi</x-button.info>
 
             </div>
             </x-card>
@@ -111,7 +114,8 @@
     <script>
         $(document).ready(function() {
             // Initialize map
-            var map = L.map('user-map-location').setView([-6.200000, 106.816666], 10); // Centered on Jakarta by default
+            var map = L.map('user-map-location').setView([-6.200000, 106.816666],
+            10); // Centered on Jakarta by default
             L.tileLayer('https://tile.openstreetmap.org/{z}/{x}/{y}.png', {
                 maxZoom: 20,
                 attribution: '&copy; <a href="http://www.openstreetmap.org/copyright">OpenStreetMap</a>'
@@ -164,7 +168,7 @@
             const mapResize = document.querySelector('#user-map-location');
 
             fullScreenButton.addEventListener("click", () => {
-                mapResize.classList.toggle("!h-[400px]");
+                mapResize.classList.toggle("!h-[500px]");
                 // Invalidate map size after resize
                 setTimeout(() => {
                     map.invalidateSize();
@@ -173,6 +177,21 @@
 
             // Optional: Handle initial coordinates if they exist
             handleCoordinateInput();
+        });
+    </script>
+@endpush
+
+@push('scripts')
+    <script>
+        const roleSelect = document.getElementById('role');
+        const accountManagement = document.getElementById('account-management');
+
+        roleSelect.addEventListener('change', () => {
+            if (roleSelect.value) {
+                accountManagement.classList.remove('hidden');
+            } else {
+                accountManagement.classList.add('hidden');
+            }
         });
     </script>
 @endpush

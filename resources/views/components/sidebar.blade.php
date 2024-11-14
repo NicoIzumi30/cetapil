@@ -48,13 +48,13 @@ $menus[] =  (object) [
     
 @endphp
 
-<aside class="z-50 bg-sidebar h-[100%] fixed top-0 p-4 w-80">
-    <div class="flex items-center gap-4 p-4">
-        <img class="w-[100px]" src="{{ asset('/assets/images/logo.webp') }}" alt="logo">
-        <h1 class="text-2xl font-bold text-white">Dashboard</h1>
+<aside id="sidebar" class="z-[45] bg-sidebar h-[100%] fixed top-0 p-4 w-20 hover:w-80 group transition-all duration-200 ease-in-out">
+    <div class="flex items-center gap-4 ">
+        <img class="w-[50px]" src="{{ asset('/assets/images/logo.webp') }}" alt="logo">
+        <h1 class="text-2xl font-bold text-white group-hover:block  hidden">Dashboard</h1>
     </div>
     <hr class="sidebar-border my-6"/>
-    <ul class="p-2 w-[264px] h-full rounded-md flex flex-col gap-4">
+    <ul class="p-2 w-[70px] group-hover:w-[264px] h-full rounded-md flex flex-col gap-4">
         @foreach ($menus as $menu)
             <li>
                 <a href="{{ $menu->path}}"
@@ -63,7 +63,7 @@ $menus[] =  (object) [
                         <img class="icon-menu" src="{{ asset("assets/icons/{$menu->icon}") }}"
                             alt="{{ $menu->title }}">
                     </div>
-                    <p>{{ $menu->title }}</p>
+                    <p class="group-hover:block hidden">{{ $menu->title }}</p>
                 </a>
             </li>
         @endforeach
@@ -74,7 +74,7 @@ $menus[] =  (object) [
 					<img class="icon-menu" src="{{ asset('assets/icons/majesticons_door_exit.svg') }}" 
 						alt="{{ $menu->title }}">
 				</div>
-				<p>Log Out</p>
+				<p class="group-hover:block hidden">Log Out</p>
 			</a>
 		</li>
     </ul>

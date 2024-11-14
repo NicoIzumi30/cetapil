@@ -2,7 +2,7 @@
 
 @section('banner-content')
     <div class="flex items-start justify-between mb-6 p-6">
-		<div class="z-50">
+		<div class="z-[30]">
 			<h2 class="text-4xl text-white text-left font-[400]">Selamat Datang,</h2>
 			<h1 class="text-5xl text-white my-6 text-left font-bold">{{ auth()->user()->name }}</h1>
 			<div class="px-5 py-2 bg-primary rounded-3xl text-center w-fit text-white font-[600] italic text-xl">
@@ -24,7 +24,7 @@
 
 @section('dashboard-content')
     <main class="w-full">
-		<div class="flex w-full gap-5">
+		<div class="flex w-full gap-5 p-6">
 			<x-pages.dashboard.total-card :title="'Total Report'" :total="7.432"/>
 			<x-pages.dashboard.total-card :title="'Total Sales'" :total="7.432"/>
 			<x-pages.dashboard.total-card :title="'Total Routing'" :total="7.432"/>

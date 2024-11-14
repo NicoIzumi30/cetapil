@@ -9,14 +9,17 @@
         <div
             class="inline-block w-full max-w-[800px] my-8 overflow-hidden text-left align-middle transition-all transform bg-white rounded-lg shadow-xl">
             {{-- Header --}}
-            <div class="flex items-center justify-between p-6 bg-white  mb-4">
-                <h3 class="text-xl font-bold text-black">
-                    {{ $title }}
-                </h3>
-                <div>    
-                    {{ $modalAction ?? "" }}
-                </div>
-            </div>
+
+			@if(isset($title))
+			<div class="flex items-center justify-between p-6 bg-white mb-4">
+				<h3 class="text-xl font-bold text-black">
+					{{ $title }}
+				</h3>
+				<div>    
+					{{ $modalAction ?? '' }}
+				</div>
+			</div>
+		@endif
 
             {{-- Content --}}
             <div class="mt-2 p-6">
