@@ -18,25 +18,33 @@
      integrity="sha256-20nQCchB9co0qIjJZRGuk2/Z9VM+kNiyxNV1lvTlZBo="
      crossorigin=""></script>
     @vite('resources/css/layout.css')
-    @stack('scripts')
     @stack('styles')
 </head>
 
 <body class="bg-[#003060] relative">
     @include('components.sidebar')
-    <div class="my-5 ml-80 z-50">
+    <div id="main-content" class="my-5 ml-20 z-[20]">
 		{{-- Banner Title --}}
         @yield('banner-content')
 		{{-- Dashboard Content --}}
         @yield('dashboard-content')
 		 {{-- Footer --}}
         <footer class="text-[12px] text-end text-white p-3 self-end w-[100%] absolute right-0 ">
-            Powered by Zira Creative and well designed by IGNICE - 2024 All Rights Reserved
+            Powered and well designed by IGNICE - 2024 All Rights Reserved
         </footer>
     </div>
 	{{-- BG-Image --}}
     <img class="fixed w-full top-0 left-0 pointer-events-none z-0 h-full"
         src="{{ asset('/assets/images/dashboard-bg.webp') }}" alt="logo">
-</body>
+		@stack('scripts')
+		<script>
+			const sidebar = document.querySelector('#sidebar')
+			const mainContent = document.querySelector('#main-content')
 
+			sidebar.addEventListener("click", () => {
+				mainContent.classList.toggle = "bg-red-400"
+				console.log('oke')
+			})
+		</script>
+</body>
 </html>
