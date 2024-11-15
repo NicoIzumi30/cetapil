@@ -53,7 +53,7 @@
             <h3 class="form-title">
                 Selamat Datang di <span class="text-primary">Dashboard!</span>
             </h3>
-            <p class="form-description">Silahkan Masukkan <span>User ID </span>dan <span>Kata Sandi</span> untuk
+            <p class="form-description">Silahkan Masukkan <span>Email</span>dan <span>Kata Sandi</span> untuk
                 melanjutkan</p>
             <form class="login-form" action="{{ route('login') }}" method="POST">
             @csrf
@@ -67,7 +67,7 @@
                                 d="M20.0575 18.7332C16.3756 18.7332 13.3908 15.7485 13.3908 12.0666C13.3908 8.38467 16.3756 5.3999 20.0575 5.3999C23.7394 5.3999 26.7241 8.38467 26.7241 12.0666C26.7241 15.7485 23.7394 18.7332 20.0575 18.7332Z"
                                 stroke="#054F7B" stroke-width="3" stroke-linecap="round" stroke-linejoin="round" />
                         </svg>
-                        <input id="userId" class="outline-none" type="text" name="email" placeholder="Masukkan User ID" />
+                        <input class="outline-none" name="email" id="email" type="email" placeholder="Masukkan Email" />
                     </div>
                 </div>
                 <div class="input">
