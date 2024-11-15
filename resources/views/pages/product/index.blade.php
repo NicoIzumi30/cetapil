@@ -135,6 +135,18 @@
                         </th>
                         <th scope="col" class="text-center">
                             <a class="table-head">
+                                {{ __('Harga MD') }}
+                                <x-icons.sort />
+                            </a>
+                        </th>
+                        <th scope="col" class="text-center">
+                            <a class="table-head">
+                                {{ __('Harga Sales') }}
+                                <x-icons.sort />
+                            </a>
+                        </th>
+                        <th scope="col" class="text-center">
+                            <a class="table-head">
                                 Aksi
                             </a>
                         </th>
@@ -150,10 +162,15 @@
                                 {{ $item['price'] }}
                             </td>
                             <td class="table-data">
+                                {{ $item['price'] }}
+                            </td>
+                            <td class="table-data">
+                                {{ $item['price'] }}
+                            </td>
+                            <td class="table-data">
                                 <x-action-table-dropdown>
                                     <li>
-                                        <button onclick="openModal('edit-produk-{{ $loop->index }}')"
-                                            class="dropdown-option ">Lihat
+                                        <button onclick="openModal('edit-produk')" class="dropdown-option ">Lihat
                                             Data</button>
                                     </li>
                                     <li>
@@ -161,7 +178,6 @@
                                             Data</a>
                                     </li>
                                 </x-action-table-dropdown>
-
                             </td>
                         </tr>
                     @empty
@@ -169,6 +185,9 @@
                     @endforelse
                 </tbody>
             </table>
+            <x-modal id="edit-produk">
+
+            </x-modal>
             {{ $items->links() }}
             {{-- Tabel Daftar Produk End --}}
         </x-card>
@@ -196,7 +215,7 @@
             {{-- Stock-on-Hand Action End --}}
 
             {{-- Tabel Stock-on-Hand --}}
-            <table class="table">
+            <table id="stock-on-hand-table" class="table">
                 <thead>
                     <tr>
                         <th scope="col" class="text-center">
@@ -285,10 +304,15 @@
             $("#stock-date-range").flatpickr({
                 mode: "range"
             });
-            $(document).ready(function() {
-                $('#product-table').DataTable({
-					paging: false
-				});
+            $('#product-table').DataTable({
+                paging: false,
+                searching: false,
+                info: false
+            });
+            $('#stock-on-hand-table').DataTable({
+                paging: false,
+                searching: false,
+                info: false
             });
         });
     </script>
