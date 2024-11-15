@@ -46,12 +46,15 @@ Route::middleware('auth')->group(function () {
         Route::get('/create', function () {
             return view('pages.users.create');
         });
+        Route::get('/edit', function () {
+            return view('pages.users.edit');
+        });
     });
     Route::prefix('products')->name('products.')->middleware('permission:menu_product')->group(function () {
         Route::get('/', [ProductController::class, 'index'])->name('pages.product.index');
     });
     Route::get('/logout', LogoutController::class)->name('logout');
 });
-
-
-
+Route::get('/unauthorized', function () {
+    return view('pages.unauthorized');
+});

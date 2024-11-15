@@ -1,2 +1,2 @@
 import './bootstrap';
-import './components/action-table-dropdown'
+import './components/action-table-dropdown';

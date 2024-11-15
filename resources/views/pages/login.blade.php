@@ -55,9 +55,8 @@
             </h3>
             <p class="form-description">Silahkan Masukkan <span>User ID </span>dan <span>Kata Sandi</span> untuk
                 melanjutkan</p>
-
             <form class="login-form" action="{{ route('login') }}" method="POST">
-                @csrf
+            @csrf
                 <div class="input">
                     <div class="login-input-container">
                         <svg width="41" height="41" viewBox="0 0 41 41" fill="none" xmlns="http://www.w3.org/2000/svg">
@@ -79,7 +78,7 @@
                                 fill="#054F7B" />
                         </svg>
                         <input id="password" class="outline-none" type="password" name="password" placeholder="Masukkan Kata Sandi" />
-                        <button id="toggle-password" class="mr-3" type="submit">
+                        <button id="toggle-password" class="mr-3" type="button">
                             <div id="eye-outline" class="hidden">
                                 <svg width="24" height="24" viewBox="0 0 24 24" fill="none"
                                     xmlns="http://www.w3.org/2000/svg">

@@ -14,60 +14,91 @@
                     </x-slot:cardTitle>
                     {{-- Profil Pengguna --}}
                     <div class="grid grid-cols-2 gap-4">
-                        <div class="mb-4">
+                        <div>
                             <label for="name" class="form-label">Nama Pengguna</label>
                             <input id="name" class="form-control" type="text" name="name"
                                 placeholder="Masukan nama pengguna" aria-describedby="name" />
                         </div>
-                        <div class="mb-4">
+                        <div>
                             <label for="email" class="form-label">Email Pengguna</label>
                             <input id="email" class="form-control" type="email" name="email"
                                 placeholder="Masukan email pengguna" aria-describedby="email" />
                         </div>
-                        <div class="mb-4">
+                        <div>
                             <label for="phone" class="form-label">Nomor Telepon Pengguna</label>
                             <input id="phone" class="form-control" type="text" name="phone"
                                 placeholder="Masukan nomor telepon pengguna" aria-describedby="phone" />
                         </div>
                         <div>
                             <label for="role" class="form-label">Jabatan Pengguna</label>
-                            <div>
-                                <select id="role" class="form-select-search text-primary">
-                                    <option value="" disabled selected>
-                                        -- Pilih Jabatan Pengguna --
-                                    </option>
-                                    <option value="superadmin">
-                                        SuperAdmin
-                                    </option>
-                                    <option value="admin">
-                                        Admin
-                                    </option>
-                                    <option value="sales">
-                                        Sales
-                                    </option>
-                                </select>
-                            </div>
+                            <select id="role" class="form-select-search text-primary">
+                                <option value="" disabled selected>
+                                    -- Pilih Jabatan Pengguna --
+                                </option>
+                                <option value="superadmin">
+                                    Superadmin
+                                </option>
+                                <option value="admin">
+                                    Admin
+                                </option>
+                                <option value="sales">
+                                    Sales
+                                </option>
+                            </select>
                         </div>
+                        <div>
+                            <label for="password" class="form-label">Kata Sandi</label>
+                            <input id="password" class="form-control" type="password" name="password"
+                                placeholder="Masukan kata Sandi" aria-describedby="password" />
+                        </div>
+                        <div>
+                            <label for="password-confirmation" class="form-label">Konfirmasi Kata Sandi</label>
+                            <input id="password-confirmation" class="form-control" type="password"
+                                name="password-confirmation" placeholder="Masukan kata Sandi"
+                                aria-describedby="password-confirmation" />
+                        </div>
+                        <div>
+                            <label for="region" class="form-label">Region</label>
+                            <input id="region" class="form-control" type="password" name="region"
+                                placeholder="Masukan Region" aria-describedby="region" />
+                        </div>
+
                     </div>
                     {{-- Profil Pengguna End --}}
 
                     {{-- Area Domisili --}}
                     <x-section-card :title="'Area Domisili Pengguna'">
                         <div class="grid grid-cols-2 gap-4">
-                            <div class="mb-4">
+                            <div>
                                 <label for="longitude" class="form-label">Longitudes <span class="font-normal">(DD
                                         Coordinates)</span></label>
                                 <input id="longitude" class="form-control" type="text" name="longitude"
                                     placeholder="Masukkan Koordinat Longitude" aria-describedby="longitude" />
                             </div>
-                            <div class="mb-4">
+                            <div>
                                 <label for="latitude" class="form-label">Latitudes<span class="font-normal">(DMS
                                         Coordinates)</span></label>
                                 <input id="latitude" class="form-control" type="text" name="latitude"
                                     placeholder="Masukkan Koordinat Latitude" aria-describedby="latitude" />
                             </div>
+                            <div>
+                                <label for="states-option">Kabupaten/Kota</label>
+                                <select id="states-option" name="states-option" class=" w-full">
+                                    <option value="" selected disabled>
+                                        -- Pilih Kabupaten/Kota--
+                                    </option>
+                                    <option value="sumatra">
+                                        Sumatra
+                                    </option>
+                                </select>
+                            </div>
+							<div>
+                                <label for="address" class="form-label">Alamat Lengkap</label>
+                                <input id="address" class="form-control" type="text" name="address"
+                                    placeholder="Masukkan Alamat Lengkap" aria-describedby="address" />
+                            </div>
                         </div>
-                        <div class="relative">
+                        <div class="relative mt-10">
                             <div class="h-[350px] z-10" id="user-map-location"></div>
                             <button id="fullscreen-button"
                                 class="absolute top-3 right-3 rounded-sm w-10 h-10 grid place-items-center bg-white z-50 hover:bg-slate-200">
@@ -115,7 +146,7 @@
         $(document).ready(function() {
             // Initialize map
             var map = L.map('user-map-location').setView([-6.200000, 106.816666],
-            10); // Centered on Jakarta by default
+                10); // Centered on Jakarta by default
             L.tileLayer('https://tile.openstreetmap.org/{z}/{x}/{y}.png', {
                 maxZoom: 20,
                 attribution: '&copy; <a href="http://www.openstreetmap.org/copyright">OpenStreetMap</a>'
@@ -194,4 +225,12 @@
             }
         });
     </script>
+@endpush
+
+@push('scripts')
+<script>
+	 $(document).ready(function() {
+	 $('#states-option').select2();
+	 });
+</script>
 @endpush

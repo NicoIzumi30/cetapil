@@ -77,31 +77,30 @@
                     <td class="table-data">
                         <x-action-table-dropdown>
                             <li>
-                                <button onclick="openModal('') class="dropdown-option ">Lihat
-                                                        Data</button>
-                                                </li>
-                                                <li>
-                                                    <a href="#" class="dropdown-option text-red-400">Hapus
-                                                        Data</a>
-                                                </li>
-                                    </x-action-table-dropdown>
-                 </td>
+                                <a href="/users/edit" class="dropdown-option">Lihat
+                                    Data</a>
+                            </li>
+                            <li>
+                                <a href="#" class="dropdown-option text-red-400">Hapus
+                                    Data</a>
+                            </li>
+                        </x-action-table-dropdown>
+                    </td>
                 </tr>
-              </tbody>
-             </table>
-             {{-- {{ $items->links() }} --}}
-             {{-- Users Table End --}}
-        </x-card>
-     {{-- Users End --}}
-     
+            </tbody>
+        </table>
+        {{-- {{ $items->links() }} --}}
+        {{-- Users Table End --}}
+    </x-card>
+    {{-- Users End --}}
 @endsection
 
 @push('scripts')
-<script>
-	 $(document).ready(function() {
+    <script>
+        $(document).ready(function() {
             $("#sales-date-range").flatpickr({
                 mode: "range"
             });
         });
-</script>
+    </script>
 @endpush
