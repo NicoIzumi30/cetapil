@@ -35,15 +35,9 @@
                                 <option value="" disabled selected>
                                     -- Pilih Jabatan Pengguna --
                                 </option>
-                                <option value="superadmin">
-                                    Superadmin
-                                </option>
-                                <option value="admin">
-                                    Admin
-                                </option>
-                                <option value="sales">
-                                    Sales
-                                </option>
+                                @foreach ($roles as $role)
+                                    <option value="{{ $role->id }}">{{ $role->name }}</option>
+                                @endforeach         
                             </select>
                         </div>
                         <div>
@@ -59,7 +53,7 @@
                         </div>
                         <div>
                             <label for="region" class="form-label">Region</label>
-                            <input id="region" class="form-control" type="password" name="region"
+                            <input id="region" class="form-control" type="text" name="region"
                                 placeholder="Masukan Region" aria-describedby="region" />
                         </div>
 
@@ -87,9 +81,9 @@
                                     <option value="" selected disabled>
                                         -- Pilih Kabupaten/Kota--
                                     </option>
-                                    <option value="sumatra">
-                                        Sumatra
-                                    </option>
+                                    @foreach ($cities as $city)
+                                        <option value="{{ $city->id }}">{{$city->name}}</option>
+                                    @endforeach
                                 </select>
                             </div>
 							<div>
@@ -120,11 +114,11 @@
                             <div>
                                 <div class="grid grid-cols-3 gap-12 ">
                                     {{-- @foreach ($form['permissions'] as $permission) --}}
-                                    <x-input.switch>Main Reports</x-input.switch>
-                                    <x-input.switch>Menu Produk</x-input.switch>
-                                    <x-input.switch>Menu Routing</x-input.switch>
-                                    <x-input.switch>Menu Selling</x-input.switch>
-                                    <x-input.switch>Menu Pengguna</x-input.switch>
+                                    <x-input.switch name="menu_report">Menu Report</x-input.switch>
+                                    <x-input.switch name="menu_product">Menu Produk</x-input.switch>
+                                    <x-input.switch name="menu_routing">Menu Routing</x-input.switch>
+                                    <x-input.switch name="menu_selling">Menu Selling</x-input.switch>
+                                    <x-input.switch name="menu_user">Menu Pengguna</x-input.switch>
                                     {{-- @endforeach --}}
                                 </div>
                             </div>

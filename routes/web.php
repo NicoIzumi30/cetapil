@@ -1,10 +1,11 @@
 <?php
 
+use Illuminate\Support\Facades\Route;
+use App\Http\Controllers\ProductController;
+use App\Http\Controllers\Web\UserController;
 use App\Http\Controllers\Auth\LoginController;
 use App\Http\Controllers\Auth\LogoutController;
 use App\Http\Controllers\Web\DashboardController;
-use Illuminate\Support\Facades\Route;
-use App\Http\Controllers\ProductController;
 
 
 Route::middleware('guest')->group(function () {
@@ -39,17 +40,7 @@ Route::middleware('auth')->group(function () {
             return view('pages.selling.index');
         });
     });
-    Route::prefix('users')->name('users.')->middleware('permission:menu_user')->group(function () {
-        Route::get('/', function () {
-            return view('pages.users.index');
-        });
-        Route::get('/create', function () {
-            return view('pages.users.create');
-        });
-        Route::get('/edit', function () {
-            return view('pages.users.edit');
-        });
-    });
+    Route::resource('users', UserController::class)->middleware('permission:menu_user');    
     Route::prefix('products')->name('products.')->middleware('permission:menu_product')->group(function () {
         Route::get('/', [ProductController::class, 'index'])->name('pages.product.index');
     });
