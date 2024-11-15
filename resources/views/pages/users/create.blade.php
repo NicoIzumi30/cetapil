@@ -59,7 +59,7 @@
                         </div>
                         <div>
                             <label for="region" class="form-label">Region</label>
-                            <input id="region" class="form-control" type="password" name="region"
+                            <input id="region" class="form-control" type="text" name="region"
                                 placeholder="Masukan Region" aria-describedby="region" />
                         </div>
 
@@ -92,7 +92,7 @@
                                     </option>
                                 </select>
                             </div>
-							<div>
+                            <div>
                                 <label for="address" class="form-label">Alamat Lengkap</label>
                                 <input id="address" class="form-control" type="text" name="address"
                                     placeholder="Masukkan Alamat Lengkap" aria-describedby="address" />
@@ -115,21 +115,32 @@
 
 
                     {{-- Manajemen Akun --}}
-                    <div id="account-management" class="hidden">
-                        <x-section-card :title="'Manajemen Akun'">
-                            <div>
-                                <div class="grid grid-cols-3 gap-12 ">
-                                    {{-- @foreach ($form['permissions'] as $permission) --}}
-                                    <x-input.switch>Main Reports</x-input.switch>
-                                    <x-input.switch>Menu Produk</x-input.switch>
-                                    <x-input.switch>Menu Routing</x-input.switch>
-                                    <x-input.switch>Menu Selling</x-input.switch>
-                                    <x-input.switch>Menu Pengguna</x-input.switch>
-                                    {{-- @endforeach --}}
-                                </div>
-                            </div>
-                        </x-section-card>
-                    </div>
+                    <x-section-card :title="'Manajemen Akun'">
+                        <div id="admin-access" class="grid-cols-3 gap-12 hidden">
+                            <x-input.switch>Main Reports</x-input.switch>
+                            <x-input.switch>Menu Produk</x-input.switch>
+                            <x-input.switch>Menu Visibility</x-input.switch>
+                            <x-input.switch>Menu Routing</x-input.switch>
+                            <x-input.switch>Menu Selling</x-input.switch>
+                            <x-input.switch>Menu Pengguna</x-input.switch>
+                        </div>
+                        <div id="sales-access" class="grid-cols-3 gap-12 hidden">
+                            <x-input.switch>Menu Routing</x-input.switch>
+                            <x-input.switch>Menu Selling</x-input.switch>
+                            <x-input.switch>Menu Outlet</x-input.switch>
+                            <x-input.switch>Menu Activity</x-input.switch>
+                        </div>
+                        <div id="superadmin-access" class="grid-cols-3 gap-12 hidden">
+                            <x-input.switch>Main Reports</x-input.switch>
+                            <x-input.switch>Menu Produk</x-input.switch>
+                            <x-input.switch>Menu Visibility</x-input.switch>
+                            <x-input.switch>Menu Routing</x-input.switch>
+                            <x-input.switch>Menu Selling</x-input.switch>
+                            <x-input.switch>Menu Pengguna</x-input.switch>
+                            <x-input.switch>Menu Outlet</x-input.switch>
+                            <x-input.switch>Menu Activity</x-input.switch>
+                        </div>
+                    </x-section-card>
                     {{-- Manajemen Akun End --}}
 
                     <x-button.info class="w-full mt-20 !text-xl">Konfirmasi</x-button.info>
@@ -214,23 +225,52 @@
 
 @push('scripts')
     <script>
-        const roleSelect = document.getElementById('role');
-        const accountManagement = document.getElementById('account-management');
-
-        roleSelect.addEventListener('change', () => {
-            if (roleSelect.value) {
-                accountManagement.classList.remove('hidden');
-            } else {
-                accountManagement.classList.add('hidden');
+        const roleConfig = {
+            admin: {
+                showElement: 'admin-access',
+                hideElements: ['sales-access', 'superadmin-access']
+            },
+            sales: {
+                showElement: 'sales-access',
+                hideElements: ['admin-access', 'superadmin-access']
+            },
+            superadmin: {
+                showElement: 'superadmin-access',
+                hideElements: ['admin-access', 'sales-access']
             }
-        });
+        };
+
+        const roleSelect = document.getElementById('role');
+
+        function toggleElementVisibility(elementId, show) {
+            const element = document.getElementById(elementId);
+            if (!element) return;
+
+            element.classList.toggle('hidden', !show);
+            element.classList.toggle('grid', show);
+        }
+
+        function handleRoleChange(event) {
+            const selectedRole = event.target.value;
+            const config = roleConfig[selectedRole];
+
+            if (!config) return;
+
+            toggleElementVisibility(config.showElement, true);
+
+            config.hideElements.forEach(elementId => {
+                toggleElementVisibility(elementId, false);
+            });
+        }
+
+        roleSelect.addEventListener('change', handleRoleChange);
     </script>
 @endpush
 
 @push('scripts')
-<script>
-	 $(document).ready(function() {
-	 $('#states-option').select2();
-	 });
-</script>
+    <script>
+        $(document).ready(function() {
+            $('#states-option').select2();
+        });
+    </script>
 @endpush
