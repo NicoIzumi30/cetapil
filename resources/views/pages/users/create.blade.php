@@ -14,91 +14,60 @@
                     </x-slot:cardTitle>
                     {{-- Profil Pengguna --}}
                     <div class="grid grid-cols-2 gap-4">
-                        <div>
+                        <div class="mb-4">
                             <label for="name" class="form-label">Nama Pengguna</label>
                             <input id="name" class="form-control" type="text" name="name"
                                 placeholder="Masukan nama pengguna" aria-describedby="name" />
                         </div>
-                        <div>
+                        <div class="mb-4">
                             <label for="email" class="form-label">Email Pengguna</label>
                             <input id="email" class="form-control" type="email" name="email"
                                 placeholder="Masukan email pengguna" aria-describedby="email" />
                         </div>
-                        <div>
+                        <div class="mb-4">
                             <label for="phone" class="form-label">Nomor Telepon Pengguna</label>
                             <input id="phone" class="form-control" type="text" name="phone"
                                 placeholder="Masukan nomor telepon pengguna" aria-describedby="phone" />
                         </div>
                         <div>
                             <label for="role" class="form-label">Jabatan Pengguna</label>
-                            <select id="role" class="form-select-search text-primary">
-                                <option value="" disabled selected>
-                                    -- Pilih Jabatan Pengguna --
-                                </option>
-                                <option value="superadmin">
-                                    Superadmin
-                                </option>
-                                <option value="admin">
-                                    Admin
-                                </option>
-                                <option value="sales">
-                                    Sales
-                                </option>
-                            </select>
+                            <div>
+                                <select id="role" class="form-select-search text-primary">
+                                    <option value="" disabled selected>
+                                        -- Pilih Jabatan Pengguna --
+                                    </option>
+                                    <option value="superadmin">
+                                        SuperAdmin
+                                    </option>
+                                    <option value="admin">
+                                        Admin
+                                    </option>
+                                    <option value="sales">
+                                        Sales
+                                    </option>
+                                </select>
+                            </div>
                         </div>
-                        <div>
-                            <label for="password" class="form-label">Kata Sandi</label>
-                            <input id="password" class="form-control" type="password" name="password"
-                                placeholder="Masukan kata Sandi" aria-describedby="password" />
-                        </div>
-                        <div>
-                            <label for="password-confirmation" class="form-label">Konfirmasi Kata Sandi</label>
-                            <input id="password-confirmation" class="form-control" type="password"
-                                name="password-confirmation" placeholder="Masukan kata Sandi"
-                                aria-describedby="password-confirmation" />
-                        </div>
-                        <div>
-                            <label for="region" class="form-label">Region</label>
-                            <input id="region" class="form-control" type="text" name="region"
-                                placeholder="Masukan Region" aria-describedby="region" />
-                        </div>
-
                     </div>
                     {{-- Profil Pengguna End --}}
 
                     {{-- Area Domisili --}}
                     <x-section-card :title="'Area Domisili Pengguna'">
                         <div class="grid grid-cols-2 gap-4">
-                            <div>
+                            <div class="mb-4">
                                 <label for="longitude" class="form-label">Longitudes <span class="font-normal">(DD
                                         Coordinates)</span></label>
                                 <input id="longitude" class="form-control" type="text" name="longitude"
                                     placeholder="Masukkan Koordinat Longitude" aria-describedby="longitude" />
                             </div>
-                            <div>
+                            <div class="mb-4">
                                 <label for="latitude" class="form-label">Latitudes<span class="font-normal">(DMS
                                         Coordinates)</span></label>
                                 <input id="latitude" class="form-control" type="text" name="latitude"
                                     placeholder="Masukkan Koordinat Latitude" aria-describedby="latitude" />
                             </div>
-                            <div>
-                                <label for="states-option">Kabupaten/Kota</label>
-                                <select id="states-option" name="states-option" class=" w-full">
-                                    <option value="" selected disabled>
-                                        -- Pilih Kabupaten/Kota--
-                                    </option>
-                                    <option value="sumatra">
-                                        Sumatra
-                                    </option>
-                                </select>
-                            </div>
-                            <div>
-                                <label for="address" class="form-label">Alamat Lengkap</label>
-                                <input id="address" class="form-control" type="text" name="address"
-                                    placeholder="Masukkan Alamat Lengkap" aria-describedby="address" />
-                            </div>
                         </div>
-                        <div class="relative mt-10">
+                        <div class="relative">
                             <div class="h-[350px] z-10" id="user-map-location"></div>
                             <button id="fullscreen-button"
                                 class="absolute top-3 right-3 rounded-sm w-10 h-10 grid place-items-center bg-white z-50 hover:bg-slate-200">
@@ -115,32 +84,21 @@
 
 
                     {{-- Manajemen Akun --}}
-                    <x-section-card :title="'Manajemen Akun'">
-                        <div id="admin-access" class="grid-cols-3 gap-12 hidden">
-                            <x-input.switch>Main Reports</x-input.switch>
-                            <x-input.switch>Menu Produk</x-input.switch>
-                            <x-input.switch>Menu Visibility</x-input.switch>
-                            <x-input.switch>Menu Routing</x-input.switch>
-                            <x-input.switch>Menu Selling</x-input.switch>
-                            <x-input.switch>Menu Pengguna</x-input.switch>
-                        </div>
-                        <div id="sales-access" class="grid-cols-3 gap-12 hidden">
-                            <x-input.switch>Menu Routing</x-input.switch>
-                            <x-input.switch>Menu Selling</x-input.switch>
-                            <x-input.switch>Menu Outlet</x-input.switch>
-                            <x-input.switch>Menu Activity</x-input.switch>
-                        </div>
-                        <div id="superadmin-access" class="grid-cols-3 gap-12 hidden">
-                            <x-input.switch>Main Reports</x-input.switch>
-                            <x-input.switch>Menu Produk</x-input.switch>
-                            <x-input.switch>Menu Visibility</x-input.switch>
-                            <x-input.switch>Menu Routing</x-input.switch>
-                            <x-input.switch>Menu Selling</x-input.switch>
-                            <x-input.switch>Menu Pengguna</x-input.switch>
-                            <x-input.switch>Menu Outlet</x-input.switch>
-                            <x-input.switch>Menu Activity</x-input.switch>
-                        </div>
-                    </x-section-card>
+                    <div id="account-management" class="hidden">
+                        <x-section-card :title="'Manajemen Akun'">
+                            <div>
+                                <div class="grid grid-cols-3 gap-12 ">
+                                    {{-- @foreach ($form['permissions'] as $permission) --}}
+                                    <x-input.switch>Main Reports</x-input.switch>
+                                    <x-input.switch>Menu Produk</x-input.switch>
+                                    <x-input.switch>Menu Routing</x-input.switch>
+                                    <x-input.switch>Menu Selling</x-input.switch>
+                                    <x-input.switch>Menu Pengguna</x-input.switch>
+                                    {{-- @endforeach --}}
+                                </div>
+                            </div>
+                        </x-section-card>
+                    </div>
                     {{-- Manajemen Akun End --}}
 
                     <x-button.info class="w-full mt-20 !text-xl">Konfirmasi</x-button.info>
@@ -155,9 +113,10 @@
 @push('scripts')
     <script>
         $(document).ready(function() {
-            // Initialize map
-            var map = L.map('user-map-location').setView([-6.200000, 106.816666],
-                10); // Centered on Jakarta by default
+            // Initialize map with default view of Indonesia
+            var map = L.map('user-map-location').setView([-2.4833826, 117.8902853],
+            5); // Centered on Indonesia by default
+
             L.tileLayer('https://tile.openstreetmap.org/{z}/{x}/{y}.png', {
                 maxZoom: 20,
                 attribution: '&copy; <a href="http://www.openstreetmap.org/copyright">OpenStreetMap</a>'
@@ -179,6 +138,17 @@
                 // Update form fields
                 $('#latitude').val(latlng.lat.toFixed(6));
                 $('#longitude').val(latlng.lng.toFixed(6));
+            }
+
+            // Function to handle geolocation success
+            function handleLocationSuccess(position) {
+                const latlng = L.latLng(position.coords.latitude, position.coords.longitude);
+                map.setView(latlng, 15);
+            }
+
+            // Try to get user's location
+            if ("geolocation" in navigator) {
+                navigator.geolocation.getCurrentPosition(handleLocationSuccess);
             }
 
             // Handle map click events
@@ -225,52 +195,15 @@
 
 @push('scripts')
     <script>
-        const roleConfig = {
-            admin: {
-                showElement: 'admin-access',
-                hideElements: ['sales-access', 'superadmin-access']
-            },
-            sales: {
-                showElement: 'sales-access',
-                hideElements: ['admin-access', 'superadmin-access']
-            },
-            superadmin: {
-                showElement: 'superadmin-access',
-                hideElements: ['admin-access', 'sales-access']
-            }
-        };
-
         const roleSelect = document.getElementById('role');
+        const accountManagement = document.getElementById('account-management');
 
-        function toggleElementVisibility(elementId, show) {
-            const element = document.getElementById(elementId);
-            if (!element) return;
-
-            element.classList.toggle('hidden', !show);
-            element.classList.toggle('grid', show);
-        }
-
-        function handleRoleChange(event) {
-            const selectedRole = event.target.value;
-            const config = roleConfig[selectedRole];
-
-            if (!config) return;
-
-            toggleElementVisibility(config.showElement, true);
-
-            config.hideElements.forEach(elementId => {
-                toggleElementVisibility(elementId, false);
-            });
-        }
-
-        roleSelect.addEventListener('change', handleRoleChange);
-    </script>
-@endpush
-
-@push('scripts')
-    <script>
-        $(document).ready(function() {
-            $('#states-option').select2();
+        roleSelect.addEventListener('change', () => {
+            if (roleSelect.value) {
+                accountManagement.classList.remove('hidden');
+            } else {
+                accountManagement.classList.add('hidden');
+            }
         });
     </script>
 @endpush
