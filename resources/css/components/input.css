@@ -14,6 +14,23 @@
 	@apply bg-opacity-70;
 }
 
+.form-control-edit::after {
+	background-color: var(--primary);
+}
+
+.form-control-edit::after {
+	content: url("/public/assets/icons/icon-park-solid_more-app.svg");
+	width: 40px;
+	height: 40px;
+	background-color: red;
+	position: absolute;
+	top: 0; 
+	right: 0;
+	z-index: 50;
+}
+
+
+
 .form-control::placeholder {
     color: #CECECE !important;
     font-size: 16px;

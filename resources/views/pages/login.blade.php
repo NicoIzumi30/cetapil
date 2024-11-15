@@ -35,7 +35,7 @@
             </h3>
             <p class="form-description">Silahkan Masukkan <span>User ID </span>dan <span>Kata Sandi</span> untuk
                 melanjutkan</p>
-            <form class="login-form">
+            <form onsubmit="bubu()" class="login-form">
 				<p class="error-message"><span>User </span>atau <span>Kata Sandi</span> yang anda masukkan salah, harap
                     coba lagi</p>
                 <div class="input">
@@ -61,7 +61,7 @@
                                 fill="#054F7B" />
                         </svg>
                         <input class="outline-none" id="password" type="password" placeholder="Masukkan Kata Sandi" />
-                        <button id="toggle-password" class="mr-3">
+                        <button type="button" id="toggle-password" class="mr-3">
                             <div id="eye-outline" class="hidden">
                                 <svg width="24" height="24" viewBox="0 0 24 24" fill="none"
                                     xmlns="http://www.w3.org/2000/svg">
@@ -103,6 +103,10 @@
         eyeOpenIcon.style.display = inputPassword.type === 'password' ? 'none' : 'block';
         eyeClosedIcon.style.display = inputPassword.type === 'password' ? 'block' : 'none';
     });
+
+	function bubu() {
+		console.log('object');
+	}
 </script>
 
 </html>

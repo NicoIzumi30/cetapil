@@ -24,13 +24,6 @@
                     <x-slot:title>
                         Tambah Produk
                     </x-slot:title>
-                    <x-slot:modalAction>
-                        <label for="upload_products" class="cursor-pointer">
-                            <x-button.info class="pointer-events-none">Unggah Secara Bulk</x-button.info>
-                            <input type="file" id="upload_products" name="upload_products" class="hidden" accept=".csv"
-                                aria-label="Unggah Secara Bulk">
-                        </label>
-                    </x-slot:modalAction>
                     <form class="grid grid-cols-2 gap-6">
                         <div>
                             <label for="categories" class="!text-black">Kategori Produk</label>
@@ -57,30 +50,21 @@
                             @enderror
                         </div>
                         <div>
-                            <label for="type-account" class="!text-black">Pilih Type Account</label>
-                            <div>
-                                <select id="type-account" name="type-account" class="type-account">
-                                    <option value="" selected>
-                                        -- Pilih Type Account --
-                                    </option>
-                                    <option value="superadmin">
-                                        Superadmin
-                                    </option>
-                                    <option value="admin">
-                                        Admin
-                                    </option>
-                                    <option value="sales">
-                                        Sales
-                                    </option>
-                                </select>
-                            </div>
+                            <label for="md-price" class="!text-black">Harga MD</label>
+                            <input id="md-price" class="form-control" wire:model="md-price" name="md-price"
+                                placeholder="Masukan Harga MD" aria-describedby="md-price" value="">
+                            @error('md-price')
+                                <div class="invalid-feedback">
+                                    {{ $message }}
+                                </div>
+                            @enderror
                         </div>
                         <div>
-                            <label for="av3m" class="!text-black">AV3M</label>
-                            <input id="av3m" class="form-control @error('av3m') is-invalid @enderror" type="text"
-                                wire:model="av3m" name="av3m" placeholder="Masukan produk av3m" aria-describedby="av3m"
-                                value="">
-                            @error('av3m')
+                            <label for="sales-price" class="!text-black">Harga Sales</label>
+                            <input id="sales-price" class="form-control @error('sales-price') is-invalid @enderror"
+                                type="text" wire:model="sales-price" name="sales-price" placeholder="Masukan Harga Sales"
+                                aria-describedby="sales-price" value="">
+                            @error('sales-price')
                                 <div class="invalid-feedback">
                                     {{ $message }}
                                 </div>
@@ -115,7 +99,7 @@
                                         Ukuran maksimal file <strong>5MB</strong>
                                     </p>
                                 </div>
-								<p class="hidden text-primary font-bold text-xl" id="filename-display"></p>
+                                <p class="hidden text-primary font-bold text-xl" id="filename-display"></p>
                             </div>
                             {{-- Hidden File Input --}}
                             <input type="file" name="file_upload" id="file_upload" class="hidden">
@@ -134,7 +118,7 @@
             {{-- Product Action End --}}
 
             {{-- Tabel Daftar Produk --}}
-            <table class="table">
+            <table id="product-table" class="table">
                 <thead>
                     <tr>
                         <th scope="col" class="text-center">
@@ -177,11 +161,7 @@
                                             Data</a>
                                     </li>
                                 </x-action-table-dropdown>
-                                <x-modal id="edit-produk-{{ $loop->index }}">
-                                    <x-slot:title>
-                                        Ubah Produk
-                                    </x-slot:title>
-                                </x-modal>
+
                             </td>
                         </tr>
                     @empty
@@ -302,11 +282,13 @@
     <script>
         $(document).ready(function() {
             $('.categories').select2();
-            $('.type-account').select2({
-                minimumResultsForSearch: Infinity
-            });
             $("#stock-date-range").flatpickr({
                 mode: "range"
+            });
+            $(document).ready(function() {
+                $('#product-table').DataTable({
+					paging: false
+				});
             });
         });
     </script>
@@ -373,20 +355,19 @@
                 }
 
                 if (file.size > maxFileSize && file.size > maxFileSize) {
-                    return 
+                    return
                 }
 
-				console.log(file.name);
+                console.log(file.name);
 
                 const reader = new FileReader();
                 reader.onload = function(e) {
-					displayFileName.classList.remove('hidden')
-					uploadHelptext.classList.add('hidden')
-					displayFileName.innerText = file.name
+                    displayFileName.classList.remove('hidden')
+                    uploadHelptext.classList.add('hidden')
+                    displayFileName.innerText = file.name
                 };
                 reader.readAsText(file);
             }
         });
-    </script>
     </script>
 @endpush

@@ -43,6 +43,14 @@ Route::get('/users/create', function () {
     return view('pages.users.create');
 });
 
+Route::get('/users/edit', function () {
+    return view('pages.users.edit');
+});
+
+Route::get('/unauthorized', function () {
+    return view('pages.unauthorized');
+});
+
 Route::get('/product', [ProductController::class, 'index'])->name('pages.product.index');
 
 
