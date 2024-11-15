@@ -58,7 +58,7 @@ class UserSeeder extends Seeder
         $users = [
             [
                 'name' => 'Yuki Me',
-                'email' => 'yukigmail.com',
+                'email' => 'yuki@gmail.com',
                 'password' => Hash::make('12345678'),
                 'phone_number' => '+62859126462972',
                 'role' => $superadmin,
