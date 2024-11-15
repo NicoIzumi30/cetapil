@@ -55,30 +55,32 @@ class GPSAwareScaffold extends StatelessWidget {
     return Scaffold(
       resizeToAvoidBottomInset: true,
       appBar: appBar,
-      body: Stack(
-        children: [
-          SvgPicture.asset(
-            'assets/background.svg',
-            fit: BoxFit.cover,
-            width: double.infinity,
-            height: double.infinity,
-          ),
-          Column(
-            children: [
-              Expanded(child: body),
-              bottomNavigationBar!
-            ],
-          ),
-          if (requiresGPS)
-            Obx(() {
-              if (!gpsController.isGPSEnabled.value) {
-                WidgetsBinding.instance.addPostFrameCallback((_) {
-                  _showGPSDialog(context);
-                });
-              }
-              return SizedBox.shrink();
-            }),
-        ],
+      body: SafeArea(
+        child: Stack(
+          children: [
+            SvgPicture.asset(
+              'assets/background.svg',
+              fit: BoxFit.cover,
+              width: double.infinity,
+              height: double.infinity,
+            ),
+            Column(
+              children: [
+                Expanded(child: body),
+                bottomNavigationBar!
+              ],
+            ),
+            if (requiresGPS)
+              Obx(() {
+                if (!gpsController.isGPSEnabled.value) {
+                  WidgetsBinding.instance.addPostFrameCallback((_) {
+                    _showGPSDialog(context);
+                  });
+                }
+                return SizedBox.shrink();
+              }),
+          ],
+        ),
       ),
       // bottomNavigationBar: bottomNavigationBar,
     );

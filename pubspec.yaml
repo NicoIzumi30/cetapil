@@ -43,6 +43,8 @@ dependencies:
   geolocator: ^13.0.1
   connectivity_plus: ^6.0.5
   flutter_easyloading: ^3.0.5
+  smooth_page_indicator: ^1.2.0+3
+  carousel_slider: ^5.0.0
 
 dev_dependencies:
   flutter_test:
@@ -70,6 +72,7 @@ flutter:
   assets:
     - assets/
     - assets/logo.svg
+    - assets/icon/setting_account.svg
   #   - images/a_dot_ham.jpeg
 
   # An image asset can refer to one or more resolution-specific "variants", see

@@ -1,9 +1,435 @@
+import 'package:carousel_slider/carousel_options.dart';
+import 'package:carousel_slider/carousel_slider.dart';
+import 'package:cetapil_mobile/page/dashboard/setting_account.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_svg/flutter_svg.dart';
+import 'package:get/get.dart';
+import 'package:get/get_core/src/get_main.dart';
+import 'package:google_fonts/google_fonts.dart';
+import 'package:smooth_page_indicator/smooth_page_indicator.dart';
+
+import '../../widget/progress_indicator.dart';
 
 class DashboardPage extends StatelessWidget {
+  final CarouselSliderController _carouselController =
+      CarouselSliderController();
+  int _currentIndex = 0;
+  final List<String> imageUrls = [
+    'assets/image1.jpg',
+    'assets/image2.jpg',
+    'assets/image3.jpg',
+    'assets/image4.jpg',
+  ];
+  @override
+  Widget build(BuildContext context) {
+    return Padding(
+      padding: EdgeInsets.fromLTRB(15,15,15,0),
+      child: SingleChildScrollView(
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            SizedBox(
+              height: 20,
+            ),
+            Padding(
+              padding: const EdgeInsets.symmetric(horizontal: 5),
+              child: Column(
+                children: [
+                  Row(
+                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                    children: [
+                      Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          Text("Selamat Datang",
+                              style: TextStyle(
+                                  fontSize: 20,
+                                  color: Color(0xFF0077BD),
+                                  fontWeight: FontWeight.bold)),
+                          Text("Selphi Nusawati Indira",
+                              style: TextStyle(
+                                  fontSize: 22,
+                                  color: Color(0xFFFFFFFF),
+                                  fontWeight: FontWeight.bold))
+                        ],
+                      ),
+                      GestureDetector(
+                        onTap: (){
+                          Get.to(
+                              SettingProfile()
+                          );
+                        },
+                        child: Container(
+                          padding:
+                              EdgeInsets.symmetric(horizontal: 10, vertical: 11),
+                          decoration: BoxDecoration(
+                              color: Colors.white,
+                              borderRadius: BorderRadius.circular(10)),
+                          child:
+                              SvgPicture.asset('assets/icon/setting_account.svg'),
+                        ),
+                      )
+                    ],
+                  ),
+                  SizedBox(
+                    height: 10,
+                  ),
+                  Row(
+                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                    children: [
+                      SizedBox(
+                        height: 25,
+                        child: ElevatedButton(
+                            style: ElevatedButton.styleFrom(
+                                foregroundColor: Colors.blue,
+                                shape: RoundedRectangleBorder(
+                                    borderRadius: BorderRadius.circular(20))),
+                            onPressed: () {},
+                            child: Text(
+                              "Sales Promotion",
+                              style: TextStyle(fontSize: 11),
+                            )),
+                      ),
+                      SizedBox(
+                        height: 25,
+                        child: ElevatedButton(
+                            style: ElevatedButton.styleFrom(
+                                foregroundColor: Colors.white,
+                                backgroundColor: Colors.blue,
+                                shape: RoundedRectangleBorder(
+                                    borderRadius: BorderRadius.circular(20))),
+                            onPressed: () {},
+                            child: Text(
+                              "Checked-In",
+                              style: TextStyle(fontSize: 11),
+                            )),
+                      )
+                    ],
+                  ),
+                  SizedBox(
+                    height: 10,
+                  ),
+                  Container(
+                    width: double.infinity,
+                    padding: EdgeInsets.all(10),
+                    decoration: BoxDecoration(
+                        borderRadius: BorderRadius.circular(10),
+                        color: Colors.white),
+                    child: Row(
+                      mainAxisAlignment: MainAxisAlignment.spaceAround,
+                      children: [
+                        Column(
+                          children: [
+                            Text(
+                              "Cluster Region",
+                              style:
+                                  TextStyle(fontSize: 10, color: Colors.blue),
+                            ),
+                            Text(
+                              "DKI Jakarta",
+                              style: TextStyle(
+                                  fontSize: 10, fontWeight: FontWeight.bold),
+                            ),
+                          ],
+                        ),
+                        Column(
+                          children: [
+                            Text("Outlet",
+                                style: TextStyle(
+                                    fontSize: 10, color: Colors.blue)),
+                            Text("Guardian Neo Soho",
+                                style: TextStyle(
+                                    fontSize: 10, fontWeight: FontWeight.bold))
+                          ],
+                        ),
+                        Column(
+                          children: [
+                            Text("Outlet Radius",
+                                style: TextStyle(
+                                    fontSize: 10, color: Colors.blue)),
+                            Text(
+                              "20m",
+                              style: TextStyle(
+                                  fontSize: 10, fontWeight: FontWeight.bold),
+                            ),
+                          ],
+                        ),
+                      ],
+                    ),
+                  ),
+                  SizedBox(
+                    height: 10,
+                  ),
+                ],
+              ),
+            ),
+            CarouselSlider.builder(
+              carouselController: _carouselController,
+              itemCount: imageUrls.length,
+              itemBuilder: (context, index, realIndex) {
+                return Container(
+                  width: double.infinity,
+                  margin: const EdgeInsets.symmetric(horizontal: 5),
+                  decoration: BoxDecoration(
+                    color: Colors.grey,
+                    borderRadius: BorderRadius.circular(20),
+                    // image: DecorationImage(
+                    //   image: AssetImage(imageUrls[index]),
+                    //   fit: BoxFit.cover,
+                    // ),
+                  ),
+                  child: Text("asdas"),
+                );
+              },
+              options: CarouselOptions(
+                height: 200,
+                viewportFraction: 0.8,
+                enlargeCenterPage: false,
+                autoPlay: true,
+                autoPlayInterval: const Duration(seconds: 3),
+                onPageChanged: (index, reason) {
+                  _currentIndex = index;
+                },
+              ),
+            ),
+            SizedBox(
+              height: 10,
+            ),
+            Stack(
+              alignment: Alignment(1, 1),
+              children: [
+                // Container(
+                //   width: double.infinity,
+                // ),
+                Container(
+                  width: double.infinity,
+                  // height: 80,
+                  padding: EdgeInsets.symmetric(horizontal: 10, vertical: 4),
+                  decoration: BoxDecoration(
+                    gradient: const LinearGradient(
+                      begin: Alignment.bottomLeft,
+                      end: Alignment.topRight,
+                      colors: [
+                        Color(0xFF39B5FF), // Lighter blue at top
+                        // Color(0xFF9BD8F1), // Darker blue at bottom
+                        Color(0xFFB2E6FD), // Darker blue at bottom
+                      ],
+                    ),
+                    boxShadow: [
+                      // Top light shadow
+                      BoxShadow(
+                        color: Colors.white.withOpacity(0.2),
+                        offset: const Offset(0, -1),
+                        blurRadius: 4,
+                      ),
+                      // Bottom shadow
+                      BoxShadow(
+                        color: Colors.black.withOpacity(0.2),
+                        offset: const Offset(0, 2),
+                        blurRadius: 4,
+                      ),
+                    ],
+                    borderRadius: BorderRadius.circular(10),
+                  ),
+                  child: Row(
+                    mainAxisAlignment: MainAxisAlignment.end,
+                    children: [
+                      Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        mainAxisSize: MainAxisSize.max,
+                        children: [
+                          Text(
+                            "Senin",
+                            style: GoogleFonts.poppins(
+                              fontSize: 14,
+                              fontWeight: FontWeight.w600,
+                              color: Colors.white,
+                              fontStyle: FontStyle.italic,
+                            ),
+                          ),
+                          Text("10",
+                              style: GoogleFonts.plusJakartaSans(
+                                fontSize: 55,
+                                fontWeight: FontWeight.w800,
+                                color: Colors.white,
+                                height: 1,
+                              )),
+                        ],
+                      ),
+                      SizedBox(
+                        width: 10,
+                      ),
+                      Column(
+                        crossAxisAlignment: CrossAxisAlignment.end,
+                        mainAxisSize: MainAxisSize.max,
+                        children: [
+                          Container(
+                            padding: EdgeInsets.symmetric(
+                                horizontal: 8, vertical: 6),
+                            decoration: BoxDecoration(
+                                color: Colors.white,
+                                borderRadius: BorderRadius.circular(10)),
+                            child: Row(
+                              children: [
+                                Text(
+                                  "Cek Kalender",
+                                  style: TextStyle(
+                                      color: Color(0xFF054F7B),
+                                      fontWeight: FontWeight.bold),
+                                ),
+                                SizedBox(
+                                  width: 8,
+                                ),
+                                Icon(Icons.calendar_month_rounded,
+                                    color: Color(0xFF054F7B))
+                              ],
+                            ),
+                          ),
+                          SizedBox(
+                            height: 10,
+                          ),
+                          Text("November 2024",
+                              style: GoogleFonts.plusJakartaSans(
+                                fontSize: 19,
+                                fontWeight: FontWeight.bold,
+                                color: Colors.white,
+                                height: 1,
+                              )),
+                        ],
+                      ),
+                    ],
+                  ),
+                ),
+                Container(
+                  width: double.infinity,
+                  padding: EdgeInsets.only(left: 10),
+                  child: Row(
+                    mainAxisAlignment: MainAxisAlignment.start,
+                    children: [
+                      // SvgPicture.asset('assets/vector_calendar.svg'),
+                      Image.asset('assets/vector_calendar.png')
+                    ],
+                  ),
+                ),
+              ],
+            ),
+            SizedBox(
+              height: 15,
+            ),
+            Row(
+              children: [
+                itemSummary(
+                  title: "Call Plan",
+                  value: "130",
+                ),
+                SizedBox(
+                  width: 10,
+                ),
+                itemSummary(
+                  title: "Actual Plan",
+                  value: "25",
+                ),
+                SizedBox(
+                  width: 10,
+                ),
+                itemSummary(
+                  title: "Outlet Coverage",
+                  value: "400",
+                ),
+              ],
+            ),
+            SizedBox(
+              height: 15,
+            ),
+            Text(
+              "Performance Index",
+              style: GoogleFonts.plusJakartaSans(
+                  fontWeight: FontWeight.w800,
+                  fontSize: 20,
+                  color: Color(0xFF054F7B)),
+            ),
+            SizedBox(
+              height: 5,
+            ),
+            Container(
+              width: double.infinity,
+              padding: EdgeInsets.all(10),
+              decoration: BoxDecoration(
+                gradient: const LinearGradient(
+                  begin: Alignment.topLeft,
+                  end: Alignment.bottomRight,
+                  colors: [
+                    Color(0xFFFFFFFF), // Lighter blue at top
+                    // Color(0xFF9BD8F1), // Darker blue at bottom
+                    Color(0x80FFFFFF), // Darker blue at bottom
+                  ],
+                ),
+                borderRadius: BorderRadius.circular(10)
+
+              ),
+              child:
+              Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Text("Update terbaru : 14 November 2024",style: TextStyle(fontSize: 10),),
+                  SizedBox(height: 15,),
+                  AnimatedGlossyProgressBar(
+                    progress: 0.62,
+                    // height: 15,
+                  ),
+                  SizedBox(height: 15,),
+                  Text("*Performance index dihitung berdasarkan target call vs aktual \n call user yang telah dilakukan dalam 1 Bulan",style: TextStyle(fontSize: 8),),
+                ],
+              )
+            )
+          ],
+        ),
+      ),
+    );
+  }
+}
+
+class itemSummary extends StatelessWidget {
+  final String title;
+  final String value;
+  const itemSummary({
+    super.key,
+    required this.title,
+    required this.value,
+  });
 
   @override
   Widget build(BuildContext context) {
-    return const Placeholder();
+    return Expanded(
+      child: Container(
+        padding: EdgeInsets.all(8),
+        decoration: BoxDecoration(
+            gradient: const LinearGradient(
+              begin: Alignment.topLeft,
+              end: Alignment.bottomRight,
+              colors: [
+                Color(0xFFFFFFFF), // Lighter blue at top
+                // Color(0xFF9BD8F1), // Darker blue at bottom
+                Color(0x80FFFFFF), // Darker blue at bottom
+              ],
+            ),
+            borderRadius: BorderRadius.circular(10)),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Text(title,
+                style: GoogleFonts.plusJakartaSans(
+                    fontSize: 10,
+                    fontWeight: FontWeight.w600,
+                    color: Colors.blue)),
+            Text(
+              value,
+              style: GoogleFonts.plusJakartaSans(
+                  fontSize: 22, fontWeight: FontWeight.w800),
+            )
+          ],
+        ),
+      ),
+    );
   }
 }

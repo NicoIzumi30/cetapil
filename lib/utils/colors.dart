@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:google_fonts/google_fonts.dart';
 
 class AppColors {
   // Light Theme Colors
@@ -20,6 +21,12 @@ class AppColors {
   static const Color warning = Color(0xFFFFC107);
   static const Color info = Color(0xFF2196F3);
   static const Color white = Color(0xFFFFFFFF);
+}
+
+class AppTextStyle{
+  static TextStyle titlePage = GoogleFonts.plusJakartaSans(
+      fontSize: 18,fontWeight: FontWeight.w700,color: Color(0xFF023B5E)
+  );
 }
 
 class AppThemes {
