@@ -46,7 +46,7 @@
                                         -- Pilih Jabatan Pengguna --
                                     </option>
                                     <option selected value="superadmin">
-                                        SuperAdmin
+                                        Superadmin
                                     </option>
                                     <option value="admin">
                                         Admin
