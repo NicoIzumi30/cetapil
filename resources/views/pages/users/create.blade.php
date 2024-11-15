@@ -59,7 +59,7 @@
                         </div>
                         <div>
                             <label for="region" class="form-label">Region</label>
-                            <input id="region" class="form-control" type="password" name="region"
+                            <input id="region" class="form-control" type="text" name="region"
                                 placeholder="Masukan Region" aria-describedby="region" />
                         </div>
 
