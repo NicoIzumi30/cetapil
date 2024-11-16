@@ -7,7 +7,6 @@ use App\Http\Controllers\Auth\LoginController;
 use App\Http\Controllers\Auth\LogoutController;
 use App\Http\Controllers\Web\DashboardController;
 
-
 Route::middleware('guest')->group(function () {
     Route::get('/login', [LoginController::class, 'index'])->name('login');
     Route::post('/login', [LoginController::class, 'login']);
@@ -28,7 +27,7 @@ Route::middleware('auth')->group(function () {
 
         Route::get('/edit', function () {
             return view('pages.routing.edit');
-        });
+        }); 
     });
     Route::prefix('visibility')->name('visibility.')->middleware('permission:menu_visibility')->group(function () {
         Route::get('/', function () {
@@ -40,7 +39,8 @@ Route::middleware('auth')->group(function () {
             return view('pages.selling.index');
         });
     });
-    Route::resource('users', UserController::class)->middleware('permission:menu_user');    
+    Route::resource('users', UserController::class)->middleware('permission:menu_user'); 
+      
     Route::prefix('products')->name('products.')->middleware('permission:menu_product')->group(function () {
         Route::get('/', [ProductController::class, 'index'])->name('pages.product.index');
     });

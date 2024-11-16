@@ -20,7 +20,7 @@ class CreateUserRequest extends FormRequest
      * @return array<string, \Illuminate\Contracts\Validation\ValidationRule|array<mixed>|string>
      */
     public function rules(): array
-    {
+    {           
         return [
             'name' => 'required|string',
             'email' => 'required|unique:users,email',
@@ -33,7 +33,7 @@ class CreateUserRequest extends FormRequest
             'address' => 'nullable|string',
             'permissions' => 'required|array',
             'permissions.*' => 'required|string|exists:permissions,name',
-            'password' => 'required|string|min:8'
+            'password' => 'required|string|min:8|confirmed',
         ];
     }
 }

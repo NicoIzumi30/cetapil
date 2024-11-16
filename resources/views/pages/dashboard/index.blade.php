@@ -17,7 +17,7 @@
 					<p class="text-black text-sms font-bold">{{$tanggal}}</p>
 				</div>
 			</div>
-			
+
 		</div>
 	</div>
 @endsection
@@ -30,7 +30,15 @@
 			<x-pages.dashboard.total-card :title="'Total Routing'" :total="7.432"/>
 			<x-pages.dashboard.total-card :title="'Total Visibility'" :total="7.432"/>
 		</div>
-		<div>
-		</div>
 	</main>
 @endsection
+
+
+
+@push('scripts')
+{{-- Highcharts Libraries --}}
+<script src="https://code.highcharts.com/maps/highmaps.js"></script>
+<script src="https://code.highcharts.com/maps/modules/exporting.js"></script>
+<script src="https://code.highcharts.com/maps/modules/offline-exporting.js"></script>
+<script src="https://code.highcharts.com/modules/accessibility.js"></script>
+@endpush

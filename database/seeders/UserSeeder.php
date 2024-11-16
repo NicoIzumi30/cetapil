@@ -35,7 +35,6 @@ class UserSeeder extends Seeder
             'name' => 'admin'
         ]);
         $sales = Role::create(['name' => 'sales']);
-
         $permissions = [
             'menu_report',
             'menu_product',
@@ -47,19 +46,18 @@ class UserSeeder extends Seeder
             'menu_activity',
             'menu_selling',
         ];
-
+       
         foreach ($permissions as $permission) {
             Permission::create([
                 'name' => $permission
             ]);
         }
-
         // Create User
         $users = [
             [
                 'name' => 'Yuki Me',
-                'email' => 'yuki@gmail.com',
-                'password' => Hash::make('12345678'),
+                'email' => 'yuki@gmail.com',                
+                'password' => Hash::make('121233'),
                 'phone_number' => '+62859126462972',
                 'role' => $superadmin,
                 'permission' => $permissions
