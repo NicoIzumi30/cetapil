@@ -24,10 +24,9 @@ class LoginController extends Controller
             $request->session()->regenerate();
             session(['auth.user_id' => Auth::id()]);
             session()->save();
-
             return redirect()->intended('/');
         }
-
+        
         return back()->withErrors([
             'email' => 'Email atau password salah.',
         ]);

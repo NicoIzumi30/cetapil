@@ -156,78 +156,110 @@
                         placeholder="Masukkan Alamat Lengkap" aria-describedby="adresss" />
                 </div>
             </div>
+            <div class="relative mt-6">
+                <div class="h-[350px] z-10" id="user-map-location"></div>
+                <button id="fullscreen-button"
+                    class="absolute top-3 right-3 rounded-sm w-10 h-10 grid place-items-center bg-white z-50 hover:bg-slate-200">
+                    <svg width="32" height="32" viewBox="0 0 24 24" fill="none"
+                        xmlns="http://www.w3.org/2000/svg">
+                        <path
+                            d="M6 14C5.45 14 5 14.45 5 15V18C5 18.55 5.45 19 6 19H9C9.55 19 10 18.55 10 18C10 17.45 9.55 17 9 17H7V15C7 14.45 6.55 14 6 14ZM6 10C6.55 10 7 9.55 7 9V7H9C9.55 7 10 6.55 10 6C10 5.45 9.55 5 9 5H6C5.45 5 5 5.45 5 6V9C5 9.55 5.45 10 6 10ZM17 17H15C14.45 17 14 17.45 14 18C14 18.55 14.45 19 15 19H18C18.55 19 19 18.55 19 18V15C19 14.45 18.55 14 18 14C17.45 14 17 14.45 17 15V17ZM14 6C14 6.55 14.45 7 15 7H17V9C17 9.55 17.45 10 18 10C18.55 10 19 9.55 19 9V6C19 5.45 18.55 5 18 5H15C14.45 5 14 5.45 14 6Z"
+                            fill="#000" />
+                    </svg>
+                </button>
+            </div>
         </x-section-card>
 
         <x-section-card :title="'Tambahkan Foto Outlet'">
-            <div class="flex flex-col items-center w-fit">
-                <div class="relative w-fit mx-3">
-                    <div class="flex justify-center items-center flex-col py-2">
-                        {{-- Upload Area --}}
-                        <div class="cursor-pointer text-center grid place-items-center border-2 border-dashed border-blue-400 rounded-lg p-4"
-                            id="upload-area-front">
-                            <svg width="30" height="63" viewBox="0 0 64 63" fill="none"
-                                xmlns="http://www.w3.org/2000/svg">
-                                <path
-                                    d="M28 43.2577C28 45.4323 29.7909 47.1952 32 47.1952C34.2091 47.1952 36 45.4323 36 43.2577V15.074L48.971 27.8423L54.6279 22.2739L32.0005 0L9.37305 22.2739L15.0299 27.8423L28 15.0749V43.2577Z"
-                                    fill="#fff" />
-                                <path
-                                    d="M0 39.375H8V55.125H56V39.375H64V55.125C64 59.4742 60.4183 63 56 63H8C3.58172 63 0 59.4742 0 55.125V39.375Z"
-                                    fill="#fff" />
-                            </svg>
-                            <h5 class="text-white font-medium mt-2">Klik disini untuk unggah foto</h5>
-                            <p class="text-white font-light text-sm">
-                                Ukuran maksimal foto <strong>2MB</strong>
-                            </p>
-                        </div>
+            <div class="flex">
+                {{-- Foto Tampak Depan Outlet --}}
+                <x-input.image id="front_outlet" name="front_outlet" label="Foto tampak depan outlet"
+                    :max-size="2" />
+                {{-- Foto Tampak Depan Outlet End --}}
 
-                        {{-- Preview Container --}}
-                        <div id="preview-container-front" class="hidden w-[250px] relative">
-                            <img id="preview-image-front" src="" alt="Preview"
-                                class="w-full mx-auto rounded-lg" />
-                            <button
-                                class="absolute bottom-2 right-2 bg-white p-2 rounded-full shadow-md hover:bg-gray-100 transition-colors"
-                                onclick="removeImage('front')">
-                                <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 text-red-500" viewBox="0 0 20 20"
-                                    fill="currentColor">
-                                    <path fill-rule="evenodd"
-                                        d="M9 2a1 1 0 00-.894.553L7.382 4H4a1 1 0 000 2v10a2 2 0 002 2h8a2 2 0 002-2V6a1 1 0 100-2h-3.382l-.724-1.447A1 1 0 0011 2H9zM7 8a1 1 0 012 0v6a1 1 0 11-2 0V8zm5-1a1 1 0 00-1 1v6a1 1 0 102 0V8a1 1 0 00-1-1z"
-                                        clip-rule="evenodd" />
-                                </svg>
-                            </button>
-                        </div>
-                    </div>
+                {{-- Foto Spanduk/Banner/Neon Box --}}
+                <x-input.image id="banner_outlet" name="banner_outlet" label="Foto spanduk/banner/neon Box"
+                    :max-size="2" />
+                {{-- Foto Spanduk/Banner/Neon Box End --}}
 
-                    {{-- Hidden File Input --}}
-                    <input type="file" name="img_front" id="img_front" class="hidden" accept="image/png, image/jpeg"
-                        onchange="previewImage(this, 'front')">
-                </div>
-
-                {{-- Label --}}
-                <label class="text-center mt-3 text-xs text-white cursor-pointer" for="img_front">
-                    Foto tampak depan outlet
-                </label>
+                {{-- Foto jalan utama outlet --}}
+                <x-input.image id="street_outlet" name="istreet_outlet" label="Foto jalan utama outlet"
+                    :max-size="2" />
+                {{-- Foto jalan utama outlet End --}}
             </div>
-
         </x-section-card>
 
         <x-section-card :title="'Formulir Survey Outlet'">
-            <div class="relative inline-flex items-center">
-                <input type="checkbox" id="toggle" class="peer sr-only">
-                <label for="toggle" class="flex w-[180px] cursor-pointer items-center rounded-full bg-gray-200 p-1">
-                    <!-- Active state (Sudah) -->
-                    <span
-                        class="flex h-8 w-[90px] items-center justify-center rounded-full text-sm font-medium transition-all duration-200 
-						peer-checked:bg-blue-400 peer-checked:text-white">
-                        Sudah
-                    </span>
-                    <!-- Inactive state (Belum) -->
-                    <span
-                        class="absolute flex h-8 w-[90px] items-center justify-center rounded-full bg-blue-400 text-sm font-medium text-white transition-all duration-200 
-						peer-checked:translate-x-[90px] left-1">
-                        Belum
-                    </span>
-                </label>
+
+            <div class="flex flex-col gap-6">
+                <div class="flex justify-between items-center w-full">
+                    <p class="text-white font-bold text-sm">Apakah outlet sudah menjual produk GIH ?</p>
+                    <div class="relative inline-flex items-center">
+                        <input type="checkbox" checked id="gih-checkbox" class="sr-only" />
+                        <label for="gih-checkbox"
+                            class="flex w-[160px] cursor-pointer items-center rounded-md bg-gray-200 p-1">
+                            <!-- Active state (Sudah) -->
+                            <span id="gih-checked"
+                                class="flex h-10 w-[90px] items-center justify-center rounded-md bg-blue-400 text-sm text-white font-medium transition-all duration-200 ">
+                                Sudah
+                            </span>
+                            <!-- Inactive state (Belum) -->
+                            <span id="gih-unchecked"
+                                class="flex h-10 w-[90px] items-center justify-center rounded-md text-sm font-medium text-blue-400 transition-all duration-200 
+						  peer-checked:-translate-x-[90px]">
+                                Belum
+                            </span>
+                        </label>
+                    </div>
+                </div>
+                <x-pages.routing.outlet-form>
+                    <x-slot:title>Berapa banyak produk GIH yang sudah terjual?</x-slot:title>
+                </x-pages.routing.outlet-form>
+                <x-pages.routing.outlet-form>
+                    <x-slot:title>Selling out GSC500/week<span class="font-normal">(in pcs)</span></x-slot:title>
+                </x-pages.routing.outlet-form>
+                <x-pages.routing.outlet-form>
+                    <x-slot:title>Selling out GSC250/week<span class="font-normal">(in pcs)</span></x-slot:title>
+                </x-pages.routing.outlet-form>
+                <x-pages.routing.outlet-form>
+                    <x-slot:title>Selling out GSC125/week<span class="font-normal">(in pcs)</span></x-slot:title>
+                </x-pages.routing.outlet-form>
+                <x-pages.routing.outlet-form>
+                    <x-slot:title>Selling out Oily 125/week<span class="font-normal">(in pcs)</span></x-slot:title>
+                </x-pages.routing.outlet-form>
+                <x-pages.routing.outlet-form>
+                    <x-slot:title>Selling out wash & shampo 400ml/week<span class="font-normal">(in
+                            pcs)</span></x-slot:title>
+                </x-pages.routing.outlet-form>
+                <x-pages.routing.outlet-form>
+                    <x-slot:title>Selling out wash & shampo cal 400ml/week <span class="font-normal">(in
+                            pcs)</span></x-slot:title>
+                </x-pages.routing.outlet-form>
+                <x-pages.routing.outlet-form>
+                    <x-slot:title>Selling out baby lotion cal 400ml/week <span class="font-normal">(in
+                            pcs)</span></x-slot:title>
+                </x-pages.routing.outlet-form>
+                <x-pages.routing.outlet-form>
+                    <x-slot:title>Selling out baby lotion 400ml/week<span class="font-normal">(in
+                            pcs)</span></x-slot:title>
+                </x-pages.routing.outlet-form>
+                <x-pages.routing.outlet-form>
+                    <x-slot:title>Selling out baby advance protection cream cal/week<span class="font-normal">(in
+                            pcs)</span></x-slot:title>
+                </x-pages.routing.outlet-form>
+                <x-pages.routing.outlet-form>
+                    <x-slot:title>Selling out BHR night/week<span class="font-normal">(in pcs)</span></x-slot:title>
+                </x-pages.routing.outlet-form>
+                <x-pages.routing.outlet-form>
+                    <x-slot:title>Selling out BHR day protection/week<span class="font-normal">(in
+                            pcs)</span></x-slot:title>
+                </x-pages.routing.outlet-form>
+                <x-pages.routing.outlet-form>
+                    <x-slot:title>Selling out BHR serum <span class="font-normal">(in pcs)</span></x-slot:title>
+                </x-pages.routing.outlet-form>
             </div>
+
+            <x-button.info class="w-full mt-20 !text-xl">Konfirmasi</x-button.info>
 
         </x-section-card>
 
@@ -251,48 +283,92 @@
 
 @push('scripts')
     <script>
-        function previewImage(input, type) {
-            const file = input.files[0];
-            if (file) {
-                // Check file size (2MB = 2 * 1024 * 1024 bytes)
-                if (file.size > 2 * 1024 * 1024) {
-                    alert('Ukuran file terlalu besar. Maksimal 2MB');
-                    input.value = '';
-                    return;
+        $(document).ready(function() {
+            // Initialize map
+            var map = L.map('user-map-location').setView([-6.200000, 106.816666],
+                10); // Centered on Jakarta by default
+            L.tileLayer('https://tile.openstreetmap.org/{z}/{x}/{y}.png', {
+                maxZoom: 20,
+                attribution: '&copy; <a href="http://www.openstreetmap.org/copyright">OpenStreetMap</a>'
+            }).addTo(map);
+
+            // Initialize marker variable
+            let marker;
+
+            // Function to update marker position
+            function updateMarker(latlng) {
+                // Remove existing marker if it exists
+                if (marker) {
+                    marker.remove();
                 }
 
-                const reader = new FileReader();
-                const uploadArea = document.getElementById(`upload-area-${type}`);
-                const previewContainer = document.getElementById(`preview-container-${type}`);
-                const previewImage = document.getElementById(`preview-image-${type}`);
+                // Add new marker
+                marker = L.marker(latlng).addTo(map);
 
-                reader.onload = function(e) {
-                    previewImage.src = e.target.result;
-                    uploadArea.classList.add('hidden');
-                    previewContainer.classList.remove('hidden');
-                }
-
-                reader.readAsDataURL(file);
+                // Update form fields
+                $('#latitude').val(latlng.lat.toFixed(6));
+                $('#longitude').val(latlng.lng.toFixed(6));
             }
-        }
 
-        function removeImage(type) {
-            const input = document.getElementById(`img_${type}`);
-            const uploadArea = document.getElementById(`upload-area-${type}`);
-            const previewContainer = document.getElementById(`preview-container-${type}`);
-            const previewImage = document.getElementById(`preview-image-${type}`);
+            // Handle map click events
+            map.on('click', function(e) {
+                updateMarker(e.latlng);
+            });
 
-            input.value = '';
-            previewImage.src = '';
-            uploadArea.classList.remove('hidden');
-            previewContainer.classList.add('hidden');
-        }
+            // Handle manual coordinate input
+            function handleCoordinateInput() {
+                const lat = parseFloat($('#latitude').val());
+                const lng = parseFloat($('#longitude').val());
 
-        // Make the entire upload area clickable
-        document.addEventListener('DOMContentLoaded', function() {
-            const uploadArea = document.getElementById('upload-area-front');
-            uploadArea.addEventListener('click', function() {
-                document.getElementById('img_front').click();
+                if (!isNaN(lat) && !isNaN(lng)) {
+                    const latlng = L.latLng(lat, lng);
+
+                    // Update marker
+                    updateMarker(latlng);
+
+                    // Center map on new coordinates
+                    map.setView(latlng, map.getZoom());
+                }
+            }
+
+            // Add event listeners to coordinate inputs
+            $('#latitude, #longitude').on('change', handleCoordinateInput);
+
+            // Handle fullscreen toggle
+            const fullScreenButton = document.querySelector('#fullscreen-button');
+            const mapResize = document.querySelector('#user-map-location');
+
+            fullScreenButton.addEventListener("click", () => {
+                mapResize.classList.toggle("!h-[500px]");
+                // Invalidate map size after resize
+                setTimeout(() => {
+                    map.invalidateSize();
+                }, 100);
+            });
+
+            // Optional: Handle initial coordinates if they exist
+            handleCoordinateInput();
+        });
+    </script>
+@endpush
+
+@push('scripts')
+    <script>
+        $(document).ready(function() {
+            const gihCheckbox = document.querySelector('#gih-checkbox');
+            const gihChecked = document.querySelector('#gih-checked');
+            const gihUnChecked = document.querySelector('#gih-unchecked');
+			
+
+            gihCheckbox.addEventListener('change', function() {
+                if (this.checked) {
+					gihChecked.classList.add("bg-blue-400", "!text-white");
+					gihUnChecked.classList.remove("bg-blue-400", "!text-white");
+                } else {
+					gihUnChecked.classList.add("bg-blue-400", "!text-white");
+					gihChecked.classList.remove("bg-blue-400", "!text-white");
+					gihChecked.classList.add("text-blue-400");
+                }
             });
         });
     </script>
