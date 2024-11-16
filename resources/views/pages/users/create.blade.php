@@ -165,34 +165,18 @@
                     {{-- Area Domisili End --}}
                     <x-section-card :title="'Manajemen Akun'">
                         @if ($errors->has('permissions'))
-                            <span id="name-error" class="text-sm text-red-600 mt-1">{{ $errors->first('permissions') }}</span>
+                            <span id="name-error"
+                                class="text-sm text-red-600 mt-1">{{ $errors->first('permissions') }}</span>
                         @endif
-                        <div id="admin-access" class="grid-cols-3 gap-12 hidden">
-                            <x-input.switch name="permissions[]" value="menu_report">Menu Reports</x-input.switch>
-                            <x-input.switch name="permissions[]" value="menu_product">Menu Produk</x-input.switch>
-                            <x-input.switch name="permissions[]" value="menu_visibility">Menu
-                                Visibility</x-input.switch>
-                            <x-input.switch name="permissions[]" value="menu_routing">Menu Routing</x-input.switch>
-                            <x-input.switch name="permissions[]" value="menu_selling">Menu Selling</x-input.switch>
-                            <x-input.switch name="permissions[]" value="menu_user">Menu Pengguna</x-input.switch>
+                        @foreach(['admin', 'sales', 'superadmin'] as $role)
+                        <div id="{{ $role }}-access" class="grid-cols-3 gap-12 hidden">
+                            @foreach($rolePermissions[$role] as $menu)
+                                <x-input.switch name="permissions[]" value="{{ $menu['value'] }}">
+                                    {{ $menu['label'] }}
+                                </x-input.switch>
+                            @endforeach
                         </div>
-                        <div id="sales-access" class="grid-cols-3 gap-12 hidden">
-                            <x-input.switch name="permissions[]" value="menu_report">Menu Routing</x-input.switch>
-                            <x-input.switch name="permissions[]" value="menu_selling">Menu Selling</x-input.switch>
-                            <x-input.switch name="permissions[]" value="menu_outlet">Menu Outlet</x-input.switch>
-                            <x-input.switch name="permissions[]" value="menu_activity">Menu Activity</x-input.switch>
-                        </div>
-                        <div id="superadmin-access" class="grid-cols-3 gap-12 hidden">
-                            <x-input.switch name="permissions[]" value="menu_report">Menu Reports</x-input.switch>
-                            <x-input.switch name="permissions[]" value="menu_product">Menu Produk</x-input.switch>
-                            <x-input.switch name="permissions[]" value="menu_visibility">Menu
-                                Visibility</x-input.switch>
-                            <x-input.switch name="permissions[]" value="menu_routing">Menu Routing</x-input.switch>
-                            <x-input.switch name="permissions[]" value="menu_selling">Menu Selling</x-input.switch>
-                            <x-input.switch name="permissions[]" value="menu_user">Menu Pengguna</x-input.switch>
-                            <x-input.switch name="permissions[]" value="menu_outlet">Menu Outlet</x-input.switch>
-                            <x-input.switch name="permissions[]" value="menu_activity">Menu Activity</x-input.switch>
-                        </div>
+                        @endforeach
                     </x-section-card>
                     {{-- Manajemen Akun End --}}
 
@@ -294,7 +278,12 @@
         };
 
         const roleSelect = document.getElementById('role');
-
+        function clearAllPermissions() {
+                const allSwitches = document.querySelectorAll('input[type="checkbox"][name="permissions[]"]');
+                allSwitches.forEach(switchElement => {
+                    switchElement.checked = false;
+                });
+        }
         function toggleElementVisibility(elementId, show) {
             const element = document.getElementById(elementId);
             if (!element) return;
@@ -311,7 +300,7 @@
             const config = roleConfig[selectedRoleName];
 
             if (!config) return;
-
+            clearAllPermissions();
             toggleElementVisibility(config.showElement, true);
 
             config.hideElements.forEach(elementId => {

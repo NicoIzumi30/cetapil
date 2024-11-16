@@ -1,87 +1,95 @@
 @extends('layouts.main')
 
 @section('banner-content')
-    <x-banner-content :title="'Pengguna'" />
+<x-banner-content :title="'Pengguna'" />
 @endsection
 
 @section('dashboard-content')
-    <main class="w-full">
-        <div>
-            <div class="form-edit">
-                <x-card>
-                    <x-slot:cardTitle>
-                        Ubah Pengguna
-                    </x-slot:cardTitle>
-                    {{-- Profil Pengguna --}}
+<main class="w-full">
+    <div>
+        <div class="form-edit">
+            <x-card>
+                <x-slot:cardTitle>
+                    Ubah Pengguna
+                </x-slot:cardTitle>
+                {{-- Profil Pengguna --}}
+                <form action="{{ route('users.update', $user) }}" method="POST" id="createUserForm">
+                    @csrf
+                    @method('PUT')
                     <div class="grid grid-cols-2 gap-4">
                         <div>
                             <label for="name" class="form-label">Nama Pengguna</label>
-                            <div class="flex items-center gap-2">
-                                <input id="name" class="form-control" type="text" name="name"
-                                    placeholder="Masukan nama pengguna" aria-describedby="name" value="sasadas"/>
-                                <x-button.edit />
-                            </div>
+                            <input id="name" class="form-control @if($errors->has('name')) is-invalid @endif"
+                                value="{{ $user->name }}" type="text" value="{{ $user->name }}" name="name"
+                                placeholder="Masukan nama pengguna" aria-describedby="name" />
+                            @if ($errors->has('name'))
+                                <span id="name-error" class="text-sm text-red-600 mt-1">{{ $errors->first('name') }}</span>
+                            @endif
                         </div>
                         <div>
                             <label for="email" class="form-label">Email Pengguna</label>
-                            <div class="flex items-center gap-2">
-                                <input id="email" class="form-control" type="email" name="email"
-                                    placeholder="Masukan email pengguna" aria-describedby="email" />
-                                <x-button.edit />
-                            </div>
+                            <input id="email" class="form-control @if($errors->has('email')) is-invalid @endif"
+                                value="{{ $user->email }}" type="email" name="email"
+                                placeholder="Masukan email pengguna" aria-describedby="email" />
+                            @if ($errors->has('email'))
+                                <span id="name-error" class="text-sm text-red-600 mt-1">{{ $errors->first('email') }}</span>
+                            @endif
+
                         </div>
                         <div>
                             <label for="phone" class="form-label">Nomor Telepon Pengguna</label>
-                            <div class="flex items-center gap-2">
-                                <input id="phone" class="form-control" type="text" name="phone"
-                                    placeholder="Masukan nomor telepon pengguna" aria-describedby="phone" />
-                                <x-button.edit />
-                            </div>
+                            <input id="phone" class="form-control @if($errors->has('phone_number')) is-invalid @endif"
+                                value="{{ $user->phone_number }}" type="text" name="phone_number"
+                                placeholder="Masukan nomor telepon pengguna" aria-describedby="phone" />
+                            @if ($errors->has('phone_number'))
+                                <span id="name-error"
+                                    class="text-sm text-red-600 mt-1">{{ $errors->first('phone_number') }}</span>
+                            @endif
                         </div>
                         <div>
                             <label for="role" class="form-label">Jabatan Pengguna</label>
-                            <div class="flex items-center gap-2">
-                                <select id="role" class="form-select-search text-primary">
-                                    <option value="" disabled>
-                                        -- Pilih Jabatan Pengguna --
-                                    </option>
-                                    <option selected value="superadmin">
-                                        Superadmin
-                                    </option>
-                                    <option value="admin">
-                                        Admin
-                                    </option>
-                                    <option value="sales">
-                                        Sales
-                                    </option>
-                                </select>
-                                <x-button.edit />
-                            </div>
+                            <select id="role" name="role_id"
+                                class="form-select-search text-primary @if($errors->has('role_id')) is-invalid @endif"
+                                value="{{ old('role_id') }}">
+                                <option value="" disabled selected>
+                                    -- Pilih Jabatan Pengguna --
+                                </option>
+                                @foreach ($roles as $role)
+                                    <option value="{{ $role->id }}" {{ $role->id == $user->roles[0]->id ? 'selected' : '' }}
+                                        data-name="{{ $role->name }}">{{ $role->name }}</option>
+                                @endforeach
+                            </select>
+                            @if ($errors->has('role_id'))
+                                <span id="name-error"
+                                    class="text-sm text-red-600 mt-1">{{ $errors->first('role_id') }}</span>
+                            @endif
                         </div>
                         <div>
                             <label for="password" class="form-label">Kata Sandi</label>
-                            <div class="flex items-center gap-2">
-                                <input id="password" class="form-control" type="password" name="password"
-                                    placeholder="Masukan kata Sandi" aria-describedby="password" />
-                                <x-button.edit />
-                            </div>
+                            <input id="password" class="form-control @if($errors->has('password')) is-invalid @endif"
+                                type="password" name="password" placeholder="Masukan kata Sandi"
+                                aria-describedby="password" />
+                            @if ($errors->has('password'))
+                                <span id="name-error"
+                                    class="text-sm text-red-600 mt-1">{{ $errors->first('password') }}</span>
+                            @endif
                         </div>
                         <div>
                             <label for="password-confirmation" class="form-label">Konfirmasi Kata Sandi</label>
-                            <div class="flex items-center gap-2">
-                                <input id="password-confirmation" class="form-control" type="password"
-                                    name="password-confirmation" placeholder="Masukan kata Sandi"
-                                    aria-describedby="password-confirmation" />
-                                <x-button.edit />
-                            </div>
+                            <input id="password-confirmation"
+                                class="form-control @if($errors->has('password')) is-invalid @endif" type="password"
+                                name="password_confirmation" placeholder="Masukan kata Sandi"
+                                aria-describedby="password-confirmation" />
                         </div>
                         <div>
                             <label for="region" class="form-label">Region</label>
-                            <div class="flex items-center gap-2">
-                                <input id="region" class="form-control" type="text" name="region"
-                                    placeholder="Masukan Region" aria-describedby="region" />
-                                <x-button.edit />
-                            </div>
+                            <input id="region" class="form-control @if($errors->has('region')) is-invalid @endif"
+                                value="{{ $user->region }}" type="text" name="region" placeholder="Masukan Region"
+                                aria-describedby="region" />
+                            @if ($errors->has('region'))
+                                <span id="name-error"
+                                    class="text-sm text-red-600 mt-1">{{ $errors->first('region') }}</span>
+                            @endif
                         </div>
 
                     </div>
@@ -93,42 +101,55 @@
                             <div>
                                 <label for="longitude" class="form-label">Longitudes <span class="font-normal">(DD
                                         Coordinates)</span></label>
-                                <div class="flex items-center gap-2">
-                                    <input id="longitude" class="form-control" type="text" name="longitude"
-                                        placeholder="Masukkan Koordinat Longitude" aria-describedby="longitude" />
-                                    <x-button.edit />
-                                </div>
+                                <input id="longitude"
+                                    class="form-control @if($errors->has('longitude')) is-invalid @endif"
+                                    value="{{ $user->longitude }}" type="text" name="longitude"
+                                    placeholder="Masukkan Koordinat Longitude" aria-describedby="longitude" />
+                                @if ($errors->has('longtitude'))
+                                    <span id="name-error"
+                                        class="text-sm text-red-600 mt-1">{{ $errors->first('longtitude') }}</span>
+                                @endif
                             </div>
                             <div>
                                 <label for="latitude" class="form-label">Latitudes<span class="font-normal">(DMS
                                         Coordinates)</span></label>
-                                <div class="flex items-center gap-2">
-                                    <input id="latitude" class="form-control" type="text" name="latitude"
-                                        placeholder="Masukkan Koordinat Latitude" aria-describedby="latitude" />
-                                    <x-button.edit />
-                                </div>
+                                <input id="latitude"
+                                    class="form-control @if($errors->has('latitude')) is-invalid @endif"
+                                    value="{{ $user->latitude }}" type="text" name="latitude"
+                                    placeholder="Masukkan Koordinat Latitude" aria-describedby="latitude" />
+                                @if ($errors->has('latitude'))
+                                    <span id="name-error"
+                                        class="text-sm text-red-600 mt-1">{{ $errors->first('latitude') }}</span>
+                                @endif
                             </div>
                             <div>
                                 <label for="states-option">Kabupaten/Kota</label>
-                                <div class="flex items-center gap-2">
-                                    <select id="states-option" name="states-option" class=" w-full">
-                                        <option value="" selected disabled>
-                                            -- Pilih Kabupaten/Kota--
+                                <select id="states-option" name="city"
+                                    class="w-full @if($errors->has('city')) is-invalid @endif"
+                                    value="{{ old('city') }}">
+                                    <option value="" selected disabled>
+                                        -- Pilih Kabupaten/Kota--
+                                    </option>
+                                    @foreach ($cities as $city)
+                                        <option value="{{ $city->name}}" {{ $city->name == $user->city ? 'selected' : ''}}>
+                                            {{$city->name}}
                                         </option>
-                                        <option value="sumatra">
-                                            Sumatra
-                                        </option>
-                                    </select>
-                                    <x-button.edit />
-                                </div>
+                                    @endforeach
+                                </select>
+                                @if ($errors->has('city'))
+                                    <span id="name-error"
+                                        class="text-sm text-red-600 mt-1">{{ $errors->first('city') }}</span>
+                                @endif
                             </div>
                             <div>
                                 <label for="address" class="form-label">Alamat Lengkap</label>
-                                <div class="flex items-center gap-2">
-                                    <input id="address" class="form-control" type="text" name="address"
-                                        placeholder="Masukkan Alamat Lengkap" aria-describedby="address" />
-                                    <x-button.edit />
-                                </div>
+                                <input id="address" class="form-control @if($errors->has('address')) is-invalid @endif"
+                                    value="{{ $user->address }}" type="text" name="address"
+                                    placeholder="Masukkan Alamat Lengkap" aria-describedby="address" />
+                                @if ($errors->has('address'))
+                                    <span id="name-error"
+                                        class="text-sm text-red-600 mt-1">{{ $errors->first('address') }}</span>
+                                @endif
                             </div>
                         </div>
                         <div class="relative mt-10">
@@ -145,38 +166,41 @@
                         </div>
                     </x-section-card>
                     {{-- Area Domisili End --}}
-
-
-                    {{-- Manajemen Akun --}}
-                    <div id="account-management" class="hidden">
-                        <x-section-card :title="'Manajemen Akun'">
-                            <div>
-                                <div class="grid grid-cols-3 gap-12 ">
-                                    {{-- @foreach ($form['permissions'] as $permission) --}}
-                                    <x-input.switch>Main Reports</x-input.switch>
-                                    <x-input.switch>Menu Produk</x-input.switch>
-                                    <x-input.switch>Menu Routing</x-input.switch>
-                                    <x-input.switch>Menu Selling</x-input.switch>
-                                    <x-input.switch>Menu Pengguna</x-input.switch>
-                                    {{-- @endforeach --}}
-                                </div>
-                            </div>
-                        </x-section-card>
-                    </div>
+                    <x-section-card :title="'Manajemen Akun'">
+                        @if ($errors->has('permissions'))
+                            <span id="name-error"
+                                class="text-sm text-red-600 mt-1">{{ $errors->first('permissions') }}</span>
+                        @endif
+                        @foreach(['admin', 'sales', 'superadmin'] as $role)
+                                            <div id="{{ $role }}-access" class="grid-cols-3 gap-12 hidden">
+                                                @foreach($rolePermissions[$role] as $menu)
+                                                                        @php
+                                                                            $isChecked = in_array($menu['value'], $permissions) && $user->roles[0]->name === $role;
+                                                                        @endphp
+                                                                        <x-input.switch name="permissions[]" value="{{ $menu['value'] }}" :checked="$isChecked">
+                                                                            {{ $menu['label'] }}
+                                                                        </x-input.switch>
+                                                @endforeach
+                                            </div>
+                        @endforeach
+                    </x-section-card>
                     {{-- Manajemen Akun End --}}
 
-                    <x-button.info class="w-full mt-20 !text-xl">Konfirmasi</x-button.info>
+                    <x-button.info class="w-full mt-20 !text-xl" type="submit">Konfirmasi</x-button.info>
+                </form>
+                {{-- Manajemen Akun End --}}
 
-            </div>
-            </x-card>
+
         </div>
-        </div>
-    </main>
+        </x-card>
+    </div>
+    </div>
+</main>
 @endsection
 
 @push('scripts')
     <script>
-        $(document).ready(function() {
+        $(document).ready(function () {
             // Initialize map
             var map = L.map('user-map-location').setView([-6.200000, 106.816666],
                 10); // Centered on Jakarta by default
@@ -204,7 +228,7 @@
             }
 
             // Handle map click events
-            map.on('click', function(e) {
+            map.on('click', function (e) {
                 updateMarker(e.latlng);
             });
 
@@ -247,22 +271,89 @@
 
 @push('scripts')
     <script>
-        const roleSelect = document.getElementById('role');
-        const accountManagement = document.getElementById('account-management');
-
-        roleSelect.addEventListener('change', () => {
-            if (roleSelect.value) {
-                accountManagement.classList.remove('hidden');
-            } else {
-                accountManagement.classList.add('hidden');
+        const roleConfig = {
+            "admin": {
+                showElement: 'admin-access',
+                hideElements: ['sales-access', 'superadmin-access']
+            },
+            "sales": {
+                showElement: 'sales-access',
+                hideElements: ['admin-access', 'superadmin-access']
+            },
+            "superadmin": {
+                showElement: 'superadmin-access',
+                hideElements: ['admin-access', 'sales-access']
             }
+        };
+
+        const roleSelect = document.getElementById('role');
+        let isInitialLoad = true;
+
+        function toggleElementVisibility(elementId, show) {
+            const element = document.getElementById(elementId);
+            if (!element) return;
+
+            element.classList.toggle('hidden', !show);
+            element.classList.toggle('grid', show);
+
+            // Hanya hapus checked jika bukan initial load dan element disembunyikan
+            if (!isInitialLoad && !show) {
+                const switches = element.querySelectorAll('input[type="checkbox"][name="permissions[]"]');
+                switches.forEach(switchElement => {
+                    switchElement.checked = false;
+                });
+            }
+        }
+
+        function clearAllPermissions() {
+            // Hanya hapus semua checked jika bukan initial load
+            if (!isInitialLoad) {
+                const allSwitches = document.querySelectorAll('input[type="checkbox"][name="permissions[]"]');
+                allSwitches.forEach(switchElement => {
+                    switchElement.checked = false;
+                });
+            }
+        }
+
+        function handleRoleChange(event) {
+            const selectedOption = event.target.options[event.target.selectedIndex];
+            const selectedRoleId = selectedOption.value;
+            const selectedRoleName = selectedOption.getAttribute('data-name');
+
+            clearAllPermissions();
+
+            const config = roleConfig[selectedRoleName];
+
+            if (!config) return;
+
+            toggleElementVisibility(config.showElement, true);
+
+            config.hideElements.forEach(elementId => {
+                toggleElementVisibility(elementId, false);
+            });
+
+            // Setelah initial load selesai, set flag menjadi false
+            if (isInitialLoad) {
+                isInitialLoad = false;
+            }
+        }
+
+        // Tambahkan event listener
+        roleSelect.addEventListener('change', handleRoleChange);
+
+        // Trigger event change secara otomatis saat halaman dimuat
+        document.addEventListener('DOMContentLoaded', function () {
+            // Buat event change baru
+            const event = new Event('change');
+            // Trigger event pada roleSelect
+            roleSelect.dispatchEvent(event);
         });
     </script>
 @endpush
 
 @push('scripts')
     <script>
-        $(document).ready(function() {
+        $(document).ready(function () {
             $('#states-option').select2();
         });
     </script>

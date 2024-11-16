@@ -21,31 +21,31 @@
             <tr>
                 <th scope="col" class="text-center">
                     <a href="#" class="table-head sort-link" data-column="name">
-                        <{{ __('name') }}
+                        <{{ __('Nama') }}
                         <x-icons.sort />
                     </a>
                 </th>
                 <th scope="col" class="text-center">
                     <a href="#" class="table-head sort-link" data-column="email">
-                        {{ __('email') }}
+                        {{ __('Email') }}
                         <x-icons.sort />
                     </a>
                 </th>
                 <th scope="col" class="text-center">
                     <a href="#" class="table-head sort-link" data-column="position">
-                    {{ __(key: 'position') }}
+                    {{ __(key: 'Position') }}
                     <x-icons.sort />
                     </a>
                 </th>
                 <th scope="col" class="text-center">
                     <a href="#" class="table-head sort-link" data-column="outlet_area">
-                    {{ __(key: 'outlet_area') }}
+                    {{ __(key: 'Outlet Area') }}
                     <x-icons.sort />
                     </a>
                 </th>
                 <th scope="col" class="text-center">
                     <a href="#" class="table-head sort-link" data-column="status">
-                    {{ __('active') }}
+                    {{ __('Status') }}
                     <x-icons.sort />
                     </a>
                 </th>
@@ -82,7 +82,7 @@
                                 </a>
                             </li>
                             <li>
-                                <a href="#" class="dropdown-option text-red-400 delete-user" data-id="{{ $user->id }}">
+                                <a href="{{ route('users.destroy', $user->id) }}" class="delete-btn dropdown-option text-red-400 delete-user" data-id="{{ $user->id }}">
                                     Hapus Data
                                 </a>
                             </li>

@@ -7,28 +7,12 @@
     @vite(['resources/css/app.css', 'resources/js/app.js'])
     <script src="https://code.jquery.com/jquery-3.7.1.js"
         integrity="sha256-eKhayi8LEQwp4NKxN+CfCh+3qOVUtJn3QNZ0TciWLP4=" crossorigin="anonymous"></script>
-    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/simple-notify@1.0.4/dist/simple-notify.css" />
+
 </head>
 
 <body class="bg-login">
-    @if ($errors->any())
-        <script>
-            Swal.fire({
-                title: "Error",
-                text: "Username atau Password Salah",
-                icon: "error"
-            });
-        </script>
-    @endif
-    @if (session('success'))
-        <script>
-            Swal.fire({
-                title: "Berhasil",
-                text: "{{ session('success') }}",
-                icon: "success"
-            });
-        </script>
-    @endif
+
     <div class="login-layout">
         <img class="bg-accent" src="{{ asset('/assets/images/rounded-bg-accent.svg') }}" alt="">
         <div class="bottom-gradient hidden md:block"></div>
@@ -56,7 +40,7 @@
             <p class="form-description">Silahkan Masukkan <span>Email</span>dan <span>Kata Sandi</span> untuk
                 melanjutkan</p>
             <form class="login-form" action="{{ route('login') }}" method="POST">
-            @csrf
+                @csrf
                 <div class="input">
                     <div class="login-input-container">
                         <svg width="41" height="41" viewBox="0 0 41 41" fill="none" xmlns="http://www.w3.org/2000/svg">
@@ -67,7 +51,7 @@
                                 d="M20.0575 18.7332C16.3756 18.7332 13.3908 15.7485 13.3908 12.0666C13.3908 8.38467 16.3756 5.3999 20.0575 5.3999C23.7394 5.3999 26.7241 8.38467 26.7241 12.0666C26.7241 15.7485 23.7394 18.7332 20.0575 18.7332Z"
                                 stroke="#054F7B" stroke-width="3" stroke-linecap="round" stroke-linejoin="round" />
                         </svg>
-                        <input class="outline-none" name="email" id="email" type="email" placeholder="Masukkan Email" />
+                        <input class="outline-none" name="email" id="email" required type="email" placeholder="Masukkan Email" />
                     </div>
                 </div>
                 <div class="input">
@@ -77,7 +61,8 @@
                                 d="M20.0578 28.7333C20.9418 28.7333 21.7897 28.3821 22.4148 27.757C23.0399 27.1319 23.3911 26.284 23.3911 25.4C23.3911 23.55 21.9078 22.0667 20.0578 22.0667C19.1737 22.0667 18.3259 22.4178 17.7008 23.043C17.0756 23.6681 16.7244 24.5159 16.7244 25.4C16.7244 26.284 17.0756 27.1319 17.7008 27.757C18.3259 28.3821 19.1737 28.7333 20.0578 28.7333ZM10.0578 33.7333V17.0667H30.0578V33.7333H10.0578ZM10.0578 13.7333C9.17373 13.7333 8.32588 14.0845 7.70076 14.7096C7.07564 15.3347 6.72445 16.1826 6.72445 17.0667V33.7333C6.72445 34.6174 7.07564 35.4652 7.70076 36.0903C8.32588 36.7155 9.17373 37.0667 10.0578 37.0667H30.0578C30.9418 37.0667 31.7897 36.7155 32.4148 36.0903C33.0399 35.4652 33.3911 34.6174 33.3911 33.7333V17.0667C33.3911 15.2167 31.9078 13.7333 30.0578 13.7333H28.3911V10.4C28.3911 8.18985 27.5131 6.07023 25.9503 4.50743C24.3875 2.94462 22.2679 2.06665 20.0578 2.06665C18.9634 2.06665 17.8798 2.2822 16.8688 2.70099C15.8577 3.11978 14.939 3.73361 14.1652 4.50743C13.3914 5.28125 12.7776 6.19991 12.3588 7.21095C11.94 8.222 11.7244 9.30563 11.7244 10.4V13.7333H10.0578ZM20.0578 5.39998C21.3839 5.39998 22.6556 5.92677 23.5933 6.86445C24.531 7.80213 25.0578 9.0739 25.0578 10.4V13.7333H15.0578V10.4C15.0578 9.0739 15.5846 7.80213 16.5222 6.86445C17.4599 5.92677 18.7317 5.39998 20.0578 5.39998Z"
                                 fill="#054F7B" />
                         </svg>
-                        <input id="password" class="outline-none" type="password" name="password" placeholder="Masukkan Kata Sandi" />
+                        <input id="password" class="outline-none" required type="password" name="password"
+                            placeholder="Masukkan Kata Sandi" />
                         <button id="toggle-password" class="mr-3" type="button">
                             <div id="eye-outline" class="hidden">
                                 <svg width="24" height="24" viewBox="0 0 24 24" fill="none"
@@ -107,8 +92,50 @@
         {{-- Form Container End --}}
     </div>
 </body>
+<script src="https://cdn.jsdelivr.net/npm/simple-notify@1.0.4/dist/simple-notify.min.js"></script>
 
 <script>
+     @if(session('success'))
+            new Notify({
+                status: 'success',
+                title: 'Success',
+                text: '{{ session('success') }}',
+                effect: 'fade',
+                speed: 300,
+                customClass: '',
+                customIcon: '',
+                showIcon: true,
+                showCloseButton: true,
+                autoclose: true,
+                autotimeout: 3000,
+                notificationsGap: null,
+                notificationsPadding: null,
+                type: 'outline',
+                position: 'right top',
+                customWrapper: '',
+            })
+        @endif
+
+        @if($errors->any())
+        new Notify({
+            status: 'error',
+            title: 'Failed',
+            text: 'Email atau password salah',
+            effect: 'fade',
+            speed: 300,
+            customClass: '',
+            customIcon: '',
+            showIcon: true,
+            showCloseButton: true,
+            autoclose: true,
+            autotimeout: 3000,
+            notificationsGap: null,
+            notificationsPadding: null,
+            type: 'outline',
+            position: 'right top',
+            customWrapper: '',
+        })
+        @endif
     const inputPassword = document.getElementById('password');
     const togglePasswordButton = document.getElementById('toggle-password');
     const eyeOpenIcon = document.getElementById('eye-outline');
