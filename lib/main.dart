@@ -10,6 +10,7 @@ import 'package:get_storage/get_storage.dart';
 
 import 'controller/bottom_nav_controller.dart';
 import 'controller/connectivity_controller.dart';
+import 'controller/dashboard_controller.dart';
 import 'controller/gps_controller.dart';
 import 'controller/login_controller.dart';
 
@@ -36,6 +37,8 @@ Future<void> initializeControllers() async {
   Get.put(ConnectivityController());
   Get.put(GPSLocationController());
   Get.put(BottomNavController());
+  Get.put(DashboardController());
+
 }
 
 void configureApp() {

@@ -1,29 +1,22 @@
-import 'package:carousel_slider/carousel_options.dart';
 import 'package:carousel_slider/carousel_slider.dart';
+import 'package:cetapil_mobile/controller/dashboard_controller.dart';
 import 'package:cetapil_mobile/page/dashboard/setting_account.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_svg/flutter_svg.dart';
 import 'package:get/get.dart';
-import 'package:get/get_core/src/get_main.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:smooth_page_indicator/smooth_page_indicator.dart';
 
 import '../../widget/progress_indicator.dart';
 
-class DashboardPage extends StatelessWidget {
+class DashboardPage extends GetView<DashboardController> {
   final CarouselSliderController _carouselController =
-      CarouselSliderController();
-  int _currentIndex = 0;
-  final List<String> imageUrls = [
-    'assets/image1.jpg',
-    'assets/image2.jpg',
-    'assets/image3.jpg',
-    'assets/image4.jpg',
-  ];
+  CarouselSliderController();
+
   @override
   Widget build(BuildContext context) {
     return Padding(
-      padding: EdgeInsets.fromLTRB(15,15,15,0),
+      padding: EdgeInsets.fromLTRB(15, 15, 15, 0),
       child: SingleChildScrollView(
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
@@ -54,19 +47,19 @@ class DashboardPage extends StatelessWidget {
                         ],
                       ),
                       GestureDetector(
-                        onTap: (){
+                        onTap: () {
                           Get.to(
                               SettingProfile()
                           );
                         },
                         child: Container(
                           padding:
-                              EdgeInsets.symmetric(horizontal: 10, vertical: 11),
+                          EdgeInsets.symmetric(horizontal: 10, vertical: 11),
                           decoration: BoxDecoration(
                               color: Colors.white,
                               borderRadius: BorderRadius.circular(10)),
                           child:
-                              SvgPicture.asset('assets/icon/setting_account.svg'),
+                          SvgPicture.asset('assets/icon/setting_account.svg'),
                         ),
                       )
                     ],
@@ -123,7 +116,7 @@ class DashboardPage extends StatelessWidget {
                             Text(
                               "Cluster Region",
                               style:
-                                  TextStyle(fontSize: 10, color: Colors.blue),
+                              TextStyle(fontSize: 10, color: Colors.blue),
                             ),
                             Text(
                               "DKI Jakarta",
@@ -157,50 +150,42 @@ class DashboardPage extends StatelessWidget {
                       ],
                     ),
                   ),
-                  SizedBox(
-                    height: 10,
-                  ),
                 ],
               ),
             ),
             CarouselSlider.builder(
-              carouselController: _carouselController,
-              itemCount: imageUrls.length,
-              itemBuilder: (context, index, realIndex) {
-                return Container(
-                  width: double.infinity,
-                  margin: const EdgeInsets.symmetric(horizontal: 5),
-                  decoration: BoxDecoration(
-                    color: Colors.grey,
-                    borderRadius: BorderRadius.circular(20),
-                    // image: DecorationImage(
-                    //   image: AssetImage(imageUrls[index]),
-                    //   fit: BoxFit.cover,
-                    // ),
-                  ),
-                  child: Text("asdas"),
-                );
-              },
-              options: CarouselOptions(
-                height: 200,
-                viewportFraction: 0.8,
-                enlargeCenterPage: false,
-                autoPlay: true,
-                autoPlayInterval: const Duration(seconds: 3),
-                onPageChanged: (index, reason) {
-                  _currentIndex = index;
+                carouselController: _carouselController,
+                itemCount: controller.imageUrls.length,
+                itemBuilder: (context, index, realIndex) {
+                  return Padding(
+                    padding: const EdgeInsets.symmetric(horizontal: 5),
+                    child: Image.asset(
+                        controller.imageUrls[index]),
+                  );
                 },
+                options: CarouselOptions(
+                  // aspectRatio: 3 / 2,
+                  viewportFraction: 1,
+                  enlargeCenterPage: false,
+                  autoPlay: true,
+                  autoPlayInterval: const Duration(seconds: 3),
+                  onPageChanged: (index, reason) {
+                    controller.currentIndex.value = index;
+                  },
+                ),
               ),
-            ),
-            SizedBox(
-              height: 10,
-            ),
+            Obx(() {
+              return Center(
+                child: AnimatedSmoothIndicator(
+                  activeIndex: controller.currentIndex.value,
+                  count: controller.imageUrls.length,
+                  effect: WormEffect(dotHeight: 10,dotWidth: 10),
+                ),
+              );
+            }),
             Stack(
               alignment: Alignment(1, 1),
               children: [
-                // Container(
-                //   width: double.infinity,
-                // ),
                 Container(
                   width: double.infinity,
                   // height: 80,
@@ -263,26 +248,29 @@ class DashboardPage extends StatelessWidget {
                         crossAxisAlignment: CrossAxisAlignment.end,
                         mainAxisSize: MainAxisSize.max,
                         children: [
-                          Container(
-                            padding: EdgeInsets.symmetric(
-                                horizontal: 8, vertical: 6),
-                            decoration: BoxDecoration(
-                                color: Colors.white,
-                                borderRadius: BorderRadius.circular(10)),
-                            child: Row(
-                              children: [
-                                Text(
-                                  "Cek Kalender",
-                                  style: TextStyle(
-                                      color: Color(0xFF054F7B),
-                                      fontWeight: FontWeight.bold),
-                                ),
-                                SizedBox(
-                                  width: 8,
-                                ),
-                                Icon(Icons.calendar_month_rounded,
-                                    color: Color(0xFF054F7B))
-                              ],
+                          GestureDetector(
+                            onTap: () => controller.showCustomCalendarDialog(context),
+                            child: Container(
+                              padding: EdgeInsets.symmetric(
+                                  horizontal: 8, vertical: 6),
+                              decoration: BoxDecoration(
+                                  color: Colors.white,
+                                  borderRadius: BorderRadius.circular(10)),
+                              child: Row(
+                                children: [
+                                  Text(
+                                    "Cek Kalender",
+                                    style: TextStyle(
+                                        color: Color(0xFF054F7B),
+                                        fontWeight: FontWeight.bold),
+                                  ),
+                                  SizedBox(
+                                    width: 8,
+                                  ),
+                                  Icon(Icons.calendar_month_rounded,
+                                      color: Color(0xFF054F7B))
+                                ],
+                              ),
                             ),
                           ),
                           SizedBox(
@@ -352,35 +340,38 @@ class DashboardPage extends StatelessWidget {
               height: 5,
             ),
             Container(
-              width: double.infinity,
-              padding: EdgeInsets.all(10),
-              decoration: BoxDecoration(
-                gradient: const LinearGradient(
-                  begin: Alignment.topLeft,
-                  end: Alignment.bottomRight,
-                  colors: [
-                    Color(0xFFFFFFFF), // Lighter blue at top
-                    // Color(0xFF9BD8F1), // Darker blue at bottom
-                    Color(0x80FFFFFF), // Darker blue at bottom
-                  ],
-                ),
-                borderRadius: BorderRadius.circular(10)
+                width: double.infinity,
+                padding: EdgeInsets.all(10),
+                decoration: BoxDecoration(
+                    gradient: const LinearGradient(
+                      begin: Alignment.topLeft,
+                      end: Alignment.bottomRight,
+                      colors: [
+                        Color(0xFFFFFFFF), // Lighter blue at top
+                        // Color(0xFF9BD8F1), // Darker blue at bottom
+                        Color(0x80FFFFFF), // Darker blue at bottom
+                      ],
+                    ),
+                    borderRadius: BorderRadius.circular(10)
 
-              ),
-              child:
-              Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  Text("Update terbaru : 14 November 2024",style: TextStyle(fontSize: 10),),
-                  SizedBox(height: 15,),
-                  AnimatedGlossyProgressBar(
-                    progress: 0.62,
-                    // height: 15,
-                  ),
-                  SizedBox(height: 15,),
-                  Text("*Performance index dihitung berdasarkan target call vs aktual \n call user yang telah dilakukan dalam 1 Bulan",style: TextStyle(fontSize: 8),),
-                ],
-              )
+                ),
+                child:
+                Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Text("Update terbaru : 14 November 2024",
+                      style: TextStyle(fontSize: 10),),
+                    SizedBox(height: 15,),
+                    AnimatedGlossyProgressBar(
+                      progress: 0.62,
+                      // height: 15,
+                    ),
+                    SizedBox(height: 15,),
+                    Text(
+                      "*Performance index dihitung berdasarkan target call vs aktual \n call user yang telah dilakukan dalam 1 Bulan",
+                      style: TextStyle(fontSize: 8),),
+                  ],
+                )
             )
           ],
         ),
@@ -392,6 +383,7 @@ class DashboardPage extends StatelessWidget {
 class itemSummary extends StatelessWidget {
   final String title;
   final String value;
+
   const itemSummary({
     super.key,
     required this.title,

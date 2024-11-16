@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_svg/svg.dart';
 import 'package:get/get.dart';
 
+import '../widget/example_animation.dart';
 import 'login.dart';
 
 
@@ -56,12 +57,23 @@ class _SplashScreenState extends State<SplashScreen> {
                     child: Column(
                       mainAxisAlignment: MainAxisAlignment.center,
                       children: [
-                        SvgPicture.asset(
-                          'assets/logo.svg',
-                          fit: BoxFit.cover,
+
+                        const EnhancedFadeInImage(
+                          imagePath: 'assets/logo2.png',
                           width: 100,
+                          height: 100,
+                          scaleEffect: true,
+                          slideEffect: true,
+                          duration: Duration(milliseconds: 1500),
+                          curve: Curves.easeIn,
                         ),
-                        Image.asset('assets/logo2.png'),
+
+                        // SvgPicture.asset(
+                        //   'assets/logo.svg',
+                        //   fit: BoxFit.cover,
+                        //   width: 100,
+                        // ),
+                        // Image.asset('assets/logo2.png'),
                         // SvgPicture.asset(
                         //   'assets/logo.svg',
                         // ),

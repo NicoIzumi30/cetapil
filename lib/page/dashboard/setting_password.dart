@@ -1,5 +1,3 @@
-import 'package:cetapil_mobile/page/dashboard/setting_password.dart';
-import 'package:cetapil_mobile/utils/colors.dart';
 import 'package:cetapil_mobile/widget/button_primary.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_svg/svg.dart';
@@ -7,13 +5,15 @@ import 'package:get/get.dart';
 import 'package:get/get_core/src/get_main.dart';
 import 'package:google_fonts/google_fonts.dart';
 
+import '../../utils/colors.dart';
 import '../../widget/back_button.dart';
 import '../../widget/password_field.dart';
 import '../../widget/text_field.dart';
 
-class SettingProfile extends StatelessWidget {
+class SettingPassword extends StatelessWidget {
   final TextEditingController _controller =
       TextEditingController(text: "Andromeda Phytagoras Silalahi");
+  bool isShow = false;
 
   @override
   Widget build(BuildContext context) {
@@ -41,53 +41,30 @@ class SettingProfile extends StatelessWidget {
               SizedBox(
                 height: 20,
               ),
-              Text("Profile Pengguna", style: AppTextStyle.titlePage),
+              Text("Ubah Kata Sandi", style: AppTextStyle.titlePage),
               SizedBox(
                 height: 20,
               ),
               ModernTextField(
-                title: "Nama Pengguna",
+                title: "Kata Sandi Lama",
                 controller: _controller,
+                suffixIcon: true,
               ),
               ModernTextField(
-                title: "Nomor Telepon Pengguna",
+                title: "Kata Sandi Baru",
                 controller: _controller,
+                suffixIcon: true,
               ),
               ModernTextField(
-                title: "Jabatan Pengguna",
+                title: "Konfirmasi Kata Sandi Baru",
                 controller: _controller,
+                suffixIcon: true,
               ),
+
               SizedBox(
                 height: 15,
               ),
-              Text("Area Domisili Pengguna", style: AppTextStyle.titlePage),
-              SizedBox(
-                height: 15,
-              ),
-              ModernTextField(
-                title: "Longitudes & Latitudes",
-                controller: _controller,
-                enable: false,
-              ),
-              SizedBox(
-                height: 15,
-              ),
-              Text("Keamanan Akun", style: AppTextStyle.titlePage),
-              SizedBox(
-                height: 15,
-              ),
-              PasswordFieldWithButton(
-                controller: _controller,
-                onButtonPressed: () {
-                  Get.to(
-                    SettingPassword()
-                  );
-                },
-              ),
-              SizedBox(
-                height: 15,
-              ),
-             ButtonPrimary(ontap: (){}, title: "Keluar Akun")
+              ButtonPrimary(ontap: (){}, title: "Simpan Perubahan",width: double.infinity,)
             ],
           ),
         )
