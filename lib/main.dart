@@ -1,3 +1,4 @@
+import 'package:cetapil_mobile/controller/outlet_controller.dart';
 import 'package:cetapil_mobile/page/splash_screen.dart';
 import 'package:cetapil_mobile/utils/colors.dart';
 import 'package:flutter/material.dart';
@@ -38,6 +39,7 @@ Future<void> initializeControllers() async {
   Get.put(GPSLocationController());
   Get.put(BottomNavController());
   Get.put(DashboardController());
+  Get.put(OutletController());
 
 }
 
