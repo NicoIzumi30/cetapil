@@ -18,11 +18,20 @@ class ApiAuthMiddleware
     public function handle(Request $request, Closure $next): Response
     {
         $token = $request->bearerToken();
+
+        // Jika token kosong, berarti user belum login sama sekali
+        if (!$token) {
+            return (new CustomResponseResource(false, 'Silakan login terlebih dahulu untuk mengakses halaman ini', null))->toResponse($request);
+        }
+
+        // Jika token ada tapi tidak valid
         $tokenInstance = PersonalAccessToken::findToken($token);
         if ($tokenInstance === null) {
-            return (new CustomResponseResource(false, 'Unauthorized', null))->toResponse($request);
+            return (new CustomResponseResource(false, 'Sesi anda telah berakhir. Silakan login kembali', null))
+                ->response()
+                ->setStatusCode(401); // Unauthorized status code
         }
+
         return $next($request);
     }
-    
 }
