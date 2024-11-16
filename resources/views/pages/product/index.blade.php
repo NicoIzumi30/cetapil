@@ -297,6 +297,84 @@
     </main>
 @endsection
 
+
+@push('styles')
+    <style>
+         /* Pagination container */
+    .dataTables_paginate {
+        display: flex;
+        gap: 2px;
+    }
+
+    /* Base button styles */
+    .paginate-btn {
+        min-width: 32px;
+        height: 32px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        cursor: pointer;
+        font-size: 14px;
+    }
+
+    /* White background buttons (prev, next, terakhir) */
+    .white-btn {
+        background-color: #FFFFFF;
+        color: #003366;
+        border: none;
+    }
+
+    /* Blue background button (current page) */
+    .blue-btn {
+        background-color: #0284c7;
+        color: #FFFFFF;
+        border: none;
+    }
+
+    /* Transparent buttons (other numbers) */
+    .transparent-btn {
+        background-color: transparent;
+        color: #FFFFFF;
+        border: 1px solid rgba(255, 255, 255, 0.2);
+    }
+
+    /* Special styling for Terakhir button */
+    .terakhir {
+        padding: 0 16px;
+        margin-left: 2px;
+    }
+
+    /* Entries per page styling */
+    .dataTables_length {
+        color: white;
+    }
+
+    .dataTables_length select {
+        background-color: transparent;
+        border: 1px solid rgba(255, 255, 255, 0.2);
+        padding: 0.25rem 0.5rem;
+        color: white;
+        margin: 0 0.5rem;
+    }
+
+    /* Wrapper and container styling */
+    .dataTables_wrapper {
+        background-color: #003366;
+    }
+
+    .bottom-container {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        margin-top: 1rem;
+        width: 100%;
+    }
+    .dt-paging-button{
+        color: white !important ;
+    }
+    </style>
+@endpush
+
 @push('scripts')
     <script>
         $(document).ready(function() {
@@ -305,10 +383,50 @@
                 mode: "range"
             });
             $('#product-table').DataTable({
-                paging: false,
-                searching: false,
-                info: false
-            });
+            paging: true,
+            searching: false,
+            info: true,
+            pageLength: 7,
+            lengthMenu: [7, 10, 25],
+            dom: 'rt<"bottom-container"<"bottom-left"l><"bottom-right"p>>',
+            language: {
+                lengthMenu: "Menampilkan _MENU_ dari 4,768 data",
+                paginate: {
+                    previous: '<',
+                    next: '>',
+                }
+            },
+            drawCallback: function(settings) {
+                var api = this.api();
+                var $pagination = $(this).closest('.dataTables_wrapper').find('.dataTables_paginate');
+
+                // Remove any existing buttons
+                $pagination.empty();
+
+                // Add custom pagination
+                var pagesInfo = api.page.info();
+                var currentPage = pagesInfo.page + 1;
+                var totalPages = pagesInfo.pages;
+
+                // Previous button
+                $pagination.append('<a class="paginate-btn prev white-btn"><</a>');
+
+                // Add page numbers
+                for(let i = 1; i <= 5; i++) {
+                    if(i === currentPage) {
+                        $pagination.append(`<a class="paginate-btn blue-btn">${i}</a>`);
+                    } else {
+                        $pagination.append(`<a class="paginate-btn transparent-btn">${i}</a>`);
+                    }
+                }
+
+                // Next button
+                $pagination.append('<a class="paginate-btn next white-btn">></a>');
+
+                // Terakhir button
+                $pagination.append('<a class="paginate-btn white-btn terakhir">Terakhir</a>');
+            }
+        });
             $('#stock-on-hand-table').DataTable({
                 paging: false,
                 searching: false,
