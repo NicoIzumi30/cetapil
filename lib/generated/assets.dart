@@ -2,13 +2,20 @@
 class Assets {
   Assets._();
 
+  static const String assetsAndroid Compact  1 (3) = 'assets/Android Compact - 1 (3).svg';
   static const String assetsBackground = 'assets/background.png';
+  static const String assetsCarousel1 = 'assets/carousel1.png';
+  static const String assetsIconSettingAccount = 'assets/icon/setting_account.svg';
   static const String assetsLogo = 'assets/logo.svg';
   static const String assetsLogo2 = 'assets/logo2.png';
   static const String assetsVector = 'assets/vector.png';
   static const String assetsVector1 = 'assets/vector1.svg';
   static const String assetsVector2 = 'assets/vector2.svg';
-  static const String cetapilMobileAssetsBackground = 'assets/background.svg';
+  static const String assetsVector3 = 'assets/vector3.svg';
+  static const String assetsVectorCalendar = 'assets/vector_calendar.png';
+  static const String cetapilMobileAssetsCarousel1 = 'assets/carousel1.svg';
   static const String cetapilMobileAssetsLogo = 'assets/logo.svg';
+  static const String cetapilMobileAssetsVectorCalendar = 'assets/vector_calendar.svg';
+  static const String iconSettingAccount = 'assets/icon/setting_account.png';
 
 }

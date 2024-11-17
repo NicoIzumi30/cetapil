@@ -53,13 +53,13 @@ class GPSAwareScaffold extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      resizeToAvoidBottomInset: true,
+      resizeToAvoidBottomInset: false,
       appBar: appBar,
       body: SafeArea(
         child: Stack(
           children: [
-            SvgPicture.asset(
-              'assets/background.svg',
+            Image.asset(
+              'assets/background.png',
               fit: BoxFit.cover,
               width: double.infinity,
               height: double.infinity,

@@ -10,7 +10,8 @@ import 'package:smooth_page_indicator/smooth_page_indicator.dart';
 import '../../widget/progress_indicator.dart';
 
 class DashboardPage extends GetView<DashboardController> {
-  final CarouselSliderController _carouselController = CarouselSliderController();
+  final CarouselSliderController _carouselController =
+      CarouselSliderController();
 
   @override
   Widget build(BuildContext context) {
@@ -50,10 +51,13 @@ class DashboardPage extends GetView<DashboardController> {
                           Get.to(SettingProfile());
                         },
                         child: Container(
-                          padding: EdgeInsets.symmetric(horizontal: 10, vertical: 11),
+                          padding: EdgeInsets.symmetric(
+                              horizontal: 10, vertical: 11),
                           decoration: BoxDecoration(
-                              color: Colors.white, borderRadius: BorderRadius.circular(10)),
-                          child: SvgPicture.asset('assets/icon/setting_account.svg'),
+                              color: Colors.white,
+                              borderRadius: BorderRadius.circular(10)),
+                          child: SvgPicture.asset(
+                              'assets/icon/setting_account.svg'),
                         ),
                       )
                     ],
@@ -99,8 +103,9 @@ class DashboardPage extends GetView<DashboardController> {
                   Container(
                     width: double.infinity,
                     padding: EdgeInsets.all(10),
-                    decoration:
-                        BoxDecoration(borderRadius: BorderRadius.circular(10), color: Colors.white),
+                    decoration: BoxDecoration(
+                        borderRadius: BorderRadius.circular(10),
+                        color: Colors.white),
                     child: Row(
                       mainAxisAlignment: MainAxisAlignment.spaceAround,
                       children: [
@@ -108,28 +113,35 @@ class DashboardPage extends GetView<DashboardController> {
                           children: [
                             Text(
                               "Cluster Region",
-                              style: TextStyle(fontSize: 10, color: Colors.blue),
+                              style:
+                                  TextStyle(fontSize: 10, color: Colors.blue),
                             ),
                             Text(
                               "DKI Jakarta",
-                              style: TextStyle(fontSize: 10, fontWeight: FontWeight.bold),
+                              style: TextStyle(
+                                  fontSize: 10, fontWeight: FontWeight.bold),
                             ),
                           ],
                         ),
                         Column(
                           children: [
-                            Text("Outlet", style: TextStyle(fontSize: 10, color: Colors.blue)),
+                            Text("Outlet",
+                                style: TextStyle(
+                                    fontSize: 10, color: Colors.blue)),
                             Text("Guardian Neo Soho",
-                                style: TextStyle(fontSize: 10, fontWeight: FontWeight.bold))
+                                style: TextStyle(
+                                    fontSize: 10, fontWeight: FontWeight.bold))
                           ],
                         ),
                         Column(
                           children: [
                             Text("Outlet Radius",
-                                style: TextStyle(fontSize: 10, color: Colors.blue)),
+                                style: TextStyle(
+                                    fontSize: 10, color: Colors.blue)),
                             Text(
                               "20m",
-                              style: TextStyle(fontSize: 10, fontWeight: FontWeight.bold),
+                              style: TextStyle(
+                                  fontSize: 10, fontWeight: FontWeight.bold),
                             ),
                           ],
                         ),
@@ -219,7 +231,7 @@ class DashboardPage extends GetView<DashboardController> {
                               )),
                           Obx(() => Text(
                                 controller.currentDate.value.day.toString(),
-                                style: GoogleFonts.plusJakartaSans(
+                                style: TextStyle(
                                   fontSize: 55,
                                   fontWeight: FontWeight.w800,
                                   color: Colors.white,
@@ -236,22 +248,27 @@ class DashboardPage extends GetView<DashboardController> {
                         mainAxisSize: MainAxisSize.max,
                         children: [
                           GestureDetector(
-                            onTap: () => controller.showCustomCalendarDialog(context),
+                            onTap: () =>
+                                controller.showCustomCalendarDialog(context),
                             child: Container(
-                              padding: EdgeInsets.symmetric(horizontal: 8, vertical: 6),
+                              padding: EdgeInsets.symmetric(
+                                  horizontal: 8, vertical: 6),
                               decoration: BoxDecoration(
-                                  color: Colors.white, borderRadius: BorderRadius.circular(10)),
+                                  color: Colors.white,
+                                  borderRadius: BorderRadius.circular(10)),
                               child: Row(
                                 children: [
                                   Text(
                                     "Cek Kalender",
                                     style: TextStyle(
-                                        color: Color(0xFF054F7B), fontWeight: FontWeight.bold),
+                                        color: Color(0xFF054F7B),
+                                        fontWeight: FontWeight.bold),
                                   ),
                                   SizedBox(
                                     width: 8,
                                   ),
-                                  Icon(Icons.calendar_month_rounded, color: Color(0xFF054F7B))
+                                  Icon(Icons.calendar_month_rounded,
+                                      color: Color(0xFF054F7B))
                                 ],
                               ),
                             ),
@@ -261,7 +278,7 @@ class DashboardPage extends GetView<DashboardController> {
                           ),
                           Obx(() => Text(
                                 "${controller.getIndonesianMonth()} ${controller.currentDate.value.year}",
-                                style: GoogleFonts.plusJakartaSans(
+                                style: TextStyle(
                                   fontSize: 19,
                                   fontWeight: FontWeight.bold,
                                   color: Colors.white,
@@ -316,8 +333,10 @@ class DashboardPage extends GetView<DashboardController> {
             ),
             Text(
               "Performance Index",
-              style: GoogleFonts.plusJakartaSans(
-                  fontWeight: FontWeight.w800, fontSize: 20, color: Color(0xFF054F7B)),
+              style: TextStyle(
+                  fontWeight: FontWeight.w800,
+                  fontSize: 20,
+                  color: Color(0xFF054F7B)),
             ),
             SizedBox(
               height: 5,
@@ -396,11 +415,13 @@ class itemSummary extends StatelessWidget {
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
             Text(title,
-                style: GoogleFonts.plusJakartaSans(
-                    fontSize: 10, fontWeight: FontWeight.w600, color: Colors.blue)),
+                style: TextStyle(
+                    fontSize: 10,
+                    fontWeight: FontWeight.w600,
+                    color: Colors.blue)),
             Text(
               value,
-              style: GoogleFonts.plusJakartaSans(fontSize: 22, fontWeight: FontWeight.w800),
+              style: TextStyle(fontSize: 22, fontWeight: FontWeight.w800),
             )
           ],
         ),

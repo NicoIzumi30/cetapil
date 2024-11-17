@@ -64,7 +64,9 @@ class SettingPassword extends StatelessWidget {
               SizedBox(
                 height: 15,
               ),
-              ButtonPrimary(ontap: (){}, title: "Simpan Perubahan",width: double.infinity,)
+              ButtonPrimary(
+                tipeButton: "danger",
+                ontap: (){}, title: "Simpan Perubahan",width: double.infinity,)
             ],
           ),
         )

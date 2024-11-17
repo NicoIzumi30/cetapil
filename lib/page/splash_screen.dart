@@ -2,7 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_svg/svg.dart';
 import 'package:get/get.dart';
 
-import '../widget/example_animation.dart';
+import '../widget/logo_animation.dart';
 import 'login.dart';
 
 
@@ -33,8 +33,8 @@ class _SplashScreenState extends State<SplashScreen> {
       body: Stack(
         children: [
           // SVG Background
-          SvgPicture.asset(
-            'assets/background.svg',
+          Image.asset(
+            'assets/background.png',
             fit: BoxFit.cover,
             width: double.infinity,
             height: double.infinity,

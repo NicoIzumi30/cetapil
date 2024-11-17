@@ -20,8 +20,8 @@ class SettingProfile extends StatelessWidget {
     return SafeArea(
         child: Stack(
       children: [
-        SvgPicture.asset(
-          'assets/background.svg',
+        Image.asset(
+          'assets/background.png',
           fit: BoxFit.cover,
           width: double.infinity,
           height: double.infinity,
@@ -46,14 +46,17 @@ class SettingProfile extends StatelessWidget {
                 height: 20,
               ),
               ModernTextField(
+                enable: false,
                 title: "Nama Pengguna",
                 controller: _controller,
               ),
               ModernTextField(
+                enable: false,
                 title: "Nomor Telepon Pengguna",
                 controller: _controller,
               ),
               ModernTextField(
+                enable: false,
                 title: "Jabatan Pengguna",
                 controller: _controller,
               ),
@@ -72,22 +75,24 @@ class SettingProfile extends StatelessWidget {
               SizedBox(
                 height: 15,
               ),
-              Text("Keamanan Akun", style: AppTextStyle.titlePage),
-              SizedBox(
-                height: 15,
-              ),
-              PasswordFieldWithButton(
-                controller: _controller,
-                onButtonPressed: () {
-                  Get.to(
-                    SettingPassword()
-                  );
-                },
-              ),
-              SizedBox(
-                height: 15,
-              ),
-             ButtonPrimary(ontap: (){}, title: "Keluar Akun")
+              // Text("Keamanan Akun", style: AppTextStyle.titlePage),
+              // SizedBox(
+              //   height: 15,
+              // ),
+              // PasswordFieldWithButton(
+              //   controller: _controller,
+              //   onButtonPressed: () {
+              //     Get.to(
+              //       SettingPassword()
+              //     );
+              //   },
+              // ),
+              // SizedBox(
+              //   height: 15,
+              // ),
+             ButtonPrimary(
+                 tipeButton: "danger",
+                 ontap: (){}, title: "Keluar Akun")
             ],
           ),
         )

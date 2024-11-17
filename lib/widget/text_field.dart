@@ -3,7 +3,7 @@ import 'package:google_fonts/google_fonts.dart';
 
 class ModernTextField extends StatefulWidget {
   final String title;
-  // final String hintText;
+  final int? maxlines;
   final TextEditingController? controller;
   bool obscureText = false;
   final bool? enable;
@@ -21,7 +21,7 @@ class ModernTextField extends StatefulWidget {
     this.validator,
     required this.title,
     this.enable,
-    this.suffixIcon = false,
+    this.suffixIcon = false, this.maxlines,
   }) : super(key: key);
 
   @override
@@ -36,8 +36,8 @@ class _ModernTextFieldState extends State<ModernTextField> {
       children: [
         Text(
           widget.title,
-          style: GoogleFonts.plusJakartaSans(
-              fontSize: 15, fontWeight: FontWeight.w500),
+          style: TextStyle(
+              fontSize: 15, fontWeight: FontWeight.w600),
         ),
         SizedBox(
           height: 10,
@@ -63,6 +63,7 @@ class _ModernTextFieldState extends State<ModernTextField> {
             onChanged: widget.onChanged,
             enabled: widget.enable,
             validator: widget.validator,
+            maxLines: widget.maxlines,
             style: const TextStyle(
               fontSize: 14,
               color: Color(0xFF0077BD),
@@ -94,7 +95,7 @@ class _ModernTextFieldState extends State<ModernTextField> {
                 vertical: 13,
               ),
               border: OutlineInputBorder(
-                borderRadius: BorderRadius.circular(12),
+                borderRadius: BorderRadius.circular(8),
                 borderSide: const BorderSide(
                   color: Color(0xFF64B5F6),
                   width: 2,
@@ -103,24 +104,24 @@ class _ModernTextFieldState extends State<ModernTextField> {
               filled: true,
               fillColor: const Color(0xFFE8F3FF), // Light blue background
               focusedBorder: OutlineInputBorder(
-                borderRadius: BorderRadius.circular(12),
+                borderRadius: BorderRadius.circular(8),
                 borderSide: const BorderSide(
                   color: Color(0xFF64B5F6),
-                  width: 2,
+                  width: 1,
                 ),
               ),
               enabledBorder: OutlineInputBorder(
-                borderRadius: BorderRadius.circular(12),
+                borderRadius: BorderRadius.circular(8),
                 borderSide: const BorderSide(
                   color: Color(0xFF64B5F6),
-                  width: 2,
+                  width: 1,
                 ),
               ),
               disabledBorder: OutlineInputBorder(
-                borderRadius: BorderRadius.circular(12),
+                borderRadius: BorderRadius.circular(8),
                 borderSide: const BorderSide(
                   color: Color(0xFF64B5F6),
-                  width: 2,
+                  width: 1,
                 ),
               ),
             ),

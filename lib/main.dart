@@ -9,6 +9,7 @@ import 'package:get/get_core/src/get_main.dart';
 import 'package:get/get_navigation/src/root/get_material_app.dart';
 import 'package:get_storage/get_storage.dart';
 
+import 'controller/activity_controller.dart';
 import 'controller/bottom_nav_controller.dart';
 import 'controller/connectivity_controller.dart';
 import 'controller/dashboard_controller.dart';
@@ -40,6 +41,7 @@ Future<void> initializeControllers() async {
   Get.put(BottomNavController());
   Get.put(DashboardController());
   Get.put(OutletController());
+  Get.put(ActivityController());
 
 }
 
@@ -63,6 +65,23 @@ class MyApp extends StatelessWidget {
       debugShowCheckedModeBanner: false,
       title: 'Cetaphil App',
       home: const SplashScreen(),
+      theme: ThemeData(
+        fontFamily: 'PlusJakartaSans',
+
+        textTheme: const TextTheme(
+          displayLarge: TextStyle(
+            fontFamily: 'PlusJakartaSans',
+            fontSize: 32,
+            fontWeight: FontWeight.bold,
+          ),
+          bodyLarge: TextStyle(
+            fontFamily: 'PlusJakartaSans',
+            fontSize: 16,
+            fontWeight: FontWeight.normal,
+          ),
+          // ... other styles
+        ),
+      ),
       builder: EasyLoading.init(),
     );
   }

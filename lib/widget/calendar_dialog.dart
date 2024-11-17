@@ -92,7 +92,7 @@ class _CustomCalendarDialogState extends State<CustomCalendarDialog> {
                 // Date number
                 Text(
                   _selectedDate.day.toString(),
-                  style:  GoogleFonts.plusJakartaSans(
+                  style:  TextStyle(
                     color: Colors.white,
                     fontSize: 80,
                     fontWeight: FontWeight.bold,

@@ -1,5 +1,7 @@
 import 'package:cetapil_mobile/controller/outlet_controller.dart';
 import 'package:cetapil_mobile/model/outlet.dart';
+import 'package:cetapil_mobile/page/outlet/detail_outlet.dart';
+import 'package:cetapil_mobile/page/outlet/tambah_outlet.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 
@@ -8,23 +10,30 @@ class OutletPage extends GetView<OutletController> {
 
   @override
   Widget build(BuildContext context) {
-    return Scaffold(
-      body: SafeArea(
+    return SafeArea(
+      child: Padding(
+        padding: EdgeInsets.fromLTRB(15, 15, 15, 0),
         child: Column(
           children: [
-            Container(
-              padding: const EdgeInsets.all(16),
+            SizedBox(
+              height: 40,
               child: SearchBar(
                 controller: TextEditingController(),
                 onChanged: controller.updateSearchQuery,
                 leading: const Icon(Icons.search),
                 hintText: 'Masukkan Kata Kunci',
+                hintStyle: WidgetStatePropertyAll(
+                    TextStyle(color: Colors.grey[500], fontSize: 14)),
+                shape: WidgetStatePropertyAll(RoundedRectangleBorder(
+                    borderRadius: BorderRadius.circular(10))),
               ),
+            ),
+            SizedBox(
+              height: 15,
             ),
             Expanded(
               child: Obx(
                 () => ListView.builder(
-                  padding: const EdgeInsets.symmetric(horizontal: 16),
                   itemCount: controller.filteredOutlets.length,
                   itemBuilder: (context, index) {
                     final outlet = controller.filteredOutlets[index];
@@ -50,8 +59,14 @@ class OutletCard extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return Card(
+    return Container(
       margin: const EdgeInsets.only(bottom: 16),
+      decoration: BoxDecoration(
+          borderRadius: BorderRadius.circular(10),
+          gradient: LinearGradient(colors: [
+            Color(0xFFFFFFFF),
+            Color(0x80FFFFFF),
+          ])),
       child: Padding(
         padding: const EdgeInsets.all(16),
         child: Row(
@@ -62,10 +77,10 @@ class OutletCard extends StatelessWidget {
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
                   Text(
-                    'Nama Outlet',
+                    'Nama Outlet :',
                     style: TextStyle(
                       color: Colors.grey[600],
-                      fontSize: 12,
+                      fontSize: 11,
                     ),
                   ),
                   const SizedBox(height: 4),
@@ -92,10 +107,15 @@ class OutletCard extends StatelessWidget {
                   ),
                   const SizedBox(height: 16),
                   ElevatedButton(
-                    onPressed: () {},
+                    onPressed: () {
+                      Get.to(
+                          () =>  TambahOutlet()
+                      );
+                    },
                     style: ElevatedButton.styleFrom(
                       backgroundColor: Colors.blue,
                       minimumSize: const Size(80, 36),
+                      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8))
                     ),
                     child: const Text(
                       'Lihat',
@@ -106,14 +126,19 @@ class OutletCard extends StatelessWidget {
               ),
             ),
             const SizedBox(width: 16),
-            ClipRRect(
-              borderRadius: BorderRadius.circular(8),
-              child: Image.asset(
-                outlet.image,
-                width: 100,
-                height: 100,
-                fit: BoxFit.cover,
-              ),
+            Column(
+              children: [
+                ClipRRect(
+                  borderRadius: BorderRadius.circular(8),
+                  child: Image.asset(
+                    outlet.image,
+                    width: 100,
+                    height: 100,
+
+                    fit: BoxFit.cover,
+                  ),
+                ),
+              ],
             ),
           ],
         ),

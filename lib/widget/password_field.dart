@@ -88,7 +88,7 @@ class _PasswordFieldWithButtonState extends State<PasswordFieldWithButton> {
                     color: Colors.blue,
                     borderRadius: BorderRadius.only(topRight: Radius.circular(12),bottomRight: Radius.circular(12))
                   ),
-                  child: Center(child: Text("Ubah",style: GoogleFonts.plusJakartaSans(color: Colors.white,fontWeight: FontWeight.w700),)),
+                  child: Center(child: Text("Ubah",style: TextStyle(color: Colors.white,fontWeight: FontWeight.w700),)),
                 ),
               )
             ],
