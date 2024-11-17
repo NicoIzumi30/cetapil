@@ -1,6 +1,7 @@
 <?php
 
 use App\Http\Controllers\Api\Auth\AuthController;
+use App\Http\Controllers\Api\OutletController;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Route;
 
@@ -14,7 +15,20 @@ Route::controller(AuthController::class)->group(function () {
     Route::post('/reset-password', 'resetPassword');
 });
 
+
+
 // Protected routes
-Route::middleware('auth_api')->group(function () {
+Route::middleware(['auth_api'])->group(function () {
     Route::post('/logout', [AuthController::class, 'logout']);
+
+    Route::prefix("outlet")->group(function () {
+        Route::get('/', [OutletController::class, 'index']);
+        Route::get('/cities', [OutletController::class, 'getCityList']);
+
+        Route::prefix("forms")->group(function () {
+            Route::get('/', [OutletController::class, 'forms']);
+            Route::post('/create-with-forms', [OutletController::class, 'createOutletWithForms'])
+                ->name('outlet.create-with-forms');
+        });
+    });
 });
