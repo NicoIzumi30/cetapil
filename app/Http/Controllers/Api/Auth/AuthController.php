@@ -2,17 +2,32 @@
 
 namespace App\Http\Controllers\Api\Auth;
 
+use App\Constants\AuthConstants;
 use App\Http\Controllers\Controller;
+use App\Http\Resources\User\UserResource;
 use App\Models\User;
+use App\Traits\HasAuthUser;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Facades\Password;
 use Illuminate\Support\Facades\Validator;
 use Illuminate\Support\Str;
+use Symfony\Component\HttpFoundation\Response;
 
 class AuthController extends Controller
 {
+    use  HasAuthUser;
+
+    /**
+     * Get the authenticated User.
+     *
+     * @return \Illuminate\Http\JsonResponse
+     */
+    public function detailUser()
+    {
+        return $this->successResponse(AuthConstants::ME, Response::HTTP_OK, new UserResource($this->getAuthUser()));
+    }
     /**
      * Handle user login
      *

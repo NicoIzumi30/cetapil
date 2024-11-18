@@ -2,12 +2,27 @@
 
 namespace App\Constants;
 
-class OutletConstants {
+final class OutletStatus
+{
+    public const APPROVED = 'APPROVED';
+    public const PENDING = 'PENDING';
+    public const REJECTED = 'REJECTED';
+
+    public const ALL = [
+        self::APPROVED,
+        self::PENDING,
+        self::REJECTED,
+    ];
+}
+class OutletConstants
+{
     public const GET_LIST = 'Get the outlet list successfully.';
+    public const GET_DETAIL = 'Get the outlet detail successfully.';
     public const CREATE = 'Outlet created successfully.';
     public const UPDATE = 'Outlet updated successfully.';
     public const DETAIL = 'Get outlet detail successfully.';
     public const DELETE = 'Outlet deleted successfully.';
+    public const NOT_FOUND = 'Outlet not found.';
 
     public const APPROVED = 'Outlet approved successfully';
     public const REJECTED = 'Outlet rejected successfully';

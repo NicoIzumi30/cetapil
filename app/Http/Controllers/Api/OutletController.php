@@ -45,6 +45,37 @@ class OutletController extends Controller
         return new RoutingCollection($outlets);
     }
 
+    public function show($id)
+    {
+        try {
+            // Get authenticated user
+            $user = $this->getAuthUser();
+
+            // Find the outlet with its relationships
+            $outlet = Outlet::where('id', $id)
+                ->where('user_id', $user->id)
+                ->first();
+
+            if (!$outlet) {
+                return $this->failedResponse(
+                    OutletConstants::NOT_FOUND,
+                    Response::HTTP_NOT_FOUND
+                );
+            }
+
+            return $this->successResponse(
+                OutletConstants::GET_DETAIL,
+                Response::HTTP_OK,
+                new OutletResource($outlet)
+            );
+        } catch (\Exception $e) {
+            return $this->failedResponse(
+                'Failed to retrieve outlet details: ' . $e->getMessage(),
+                Response::HTTP_INTERNAL_SERVER_ERROR
+            );
+        }
+    }
+
     public function forms(Request $request)
     {
         $data = OutletForm::select('id', 'question', 'type')->get();
