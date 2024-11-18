@@ -7,7 +7,7 @@ use App\Http\Controllers\Auth\LoginController;
 use App\Http\Controllers\Auth\LogoutController;
 use App\Http\Controllers\Web\DashboardController;
 
-// Guest Routes
+
 Route::middleware('guest')->group(function () {
     Route::get('/login', [LoginController::class, 'index'])->name('login');
     Route::post('/login', [LoginController::class, 'login']);
@@ -34,6 +34,18 @@ Route::middleware('auth')->group(function () {
         Route::get('/edit', function () {
             return view('pages.routing.edit');
         })->name('edit');
+        Route::get('/request', function () {
+            return view('pages.routing.request');
+        });
+        Route::get('/routingrequest/detail', function () {
+            return view('pages.routing.detail-request');
+        });
+        Route::get('/sales-activity', function () {
+            return view('pages.routing.sales-activity');
+        });
+        Route::get('/av3m', function () {
+            return view('pages.routing.av3m');
+        });
     });
 
     // Visibility Management
@@ -41,6 +53,12 @@ Route::middleware('auth')->group(function () {
         Route::get('/', function () {
             return view('pages.visibility.index');
         })->name('index');
+        Route::get('/edit', function () {
+            return view('pages.visibility.edit');
+        });
+        Route::get('/create', function () {
+            return view('pages.visibility.create');
+        });
     });
 
     // Selling Management
@@ -48,6 +66,12 @@ Route::middleware('auth')->group(function () {
         Route::get('/', function () {
             return view('pages.selling.index');
         })->name('index');
+        Route::get('/create', function () {
+            return view('pages.selling.create');
+        });
+        Route::get('/edit', function () {
+            return view('pages.selling.edit');
+        });
     });
 
     // User Management
@@ -63,12 +87,7 @@ Route::middleware('auth')->group(function () {
         Route::delete('/{product}', [ProductController::class, 'destroy'])->name('destroy');
         
     });
-
-    // Logout
-    Route::get('/logout', LogoutController::class)->name('logout');
-});
-
-// Unauthorized Access
-Route::get('/unauthorized', function () {
-    return view('pages.unauthorized');
-})->name('unauthorized');
+    });
+    Route::get('/unauthorized', function () {
+        return view('pages.unauthorized');
+    });

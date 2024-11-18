@@ -1,8 +1,7 @@
-function previewImage(input, id) {
+function previewImage(input, id, maxImageSize) {
 	const file = input.files[0];
 	if (file) {
-		// Check file size (2MB = 2 * 1024 * 1024 bytes)
-		const maxSize = 2 * 1024 * 1024;
+		const maxSize =  maxImageSize * 1024 * 1024;
 		if (file.size > maxSize) {
 			alert(`Ukuran file terlalu besar. Maksimal 2 MB`);
 			input.value = '';

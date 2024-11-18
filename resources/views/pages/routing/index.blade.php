@@ -22,13 +22,33 @@
             <x-button.light href="/routing/request" class="!text-white !bg-[#39B5FF] py-2">
                 Need Approval <span class="py-1 px-2 ml-2 rounded-md bg-white text-primary">4</span>
             </x-button.light>
-            <x-button.info href="/routing/avg-three-month">AV3M</x-button.info>
+            <x-button.info onclick="openModal('upload-product-knowledge')">Upload Product knowledge</x-button.info>
+            <x-modal id="upload-product-knowledge">
+                <x-slot:title>Upload Product Knowledge</x-slot:title>
+                <div>
+                    <label for="knowledge_file" class="!text-black">
+                        Unggah product knowledge berupa file pdf
+                        <div id="fileUpload" class="flex mt-2">
+                            <input type="text" id="fileNameDisplay" readonly disabled class="form-control mt-0 border-r-none"
+                                {{-- if ($knowledge_file) value="{{ pathinfo($knowledge_file->getClientOriginalName(), PATHINFO_FILENAME) . '.pdf' }}" @endif --}} placeholder="Unggah product knowledge berupa file pdf"
+                                aria-describedby="button-addon2">
+                            <div class="bg-primary text-white align-middle p-3 rounded-r-md cursor-pointer -translate-x-2">
+                                Browse</div>
+                        </div>
+                        <input type="file" id="knowledge_file" name="knowledge_file" class="form-control hidden"
+                            accept="application/pdf" aria-label="Unggah product knowledge berupa file pdf">
+                    </label>
+                </div>
+                <x-slot:footer>
+                    <x-button.info class="w-full">Upload</x-button.info>
+                </x-slot:footer>
+            </x-modal>
             <x-button.info href="/routing/create">Tambah Daftar Outlet</x-button.info>
         </x-slot:cardAction>
         {{-- Routing Action End --}}
 
         {{-- Routing Table --}}
-        <table class="table">
+        <table id="routing-table" class="table">
             <thead>
                 <tr>
                     <th scope="col" class="text-center">
@@ -83,14 +103,23 @@
                                     Data</a>
                             </li>
                             <li>
-                                <a href="#" class="dropdown-option text-red-400">Hapus
-                                    Data</a>
+                                <button onclick="openModal('delete-routing')" class="dropdown-option text-red-400">Hapus
+                                    Data</button>
                             </li>
                         </x-action-table-dropdown>
                     </td>
                 </tr>
             </tbody>
         </table>
+        {{-- Delete Modal --}}
+        <x-modal id="delete-routing">
+            <x-slot:title>Hapus Routing</x-slot:title>
+            <p>Apakah kamu yakin Ingin Menghapus data Routing ini?</p>
+            <x-slot:footer>
+                <x-button.light onclick="closeModal('delete-routing')" class="border-primary border">Batal</x-button.light>
+                <x-button.light class="!bg-red-400 text-white border border-red-400">Hapus Data</x-button.light>
+            </x-slot:footer>
+        </x-modal>
         {{-- {{ $items->links() }} --}}
         {{-- Routing Table End --}}
     </x-card>
@@ -120,7 +149,7 @@
         {{-- Sales Activity Action End --}}
 
         {{-- Sales Activity Table --}}
-        <table class="table">
+        <table id="sales-table" class="table">
             <thead>
                 <tr>
                     <th scope="col" class="text-center">
@@ -188,22 +217,32 @@
                     <td class="table-data">
                         <x-action-table-dropdown>
                             <li>
-                                <button onclick="openModal('') class="dropdown-option ">Lihat
-                                        Data</a>
-                                </li>
-                                <li>
-                                    <a href="#" class="dropdown-option text-red-400">Hapus
-                                        Data</a>
-                                </li>
-                            </x-action-table-dropdown>
-                        </td>
-                    </tr>
-                </tbody>
-            </table>
-            {{-- {{ $items->links() }} --}}
-            {{-- Sales Activity Table End --}}
-        </x-card>
-        {{-- Sales Activity End --}}
+                                <a href="/routing/sales-activity" class="dropdown-option">Lihat
+                                    Data</a>
+                            </li>
+                            <li>
+                                <button onclick="openModal('delete-sales-activity')"
+                                    class="dropdown-option text-red-400">Hapus
+                                    Data</button>
+                            </li>
+                        </x-action-table-dropdown>
+                    </td>
+                </tr>
+            </tbody>
+        </table>
+        {{-- Delete Modal --}}
+        <x-modal id="delete-sales-activity">
+            <x-slot:title>Hapus Sales Activity</x-slot:title>
+            <p>Apakah kamu yakin Ingin Menghapus data Sales Activity ini?</p>
+            <x-slot:footer>
+                <x-button.light onclick="closeModal('delete-sales-activity')"
+                    class="border-primary border">Batal</x-button.light>
+                <x-button.light class="!bg-red-400 text-white border border-red-400">Hapus Data</x-button.light>
+            </x-slot:footer>
+        </x-modal>
+        {{-- Sales Activity Table End --}}
+    </x-card>
+    {{-- Sales Activity End --}}
 @endsection
 
 @push('scripts')
@@ -212,6 +251,54 @@
             $("#sales-date-range").flatpickr({
                 mode: "range"
             });
+        });
+    </script>
+@endpush
+
+@push('scripts')
+    <script>
+        $(document).ready(function() {
+            $('#routing-table').DataTable({
+                paging: true,
+                searching: false,
+                info: true,
+                pageLength: 10,
+                lengthMenu: [10, 20, 30, 40, 50],
+                dom: 'rt<"bottom-container"<"bottom-left"l><"bottom-right"p>>',
+                language: {
+                    lengthMenu: "Menampilkan _MENU_ dari 4,768 data",
+                    paginate: {
+                        previous: '<',
+                        next: '>',
+                        last: 'Terakhir',
+                    }
+                },
+            });
+            $('#sales-table').DataTable({
+                paging: true,
+                searching: false,
+                info: true,
+                pageLength: 10,
+                lengthMenu: [10, 20, 30, 40, 50],
+                dom: 'rt<"bottom-container"<"bottom-left"l><"bottom-right"p>>',
+                language: {
+                    lengthMenu: "Menampilkan _MENU_ dari 4,768 data",
+                    paginate: {
+                        previous: '<',
+                        next: '>',
+                        last: 'Terakhir',
+                    }
+                },
+            });
+        });
+    </script>
+@endpush
+
+@push('scripts')
+    <script>
+        document.getElementById('knowledge_file').addEventListener('change', function(e) {
+            const fileName = e.target.files[0] ? e.target.files[0].name : 'No file selected';
+            document.getElementById('fileNameDisplay').value = fileName;
         });
     </script>
 @endpush

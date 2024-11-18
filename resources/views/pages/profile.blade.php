@@ -31,22 +31,8 @@
                         </div>
                         <div>
                             <label for="role" class="form-label">Jabatan Pengguna</label>
-                            <div>
-								<select id="role" class="form-select-search">
-									<option value="" disabled>
-										-- Pilih Jabatan Pengguna --
-									</option>
-									<option value="superadmin" selected>
-										Superadmin
-									</option>
-									<option value="admin">
-										Admin
-									</option>
-									<option value="sales">
-										Sales
-									</option>
-								</select>
-							</div>
+							<input id="role" class="form-control" type="text" name="role"
+							placeholder="Masukkkan Jabatan Pengguna" value="Superadmin" readonly aria-describedby="role" />
                         </div>
                     </div>
                     {{-- Profil Pengguna End --}}

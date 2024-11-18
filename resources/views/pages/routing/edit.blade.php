@@ -14,78 +14,60 @@
         <x-slot:cardAction>
             <label for="upload_products" class="cursor-pointer">
                 <x-button.light class="pointer-events-none">Unggah Secara Bulk</x-button.light>
-				<div class="flex items-center gap-2">
-				 <input type="file" id="upload_products" name="upload_products" class="hidden" accept=".csv"
-					 aria-label="Unggah Secara Bulk">
-				 <x-button.edit />
-			   </div>
+                <input type="file" id="upload_products" name="upload_products" class="hidden" accept=".csv"
+                    aria-label="Unggah Secara Bulk">
             </label>
         </x-slot:cardAction>
 
         <div class="grid grid-cols-2 gap-4">
             <div>
                 <label for="name" class="form-label">Nama Pengguna</label>
-				<div class="flex items-center gap-2">
-					<input id="name" class="form-control" type="text" name="name" placeholder="Masukan nama pengguna"
-						aria-describedby="name" />
-					<x-button.edit />
-				</div>
+                <input id="name" class="form-control" type="text" name="name" placeholder="Masukan nama pengguna"
+                    aria-describedby="name" />
             </div>
             <div>
                 <label for="sales-names">Nama Sales</label>
-				<div class="flex items-center gap-2">
-					<select id="sales-names" name="sales-names" class="w-full">
-						<option value="" selected disabled>
-							-- Pilih nama sales yang ditugaskan --
-						</option>
-						<option value="cleanser">
-							SunProtect
-						</option>
-					</select>
-					<x-button.edit />
-				</div>
+                <select id="sales-names" name="sales-names" class="w-full">
+                    <option value="" selected disabled>
+                        -- Pilih nama sales yang ditugaskan --
+                    </option>
+                    <option value="cleanser">
+                        SunProtect
+                    </option>
+                </select>
             </div>
             <div>
                 <label for="outlet-categories">Kategori Outlet</label>
-				<div class="flex items-center gap-2">
-					<select id="outlet-categories" name="outlet-categories" class=" w-full">
-						<option value="" selected disabled>
-							-- Pilih kategori outlet --
-						</option>
-						<option value="cleanser">
-							SunProtect
-						</option>
-					</select>
-					<x-button.edit />
-				</div>
+                <select id="outlet-categories" name="outlet-categories" class=" w-full">
+                    <option value="" selected disabled>
+                        -- Pilih kategori outlet --
+                    </option>
+                    <option value="cleanser">
+                        SunProtect
+                    </option>
+                </select>
             </div>
             <div>
                 <label for="time-visit">Waktu Kunjungan</label>
-				<div class="flex items-center gap-2">
-					<select id="time-visit" name="time-visit" class=" w-full">
-						<option value="" selected disabled>
-							-- Pilih waktu kunjungan --
-						</option>
-						<option value="cleanser">
-							SunProtect
-						</option>
-					</select>
-					<x-button.edit />
-				</div>
+                <select id="time-visit" name="time-visit" class=" w-full">
+                    <option value="" selected disabled>
+                        -- Pilih waktu kunjungan --
+                    </option>
+                    <option value="cleanser">
+                        SunProtect
+                    </option>
+                </select>
             </div>
             <div>
                 <label for="cycle">Cycle</label>
-				<div class="flex items-center gap-2">
-					<select id="cycle" name="cycle" class=" w-full">
-						<option value="" selected disabled>
-							-- Pilih cycle --
-						</option>
-						<option value="cleanser">
-							SunProtect
-						</option>
-					</select>
-					<x-button.edit />
-				</div>
+                <select id="cycle" name="cycle" class=" w-full">
+                    <option value="" selected disabled>
+                        -- Pilih cycle --
+                    </option>
+                    <option value="cleanser">
+                        SunProtect
+                    </option>
+                </select>
             </div>
         </div>
 
@@ -93,17 +75,14 @@
             <div class="grid grid-cols-2 gap-4">
                 <div>
                     <label for="product-categories">Kategori Produk</label>
-					<div class="flex items-center gap-2">
-						<select id="product-categories" name="product-categories" class=" w-full">
-							<option value="" selected disabled>
-								-- Pilih kategori produk --
-							</option>
-							<option value="cleanser">
-								SunProtect
-							</option>
-						</select>
-						<x-button.edit />
-					</div>
+                    <select id="product-categories" name="product-categories" class=" w-full">
+                        <option value="" selected disabled>
+                            -- Pilih kategori produk --
+                        </option>
+                        <option value="cleanser">
+                            SunProtect
+                        </option>
+                    </select>
                 </div>
             </div>
         </x-section-card>
@@ -117,11 +96,8 @@
                 <p class="text-white">Cetaphil Baby Daily Lotion with Organic Calendula 500ml</p>
                 <div>
                     <label for="name" class="form-label">AV3M</label>
-					<div class="flex items-center gap-2">
-					 <input id="name" class="form-control" type="text" name="name"
-						 placeholder="Masukan Jumlah AV3M" aria-describedby="name" />
-					 <x-button.edit />
-				   </div>
+                    <input id="name" class="form-control" type="text" name="name"
+                        placeholder="Masukan Jumlah AV3M" aria-describedby="name" />
                 </div>
             </div>
         </div>
@@ -134,11 +110,8 @@
                 <p class="text-white">Cetaphil Baby Daily Lotion with Organic Calendula 400ml</p>
                 <div>
                     <label for="name" class="form-label">AV3M</label>
-					<div class="flex items-center gap-2">
-					 <input id="name" class="form-control" type="text" name="name"
-						 placeholder="Masukan Jumlah AV3M" aria-describedby="name" />
-					 <x-button.edit />
-				   </div>
+                    <input id="name" class="form-control" type="text" name="name"
+                        placeholder="Masukan Jumlah AV3M" aria-describedby="name" />
                 </div>
             </div>
         </div>
@@ -147,11 +120,8 @@
             <p class="text-white">Cetaphil Baby Daily Lotion with Organic Calendula 200ml</p>
             <div>
                 <label for="name" class="form-label">AV3M</label>
-				<div class="flex items-center gap-2">
-				 <input id="name" class="form-control" type="text" name="name" placeholder="Masukan Jumlah AV3M"
-					 aria-describedby="name" />
-				 <x-button.edit />
-			   </div>
+                <input id="name" class="form-control" type="text" name="name" placeholder="Masukan Jumlah AV3M"
+                    aria-describedby="name" />
             </div>
         </div>
 
@@ -160,46 +130,34 @@
                 <div>
                     <label for="longitude" class="form-label">Longitudes <span class="font-normal">(DD
                             Coordinates)</span></label>
-                    <div class="flex items-center gap-2">
-                        <input id="longitude" class="form-control" type="text" name="longitude"
-                            placeholder="Masukkan Koordinat Longitude" aria-describedby="longitude" />
-                        <x-button.edit />
-                    </div>
+                    <input id="longitude" class="form-control" type="text" name="longitude"
+                        placeholder="Masukkan Koordinat Longitude" aria-describedby="longitude" />
                 </div>
                 <div>
                     <label for="latitude" class="form-label">Latitudes <span class="font-normal">(DMS
                             Coordinates)</span></label>
-                    <div class="flex items-center gap-2">
-                        <input id="latitude" class="form-control" type="text" name="latitude"
-                            placeholder="Masukkan Koordinat Latitude" aria-describedby="latitude" />
-                        <x-button.edit />
-                    </div>
+                    <input id="latitude" class="form-control" type="text" name="latitude"
+                        placeholder="Masukkan Koordinat Latitude" aria-describedby="latitude" />
                 </div>
                 <div>
                     <label for="states-option">Kabupaten/Kota</label>
-                    <div class="flex items-center gap-2">
-                        <select id="states-option" name="states-option" class=" w-full">
-                            <option value="" selected disabled>
-                                -- Pilih Kabupaten/Kota--
-                            </option>
-                            <option value="cleanser">
-                                Sumatra
-                            </option>
-                        </select>
-                        <x-button.edit />
-                    </div>
+                    <select id="states-option" name="states-option" class=" w-full">
+                        <option value="" selected disabled>
+                            -- Pilih Kabupaten/Kota--
+                        </option>
+                        <option value="cleanser">
+                            Sumatra
+                        </option>
+                    </select>
                 </div>
                 <div>
                     <label for="adresss" class="form-label">Alamat Lengkap</label>
-                    <div class="flex items-center gap-2">
-                            <input id="adresss" class="form-control" type="text" name="adresss"
-                                placeholder="Masukkan Alamat Lengkap" aria-describedby="adresss" />
-                            <x-button.edit />
-                    </div>
+                    <input id="adresss" class="form-control" type="text" name="adresss"
+                        placeholder="Masukkan Alamat Lengkap" aria-describedby="adresss" />
                 </div>
             </div>
             <div class="relative mt-6">
-                <div class="h-[350px] z-10" id="user-map-location"></div>
+                <div class="h-[450px] z-10" id="user-map-location"></div>
                 <button id="fullscreen-button"
                     class="absolute top-3 right-3 rounded-sm w-10 h-10 grid place-items-center bg-white z-50 hover:bg-slate-200">
                     <svg width="32" height="32" viewBox="0 0 24 24" fill="none"
@@ -381,7 +339,7 @@
             const mapResize = document.querySelector('#user-map-location');
 
             fullScreenButton.addEventListener("click", () => {
-                mapResize.classList.toggle("!h-[500px]");
+                mapResize.classList.toggle("!h-[00px]");
                 // Invalidate map size after resize
                 setTimeout(() => {
                     map.invalidateSize();
@@ -400,16 +358,16 @@
             const gihCheckbox = document.querySelector('#gih-checkbox');
             const gihChecked = document.querySelector('#gih-checked');
             const gihUnChecked = document.querySelector('#gih-unchecked');
-
+			
 
             gihCheckbox.addEventListener('change', function() {
                 if (this.checked) {
-                    gihChecked.classList.add("bg-blue-400", "!text-white");
-                    gihUnChecked.classList.remove("bg-blue-400", "!text-white");
+					gihChecked.classList.add("bg-blue-400", "!text-white");
+					gihUnChecked.classList.remove("bg-blue-400", "!text-white");
                 } else {
-                    gihUnChecked.classList.add("bg-blue-400", "!text-white");
-                    gihChecked.classList.remove("bg-blue-400", "!text-white");
-                    gihChecked.classList.add("text-blue-400");
+					gihUnChecked.classList.add("bg-blue-400", "!text-white");
+					gihChecked.classList.remove("bg-blue-400", "!text-white");
+					gihChecked.classList.add("text-blue-400");
                 }
             });
         });
