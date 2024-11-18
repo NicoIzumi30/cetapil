@@ -2,21 +2,21 @@
 @props(['id', 'name' => 'image', 'label' => 'Upload Image', 'maxSize' => 2])
 
 <div class="flex flex-col items-center w-fit">
-    <div class="relative w-fit mx-3">
+    <div class="relative w-[250px] mx-3">
         <div class="flex justify-center items-center flex-col py-2">
             {{-- Upload Area --}}
-            <div class="cursor-pointer text-center grid place-items-center border-2 border-dashed border-blue-400 rounded-lg p-4"
+            <div {{ $attributes->merge(['class' => 'cursor-pointer text-center text-white grid place-items-center border-2 border-dashed border-blue-400 rounded-lg p-4']) }}
                 id="upload-area-{{ $id }}">
                 <svg width="30" height="63" viewBox="0 0 64 63" fill="none" xmlns="http://www.w3.org/2000/svg">
                     <path
                         d="M28 43.2577C28 45.4323 29.7909 47.1952 32 47.1952C34.2091 47.1952 36 45.4323 36 43.2577V15.074L48.971 27.8423L54.6279 22.2739L32.0005 0L9.37305 22.2739L15.0299 27.8423L28 15.0749V43.2577Z"
-                        fill="#fff" />
+                        fill="currentColor" />
                     <path
                         d="M0 39.375H8V55.125H56V39.375H64V55.125C64 59.4742 60.4183 63 56 63H8C3.58172 63 0 59.4742 0 55.125V39.375Z"
-                        fill="#fff" />
+                        fill="currentColor" />
                 </svg>
-                <h5 class="text-white font-medium mt-2">Klik disini untuk unggah foto</h5>
-                <p class="text-white font-light text-sm">
+                <h5 class="font-medium mt-2">Klik disini untuk unggah foto</h5>
+                <p class="font-light text-sm">
                     Ukuran maksimal foto <strong>{{ $maxSize }}MB</strong>
                 </p>
             </div>
@@ -40,11 +40,11 @@
 
         {{-- Hidden File Input --}}
         <input type="file" name="{{ $name }}" id="img_{{ $id }}" class="hidden"
-            accept="image/png, image/jpeg" onchange="previewImage(this, '{{ $id }}')">
+            accept="image/png, image/jpeg" onchange="previewImage(this, '{{ $id }}', '{{ $maxSize }}')" {{$attributes}}>
     </div>
 
     {{-- Label --}}
-    <label class="text-center mt-3 text-xs text-white cursor-pointer" for="img_{{ $id }}">
+    <label {{ $attributes->merge(['class' => 'text-center mt-3 text-xs text-white cursor-pointer']) }} for="img_{{ $id }}">
         {{ $label }}
     </label>
 </div>

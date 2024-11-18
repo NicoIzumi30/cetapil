@@ -196,14 +196,37 @@
 @push('scripts')
     <script>
         const roleSelect = document.getElementById('role');
-        const accountManagement = document.getElementById('account-management');
 
-        roleSelect.addEventListener('change', () => {
-            if (roleSelect.value) {
-                accountManagement.classList.remove('hidden');
-            } else {
-                accountManagement.classList.add('hidden');
-            }
+        function toggleElementVisibility(elementId, show) {
+            const element = document.getElementById(elementId);
+            if (!element) return;
+
+            element.classList.toggle('hidden', !show);
+            element.classList.toggle('grid', show);
+        }
+
+        function handleRoleChange(event) {
+            const selectedRole = event.target.value;
+            const config = roleConfig[selectedRole];
+			console.log(config);
+
+            if (!config) return;
+
+            toggleElementVisibility(config.showElement, true);
+
+            config.hideElements.forEach(elementId => {
+                toggleElementVisibility(elementId, false);
+            });
+        }
+
+        roleSelect.addEventListener('change', handleRoleChange);
+    </script>
+@endpush
+
+@push('scripts')
+    <script>
+        $(document).ready(function() {
+            $('#states-option').select2();
         });
     </script>
 @endpush

@@ -464,7 +464,7 @@ class ProductController extends Controller
             ],
         ]);
 
-		$perPage = $request->input('per_page', 10);
+		$perPage = $request->input('per_page', 50);
         
         // Validate the per_page parameter to ensure it's one of the allowed values
         $validPerPage = in_array($perPage, [10, 20, 30, 40, 50]) ? $perPage : 10;

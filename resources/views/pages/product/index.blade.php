@@ -28,7 +28,7 @@
                         <div>
                             <label for="categories" class="!text-black">Kategori Produk</label>
                             <div>
-                                <select id="categories" name="category" class="categories w-full">
+                                <select id="categories" name="categories" class="categories w-full">
                                     <option value="" selected disabled>
                                         -- Pilih Category Product --
                                     </option>
@@ -50,7 +50,7 @@
                             @enderror
                         </div>
                         <div>
-                            <label for="md-price" class="!text-black">Harga MD</label>
+                            <label for="edit-md-price" class="!text-black">Harga MD</label>
                             <input id="md-price" class="form-control" wire:model="md-price" name="md-price"
                                 placeholder="Masukan Harga MD" aria-describedby="md-price" value="">
                             @error('md-price')
@@ -174,8 +174,13 @@
                                             Data</button>
                                     </li>
                                     <li>
-                                        <a href="#" class="dropdown-option text-red-400">Hapus
-                                            Data</a>
+                                        <button onclick="openModal('update-av3m')" class="dropdown-option ">Update
+                                            AV3M</button>
+                                    </li>
+                                    <li>
+                                        <button onclick="openModal('delete-product')"
+                                            class="dropdown-option text-red-400">Hapus
+                                            Data</button>
                                     </li>
                                 </x-action-table-dropdown>
                             </td>
@@ -185,10 +190,101 @@
                     @endforelse
                 </tbody>
             </table>
-            <x-modal id="edit-produk">
-
+            {{-- Delete Modal --}}
+            <x-modal id="delete-product">
+                <x-slot:title>Hapus Produk</x-slot:title>
+                <p>Apakah kamu yakin Ingin Menghapus data ini?</p>
+                <x-slot:footer>
+                    <x-button.light onclick="closeModal('delete-product')"
+                        class="border-primary border">Batal</x-button.light>
+                    <x-button.light class="!bg-red-400 text-white border border-red-400">Hapus Data</x-button.light>
+                </x-slot:footer>
             </x-modal>
-            {{ $items->links() }}
+            <x-modal id="edit-produk">
+                <x-slot:title>Ubah Produk</x-slot:title>
+                <form class="grid grid-cols-2 gap-6">
+                    <div>
+                        <label for="edit-category" class="!text-black">Kategori Produk</label>
+                        <div>
+                            <select id="edit-category" name="edit-category" class="edit-category w-full">
+                                <option value="" selected disabled>
+                                    -- Pilih Category Product --
+                                </option>
+                                <option value="cleanser">
+                                    SunProtect
+                                </option>
+                            </select>
+                        </div>
+                    </div>
+                    <div>
+                        <label for="edit-sku" class="!text-black">Produk SKU</label>
+                        <input id="edit-sku" class="form-control @error('edit-sku') is-invalid @enderror" type="text"
+                            wire:model="edit-sku" name="edit-sku" placeholder="Masukan produk SKU"
+                            aria-describedby="edit-sku" value="">
+                        @error('edit-sku')
+                            <div class="invalid-feedback">
+                                {{ $message }}
+                            </div>
+                        @enderror
+                    </div>
+                    <div>
+                        <label for="edit-md-price" class="!text-black">Harga MD</label>
+                        <input id="edit-md-price" class="form-control" wire:model="edit-md-price" name="edit-md-price"
+                            placeholder="Masukan Harga MD" aria-describedby="edit-md-price" value="">
+                        @error('edit-md-price')
+                            <div class="invalid-feedback">
+                                {{ $message }}
+                            </div>
+                        @enderror
+                    </div>
+                    <div>
+                        <label for="edit-sales-price" class="!text-black">Harga Sales</label>
+                        <input id="edit-sales-price" class="form-control @error('edit-sales-price') is-invalid @enderror"
+                            type="text" wire:model="edit-sales-price" name="edit-sales-price"
+                            placeholder="Masukan Harga Sales" aria-describedby="edit-sales-price" value="">
+                        @error('edit-sales-price')
+                            <div class="invalid-feedback">
+                                {{ $message }}
+                            </div>
+                        @enderror
+                    </div>
+                </form>
+                <x-slot:footer>
+                    <x-button.primary class="w-full">Simpan Perubahan</x-button.primary>
+                </x-slot:footer>
+            </x-modal>
+            <x-modal id="update-av3m">
+                <x-slot:title>Update AV3M</x-slot:title>
+                <form class="grid grid-cols-2 gap-6">
+                    <div>
+                        <label for="channel-a" class="!text-black">Channel A</label>
+                        <input id="channel-a" class="form-control @error('channel-a') is-invalid @enderror"
+                            type="text" wire:model="channel-a" name="channel-a" placeholder="Masukan Channel A"
+                            aria-describedby="channel-a" value="">
+                    </div>
+                    <div>
+                        <label for="channel-b" class="!text-black">Channel B</label>
+                        <input id="channel-b" class="form-control @error('channel-b') is-invalid @enderror"
+                            type="text" wire:model="channel-b" name="channel-b" placeholder="Masukan Channel B"
+                            aria-describedby="channel-b" value="">
+                    </div>
+                    <div>
+                        <label for="channel-c" class="!text-black">Channel C</label>
+                        <input id="channel-c" class="form-control @error('channel-c') is-invalid @enderror"
+                            type="text" wire:model="channel-c" name="channel-c" placeholder="Masukan Channel C"
+                            aria-describedby="channel-c" value="">
+                    </div>
+                    <div>
+                        <label for="channel-d" class="!text-black">Channel D</label>
+                        <input id="channel-d" class="form-control @error('channel-d') is-invalid @enderror"
+                            type="text" wire:model="channel-d" name="channel-d" placeholder="Masukan Channel D"
+                            aria-describedby="channel-d" value="">
+                    </div>
+                    <x-slot:footer>
+                        <x-button.primary class="w-full">Simpan Perubahan</x-button.primary>
+                    </x-slot:footer>
+                </form>
+            </x-modal>
             {{-- Tabel Daftar Produk End --}}
         </x-card>
         {{-- Daftar Produk End --}}
@@ -289,7 +385,6 @@
                     @endforelse
                 </tbody>
             </table>
-            {{ $items->links() }}
             {{-- Tabel Stock-on-Hand End --}}
 
         </x-card>
@@ -298,139 +393,46 @@
 @endsection
 
 
-@push('styles')
-    <style>
-         /* Pagination container */
-    .dataTables_paginate {
-        display: flex;
-        gap: 2px;
-    }
-
-    /* Base button styles */
-    .paginate-btn {
-        min-width: 32px;
-        height: 32px;
-        display: flex;
-        align-items: center;
-        justify-content: center;
-        cursor: pointer;
-        font-size: 14px;
-    }
-
-    /* White background buttons (prev, next, terakhir) */
-    .white-btn {
-        background-color: #FFFFFF;
-        color: #003366;
-        border: none;
-    }
-
-    /* Blue background button (current page) */
-    .blue-btn {
-        background-color: #0284c7;
-        color: #FFFFFF;
-        border: none;
-    }
-
-    /* Transparent buttons (other numbers) */
-    .transparent-btn {
-        background-color: transparent;
-        color: #FFFFFF;
-        border: 1px solid rgba(255, 255, 255, 0.2);
-    }
-
-    /* Special styling for Terakhir button */
-    .terakhir {
-        padding: 0 16px;
-        margin-left: 2px;
-    }
-
-    /* Entries per page styling */
-    .dataTables_length {
-        color: white;
-    }
-
-    .dataTables_length select {
-        background-color: transparent;
-        border: 1px solid rgba(255, 255, 255, 0.2);
-        padding: 0.25rem 0.5rem;
-        color: white;
-        margin: 0 0.5rem;
-    }
-
-    /* Wrapper and container styling */
-    .dataTables_wrapper {
-        background-color: #003366;
-    }
-
-    .bottom-container {
-        display: flex;
-        justify-content: space-between;
-        align-items: center;
-        margin-top: 1rem;
-        width: 100%;
-    }
-    .dt-paging-button{
-        color: white !important ;
-    }
-    </style>
-@endpush
 
 @push('scripts')
     <script>
         $(document).ready(function() {
             $('.categories').select2();
+            $('.edit-category').select2();
             $("#stock-date-range").flatpickr({
                 mode: "range"
             });
             $('#product-table').DataTable({
-            paging: true,
-            searching: false,
-            info: true,
-            pageLength: 7,
-            lengthMenu: [7, 10, 25],
-            dom: 'rt<"bottom-container"<"bottom-left"l><"bottom-right"p>>',
-            language: {
-                lengthMenu: "Menampilkan _MENU_ dari 4,768 data",
-                paginate: {
-                    previous: '<',
-                    next: '>',
-                }
-            },
-            drawCallback: function(settings) {
-                var api = this.api();
-                var $pagination = $(this).closest('.dataTables_wrapper').find('.dataTables_paginate');
-
-                // Remove any existing buttons
-                $pagination.empty();
-
-                // Add custom pagination
-                var pagesInfo = api.page.info();
-                var currentPage = pagesInfo.page + 1;
-                var totalPages = pagesInfo.pages;
-
-                // Previous button
-                $pagination.append('<a class="paginate-btn prev white-btn"><</a>');
-
-                // Add page numbers
-                for(let i = 1; i <= 5; i++) {
-                    if(i === currentPage) {
-                        $pagination.append(`<a class="paginate-btn blue-btn">${i}</a>`);
-                    } else {
-                        $pagination.append(`<a class="paginate-btn transparent-btn">${i}</a>`);
-                    }
-                }
-
-                // Next button
-                $pagination.append('<a class="paginate-btn next white-btn">></a>');
-
-                // Terakhir button
-                $pagination.append('<a class="paginate-btn white-btn terakhir">Terakhir</a>');
-            }
-        });
-            $('#stock-on-hand-table').DataTable({
-                paging: false,
+                paging: true,
                 searching: false,
-                info: false
+                info: true,
+                pageLength: 10,
+                lengthMenu: [10, 20, 30, 40, 50],
+                dom: 'rt<"bottom-container"<"bottom-left"l><"bottom-right"p>>',
+                language: {
+                    lengthMenu: "Menampilkan _MENU_ dari 4,768 data",
+                    paginate: {
+                        previous: '<',
+                        next: '>',
+                        last: 'Terakhir',
+                    }
+                },
+            });
+            $('#stock-on-hand-table').DataTable({
+                paging: true,
+                searching: false,
+                info: true,
+                pageLength: 10,
+                lengthMenu: [10, 20, 30, 40, 50],
+                dom: 'rt<"bottom-container"<"bottom-left"l><"bottom-right"p>>',
+                language: {
+                    lengthMenu: "Menampilkan _MENU_ dari 4,768 data",
+                    paginate: {
+                        previous: '<',
+                        next: '>',
+                        last: 'Terakhir',
+                    }
+                },
             });
         });
     </script>

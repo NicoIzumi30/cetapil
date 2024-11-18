@@ -1,25 +1,23 @@
 @extends('layouts.main')
 
 @section('banner-content')
-    <x-banner-content :title="'Pengguna'" />
+    <x-banner-content :title="'Routing'" />
 @endsection
 
 @section('dashboard-content')
-    {{-- Users --}}
     <x-card>
         <x-slot:cardTitle>
-            Manajemen Pengguna
+            Daftar Request NOO
         </x-slot:cardTitle>
-        {{-- Users Action --}}
-        <x-slot:cardAction>
-            <x-button.info href="/users/create">Tambah Pengguna</x-button.info>
-        </x-slot:cardAction>
-        {{-- Users Action End --}}
-
-        {{-- Users Table --}}
-        <table id="users-table" class="table">
+		<table id="request-table" class="table">
             <thead>
                 <tr>
+					<th scope="col" class="text-center">
+                        <a class="table-head">
+                            {{ __('Nama Outlet') }}
+                            <x-icons.sort />
+                        </a>
+                    </th>
                     <th scope="col" class="text-center">
                         <a class="table-head">
                             {{ __('Nama Sales') }}
@@ -28,19 +26,13 @@
                     </th>
                     <th scope="col" class="text-center">
                         <a class="table-head">
-                            {{ __('Alamat Email') }}
-                            <x-icons.sort />
-                        </a>
-                    </th>
-                    <th scope="col" class="text-center">
-                        <a class="table-head">
-                            {{ __('Jabatan') }}
-                            <x-icons.sort />
-                        </a>
-                    </th>
-                    <th scope="col" class="text-center">
-                        <a class="table-head">
                             {{ __('Area Outlet') }}
+                            <x-icons.sort />
+                        </a>
+                    </th>
+                    <th scope="col" class="text-center">
+                        <a class="table-head">
+                            {{ __('Hari Kunjungan') }}
                             <x-icons.sort />
                         </a>
                     </th>
@@ -65,62 +57,57 @@
                     <td scope="row" class="table-data">
                         halo
                     </td>
-                    <td scope="row" class="table-data !text-[#70FFE2]">
-                        halo
-                    </td>
-                    <td scope="row" class="table-data !text-[#70FFE2]">
+                    <td scope="row" class="table-data !text-blue-400">
                         halo
                     </td>
                     <td scope="row" class="table-data">
                         halo
                     </td>
+                    <td scope="row" class="table-data">
+                        <div class="rounded-full py-2 px-4 font-bold w-fit bg-blue-400">
+							New Request 
+						</div>
+                    </td>
                     <td class="table-data">
                         <x-action-table-dropdown>
                             <li>
-                                <a href="/users/edit" class="dropdown-option">Lihat
+                                <a href="/routing/request/detail" class="dropdown-option">Lihat
                                     Data</a>
                             </li>
                             <li>
-                                <button onclick="openModal('delete-user')" class="dropdown-option text-red-400">Hapus
-                                    Data</button>
+                                <a href="#" class="dropdown-option text-red-400">Hapus
+                                    Data</a>
                             </li>
                         </x-action-table-dropdown>
                     </td>
                 </tr>
             </tbody>
         </table>
-		<x-modal id="delete-user">
-			<x-slot:title>Hapus Pengguna</x-slot:title>
-			<p>Apakah kamu yakin Ingin Menghapus Data Pengguna ini?</p>
-			<x-slot:footer>
-				<x-button.light onclick="closeModal('delete-user')" class="border-primary border">Batal</x-button.light>
-				<x-button.light class="!bg-red-400 text-white border border-red-400">Hapus Data</x-button.light>
-			</x-slot:footer>
-		</x-modal>
-        {{-- Users Table End --}}
-    </x-card>
-    {{-- Users End --}}
+        </x-card>
 @endsection
 
 @push('scripts')
     <script>
-            $(document).ready(function() {
-                $('#users-table').DataTable({
-                    paging: true,
-                    searching: false,
-                    info: true,
-                    pageLength: 10,
-                    lengthMenu: [10, 20, 30, 40, 50],
-                    dom: 'rt<"bottom-container"<"bottom-left"l><"bottom-right"p>>',
-                    language: {
-                        lengthMenu: "Menampilkan _MENU_ dari 4,768 data",
-                        paginate: {
-                            previous: '<',
-                            next: '>',
-                            last: 'Terakhir',
-                        }
-                    },
-                });
+        $(document).ready(function() {
+            $("#sales-date-range").flatpickr({
+                mode: "range"
             });
+			$('#request-table').DataTable({
+                paging: true,
+                searching: false,
+                info: true,
+                pageLength: 10,
+                lengthMenu: [10, 20, 30, 40, 50],
+                dom: 'rt<"bottom-container"<"bottom-left"l><"bottom-right"p>>',
+                language: {
+                    lengthMenu: "Menampilkan _MENU_ dari 4,768 data",
+                    paginate: {
+                        previous: '<',
+                        next: '>',
+                        last: 'Terakhir',
+                    }
+                },
+            });
+        });
     </script>
 @endpush
