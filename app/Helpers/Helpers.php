@@ -1,0 +1,119 @@
+<?php
+
+use App\Models\Category;
+use App\Models\City;
+use App\Models\Outlet;
+use App\Models\OutletForm;
+use App\Models\PosmType;
+use App\Models\Product;
+use App\Models\User;
+use App\Models\VisualType;
+use Illuminate\Support\Arr;
+
+if (!function_exists('getOutletByName')) {
+    function getOutletByName($name)
+    {
+        return Outlet::where('name', $name)->first();
+    }
+}
+
+if (!function_exists('getProductBySku')) {
+    function getProductBySku($sku)
+    {
+        return Product::where('sku', $sku)->first();
+    }
+}
+
+if (!function_exists('getCityByName')) {
+    function getCityByName($name)
+    {
+        return City::where('name', $name)->first();
+    }
+}
+
+if (!function_exists('getPosmByName')) {
+    function getPosmByName($name)
+    {
+        return PosmType::where('name', $name)->first();
+    }
+}
+
+if (!function_exists('getCapaigenByName')) {
+    function getCapaigenByName($name)
+    {
+        return VisualType::where('name', $name)->first();
+    }
+}
+
+if (!function_exists('getUserByName')) {
+    function getUserByName($name)
+    {
+        return User::where('name', $name)->first();
+    }
+}
+
+if (!function_exists('getOutletFormByQuestion')) {
+    function getOutletFormByQuestion($question)
+    {
+        return OutletForm::where('question', $question)->first();
+    }
+}
+
+if (!function_exists('getCategoryByName')) {
+    function getCategoryByName($name)
+    {
+        return Category::where('name', $name)->first();
+    }
+}
+
+if (!function_exists('getVisitDayByDay')) {
+    function getVisitDayByDay($nameDay)
+    {
+        $day = [
+            'SENIN'  => '1',
+            'SELASA' => '2',
+            'RABU'   => '3',
+            'KAMIS'  => '4',
+            'JUMAT'  => '5',
+            'SABTU'  => '6',
+            'MINGGU' => '7',
+        ];
+
+        return Arr::get($day, $nameDay) ?? '7';
+    }
+}
+
+if (!function_exists('updatePhotoVisibility')) {
+    function updatePhotoVisibility($request, $img, $data)
+    {
+        $file = $request->file($img);
+        $fileName = "{$img}.jpeg";
+        $path = "/images/visibilities/{$fileName}";
+        $file->storeAs('public', $path);
+
+        foreach ($data as $value) {
+            $value->update(['filename' => $fileName, 'path' => $path]);
+        }
+    }
+}
+
+if (!function_exists('csv_to_array')) {
+    function csv_to_array($filename, $header)
+    {
+        $delimiter = ',';
+        if (!file_exists($filename) || !is_readable($filename)) {
+            return false;
+        }
+
+        $data = [];
+        if (($handle = fopen($filename, 'r')) !== false) {
+            while (($row = fgetcsv($handle, 1000, $delimiter)) !== false) {
+                $data[] = array_combine($header, $row);
+            }
+            fclose($handle);
+        }
+
+        return $data;
+    }
+}
+
