@@ -1,12 +1,14 @@
 <?php
 
 use App\Http\Controllers\Api\Auth\AuthController;
+use App\Http\Controllers\Api\OutletController;
+use App\Http\Controllers\Api\DashboardController;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Route;
 
-Route::get('/user', function (Request $request) {
-    return $request->user();
-})->middleware('auth_api');
+// Route::get('/user', function (Request $request) {
+//     return $request->user();
+// })->middleware('auth_api');
 
 Route::controller(AuthController::class)->group(function () {
     Route::post('/login', 'login');
@@ -14,7 +16,30 @@ Route::controller(AuthController::class)->group(function () {
     Route::post('/reset-password', 'resetPassword');
 });
 
+
+
 // Protected routes
-Route::middleware('auth_api')->group(function () {
+Route::middleware(['auth_api','role:sales'])->group(function () {
+    Route::get('/user', [AuthController::class, 'detailUser']);
     Route::post('/logout', [AuthController::class, 'logout']);
+
+    Route::controller(DashboardController::class)
+        ->prefix('dashboard')
+        ->group(function () {
+            Route::get('/', 'index');
+            Route::get('/performance', 'performanceIndex');
+        });
+
+    Route::prefix("outlet")->group(function () {
+        Route::get('/', [OutletController::class, 'index']);
+        Route::get('/detail/{id}', [OutletController::class, 'show']);
+        Route::get('/cities', [OutletController::class, 'getCityList']);
+
+        Route::prefix("forms")->group(function () {
+            Route::get('/', [OutletController::class, 'forms']);
+            Route::post('/create-with-forms', [OutletController::class, 'createOutletWithForms'])
+                ->name('create');
+        });
+    });
+    Route::middleware('permission:menu_outlet')->group(function () {});
 });
