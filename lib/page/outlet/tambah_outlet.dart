@@ -4,7 +4,7 @@ import 'package:get/get.dart';
 import 'package:get/get_core/src/get_main.dart';
 import 'package:google_fonts/google_fonts.dart';
 
-import '../../controller/outlet_controller.dart';
+import '../../controller/outlet/outlet_controller.dart';
 import '../../utils/colors.dart';
 import '../../widget/back_button.dart';
 import '../../widget/clipped_maps.dart';

@@ -6,8 +6,8 @@ import 'package:cetapil_mobile/model/question_outlet.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 
-import '../api/api.dart';
-import '../model/outlet.dart';
+import '../../api/api.dart';
+import '../../model/outlet.dart';
 
 class OutletController extends GetxController {
   RxList<Outlet> outlets = <Outlet>[].obs;
@@ -65,7 +65,7 @@ class OutletController extends GetxController {
   ''';
 
   // var parsedJson = <dynamic>[].obs;
-  var questions = <FormOutletResponse>[].obs;
+  RxList<FormOutletResponse> questions = <FormOutletResponse>[].obs;
 
   @override
   void onInit() {
@@ -109,9 +109,16 @@ class OutletController extends GetxController {
   }
 
   getFormOutlet() async {
-    await Api.getFormOutlet().then((value) {
-      questions.add(value);
-    });
+      try {
+        FormOutletResponse response = await Api.getFormOutlet();
+
+        questions.assignAll([response]);
+
+        print("Data loaded successfully!");
+      } catch (e) {
+        print("Error loading form outlet: $e");
+      }
+
   }
 
   List<Outlet> get filteredOutlets => outlets.where((outlet) {

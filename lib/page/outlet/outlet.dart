@@ -1,4 +1,4 @@
-import 'package:cetapil_mobile/controller/outlet_controller.dart';
+import 'package:cetapil_mobile/controller/outlet/outlet_controller.dart';
 import 'package:cetapil_mobile/model/outlet.dart';
 import 'package:cetapil_mobile/page/outlet/detail_outlet.dart';
 import 'package:cetapil_mobile/page/outlet/tambah_outlet.dart';
@@ -6,7 +6,6 @@ import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 
 class OutletPage extends GetView<OutletController> {
-  const OutletPage({Key? key}) : super(key: key);
 
   @override
   Widget build(BuildContext context) {

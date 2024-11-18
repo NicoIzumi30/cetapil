@@ -1,11 +1,13 @@
+import 'package:cetapil_mobile/page/activity/tambah_activity.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:get/get_core/src/get_main.dart';
 import 'package:get/get_state_manager/src/rx_flutter/rx_obx_widget.dart';
 import 'package:get/get_state_manager/src/simple/get_view.dart';
 
-import '../../controller/activity_controller.dart';
+import '../../controller/activity/activity_controller.dart';
 import '../../model/activity.dart';
+import '../../utils/colors.dart';
 import '../outlet/detail_outlet.dart';
 
 class ActivityPage extends GetView<ActivityController> {
@@ -39,7 +41,9 @@ class ActivityPage extends GetView<ActivityController> {
                   itemCount: controller.filteredOutlets.length,
                   itemBuilder: (context, index) {
                     final activity = controller.filteredOutlets[index];
-                    return ActivityCard(activity: activity);
+                    return ActivityCard(activity: activity, statusDraft: 'Drafted',statusCheckin: true, ontap: (){
+                      Get.to(()=> TambahActivity());
+                    },);
                   },
                 ),
               ),
@@ -52,10 +56,13 @@ class ActivityPage extends GetView<ActivityController> {
 }
 class ActivityCard extends StatelessWidget {
   final Activity activity;
+  final String statusDraft;
+  final bool statusCheckin;
+  final VoidCallback ontap;
 
   const ActivityCard({
     Key? key,
-    required this.activity,
+    required this.activity, required this.ontap, required this.statusDraft, required this.statusCheckin,
   }) : super(key: key);
 
   @override
@@ -64,70 +71,114 @@ class ActivityCard extends StatelessWidget {
       margin: const EdgeInsets.only(bottom: 16),
       decoration: BoxDecoration(
           borderRadius: BorderRadius.circular(10),
-          gradient: LinearGradient(colors: [
+          gradient: LinearGradient(
+              begin: Alignment.topCenter,
+              end: Alignment.bottomCenter,
+              colors: [
             Color(0xFFFFFFFF),
             Color(0x80FFFFFF),
           ])),
       child: Padding(
         padding: const EdgeInsets.all(16),
-        child: Row(
-          crossAxisAlignment: CrossAxisAlignment.start,
+        child: Column(
           children: [
-            Expanded(
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  Text(
-                    'Nama Outlet :',
-                    style: TextStyle(
-                      color: Colors.grey[600],
-                      fontSize: 11,
+            Row(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              mainAxisAlignment: MainAxisAlignment.spaceBetween,
+              children: [
+                Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Text(
+                      activity.name,
+                      style: const TextStyle(
+                        fontWeight: FontWeight.bold,
+                      ),
                     ),
-                  ),
-                  const SizedBox(height: 4),
-                  Text(
-                    activity.name,
-                    style: const TextStyle(
-                      fontWeight: FontWeight.bold,
-                    ),
-                  ),
-                  const SizedBox(height: 8),
-                  Text(
-                    'Kategori Outlet',
-                    style: TextStyle(
-                      color: Colors.grey[600],
-                      fontSize: 12,
-                    ),
-                  ),
-                  const SizedBox(height: 4),
-                  Text(
-                    activity.category,
-                    style: const TextStyle(
-                      fontWeight: FontWeight.bold,
-                    ),
-                  ),
-                  const SizedBox(height: 16),
-                  ElevatedButton(
-                    onPressed: () {
-                      Get.to(
-                          DetailOutlet()
-                      );
-                    },
-                    style: ElevatedButton.styleFrom(
-                        backgroundColor: Colors.blue,
-                        minimumSize: const Size(80, 36),
-                        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8))
-                    ),
-                    child: const Text(
-                      'Lihat',
-                      style: TextStyle(color: Colors.white),
-                    ),
-                  ),
-                ],
-              ),
+                    const SizedBox(height: 8),
+                    RichText(
+                        text: TextSpan(
+                          style: TextStyle(color: Colors.black, fontSize: 13),
+                          children: <TextSpan>[
+                            TextSpan(text: 'Kategori Outlet : '),
+                            TextSpan(
+                              text: activity.category,
+                              style: TextStyle(fontWeight: FontWeight.bold),
+                            ),
+                          ],
+                        )),
+                  ],
+                ),
+                Text(activity.date,style: TextStyle(fontSize: 11,fontStyle: FontStyle.italic),)
+              ],
             ),
-            const SizedBox(width: 16),
-            Text(activity.date)
+            SizedBox(height: 10,),
+            Row(
+              mainAxisAlignment: MainAxisAlignment.spaceBetween,
+              children: [
+                Container(
+                  padding: EdgeInsets.symmetric(vertical: 7, horizontal: 15),
+
+                  decoration: BoxDecoration(
+                    color: statusDraft == "Drafted" ? Colors.white : AppColors.primary,
+                    borderRadius: BorderRadius.circular(4),
+                  ),
+                  child: Text(
+                    statusDraft,
+                    style: TextStyle(fontSize: 12,fontWeight: FontWeight.bold, color: statusDraft == "Drafted" ? Colors.blue : Colors.white),
+                  ),
+                ),
+
+                Row(
+                  children: [
+                    Container(
+                      padding: EdgeInsets.symmetric(vertical: 7, horizontal: 15),
+                      decoration: BoxDecoration(
+                        color: statusCheckin ? Colors.white : AppColors.primary,
+                        borderRadius: BorderRadius.circular(4),
+                        gradient: LinearGradient(
+                            begin: Alignment.topCenter,
+                            end: Alignment.bottomCenter,
+                            colors:
+                            statusCheckin
+                            ? [
+                              Color(0X9039B5FF),
+                              Color(0X5039B5FF)
+                            ]
+                        : [
+                              Color(0X905FF95F),
+                              Color(0X501BE86E)
+                            ]
+
+                        )
+                      ),
+                      child: Text(
+                        statusCheckin ? "Check-In" : "Check-Out",
+                        style: TextStyle(fontSize: 12,fontWeight: FontWeight.bold, color: AppColors.primary),
+                      ),
+                    ),
+                    SizedBox(width: 10,),
+                    ElevatedButton(
+                      onPressed: ontap,
+                      style: ElevatedButton.styleFrom(
+                        backgroundColor: Colors.blue[600],
+
+                        // padding: EdgeInsets.symmetric(vertical: 5, horizontal: 13),
+                        minimumSize: const Size(80, 30),
+                        shape: RoundedRectangleBorder(
+                            borderRadius: BorderRadius.circular(4)),
+
+
+                      ),
+                      child: const Text(
+                        'Lihat',
+                        style: TextStyle(color: Colors.white),
+                      ),
+                    ),
+                  ],
+                ),
+              ],
+            )
           ],
         ),
       ),

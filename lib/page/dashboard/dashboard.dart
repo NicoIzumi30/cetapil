@@ -1,5 +1,5 @@
 import 'package:carousel_slider/carousel_slider.dart';
-import 'package:cetapil_mobile/controller/dashboard_controller.dart';
+import 'package:cetapil_mobile/controller/dashboard/dashboard_controller.dart';
 import 'package:cetapil_mobile/page/dashboard/setting_account.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_svg/flutter_svg.dart';

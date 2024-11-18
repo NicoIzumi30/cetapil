@@ -37,7 +37,7 @@ class _ModernTextFieldState extends State<ModernTextField> {
         Text(
           widget.title,
           style: TextStyle(
-              fontSize: 15, fontWeight: FontWeight.w600),
+              fontSize: 13, fontWeight: FontWeight.w700),
         ),
         SizedBox(
           height: 10,
@@ -45,7 +45,6 @@ class _ModernTextFieldState extends State<ModernTextField> {
         Container(
           margin: EdgeInsets.only(bottom: 10),
           decoration: BoxDecoration(
-            color: Colors.white,
             borderRadius: BorderRadius.circular(12),
             boxShadow: [
               BoxShadow(

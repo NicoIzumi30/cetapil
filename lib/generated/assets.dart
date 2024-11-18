@@ -2,7 +2,6 @@
 class Assets {
   Assets._();
 
-  static const String assetsAndroid Compact  1 (3) = 'assets/Android Compact - 1 (3).svg';
   static const String assetsBackground = 'assets/background.png';
   static const String assetsCarousel1 = 'assets/carousel1.png';
   static const String assetsIconSettingAccount = 'assets/icon/setting_account.svg';
