@@ -44,31 +44,88 @@
                         <div>
                             <label for="sku" class="!text-black">Produk SKU</label>
                             <input id="sku" class="form-control @error('sku') is-invalid @enderror" type="text"
-                                name="sku" placeholder="Masukan produk SKU" >
-                                <span id="sku-error" class="text-red-500 text-xs hidden"></span>
+                                name="sku" placeholder="Masukan produk SKU">
+                            <span id="sku-error" class="text-red-500 text-xs hidden"></span>
                         </div>
                         <div>
-                            <label for="md-price" class="!text-black">Harga MD</label>
-                            <input id="md_price" class="form-control @error('md_price') is-invalid @enderror"
-                                type="number" name="md_price" placeholder="Masukan Harga MD">
-                                <span id="md_price-error" class="text-red-500 text-xs hidden"></span>
+                            <label for="md_price" class="!text-black">Harga MD</label>
+                            <input id="md_price" class="form-control" type="text" name="md_price"
+                                placeholder="Masukan Harga MD">
+                            <span id="md_price-error" class="text-red-500 text-xs hidden"></span>
                         </div>
                         <div>
-                            <label for="sales-price" class="!text-black">Harga Sales</label>
-                            <input id="sales_price" class="form-control @error('sales_price') is-invalid @enderror"
-                                type="number" name="sales_price" placeholder="Masukan Harga Sales">
-                                <span id="sales_price-error" class="text-red-500 text-xs hidden"></span>
+                            <label for="sales_price" class="!text-black">Harga Sales</label>
+                            <input id="sales_price" class="form-control" type="text" name="sales_price" 
+                                placeholder="Masukan Harga Sales">
+                            <span id="sales_price-error" class="text-red-500 text-xs hidden"></span>
                         </div>
                         <x-slot:footer>
-                            <x-button.primary type="submit" id="saveBtn" class="w-full"> <span id="saveBtnText">Tambah Produk</span>
-                                <span id="saveBtnLoading" class="hidden">
-                                    Menyimpan...
-                                </span></x-button.primary>
+                            <x-button.primary type="submit" id="saveBtn" class="w-full"> 
+                                <span id="saveBtnText">Tambah Produk</span>
+                                <span id="saveBtnLoading" class="hidden">Menyimpan...</span>
+                            </x-button.primary>
                         </x-slot:footer>
                     </form>
 
                 </x-modal>
                 {{-- Tambah Produk Modal End --}}
+
+                {{-- Edit Produk Modal  --}}
+                <x-modal id="view-produk">
+                    <x-slot:title>
+                        Detail Produk
+                    </x-slot:title>
+                    <form id="editProductForm" class="grid grid-cols-2 gap-6">
+                        @csrf
+                        @method('PUT')
+                        <input type="hidden" name="product_id" id="edit_product_id">
+                        <div>
+                            <label for="edit_category_id" class="!text-black">Kategori Produk</label>
+                            <div>
+                                <select id="edit_category_id" name="category_id"
+                                    class="edit-category w-full form-control @error('category_id') is-invalid @enderror">
+                                    <option value="" selected disabled>-- Pilih Category Product --</option>
+                                    @foreach ($categories as $category)
+                                        <option value="{{ $category->id }}">
+                                            {{ $category->name }}
+                                        </option>
+                                    @endforeach
+                                </select>
+                                <span id="edit_category_id-error" class="text-red-500 text-xs hidden"></span>
+                            </div>
+                        </div>
+                        <div>
+                            <label for="edit_sku" class="!text-black">Produk SKU</label>
+                            <input id="edit_sku" class="form-control" type="text"
+                                name="sku" placeholder="Masukan produk SKU">
+                            <span id="edit_sku-error" class="text-red-500 text-xs hidden"></span>
+                        </div>
+                        <div>
+                            <label for="edit_md_price" class="!text-black">Harga MD</label>
+                            <input id="edit_md_price" class="form-control" type="text"
+                                name="md_price" placeholder="Masukan Harga MD">
+                            <span id="edit_md_price-error" class="text-red-500 text-xs hidden"></span>
+                        </div>
+                        <div>
+                            <label for="edit_sales_price" class="!text-black">Harga Sales</label>
+                            <input id="edit_sales_price" class="form-control" type="text"
+                                name="sales_price" placeholder="Masukan Harga Sales">
+                            <span id="edit_sales_price-error" class="text-red-500 text-xs hidden"></span>
+                        </div>
+                        <x-slot:footer>
+                            <div class="flex gap-4">
+                                <x-button.light onclick="closeModal('view-produk')" type="button"
+                                    class="w-full border-primary border">Tutup</x-button.light>
+                                <x-button.primary type="submit" id="updateBtn" class="w-full">
+                                    <span id="updateBtnText">Simpan Perubahan</span>
+                                    <span id="updateBtnLoading" class="hidden">Menyimpan...</span>
+                                </x-button.primary>
+                            </div>
+                        </x-slot:footer>
+                    </form>
+                </x-modal>
+                {{-- Edit Produk Modal End --}}
+
                 <x-button.info onclick="openModal('unggah-produk-bulk')">Unggah Secara Bulk</x-button.info>
                 <x-modal id="unggah-produk-bulk">
                     <div class="flex flex-col items-center w-full">
@@ -163,9 +220,11 @@
                             <td class="table-data">
                                 <x-action-table-dropdown>
                                     <li>
-                                        <a href="{{ route('products.edit', $item->id) }}" class="dropdown-option">
+                                        <button type="button" 
+                                            onclick="viewProduct({{ $item->id }})" 
+                                            class="dropdown-option">
                                             Lihat Data
-                                        </a>
+                                        </button>
                                     </li>
                                     <li>
                                         <a href="{{ route('products.destroy', $item->id) }}" 
@@ -176,6 +235,8 @@
                                         {{-- <button onclick="deleteProduct('{{ $item->id }}')" class="dropdown-option text-red-400">
                                             Hapus Data
                                         </button> --}}
+                                        <button onclick="openModal('update-av3m')" class="dropdown-option ">Update
+                                            AV3M</button>
                                     </li>
                                 </x-action-table-dropdown>
                             </td>
@@ -189,10 +250,101 @@
                     @endforelse
                 </tbody>
             </table>
-            <x-modal id="edit-produk">
-
+            {{-- Delete Modal --}}
+            <x-modal id="delete-product">
+                <x-slot:title>Hapus Produk</x-slot:title>
+                <p>Apakah kamu yakin Ingin Menghapus data ini?</p>
+                <x-slot:footer>
+                    <x-button.light onclick="closeModal('delete-product')"
+                        class="border-primary border">Batal</x-button.light>
+                    <x-button.light class="!bg-red-400 text-white border border-red-400">Hapus Data</x-button.light>
+                </x-slot:footer>
             </x-modal>
-            {{ $items->links() }}
+            <x-modal id="edit-produk">
+                <x-slot:title>Ubah Produk</x-slot:title>
+                <form class="grid grid-cols-2 gap-6">
+                    <div>
+                        <label for="edit-category" class="!text-black">Kategori Produk</label>
+                        <div>
+                            <select id="edit-category" name="edit-category" class="edit-category w-full">
+                                <option value="" selected disabled>
+                                    -- Pilih Category Product --
+                                </option>
+                                <option value="cleanser">
+                                    SunProtect
+                                </option>
+                            </select>
+                        </div>
+                    </div>
+                    <div>
+                        <label for="edit-sku" class="!text-black">Produk SKU</label>
+                        <input id="edit-sku" class="form-control @error('edit-sku') is-invalid @enderror" type="text"
+                            wire:model="edit-sku" name="edit-sku" placeholder="Masukan produk SKU"
+                            aria-describedby="edit-sku" value="">
+                        @error('edit-sku')
+                            <div class="invalid-feedback">
+                                {{ $message }}
+                            </div>
+                        @enderror
+                    </div>
+                    <div>
+                        <label for="edit-md-price" class="!text-black">Harga MD</label>
+                        <input id="edit-md-price" class="form-control" wire:model="edit-md-price" name="edit-md-price"
+                            placeholder="Masukan Harga MD" aria-describedby="edit-md-price" value="">
+                        @error('edit-md-price')
+                            <div class="invalid-feedback">
+                                {{ $message }}
+                            </div>
+                        @enderror
+                    </div>
+                    <div>
+                        <label for="edit-sales-price" class="!text-black">Harga Sales</label>
+                        <input id="edit-sales-price" class="form-control @error('edit-sales-price') is-invalid @enderror"
+                            type="text" wire:model="edit-sales-price" name="edit-sales-price"
+                            placeholder="Masukan Harga Sales" aria-describedby="edit-sales-price" value="">
+                        @error('edit-sales-price')
+                            <div class="invalid-feedback">
+                                {{ $message }}
+                            </div>
+                        @enderror
+                    </div>
+                </form>
+                <x-slot:footer>
+                    <x-button.primary class="w-full">Simpan Perubahan</x-button.primary>
+                </x-slot:footer>
+            </x-modal>
+            <x-modal id="update-av3m">
+                <x-slot:title>Update AV3M</x-slot:title>
+                <form class="grid grid-cols-2 gap-6">
+                    <div>
+                        <label for="channel-a" class="!text-black">Channel A</label>
+                        <input id="channel-a" class="form-control @error('channel-a') is-invalid @enderror"
+                            type="text" wire:model="channel-a" name="channel-a" placeholder="Masukan Channel A"
+                            aria-describedby="channel-a" value="">
+                    </div>
+                    <div>
+                        <label for="channel-b" class="!text-black">Channel B</label>
+                        <input id="channel-b" class="form-control @error('channel-b') is-invalid @enderror"
+                            type="text" wire:model="channel-b" name="channel-b" placeholder="Masukan Channel B"
+                            aria-describedby="channel-b" value="">
+                    </div>
+                    <div>
+                        <label for="channel-c" class="!text-black">Channel C</label>
+                        <input id="channel-c" class="form-control @error('channel-c') is-invalid @enderror"
+                            type="text" wire:model="channel-c" name="channel-c" placeholder="Masukan Channel C"
+                            aria-describedby="channel-c" value="">
+                    </div>
+                    <div>
+                        <label for="channel-d" class="!text-black">Channel D</label>
+                        <input id="channel-d" class="form-control @error('channel-d') is-invalid @enderror"
+                            type="text" wire:model="channel-d" name="channel-d" placeholder="Masukan Channel D"
+                            aria-describedby="channel-d" value="">
+                    </div>
+                    <x-slot:footer>
+                        <x-button.primary class="w-full">Simpan Perubahan</x-button.primary>
+                    </x-slot:footer>
+                </form>
+            </x-modal>
             {{-- Tabel Daftar Produk End --}}
         </x-card>
         {{-- Daftar Produk End --}}
@@ -293,7 +445,6 @@
                     @endforelse
                 </tbody>
             </table>
-            {{ $items->links() }}
             {{-- Tabel Stock-on-Hand End --}}
 
         </x-card>
@@ -301,22 +452,47 @@
     </main>
 @endsection
 
+
+
 @push('scripts')
     <script>
         $(document).ready(function() {
             $('.categories').select2();
+            $('.edit-category').select2();
             $("#stock-date-range").flatpickr({
                 mode: "range"
             });
             $('#product-table').DataTable({
-                paging: false,
+                paging: true,
                 searching: false,
-                info: false
+                info: true,
+                pageLength: 10,
+                lengthMenu: [10, 20, 30, 40, 50],
+                dom: 'rt<"bottom-container"<"bottom-left"l><"bottom-right"p>>',
+                language: {
+                    lengthMenu: "Menampilkan _MENU_ dari 4,768 data",
+                    paginate: {
+                        previous: '<',
+                        next: '>',
+                        last: 'Terakhir',
+                    }
+                },
             });
             $('#stock-on-hand-table').DataTable({
-                paging: false,
+                paging: true,
                 searching: false,
-                info: false
+                info: true,
+                pageLength: 10,
+                lengthMenu: [10, 20, 30, 40, 50],
+                dom: 'rt<"bottom-container"<"bottom-left"l><"bottom-right"p>>',
+                language: {
+                    lengthMenu: "Menampilkan _MENU_ dari 4,768 data",
+                    paginate: {
+                        previous: '<',
+                        next: '>',
+                        last: 'Terakhir',
+                    }
+                },
             });
         });
     </script>
@@ -560,5 +736,137 @@
             });
         });
     });
+
+    (document).ready(function() {
+    // Format number untuk input harga
+    function formatNumber(input) {
+        let value = input.val().replace(/\D/g, '');
+        if (value) {
+            input.val(new Intl.NumberFormat('id-ID').format(value));
+        }
+    }
+
+    // Format number inputs dengan thousand separator
+    $('input[name="md_price"], input[name="sales_price"], #edit_md_price, #edit_sales_price').on('input', function() {
+        formatNumber($(this));
+    });
+
+    // Handle klik tombol edit
+    $('.edit-product').on('click', function() {
+        const productId = $(this).data('id');
+        
+        // Reset form dan error states
+        $('#editProductForm')[0].reset();
+        $('.text-red-500').addClass('hidden');
+        $('input').removeClass('border-red-500');
+        
+        // Ambil data produk
+        $.ajax({
+            type: 'GET',
+            url: `/products/${productId}/edit`,
+            success: function(response) {
+                // Isi form dengan data yang diambil
+                $('#edit_product_id').val(productId);
+                $('#edit_category_id').val(response.category_id).trigger('change');
+                $('#edit_sku').val(response.sku);
+                $('#edit_md_price').val(new Intl.NumberFormat('id-ID').format(response.md_price));
+                $('#edit_sales_price').val(new Intl.NumberFormat('id-ID').format(response.sales_price));
+                
+                // Buka modal
+                openModal('edit-produk');
+            },
+            error: function(xhr) {
+                new Notify({
+                    status: 'error',
+                    title: 'Error',
+                    text: 'Gagal mengambil data produk',
+                    effect: 'fade',
+                    speed: 300,
+                    showIcon: true,
+                    showCloseButton: true,
+                    autoclose: true,
+                    autotimeout: 3000,
+                    position: 'right top',
+                    type: 'outline'
+                });
+            }
+        });
+    });
+
+    // Handle submit form edit
+    $('#editProductForm').on('submit', function(e) {
+        e.preventDefault();
+        
+        // Reset error states
+        $('.text-red-500').addClass('hidden');
+        $('input').removeClass('border-red-500');
+
+        // Get form data
+        let formData = new FormData(this);
+        const productId = formData.get('product_id');
+        
+        // Clean number formats
+        let mdPrice = formData.get('md_price').replace(/\D/g, '');
+        let salesPrice = formData.get('sales_price').replace(/\D/g, '');
+        
+        formData.set('md_price', mdPrice);
+        formData.set('sales_price', salesPrice);
+
+        // Convert to object
+        let formObject = {};
+        formData.forEach((value, key) => {
+            formObject[key] = value;
+        });
+
+        // Toggle loading state
+        $('#updateBtnText').addClass('hidden');
+        $('#updateBtnLoading').removeClass('hidden');
+        $('#updateBtn').prop('disabled', true);
+
+        // Submit form
+        $.ajax({
+            type: 'PUT',
+            url: `/products/${productId}`,
+            data: formObject,
+            success: function(response) {
+                if (response.status === 'success') {
+                    closeModal('edit-produk');
+                    new Notify({
+                        status: 'success',
+                        title: 'Success',
+                        text: response.message,
+                        effect: 'fade',
+                        speed: 300,
+                        showIcon: true,
+                        showCloseButton: true,
+                        autoclose: true,
+                        autotimeout: 1500,
+                        position: 'right top',
+                        type: 'outline'
+                    });
+                    setTimeout(() => {
+                        window.location.reload();
+                    }, 1500);
+                }
+            },
+            error: function(xhr) {
+                // Toggle loading state back
+                $('#updateBtnText').removeClass('hidden');
+                $('#updateBtnLoading').addClass('hidden');
+                $('#updateBtn').prop('disabled', false);
+
+                if (xhr.status === 422) {
+                    const errors = xhr.responseJSON.errors;
+                    $.each(errors, function(key, value) {
+                        $(`#edit_${key}-error`)
+                            .text(value[0])
+                            .removeClass('hidden');
+                        $(`#edit_${key}`).addClass('border-red-500');
+                    });
+                }
+            }
+        });
+    });
+});
     </script>
 @endpush

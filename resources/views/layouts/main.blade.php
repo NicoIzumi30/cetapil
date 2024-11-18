@@ -19,8 +19,12 @@
     <link rel="stylesheet" href="https://cdn.datatables.net/2.1.8/css/dataTables.dataTables.css" />
     <script src="https://cdn.datatables.net/2.1.8/js/dataTables.js"></script>
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/simple-notify@1.0.4/dist/simple-notify.css" />
+<<<<<<< HEAD
     <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
 
+=======
+    <script src="https://cdn.jsdelivr.net/npm/simple-notify@1.0.4/dist/simple-notify.min.js"></script>
+>>>>>>> 2b28e8f560e39e1358d9310e8bf57b3ff6ccfc4f
     @vite('resources/css/layout.css')
     @stack('styles')
 </head>

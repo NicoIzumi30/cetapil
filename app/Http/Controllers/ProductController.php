@@ -14,6 +14,7 @@ class ProductController extends Controller
     {
         // Validate and get per_page parameter
         $perPage = $request->input('per_page', 10);
+
         $validPerPage = in_array($perPage, [10, 20, 30, 40, 50]) ? $perPage : 10;
         
         // Get all products with pagination

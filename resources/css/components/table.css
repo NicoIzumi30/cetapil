@@ -1,15 +1,157 @@
 .table {
- @apply w-full text-sm text-left rtl:text-right text-gray-500 border-spacing-0 border-separate rounded-md ;
+	@apply w-full text-sm text-left rtl:text-right text-gray-500 border-spacing-0 border-separate rounded-md;
 }
 
 .table-head {
-	@apply flex gap-2 px-6 py-4 text-white font-bold text-lg items-center;
+	@apply flex gap-2 text-white font-bold text-lg items-center;
 }
 
 .table-row {
-	@apply bg-transparent text-white ;
+	@apply bg-transparent text-white;
 }
 
 .table-data {
 	@apply px-6 py-4 text-white;
+}
+
+
+/*  datatables customization */
+table.dataTable>thead>tr>th,
+table.dataTable>thead>tr>td,
+div.dt-container.dt-empty-footer tbody>tr:last-child>* {
+	border: none !important;
+}
+
+.dt-column-order {
+	display: none;
+}
+
+table.dataTable thead>tr>th.dt-orderable-asc:hover,
+table.dataTable thead>tr>th.dt-orderable-desc:hover,
+table.dataTable thead>tr>td.dt-orderable-asc:hover,
+table.dataTable thead>tr>td.dt-orderable-desc:hover {
+	outline: none !important;
+}
+
+table.dataTable th.dt-type-numeric,
+table.dataTable th.dt-type-date,
+table.dataTable td.dt-type-numeric,
+table.dataTable td.dt-type-date {
+	text-align: left !important;
+}
+
+div.dt-container .dt-paging .dt-paging-button.current,
+div.dt-container .dt-paging .dt-paging-button.current:hover {
+	border: 1px solid white !important;
+	background-color: white !important;
+	border-radius: 0px !important;
+}
+
+body div.dt-container .dt-paging .dt-paging-button.current,
+body div.dt-container .dt-paging .dt-paging-button.current:hover {
+    color: initial !important;  /* your desired color */
+}
+
+div.dt-container .dt-paging .dt-paging-button {
+	border: 1px solid white !important;
+}
+
+div.dt-container .dt-paging .dt-paging-button.disabled {
+	display: none
+}
+
+.dt-paging-button .next {
+	background-color: white !important;
+}
+
+nav {
+	color: white;
+}
+
+/* detail table  */
+.detail-title {
+	@apply py-4 w-1/12 text-white font-bold;
+}
+
+.detail {
+	@apply py-4 w-1/3 text-white;
+}
+
+.colon {
+	@apply py-4 w-[2%] text-white;
+}
+
+/* Pagination container */
+.dataTables_paginate {
+	display: flex;
+	align-items: center;
+	gap: 2px;
+}
+
+/* Base button styles */
+.paginate-btn {
+	min-width: 32px;
+	height: 32px;
+	display: flex;
+	align-items: center;
+	justify-content: center;
+	cursor: pointer;
+	font-size: 14px;
+}
+
+/* White background buttons (prev, next, terakhir) */
+.white-btn {
+	background-color: #FFFFFF;
+	color: #003366;
+	border: none;
+}
+
+/* Blue background button (current page) */
+.blue-btn {
+	background-color: #0284c7;
+	color: #FFFFFF;
+	border: none;
+}
+
+/* Transparent buttons (other numbers) */
+.transparent-btn {
+	background-color: transparent;
+	color: #FFFFFF;
+	border: 1px solid rgba(255, 255, 255, 0.2);
+}
+
+/* Special styling for Terakhir button */
+.terakhir {
+	padding: 0 16px;
+	margin-left: 2px;
+}
+
+/* Entries per page styling */
+.dataTables_length {
+	color: white;
+}
+
+.dataTables_length select {
+	background-color: transparent;
+	border: 1px solid rgba(255, 255, 255, 0.2);
+	padding: 0.25rem 0.5rem;
+	color: white;
+	margin: 0 0.5rem;
+}
+
+/* Wrapper and container styling */
+.dataTables_wrapper {
+	background-color: #003366;
+}
+
+.bottom-container {
+	display: flex;
+	justify-content: space-between;
+	align-items: center;
+	margin-top: 1rem;
+	width: 100%;
+}
+
+.dt-paging-button {
+	color: white !important;
 }

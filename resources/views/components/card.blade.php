@@ -1,6 +1,6 @@
 @props(['cardTitle', 'cardAction', 'cardFooter', 'cardGroup'])
 
-<div class="card mt-4 mx-4 rounded-lg">
+<div class="card mt-4 mx-4 rounded-lg  min-w-[1180px]">
     <x-card-header>
         <x-slot:cardTitle>
             {{ $cardTitle }}
