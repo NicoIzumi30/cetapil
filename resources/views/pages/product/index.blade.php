@@ -24,56 +24,49 @@
                     <x-slot:title>
                         Tambah Produk
                     </x-slot:title>
-                    <form class="grid grid-cols-2 gap-6">
+                    <form method="POST" action="{{ route('products.store') }}" id="createProductForm" class="grid grid-cols-2 gap-6">
+                        @csrf
                         <div>
                             <label for="categories" class="!text-black">Kategori Produk</label>
                             <div>
-                                <select id="categories" name="category" class="categories w-full">
-                                    <option value="" selected disabled>
-                                        -- Pilih Category Product --
-                                    </option>
-                                    <option value="cleanser">
-                                        SunProtect
-                                    </option>
+                                <select id="categories" name="category_id"
+                                    class="categories w-full form-control @error('category_id') is-invalid @enderror">
+                                    <option value="" selected disabled>-- Pilih Category Product --</option>
+                                    @foreach ($categories as $category)
+                                        <option value="{{ $category->id }}">
+                                            {{ $category->name }}
+                                        </option>
+                                    @endforeach
                                 </select>
+                                <span id="category_id-error" class="text-red-500 text-xs hidden"></span>
                             </div>
                         </div>
                         <div>
                             <label for="sku" class="!text-black">Produk SKU</label>
                             <input id="sku" class="form-control @error('sku') is-invalid @enderror" type="text"
-                                wire:model="sku" name="sku" placeholder="Masukan produk SKU" aria-describedby="sku"
-                                value="">
-                            @error('sku')
-                                <div class="invalid-feedback">
-                                    {{ $message }}
-                                </div>
-                            @enderror
+                                name="sku" placeholder="Masukan produk SKU" >
+                                <span id="sku-error" class="text-red-500 text-xs hidden"></span>
                         </div>
                         <div>
                             <label for="md-price" class="!text-black">Harga MD</label>
-                            <input id="md-price" class="form-control" wire:model="md-price" name="md-price"
-                                placeholder="Masukan Harga MD" aria-describedby="md-price" value="">
-                            @error('md-price')
-                                <div class="invalid-feedback">
-                                    {{ $message }}
-                                </div>
-                            @enderror
+                            <input id="md_price" class="form-control @error('md_price') is-invalid @enderror"
+                                type="number" name="md_price" placeholder="Masukan Harga MD">
+                                <span id="md_price-error" class="text-red-500 text-xs hidden"></span>
                         </div>
                         <div>
                             <label for="sales-price" class="!text-black">Harga Sales</label>
-                            <input id="sales-price" class="form-control @error('sales-price') is-invalid @enderror"
-                                type="text" wire:model="sales-price" name="sales-price" placeholder="Masukan Harga Sales"
-                                aria-describedby="sales-price" value="">
-                            @error('sales-price')
-                                <div class="invalid-feedback">
-                                    {{ $message }}
-                                </div>
-                            @enderror
+                            <input id="sales_price" class="form-control @error('sales_price') is-invalid @enderror"
+                                type="number" name="sales_price" placeholder="Masukan Harga Sales">
+                                <span id="sales_price-error" class="text-red-500 text-xs hidden"></span>
                         </div>
+                        <x-slot:footer>
+                            <x-button.primary type="submit" id="saveBtn" class="w-full"> <span id="saveBtnText">Tambah Produk</span>
+                                <span id="saveBtnLoading" class="hidden">
+                                    Menyimpan...
+                                </span></x-button.primary>
+                        </x-slot:footer>
                     </form>
-                    <x-slot:footer>
-                        <x-button.primary class="w-full">Tambah Produk</x-button.primary>
-                    </x-slot:footer>
+
                 </x-modal>
                 {{-- Tambah Produk Modal End --}}
                 <x-button.info onclick="openModal('unggah-produk-bulk')">Unggah Secara Bulk</x-button.info>
@@ -156,32 +149,43 @@
                     @forelse ($items as $item)
                         <tr class="table-row">
                             <td scope="row" class="table-data">
-                                {{ $item['name'] }}
+                                {{ $item->category->name }}
                             </td>
                             <td class="table-data">
-                                {{ $item['price'] }}
+                                {{ $item->sku }}
                             </td>
                             <td class="table-data">
-                                {{ $item['price'] }}
+                                Rp {{ number_format($item->md_price, 0, ',', '.') }}
                             </td>
                             <td class="table-data">
-                                {{ $item['price'] }}
+                                Rp {{ number_format($item->sales_price, 0, ',', '.') }}
                             </td>
                             <td class="table-data">
                                 <x-action-table-dropdown>
                                     <li>
-                                        <button onclick="openModal('edit-produk')" class="dropdown-option ">Lihat
-                                            Data</button>
+                                        <a href="{{ route('products.edit', $item->id) }}" class="dropdown-option">
+                                            Lihat Data
+                                        </a>
                                     </li>
                                     <li>
-                                        <a href="#" class="dropdown-option text-red-400">Hapus
-                                            Data</a>
+                                        <a href="{{ route('products.destroy', $item->id) }}" 
+                                            class="dropdown-option text-red-400 delete-product" 
+                                            data-id="{{ $item->id }}">
+                                             Hapus Data
+                                         </a>
+                                        {{-- <button onclick="deleteProduct('{{ $item->id }}')" class="dropdown-option text-red-400">
+                                            Hapus Data
+                                        </button> --}}
                                     </li>
                                 </x-action-table-dropdown>
                             </td>
                         </tr>
                     @empty
-                        <p>data not found</p>
+                        <tr>
+                            <td colspan="5" class="px-6 py-4 text-center text-gray-500">
+                                Tidak ada data produk
+                            </td>
+                        </tr>
                     @endforelse
                 </tbody>
             </table>
@@ -320,6 +324,102 @@
 
 @push('scripts')
     <script>
+        $(document).ready(function() {
+            // Setup AJAX CSRF
+            $.ajaxSetup({
+                headers: {
+                    'X-CSRF-TOKEN': $('meta[name="csrf-token"]').attr('content')
+                }
+            });
+
+            function resetForm() {
+                $('#createProductForm')[0].reset();
+                $('.text-red-500').addClass('hidden');
+                $('input').removeClass('border-red-500');
+            }
+
+            function toggleLoading(show) {
+                if (show) {
+                    $('#saveBtnText').addClass('hidden');
+                    $('#saveBtnLoading').removeClass('hidden');
+                    $('#saveBtn').prop('disabled', true);
+                } else {
+                    $('#saveBtnText').removeClass('hidden');
+                    $('#saveBtnLoading').addClass('hidden');
+                    $('#saveBtn').prop('disabled', false);
+                }
+            }
+
+            // Form submission
+            $('#saveBtn').click(function() {
+                // Reset error states
+                
+                $('.text-red-500').addClass('hidden');
+                $('input').removeClass('border-red-500');
+
+                toggleLoading(true);
+
+                $.ajax({
+                    type: 'POST',
+                    url: '{{ route('products.store') }}',
+                    data: $('#createProductForm').serialize(),
+                    success: function(response) {
+                        toggleLoading(false);
+                        if (response.status === 'success') {
+                            closeModal('tambah-produk');
+                            new Notify({
+                                    status: 'success',
+                                    title: 'Success',
+                                    text: response.message,
+                                    effect: 'fade',
+                                    speed: 300,
+                                    customClass: '',
+                                    customIcon: '',
+                                    showIcon: true,
+                                    showCloseButton: true,
+                                    autoclose: true,
+                                    autotimeout: 1000,
+                                    notificationsGap: null,
+                                    notificationsPadding: null,
+                                    type: 'outline',
+                                    position: 'right top',
+                                    customWrapper: '',
+                                })
+                                setTimeout(() => {
+                                    window.location.reload();
+                                }, 1500);
+                        }
+                    },
+                    error: function(xhr) {
+                        toggleLoading(false);
+                        if (xhr.status === 422) {
+                            const errors = xhr.responseJSON.errors;
+                            $.each(errors, function(key, value) {
+                                $(`#${key}-error`)
+                                    .text(value[0])
+                                    .removeClass('hidden');
+                                $(`[name="${key}"]`).addClass('border-red-500');
+                            });
+                        }
+                    }
+                });
+            });
+
+            // Format number inputs with thousand separator
+            // $('input[type="number"]').on('input', function() {
+            //     const value = $(this).val().replace(/[^\d]/g, '');
+            //     if (value) {
+            //         $(this).val(parseInt(value).toLocaleString('id-ID'));
+            //     }
+            // });
+
+            // Clean number format before submit
+            // $('#createProductForm').on('submit', function() {
+            //     $('input[type="number"]').each(function() {
+            //         $(this).val($(this).val().replace(/[^\d]/g, ''));
+            //     });
+            // });
+        });
         document.addEventListener('DOMContentLoaded', function() {
             const uploadArea = document.getElementById('upload-area');
             const fileInput = document.getElementById('file_upload');
@@ -393,5 +493,72 @@
                 reader.readAsText(file);
             }
         });
+
+        //delete product
+
+        $(document).ready(function() {
+        // Event handler untuk delete
+        $('.delete-product').on('click', function(e) {
+            e.preventDefault();
+            const deleteUrl = $(this).attr('href');
+            
+            Swal.fire({
+                title: 'Apakah Anda yakin?',
+                text: "Data produk akan dihapus",
+                icon: 'warning',
+                showCancelButton: true,
+                confirmButtonColor: '#d33',
+                cancelButtonColor: '#3085d6',
+                confirmButtonText: 'Ya, hapus!',
+                cancelButtonText: 'Batal'
+            }).then((result) => {
+                if (result.isConfirmed) {
+                    $.ajax({
+                        type: 'DELETE',
+                        url: deleteUrl,
+                        headers: {
+                            'X-CSRF-TOKEN': $('meta[name="csrf-token"]').attr('content')
+                        },
+                        success: function(response) {
+                            if (response.status === 'success') {
+                                new Notify({
+                                    status: 'success',
+                                    title: 'Success',
+                                    text: response.message,
+                                    effect: 'fade',
+                                    speed: 300,
+                                    showIcon: true,
+                                    showCloseButton: true,
+                                    autoclose: true,
+                                    autotimeout: 1000,
+                                    position: 'right top',
+                                    type: 'outline'
+                                });
+                                
+                                setTimeout(() => {
+                                    window.location.reload();
+                                }, 1500);
+                            }
+                        },
+                        error: function(xhr) {
+                            new Notify({
+                                status: 'error',
+                                title: 'Error',
+                                text: 'Gagal menghapus produk',
+                                effect: 'fade',
+                                speed: 300,
+                                showIcon: true,
+                                showCloseButton: true,
+                                autoclose: true,
+                                autotimeout: 1000,
+                                position: 'right top',
+                                type: 'outline'
+                            });
+                        }
+                    });
+                }
+            });
+        });
+    });
     </script>
 @endpush

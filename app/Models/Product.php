@@ -15,6 +15,8 @@ class Product extends Model
     protected $guarded = [];
 
     protected $appends = ['image'];
+
+    protected $fillable = ['category_id', 'sku', 'md_price', 'sales_price'];
     /**
      * Get the category that owns the product.
      */
