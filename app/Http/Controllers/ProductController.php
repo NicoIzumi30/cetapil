@@ -2,11 +2,15 @@
 
 namespace App\Http\Controllers;
 
-use App\Http\Requests\Product\CreateProductRequest;
+use Exception;
 use App\Models\Product;
 use App\Models\Category;
 use Illuminate\Http\Request;
+use App\Imports\ProductImport;
+use Illuminate\Support\Facades\DB;
 use Illuminate\Pagination\LengthAwarePaginator;
+use App\Http\Requests\Product\CreateProductRequest;
+use Maatwebsite\Excel\Facades\Excel;
 
 class ProductController extends Controller
 {
@@ -122,6 +126,40 @@ class ProductController extends Controller
             'message' => 'AV3M berhasil diperbarui'
         ]);
     }
+    public function downloadTemplate()
+    {
+        $filePath = public_path('assets/template/template_buk_product.xlsx');
+        $fileName = 'template_buk_product_' . now()->timestamp . '.xlsx';
+        if (file_exists($filePath)) {
+            return response()->download($filePath, $fileName);
+        }
+        return abort(404, 'File tidak ditemukan');
+    }
+    public function bulk(Request $request)
+    {
+        $request->validate([
+            'excel_file' => 'required|mimes:xlsx|max:10240'
+        ]);
 
+        DB::beginTransaction();
+        try {
+            $file = $request->file('excel_file');
+            // Sanitasi nama file
+            $fileName = str_replace(' ', '_', $file->getClientOriginalName());
+            $fileName = preg_replace('/[^A-Za-z0-9\-\_\.]/', '', $fileName);
 
+            $import = new ProductImport($fileName);
+            Excel::import($import, $file);
+
+            if ($import->response['status'] == 'error') {
+                throw new Exception($import->response['message']);
+            }
+
+            DB::commit();
+            return response()->json(['message' => 'Import success'], 200);
+        } catch (\Exception $e) {
+            DB::rollBack();
+            return response()->json(['message' => $e->getMessage()], 500);
+        }
+    }
 }

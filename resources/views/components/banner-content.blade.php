@@ -9,7 +9,7 @@
 			<img class="w-10 h-auto" src="{{ asset('/assets/icons/material-symbols_date-range.svg') }}" alt="calendar">
 			<div>
 				<p class="text-lightGrey text-sm font-bold">Hari Ini</p>
-				{{-- <p class="text-black text-sms font-bold">{{formatTanggalIndonesia()}}</p> --}}
+				<p class="text-black text-sms font-bold">{{formatTanggalIndonesia()}}</p> 
 			</div>
 		</div>
 	</div>

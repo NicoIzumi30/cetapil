@@ -48,66 +48,54 @@
     <script src="https://cdn.jsdelivr.net/npm/simple-notify@1.0.4/dist/simple-notify.min.js"></script>
 
     <script>
+         $.ajaxSetup({
+            headers: {
+                'X-CSRF-TOKEN': $('meta[name="csrf-token"]').attr('content')
+            }
+        });
+        function toast(status, message, speed = 300) {
+            let title = 'Success'
+            if (status == 'error'){
+                title = 'Failed'
+            }
+            new Notify({
+                status: status,
+                title: title,
+                text: message,
+                effect: 'fade',
+                speed: speed,
+                customClass: '',
+                customIcon: '',
+                showIcon: true,
+                showCloseButton: true,
+                autoclose: true,
+                autotimeout: 1000,
+                notificationsGap: null,
+                notificationsPadding: null,
+                type: 'outline',
+                position: 'right top',
+                customWrapper: '',
+            })
+        }
+        function toggleLoading(show, proses) {
+            if (show) {
+                    $('#'+proses+'BtnText').addClass('hidden');
+                    $('#'+proses+'updateBtnLoading').removeClass('hidden');
+                    $('#'+proses+'updateBtn').prop('disabled', true);
+                } else {
+                    $('#'+proses+'BtnText').removeClass('hidden');
+                    $('#'+proses+'updateBtnLoading').addClass('hidden');
+                    $('#'+proses+'updateBtn').prop('disabled', false);
+                }
+        }
         @if(session('success'))
-            new Notify({
-                status: 'success',
-                title: 'Success',
-                text: '{{ session('success') }}',
-                effect: 'fade',
-                speed: 300,
-                customClass: '',
-                customIcon: '',
-                showIcon: true,
-                showCloseButton: true,
-                autoclose: true,
-                autotimeout: 3000,
-                notificationsGap: null,
-                notificationsPadding: null,
-                type: 'outline',
-                position: 'right top',
-                customWrapper: '',
-            })
+            toast('success', '{{ session('success') }}')
         @endif
-
         @if(session('error'))
-            new Notify({
-                status: 'error',
-                title: 'Failed',
-                text: '{{ session('error') }}',
-                effect: 'fade',
-                speed: 300,
-                customClass: '',
-                customIcon: '',
-                showIcon: true,
-                showCloseButton: true,
-                autoclose: true,
-                autotimeout: 3000,
-                notificationsGap: null,
-                notificationsPadding: null,
-                type: 'outline',
-                position: 'right top',
-                customWrapper: '',
-            })
+            toast('error', '{{ session('error') }}')
         @endif
         @if($errors->any())
-            new Notify({
-                status: 'error',
-                title: 'Failed',
-                text: 'Form Validation Failed',
-                effect: 'fade',
-                speed: 300,
-                customClass: '',
-                customIcon: '',
-                showIcon: true,
-                showCloseButton: true,
-                autoclose: true,
-                autotimeout: 3000,
-                notificationsGap: null,
-                notificationsPadding: null,
-                type: 'outline',
-                position: 'right top',
-                customWrapper: '',
-            })
+            toast('error', 'Form Validation Error!!')
         @endif
         function previewImage(input, id) {
             const file = input.files[0];
@@ -119,22 +107,18 @@
                     input.value = '';
                     return;
                 }
-
                 const reader = new FileReader();
                 const uploadArea = document.getElementById(`upload-area-${id}`);
                 const previewContainer = document.getElementById(`preview-container-${id}`);
                 const previewImage = document.getElementById(`preview-image-${id}`);
-
                 reader.onload = function (e) {
                     previewImage.src = e.target.result;
                     uploadArea.classList.add('hidden');
                     previewContainer.classList.remove('hidden');
                 }
-
                 reader.readAsDataURL(file);
             }
         }
-
         function removeImage(id) {
             const input = document.getElementById(`img_${id}`);
             const uploadArea = document.getElementById(`upload-area-${id}`);
@@ -146,7 +130,6 @@
             uploadArea.classList.remove('hidden');
             previewContainer.classList.add('hidden');
         }
-
         // Make upload areas clickable
         document.addEventListener('DOMContentLoaded', function () {
             const uploadAreas = document.querySelectorAll('[id^="upload-area-"]');
@@ -157,74 +140,35 @@
                 });
             });
         });
-        $.ajaxSetup({
-            headers: {
-                'X-CSRF-TOKEN': $('meta[name="csrf-token"]').attr('content')
-            }
-        });
         $('.delete-btn').on('click', function (e) {
             e.preventDefault();
             const deleteUrl = $(this).attr('href');
 
             Swal.fire({
-                title: 'Are you sure?',
-                text: "This data will be deleted permanently!",
+                title: 'Apakah Anda yakin?',
+                text: "Data " + $(this).data('name') + " akan dihapus",
                 icon: 'warning',
                 showCancelButton: true,
                 confirmButtonColor: '#e74c3c',
                 cancelButtonColor: '#3085d6',
-                cancelButtonText: 'Cancel',
-                confirmButtonText: 'Yes, delete it!'
+                cancelButtonText: 'Batal',
+                confirmButtonText: 'Ya, hapus!'
             }).then((result) => {
                 if (result.value) {
-                    // Send DELETE request using Ajax
                     $.ajax({
                         url: deleteUrl,
                         type: 'DELETE',
                         success: function (response) {
-                            if (response.success) {
-                                new Notify({
-                                    status: 'success',
-                                    title: 'Success',
-                                    text: response.message,
-                                    effect: 'fade',
-                                    speed: 300,
-                                    customClass: '',
-                                    customIcon: '',
-                                    showIcon: true,
-                                    showCloseButton: true,
-                                    autoclose: true,
-                                    autotimeout: 1000,
-                                    notificationsGap: null,
-                                    notificationsPadding: null,
-                                    type: 'outline',
-                                    position: 'right top',
-                                    customWrapper: '',
-                                })
+                            console.log(response);
+                            if (response.status === 'success') {
+                               toast('success', response.message,150);
                                 setTimeout(() => {
                                     window.location.reload();
                                 }, 1500); 
                             }
                         },
                         error: function (xhr) {
-                            new Notify({
-                                status: 'error',
-                                title: 'Failed',
-                                text: xhr.responseJSON.message,
-                                effect: 'fade',
-                                speed: 300,
-                                customClass: '',
-                                customIcon: '',
-                                showIcon: true,
-                                showCloseButton: true,
-                                autoclose: true,
-                                autotimeout: 3000,
-                                notificationsGap: null,
-                                notificationsPadding: null,
-                                type: 'outline',
-                                position: 'right top',
-                                customWrapper: '',
-                            })
+                            toast('error', xhr.responseJSON.message);
                         }
                     });
                 }

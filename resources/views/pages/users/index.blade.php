@@ -59,47 +59,6 @@
         <tbody>
             @forelse($users as $user)
         {{-- Users Table --}}
-        <table id="users-table" class="table">
-            <thead>
-                <tr>
-                    <th scope="col" class="text-center">
-                        <a class="table-head">
-                            {{ __('Nama Sales') }}
-                            <x-icons.sort />
-                        </a>
-                    </th>
-                    <th scope="col" class="text-center">
-                        <a class="table-head">
-                            {{ __('Alamat Email') }}
-                            <x-icons.sort />
-                        </a>
-                    </th>
-                    <th scope="col" class="text-center">
-                        <a class="table-head">
-                            {{ __('Jabatan') }}
-                            <x-icons.sort />
-                        </a>
-                    </th>
-                    <th scope="col" class="text-center">
-                        <a class="table-head">
-                            {{ __('Area Outlet') }}
-                            <x-icons.sort />
-                        </a>
-                    </th>
-                    <th scope="col" class="text-center">
-                        <a class="table-head">
-                            {{ __('Status') }}
-                            <x-icons.sort />
-                        </a>
-                    </th>
-                    <th scope="col" class="text-center">
-                        <a class="table-head">
-                            Aksi
-                        </a>
-                    </th>
-                </tr>
-            </thead>
-            <tbody>
                 <tr class="table-row">
                     <td scope="row" class="table-data">
                         {{ $user->name }}
@@ -127,13 +86,6 @@
                                 <a href="{{ route('users.destroy', $user->id) }}" class="delete-btn dropdown-option text-red-400 delete-user" data-id="{{ $user->id }}">
                                     Hapus Data
                                 </a>
-
-                                <button onclick="openModal('delete-user')" class="dropdown-option text-red-400">Hapus
-                                    Data</button>
-
-                                <a href="{{ route('users.destroy', $user->id) }}" class="delete-btn dropdown-option text-red-400 delete-user" data-id="{{ $user->id }}">
-                                    Hapus Data
-                                </a>
                             </li>
                         </x-action-table-dropdown>
                     </td>
@@ -152,18 +104,6 @@
     {{-- Users Table End --}}
 </x-card>
 {{-- Users End --}}
-            </tbody>
-        </table>
-		<x-modal id="delete-user">
-			<x-slot:title>Hapus Pengguna</x-slot:title>
-			<p>Apakah kamu yakin Ingin Menghapus Data Pengguna ini?</p>
-			<x-slot:footer>
-				<x-button.light onclick="closeModal('delete-user')" class="border-primary border">Batal</x-button.light>
-				<x-button.light class="!bg-red-400 text-white border border-red-400">Hapus Data</x-button.light>
-			</x-slot:footer>
-		</x-modal>
-        {{-- Users Table End --}}
-    </x-card>
     {{-- Users End --}}
 
 @endsection

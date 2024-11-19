@@ -48,7 +48,6 @@
                         </div>
                         <div>
                             <label for="role" class="form-label">Jabatan Pengguna</label>
-<<<<<<< HEAD
                             <select id="role" name="role_id"
                                 class="form-select-search text-primary @if($errors->has('role_id')) is-invalid @endif"
                                 value="{{ old('role_id') }}">
@@ -91,26 +90,6 @@
                                     class="text-sm text-red-600 mt-1">{{ $errors->first('region') }}</span>
                             @endif
                         </div>
-
-=======
-                            <div>
-                                <select id="role" class="form-select-search text-primary">
-                                    <option value="" disabled selected>
-                                        -- Pilih Jabatan Pengguna --
-                                    </option>
-                                    <option value="superadmin">
-                                        SuperAdmin
-                                    </option>
-                                    <option value="admin">
-                                        Admin
-                                    </option>
-                                    <option value="sales">
-                                        Sales
-                                    </option>
-                                </select>
-                            </div>
-                        </div>
->>>>>>> 2b28e8f560e39e1358d9310e8bf57b3ff6ccfc4f
                     </div>
                     {{-- Profil Pengguna End --}}
 
@@ -141,7 +120,6 @@
                                         class="text-sm text-red-600 mt-1">{{ $errors->first('latitude') }}</span>
                                 @endif
                             </div>
-<<<<<<< HEAD
                             <div>
                                 <label for="states-option">Kabupaten/Kota</label>
                                 <select id="states-option" name="city"
@@ -169,10 +147,8 @@
                                         class="text-sm text-red-600 mt-1">{{ $errors->first('address') }}</span>
                                 @endif
                             </div>
-=======
->>>>>>> 2b28e8f560e39e1358d9310e8bf57b3ff6ccfc4f
                         </div>
-                        <div class="relative">
+                        <div class="relative mt-5">
                             <div class="h-[350px] z-10" id="user-map-location"></div>
                             <button id="fullscreen-button"
                                 class="absolute top-3 right-3 rounded-sm w-10 h-10 grid place-items-center bg-white z-50 hover:bg-slate-200">
@@ -186,7 +162,6 @@
                         </div>
                     </x-section-card>
                     {{-- Area Domisili End --}}
-<<<<<<< HEAD
                     <x-section-card :title="'Manajemen Akun'">
                         @if ($errors->has('permissions'))
                             <span id="name-error"
@@ -202,26 +177,6 @@
                         </div>
                         @endforeach
                     </x-section-card>
-=======
-
-
-                    {{-- Manajemen Akun --}}
-                    <div id="account-management" class="hidden">
-                        <x-section-card :title="'Manajemen Akun'">
-                            <div>
-                                <div class="grid grid-cols-3 gap-12 ">
-                                    {{-- @foreach ($form['permissions'] as $permission) --}}
-                                    <x-input.switch>Main Reports</x-input.switch>
-                                    <x-input.switch>Menu Produk</x-input.switch>
-                                    <x-input.switch>Menu Routing</x-input.switch>
-                                    <x-input.switch>Menu Selling</x-input.switch>
-                                    <x-input.switch>Menu Pengguna</x-input.switch>
-                                    {{-- @endforeach --}}
-                                </div>
-                            </div>
-                        </x-section-card>
-                    </div>
->>>>>>> 2b28e8f560e39e1358d9310e8bf57b3ff6ccfc4f
                     {{-- Manajemen Akun End --}}
 
                     <x-button.info class="w-full mt-20 !text-xl" type="submit">Konfirmasi</x-button.info>
@@ -235,18 +190,10 @@
 
 @push('scripts')
     <script>
-<<<<<<< HEAD
-        $(document).ready(function () {
-            // Initialize map
-            var map = L.map('user-map-location').setView([-6.200000, 106.816666],
-                10); // Centered on Jakarta by default
-=======
         $(document).ready(function() {
             // Initialize map with default view of Indonesia
             var map = L.map('user-map-location').setView([-2.4833826, 117.8902853],
             5); // Centered on Indonesia by default
-
->>>>>>> 2b28e8f560e39e1358d9310e8bf57b3ff6ccfc4f
             L.tileLayer('https://tile.openstreetmap.org/{z}/{x}/{y}.png', {
                 maxZoom: 20,
                 attribution: '&copy; <a href="http://www.openstreetmap.org/copyright">OpenStreetMap</a>'
@@ -325,7 +272,6 @@
 
 @push('scripts')
     <script>
-<<<<<<< HEAD
         const roleConfig = {
             "admin": {
                 showElement: 'admin-access',
@@ -341,8 +287,6 @@
             }
         };
 
-=======
->>>>>>> 2b28e8f560e39e1358d9310e8bf57b3ff6ccfc4f
         const roleSelect = document.getElementById('role');
         function clearAllPermissions() {
                 const allSwitches = document.querySelectorAll('input[type="checkbox"][name="permissions[]"]');
@@ -359,17 +303,11 @@
         }
 
         function handleRoleChange(event) {
-<<<<<<< HEAD
             const selectedOption = event.target.options[event.target.selectedIndex];
             const selectedRoleId = selectedOption.value;
             const selectedRoleName = selectedOption.getAttribute('data-name');
 
             const config = roleConfig[selectedRoleName];
-=======
-            const selectedRole = event.target.value;
-            const config = roleConfig[selectedRole];
-			console.log(config);
->>>>>>> 2b28e8f560e39e1358d9310e8bf57b3ff6ccfc4f
 
             if (!config) return;
             clearAllPermissions();
