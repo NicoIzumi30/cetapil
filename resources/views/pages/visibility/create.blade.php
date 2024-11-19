@@ -30,15 +30,15 @@
 					<x-button.info class="w-full">Konfirmasi</x-button.info>
 				</x:slot:footer>
 			</x-modal>
-            {{-- <x-button.info onclick="openModal('add-posm')">Tambah Jenis POSM</x-button.info>
+            <x-button.info onclick="openModal('add-posm')">Tambah Jenis POSM</x-button.info>
 			<x-modal id="add-posm">
 				<x:slot:title>Tambah Jenis POSM</x:slot:title>
 				<form class="w-full">
 					<div>
-						<label for="posm" class="!text-black">Jenis POSM</label>
-						<input id="posm" class="form-control" wire:model="posm" name="posm"
-							placeholder="Masukan Nama Jenis POSM" aria-describedby="posm" value="">
-						@error('posm')
+						<label for="add-posm" class="!text-black">Jenis POSM</label>
+						<input id="add-posm" class="form-control" wire:model="add-posm" name="add-posm"
+							placeholder="Masukan Nama Jenis POSM" aria-describedby="add-posm" value="">
+						@error('add-posm')
 							<div class="invalid-feedback">
 								{{ $message }}
 							</div>
@@ -48,7 +48,7 @@
 				<x:slot:footer>
 					<x-button.info class="w-full">Konfirmasi</x-button.info>
 				</x:slot:footer>
-			</x-modal> --}}
+			</x-modal>
             <x-button.info>Unggah Secara Bulk</x-button.info>
         </x-slot:cardAction>
 
