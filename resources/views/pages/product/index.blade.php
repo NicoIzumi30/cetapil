@@ -24,7 +24,8 @@
                     <x-slot:title>
                         Tambah Produk
                     </x-slot:title>
-                    <form method="POST" action="{{ route('products.store') }}" id="createProductForm" class="grid grid-cols-2 gap-6">
+                    <form method="POST" action="{{ route('products.store') }}" id="createProductForm"
+                        class="grid grid-cols-2 gap-6">
                         @csrf
                         <div>
                             <label for="categories" class="!text-black">Kategori Produk</label>
@@ -55,12 +56,12 @@
                         </div>
                         <div>
                             <label for="sales_price" class="!text-black">Harga Sales</label>
-                            <input id="sales_price" class="form-control" type="text" name="sales_price" 
+                            <input id="sales_price" class="form-control" type="text" name="sales_price"
                                 placeholder="Masukan Harga Sales">
                             <span id="sales_price-error" class="text-red-500 text-xs hidden"></span>
                         </div>
                         <x-slot:footer>
-                            <x-button.primary type="submit" id="saveBtn" class="w-full"> 
+                            <x-button.primary type="submit" id="saveBtn" class="w-full">
                                 <span id="saveBtnText">Tambah Produk</span>
                                 <span id="saveBtnLoading" class="hidden">Menyimpan...</span>
                             </x-button.primary>
@@ -71,75 +72,51 @@
                 {{-- Tambah Produk Modal End --}}
 
                 {{-- Edit Produk Modal  --}}
-                @if ($product)
-                <x-modal id="view-produk">
-                    <x-slot:title>
-                        Detail Produk
-                    </x-slot:title>
-                    <form method="POST" id="editProductForm-{{ $item->id }}" class="grid grid-cols-2 gap-6">
+                <x-modal id="edit-produk">
+                    <x-slot:title>Ubah Produk</x-slot:title>
+                    <form id="editProductForm" class="grid grid-cols-2 gap-6">
                         @csrf
                         @method('PUT')
                         <div>
-                            <label for="edit_categories_{{ $item->id }}" class="text-black font-sans">Kategori Produk</label>
+                            <label for="edit-category" class="!text-black">Kategori Produk</label>
                             <div>
-                                <select id="edit_categories_{{ $item->id }}" name="category_id"
-                                    class="categories w-full form-control @error('category_id') is-invalid @enderror">
-                                    <option value="" disabled>-- Pilih Category Product --</option>
+                                <select id="edit-category" name="category_id" class="edit-category w-full form-control">
+                                    <option value="" selected disabled>-- Pilih Category Product --</option>
                                     @foreach ($categories as $category)
-                                        <option value="{{ $category->id }}" 
-                                            {{ $category->id == $item->category_id ? 'selected' : '' }}>
+                                        <option value="{{ $category->id }}">
                                             {{ $category->name }}
                                         </option>
                                     @endforeach
                                 </select>
-                                <span id="edit_category_id-error-{{ $item->id }}" class="text-red-500 text-xs hidden"></span>
+                                <span id="edit-category_id-error" class="text-red-500 text-xs hidden"></span>
                             </div>
                         </div>
                         <div>
-                            <label for="edit_sku_{{ $item->id }}" class="text-black font-sans">Produk SKU</label>
-                            <input id="edit_sku_{{ $item->id }}" 
-                                class="form-control @error('sku') is-invalid @enderror" 
-                                type="text"
-                                name="sku" 
+                            <label for="edit-sku" class="!text-black">Produk SKU</label>
+                            <input id="edit-sku" class="form-control" type="text" name="sku"
                                 placeholder="Masukan produk SKU">
-                            <span id="edit_sku-error-{{ $item->id }}" class="text-red-500 text-xs hidden"></span>
+                            <span id="edit-sku-error" class="text-red-500 text-xs hidden"></span>
                         </div>
                         <div>
-                            <label for="edit_md_price_{{ $item->id }}" class="text-black font-sans">Harga MD</label>
-                            <input id="edit_md_price_{{ $item->id }}" 
-                                class="form-control @error('md_price') is-invalid @enderror"
-                                type="text" 
-                                name="md_price" 
+                            <label for="edit-md-price" class="!text-black">Harga MD</label>
+                            <input id="edit-md-price" class="form-control" type="text" name="md_price"
                                 placeholder="Masukan Harga MD">
-                            <span id="edit_md_price-error-{{ $item->id }}" class="text-red-500 text-xs hidden"></span>
+                            <span id="edit-md_price-error" class="text-red-500 text-xs hidden"></span>
                         </div>
                         <div>
-                            <label for="edit_sales_price_{{ $item->id }}" class="text-black font-sans">Harga Sales</label>
-                            <input id="edit_sales_price_{{ $item->id }}" 
-                                class="form-control @error('sales_price') is-invalid @enderror"
-                                type="text" 
-                                name="sales_price" 
+                            <label for="edit-sales-price" class="!text-black">Harga Sales</label>
+                            <input id="edit-sales-price" class="form-control" type="text" name="sales_price"
                                 placeholder="Masukan Harga Sales">
-                            <span id="edit_sales_price-error-{{ $item->id }}" class="text-red-500 text-xs hidden"></span>
-                        </div>
-                        <div class="col-span-2 flex justify-end gap-4">
-                            <button type="button" 
-                                class="px-3 py-1.5 text-sm bg-white border border-gray-500 rounded hover:bg-gray-50 text-primary"
-                                onclick="closeModal('view-produk')">
-                                Kembali
-                            </button>
-                            <x-button.info type="button"
-                                class="px-3 py-1.5 text-sm bg-blue-500 text-white rounded hover:bg-blue-600 update-product-btn" 
-                                data-id="{{ $item->id }}">
-                                <span id="updateBtnText-{{ $item->id }}">Simpan Perubahan</span>
-                                <span id="updateBtnLoading-{{ $item->id }}" class="hidden">
-                                    Menyimpan...
-                                </span>
-                            </x-button.info>
+                            <span id="edit-sales_price-error" class="text-red-500 text-xs hidden"></span>
                         </div>
                     </form>
+                    <x-slot:footer>
+                        <x-button.primary type="submit" id="updateBtn" class="w-full">
+                            <span id="updateBtnText">Simpan Perubahan</span>
+                            <span id="updateBtnLoading" class="hidden">Menyimpan...</span>
+                        </x-button.primary>
+                    </x-slot:footer>
                 </x-modal>
-            @endif
 
                 {{-- Edit Produk Modal End --}}
 
@@ -237,24 +214,18 @@
                             <td class="table-data">
                                 <x-action-table-dropdown>
                                     <li>
-                                        <button type="button" 
-            onclick="showEditModal('{{ $item->id }}')" 
-            class="dropdown-option">
-            Lihat Data
-        </button>
+                                        <button class="dropdown-option" id="view-product" data-id="{{ $item->id }}">
+                                            Lihat Data
+                                        </button>
                                     </li>
                                     <li>
-                                        <a href="{{ route('products.destroy', $item->id) }}" 
+                                        <a href="{{ route('products.destroy', $item->id) }}"
                                             class="dropdown-option text-red-400 delete-product">
-                                             Hapus Data
-                                         </a>
-
-                                        {{-- <button onclick="deleteProduct('{{ $item->id }}')" class="dropdown-option text-red-400">
                                             Hapus Data
-                                        </button> --}}
-
-                                        <button onclick="openModal('update-av3m')" class="dropdown-option ">Update
-                                            AV3M</button>
+                                        </a>
+                                        <button class="dropdown-option" id="view-av3m" data-id="{{ $item->id }}" >
+                                            Update AV3M
+                                        </button>
                                     </li>
                                 </x-action-table-dropdown>
                             </td>
@@ -268,10 +239,12 @@
                     @endforelse
                 </tbody>
             </table>
-           
+
+            {{-- TAMBAH AV3M --}}
             <x-modal id="update-av3m">
                 <x-slot:title>Update AV3M</x-slot:title>
-                <form class="grid grid-cols-2 gap-6">
+                <form id="av3mForm" class="grid grid-cols-2 gap-6">
+                    @csrf
                     <div>
                         <label for="channel-a" class="!text-black">Channel A</label>
                         <input id="channel-a" class="form-control @error('channel-a') is-invalid @enderror"
@@ -301,7 +274,7 @@
                     </x-slot:footer>
                 </form>
             </x-modal>
-            {{-- Tabel Daftar Produk End --}}
+            {{-- END TAMBAH AV3M --}}
         </x-card>
         {{-- Daftar Produk End --}}
 
@@ -484,8 +457,7 @@
 
             // Form submission
             $('#saveBtn').click(function() {
-                // Reset error states
-                
+
                 $('.text-red-500').addClass('hidden');
                 $('input').removeClass('border-red-500');
 
@@ -500,26 +472,26 @@
                         if (response.status === 'success') {
                             closeModal('tambah-produk');
                             new Notify({
-                                    status: 'success',
-                                    title: 'Success',
-                                    text: response.message,
-                                    effect: 'fade',
-                                    speed: 300,
-                                    customClass: '',
-                                    customIcon: '',
-                                    showIcon: true,
-                                    showCloseButton: true,
-                                    autoclose: true,
-                                    autotimeout: 1000,
-                                    notificationsGap: null,
-                                    notificationsPadding: null,
-                                    type: 'outline',
-                                    position: 'right top',
-                                    customWrapper: '',
-                                })
-                                setTimeout(() => {
-                                    window.location.reload();
-                                }, 1500);
+                                status: 'success',
+                                title: 'Success',
+                                text: response.message,
+                                effect: 'fade',
+                                speed: 300,
+                                customClass: '',
+                                customIcon: '',
+                                showIcon: true,
+                                showCloseButton: true,
+                                autoclose: true,
+                                autotimeout: 1000,
+                                notificationsGap: null,
+                                notificationsPadding: null,
+                                type: 'outline',
+                                position: 'right top',
+                                customWrapper: '',
+                            })
+                            setTimeout(() => {
+                                window.location.reload();
+                            }, 1500);
                         }
                     },
                     error: function(xhr) {
@@ -633,302 +605,287 @@
         $(document).ready(function() {
             // Setup AJAX CSRF
             $.ajaxSetup({
-            headers: {
-                'X-CSRF-TOKEN': $('meta[name="csrf-token"]').attr('content')
-            }
+                headers: {
+                    'X-CSRF-TOKEN': $('meta[name="csrf-token"]').attr('content')
+                }
+            });
+
+            $(document).ready(function() {
+                // Event handler untuk tombol delete
+                $(document).on('click', '.delete-product', function(e) {
+                    e.preventDefault();
+                    const deleteUrl = $(this).attr('href');
+
+                    // Konfirmasi penghapusan dengan Sweet Alert
+                    Swal.fire({
+                        title: 'Apakah Anda yakin?',
+                        text: "Data produk akan dihapus secara permanen",
+                        icon: 'warning',
+                        showCancelButton: true,
+                        confirmButtonColor: '#d33',
+                        cancelButtonColor: '#3085d6',
+                        confirmButtonText: 'Ya, hapus!',
+                        cancelButtonText: 'Batal'
+                    }).then((result) => {
+                        if (result.isConfirmed) {
+                            // Kirim request DELETE
+                            $.ajax({
+                                url: deleteUrl,
+                                type: 'DELETE',
+                                success: function(response) {
+                                    if (response.status === 'success') {
+                                        // Tampilkan notifikasi sukses
+                                        new Notify({
+                                            status: 'success',
+                                            title: 'Berhasil',
+                                            text: response.message,
+                                            effect: 'fade',
+                                            speed: 300,
+                                            customClass: '',
+                                            customIcon: '',
+                                            showIcon: true,
+                                            showCloseButton: true,
+                                            autoclose: true,
+                                            autotimeout: 1000,
+                                            gap: 20,
+                                            distance: 20,
+                                            type: 'outline',
+                                            position: 'right top'
+                                        });
+
+                                        // Reload halaman setelah delay
+                                        setTimeout(() => {
+                                            window.location.reload();
+                                        }, 1500);
+                                    }
+                                },
+                                error: function(xhr) {
+                                    // Tampilkan notifikasi error
+                                    Swal.fire(
+                                        'Gagal!',
+                                        'Terjadi kesalahan saat menghapus data.',
+                                        'error'
+                                    );
+                                }
+                            });
+                        }
+                    });
+                });
+            });
         });
 
-        $(document).ready(function() {
-            // Event handler untuk tombol delete
-            $(document).on('click', '.delete-product', function(e) {
-                e.preventDefault();
-                const deleteUrl = $(this).attr('href');
-                
-                // Konfirmasi penghapusan dengan Sweet Alert
-                Swal.fire({
-                    title: 'Apakah Anda yakin?',
-                    text: "Data produk akan dihapus secara permanen",
-                    icon: 'warning',
-                    showCancelButton: true,
-                    confirmButtonColor: '#d33',
-                    cancelButtonColor: '#3085d6',
-                    confirmButtonText: 'Ya, hapus!',
-                    cancelButtonText: 'Batal'
-                }).then((result) => {
-                    if (result.isConfirmed) {
-                        // Kirim request DELETE
-                        $.ajax({
-                            url: deleteUrl,
-                            type: 'DELETE',
-                            success: function(response) {
-                                if (response.status === 'success') {
-                                    // Tampilkan notifikasi sukses
-                                    new Notify({
-                                        status: 'success',
-                                        title: 'Berhasil',
-                                        text: response.message,
-                                        effect: 'fade',
-                                        speed: 300,
-                                        customClass: '',
-                                        customIcon: '',
-                                        showIcon: true,
-                                        showCloseButton: true,
-                                        autoclose: true,
-                                        autotimeout: 3000,
-                                        gap: 20,
-                                        distance: 20,
-                                        type: 'outline',
-                                        position: 'right top'
-                                    });
+        // (document).ready(function() {
+            // Format number untuk input harga
+            function formatNumber(input) {
+                let value = input.val().replace(/\D/g, '');
+                if (value) {
+                    input.val(new Intl.NumberFormat('id-ID').format(value));
+                }
+            }
 
-                                    // Reload halaman setelah delay
-                                    setTimeout(() => {
-                                        window.location.reload();
-                                    }, 1500);
-                                }
-                            },
-                            error: function(xhr) {
-                                // Tampilkan notifikasi error
-                                Swal.fire(
-                                    'Gagal!',
-                                    'Terjadi kesalahan saat menghapus data.',
-                                    'error'
-                                );
-                            }
+            $('input[name="md_price"], input[name="sales_price"], #edit_md_price, #edit_sales_price').on('input',
+                function() {
+                    formatNumber($(this));
+                });
+
+        // });
+
+
+        //EDIT PRODUK
+
+        $(document).ready(function() {
+            // Setup AJAX CSRF
+            $.ajaxSetup({
+                headers: {
+                    'X-CSRF-TOKEN': $('meta[name="csrf-token"]').attr('content')
+                }
+            });
+
+            // Initialize select2 for category dropdown
+            $('.edit-category').select2();
+
+            function toggleUpdateLoading(show) {
+                if (show) {
+                    $('#updateBtnText').addClass('hidden');
+                    $('#updateBtnLoading').removeClass('hidden');
+                    $('#updateBtn').prop('disabled', true);
+                } else {
+                    $('#updateBtnText').removeClass('hidden');
+                    $('#updateBtnLoading').addClass('hidden');
+                    $('#updateBtn').prop('disabled', false);
+                }
+            }
+
+            // Load product data into form
+            $(document).on('click', '#view-product', function(e) {
+                e.preventDefault();
+                const productId = $(this).data('id');
+
+                // Reset form state
+                $('.text-red-500').addClass('hidden');
+                $('input, select').removeClass('border-red-500');
+
+                $.ajax({
+                    url: `/products/${productId}/edit`,
+                    type: 'GET',
+                    success: function(response) {
+                        $('#edit-category').val(response.category_id).trigger('change');
+                        $('#edit-sku').val(response.sku);
+                        $('#edit-md-price').val(new Intl.NumberFormat('id-ID').format(response
+                            .md_price));
+                        $('#edit-sales-price').val(new Intl.NumberFormat('id-ID').format(
+                            response.sales_price));
+                        $('#editProductForm').data('id', response.id);
+                        openModal('edit-produk');
+                    },
+                    error: function(xhr) {
+                        new Notify({
+                            status: 'error',
+                            title: 'Error',
+                            text: 'Gagal mengambil data produk',
+                            effect: 'fade',
+                            speed: 300,
+                            showIcon: true,
+                            showCloseButton: true,
+                            autoclose: true,
+                            autotimeout: 3000,
+                            type: 'outline',
+                            position: 'right top'
                         });
                     }
                 });
             });
-        });
-    });
 
-    (document).ready(function() {
-    // Format number untuk input harga
-    function formatNumber(input) {
-        let value = input.val().replace(/\D/g, '');
-        if (value) {
-            input.val(new Intl.NumberFormat('id-ID').format(value));
-        }
-    }
+            // Handle form submission
+            $('#updateBtn').click(function(e) {
+                e.preventDefault();
 
-    // Format number inputs dengan thousand separator
-    $('input[name="md_price"], input[name="sales_price"], #edit_md_price, #edit_sales_price').on('input', function() {
-        formatNumber($(this));
-    });
+                $('.text-red-500').addClass('hidden');
+                $('input, select').removeClass('border-red-500');
 
-    // Handle klik tombol edit
-    $('.edit-product').on('click', function() {
-        const productId = $(this).data('id');
-        
-        // Reset form dan error states
-        $('#editProductForm')[0].reset();
-        $('.text-red-500').addClass('hidden');
-        $('input').removeClass('border-red-500');
-        
-        // Ambil data produk
-        $.ajax({
-            type: 'GET',
-            url: `/products/${productId}/edit`,
-            success: function(response) {
-                // Isi form dengan data yang diambil
-                $('#edit_product_id').val(productId);
-                $('#edit_category_id').val(response.category_id).trigger('change');
-                $('#edit_sku').val(response.sku);
-                $('#edit_md_price').val(new Intl.NumberFormat('id-ID').format(response.md_price));
-                $('#edit_sales_price').val(new Intl.NumberFormat('id-ID').format(response.sales_price));
-                
-                // Buka modal
-                openModal('edit-produk');
-            },
-            error: function(xhr) {
-                new Notify({
-                    status: 'error',
-                    title: 'Error',
-                    text: 'Gagal mengambil data produk',
-                    effect: 'fade',
-                    speed: 300,
-                    showIcon: true,
-                    showCloseButton: true,
-                    autoclose: true,
-                    autotimeout: 3000,
-                    position: 'right top',
-                    type: 'outline'
+                toggleUpdateLoading(true);
+
+                const productId = $('#editProductForm').data('id');
+                const formData = {
+                    category_id: $('#edit-category').val(),
+                    sku: $('#edit-sku').val(),
+                    md_price: $('#edit-md-price').val().replace(/[^\d]/g, ''),
+                    sales_price: $('#edit-sales-price').val().replace(/[^\d]/g, '')
+                };
+
+                $.ajax({
+                    url: `/products/${productId}`,
+                    type: 'PUT',
+                    data: formData,
+                    success: function(response) {
+                        toggleUpdateLoading(false);
+                        closeModal('edit-produk');
+
+                        new Notify({
+                            status: 'success',
+                            title: 'Success',
+                            text: response.message,
+                            effect: 'fade',
+                            speed: 300,
+                            showIcon: true,
+                            showCloseButton: true,
+                            autoclose: true,
+                            autotimeout: 1500,
+                            type: 'outline',
+                            position: 'right top'
+                        });
+
+                        setTimeout(() => {
+                            window.location.reload();
+                        }, 1500);
+                    },
+                    error: function(xhr) {
+                        toggleUpdateLoading(false);
+                        if (xhr.status === 422) {
+                            const errors = xhr.responseJSON.errors;
+                            $.each(errors, function(key, value) {
+                                $(`#edit-${key}-error`)
+                                    .text(value[0])
+                                    .removeClass('hidden');
+                                $(`[name="${key}"]`).addClass('border-red-500');
+                            });
+                        }
+                    }
                 });
-            }
+            });
+
+            // Format number inputs with thousand separator
+            $('#edit-md-price, #edit-sales-price').on('input', function() {
+                const value = $(this).val().replace(/[^\d]/g, '');
+                if (value) {
+                    $(this).val(new Intl.NumberFormat('id-ID').format(value));
+                }
+            });
         });
-    });
 
 
-    $(document).ready(function() {
-    // Setup AJAX CSRF
-    $.ajaxSetup({
-        headers: {
-            'X-CSRF-TOKEN': $('meta[name="csrf-token"]').attr('content')
-        }
-    });
+        // TAMBAH AV3M
 
-    // Event handler untuk tombol Lihat Data
-    $(document).on('click', '.view-product-btn', function(e) {
-        e.preventDefault();
-        const productId = $(this).data('id');
-        
-        // Fetch product data
-        $.ajax({
-            url: `/products/${productId}/edit`,
-            type: 'GET',
-            success: function(response) {
-                // Populate form with product data
-                $('#edit_categories_' + productId).val(response.category_id).trigger('change');
-                $('#edit_sku_' + productId).val(response.sku);
-                $('#edit_md_price_' + productId).val(formatNumber(response.md_price));
-                $('#edit_sales_price_' + productId).val(formatNumber(response.sales_price));
-                
-                // Show modal
-                openModal('view-produk');
-            },
-            error: function(xhr) {
-                new Notify({
-                    status: 'error',
-                    title: 'Error',
-                    text: 'Gagal mengambil data produk',
-                    effect: 'fade',
-                    speed: 300,
-                    customClass: '',
-                    customIcon: '',
-                    showIcon: true,
-                    showCloseButton: true,
-                    autoclose: true,
-                    autotimeout: 3000,
-                    position: 'right top'
-                });
-            }
-        });
-    });
-});
+        $(document).on('click', '#view-av3m', function(e) {
+    e.preventDefault();
+    const productId = $(this).data('id');
+    openModal('update-av3m');
 
-});
-
-
-//EDIT PRODUK
-
-function showEditModal(productId) {
-    // Reset form dan error states
-    $(`#editProductForm-${productId}`)[0].reset();
+    // Reset form
     $('.text-red-500').addClass('hidden');
     $('input').removeClass('border-red-500');
-    
-    // Fetch product data
+
     $.ajax({
-        url: `/products/${productId}/edit`,
+        url: `/products/${productId}/av3m`,
         type: 'GET',
         success: function(response) {
-            // Populate form dengan data produk
-            $(`#edit_categories_${productId}`).val(response.category_id).trigger('change');
-            $(`#edit_sku_${productId}`).val(response.sku);
-            $(`#edit_md_price_${productId}`).val(formatNumber(response.md_price));
-            $(`#edit_sales_price_${productId}`).val(formatNumber(response.sales_price));
-            
-            // Buka modal
-            openModal(`edit-modal-${productId}`);
-        },
-        error: function(xhr) {
+            $('#channel-a').val(response.channel_a);
+            $('#channel-b').val(response.channel_b);
+            $('#channel-c').val(response.channel_c);
+            $('#channel-d').val(response.channel_d);
+            $('#av3mForm').data('id', response.id);
+        }
+    });
+});
+
+// Handle form submission
+$('#saveAv3mBtn').click(function(e) {
+    e.preventDefault();
+    const productId = $('#av3mForm').data('id');
+
+    $.ajax({
+        url: `/products/${productId}/av3m`,
+        type: 'POST',
+        data: $('#av3mForm').serialize(),
+        success: function(response) {
+            closeModal('update-av3m');
             new Notify({
-                status: 'error',
-                title: 'Error',
-                text: 'Gagal mengambil data produk',
+                status: 'success',
+                title: 'Success',
+                text: response.message,
                 effect: 'fade',
                 speed: 300,
                 showIcon: true,
                 showCloseButton: true,
                 autoclose: true,
-                autotimeout: 3000,
+                autotimeout: 1500,
+                type: 'outline',
                 position: 'right top'
             });
+            setTimeout(() => {
+                window.location.reload();
+            }, 1500);
+        },
+        error: function(xhr) {
+            if (xhr.status === 422) {
+                const errors = xhr.responseJSON.errors;
+                $.each(errors, function(key, value) {
+                    $(`#${key}-error`).text(value[0]).removeClass('hidden');
+                    $(`#${key}`).addClass('border-red-500');
+                });
+            }
         }
     });
-}
-
-// Function untuk format number
-function formatNumber(number) {
-    return new Intl.NumberFormat('id-ID').format(number);
-}
-
-// Event handler untuk tombol update
-$(document).ready(function() {
-    $('.update-product-btn').on('click', function(e) {
-        e.preventDefault();
-        const productId = $(this).data('id');
-        const form = $(`#editProductForm-${productId}`);
-        
-        // Reset error states
-        $('.text-red-500').addClass('hidden');
-        $('input').removeClass('border-red-500');
-
-        // Show loading state
-        $(`#updateBtnText-${productId}`).addClass('hidden');
-        $(`#updateBtnLoading-${productId}`).removeClass('hidden');
-        $(this).prop('disabled', true);
-
-        // Get form data dan bersihkan format number
-        const formData = new FormData(form[0]);
-        let mdPrice = formData.get('md_price').replace(/\D/g, '');
-        let salesPrice = formData.get('sales_price').replace(/\D/g, '');
-        
-        formData.set('md_price', mdPrice);
-        formData.set('sales_price', salesPrice);
-
-        // Convert ke object untuk AJAX
-        const formObject = {};
-        formData.forEach((value, key) => {
-            formObject[key] = value;
-        });
-
-        // Submit update request
-        $.ajax({
-            url: `/products/${productId}`,
-            type: 'PUT',
-            data: formObject,
-            success: function(response) {
-                if (response.status === 'success') {
-                    closeModal(`edit-modal-${productId}`);
-                    new Notify({
-                        status: 'success',
-                        title: 'Success',
-                        text: response.message,
-                        effect: 'fade',
-                        speed: 300,
-                        showIcon: true,
-                        showCloseButton: true,
-                        autoclose: true,
-                        autotimeout: 1500,
-                        position: 'right top'
-                    });
-                    
-                    setTimeout(() => {
-                        window.location.reload();
-                    }, 1500);
-                }
-            },
-            error: function(xhr) {
-                // Reset loading state
-                $(`#updateBtnText-${productId}`).removeClass('hidden');
-                $(`#updateBtnLoading-${productId}`).removeClass('hidden');
-                $('.update-product-btn').prop('disabled', false);
-
-                if (xhr.status === 422) {
-                    const errors = xhr.responseJSON.errors;
-                    $.each(errors, function(key, value) {
-                        $(`#edit_${key}-error-${productId}`)
-                            .text(value[0])
-                            .removeClass('hidden');
-                        $(`#edit_${key}_${productId}`).addClass('border-red-500');
-                    });
-                }
-            }
-        });
-    });
 });
-
     </script>
 @endpush
-

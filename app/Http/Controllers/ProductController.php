@@ -15,15 +15,12 @@ class ProductController extends Controller
         // Validate and get per_page parameter
         $perPage = $request->input('per_page', 10);
         $validPerPage = in_array($perPage, [10, 20, 30, 40, 50]) ? $perPage : 10;
-        
-        $items = Product::with('category')
-            ->latest()
-            ->get(); // Menggunakan get() daripada paginate() karena paginasi sudah ditangani DataTable
-            
+
+        $items = Product::with('category')->latest()->get();
         $categories = Category::all();
 
         return view('pages.product.index', [
-            'items' => $items, 
+            'items' => $items,
             'categories' => $categories,
             // Pass null sebagai default product untuk modal edit
             'product' => null
@@ -49,7 +46,7 @@ class ProductController extends Controller
     public function destroy(Product $product)
     {
         try {
-            $product->delete(); 
+            $product->delete();
 
             return response()->json([
                 'status' => 'success',
@@ -65,13 +62,26 @@ class ProductController extends Controller
 
     public function edit(Product $product)
     {
-        return response()->json($product);
+        $product->load('category'); // Eager load the category relationship
+
+        return response()->json([
+            'id' => $product->id,
+            'category_id' => $product->category_id,
+            'sku' => $product->sku,
+            'md_price' => $product->md_price,
+            'sales_price' => $product->sales_price
+        ]);
     }
 
     public function update(CreateProductRequest $request, Product $product)
     {
         try {
-            $product->update($request->validated());
+            $product->update([
+                'category_id' => $request->category_id,
+                'sku' => $request->sku,
+                'md_price' => $request->md_price,
+                'sales_price' => $request->sales_price
+            ]);
 
             return response()->json([
                 'status' => 'success',
@@ -84,5 +94,34 @@ class ProductController extends Controller
             ], 500);
         }
     }
+
+    public function getAv3m(Product $product)
+    {
+        return response()->json([
+            'id' => $product->id,
+            'channel_a' => $product->channel_a,
+            'channel_b' => $product->channel_b,
+            'channel_c' => $product->channel_c,
+            'channel_d' => $product->channel_d
+        ]);
+    }
+
+    public function updateAv3m(Request $request, Product $product)
+    {
+        $validated = $request->validate([
+            'channel_a' => 'required|numeric',
+            'channel_b' => 'required|numeric',
+            'channel_c' => 'required|numeric',
+            'channel_d' => 'required|numeric',
+        ]);
+
+        $product->update($validated);
+
+        return response()->json([
+            'status' => 'success',
+            'message' => 'AV3M berhasil diperbarui'
+        ]);
+    }
+
 
 }

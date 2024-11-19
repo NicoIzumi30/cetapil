@@ -18,7 +18,7 @@ Route::middleware('guest')->group(function () {
 Route::middleware('auth')->group(function () {
     // Dashboard
     Route::get('/', [DashboardController::class, 'index'])->name('dashboard');
-    
+
     // Profile
     Route::get('/profile', function () {
         return view('pages.profile');
@@ -56,13 +56,14 @@ Route::middleware('auth')->group(function () {
 
     // Product Management
     Route::prefix('products')->name('products.')->middleware('permission:menu_product')->group(function () {
-        Route::get('/', [ProductController::class, 'index'])->name('index'); 
+        Route::get('/', [ProductController::class, 'index'])->name('index');
         Route::get('/create', [ProductController::class, 'create'])->name('create');
         Route::post('/', [ProductController::class, 'store'])->name('store');
-        Route::get('/products/{product}/edit', [ProductController::class, 'edit'])->name('edit');
+        Route::get('products/{product}/edit', [ProductController::class, 'edit'])->name('edit');
         Route::put('/products/{product}', [ProductController::class, 'update'])->name('update');
         Route::delete('/products/{product}', [ProductController::class, 'destroy'])->name('products.destroy');
-        
+        Route::get('/products/{product}/av3m', [ProductController::class, 'getAv3m'])->name('products.getAv3m');
+        Route::post('/products/{product}/av3m', [ProductController::class, 'updateAv3m'])->name('products.updateAv3m');
     });
 
     // Logout
@@ -163,7 +164,7 @@ Route::middleware('guest')->group(function () {
 Route::middleware('auth')->group(function () {
     // Dashboard
     Route::get('/', [DashboardController::class, 'index'])->name('dashboard');
-    
+
     // Profile
     Route::get('/profile', function () {
         return view('pages.profile');
@@ -225,13 +226,13 @@ Route::middleware('auth')->group(function () {
 
     // Product Management
     Route::prefix('products')->name('products.')->middleware('permission:menu_product')->group(function () {
-        Route::get('/', [ProductController::class, 'index'])->name('index'); 
+        Route::get('/', [ProductController::class, 'index'])->name('index');
         Route::get('/create', [ProductController::class, 'create'])->name('create');
         Route::post('/', [ProductController::class, 'store'])->name('store');
         Route::get('/{product}/edit', [ProductController::class, 'edit'])->name('edit');
         Route::put('/{product}', [ProductController::class, 'update'])->name('update');
         Route::delete('/{product}', [ProductController::class, 'destroy'])->name('destroy');
-        
+
     });
     });
     Route::get('/unauthorized', function () {
