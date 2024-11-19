@@ -2,7 +2,7 @@
 
 @section('banner-content')
     <div class="flex items-start justify-between mb-6 p-6">
-<<<<<<< HEAD
+
 		<div class="z-[30]">
 			<h2 class="text-4xl text-white text-left font-[400]">Selamat Datang,</h2>
 			<h1 class="text-5xl text-white my-6 text-left font-bold">{{ auth()->user()->name }}</h1>
@@ -15,13 +15,12 @@
 				<img class="w-10 h-auto" src="{{ asset('/assets/icons/material-symbols_date-range.svg') }}" alt="calendar">
 				<div>
 					<p class="text-lightGrey text-sm font-bold">Hari Ini</p>
-					{{-- <p class="text-black text-sms font-bold">{{formatTanggalIndonesia()}}</p> --}}
+					<p class="text-black text-sms font-bold">{{formatTanggalIndonesia()}}</p> 
 				</div>
 			</div>
 
 		</div>
 	</div>
-=======
         <div class="z-[30]">
             <h2 class="text-4xl text-white text-left font-[400]">Selamat Datang,</h2>
             <h1 class="text-5xl text-white my-6 text-left font-bold">Andromeda Phytagoras Silalahi</h1>
@@ -39,12 +38,10 @@
             </div>
         </div>
     </div>
->>>>>>> 2b28e8f560e39e1358d9310e8bf57b3ff6ccfc4f
 @endsection
 
 @section('dashboard-content')
     <main class="w-full">
-<<<<<<< HEAD
 		<div class="flex w-full gap-5 p-6">
 			<x-pages.dashboard.total-card :title="'Total Report'" :total="7.432"/>
 			<x-pages.dashboard.total-card :title="'Total Sales'" :total="7.432"/>
@@ -54,6 +51,11 @@
 	</main>
 @endsection
 
+@endsection
+
+@section('dashboard-content')
+>>>>>>> 9f15660adf1a3ecfa664c526292180fab83bfe79
+
 
 
 @push('scripts')
@@ -62,7 +64,7 @@
 <script src="https://code.highcharts.com/maps/modules/exporting.js"></script>
 <script src="https://code.highcharts.com/maps/modules/offline-exporting.js"></script>
 <script src="https://code.highcharts.com/modules/accessibility.js"></script>
-=======
+
         <div class="flex w-full gap-5 p-6">
             <x-pages.dashboard.total-card :title="'Total Report'" :total="7.432" />
             <x-pages.dashboard.total-card :title="'Total Sales'" :total="7.432" />

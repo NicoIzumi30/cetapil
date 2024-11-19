@@ -7,6 +7,7 @@ use App\Http\Controllers\Auth\LoginController;
 use App\Http\Controllers\Auth\LogoutController;
 use App\Http\Controllers\Web\DashboardController;
 
+
 // Guest Routes
 Route::middleware('guest')->group(function () {
     Route::get('/login', [LoginController::class, 'index'])->name('login');
@@ -58,9 +59,9 @@ Route::middleware('auth')->group(function () {
         Route::get('/', [ProductController::class, 'index'])->name('index'); 
         Route::get('/create', [ProductController::class, 'create'])->name('create');
         Route::post('/', [ProductController::class, 'store'])->name('store');
-        Route::get('/{product}/edit', [ProductController::class, 'edit'])->name('edit');
-        Route::put('/{product}', [ProductController::class, 'update'])->name('update');
-        Route::delete('/{product}', [ProductController::class, 'destroy'])->name('destroy');
+        Route::get('/products/{product}/edit', [ProductController::class, 'edit'])->name('edit');
+        Route::put('/products/{product}', [ProductController::class, 'update'])->name('update');
+        Route::delete('/products/{product}', [ProductController::class, 'destroy'])->name('products.destroy');
         
     });
 
@@ -151,4 +152,89 @@ Route::get('/unauthorized', function () {
 
 
 Route::get('/product', [ProductController::class, 'index'])->name('pages.product.index');
+
+
+Route::middleware('guest')->group(function () {
+    Route::get('/login', [LoginController::class, 'index'])->name('login');
+    Route::post('/login', [LoginController::class, 'login']);
+});
+
+// Authenticated Routes
+Route::middleware('auth')->group(function () {
+    // Dashboard
+    Route::get('/', [DashboardController::class, 'index'])->name('dashboard');
+    
+    // Profile
+    Route::get('/profile', function () {
+        return view('pages.profile');
+    })->name('profile');
+
+    // Routing Management
+    Route::prefix('routing')->name('routing.')->middleware('permission:menu_routing')->group(function () {
+        Route::get('/', function () {
+            return view('pages.routing.index');
+        })->name('index');
+        Route::get('/create', function () {
+            return view('pages.routing.create');
+        })->name('create');
+        Route::get('/edit', function () {
+            return view('pages.routing.edit');
+        })->name('edit');
+        Route::get('/request', function () {
+            return view('pages.routing.request');
+        });
+        Route::get('/routingrequest/detail', function () {
+            return view('pages.routing.detail-request');
+        });
+        Route::get('/sales-activity', function () {
+            return view('pages.routing.sales-activity');
+        });
+        Route::get('/av3m', function () {
+            return view('pages.routing.av3m');
+        });
+    });
+
+    // Visibility Management
+    Route::prefix('visibility')->name('visibility.')->middleware('permission:menu_visibility')->group(function () {
+        Route::get('/', function () {
+            return view('pages.visibility.index');
+        })->name('index');
+        Route::get('/edit', function () {
+            return view('pages.visibility.edit');
+        });
+        Route::get('/create', function () {
+            return view('pages.visibility.create');
+        });
+    });
+
+    // Selling Management
+    Route::prefix('selling')->name('selling.')->middleware('permission:menu_selling')->group(function () {
+        Route::get('/', function () {
+            return view('pages.selling.index');
+        })->name('index');
+        Route::get('/create', function () {
+            return view('pages.selling.create');
+        });
+        Route::get('/edit', function () {
+            return view('pages.selling.edit');
+        });
+    });
+
+    // User Management
+    Route::resource('users', UserController::class)->middleware('permission:menu_user');
+
+    // Product Management
+    Route::prefix('products')->name('products.')->middleware('permission:menu_product')->group(function () {
+        Route::get('/', [ProductController::class, 'index'])->name('index'); 
+        Route::get('/create', [ProductController::class, 'create'])->name('create');
+        Route::post('/', [ProductController::class, 'store'])->name('store');
+        Route::get('/{product}/edit', [ProductController::class, 'edit'])->name('edit');
+        Route::put('/{product}', [ProductController::class, 'update'])->name('update');
+        Route::delete('/{product}', [ProductController::class, 'destroy'])->name('destroy');
+        
+    });
+    });
+    Route::get('/unauthorized', function () {
+        return view('pages.unauthorized');
+    });
 

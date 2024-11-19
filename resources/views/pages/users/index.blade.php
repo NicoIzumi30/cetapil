@@ -16,7 +16,6 @@
     </x-slot:cardAction>
     {{-- Users Action End --}}
 
-<<<<<<< HEAD
     <table class="table">
         <thead>
             <tr>
@@ -59,7 +58,6 @@
         </thead>
         <tbody>
             @forelse($users as $user)
-=======
         {{-- Users Table --}}
         <table id="users-table" class="table">
             <thead>
@@ -102,7 +100,6 @@
                 </tr>
             </thead>
             <tbody>
->>>>>>> 2b28e8f560e39e1358d9310e8bf57b3ff6ccfc4f
                 <tr class="table-row">
                     <td scope="row" class="table-data">
                         {{ $user->name }}
@@ -127,19 +124,20 @@
                                 </a>
                             </li>
                             <li>
-<<<<<<< HEAD
                                 <a href="{{ route('users.destroy', $user->id) }}" class="delete-btn dropdown-option text-red-400 delete-user" data-id="{{ $user->id }}">
                                     Hapus Data
                                 </a>
-=======
+
                                 <button onclick="openModal('delete-user')" class="dropdown-option text-red-400">Hapus
                                     Data</button>
->>>>>>> 2b28e8f560e39e1358d9310e8bf57b3ff6ccfc4f
+
+                                <a href="{{ route('users.destroy', $user->id) }}" class="delete-btn dropdown-option text-red-400 delete-user" data-id="{{ $user->id }}">
+                                    Hapus Data
+                                </a>
                             </li>
                         </x-action-table-dropdown>
                     </td>
                 </tr>
-<<<<<<< HEAD
             @empty
                 <tr>
                     <td colspan="6" class="text-center py-4">
@@ -154,7 +152,6 @@
     {{-- Users Table End --}}
 </x-card>
 {{-- Users End --}}
-=======
             </tbody>
         </table>
 		<x-modal id="delete-user">
@@ -168,16 +165,15 @@
         {{-- Users Table End --}}
     </x-card>
     {{-- Users End --}}
->>>>>>> 2b28e8f560e39e1358d9310e8bf57b3ff6ccfc4f
+
 @endsection
 
 @push('scripts')
     <script>
-<<<<<<< HEAD
+
         $(document).ready(function () {
             $("#sales-date-range").flatpickr({
                 mode: "range"
-=======
             $(document).ready(function() {
                 $('#users-table').DataTable({
                     paging: true,
@@ -195,7 +191,12 @@
                         }
                     },
                 });
->>>>>>> 2b28e8f560e39e1358d9310e8bf57b3ff6ccfc4f
+
+        $(document).ready(function () {
+            $("#sales-date-range").flatpickr({
+                mode: "range"
+
             });
+        });
     </script>
 @endpush

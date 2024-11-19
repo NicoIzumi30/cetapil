@@ -14,23 +14,20 @@ class ProductController extends Controller
     {
         // Validate and get per_page parameter
         $perPage = $request->input('per_page', 10);
-
         $validPerPage = in_array($perPage, [10, 20, 30, 40, 50]) ? $perPage : 10;
         
-        // Get all products with pagination
         $items = Product::with('category')
             ->latest()
-            ->paginate($validPerPage);
+            ->get(); // Menggunakan get() daripada paginate() karena paginasi sudah ditangani DataTable
             
-        // Get all categories for the form
         $categories = Category::all();
-            
-        if ($validPerPage != 10) {
-            $items->appends(['per_page' => $validPerPage]);
-        }
 
-        // Pass both items and categories to the view
-        return view('pages.product.index', compact('items', 'categories'));
+        return view('pages.product.index', [
+            'items' => $items, 
+            'categories' => $categories,
+            // Pass null sebagai default product untuk modal edit
+            'product' => null
+        ]);
     }
 
     public function create()
@@ -68,8 +65,7 @@ class ProductController extends Controller
 
     public function edit(Product $product)
     {
-        $categories = Category::all();
-        return view('pages.product.edit', compact('product', 'categories'));
+        return response()->json($product);
     }
 
     public function update(CreateProductRequest $request, Product $product)
