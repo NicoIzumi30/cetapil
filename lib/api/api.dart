@@ -1,13 +1,16 @@
-
 import 'dart:convert';
 
+import 'package:cetapil_mobile/model/dashboard.dart';
+import 'package:get_storage/get_storage.dart';
 import 'package:http/http.dart' as http;
 
 import '../model/form_outlet_response.dart';
 import '../model/login_response.dart';
-const String baseUrl = 'https://8a37-103-86-100-201.ngrok-free.app';
-class Api{
 
+const String baseUrl = 'https://a820-125-163-145-160.ngrok-free.app';
+GetStorage storage = GetStorage();
+
+class Api {
   Future<LoginResponse> login(String email, String password) async {
     var uri = Uri.parse('$baseUrl/api/login');
     var request = http.MultipartRequest('POST', uri)
@@ -46,5 +49,22 @@ class Api{
       return FormOutletResponse.fromJson(jsonDecode(response.body));
     }
     throw "Gagal request form outlet:\n${response.body}";
+  }
+
+  static Future<Dashboard> getDashboard() async {
+    var url = "$baseUrl/api/dashboard";
+    var token = await storage.read('token');
+    var response = await http.get(
+      Uri.parse(url),
+      headers: {
+        'Content-type': 'application/json',
+        'Authorization': 'Bearer $token',
+      },
+    );
+    print(response.body);
+    if (response.statusCode == 200) {
+      return Dashboard.fromJson(jsonDecode(response.body));
+    }
+    throw "Gagal request data dashboard : \n${response.body}";
   }
 }
