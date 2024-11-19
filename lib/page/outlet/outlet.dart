@@ -5,6 +5,8 @@ import 'package:cetapil_mobile/page/outlet/tambah_outlet.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 
+import '../../model/outlet_example.dart';
+
 class OutletPage extends GetView<OutletController> {
 
   @override
@@ -36,6 +38,7 @@ class OutletPage extends GetView<OutletController> {
                   itemCount: controller.filteredOutlets.length,
                   itemBuilder: (context, index) {
                     final outlet = controller.filteredOutlets[index];
+                    print(outlet);
                     return OutletCard(outlet: outlet);
                   },
                 ),
@@ -84,7 +87,7 @@ class OutletCard extends StatelessWidget {
                   ),
                   const SizedBox(height: 4),
                   Text(
-                    outlet.name,
+                    outlet.outletName,
                     style: const TextStyle(
                       fontWeight: FontWeight.bold,
                     ),
@@ -130,7 +133,7 @@ class OutletCard extends StatelessWidget {
                 ClipRRect(
                   borderRadius: BorderRadius.circular(8),
                   child: Image.asset(
-                    outlet.image,
+                    "assets/carousel1.png",
                     width: 100,
                     height: 100,
 

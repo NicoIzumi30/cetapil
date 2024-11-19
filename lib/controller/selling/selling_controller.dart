@@ -1,11 +1,14 @@
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
+import 'package:uuid/uuid.dart';
 
 import '../../model/outlet.dart';
+import '../../model/outlet_example.dart';
 
 class SellingController extends GetxController {
   RxString searchQuery = ''.obs;
   RxList<Outlet> outlets = <Outlet>[].obs;
+  final uuid = Uuid();
 
   @override
   void onInit() {
@@ -13,30 +16,30 @@ class SellingController extends GetxController {
 
     outlets.addAll([
       Outlet(
-        name: 'Guardian Setiabudi Building',
+        id: uuid.v4(),
+        outletName: 'Guardian Setiabudi Building',
+        salesName: "Andromeda",
         category: 'GT',
-        image: 'assets/carousel1.png',
+        status: "APPROVED",
+        address: "WONOGIRI",
+        latitude: "123.00",
+        longitude: "123.00",
+        createdAt: DateTime.now(),
+        updatedAt: DateTime.now(),
       ),
       Outlet(
-        name: 'CV Jaya Makmur Sentosa',
-        category: 'MT',
-        image: 'assets/carousel1.png',
-      ),
-      Outlet(
-        name: 'Alfamart Senen Raya',
+        id: uuid.v4(),
+        outletName: 'Guardian Setiabudi Building',
+        salesName: "Andromeda",
         category: 'GT',
-        image: 'assets/carousel1.png',
+        status: "APPROVED",
+        address: "WONOGIRI",
+        latitude: "123.00",
+        longitude: "123.00",
+        createdAt: DateTime.now(),
+        updatedAt: DateTime.now(),
       ),
-      Outlet(
-        name: 'Alfamart Thamrin City',
-        category: 'GT',
-        image: 'assets/carousel1.png',
-      ),
-      Outlet(
-        name: 'Guardian Setiabudi Building',
-        category: 'MT',
-        image: 'assets/carousel1.png',
-      ),
+
     ]);
   }
 
@@ -45,7 +48,7 @@ class SellingController extends GetxController {
   }
 
   List<Outlet> get filteredOutlets => outlets.where((outlet) {
-    return outlet.name
+    return outlet.outletName
         .toLowerCase()
         .contains(searchQuery.value.toLowerCase());
   }).toList();

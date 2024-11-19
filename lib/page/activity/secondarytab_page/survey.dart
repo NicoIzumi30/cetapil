@@ -4,6 +4,7 @@ import 'package:cetapil_mobile/widget/dropdown_textfield.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 
+import '../../../utils/price_formatter.dart';
 import '../../../widget/text_field.dart';
 
 class SurveyPage extends GetView<TambahActivityController> {
@@ -127,6 +128,8 @@ class priceQuestion extends StatelessWidget {
                     fontSize: 14,
                     color: Color(0xFF0077BD),
                   ),
+                  keyboardType: TextInputType.number,
+                  inputFormatters: [NumberInputFormatter()],
                   decoration: InputDecoration(
                     hintText: "Masukan Harga",
                     hintStyle: TextStyle(fontSize: 12,color: Colors.grey[400]),

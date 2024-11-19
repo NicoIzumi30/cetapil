@@ -4,8 +4,32 @@ import 'dart:convert';
 import 'package:http/http.dart' as http;
 
 import '../model/form_outlet_response.dart';
-const String baseUrl = 'https://2164-180-254-100-177.ngrok-free.app';
+import '../model/login_response.dart';
+const String baseUrl = 'https://8a37-103-86-100-201.ngrok-free.app';
 class Api{
+
+  Future<LoginResponse> login(String email, String password) async {
+    var uri = Uri.parse('$baseUrl/api/login');
+    var request = http.MultipartRequest('POST', uri)
+      ..fields['email'] = email
+      ..fields['password'] = password;
+
+    try {
+      var streamedResponse = await request.send();
+      var response = await http.Response.fromStream(streamedResponse);
+
+      if (response.statusCode == 200) {
+        return LoginResponse.fromJson(json.decode(response.body));
+      } else {
+        if (response.statusCode >= 500) {
+          throw Exception('Server Error');
+        }
+        throw Exception('Failed to login: ${response.statusCode} ${response.reasonPhrase}');
+      }
+    } catch (e) {
+      throw Exception('Failed to login: $e');
+    }
+  }
 
   static Future<FormOutletResponse> getFormOutlet() async {
     var url = "$baseUrl/api/outlet/forms";

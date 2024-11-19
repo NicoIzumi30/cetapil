@@ -7,6 +7,7 @@ import 'package:google_fonts/google_fonts.dart';
 
 import '../../controller/selling/selling_controller.dart';
 import '../../model/outlet.dart';
+import '../../model/outlet_example.dart';
 import '../outlet/outlet.dart';
 
 class SellingPage extends GetView<SellingController> {
@@ -91,7 +92,7 @@ class SellingCard extends StatelessWidget {
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
                       Text(
-                        outlet.name,
+                        outlet.outletName,
                         style: const TextStyle(
                           fontWeight: FontWeight.bold,
                         ),

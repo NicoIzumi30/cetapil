@@ -147,13 +147,13 @@ class TambahOutlet extends GetView<OutletController> {
                           Obx(() {
                             return Column(
                               children: List<Widget>.generate(
-                                controller.questions.length,
+                                controller.forms.length,
                                     (index) {
-                                  final question = controller.questions[index];
+                                  final question = controller.forms[index];
                                   print("Question ${question.question}");
                                   return ModernTextField(
                                     title: question.question ?? "",
-                                    controller: controller.controllers[index],
+                                    controller: TextEditingController(),
                                   );
                                 },
                               ),

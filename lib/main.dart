@@ -2,6 +2,7 @@ import 'package:cetapil_mobile/controller/activity/tambah_activity_controller.da
 import 'package:cetapil_mobile/controller/outlet/outlet_controller.dart';
 import 'package:cetapil_mobile/controller/routing/routing_controller.dart';
 import 'package:cetapil_mobile/controller/selling/selling_controller.dart';
+import 'package:cetapil_mobile/controller/video_controller/video_controller.dart';
 import 'package:cetapil_mobile/page/splash_screen.dart';
 import 'package:cetapil_mobile/utils/colors.dart';
 import 'package:flutter/material.dart';
@@ -11,6 +12,7 @@ import 'package:get/get.dart';
 import 'package:get/get_core/src/get_main.dart';
 import 'package:get/get_navigation/src/root/get_material_app.dart';
 import 'package:get_storage/get_storage.dart';
+import 'package:intl/intl.dart';
 
 import 'controller/activity/activity_controller.dart';
 import 'controller/bottom_nav_controller.dart';
@@ -18,9 +20,12 @@ import 'controller/connectivity_controller.dart';
 import 'controller/dashboard/dashboard_controller.dart';
 import 'controller/gps_controller.dart';
 import 'controller/login_controller.dart';
+import 'database/database_instance.dart';
 
 void main()async {
   WidgetsFlutterBinding.ensureInitialized();
+  Intl.defaultLocale = 'id';
+  await DatabaseHelper.instance.database;
   await GetStorage.init();
   await initializeGPS();
   await initializeControllers();
@@ -48,6 +53,7 @@ Future<void> initializeControllers() async {
   Get.put(RoutingController());
   Get.put(SellingController());
   Get.put(TambahActivityController());
+  Get.put(VideoController());
 
 }
 

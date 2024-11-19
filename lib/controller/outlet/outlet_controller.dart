@@ -2,127 +2,135 @@
 import 'dart:convert';
 
 import 'package:cetapil_mobile/model/form_outlet_response.dart';
-import 'package:cetapil_mobile/model/question_outlet.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
+import 'package:uuid/uuid.dart';
 
-import '../../api/api.dart';
-import '../../model/outlet.dart';
+import '../../database/database_instance.dart';
+import '../../model/outlet_example.dart';
 
 class OutletController extends GetxController {
-  RxList<Outlet> outlets = <Outlet>[].obs;
+  // RxList<Outlet> outlets = <Outlet>[].obs;
   RxString searchQuery = ''.obs;
   RxDouble longitude = 0.0.obs;
   RxDouble latitude = 0.0.obs;
   var controllers = <TextEditingController>[].obs;
-
-  var jsonExample = '''
-  [{
-    "id": "9d7cc874-0604-40c5-9537-1c7a9bc68eb8",
-    "question": "Apakah outlet sudah menjual produk GIH",
-    "type": "bool"
-  },
-  {
-    "id": "9d7cc874-0748-49c1-ae92-99ccbd0c690a",
-    "question": "Berapa SKU GIH yang dijual",
-    "type": "text"
-  },
-  {
-    "id": "9d7cc874-07e9-4776-8b95-cea69cdd4245",
-    "question": "Selling out GSC500 / week (in pcs)",
-    "type": "text"
-  },
-  {
-    "id": "9d7cc874-08a3-4d80-9eb5-740c584993f8",
-    "question": "Selling out GSC1000 / week (in pcs)",
-    "type": "text"
-  },
-  {
-    "id": "9d7cc874-094f-49e3-a2f8-1eee8a2c2ed2",
-    "question": "Selling out GSC 250 / week (in pcs)",
-    "type": "text"
-  },
-  {
-    "id": "9d7cc874-09f4-4ee4-af9d-8ebab2572a54",
-    "question": "Selling out GSC 125 / week (in pcs)",
-    "type": "text"
-  },
-  {
-    "id": "9d7cc874-0a8d-4d75-b764-e17f969a25fd",
-    "question": "Selling out Oily 125 / week (in pcs)",
-    "type": "text"
-  },
-  {
-    "id": "9d7cc874-02bd-493a-b017-e77c76bbfd94",
-    "question": "Selling out Wash & Shampoo 400 ml / week (in pcs)",
-    "type": "text"
-  },
-  {
-    "id": "9d7cc874-0bc3-4ec1-9058-9292e52150f8",
-    "question": "Selling out Wash & Shampoo Cal 400 ml / week (in pcs)",
-    "type": "text"
-  }]
-  ''';
-
-  // var parsedJson = <dynamic>[].obs;
   RxList<FormOutletResponse> questions = <FormOutletResponse>[].obs;
+
+  ///Database
+  final uuid = Uuid();
+  final db = DatabaseHelper.instance;
+  var outlets = <Outlet>[].obs;
+  var forms = <OutletForm>[].obs;
+  final formsExample = [
+    OutletForm(
+      id: '1',
+      question: "Apakah outlet sudah menjual produk GIH",
+      type: "bool",
+      createdAt: DateTime.now(),
+      updatedAt: DateTime.now(),
+    ),
+    OutletForm(
+      id: '2',
+      question: "Berapa SKU GIH yang dijual",
+      type: "text",
+      createdAt: DateTime.now(),
+      updatedAt: DateTime.now(),
+    ),
+  ];
+  var isLoading = false.obs;
+  var hasError = false.obs;
+  var errorMessage = ''.obs;
 
   @override
   void onInit() {
     super.onInit();
-    getFormOutlet();
-    // parsedJson.value = jsonDecode(jsonExample);
-    // questions.value =
-    //     parsedJson.map((json) => Question.fromJson(json)).toList();
+    outlets.addAll([
+      Outlet(
+        id: uuid.v4(),
+        outletName: 'Guardian Setiabudi Building',
+        salesName: "Andromeda",
+        category: 'GT',
+        status: "APPROVED",
+        address: "WONOGIRI",
+        latitude: "123.00",
+        longitude: "123.00",
+        createdAt: DateTime.now(),
+        updatedAt: DateTime.now(),
+      ),
+      Outlet(
+        id: uuid.v4(),
+        outletName: 'Guardian Setiabudi Building',
+        salesName: "Andromeda",
+        category: 'GT',
+        status: "APPROVED",
+        address: "WONOGIRI",
+        latitude: "123.00",
+        longitude: "123.00",
+        createdAt: DateTime.now(),
+        updatedAt: DateTime.now(),
+      ),
+
+    ]);
+    initializeData();
+    loadForms();
+    // loadOutlets();
+    // getFormOutlet();
 
     controllers.value = List.generate(
       questions.length,
       (index) => TextEditingController(),
     );
-    outlets.addAll([
-      Outlet(
-        name: 'Guardian Setiabudi Building',
-        category: 'GT',
-        image: 'assets/carousel1.png',
-      ),
-      Outlet(
-        name: 'CV Jaya Makmur Sentosa',
-        category: 'MT',
-        image: 'assets/carousel1.png',
-      ),
-      Outlet(
-        name: 'Alfamart Senen Raya',
-        category: 'GT',
-        image: 'assets/carousel1.png',
-      ),
-      Outlet(
-        name: 'Alfamart Thamrin City',
-        category: 'GT',
-        image: 'assets/carousel1.png',
-      ),
-      Outlet(
-        name: 'Guardian Setiabudi Building',
-        category: 'MT',
-        image: 'assets/carousel1.png',
-      ),
-    ]);
+
   }
 
-  getFormOutlet() async {
-      try {
-        FormOutletResponse response = await Api.getFormOutlet();
+  Future<void> initializeData() async {
+    try {
+      final existingForms = await db.getAllOutletForms();
 
-        questions.assignAll([response]);
+      if (existingForms.isEmpty) {
+        // Only insert initial data if table is empty
+        final uuid = Uuid();
+        final initialForms = [
+          OutletForm(
+            id: uuid.v4(),
+            question: "Apakah outlet sudah menjual produk GIH",
+            type: "bool",
+            createdAt: DateTime.now(),
+            updatedAt: DateTime.now(),
+          ),
+          OutletForm(
+            id: uuid.v4(),
+            question: "Berapa SKU GIH yang dijual",
+            type: "text",
+            createdAt: DateTime.now(),
+            updatedAt: DateTime.now(),
+          ),
+        ];
 
-        print("Data loaded successfully!");
-      } catch (e) {
-        print("Error loading form outlet: $e");
+        await addFormBatch(initialForms);
       }
-
+    } catch (e) {
+      print('Error initializing data: $e');
+    }
   }
+
+
+
+  // getFormOutlet() async {
+  //   try {
+  //     FormOutletResponse response = await Api.getFormOutlet();
+  //
+  //     questions.assignAll([response]);
+  //
+  //     print("Data loaded successfully!");
+  //   } catch (e) {
+  //     print("Error loading form outlet: $e");
+  //   }
+  // }
 
   List<Outlet> get filteredOutlets => outlets.where((outlet) {
-        return outlet.name
+        return outlet.outletName
             .toLowerCase()
             .contains(searchQuery.value.toLowerCase());
       }).toList();
@@ -130,6 +138,108 @@ class OutletController extends GetxController {
   void updateSearchQuery(String query) {
     searchQuery.value = query;
   }
+
+  Future<void> loadOutlets() async {
+    isLoading.value = true;
+    try {
+      final result = await db.getAllOutlets();
+      outlets.value = result;
+    } catch (e) {
+      print('Error loading outlets: $e');
+    } finally {
+      isLoading.value = false;
+    }
+  }
+
+  Future<void> saveOutletWithAnswers({
+    required Outlet outlet,
+    required List<OutletFormAnswer> answers,
+  }) async {
+    try {
+      final database = await db.database;
+      await database.transaction((txn) async {
+        // Insert outlet
+        await txn.insert('outlets', outlet.toJson());
+
+        // Insert answers
+        for (var answer in answers) {
+          await txn.insert('outlet_form_answers', answer.toJson());
+        }
+      });
+
+      await loadOutlets();
+    } catch (e) {
+      print('Error saving outlet with answers: $e');
+      rethrow;
+    }
+  }
+
+
+  /// CRUD FORM OUTLET
+  Future<void> initializeDatabase() async {
+    try {
+      await db.database; // Ensure database is initialized
+      await loadForms();
+    } catch (e) {
+      hasError.value = true;
+      errorMessage.value = e.toString();
+      print('Database initialization error: $e');
+    }
+  }
+  Future<void> loadForms() async {
+    isLoading.value = true;
+    try {
+      final result = await db.getAllOutletForms();
+      forms.value = result;
+      hasError.value = false;
+      errorMessage.value = '';
+    } catch (e) {
+      hasError.value = true;
+      errorMessage.value = e.toString();
+      print('Error loading forms: $e');
+    } finally {
+      isLoading.value = false;
+    }
+  }
+
+  Future<void> addForm(OutletForm form) async {
+    try {
+      await db.insertOutletForm(form);
+      await loadForms();
+    } catch (e) {
+      print('Error adding form: $e');
+      rethrow;
+    }
+  }
+
+  Future<void> addFormBatch(List<OutletForm> newForms) async {
+    try {
+      isLoading.value = true;
+
+      // Option 1: Skip existing records
+      await db.insertOutletFormBatch(newForms);
+
+      // Option 2: Replace existing records
+      // await db.upsertOutletFormBatch(newForms);
+
+      // Option 3: Clear and insert new data
+      // await db.clearAndInsertOutletFormBatch(newForms);
+
+      await loadForms();
+    } catch (e) {
+      print('Error adding forms batch: $e');
+      Get.snackbar(
+        'Error',
+        'Failed to add forms: ${e.toString()}',
+        snackPosition: SnackPosition.BOTTOM,
+      );
+    } finally {
+      isLoading.value = false;
+    }
+  }
+
+
+
 
   @override
   void onClose() {
