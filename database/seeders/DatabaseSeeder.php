@@ -21,7 +21,8 @@ class DatabaseSeeder extends Seeder
             ProductAccountTypeSeeder::class,
             OutletFormSeeder::class,
             VisibilitySeeder::class,
-            SurveySeeder::class
+            SurveySeeder::class,
+            ChannelSeeder::class
         ]);
     }
 }

@@ -1,24 +1,23 @@
 <?php
 
-// app/Http/Requests/ProductRequest.php
 namespace App\Http\Requests\Product;
 
+use Illuminate\Validation\Rule;
 use Illuminate\Foundation\Http\FormRequest;
 use Illuminate\Contracts\Validation\Validator;
 use Illuminate\Http\Exceptions\HttpResponseException;
 
-class CreateProductRequest extends FormRequest
+class UpdateProductRequest extends FormRequest
 {
     /**
      * Determine if the user is authorized to make this request.
      */
     public function authorize(): bool
     {
-        return true; // Set ke false jika perlu authorization
+        return true;
     }
-
-    /**
-     * Get the validation rules that apply to the request.
+ /**
+    * Get the validation rules that apply to the request.
      *
      * @return array<string, mixed>
      */
@@ -26,7 +25,10 @@ class CreateProductRequest extends FormRequest
     {
         return [
             'category_id' => 'required|exists:categories,id',
-            'sku' => 'required|string|unique:products,sku',
+            'sku' => [
+                'required',
+                Rule::unique('products', 'sku')->ignore($this->product),
+            ],
             'md_price' => 'required|numeric|min:0',
             'sales_price' => 'required|numeric|min:0'
         ]
@@ -49,4 +51,3 @@ class CreateProductRequest extends FormRequest
         ], 422));
     }
 }
-?>

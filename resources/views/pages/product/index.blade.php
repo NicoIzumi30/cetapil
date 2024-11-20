@@ -246,32 +246,15 @@
             <x-slot:title>Update AV3M</x-slot:title>
             <form id="av3mForm" class="grid grid-cols-2 gap-6">
                 @csrf
+                @foreach ($channels as $channel)
                 <div>
-                    <label for="channel-a" class="!text-black">Channel A</label>
-                    <input id="channel-a" class="form-control @error('channel-a') is-invalid @enderror" type="text"
-                        wire:model="channel-a" name="channel-a" placeholder="Masukan Channel A"
-                        aria-describedby="channel-a" value="">
+                    <label for="channel{{$channel->id}}" class="!text-black">{{$channel->name}}</label>
+                    <input id="channel-{{$channel->id}}" class="form-control channer_{{$loop->iteration}}" type="text" name="channel_{{$loop->iteration}}" placeholder="Masukan A3M {{$channel->name}}" aria-describedby="channel-{{$channel->name}}" value="">
                 </div>
-                <div>
-                    <label for="channel-b" class="!text-black">Channel B</label>
-                    <input id="channel-b" class="form-control @error('channel-b') is-invalid @enderror" type="text"
-                        wire:model="channel-b" name="channel-b" placeholder="Masukan Channel B"
-                        aria-describedby="channel-b" value="">
-                </div>
-                <div>
-                    <label for="channel-c" class="!text-black">Channel C</label>
-                    <input id="channel-c" class="form-control @error('channel-c') is-invalid @enderror" type="text"
-                        wire:model="channel-c" name="channel-c" placeholder="Masukan Channel C"
-                        aria-describedby="channel-c" value="">
-                </div>
-                <div>
-                    <label for="channel-d" class="!text-black">Channel D</label>
-                    <input id="channel-d" class="form-control @error('channel-d') is-invalid @enderror" type="text"
-                        wire:model="channel-d" name="channel-d" placeholder="Masukan Channel D"
-                        aria-describedby="channel-d" value="">
-                </div>
+                @endforeach
+                
                 <x-slot:footer>
-                    <x-button.primary class="w-full">Simpan Perubahan</x-button.primary>
+                    <x-button.primary class="w-full" id="saveAv3mBtn">Simpan Perubahan</x-button.primary>
                 </x-slot:footer>
             </form>
         </x-modal>
@@ -646,10 +629,10 @@
                 url: `/products/${productId}/av3m`,
                 type: 'GET',
                 success: function (response) {
-                    $('#channel-a').val(response.channel_a);
-                    $('#channel-b').val(response.channel_b);
-                    $('#channel-c').val(response.channel_c);
-                    $('#channel-d').val(response.channel_d);
+                    console.log(response);
+                @foreach ($channels as $channel)
+                    $('#channel-{{$channel->id}}').val(response.channel_{{$loop->iteration}});
+                @endforeach
                     $('#av3mForm').data('id', response.id);
                 }
             });
@@ -672,10 +655,11 @@
                 },
                 error: function (xhr) {
                     if (xhr.status === 422) {
+                        toast('error', xhr.responseJSON.message,200);
                         const errors = xhr.responseJSON.errors;
                         $.each(errors, function (key, value) {
-                            $(`#${key}-error`).text(value[0]).removeClass('hidden');
-                            $(`#${key}`).addClass('border-red-500');
+                            $(`.${key}-error`).text(value[0]).removeClass('hidden');
+                            $(`.${key}`).addClass('border-red-500');
                         });
                     }
                 }

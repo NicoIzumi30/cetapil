@@ -2,14 +2,12 @@
 
 namespace App\Http\Controllers\Web;
 
-use App\Http\Requests\UpdateUserRequest;
+use App\Http\Requests\User\UpdateUserRequest;
 use App\Models\City;
 use App\Models\Role;
 use App\Models\User;
-use App\Models\Province;
 use Illuminate\Support\Arr;
 use Illuminate\Http\Request;
-use App\Http\Requests\UserRequest;
 use App\Http\Controllers\Controller;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Hash;

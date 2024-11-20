@@ -1,7 +1,7 @@
 <?php
 
 use Illuminate\Support\Facades\Route;
-use App\Http\Controllers\ProductController;
+use App\Http\Controllers\Web\ProductController;
 use App\Http\Controllers\Web\UserController;
 use App\Http\Controllers\Auth\LoginController;
 use App\Http\Controllers\Auth\LogoutController;
@@ -88,8 +88,8 @@ Route::middleware('auth')->group(function () {
         Route::delete('/{product}', [ProductController::class, 'destroy'])->name('destroy');
         Route::post('/bulk', [ProductController::class, 'bulk'])->name('bulk');
         Route::get('/download-template', [ProductController::class,'downloadTemplate'])->name('downloadTemplate');
-        Route::get('/products/{product}/av3m', [ProductController::class, 'getAv3m'])->name('products.getAv3m');
-        Route::post('/products/{product}/av3m', [ProductController::class, 'updateAv3m'])->name('products.updateAv3m');
+        Route::get('/{product}/av3m', [ProductController::class, 'getAv3m'])->name('products.getAv3m');
+        Route::post('/{product}/av3m', [ProductController::class, 'updateAv3m'])->name('products.updateAv3m');
     });
     // Logout
     Route::get('/logout', LogoutController::class)->name('logout');

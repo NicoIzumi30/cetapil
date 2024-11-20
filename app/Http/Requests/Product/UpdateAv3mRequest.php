@@ -1,23 +1,20 @@
 <?php
 
-// app/Http/Requests/ProductRequest.php
 namespace App\Http\Requests\Product;
 
 use Illuminate\Foundation\Http\FormRequest;
 use Illuminate\Contracts\Validation\Validator;
 use Illuminate\Http\Exceptions\HttpResponseException;
-
-class CreateProductRequest extends FormRequest
+class UpdateAv3mRequest extends FormRequest
 {
     /**
      * Determine if the user is authorized to make this request.
      */
     public function authorize(): bool
     {
-        return true; // Set ke false jika perlu authorization
+        return true;
     }
-
-    /**
+      /**
      * Get the validation rules that apply to the request.
      *
      * @return array<string, mixed>
@@ -25,10 +22,10 @@ class CreateProductRequest extends FormRequest
     public function rules(): array
     {
         return [
-            'category_id' => 'required|exists:categories,id',
-            'sku' => 'required|string|unique:products,sku',
-            'md_price' => 'required|numeric|min:0',
-            'sales_price' => 'required|numeric|min:0'
+            'channel_1' => 'required|numeric',
+            'channel_2' => 'required|numeric',
+            'channel_3' => 'required|numeric',
+            'channel_4' => 'required|numeric',
         ]
         ;
     }
@@ -49,4 +46,3 @@ class CreateProductRequest extends FormRequest
         ], 422));
     }
 }
-?>
