@@ -1,3 +1,4 @@
+import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:geolocator/geolocator.dart';
 import 'package:geocoding/geocoding.dart';
@@ -19,6 +20,9 @@ class GPSLocationController extends GetxController {
 
   StreamSubscription<Position>? _positionStream;
   Timer? _backupTimer;
+
+  var longController = TextEditingController().obs;
+  var latController = TextEditingController().obs;
 
   final ConnectivityController _connectivityController = Get.find<ConnectivityController>();
 
@@ -73,6 +77,8 @@ class GPSLocationController extends GetxController {
     ).listen(
           (Position position) {
         print("Received position: ${position.latitude}, ${position.longitude}");
+        longController.value.text = position.longitude.toString();
+        latController.value.text = position.latitude.toString();
         currentPosition.value = position;
         getLocationInfo(position.latitude, position.longitude);
       },

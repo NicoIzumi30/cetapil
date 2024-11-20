@@ -122,7 +122,6 @@ class ActivityCard extends StatelessWidget {
                     style: TextStyle(fontSize: 12,fontWeight: FontWeight.bold, color: statusDraft == "Drafted" ? Colors.blue : Colors.white),
                   ),
                 ),
-
                 Row(
                   children: [
                     Container(

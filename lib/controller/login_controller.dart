@@ -27,7 +27,7 @@ class LoginController extends GetxController {
   Future<void> login(String email, String password) async {
     isLoading.value = true;
     errorMessage.value = '';
-    await Future.delayed(Duration(seconds: 1));
+    // await Future.delayed(Duration(seconds: 1));
 
     try {
       final response = await _api.login(email, password);
@@ -72,6 +72,7 @@ class LoginController extends GetxController {
     }
   }
   Future<void> _saveUserData(LoginModel.Data userData) async {
-    // await _storage.write('user_id', userData.user?.id);
+    await _storage.write('user_id', userData.user?.id);
+    await _storage.write('token', userData.token);
   }
 }

@@ -3,6 +3,7 @@ import 'package:flutter/material.dart';
 class GlassmorphicTextField extends StatelessWidget {
   final String hintText;
   final TextEditingController? controller;
+  final TextInputType? inputType;
   final bool obscureText;
   final Widget? prefixIcon;
   final Widget? suffixIcon;
@@ -13,7 +14,7 @@ class GlassmorphicTextField extends StatelessWidget {
     this.controller,
     this.obscureText = false,
     this.prefixIcon,
-    this.suffixIcon,
+    this.suffixIcon, this.inputType,
   }) : super(key: key);
 
   @override
@@ -38,6 +39,7 @@ class GlassmorphicTextField extends StatelessWidget {
       child: TextField(
         controller: controller,
         obscureText: obscureText,
+        keyboardType: inputType,
         style: const TextStyle(
           color: Colors.black87,
           fontSize: 15,

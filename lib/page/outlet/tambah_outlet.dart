@@ -1,9 +1,11 @@
 import 'package:cetapil_mobile/controller/bottom_nav_controller.dart';
+import 'package:dropdown_search/dropdown_search.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:get/get_core/src/get_main.dart';
 import 'package:google_fonts/google_fonts.dart';
 
+import '../../controller/gps_controller.dart';
 import '../../controller/outlet/outlet_controller.dart';
 import '../../utils/colors.dart';
 import '../../widget/back_button.dart';
@@ -13,6 +15,7 @@ import '../../widget/text_field.dart';
 class TambahOutlet extends GetView<OutletController> {
   final TextEditingController _controller =
   TextEditingController(text: "Andromeda");
+  final GPSLocationController gpsController = Get.find<GPSLocationController>();
 
   @override
   Widget build(BuildContext context) {
@@ -56,10 +59,9 @@ class TambahOutlet extends GetView<OutletController> {
                             title: "Nama Outlet",
                             controller: _controller,
                           ),
-                          ModernTextField(
-                            title: "Kabupaten/Kota",
-                            controller: _controller,
-                          ),
+                          CityDropdown(
+                              title: "Kabupaten/Kota",
+                              controller: controller),
                           ModernTextField(
                             // enable: false,
                             title: "Alamat Outlet",
@@ -68,21 +70,29 @@ class TambahOutlet extends GetView<OutletController> {
                           ),
                           Row(
                             children: [
-                              Expanded(
-                                child: ModernTextField(
-                                  title: "Longitude",
-                                  controller: _controller,
-                                ),
-                              ),
+                              Obx(() {
+                                return Expanded(
+                                  child: ModernTextField(
+                                    enable: false,
+                                    title: "Longitude",
+                                    controller: gpsController.longController
+                                        .value,
+                                  ),
+                                );
+                              }),
                               SizedBox(
                                 width: 10,
                               ),
-                              Expanded(
-                                child: ModernTextField(
-                                  title: "Latitude",
-                                  controller: _controller,
-                                ),
-                              ),
+                              Obx(() {
+                                return Expanded(
+                                  child: ModernTextField(
+                                    enable: false,
+                                    title: "Latitude",
+                                    controller: gpsController.latController
+                                        .value,
+                                  ),
+                                );
+                              }),
                             ],
                           ),
                           (controller.latitude.value != 0.0 ||
@@ -116,24 +126,18 @@ class TambahOutlet extends GetView<OutletController> {
                           Row(
                             crossAxisAlignment: CrossAxisAlignment.start,
                             children: [
-                              UploadImage(
-                                onTap: () {},
-                                title: "Foto Tampak Depan Outlet",
-                              ),
+                              _buildUploadImage(
+                                  "Foto Tampak Depan Outlet", () {}),
                               SizedBox(
                                 width: 8,
                               ),
-                              UploadImage(
-                                onTap: () {},
-                                title: "Foto Banner/Neon Box Outlet",
-                              ),
+                              _buildUploadImage(
+                                  "Foto Banner/Neon Box Outlet", () {}),
                               SizedBox(
                                 width: 8,
                               ),
-                              UploadImage(
-                                onTap: () {},
-                                title: "Foto Patokan Jalan Outlet",
-                              ),
+                              _buildUploadImage(
+                                  "Foto Patokan Jalan Outlet", () {}),
                             ],
                           ),
                           SizedBox(
@@ -169,60 +173,119 @@ class TambahOutlet extends GetView<OutletController> {
   }
 }
 
-class UploadImage extends StatelessWidget {
+class CityDropdown extends StatelessWidget {
+  final OutletController controller;
   final String title;
-  final VoidCallback onTap;
 
-  const UploadImage({
+  const CityDropdown({
     super.key,
-    required this.onTap,
-    required this.title,
+    required this.controller, required this.title,
   });
+
 
   @override
   Widget build(BuildContext context) {
-    return Expanded(
-      child: Column(
-        children: [
-          GestureDetector(
-            onTap: onTap,
-            child: AspectRatio(
-              aspectRatio: 1,
-              child: Container(
-                decoration: BoxDecoration(
-                  color: Color(0xFFEDF8FF),
-                  border: Border.all(
-                    color: Colors.blue,
-                    width: 1,
-                  ),
-                  borderRadius: BorderRadius.circular(5),
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        Text(
+          title,
+          style: TextStyle(
+              fontSize: 13, fontWeight: FontWeight.w700),
+        ),
+        SizedBox(
+          height: 10,
+        ),
+        DropdownSearch<String>(
+          suffixProps: DropdownSuffixProps(
+              clearButtonProps: ClearButtonProps()
+          ),
+          items: (filter, infiniteScrollProps) => controller.getData(),
+          decoratorProps: DropDownDecoratorProps(
+            decoration: InputDecoration(
+              filled: true,
+              fillColor: const Color(0xFFE8F3FF),
+              focusedBorder: OutlineInputBorder(
+                borderRadius: BorderRadius.circular(8),
+                borderSide: const BorderSide(
+                  color: Color(0xFF64B5F6),
+                  width: 1,
                 ),
-                child: Column(
-                  mainAxisAlignment: MainAxisAlignment.center,
-                  children: [
-                    Icon(Icons.file_upload_outlined, color: Colors.blue),
-                    Text(
-                      "Klik disini untuk unggah",
-                      style: TextStyle(
-                          fontSize: 8,
-                          fontWeight: FontWeight.bold,
-                          color: Colors.blue),
-                    ),
-                    Text(
-                      "Ukuran maksimal foto 2MB",
-                      style: TextStyle(fontSize: 7, color: Colors.blue),
-                    )
-                  ],
+              ),
+              enabledBorder: OutlineInputBorder(
+                borderRadius: BorderRadius.circular(8),
+                borderSide: const BorderSide(
+                  color: Color(0xFF64B5F6),
+                  width: 1,
+                ),
+              ),
+              disabledBorder: OutlineInputBorder(
+                borderRadius: BorderRadius.circular(8),
+                borderSide: const BorderSide(
+                  color: Color(0xFF64B5F6),
+                  width: 1,
                 ),
               ),
             ),
           ),
-          Text(
-            title,
-            style: TextStyle(fontSize: 8, fontWeight: FontWeight.w700),
-          )
-        ],
-      ),
+          popupProps: PopupProps.menu(
+            showSearchBox: true,
+            fit: FlexFit.loose,
+            cacheItems: true,
+
+          ),
+        ),
+        SizedBox(
+          height: 10,
+        ),
+      ],
     );
   }
+}
+
+
+Widget _buildUploadImage(String title, VoidCallback onTap) {
+  return Expanded(
+    child: Column(
+      children: [
+        GestureDetector(
+          onTap: onTap,
+          child: AspectRatio(
+            aspectRatio: 1,
+            child: Container(
+              decoration: BoxDecoration(
+                color: Color(0xFFEDF8FF),
+                border: Border.all(
+                  color: Colors.blue,
+                  width: 1,
+                ),
+                borderRadius: BorderRadius.circular(5),
+              ),
+              child: Column(
+                mainAxisAlignment: MainAxisAlignment.center,
+                children: [
+                  Icon(Icons.file_upload_outlined, color: Colors.blue),
+                  Text(
+                    "Klik disini untuk unggah",
+                    style: TextStyle(
+                        fontSize: 8,
+                        fontWeight: FontWeight.bold,
+                        color: Colors.blue),
+                  ),
+                  Text(
+                    "Ukuran maksimal foto 2MB",
+                    style: TextStyle(fontSize: 7, color: Colors.blue),
+                  )
+                ],
+              ),
+            ),
+          ),
+        ),
+        Text(
+          title,
+          style: TextStyle(fontSize: 8, fontWeight: FontWeight.w700),
+        )
+      ],
+    ),
+  );
 }

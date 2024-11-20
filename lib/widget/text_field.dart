@@ -93,6 +93,8 @@ class _ModernTextFieldState extends State<ModernTextField> {
                 horizontal: 18,
                 vertical: 13,
               ),
+              filled: true,
+              fillColor: const Color(0xFFE8F3FF), // Light blue background
               border: OutlineInputBorder(
                 borderRadius: BorderRadius.circular(8),
                 borderSide: const BorderSide(
@@ -100,8 +102,6 @@ class _ModernTextFieldState extends State<ModernTextField> {
                   width: 2,
                 ),
               ),
-              filled: true,
-              fillColor: const Color(0xFFE8F3FF), // Light blue background
               focusedBorder: OutlineInputBorder(
                 borderRadius: BorderRadius.circular(8),
                 borderSide: const BorderSide(

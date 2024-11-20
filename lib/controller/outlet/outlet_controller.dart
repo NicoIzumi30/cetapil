@@ -1,21 +1,30 @@
 // outlet_controller.dart
 import 'dart:convert';
 
+import 'package:cetapil_mobile/api/api.dart';
+import 'package:cetapil_mobile/controller/gps_controller.dart';
 import 'package:cetapil_mobile/model/form_outlet_response.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:uuid/uuid.dart';
 
 import '../../database/database_instance.dart';
+import '../../model/get_city_response.dart';
+import '../../model/list_city.dart';
 import '../../model/outlet_example.dart';
 
 class OutletController extends GetxController {
   // RxList<Outlet> outlets = <Outlet>[].obs;
+  final api = Api();
   RxString searchQuery = ''.obs;
   RxDouble longitude = 0.0.obs;
   RxDouble latitude = 0.0.obs;
   var controllers = <TextEditingController>[].obs;
   RxList<FormOutletResponse> questions = <FormOutletResponse>[].obs;
+
+  ///controller
+
+
 
   ///Database
   final uuid = Uuid();
@@ -41,6 +50,8 @@ class OutletController extends GetxController {
   var isLoading = false.obs;
   var hasError = false.obs;
   var errorMessage = ''.obs;
+
+
 
   @override
   void onInit() {
@@ -82,6 +93,14 @@ class OutletController extends GetxController {
       (index) => TextEditingController(),
     );
 
+  }
+
+  Future<List<String>> getData() async {
+    final value = await Api.getListCity();
+    if (value.status == "OK") {
+      return value.data!.map((city) => city.name!).toList();
+    }
+    return [];
   }
 
   Future<void> initializeData() async {
