@@ -51,7 +51,7 @@ class ButtonPrimary extends StatelessWidget {
         child: Center(
             child: Text(
               title,
-              style: TextStyle(color: Colors.white),
+              style: TextStyle(color: Colors.white,fontWeight: FontWeight.bold),
             )),
       ),
     );

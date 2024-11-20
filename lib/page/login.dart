@@ -1,5 +1,6 @@
 import 'package:cetapil_mobile/controller/login_controller.dart';
 import 'package:cetapil_mobile/page/index.dart';
+import 'package:cetapil_mobile/utils/colors.dart';
 import 'package:cetapil_mobile/widget/glassmorphic_textfield.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_svg/svg.dart';
@@ -98,14 +99,11 @@ class LoginPage extends GetView<LoginController> {
                                 ),
                                 suffixIcon: IconButton(
                                   icon: Icon(
-                                    Icons.visibility_off_outlined,
-                                    color: Colors.black54,
-                                    size: 22,
+                                    _isPasswordVisible.value ? Icons.visibility : Icons.visibility_off,
+                                    color: AppColors.primary,
                                   ),
-                                  onPressed: () {
-                                    // Toggle password visibility
-                                  },
-                                ),
+                                  onPressed: () => _isPasswordVisible.toggle(),
+                                )
                               );
                             }),
                             const SizedBox(height: 10),

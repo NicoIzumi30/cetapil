@@ -4,11 +4,14 @@ import 'dart:convert';
 import 'package:get_storage/get_storage.dart';
 import 'package:http/http.dart' as http;
 
+import '../model/dashboard.dart';
 import '../model/form_outlet_response.dart';
+import '../model/get_city_response.dart';
 import '../model/login_response.dart';
 
-const String baseUrl = 'https://dev-cetaphil.i-am.host';
+const String baseUrl = 'https://be8b-125-163-145-160.ngrok-free.app';
 final GetStorage storage = GetStorage();
+
 class Api{
   Future<LoginResponse> login(String email, String password) async {
     var uri = Uri.parse('$baseUrl/api/login');
@@ -53,21 +56,30 @@ class Api{
     }
   }
 
-  static Future<FormOutletResponse> getFormOutlet() async {
-    var url = "$baseUrl/api/outlet/forms";
-    // var token = await storage.read('token');
-    var response = await http.get(
-      Uri.parse(url),
-      headers: {
-        'Content-type': 'application/json',
-        // 'Authorization': 'Bearer $token',
-      },
-    );
-    print(response.statusCode);
-    if (response.statusCode == 200) {
-      return FormOutletResponse.fromJson(jsonDecode(response.body));
+  static Future<List<Map<String, dynamic>>> getFormOutlet() async {
+    try {
+      var token = await storage.read('token');
+      var url = "$baseUrl/api/outlet/forms";
+      final response = await http.get(
+        Uri.parse(url),
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': 'Bearer $token',
+        },
+      );
+
+      if (response.statusCode == 200) {
+        final jsonResponse = json.decode(response.body);
+        final List<dynamic> data = jsonResponse;
+        print(data);
+        return data.map((item) => FormOutletResponse.fromJson(item).toJson()).toList();
+      }
+
+      throw Exception('Failed to load forms');
+    } catch (e) {
+      print('API Error: $e');
+      rethrow;
     }
-    throw "Gagal request form outlet:\n${response.body}";
   }
 
   static Future<Dashboard> getDashboard() async {

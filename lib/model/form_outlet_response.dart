@@ -1,42 +1,23 @@
-/// id : "9d7cc874-0604-40c5-9537-1c7a9bc68eb8"
-/// question : "Apakah outlet sudah menjual produk GIH"
-/// type : "bool"
-
 class FormOutletResponse {
+  final String id;
+  final String question;
+  final String type;
+
   FormOutletResponse({
-      String? id, 
-      String? question, 
-      String? type,}){
-    _id = id;
-    _question = question;
-    _type = type;
-}
+    required this.id,
+    required this.question,
+    required this.type,
+  });
 
-  FormOutletResponse.fromJson(dynamic json) {
-    _id = json['id'];
-    _question = json['question'];
-    _type = json['type'];
-  }
-  String? _id;
-  String? _question;
-  String? _type;
-FormOutletResponse copyWith({  String? id,
-  String? question,
-  String? type,
-}) => FormOutletResponse(  id: id ?? _id,
-  question: question ?? _question,
-  type: type ?? _type,
-);
-  String? get id => _id;
-  String? get question => _question;
-  String? get type => _type;
+  factory FormOutletResponse.fromJson(Map<String, dynamic> json) => FormOutletResponse(
+    id: json['id'].toString(),
+    question: json['question'].toString(),
+    type: json['type'].toString(),
+  );
 
-  Map<String, dynamic> toJson() {
-    final map = <String, dynamic>{};
-    map['id'] = _id;
-    map['question'] = _question;
-    map['type'] = _type;
-    return map;
-  }
-
+  Map<String, dynamic> toJson() => {
+    'id': id,
+    'question': question,
+    'type': type,
+  };
 }

@@ -2,7 +2,9 @@ import 'package:flutter/material.dart';
 import 'package:flutter_svg/svg.dart';
 import 'package:get/get.dart';
 
+import '../controller/login_controller.dart';
 import '../widget/logo_animation.dart';
+import 'index.dart';
 import 'login.dart';
 
 
@@ -14,16 +16,16 @@ class SplashScreen extends StatefulWidget {
 }
 
 class _SplashScreenState extends State<SplashScreen> {
+  final loginController = Get.find<LoginController>();
   @override
   void initState() {
     super.initState();
-    // Navigate to login page after 3 seconds
+    _navigateToNextScreen();
+  }
+  Future<void> _navigateToNextScreen() async {
+    bool isLoggedIn = await loginController.isLoggedIn();
     Future.delayed(const Duration(seconds: 3), () {
-      Get.off(
-            () => LoginPage(),
-        transition: Transition.fade,
-        duration: const Duration(milliseconds: 800),
-      );
+    Get.offAll(() => isLoggedIn ? MainPage() : LoginPage());
     });
   }
 
@@ -67,25 +69,6 @@ class _SplashScreenState extends State<SplashScreen> {
                           duration: Duration(milliseconds: 1500),
                           curve: Curves.easeIn,
                         ),
-
-                        // SvgPicture.asset(
-                        //   'assets/logo.svg',
-                        //   fit: BoxFit.cover,
-                        //   width: 100,
-                        // ),
-                        // Image.asset('assets/logo2.png'),
-                        // SvgPicture.asset(
-                        //   'assets/logo.svg',
-                        // ),
-                        // AnimatedContainer(
-                        //   duration: Duration(milliseconds: 500),
-                        //   width: 100,
-                        //   child: SvgPicture.asset(
-                        //     'assets/logo.svg',
-                        //     width: 100,
-                        //     height: 30,
-                        //   ),
-                        // ),
                         const SizedBox(height: 20),
                         const Text(
                           'KARENA KITA BERHAK MILIKI KULIT SEHAT',

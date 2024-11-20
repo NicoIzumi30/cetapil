@@ -9,167 +9,231 @@ import '../../controller/gps_controller.dart';
 import '../../controller/outlet/outlet_controller.dart';
 import '../../utils/colors.dart';
 import '../../widget/back_button.dart';
+import '../../widget/button_primary.dart';
 import '../../widget/clipped_maps.dart';
 import '../../widget/text_field.dart';
 
 class TambahOutlet extends GetView<OutletController> {
   final TextEditingController _controller =
-  TextEditingController(text: "Andromeda");
+      TextEditingController(text: "Andromeda");
   final GPSLocationController gpsController = Get.find<GPSLocationController>();
 
   @override
   Widget build(BuildContext context) {
     return SafeArea(
         child: Stack(children: [
-          Image.asset(
-            'assets/background.png',
-            fit: BoxFit.cover,
-            width: double.infinity,
-            height: double.infinity,
-          ),
-          Padding(
-              padding: const EdgeInsets.fromLTRB(15, 30, 15, 10),
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  EnhancedBackButton(
-                    onPressed: () {
-                      Get.back();
-                    },
-                    backgroundColor: Colors.white,
-                    iconColor: Colors.blue,
-                  ),
-                  SizedBox(
-                    height: 20,
-                  ),
-                  Expanded(
-                    child: SingleChildScrollView(
-                      child: Column(
-                        crossAxisAlignment: CrossAxisAlignment.start,
-                        children: [
-                          Text("Tambah Outlet", style: AppTextStyle.titlePage),
-                          SizedBox(
-                            height: 20,
-                          ),
-                          ModernTextField(
-                            title: "Nama Sales",
-                            controller: _controller,
-                          ),
-                          ModernTextField(
-                            title: "Nama Outlet",
-                            controller: _controller,
-                          ),
-                          CityDropdown(
-                              title: "Kabupaten/Kota",
-                              controller: controller),
-                          ModernTextField(
-                            // enable: false,
-                            title: "Alamat Outlet",
-                            controller: _controller,
-                            maxlines: 4,
-                          ),
-                          Row(
-                            children: [
-                              Obx(() {
-                                return Expanded(
-                                  child: ModernTextField(
-                                    enable: false,
-                                    title: "Longitude",
-                                    controller: gpsController.longController
-                                        .value,
-                                  ),
-                                );
-                              }),
-                              SizedBox(
-                                width: 10,
-                              ),
-                              Obx(() {
-                                return Expanded(
-                                  child: ModernTextField(
-                                    enable: false,
-                                    title: "Latitude",
-                                    controller: gpsController.latController
-                                        .value,
-                                  ),
-                                );
-                              }),
-                            ],
-                          ),
-                          (controller.latitude.value != 0.0 ||
-                              controller.longitude.value != 0.0)
-                              ? MapPreviewWidget(
-                            latitude: -6.2088,
-                            longitude: 106.8456,
-                            zoom: 14.0,
-                            height: 250,
-                            borderRadius: 10,
-                          )
-                              : Container(
-                            height: 250,
-                            width: double.infinity,
-                            decoration: BoxDecoration(
-                              color: Colors.white,
-                              borderRadius: BorderRadius.circular(10),
-                            ),
-                          ),
-                          SizedBox(
-                            height: 10,
-                          ),
-                          Text(
-                            "Foto Outlet",
-                            style: TextStyle(
-                                fontSize: 15, fontWeight: FontWeight.w700),
-                          ),
-                          SizedBox(
-                            height: 10,
-                          ),
-                          Row(
+      Image.asset(
+        'assets/background.png',
+        fit: BoxFit.cover,
+        width: double.infinity,
+        height: double.infinity,
+      ),
+      Column(
+        children: [
+          Expanded(
+            child: Padding(
+                padding: const EdgeInsets.fromLTRB(15, 30, 15, 10),
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    EnhancedBackButton(
+                      onPressed: () {
+                        Get.back();
+                      },
+                      backgroundColor: Colors.white,
+                      iconColor: Colors.blue,
+                    ),
+                    SizedBox(
+                      height: 20,
+                    ),
+                    Obx(() {
+                      return Expanded(
+                        child: SingleChildScrollView(
+                          child: Column(
                             crossAxisAlignment: CrossAxisAlignment.start,
                             children: [
-                              _buildUploadImage(
-                                  "Foto Tampak Depan Outlet", () {}),
+                              Text("Tambah Outlet",
+                                  style: AppTextStyle.titlePage),
                               SizedBox(
-                                width: 8,
+                                height: 20,
                               ),
-                              _buildUploadImage(
-                                  "Foto Banner/Neon Box Outlet", () {}),
+                              ModernTextField(
+                                title: "Nama Sales",
+                                controller: controller.salesName.value,
+                              ),
+                              ModernTextField(
+                                title: "Nama Outlet",
+                                controller: controller.outletName.value,
+                              ),
+                              CityDropdown(
+                                  title: "Kabupaten/Kota",
+                                  controller: controller),
+                              ModernTextField(
+                                // enable: false,
+                                title: "Alamat Outlet",
+                                controller: controller.outletAddress.value,
+                                maxlines: 4,
+                              ),
+                              Row(
+                                children: [
+                                  Expanded(
+                                    child: ModernTextField(
+                                      enable: false,
+                                      title: "Longitude",
+                                      controller:
+                                          gpsController.longController.value,
+                                    ),
+                                  ),
+                                  SizedBox(
+                                    width: 10,
+                                  ),
+                                  Expanded(
+                                    child: ModernTextField(
+                                      enable: false,
+                                      title: "Latitude",
+                                      controller:
+                                          gpsController.latController.value,
+                                    ),
+                                  )
+                                ],
+                              ),
+                              (gpsController.latController.value != 0.0 ||
+                                      gpsController.longController.value != 0.0)
+                                  ? MapPreviewWidget(
+                                      latitude: double.parse(gpsController
+                                          .latController.value.text),
+                                      longitude: double.parse(gpsController
+                                          .longController.value.text),
+                                      zoom: 14.0,
+                                      height: 250,
+                                      borderRadius: 10,
+                                    )
+                                  : Container(
+                                      height: 250,
+                                      width: double.infinity,
+                                      decoration: BoxDecoration(
+                                        color: Colors.white,
+                                        borderRadius: BorderRadius.circular(10),
+                                      ),
+                                    ),
                               SizedBox(
-                                width: 8,
+                                height: 10,
                               ),
-                              _buildUploadImage(
-                                  "Foto Patokan Jalan Outlet", () {}),
+                              Text(
+                                "Foto Outlet",
+                                style: TextStyle(
+                                    fontSize: 15, fontWeight: FontWeight.w700),
+                              ),
+                              SizedBox(
+                                height: 10,
+                              ),
+                              Row(
+                                crossAxisAlignment: CrossAxisAlignment.start,
+                                children: [
+                                  _buildUploadImage(
+                                      "Foto Tampak Depan Outlet", () {}),
+                                  SizedBox(
+                                    width: 8,
+                                  ),
+                                  _buildUploadImage(
+                                      "Foto Banner/Neon Box Outlet", () {}),
+                                  SizedBox(
+                                    width: 8,
+                                  ),
+                                  _buildUploadImage(
+                                      "Foto Patokan Jalan Outlet", () {}),
+                                ],
+                              ),
+                              SizedBox(
+                                height: 10,
+                              ),
+                              Text("Formulir Survey Outlet",
+                                  style: AppTextStyle.titlePage),
+                              SizedBox(
+                                height: 20,
+                              ),
+                              Obx(() {
+                                if (controller.isLoading.value) {
+                                  return const Center(
+                                      child: CircularProgressIndicator());
+                                }
+
+                                if (controller.questions.isEmpty) {
+                                  return const Center(child: Text("No Form"));
+                                }
+                                return Column(
+                                  children: List<Widget>.generate(
+                                    controller.questions.length,
+                                    (index) {
+                                      final question =
+                                          controller.questions[index];
+                                      // print("Question ${question.question}");
+                                      return ModernTextField(
+                                        keyboardType: TextInputType.number,
+                                        title: question.question ?? "",
+                                        controller:
+                                            controller.controllers[index],
+                                      );
+                                    },
+                                  ),
+                                );
+                              }),
                             ],
                           ),
-                          SizedBox(
-                            height: 10,
-                          ),
-                          Text("Formulir Survey Outlet",
-                              style: AppTextStyle.titlePage),
-                          SizedBox(
-                            height: 20,
-                          ),
-                          Obx(() {
-                            return Column(
-                              children: List<Widget>.generate(
-                                controller.forms.length,
-                                    (index) {
-                                  final question = controller.forms[index];
-                                  print("Question ${question.question}");
-                                  return ModernTextField(
-                                    title: question.question ?? "",
-                                    controller: TextEditingController(),
-                                  );
-                                },
-                              ),
-                            );
-                          })
-                        ],
-                      ),
-                    ),
-                  )
+                        ),
+                      );
+                    }),
+                  ],
+                )),
+          ),
+          Container(
+            width: double.infinity,
+            color: Colors.white,
+            child: Padding(
+              padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 15),
+              child: Row(
+                children: [
+                  _buildButton(
+                    false,
+                    "Save as Draft",
+                    () => controller.saveDraftOutlet(),
+                  ),
+                  SizedBox(
+                    width: 10,
+                  ),
+                  _buildButton(
+                    true,
+                    "Kirim",
+                    () {
+                      print("asd");
+                    },
+                  ),
                 ],
-              ))
-        ]));
+              ),
+            ),
+          )
+        ],
+      )
+    ]));
+  }
+
+  Expanded _buildButton(bool isSubmit, String title, VoidCallback onTap) {
+    return Expanded(
+      child: ElevatedButton(
+          style: ElevatedButton.styleFrom(
+            backgroundColor: isSubmit ? AppColors.primary : Colors.white,
+            shape: RoundedRectangleBorder(
+                borderRadius: BorderRadius.circular(10),
+                side: isSubmit
+                    ? BorderSide.none
+                    : BorderSide(color: AppColors.primary)),
+          ),
+          onPressed: onTap,
+          child: Text(title,
+              style: TextStyle(
+                  color: isSubmit ? Colors.white : AppColors.primary,
+                  fontWeight: FontWeight.bold))),
+    );
   }
 }
 
@@ -179,9 +243,9 @@ class CityDropdown extends StatelessWidget {
 
   const CityDropdown({
     super.key,
-    required this.controller, required this.title,
+    required this.controller,
+    required this.title,
   });
-
 
   @override
   Widget build(BuildContext context) {
@@ -190,17 +254,15 @@ class CityDropdown extends StatelessWidget {
       children: [
         Text(
           title,
-          style: TextStyle(
-              fontSize: 13, fontWeight: FontWeight.w700),
+          style: TextStyle(fontSize: 13, fontWeight: FontWeight.w700),
         ),
         SizedBox(
           height: 10,
         ),
         DropdownSearch<String>(
-          suffixProps: DropdownSuffixProps(
-              clearButtonProps: ClearButtonProps()
-          ),
-          items: (filter, infiniteScrollProps) => controller.getData(),
+          suffixProps:
+              DropdownSuffixProps(clearButtonProps: ClearButtonProps()),
+          items: (filter, infiniteScrollProps) => controller.getDataCity(),
           decoratorProps: DropDownDecoratorProps(
             decoration: InputDecoration(
               filled: true,
@@ -232,7 +294,6 @@ class CityDropdown extends StatelessWidget {
             showSearchBox: true,
             fit: FlexFit.loose,
             cacheItems: true,
-
           ),
         ),
         SizedBox(
@@ -242,7 +303,6 @@ class CityDropdown extends StatelessWidget {
     );
   }
 }
-
 
 Widget _buildUploadImage(String title, VoidCallback onTap) {
   return Expanded(
