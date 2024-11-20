@@ -17,7 +17,7 @@
                 <form action="{{ route('users.store') }}" method="POST" id="createUserForm">
                     @csrf
                     <div class="grid grid-cols-2 gap-4">
-                        <div>
+                        <div class="mb-4">
                             <label for="name" class="form-label">Nama Pengguna</label>
                             <input id="name" class="form-control @if($errors->has('name')) is-invalid @endif"
                                 value="{{ old('name') }}" type="text" value="{{ old('name') }}" name="name"
@@ -26,7 +26,7 @@
                                 <span id="name-error" class="text-sm text-red-600 mt-1">{{ $errors->first('name') }}</span>
                             @endif
                         </div>
-                        <div>
+                        <div class="mb-4">
                             <label for="email" class="form-label">Email Pengguna</label>
                             <input id="email" class="form-control @if($errors->has('email')) is-invalid @endif"
                                 value="{{ old('email') }}" type="email" name="email"
@@ -36,7 +36,7 @@
                             @endif
 
                         </div>
-                        <div>
+                        <div class="mb-4">
                             <label for="phone" class="form-label">Nomor Telepon Pengguna</label>
                             <input id="phone" class="form-control @if($errors->has('phone_number')) is-invalid @endif"
                                 value="{{ old('phone_number') }}" type="text" name="phone_number"
@@ -90,14 +90,13 @@
                                     class="text-sm text-red-600 mt-1">{{ $errors->first('region') }}</span>
                             @endif
                         </div>
-
                     </div>
                     {{-- Profil Pengguna End --}}
 
                     {{-- Area Domisili --}}
                     <x-section-card :title="'Area Domisili Pengguna'">
                         <div class="grid grid-cols-2 gap-4">
-                            <div>
+                            <div class="mb-4">
                                 <label for="longitude" class="form-label">Longitudes <span class="font-normal">(DD
                                         Coordinates)</span></label>
                                 <input id="longitude"
@@ -109,7 +108,7 @@
                                         class="text-sm text-red-600 mt-1">{{ $errors->first('longtitude') }}</span>
                                 @endif
                             </div>
-                            <div>
+                            <div class="mb-4">
                                 <label for="latitude" class="form-label">Latitudes<span class="font-normal">(DMS
                                         Coordinates)</span></label>
                                 <input id="latitude"
@@ -149,7 +148,7 @@
                                 @endif
                             </div>
                         </div>
-                        <div class="relative mt-10">
+                        <div class="relative mt-5">
                             <div class="h-[350px] z-10" id="user-map-location"></div>
                             <button id="fullscreen-button"
                                 class="absolute top-3 right-3 rounded-sm w-10 h-10 grid place-items-center bg-white z-50 hover:bg-slate-200">
@@ -191,10 +190,10 @@
 
 @push('scripts')
     <script>
-        $(document).ready(function () {
-            // Initialize map
-            var map = L.map('user-map-location').setView([-6.200000, 106.816666],
-                10); // Centered on Jakarta by default
+        $(document).ready(function() {
+            // Initialize map with default view of Indonesia
+            var map = L.map('user-map-location').setView([-2.4833826, 117.8902853],
+            5); // Centered on Indonesia by default
             L.tileLayer('https://tile.openstreetmap.org/{z}/{x}/{y}.png', {
                 maxZoom: 20,
                 attribution: '&copy; <a href="http://www.openstreetmap.org/copyright">OpenStreetMap</a>'
@@ -216,6 +215,17 @@
                 // Update form fields
                 $('#latitude').val(latlng.lat.toFixed(6));
                 $('#longitude').val(latlng.lng.toFixed(6));
+            }
+
+            // Function to handle geolocation success
+            function handleLocationSuccess(position) {
+                const latlng = L.latLng(position.coords.latitude, position.coords.longitude);
+                map.setView(latlng, 15);
+            }
+
+            // Try to get user's location
+            if ("geolocation" in navigator) {
+                navigator.geolocation.getCurrentPosition(handleLocationSuccess);
             }
 
             // Handle map click events

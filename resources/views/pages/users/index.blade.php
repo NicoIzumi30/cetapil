@@ -58,6 +58,7 @@
         </thead>
         <tbody>
             @forelse($users as $user)
+        {{-- Users Table --}}
                 <tr class="table-row">
                     <td scope="row" class="table-data">
                         {{ $user->name }}
@@ -103,13 +104,38 @@
     {{-- Users Table End --}}
 </x-card>
 {{-- Users End --}}
+    {{-- Users End --}}
+
 @endsection
 
 @push('scripts')
     <script>
+
         $(document).ready(function () {
             $("#sales-date-range").flatpickr({
                 mode: "range"
+            $(document).ready(function() {
+                $('#users-table').DataTable({
+                    paging: true,
+                    searching: false,
+                    info: true,
+                    pageLength: 10,
+                    lengthMenu: [10, 20, 30, 40, 50],
+                    dom: 'rt<"bottom-container"<"bottom-left"l><"bottom-right"p>>',
+                    language: {
+                        lengthMenu: "Menampilkan _MENU_ dari 4,768 data",
+                        paginate: {
+                            previous: '<',
+                            next: '>',
+                            last: 'Terakhir',
+                        }
+                    },
+                });
+
+        $(document).ready(function () {
+            $("#sales-date-range").flatpickr({
+                mode: "range"
+
             });
         });
     </script>

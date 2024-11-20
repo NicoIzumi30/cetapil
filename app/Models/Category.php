@@ -12,4 +12,11 @@ class Category extends Model
     use HasFactory, HasUuids, SoftDeletes;
 
     protected $guarded = [];
+
+    protected $fillable = ['name'];
+
+    public function products()
+    {
+        return $this->hasMany(Product::class);
+    }
 }

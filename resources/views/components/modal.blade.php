@@ -7,7 +7,7 @@
 
         {{-- Modal panel --}}
         <div
-            class="inline-block w-full max-w-[800px] my-8 overflow-hidden text-left align-middle transition-all transform bg-white rounded-lg shadow-xl">
+            class="inline-block w-full max-w-[1150px] my-8 overflow-hidden text-left align-middle transition-all transform bg-white rounded-lg shadow-xl">
             {{-- Header --}}
 
 			@if(isset($title))
