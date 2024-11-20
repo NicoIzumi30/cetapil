@@ -25,96 +25,96 @@ class ProductSeeder extends Seeder
             'Cleanser' => [
                 [
                     'sku' => 'CETAPHIL Exfoliating Cleanser 178 ML',
-                    'price_md' => '40000',
+                    'md_price' => '40000',
                     'sales_price' => '30000',
                 ],
                 [
                     'sku' => 'CETAPHIL GENTLE SKIN CLEANSER 1000 ML',
-                    'price_md' => '40000',
+                    'md_price' => '40000',
                     'sales_price' => '30000',
                 ],
                 [
                     'sku' => 'CETAPHIL GENTLE SKIN CLEANSER 125 ML',
-                    'price_md' => '40000',
+                    'md_price' => '40000',
                     'sales_price' => '30000',
                 ],
                 [
                     'sku' => 'CETAPHIL GENTLE SKIN CLEANSER 250 ML',
-                    'price_md' => '40000',
+                    'md_price' => '40000',
                     'sales_price' => '30000',
                 ],
                 [
                     'sku' => 'CETAPHIL GENTLE SKIN CLEANSER 500 ML',
-                    'price_md' => '40000',
+                    'md_price' => '40000',
                     'sales_price' => '30000',
                 ],
                 [
                     'sku' => 'CETAPHIL GENTLE SKIN CLEANSER 59 ML',
-                    'price_md' => '40000',
+                    'md_price' => '40000',
                     'sales_price' => '30000',
                 ],
                 [
                     'sku' => 'CETAPHIL OILY SKIN CLEANSER 125 ML',
-                    'price_md' => '40000',
+                    'md_price' => '40000',
                     'sales_price' => '30000',
                 ],
                 [
                     'sku' => 'CETAPHIL ULTRA GENTLE BODY WASH 500 ML',
-                    'price_md' => '40000',
+                    'md_price' => '40000',
                     'sales_price' => '30000',
                 ],
             ],
             'BHR' => [
                 [
                     'sku' => 'Cetaphil Brightening Body Lotion 245 ML',
-                    'price_md' => '50000',
+                    'md_price' => '50000',
                     'sales_price' => '10000',
                 ],
                 [
                     'sku' => 'Cetaphil Brightening Day Protection Cream SPF 50 ML',
-                    'price_md' => '50000',
+                    'md_price' => '50000',
                     'sales_price' => '10000',
                 ],
                 [
                     'sku' => 'Cetaphil Brightening Night Nourishing Cream 50 ML',
-                   'price_md' => '50000',
+                   'md_price' => '50000',
                     'sales_price' => '10000',
                 ],
                 [
                     'sku' => 'Cetaphil Brightness Refresh Toner 150 ML',
-                    'price_md' => '50000',
+                    'md_price' => '50000',
                     'sales_price' => '10000',
                 ],
                 [
                     'sku' => 'Cetaphil Brightness Reveal Body Wash 245 ML',
-                    'price_md' => '50000',
+                    'md_price' => '50000',
                     'sales_price' => '10000',
                 ],
                 [
                     'sku' => 'Cetaphil Brightness Reveal Creamy Cleanser 100 ML',
-                   'price_md' => '50000',
+                   'md_price' => '50000',
                     'sales_price' => '10000',
                 ],
             ],
             'Baby Calendula' => [
                 [
                     'sku' => 'Cetaphil Baby Daily Lotion with Organic Calendula 400 ML',
-                    'price_md' => '100000',
+                    'md_price' => '100000',
                     'sales_price' => '20000',
                 ],
                 [
                     'sku' => 'Cetaphil Baby Diaper Cream with Organic Calendula 70G',
-                    'price_md' => '100000',
+                    'md_price' => '100000',
                     'sales_price' => '20000',
                 ],
                 [
                     'sku' => 'Cetaphil Baby Wash & Shampoo with Organic Calendula 230 ML',
-                    'price_md' => '100000',
+                    'md_price' => '100000',
                     'sales_price' => '20000',
                 ],
                 [
                     'sku' => 'Cetaphil Baby Wash & Shampoo with Organic Calendula 400 ML',
-                    'price_md' => '100000',
+                    'md_price' => '100000',
                     'sales_price' => '20000',
                 ]
             ]
@@ -130,7 +130,7 @@ class ProductSeeder extends Seeder
                     Product::create([
                         'category_id' => $category->id,
                         'sku' => $product['sku'],
-                        'price_md' => $product['price_md'],
+                        'md_price' => $product['md_price'],
                         'sales_price' => $product['sales_price'],
                     ]);
                 }
