@@ -1,11 +1,14 @@
 <?php
 
+use App\Http\Controllers\Web\VisualController;
+use App\Models\Visibility;
 use Illuminate\Support\Facades\Route;
-use App\Http\Controllers\Web\ProductController;
 use App\Http\Controllers\Web\UserController;
 use App\Http\Controllers\Auth\LoginController;
 use App\Http\Controllers\Auth\LogoutController;
+use App\Http\Controllers\Web\ProductController;
 use App\Http\Controllers\Web\DashboardController;
+use App\Http\Controllers\Web\VisibilityController;
 
 
 // Guest Routes
@@ -50,18 +53,9 @@ Route::middleware('auth')->group(function () {
     });
 
     // Visibility Management
-    Route::prefix('visibility')->name('visibility.')->middleware('permission:menu_visibility')->group(function () {
-        Route::get('/', function () {
-            return view('pages.visibility.index');
-        })->name('index');
-        Route::get('/edit', function () {
-            return view('pages.visibility.edit');
-        });
-        Route::get('/create', function () {
-            return view('pages.visibility.create');
-        });
-    });
+    Route::resource('visibility', VisibilityController::class)->middleware('permission:menu_visibility');
 
+    Route::post('visual', [VisualController::class,'store'])->name('visual.store')->middleware('permission:menu_visibility');
     // Selling Management
     Route::prefix('selling')->name('selling.')->middleware('permission:menu_selling')->group(function () {
         Route::get('/', function () {

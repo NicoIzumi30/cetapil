@@ -24,7 +24,7 @@
                 <x-slot:title>
                     Tambah Produk
                 </x-slot:title>
-                <form method="POST" action="{{ route('products.store') }}" id="createProductForm"
+                <form id="createProductForm"
                     class="grid grid-cols-2 gap-6">
                     @csrf
                     <div>

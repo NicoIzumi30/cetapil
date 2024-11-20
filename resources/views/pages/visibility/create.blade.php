@@ -14,20 +14,20 @@
             <x-button.info onclick="openModal('add-visual')">Tambah Jenis Visual</x-button.info>
 			<x-modal id="add-visual">
 				<x:slot:title>Tambah Jenis Visual</x:slot:title>
-				<form class="w-full">
+				<form class="w-full" id="createVisualForm">
+                    @csrf
 					<div>
-						<label for="visual" class="!text-black">Jenis Visual</label>
-						<input id="visual" class="form-control" wire:model="visual" name="visual"
-							placeholder="Masukan Nama Jenis Visual" aria-describedby="visual" value="">
-						@error('visual')
-							<div class="invalid-feedback">
-								{{ $message }}
-							</div>
-						@enderror
+						<label for="name" class="!text-black">Jenis Visual</label>
+						<input id="name" class="form-control" name="name"
+							placeholder="Masukan Nama Jenis Visual" aria-describedby="name" value="">
+                            <span id="name-error" class="text-red-500 text-xs hidden"></span>
 					</div>
 				</form>
 				<x:slot:footer>
-					<x-button.info class="w-full">Konfirmasi</x-button.info>
+                <x-button.info type="submit" id="saveBtn" class="w-full">
+                            <span id="saveBtnText">Konfirmasi</span>
+                            <span id="saveBtnLoading" class="hidden">Menyimpan...</span>
+                        </x-button.info>
 				</x:slot:footer>
 			</x-modal>
             {{-- <x-button.info onclick="openModal('add-posm')">Tambah Jenis POSM</x-button.info>
@@ -204,6 +204,39 @@
             $('#sku').select2();
             $('#visual-campaign').select2();
             $('#posm').select2();
+            $('#saveBtn').click(function () {
+                $('.text-red-500').addClass('hidden');
+                $('input').removeClass('border-red-500');
+                toggleLoading(true, 'save');
+                $.ajax({
+                    type: 'POST',
+                    url: '{{ route('visual.store') }}',
+                    data: $('#createVisualForm').serialize(),
+                    success: function (response) {
+                        toggleLoading(false,'save');
+                        if (response.status === 'success') {
+                            closeModal('add-visual');
+                            toast('success', response.message,150);
+                            setTimeout(() => {
+                                window.location.reload();
+                            }, 1500);
+                        }
+                    },
+                    error: function (xhr) {
+                        toggleLoading(false, 'save');
+                        if (xhr.status === 422) {
+                            const errors = xhr.responseJSON.errors;
+                            $.each(errors, function (key, value) {
+                                $(`#${key}-error`)
+                                    .text(value[0])
+                                    .removeClass('hidden');
+                                $(`[name="${key}"]`).addClass('border-red-500');
+                            });
+                        }
+                    }
+                });
+            });
         });
+      
     </script>
 @endpush
