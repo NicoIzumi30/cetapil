@@ -53,15 +53,12 @@ class CitiesDatabaseHelper {
   }
 
   // Get all cities
-  Future<List<Data>> getAllCities() async {
+  Future<List<String>> getAllCities() async {
     final db = await database;
     final results = await db.query('cities', orderBy: 'name ASC');
 
     return results
-        .map((map) => Data(
-              id: map['id'] as String,
-              name: map['name'] as String,
-            ))
+        .map((map) => map['name'] as String,)
         .toList();
   }
 

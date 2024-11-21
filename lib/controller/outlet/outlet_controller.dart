@@ -8,6 +8,7 @@ import 'package:cetapil_mobile/model/form_outlet_response.dart';
 import 'package:cetapil_mobile/model/outlet.dart';
 import 'package:cetapil_mobile/model/get_city_response.dart';
 import 'package:cetapil_mobile/utils/image_upload.dart';
+import 'package:cetapil_mobile/widget/custom_alert.dart';
 import 'package:get/get.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_easyloading/flutter_easyloading.dart';
@@ -211,9 +212,9 @@ class OutletController extends GetxController {
     }
   }
 
-  Future<void> saveDraftOutlet() async {
+  Future<void> saveDraftOutlet(BuildContext context) async {
     try {
-      if (!validateCity()) return;
+      // if (!validateCity()) return;
       
       EasyLoading.show(status: 'Saving draft...');
 
@@ -228,8 +229,10 @@ class OutletController extends GetxController {
         'salesName': salesName.value.text,
         'outletName': outletName.value.text,
         'category': 'MT',
-        'city_id': cityId.value,
-        'city_name': cityName.value,
+        // 'city_id': cityId.value,
+        // 'city_name': cityName.value,
+        'city_id': "1",
+        'city_name': "Wonogiri",
         'longitude': gpsController.longController.value.text,
         'latitude': gpsController.latController.value.text,
         'address': outletAddress.value.text,
@@ -250,12 +253,8 @@ class OutletController extends GetxController {
 
       await db.insertOutletWithAnswers(data: data);
       await loadOutlets();
-
-      Get.snackbar(
-        'Success',
-        'Draft saved successfully',
-        snackPosition: SnackPosition.BOTTOM,
-      );
+      Get.back();
+      showSuccessAlert(context, "Draft Berhasil Disimpan", "Anda baru menyimpan Draft. Silahkan periksa status Draft pada aplikasi.");
 
       clearForm();
     } catch (e) {

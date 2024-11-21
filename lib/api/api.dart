@@ -9,7 +9,7 @@ import '../model/form_outlet_response.dart';
 import '../model/get_city_response.dart';
 import '../model/login_response.dart';
 
-const String baseUrl = 'https://e15a-36-81-29-70.ngrok-free.app';
+const String baseUrl = 'https://dev-cetaphil.i-am.host';
 final GetStorage storage = GetStorage();
 
 class Api {
