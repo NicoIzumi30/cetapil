@@ -4,6 +4,7 @@
 <x-banner-content :title="'Produk'" />
 @endsection
 
+
 @section('dashboard-content')
 <main class="w-full">
     {{-- Daftar Produk --}}
@@ -15,7 +16,10 @@
         {{-- Product Action --}}
         <x-slot:cardAction>
             <x-input.search class="border-0" placeholder="Cari data produk"></x-input.search>
-            <x-button.light>Download</x-button.light>
+            <x-button.light id="downloadBtn">
+                <span id="downloadBtnText">Download</span>
+                <span id="downloadBtnLoading" class="hidden">Memproses...</span>
+            </x-button.light>
             <x-button.info onclick="openModal('tambah-produk')">
                 Tambah Daftar Produk
             </x-button.info>
@@ -665,5 +669,60 @@
                 }
             });
         });
+
+
+        //DOWNLOAD EXEL PRODUK
+        $(document).ready(function() {
+    function toggleLoading(isLoading) {
+        const btnText = $('#downloadBtnText');
+        const btnLoading = $('#downloadBtnLoading');
+        const btn = $('#downloadBtn');
+
+        if (isLoading) {
+            btnText.addClass('hidden');
+            btnLoading.removeClass('hidden');
+            btn.prop('disabled', true);
+        } else {
+            btnText.removeClass('hidden');
+            btnLoading.addClass('hidden');
+            btn.prop('disabled', false);
+        }
+    }
+
+    $('#downloadBtn').click(function(e) {
+        e.preventDefault();
+        toggleLoading(true);
+        
+        // Buat form temporary untuk download
+        const form = document.createElement('form');
+        form.method = 'GET';
+        form.action = '/products/generate-excel';
+        document.body.appendChild(form);
+
+        // Gunakan fetch untuk cek error terlebih dahulu
+        fetch('/products/generate-excel')
+            .then(response => {
+                if (response.ok) {
+                    // Jika response ok, submit form untuk download
+                    form.submit();
+                    toast('success', 'File berhasil diunduh', 150);
+                } else {
+                    // Jika ada error, parse error message
+                    return response.json().then(data => {
+                        throw new Error(data.message || 'Gagal mengunduh file');
+                    });
+                }
+            })
+            .catch(error => {
+                console.error('Download error:', error);
+                toast('error', error.message || 'Gagal mengunduh file', 200);
+            })
+            .finally(() => {
+                toggleLoading(false);
+                // Cleanup form
+                document.body.removeChild(form);
+            });
+    });
+});
     </script>
 @endpush

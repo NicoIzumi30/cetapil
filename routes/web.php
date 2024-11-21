@@ -84,6 +84,8 @@ Route::middleware('auth')->group(function () {
         Route::get('/download-template', [ProductController::class,'downloadTemplate'])->name('downloadTemplate');
         Route::get('/{product}/av3m', [ProductController::class, 'getAv3m'])->name('products.getAv3m');
         Route::post('/{product}/av3m', [ProductController::class, 'updateAv3m'])->name('products.updateAv3m');
+        Route::get('/generate-excel', [ProductController::class, 'downloadExcel'])
+        ->name('generate-excel');
     });
     // Logout
     Route::get('/logout', LogoutController::class)->name('logout');

@@ -37,4 +37,9 @@ class Product extends Model
         }
         return env('APP_URL') . "/storage$this->path";
     }
+
+    public function av3ms()
+    {
+        return $this->hasMany(Av3m::class);
+    }
 }

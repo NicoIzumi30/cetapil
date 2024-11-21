@@ -16,6 +16,9 @@ use Maatwebsite\Excel\Facades\Excel;
 use Illuminate\Validation\ValidationException;
 use App\Http\Requests\Product\CreateProductRequest;
 use App\Http\Controllers\Controller;
+use App\Exports\ProductExport;
+use Illuminate\Support\Facades\Log;
+use Illuminate\Support\Facades\Storage;
 
 class ProductController extends Controller
 {
@@ -192,6 +195,53 @@ class ProductController extends Controller
         } catch (\Exception $e) {
             DB::rollBack();
             return response()->json(['message' => $e->getMessage()], 500);
+        }
+    }
+
+    public function downloadExcel()
+    {
+        try {
+            // Generate file langsung ke output
+            return Excel::download(new ProductExport(), 'products_data_' . now()->format('Y-m-d_His') . '.xlsx', \Maatwebsite\Excel\Excel::XLSX);
+        } catch (\Exception $e) {
+            Log::error('Excel Download Error', [
+                'message' => $e->getMessage(),
+                'file' => $e->getFile(),
+                'line' => $e->getLine()
+            ]);
+            
+            return response()->json([
+                'status' => 'error',
+                'message' => 'Gagal membuat file Excel: ' . $e->getMessage()
+            ], 500);
+        }
+    }
+
+    public function getExcelFile($filename)
+    {
+        try {
+            $path = storage_path('app/temp/' . $filename);
+            
+            if (!file_exists($path)) {
+                throw new \Exception('File tidak ditemukan di path: ' . $path);
+            }
+
+            return response()->download($path, $filename, [
+                'Content-Type' => 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet',
+            ])->deleteFileAfterSend(true);
+
+        } catch (\Exception $e) {
+            Log::error('Excel Download Error: ' . $e->getMessage(), [
+                'file' => $e->getFile(),
+                'line' => $e->getLine(),
+                'filename' => $filename,
+                'path' => $path ?? null
+            ]);
+            
+            return response()->json([
+                'status' => 'error',
+                'message' => 'Gagal mengunduh file: ' . $e->getMessage()
+            ], 500);
         }
     }
 }

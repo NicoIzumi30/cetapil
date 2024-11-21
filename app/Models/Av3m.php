@@ -15,7 +15,9 @@ class Av3m extends Model
     {
         return $this->belongsTo(Product::class);
     }
-    public function channel(){
+
+    public function channel()
+    {
         return $this->belongsTo(Channel::class);
     }
 }
