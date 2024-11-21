@@ -41,5 +41,9 @@ Route::middleware(['auth_api','role:sales'])->group(function () {
                 ->name('create');
         });
     });
+    Route::prefix("routing")->group(function () {
+        Route::get('/', [OutletController::class, 'getRouting']);
+        Route::get('/detail/{id}', [OutletController::class, 'show']);
+    });
     Route::middleware('permission:menu_outlet')->group(function () {});
 });
