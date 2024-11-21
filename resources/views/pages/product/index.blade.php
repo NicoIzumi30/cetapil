@@ -4,6 +4,7 @@
 <x-banner-content :title="'Produk'" />
 @endsection
 
+
 @section('dashboard-content')
 <main class="w-full">
     {{-- Daftar Produk --}}
@@ -14,8 +15,11 @@
 
         {{-- Product Action --}}
         <x-slot:cardAction>
-            <x-input.search class="border-0" placeholder="Cari data produk"></x-input.search>
-            <x-button.light>Download</x-button.light>
+            <x-input.search class="border-0" placeholder="Cari data produk" id="global-search"></x-input.search>
+            <x-button.light id="downloadBtn">
+                <span id="downloadBtnText">Download</span>
+                <span id="downloadBtnLoading" class="hidden">Memproses...</span>
+            </x-button.light>
             <x-button.info onclick="openModal('tambah-produk')">
                 Tambah Daftar Produk
             </x-button.info>
@@ -24,8 +28,7 @@
                 <x-slot:title>
                     Tambah Produk
                 </x-slot:title>
-                <form id="createProductForm"
-                    class="grid grid-cols-2 gap-6">
+                <form id="createProductForm" class="grid grid-cols-2 gap-6">
                     @csrf
                     <div>
                         <label for="categories" class="!text-black">Kategori Produk</label>
@@ -153,9 +156,11 @@
                     <div class="flex gap-4">
                         <x-button.light onclick="closeModal('unggah-produk-bulk')"
                             class="w-full border rounded-md ">Batalkan</x-button.light>
-                        <x-button.light class="w-full !text-white !bg-primary" id="importBtn"> <span id="importBtnText">Mulai Unggah</span>
-                        <span id="importBtnLoading" class="hidden">Memproses...</span></x-button.light>
-                        <x-button.light class="w-full !text-white !bg-primary" id="downloadTemplate">Download Template</x-button.light>
+                        <x-button.light class="w-full !text-white !bg-primary" id="importBtn"> <span
+                                id="importBtnText">Mulai Unggah</span>
+                            <span id="importBtnLoading" class="hidden">Memproses...</span></x-button.light>
+                        <x-button.light class="w-full !text-white !bg-primary" id="downloadTemplate">Download
+                            Template</x-button.light>
                     </div>
                 </x-slot:footer>
             </x-modal>
@@ -197,48 +202,6 @@
                     </th>
                 </tr>
             </thead>
-            <tbody>
-                @forelse ($items as $item)
-                    <tr class="table-row">
-                        <td scope="row" class="table-data">
-                            {{ $item->category->name }}
-                        </td>
-                        <td class="table-data">
-                            {{ $item->sku }}
-                        </td>
-                        <td class="table-data">
-                            Rp {{ number_format($item->md_price, 0, ',', '.') }}
-                        </td>
-                        <td class="table-data">
-                            Rp {{ number_format($item->sales_price, 0, ',', '.') }}
-                        </td>
-                        <td class="table-data">
-                            <x-action-table-dropdown>
-                                <li>
-                                    <button class="dropdown-option" id="view-product" data-id="{{ $item->id }}">
-                                        Lihat Data
-                                    </button>
-                                </li>
-                                <li>
-                                    <a href="{{ route('products.destroy', $item->id) }}"
-                                        class="dropdown-option text-red-400 delete-btn" data-name="{{ $item->sku }}">
-                                        Hapus Data
-                                    </a>
-                                    <button class="dropdown-option" id="view-av3m" data-id="{{ $item->id }}">
-                                        Update AV3M
-                                    </button>
-                                </li>
-                            </x-action-table-dropdown>
-                        </td>
-                    </tr>
-                @empty
-                    <tr>
-                        <td colspan="5" class="px-6 py-4 text-center text-gray-500">
-                            Tidak ada data produk
-                        </td>
-                    </tr>
-                @endforelse
-            </tbody>
         </table>
 
         {{-- TAMBAH AV3M --}}
@@ -247,12 +210,14 @@
             <form id="av3mForm" class="grid grid-cols-2 gap-6">
                 @csrf
                 @foreach ($channels as $channel)
-                <div>
-                    <label for="channel{{$channel->id}}" class="!text-black">{{$channel->name}}</label>
-                    <input id="channel-{{$channel->id}}" class="form-control channer_{{$loop->iteration}}" type="text" name="channel_{{$loop->iteration}}" placeholder="Masukan A3M {{$channel->name}}" aria-describedby="channel-{{$channel->name}}" value="">
-                </div>
+                    <div>
+                        <label for="channel{{$channel->id}}" class="!text-black">{{$channel->name}}</label>
+                        <input id="channel-{{$channel->id}}" class="form-control channer_{{$loop->iteration}}" type="text"
+                            name="channel_{{$loop->iteration}}" placeholder="Masukan A3M {{$channel->name}}"
+                            aria-describedby="channel-{{$channel->name}}" value="">
+                    </div>
                 @endforeach
-                
+
                 <x-slot:footer>
                     <x-button.primary class="w-full" id="saveAv3mBtn">Simpan Perubahan</x-button.primary>
                 </x-slot:footer>
@@ -368,302 +333,342 @@
 
 
 @push('scripts')
-    <script>
-        $(document).ready(function () {
-            $('.categories').select2();
-            $('.edit-category').select2();
-            $("#stock-date-range").flatpickr({
-                mode: "range"
-            });
-            $('#product-table').DataTable({
-                paging: true,
-                searching: false,
-                info: true,
-                pageLength: 10,
-                lengthMenu: [10, 20, 30, 40, 50],
-                dom: 'rt<"bottom-container"<"bottom-left"l><"bottom-right"p>>',
-                language: {
-                    lengthMenu: "Menampilkan _MENU_ dari 4,768 data",
-                    paginate: {
-                        previous: '<',
-                        next: '>',
-                        last: 'Terakhir',
-                    }
-                },
-            });
-            $('#stock-on-hand-table').DataTable({
-                paging: true,
-                searching: false,
-                info: true,
-                pageLength: 10,
-                lengthMenu: [10, 20, 30, 40, 50],
-                dom: 'rt<"bottom-container"<"bottom-left"l><"bottom-right"p>>',
-                language: {
-                    lengthMenu: "Menampilkan _MENU_ dari 4,768 data",
-                    paginate: {
-                        previous: '<',
-                        next: '>',
-                        last: 'Terakhir',
-                    }
-                },
-            });
-            $('#downloadTemplate').click(function () {
-                window.location.href = "{{ route('products.downloadTemplate') }}";
-            });
+<script>
+$(document).ready(function() {
+    // Inisialisasi komponen
+    $('.categories, .edit-category').select2();
+    $("#stock-date-range").flatpickr({ mode: "range" });
+
+    // Konfigurasi DataTable utama
+    let table = $('#product-table').DataTable({
+        processing: true,
+        serverSide: true,
+        paging: true,
+        searching: false,
+        info: true,
+        pageLength: 10,
+        lengthMenu: [10, 20, 30, 40, 50],
+        dom: 'rt<"bottom-container"<"bottom-left"l><"bottom-right"p>>',
+        language: {
+            lengthMenu: "Menampilkan _MENU_ dari _TOTAL_ data",
+            processing: "Memuat data...",
+            paginate: {
+                previous: '<',
+                next: '>',
+                last: 'Terakhir',
+            },
+            info: "Menampilkan _START_ sampai _END_ dari _TOTAL_ data",
+            infoEmpty: "Menampilkan 0 sampai 0 dari 0 data",
+            emptyTable: "Tidak ada data yang tersedia"
+        },
+        ajax: {
+            url: "{{ route('products.data') }}",
+            data: function(d) {
+                d.search_term = $('#global-search').val();
+            },
+            dataSrc: function(json) {
+                $('.dataTables_length select').closest('.dataTables_length')
+                    .find('label')
+                    .html(`Menampilkan <select>${$('.dataTables_length select').html()}</select> dari ${json.recordsFiltered} data`);
+                return json.data;
+            }
+        },
+        columns: [
+            { data: 'category', name: 'category.name' },
+            { data: 'sku', name: 'sku' },
+            { 
+                data: 'md_price',
+                name: 'md_price',
+                render: data => 'Rp ' + data
+            },
+            { 
+                data: 'sales_price',
+                name: 'sales_price',
+                render: data => 'Rp ' + data
+            },
+            { 
+                data: 'actions',
+                name: 'actions',
+                orderable: false,
+                searchable: false
+            }
+        ]
+    });
+
+    // Search dengan debounce
+    let searchTimer;
+    $('#global-search').on('input', function() {
+        clearTimeout(searchTimer);
+        searchTimer = setTimeout(() => table.ajax.reload(null, false), 500);
+    });
+
+    // Stock on hand table
+    $('#stock-on-hand-table').DataTable({
+        paging: true,
+        searching: false,
+        info: true,
+        pageLength: 10,
+        lengthMenu: [10, 20, 30, 40, 50],
+        dom: 'rt<"bottom-container"<"bottom-left"l><"bottom-right"p>>',
+        language: {
+            lengthMenu: "Menampilkan _MENU_ dari 4,768 data",
+            paginate: {
+                previous: '<',
+                next: '>',
+                last: 'Terakhir',
+            }
+        },
+    });
+    $(document).on('click', '#product-table .delete-btn', function(e) {
+        e.preventDefault();
+        const url = $(this).attr('href');
+        const name = $(this).data('name');
+        deleteData(url, name);
+    });
+    // Create Product
+    $('#saveBtn').click(function() {
+        resetFormErrors();
+        toggleLoading(true, 'save');
+        
+        $.ajax({
+            type: 'POST',
+            url: '{{ route('products.store') }}',
+            data: $('#createProductForm').serialize(),
+            success: function(response) {
+                handleSuccess('tambah-produk', response.message);
+            },
+            error: handleFormErrors
         });
-    </script>
-@endpush
+    });
 
-@push('scripts')
-    <script>
-        $(document).ready(function () {
-            // Form submission
-            $('#saveBtn').click(function () {
-                $('.text-red-500').addClass('hidden');
-                $('input').removeClass('border-red-500');
-                toggleLoading(true, 'save');
-                $.ajax({
-                    type: 'POST',
-                    url: '{{ route('products.store') }}',
-                    data: $('#createProductForm').serialize(),
-                    success: function (response) {
-                        toggleLoading(false,'save');
-                        if (response.status === 'success') {
-                            closeModal('tambah-produk');
-                            toast('success', response.message,150);
-                            setTimeout(() => {
-                                window.location.reload();
-                            }, 1500);
-                        }
-                    },
-                    error: function (xhr) {
-                        toggleLoading(false, 'save');
-                        if (xhr.status === 422) {
-                            const errors = xhr.responseJSON.errors;
-                            $.each(errors, function (key, value) {
-                                $(`#${key}-error`)
-                                    .text(value[0])
-                                    .removeClass('hidden');
-                                $(`[name="${key}"]`).addClass('border-red-500');
-                            });
-                        }
-                    }
-                });
-            });
-
-        });
-            $('#importBtn').on('click', function() {
-                let file = $('#file_upload')[0].files[0];
-                if (!file) {
-                    toast('error', 'Silakan pilih file terlebih dahulu',200);
-                }
-                let formData = new FormData();
-                formData.append('excel_file', file);
-                toggleLoading(true, 'import');
-                $.ajax({
-                    url: '/products/bulk',
-                    type: 'POST',
-                    data: formData,
-                    processData: false,
-                    contentType: false,
-                    success: function (response) {
-                        toggleLoading(false, 'import');
-                        closeModal('unggah-produk-bulk');
-                        toast('success', response.message,150);
-                        setTimeout(() => {
-                            window.location.reload();
-                        }, 1500);
-                    },
-                    error: function (xhr) {
-                        toggleLoading(false,'import');
-                        toast('error', xhr.responseJSON.message,200);
-                    }
-                });
-            });
-        document.addEventListener('DOMContentLoaded', function () {
-            const uploadArea = document.getElementById('upload-area');
-            const fileInput = document.getElementById('file_upload');
-            const displayFileName = document.getElementById('filename-display');
-            const uploadHelptext = document.getElementById('upload-helptext');
-            const maxFileSize = 5 * 1024 * 1024;
-
-            // Click handler for the upload area
-            uploadArea.addEventListener('click', () => {
-                fileInput.click();
-            });
-
-            // Drag and drop handlers
-            uploadArea.addEventListener('dragover', (e) => {
-                e.preventDefault();
-                uploadArea.classList.add('drag-over');
-            });
-
-            uploadArea.addEventListener('dragleave', (e) => {
-                e.preventDefault();
-                uploadArea.classList.remove('drag-over');
-            });
-
-            uploadArea.addEventListener('drop', (e) => {
-                e.preventDefault();
-                uploadArea.classList.remove('drag-over');
-
-                const files = e.dataTransfer.files;
-                handleFiles(files);
-            });
-
-            fileInput.addEventListener('change', (e) => {
-                handleFiles(e.target.files);
-            });
-            function handleFiles(files) {
-                if (files.length === 0) return;
-
-                const file = files[0];
-
-                const validTypes = [
-                    'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet',
-                    'application/wps-office.xlsx',
-                    'application/vnd.ms-excel',
-                ];
-                if (!validTypes.includes(file.type)) {
-                    console.log(file.type);
-                    alert('Upload file gagal, Tolong Unggah Hanya file berformat .xlxs');
-                    fileInput.value = '';
-                    return;
-                }
-
-                if (file.size > maxFileSize) {
-                    alert('Upload file gagal, Ukuran file lebih dari 5 MB');
-                    fileInput.value = '';
-                    return;
-                }
-
-                if (file.size > maxFileSize && file.size > maxFileSize) {
-                    return
-                }
-
-                console.log(file.name);
-
-                const reader = new FileReader();
-                reader.onload = function (e) {
-                    displayFileName.classList.remove('hidden')
-                    uploadHelptext.classList.add('hidden')
-                    displayFileName.innerText = file.name
-                };
-                reader.readAsText(file);
+    // Edit product handler
+    $(document).on('click', '#view-product', function(e) {
+        e.preventDefault();
+        const productId = $(this).data('id');
+        resetFormErrors();
+        
+        $.ajax({
+            url: `/products/${productId}/edit`,
+            type: 'GET',
+            success: function(response) {
+                $('#edit-category').val(response.category_id).trigger('change');
+                $('#edit-sku').val(response.sku);
+                $('#edit-md-price').val(response.md_price);
+                $('#edit-sales-price').val(response.sales_price);
+                $('#editProductForm').data('id', response.id);
+                openModal('edit-produk');
+            },
+            error: function() {
+                toast('error', 'Terjadi kesalahan saat mengambil data produk', 200);
             }
         });
-        //EDIT PRODUK
-        $(document).ready(function () {
-            $('.edit-category').select2();
-            $(document).on('click', '#view-product', function (e) {
-                e.preventDefault();
-                const productId = $(this).data('id');
-                $('.text-red-500').addClass('hidden');
-                $('input, select').removeClass('border-red-500');
-                $.ajax({
-                    url: `/products/${productId}/edit`,
-                    type: 'GET',
-                    success: function (response) {
-                        $('#edit-category').val(response.category_id).trigger('change');
-                        $('#edit-sku').val(response.sku);
-                        $('#edit-md-price').val(response.md_price);
-                        $('#edit-sales-price').val(response.sales_price);
-                        $('#editProductForm').data('id', response.id);
-                        openModal('edit-produk');
-                    },
-                    error: function (xhr) {
-                        toast('error', 'Terjadi kesalahan saat mengambil data produk',200);
-                    }
-                });
-            });
+    });
 
-            // Handle form submission
-            $('#updateBtn').click(function (e) {
-                e.preventDefault();
-                $('.text-red-500').addClass('hidden');
-                $('input, select').removeClass('border-red-500');
-                toggleLoading(true, 'update');
-                const productId = $('#editProductForm').data('id');
-                const formData = {
-                    category_id: $('#edit-category').val(),
-                    sku: $('#edit-sku').val(),
-                    md_price: $('#edit-md-price').val().replace(/[^\d]/g, ''),
-                    sales_price: $('#edit-sales-price').val().replace(/[^\d]/g, '')
-                };
-                $.ajax({
-                    url: `/products/${productId}`,
-                    type: 'PUT',
-                    data: formData,
-                    success: function (response) {
-                        toggleLoading(false, 'update');
-                        closeModal('edit-produk');
-                        toast('success', response.message,150);
-                        setTimeout(() => {
-                            window.location.reload();
-                        }, 1500);
-                    },
-                    error: function (xhr) {
-                        toggleLoading(false, 'update');
-                        if (xhr.status === 422) {
-                            const errors = xhr.responseJSON.errors;
-                            $.each(errors, function (key, value) {
-                                $(`#edit-${key}-error`)
-                                    .text(value[0])
-                                    .removeClass('hidden');
-                                $(`[name="${key}"]`).addClass('border-red-500');
-                            });
-                        }
-                    }
-                });
-            });
+    // Update product handler
+    $('#updateBtn').click(function(e) {
+        e.preventDefault();
+        const productId = $('#editProductForm').data('id');
+        const formData = {
+            category_id: $('#edit-category').val(),
+            sku: $('#edit-sku').val(),
+            md_price: $('#edit-md-price').val().replace(/[^\d]/g, ''),
+            sales_price: $('#edit-sales-price').val().replace(/[^\d]/g, '')
+        };
+
+        resetFormErrors();
+        toggleLoading(true, 'update');
+
+        $.ajax({
+            url: `/products/${productId}`,
+            type: 'PUT',
+            data: formData,
+            success: function(response) {
+                handleSuccess('edit-produk', response.message);
+            },
+            error: handleFormErrors
         });
-        // TAMBAH AV3M
-        $(document).on('click', '#view-av3m', function (e) {
-            e.preventDefault();
-            const productId = $(this).data('id');
-            openModal('update-av3m');
-            // Reset form
-            $('.text-red-500').addClass('hidden');
-            $('input').removeClass('border-red-500');
-            $.ajax({
-                url: `/products/${productId}/av3m`,
-                type: 'GET',
-                success: function (response) {
-                    console.log(response);
+    });
+
+    // AV3M update handler
+    $(document).on('click', '#view-av3m', function(e) {
+        e.preventDefault();
+        const productId = $(this).data('id');
+        resetFormErrors();
+        openModal('update-av3m');
+        
+        $.ajax({
+            url: `/products/${productId}/av3m`,
+            type: 'GET',
+            success: function(response) {
                 @foreach ($channels as $channel)
                     $('#channel-{{$channel->id}}').val(response.channel_{{$loop->iteration}});
                 @endforeach
-                    $('#av3mForm').data('id', response.id);
+                $('#av3mForm').data('id', response.id);
+            }
+        });
+    });
+
+    // Save AV3M handler
+    $('#saveAv3mBtn').click(function(e) {
+        e.preventDefault();
+        const productId = $('#av3mForm').data('id');
+
+        $.ajax({
+            url: `/products/${productId}/av3m`,
+            type: 'POST',
+            data: $('#av3mForm').serialize(),
+            success: function(response) {
+                handleSuccess('update-av3m', response.message);
+            },
+            error: function(xhr) {
+                if (xhr.status === 422) {
+                    toast('error', xhr.responseJSON.message, 200);
+                    handleFieldErrors(xhr.responseJSON.errors, true);
                 }
+            }
+        });
+    });
+
+    // Import/Upload handlers
+    $('#downloadTemplate').click(function() {
+        window.location.href = "{{ asset('assets/template/template_bulk_product.xlsx') }}";
+    });
+
+    $('#importBtn').click(function() {
+        const file = $('#file_upload')[0].files[0];
+        if (!file) {
+            return toast('error', 'Silakan pilih file terlebih dahulu', 200);
+        }
+
+        const formData = new FormData();
+        formData.append('excel_file', file);
+        toggleLoading(true, 'import');
+
+        $.ajax({
+            url: '/products/bulk',
+            type: 'POST',
+            data: formData,
+            processData: false,
+            contentType: false,
+            success: function(response) {
+                handleSuccess('unggah-produk-bulk', response.message);
+            },
+            error: function(xhr) {
+                toggleLoading(false, 'import');
+                toast('error', xhr.responseJSON.message, 200);
+            }
+        });
+    });
+
+    // Download Excel handler
+    $('#downloadBtn').click(function(e) {
+        e.preventDefault();
+        toggleLoading(true);
+
+        const form = document.createElement('form');
+        form.method = 'GET';
+        form.action = '/products/generate-excel';
+        document.body.appendChild(form);
+
+        fetch('/products/generate-excel')
+            .then(response => {
+                if (response.ok) {
+                    form.submit();
+                    toast('success', 'File berhasil diunduh', 150);
+                } else {
+                    return response.json().then(data => {
+                        throw new Error(data.message || 'Gagal mengunduh file');
+                    });
+                }
+            })
+            .catch(error => {
+                console.error('Download error:', error);
+                toast('error', error.message || 'Gagal mengunduh file', 200);
+            })
+            .finally(() => {
+                toggleLoading(false);
+                document.body.removeChild(form);
+            });
+    });
+
+    // File Upload Area
+    const setupFileUpload = () => {
+        const uploadArea = document.getElementById('upload-area');
+        const fileInput = document.getElementById('file_upload');
+        const displayFileName = document.getElementById('filename-display');
+        const uploadHelptext = document.getElementById('upload-helptext');
+        const maxFileSize = 5 * 1024 * 1024;
+
+        uploadArea.addEventListener('click', () => fileInput.click());
+
+        ['dragover', 'dragleave', 'drop'].forEach(eventName => {
+            uploadArea.addEventListener(eventName, (e) => {
+                e.preventDefault();
+                uploadArea.classList.toggle('drag-over', eventName === 'dragover');
+                if (eventName === 'drop') handleFiles(e.dataTransfer.files);
             });
         });
 
-        // Handle form submission
-        $('#saveAv3mBtn').click(function (e) {
-            e.preventDefault();
-            const productId = $('#av3mForm').data('id');
-            $.ajax({
-                url: `/products/${productId}/av3m`,
-                type: 'POST',
-                data: $('#av3mForm').serialize(),
-                success: function (response) {
-                    closeModal('update-av3m');
-                    toast('success', response.message,150);
-                    setTimeout(() => {
-                        window.location.reload();
-                    }, 1500);
-                },
-                error: function (xhr) {
-                    if (xhr.status === 422) {
-                        toast('error', xhr.responseJSON.message,200);
-                        const errors = xhr.responseJSON.errors;
-                        $.each(errors, function (key, value) {
-                            $(`.${key}-error`).text(value[0]).removeClass('hidden');
-                            $(`.${key}`).addClass('border-red-500');
-                        });
-                    }
-                }
-            });
+        fileInput.addEventListener('change', (e) => handleFiles(e.target.files));
+
+        function handleFiles(files) {
+            if (!files.length) return;
+
+            const file = files[0];
+            const validTypes = [
+                'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet',
+                'application/wps-office.xlsx',
+                'application/vnd.ms-excel'
+            ];
+
+            if (!validTypes.includes(file.type)) {
+                alert('Upload file gagal, Tolong Unggah Hanya file berformat .xlsx');
+                fileInput.value = '';
+                return;
+            }
+
+            if (file.size > maxFileSize) {
+                alert('Upload file gagal, Ukuran file lebih dari 5 MB');
+                fileInput.value = '';
+                return;
+            }
+
+            displayFileName.classList.remove('hidden');
+            uploadHelptext.classList.add('hidden');
+            displayFileName.innerText = file.name;
+        }
+    };
+
+    setupFileUpload();
+
+    // Helper functions
+    function resetFormErrors() {
+        $('.text-red-500').addClass('hidden');
+        $('input, select').removeClass('border-red-500');
+    }
+
+    function handleSuccess(modalId, message) {
+        toggleLoading(false, 'update');
+        closeModal(modalId);
+        toast('success', message, 150);
+        setTimeout(() => window.location.reload(), 1500);
+    }
+
+    function handleFormErrors(xhr) {
+        toggleLoading(false, 'update');
+        if (xhr.status === 422) {
+            handleFieldErrors(xhr.responseJSON.errors);
+        }
+    }
+
+    function handleFieldErrors(errors, isAv3m = false) {
+        $.each(errors, function(key, value) {
+            const prefix = isAv3m ? '.' : '#edit-';
+            const suffix = isAv3m ? '' : '-error';
+            $(`${prefix}${key}${suffix}`).text(value[0]).removeClass('hidden');
+            $(`[name="${key}"]`).addClass('border-red-500');
         });
-    </script>
+    }
+});
+</script>
 @endpush
