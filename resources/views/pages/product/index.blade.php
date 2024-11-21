@@ -408,7 +408,7 @@
                 },
             });
             $('#downloadTemplate').click(function () {
-                window.location.href = "{{ route('products.downloadTemplate') }}";
+                window.location.href = "{{ asset('assets/template/template_bulk_product.xlsx') }}";
             });
         });
     </script>

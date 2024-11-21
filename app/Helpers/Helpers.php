@@ -1,6 +1,7 @@
 <?php
 
 use App\Models\Category;
+use App\Models\Channel;
 use App\Models\City;
 use App\Models\Outlet;
 use App\Models\OutletForm;
@@ -23,7 +24,12 @@ if (!function_exists('getProductBySku')) {
         return Product::where('sku', $sku)->first();
     }
 }
-
+if (!function_exists('getChannelByName')) {
+    function getChannelByName($name)
+    {
+        return Channel::where('name', $name)->first();
+    }
+}
 if (!function_exists('getCityByName')) {
     function getCityByName($name)
     {
