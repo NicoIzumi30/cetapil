@@ -171,31 +171,24 @@ class ProductController extends Controller
         return abort(404, 'File tidak ditemukan');
     }
     public function bulk(Request $request)
-    {
-        $request->validate([
-            'excel_file' => 'required|mimes:xlsx|max:10240'
-        ]);
+{
+    $request->validate([
+        'excel_file' => 'required|mimes:xlsx|max:10240'
+    ]);
 
-        DB::beginTransaction();
-        try {
-            $file = $request->file('excel_file');
-            // Sanitasi nama file
-            $fileName = str_replace(' ', '_', $file->getClientOriginalName());
-            $fileName = preg_replace('/[^A-Za-z0-9\-\_\.]/', '', $fileName);
-
-            $import = new ProductImport($fileName);
-            Excel::import($import, $file);
-
-            if ($import->response['status'] == 'error') {
-                throw new Exception($import->response['message']);
-            }
-
-            DB::commit();
-            return response()->json(['message' => 'Import success'], 200);
-        } catch (\Exception $e) {
-            DB::rollBack();
-            return response()->json(['message' => $e->getMessage()], 500);
+    try {
+        $file = $request->file('excel_file');
+        $fileName = $file->getClientOriginalName();
+        $import = new ProductImport($fileName);
+        Excel::import($import, $file);
+        
+        if ($import->response['status'] == 'error') {
+            throw new Exception($import->response['message']);
         }
+
+        return response()->json(['message' => 'Import success'], 200);
+    } catch (\Exception $e) {
+        return response()->json(['message' => $e->getMessage()], 500);
     }
 
     public function downloadExcel()
@@ -244,4 +237,5 @@ class ProductController extends Controller
             ], 500);
         }
     }
+}
 }
