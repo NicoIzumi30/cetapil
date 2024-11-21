@@ -1,3 +1,4 @@
+import 'dart:convert';
 import 'dart:io';
 
 import 'package:cetapil_mobile/api/api.dart';
@@ -9,10 +10,14 @@ import 'package:cetapil_mobile/model/outlet.dart';
 import 'package:cetapil_mobile/model/get_city_response.dart';
 import 'package:cetapil_mobile/utils/image_upload.dart';
 import 'package:cetapil_mobile/widget/custom_alert.dart';
+import 'package:flutter/services.dart';
 import 'package:get/get.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_easyloading/flutter_easyloading.dart';
+import 'package:path_provider/path_provider.dart';
 import 'package:uuid/uuid.dart';
+
+import '../../page/outlet/tambah_outlet.dart';
 
 class OutletController extends GetxController {
   final GPSLocationController gpsController = Get.find<GPSLocationController>();
@@ -33,6 +38,40 @@ class OutletController extends GetxController {
   var outletAddress = TextEditingController().obs;
   var controllers = <TextEditingController>[].obs;
   var questions = <FormOutletResponse>[].obs;
+
+
+  setDraftValue(Outlet outlet)async{
+    salesName.value.text = outlet.user!.name!;
+    outletName.value.text = outlet.name!;
+    ///city value
+    outletAddress.value.text = outlet.address!;
+    gpsController.longController.value.text = outlet.longitude!;
+    gpsController.latController.value.text = outlet.latitude!;
+    outletImages[0] = await base64ToFile(outlet.images![0].image!, outlet.images![0].filename!);
+    outletImages[1] = await base64ToFile(outlet.images![1].image!, outlet.images![1].filename!);
+    outletImages[2] = await base64ToFile(outlet.images![2].image!, outlet.images![2].filename!);
+    for (int i = 0; i < outlet.forms!.length; i++){
+      controllers[i].text = outlet.forms![i].outletForm!.question!;
+    }
+
+    Get.to(()=>TambahOutlet());
+
+
+  }
+
+  Future<File> base64ToFile(String base64String, String fileName) async {
+    Uint8List bytes = base64Decode(base64String);
+
+    // Get the temporary directory of the device
+    Directory tempDir = await getTemporaryDirectory();
+
+    // Create a file path with the desired file name
+    String filePath = '${tempDir.path}/$fileName';
+
+    // Write the bytes to the file
+    File file = File(filePath);
+    return await file.writeAsBytes(bytes);
+  }
 
   // City Related
   var cityId = RxString('');

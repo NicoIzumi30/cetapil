@@ -9,7 +9,8 @@ class OutletPage extends GetView<OutletController> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: Colors.transparent, // Make scaffold background transparent
+      backgroundColor:
+          Colors.transparent, // Make scaffold background transparent
       body: SafeArea(
         child: Padding(
           padding: EdgeInsets.fromLTRB(15, 15, 15, 0),
@@ -22,10 +23,10 @@ class OutletPage extends GetView<OutletController> {
                   onChanged: controller.updateSearchQuery,
                   leading: const Icon(Icons.search),
                   hintText: 'Masukkan Kata Kunci',
-                  hintStyle:
-                      WidgetStatePropertyAll(TextStyle(color: Colors.grey[500], fontSize: 14)),
-                  shape: WidgetStatePropertyAll(
-                      RoundedRectangleBorder(borderRadius: BorderRadius.circular(10))),
+                  hintStyle: WidgetStatePropertyAll(
+                      TextStyle(color: Colors.grey[500], fontSize: 14)),
+                  shape: WidgetStatePropertyAll(RoundedRectangleBorder(
+                      borderRadius: BorderRadius.circular(10))),
                 ),
               ),
               SizedBox(height: 15),
@@ -43,7 +44,8 @@ class OutletPage extends GetView<OutletController> {
                                 physics: AlwaysScrollableScrollPhysics(),
                                 itemCount: controller.filteredOutlets.length,
                                 itemBuilder: (context, index) {
-                                  final outlet = controller.filteredOutlets[index];
+                                  final outlet =
+                                      controller.filteredOutlets[index];
                                   return OutletCard(outlet: outlet);
                                 },
                               ),
@@ -105,9 +107,10 @@ class OutletPage extends GetView<OutletController> {
 }
 
 class OutletCard extends StatelessWidget {
+  final OutletController outletController = Get.find<OutletController>();
   final Outlet outlet;
 
-  const OutletCard({
+  OutletCard({
     Key? key,
     required this.outlet,
   }) : super(key: key);
@@ -178,21 +181,31 @@ class OutletCard extends StatelessWidget {
                             Icon(
                               Icons.circle,
                               size: 12,
-                              color: outlet.dataSource == 'DRAFT' ? Colors.orange : Colors.green,
+                              color: outlet.dataSource == 'DRAFT'
+                                  ? Colors.orange
+                                  : Colors.green,
                             ),
                             SizedBox(width: 4),
                             Text(
                               outlet.dataSource == 'DRAFT' ? 'Draft' : 'Synced',
                               style: TextStyle(
                                 fontSize: 12,
-                                color: outlet.dataSource == 'DRAFT' ? Colors.orange : Colors.green,
+                                color: outlet.dataSource == 'DRAFT'
+                                    ? Colors.orange
+                                    : Colors.green,
                               ),
                             ),
                           ],
                         ),
                   const SizedBox(height: 16),
                   ElevatedButton(
-                    onPressed: () => Get.to(() => DetailOutlet(outlet: outlet)),
+                    onPressed: () {
+                      outlet.dataSource != "DRAFT"
+                          ? Get.to(() {
+                              return DetailOutlet(outlet: outlet);
+                            })
+                          : outletController.setDraftValue(outlet);
+                    },
                     style: ElevatedButton.styleFrom(
                       backgroundColor: Colors.blue,
                       minimumSize: const Size(80, 36),
