@@ -1,135 +1,181 @@
-// outlet_controller.dart
-import 'dart:convert';
+import 'dart:io';
 
 import 'package:cetapil_mobile/api/api.dart';
 import 'package:cetapil_mobile/controller/gps_controller.dart';
+import 'package:cetapil_mobile/database/database_instance.dart';
+import 'package:cetapil_mobile/database/cities.dart';
 import 'package:cetapil_mobile/model/form_outlet_response.dart';
+import 'package:cetapil_mobile/model/outlet.dart';
+import 'package:cetapil_mobile/model/get_city_response.dart';
+import 'package:cetapil_mobile/utils/image_upload.dart';
+import 'package:get/get.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_easyloading/flutter_easyloading.dart';
-import 'package:get/get.dart';
 import 'package:uuid/uuid.dart';
 
-import '../../database/database_instance.dart';
-import '../../model/get_city_response.dart';
-import '../../model/list_city.dart';
-import '../../model/outlet_example.dart';
-
 class OutletController extends GetxController {
-  // RxList<Outlet> outlets = <Outlet>[].obs;
   final GPSLocationController gpsController = Get.find<GPSLocationController>();
+  final api = Api();
+  final db = DatabaseHelper.instance;
+  final citiesDb = CitiesDatabaseHelper.instance;
+  final uuid = Uuid();
+
+  // Observables
+  var outlets = <Outlet>[].obs;
+  var isLoading = false.obs;
+  var isSyncing = false.obs;
+  RxString searchQuery = ''.obs;
+
+  // Form Controllers
   var salesName = TextEditingController().obs;
   var outletName = TextEditingController().obs;
   var outletAddress = TextEditingController().obs;
-  final api = Api();
-  RxString searchQuery = ''.obs;
-  RxDouble longitude = 0.0.obs;
-  RxDouble latitude = 0.0.obs;
   var controllers = <TextEditingController>[].obs;
   var questions = <FormOutletResponse>[].obs;
 
-  ///controller
+  // City Related
+  var cityId = RxString('');
+  var cityName = RxString('');
+  var selectedCity = Rxn<Data>();
 
-
-
-  ///Database
-  final uuid = Uuid();
-  final db = DatabaseHelper.instance;
-  var outlets = <Outlet>[].obs;
-  // var forms = <OutletForm>[].obs;
-  var isLoading = false.obs;
-
-
+  // Image Controllers
+  final RxList<File?> outletImages = RxList([null, null, null]); // [frontView, banner, landmark]
+  final RxList<String> imageUrls = RxList(['', '', '']);
+  final RxList<bool> isImageUploading = RxList([false, false, false]);
 
   @override
   void onInit() {
     super.onInit();
-    loadOutlets();
-    ///for testing
-    // outlets.addAll([
-    //   Outlet(
-    //     id: uuid.v4(),
-    //     outletName: 'Guardian Setiabudi Building',
-    //     salesName: "Andromeda",
-    //     category: 'GT',
-    //     status: "APPROVED",
-    //     address: "WONOGIRI",
-    //     latitude: "123.00",
-    //     longitude: "123.00",
-    //     createdAt: DateTime.now(),
-    //     updatedAt: DateTime.now(),
-    //   ),
-    //   Outlet(
-    //     id: uuid.v4(),
-    //     outletName: 'Guardian Setiabudi Building',
-    //     salesName: "Andromeda",
-    //     category: 'GT',
-    //     status: "APPROVED",
-    //     address: "WONOGIRI",
-    //     latitude: "123.00",
-    //     longitude: "123.00",
-    //     createdAt: DateTime.now(),
-    //     updatedAt: DateTime.now(),
-    //   ),
-    //
-    // ]);
     initializeFormData();
-
-
+    syncOutlets();
   }
 
-  /// GET Function
-  Future<List<String>> getDataCity() async {
-    final value = await Api.getListCity();
-    if (value.status == "OK") {
-      return value.data!.map((city) => city.name!).toList();
+  // City related methods
+  void setCity(Data? city) {
+    if (city != null) {
+      cityId.value = city.id ?? '';
+      cityName.value = city.name ?? '';
+      selectedCity.value = city;
+    } else {
+      cityId.value = '';
+      cityName.value = '';
+      selectedCity.value = null;
     }
-    return [];
+  }
+
+  bool validateCity() {
+    if (cityId.isEmpty) {
+      Get.snackbar(
+        'Validation Error',
+        'Please select a city',
+        snackPosition: SnackPosition.BOTTOM,
+        backgroundColor: Colors.red[100],
+        colorText: Colors.red[900],
+      );
+      return false;
+    }
+    return true;
+  }
+
+  void updateImage(int index, File? file) {
+    outletImages[index] = file;
+    update();
+  }
+
+  Future<void> uploadImage(int index) async {
+    if (outletImages[index] == null) return;
+
+    try {
+      isImageUploading[index] = true;
+
+      final base64Image = await ImageUploadUtils.convertImageToBase64(outletImages[index]!);
+
+      if (base64Image != null) {
+        imageUrls[index] = base64Image;
+      }
+    } catch (e) {
+      print('Error uploading image: $e');
+      Get.snackbar(
+        'Error',
+        'Failed to upload image',
+        snackPosition: SnackPosition.BOTTOM,
+      );
+    } finally {
+      isImageUploading[index] = false;
+    }
+  }
+
+  Future<void> syncOutlets() async {
+    try {
+      isSyncing.value = true;
+      EasyLoading.show(status: 'Syncing data...');
+
+      final apiResponse = await Api.getOutletList();
+      if (apiResponse.status != "OK") {
+        throw Exception('Failed to get outlets from API');
+      }
+
+      final apiOutlets = apiResponse.data ?? [];
+      final localOutlets = await db.getAllOutlets();
+      final apiIds = apiOutlets.map((o) => o.id).toSet();
+      final localIds = localOutlets.map((o) => o.id).toSet();
+      final idsToAdd = apiIds.difference(localIds);
+      final idsToUpdate = apiIds.intersection(localIds);
+      final idsToDelete = localIds
+          .difference(apiIds)
+          .where((id) => localOutlets.firstWhere((o) => o.id == id).dataSource == 'API');
+
+      for (var id in idsToDelete) {
+        await db.deleteOutlet(id!);
+      }
+
+      for (var outlet in apiOutlets) {
+        if (idsToAdd.contains(outlet.id) || idsToUpdate.contains(outlet.id)) {
+          await db.upsertOutletFromApi(outlet);
+        }
+      }
+
+      final drafts = await db.getUnsyncedDraftOutlets();
+      for (var draft in drafts) {
+        try {
+          await db.markOutletAsSynced(draft.id!);
+        } catch (e) {
+          print('Failed to sync draft outlet ${draft.id}: $e');
+        }
+      }
+
+      await loadOutlets();
+
+      Get.snackbar(
+        'Sync Complete',
+        'Outlets have been synchronized successfully',
+        snackPosition: SnackPosition.BOTTOM,
+      );
+    } catch (e) {
+      print('Error syncing outlets: $e');
+      Get.snackbar(
+        'Sync Error',
+        'Failed to sync outlets: $e',
+        snackPosition: SnackPosition.BOTTOM,
+      );
+    } finally {
+      isSyncing.value = false;
+      EasyLoading.dismiss();
+    }
   }
 
   Future<void> loadOutlets() async {
-    final example = await db.getAllOutletWithAnswers();
-    print("example $example");
     try {
-      final results = await db.getAllOutletWithAnswers();
-
-      outlets.assignAll(
-          results.map((data) {
-            return Outlet(id: data['id'] ?? "",
-                salesName: data["salesName"] ?? "",
-                outletName: data['outletName'] ?? "",
-                category: data['category'] ?? "",
-                longitude: data['category'] ?? "",
-                latitude: data['latitude'] ?? "",
-                address: data['address'] ?? "",
-                status: data['status'] ?? "",
-                createdAt: DateTime.parse(data['created_at']),
-                updatedAt: DateTime.parse(data['updated_at'])
-            );
-          }).toList()
-      );
-
+      isLoading.value = true;
+      final results = await db.getAllOutlets();
+      outlets.assignAll(results);
     } catch (e) {
       print('Error loading outlets: $e');
+    } finally {
+      isLoading.value = false;
     }
   }
 
-  List<Outlet> get filteredOutlets => outlets.where((outlet) {
-    return outlet.outletName
-        .toLowerCase()
-        .contains(searchQuery.value.toLowerCase());
-  }).toList();
-  void updateSearchQuery(String query) {
-    searchQuery.value = query;
-  }
-
-
-
-
-
-
-
-
-  /// Store Function
   Future<void> initializeFormData() async {
     try {
       isLoading.value = true;
@@ -137,123 +183,130 @@ class OutletController extends GetxController {
       final isEmpty = await db.isOutletFormsEmpty();
 
       if (isEmpty) {
-        // Get data from API
         final response = await Api.getFormOutlet();
-        print("response form = $response");
-
         if (response.isNotEmpty) {
-          // Insert to database
           await db.insertOutletFormBatch(response);
-
-          // Update questions list
-          questions.value = response.map((json) =>
-              FormOutletResponse.fromJson(json)
-          ).toList();
-          generateControllers();
         }
       }
-      questions.value = await db.getAllForms();
+
+      final forms = await db.getAllForms();
+      questions.value = forms
+          .map((form) => FormOutletResponse(
+                id: form['id'] as String,
+                type: form['type'] as String,
+                question: form['question'] as String,
+              ))
+          .toList();
+
       generateControllers();
     } catch (e) {
       print('Error initializing form data: $e');
+      Get.snackbar(
+        'Error',
+        'Failed to load form data',
+        snackPosition: SnackPosition.BOTTOM,
+      );
     } finally {
       isLoading.value = false;
     }
   }
 
-  Future<void> saveOutlet(Map<String, dynamic> data) async {
+  Future<void> saveDraftOutlet() async {
     try {
-      EasyLoading.show();
+      if (!validateCity()) return;
+      
+      EasyLoading.show(status: 'Saving draft...');
+
+      for (int i = 0; i < outletImages.length; i++) {
+        if (outletImages[i] != null) {
+          await uploadImage(i);
+        }
+      }
+
+      final data = {
+        'id': uuid.v4(),
+        'salesName': salesName.value.text,
+        'outletName': outletName.value.text,
+        'category': 'MT',
+        'city_id': cityId.value,
+        'city_name': cityName.value,
+        'longitude': gpsController.longController.value.text,
+        'latitude': gpsController.latController.value.text,
+        'address': outletAddress.value.text,
+        'status': 'PENDING',
+        'data_source': 'DRAFT',
+        'is_synced': 0,
+
+        'image_front': imageUrls[0],
+        'image_banner': imageUrls[1],
+        'image_landmark': imageUrls[2],
+
+        for (int i = 0; i < questions.length; i++)
+          'form_id_${questions[i].id}': controllers[i].value.text,
+
+        'created_at': DateTime.now().toIso8601String(),
+        'updated_at': DateTime.now().toIso8601String(),
+      };
+
       await db.insertOutletWithAnswers(data: data);
-      EasyLoading.dismiss();
+      await loadOutlets();
+
       Get.snackbar(
         'Success',
-        'Outlet saved successfully',
+        'Draft saved successfully',
         snackPosition: SnackPosition.BOTTOM,
       );
+
+      clearForm();
     } catch (e) {
-      EasyLoading.dismiss();
-      print('Error saving outlet: $e');
+      print('Error saving draft: $e');
       Get.snackbar(
         'Error',
-        'Failed to save outlet: $e',
+        'Failed to save draft: $e',
         snackPosition: SnackPosition.BOTTOM,
       );
+    } finally {
+      EasyLoading.dismiss();
     }
   }
 
-  void saveDraftOutlet() {
-    print("jalan");
-    final data = {
-      'id': const Uuid().v4(),
-      'salesName': salesName.value.text,
-      'outletName': outletName.value.text,
-      'category': 'MT',
-      'longitude': gpsController.longController.value.text,
-      'latitude': gpsController.latController.value.text,
-      'address': outletAddress.value.text,
-      'status': 'APPROVED',
-
-      for (int i = 0; i < questions.length; i++)
-        'form_id_${i + 1}': controllers[i].value.text,
-
-      'created_at': DateTime.now().toIso8601String(),
-      'updated_at': DateTime.now().toIso8601String(),
-    };
-
-    saveOutlet(data);
+  void clearForm() {
+    salesName.value.clear();
+    outletName.value.clear();
+    outletAddress.value.clear();
+    cityId.value = '';
+    cityName.value = '';
+    selectedCity.value = null;
+    for (var controller in controllers) {
+      controller.clear();
+    }
+    outletImages.assignAll([null, null, null]);
+    imageUrls.assignAll(['', '', '']);
   }
 
+  List<Outlet> get filteredOutlets => outlets.where((outlet) {
+        return outlet.name?.toLowerCase().contains(searchQuery.value.toLowerCase()) ?? false;
+      }).toList();
 
+  void updateSearchQuery(String query) {
+    searchQuery.value = query;
+  }
 
-
-  /// Utils Function
   void generateControllers() {
-    // Dispose existing controllers first
     for (var controller in controllers) {
       controller.dispose();
     }
-
-    controllers.assignAll(
-      List.generate(
-        questions.length,
-            (index) => TextEditingController(),
-      ),
-    );
+    controllers.assignAll(List.generate(questions.length, (index) => TextEditingController()));
   }
-
-
-
-
-
-
-
-
-  // getFormOutlet() async {
-  //   try {
-  //     FormOutletResponse response = await Api.getFormOutlet();
-  //
-  //     questions.assignAll([response]);
-  //
-  //     print("Data loaded successfully!");
-  //   } catch (e) {
-  //     print("Error loading form outlet: $e");
-  //   }
-  // }
-
-
-
-
 
   @override
   void onClose() {
+    salesName.value.dispose();
+    outletName.value.dispose();
+    outletAddress.value.dispose();
     for (var controller in controllers) {
       controller.dispose();
     }
     super.onClose();
   }
-  }
-
-
-
-
+}

@@ -3,8 +3,8 @@ import 'package:cetapil_mobile/controller/outlet/outlet_controller.dart';
 import 'package:cetapil_mobile/controller/routing/routing_controller.dart';
 import 'package:cetapil_mobile/controller/selling/selling_controller.dart';
 import 'package:cetapil_mobile/controller/video_controller/video_controller.dart';
+import 'package:cetapil_mobile/database/dashboard.dart';
 import 'package:cetapil_mobile/page/splash_screen.dart';
-import 'package:cetapil_mobile/utils/colors.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_easyloading/flutter_easyloading.dart';
 import 'package:geolocator/geolocator.dart';
@@ -20,41 +20,82 @@ import 'controller/connectivity_controller.dart';
 import 'controller/dashboard/dashboard_controller.dart';
 import 'controller/gps_controller.dart';
 import 'controller/login_controller.dart';
-import 'database/database_instance.dart';
 
-void main()async {
+void main() async {
   WidgetsFlutterBinding.ensureInitialized();
-  Intl.defaultLocale = 'id';
-  await DatabaseHelper.instance.database;
-  await GetStorage.init();
-  await initializeGPS();
-  await initializeControllers();
-  configureApp();
-  runApp(const MyApp());
-}
 
+  try {
+    Intl.defaultLocale = 'id';
+
+    // Use parallel initialization for better performance
+    await Future.wait([
+      DashboardDatabaseHelper.instance.database,
+      GetStorage.init(),
+      initializeGPS(),
+      initializeControllers()
+    ]);
+
+    configureApp();
+    runApp(const MyApp());
+  } catch (e) {
+    print('App Initialization Error: $e');
+  }
+}
 
 Future<void> initializeGPS() async {
   try {
-    await Geolocator.requestPermission();
+    // Check if location service is enabled
+    bool serviceEnabled = await Geolocator.isLocationServiceEnabled();
+    if (!serviceEnabled) {
+      // Handle case where location service is disabled
+      print('Location services are disabled.');
+      return;
+    }
+
+    // Check and request permissions with more detailed handling
+    LocationPermission permission = await Geolocator.checkPermission();
+    if (permission == LocationPermission.denied) {
+      permission = await Geolocator.requestPermission();
+
+      if (permission == LocationPermission.denied) {
+        // Permissions are denied, handle accordingly
+        print('Location permissions are denied');
+        return;
+      }
+    }
+
+    if (permission == LocationPermission.deniedForever) {
+      // Permissions are permanently denied, handle accordingly
+      print('Location permissions are permanently denied');
+      return;
+    }
+
+    // Optional: Get current position to validate GPS
+    Position? position =
+        await Geolocator.getCurrentPosition(desiredAccuracy: LocationAccuracy.best);
+    print('Initial GPS Position: $position');
   } catch (e) {
-    print('Error requesting GPS permission: $e');
+    print('Comprehensive GPS Initialization Error: $e');
   }
 }
 
 Future<void> initializeControllers() async {
-  Get.put(LoginController());
-  Get.put(ConnectivityController());
-  Get.put(GPSLocationController());
-  Get.put(BottomNavController());
-  Get.put(DashboardController());
-  Get.put(OutletController());
-  Get.put(ActivityController());
-  Get.put(RoutingController());
-  Get.put(SellingController());
-  Get.put(TambahActivityController());
-  Get.put(VideoController());
-
+  try {
+    // Use lazyPut for more efficient controller management
+    Get.lazyPut(() => LoginController());
+    Get.lazyPut(() => ConnectivityController());
+    Get.lazyPut(() => GPSLocationController());
+    Get.lazyPut(() => BottomNavController());
+    Get.lazyPut(() => DashboardController());
+    Get.lazyPut(() => OutletController());
+    Get.lazyPut(() => ActivityController());
+    Get.lazyPut(() => RoutingController());
+    Get.lazyPut(() => SellingController());
+    Get.lazyPut(() => TambahActivityController());
+    Get.lazyPut(() => VideoController());
+  } catch (e) {
+    print('Controller Initialization Error: $e');
+  }
 }
 
 void configureApp() {
@@ -79,7 +120,6 @@ class MyApp extends StatelessWidget {
       home: const SplashScreen(),
       theme: ThemeData(
         fontFamily: 'PlusJakartaSans',
-
         textTheme: const TextTheme(
           displayLarge: TextStyle(
             fontFamily: 'PlusJakartaSans',
@@ -95,6 +135,9 @@ class MyApp extends StatelessWidget {
         ),
       ),
       builder: EasyLoading.init(),
+      // Consider adding additional GetMaterialApp configurations
+      defaultTransition: Transition.fadeIn,
+      transitionDuration: const Duration(milliseconds: 300),
     );
   }
 }

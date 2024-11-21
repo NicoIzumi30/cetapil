@@ -1,5 +1,8 @@
+import 'package:cetapil_mobile/controller/outlet/outlet_controller.dart';
+import 'package:cetapil_mobile/model/outlet.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_svg/svg.dart';
+import 'package:get/get.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:google_maps_flutter/google_maps_flutter.dart';
 
@@ -7,7 +10,9 @@ import '../../utils/colors.dart';
 import '../../widget/back_button.dart';
 import '../../widget/clipped_maps.dart';
 
-class DetailOutlet extends StatelessWidget {
+class DetailOutlet extends GetView<OutletController> {
+  DetailOutlet({super.key, required this.outlet});
+  final Outlet outlet;
   final TextEditingController _controller =
       TextEditingController(text: "Guardian Setiabudi Building");
   final LatLng _targetLocation = LatLng(37.7749, -122.4194); // San Francisco
@@ -48,32 +53,40 @@ class DetailOutlet extends StatelessWidget {
                         height: 20,
                       ),
                       UnderlineTextField.readOnly(
-                          title: "Nama Outlet",value: "Guardian Setiabudi Building",),
+                        title: "Nama Outlet",
+                        value: outlet.name,
+                      ),
                       UnderlineTextField.readOnly(
-                          title: "Kategori Outlet", value: "MT",),
+                        title: "Kategori Outlet",
+                        value: outlet.category,
+                      ),
                       UnderlineTextField.readOnly(
                         title: "Alamat Outlet",
-                        value: "Mega Plaza, Jl. H. R. Rasuna Said, RT.18/RW.1 Kuningan, Karet, Setiabudi, Jakarta Selatan",
+                        value: outlet.address,
                         maxlines: 2,
                       ),
                       Row(
                         children: [
                           Expanded(
                             child: UnderlineTextField.readOnly(
-                                title: "Latitude", value: "-7.89231",),
+                              title: "Latitude",
+                              value: outlet.longitude,
+                            ),
                           ),
                           SizedBox(
                             width: 10,
                           ),
                           Expanded(
                             child: UnderlineTextField.readOnly(
-                                title: "Longitude", value: "621.27382",),
+                              title: "Longitude",
+                              value: outlet.latitude,
+                            ),
                           ),
                         ],
                       ),
-                      const MapPreviewWidget(
-                        latitude: -6.2088,
-                        longitude: 106.8456,
+                      MapPreviewWidget(
+                        latitude: double.tryParse(outlet.latitude!) ?? 0,
+                        longitude: double.tryParse(outlet.longitude!) ?? 0,
                         zoom: 14.0,
                         height: 250,
                         borderRadius: 10,
@@ -83,30 +96,22 @@ class DetailOutlet extends StatelessWidget {
                       ),
                       Text(
                         "Foto Outlet",
-                        style: TextStyle(
-                            fontSize: 15, fontWeight: FontWeight.w700),
+                        style: TextStyle(fontSize: 15, fontWeight: FontWeight.w700),
                       ),
                       SizedBox(
                         height: 10,
                       ),
                       Row(
                         children: [
-                          ClipImage(
-                              url:
-                                  'https://goalkes-images.s3.ap-southeast-1.amazonaws.com/media/4938/boWCVZ4RqOc87vb62KE1ryS2wiXdFIOSdDkHDFna.jpg'),
+                          ClipImage(url: outlet.images![0].image!),
                           SizedBox(
                             width: 8,
                           ),
-                          ClipImage(
-                            url:
-                                'https://goalkes-images.s3.ap-southeast-1.amazonaws.com/media/4938/boWCVZ4RqOc87vb62KE1ryS2wiXdFIOSdDkHDFna.jpg',
-                          ),
+                          ClipImage(url: outlet.images![1].image!),
                           SizedBox(
                             width: 8,
                           ),
-                          ClipImage(
-                              url:
-                                  'https://goalkes-images.s3.ap-southeast-1.amazonaws.com/media/4938/boWCVZ4RqOc87vb62KE1ryS2wiXdFIOSdDkHDFna.jpg')
+                          ClipImage(url: outlet.images![2].image!),
                         ],
                       ),
                       SizedBox(
@@ -116,24 +121,60 @@ class DetailOutlet extends StatelessWidget {
                       SizedBox(
                         height: 20,
                       ),
-                      UnderlineTextField.editable(
-                          title: "Apakah outlet sudah menjual produk GIH ?", controller: _controller),
-                      UnderlineTextField.editable(
-                          title: "Berapa banyak produk GIH yang sudah terjual ?", controller: _controller),
-                      UnderlineTextField.editable(
-                          title: "Selling out GSC500/week (in pcs)", controller: _controller),
-                      UnderlineTextField.editable(
-                          title: "Selling out GSC1000/week (in pcs)", controller: _controller),
-                      UnderlineTextField.editable(
-                          title: "Selling out GSC250/week (in pcs)", controller: _controller),
-                      UnderlineTextField.editable(
-                          title: "Selling out GSC125/week (in pcs)", controller: _controller),
-                      UnderlineTextField.editable(
-                          title: "Selling out Oily 125/week (in pcs)", controller: _controller),
-                      UnderlineTextField.editable(
-                          title: "Selling out wash & shampo 400ml/week (in pcs)", controller: _controller),
-                      UnderlineTextField.editable(
-                          title: "Selling out wash & shampo cal 400ml/week (in pcs)", controller: _controller),
+                      Obx(() {
+                        if (controller.isLoading.value) {
+                          return const Center(child: CircularProgressIndicator());
+                        }
+
+                        if (controller.questions.isEmpty) {
+                          return const Center(child: Text("No Form"));
+                        }
+                        return Column(
+                          children: List<Widget>.generate(
+                            controller.questions.length,
+                            (index) {
+                              final question = controller.questions[index];
+
+                              // Find matching form element
+                              final matchingForms = outlet.forms
+                                      ?.where((element) => element.id == question.id)
+                                      .toList() ??
+                                  [];
+
+                              // Get answer value with null safety
+                              final String answer =
+                                  matchingForms.isNotEmpty ? matchingForms.first.answer ?? '' : '';
+
+                              return UnderlineTextField.readOnly(
+                                title: question.question,
+                                value: answer,
+                              );
+                            },
+                          ),
+                        );
+                      }),
+                      // UnderlineTextField.editable(
+                      //     title: "Apakah outlet sudah menjual produk GIH ?",
+                      //     controller: _controller),
+                      // UnderlineTextField.editable(
+                      //     title: "Berapa banyak produk GIH yang sudah terjual ?",
+                      //     controller: _controller),
+                      // UnderlineTextField.editable(
+                      //     title: "Selling out GSC500/week (in pcs)", controller: _controller),
+                      // UnderlineTextField.editable(
+                      //     title: "Selling out GSC1000/week (in pcs)", controller: _controller),
+                      // UnderlineTextField.editable(
+                      //     title: "Selling out GSC250/week (in pcs)", controller: _controller),
+                      // UnderlineTextField.editable(
+                      //     title: "Selling out GSC125/week (in pcs)", controller: _controller),
+                      // UnderlineTextField.editable(
+                      //     title: "Selling out Oily 125/week (in pcs)", controller: _controller),
+                      // UnderlineTextField.editable(
+                      //     title: "Selling out wash & shampo 400ml/week (in pcs)",
+                      //     controller: _controller),
+                      // UnderlineTextField.editable(
+                      //     title: "Selling out wash & shampo cal 400ml/week (in pcs)",
+                      //     controller: _controller),
                     ],
                   ),
                 ),
@@ -148,10 +189,23 @@ class DetailOutlet extends StatelessWidget {
 
 class ClipImage extends StatelessWidget {
   final String url;
+  final double? size;
+  final BoxFit fit;
+
   const ClipImage({
     super.key,
     required this.url,
+    this.size,
+    this.fit = BoxFit.cover,
   });
+
+  String _sanitizeUrl(String url) {
+    // Convert localhost/127.0.0.1 URLs to your actual development server IP
+    // Replace this with your actual development server IP
+    return url
+        .replaceAll('http://127.0.0.1:8000', 'https://e15a-36-81-29-70.ngrok-free.app')
+        .replaceAll('http://localhost:8000', 'https://e15a-36-81-29-70.ngrok-free.app');
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -170,22 +224,65 @@ class ClipImage extends StatelessWidget {
           child: ClipRRect(
             borderRadius: BorderRadius.circular(5),
             child: Image.network(
-              url,
-              fit: BoxFit.cover,
+              _sanitizeUrl(url),
+              fit: fit,
               loadingBuilder: (context, child, loadingProgress) {
                 if (loadingProgress == null) return child;
+
                 return Center(
-                  child: CircularProgressIndicator(
-                    value: loadingProgress.expectedTotalBytes != null
-                        ? loadingProgress.cumulativeBytesLoaded /
-                            loadingProgress.expectedTotalBytes!
-                        : null,
+                  child: Column(
+                    mainAxisSize: MainAxisSize.min,
+                    children: [
+                      CircularProgressIndicator(
+                        value: loadingProgress.expectedTotalBytes != null
+                            ? loadingProgress.cumulativeBytesLoaded /
+                                loadingProgress.expectedTotalBytes!
+                            : null,
+                      ),
+                      if (loadingProgress.expectedTotalBytes != null)
+                        Padding(
+                          padding: const EdgeInsets.only(top: 8.0),
+                          child: Text(
+                            '${((loadingProgress.cumulativeBytesLoaded / loadingProgress.expectedTotalBytes!) * 100).toStringAsFixed(0)}%',
+                            style: const TextStyle(fontSize: 12),
+                          ),
+                        ),
+                    ],
                   ),
                 );
               },
               errorBuilder: (context, error, stackTrace) {
-                return const Center(
-                  child: Icon(Icons.error_outline, color: Colors.red),
+                return Container(
+                  color: Colors.grey[200],
+                  child: Column(
+                    mainAxisAlignment: MainAxisAlignment.center,
+                    children: [
+                      const Icon(
+                        Icons.error_outline,
+                        color: Colors.red,
+                        size: 24,
+                      ),
+                      const SizedBox(height: 8),
+                      Text(
+                        'Image Error',
+                        style: TextStyle(
+                          fontSize: 12,
+                          color: Colors.grey[600],
+                        ),
+                      ),
+                      if (error is NetworkImageLoadException)
+                        Padding(
+                          padding: const EdgeInsets.all(4.0),
+                          child: Text(
+                            'Network Error',
+                            style: TextStyle(
+                              fontSize: 10,
+                              color: Colors.grey[500],
+                            ),
+                          ),
+                        ),
+                    ],
+                  ),
                 );
               },
             ),
@@ -197,7 +294,6 @@ class ClipImage extends StatelessWidget {
 }
 
 class UnderlineTextField extends StatelessWidget {
-
   final String title;
   final bool readOnly;
   final String? value;
@@ -222,7 +318,6 @@ class UnderlineTextField extends StatelessWidget {
   })  : readOnly = false,
         value = null;
 
-
   @override
   Widget build(BuildContext context) {
     return Column(
@@ -230,8 +325,7 @@ class UnderlineTextField extends StatelessWidget {
       children: [
         Text(
           title,
-          style: TextStyle(
-              fontSize: 13, fontWeight: FontWeight.w700),
+          style: TextStyle(fontSize: 13, fontWeight: FontWeight.w700),
         ),
         SizedBox(
           height: 10,
@@ -240,18 +334,12 @@ class UnderlineTextField extends StatelessWidget {
           controller: readOnly ? TextEditingController(text: value) : controller,
           maxLines: maxlines,
           readOnly: readOnly,
-          style: TextStyle(
-              fontSize: 13,
-              color: AppColors.primary,
-              fontWeight: FontWeight.w600),
+          style: TextStyle(fontSize: 13, color: AppColors.primary, fontWeight: FontWeight.w600),
           decoration: InputDecoration(
               contentPadding: EdgeInsets.only(left: 10),
-              focusedBorder: UnderlineInputBorder(
-                  borderSide: BorderSide(color: Colors.white)),
-              enabledBorder: UnderlineInputBorder(
-                  borderSide: BorderSide(color: Colors.white)),
-              disabledBorder: UnderlineInputBorder(
-                  borderSide: BorderSide(color: Colors.white))),
+              focusedBorder: UnderlineInputBorder(borderSide: BorderSide(color: Colors.white)),
+              enabledBorder: UnderlineInputBorder(borderSide: BorderSide(color: Colors.white)),
+              disabledBorder: UnderlineInputBorder(borderSide: BorderSide(color: Colors.white))),
         ),
         SizedBox(
           height: 15,

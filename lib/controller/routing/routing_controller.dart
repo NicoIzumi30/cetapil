@@ -3,7 +3,7 @@ import 'package:get/get.dart';
 import 'package:intl/intl.dart';
 import 'package:uuid/uuid.dart';
 
-import '../../model/outlet.dart';
+// import '../../model/outlet.dart';
 import '../../model/outlet_example.dart';
 
 class RoutingController extends GetxController {

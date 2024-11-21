@@ -1,6 +1,6 @@
-
 import 'dart:convert';
 
+import 'package:cetapil_mobile/model/outlet.dart';
 import 'package:get_storage/get_storage.dart';
 import 'package:http/http.dart' as http;
 
@@ -9,10 +9,10 @@ import '../model/form_outlet_response.dart';
 import '../model/get_city_response.dart';
 import '../model/login_response.dart';
 
-const String baseUrl = 'https://be8b-125-163-145-160.ngrok-free.app';
+const String baseUrl = 'https://e15a-36-81-29-70.ngrok-free.app';
 final GetStorage storage = GetStorage();
 
-class Api{
+class Api {
   Future<LoginResponse> login(String email, String password) async {
     var uri = Uri.parse('$baseUrl/api/login');
     var request = http.MultipartRequest('POST', uri)
@@ -37,7 +37,7 @@ class Api{
   }
 
   static Future<GetCityResponse> getListCity() async {
-    try{
+    try {
       var url = "$baseUrl/api/outlet/cities";
       var token = await storage.read('token');
       var response = await http.get(
@@ -98,4 +98,22 @@ class Api{
     }
     throw "Gagal request data dashboard : \n${response.body}";
   }
+
+  static Future<OutletResponse> getOutletList() async {
+    var url = "$baseUrl/api/outlet";
+    var token = await storage.read('token');
+    var response = await http.get(
+      Uri.parse(url),
+      headers: {
+        'Content-type': 'application/json',
+        'Authorization': 'Bearer $token',
+      },
+    );
+    print(response.body);
+    if (response.statusCode == 200) {
+      return OutletResponse.fromJson(jsonDecode(response.body));
+    }
+    throw "Gagal request data Outlet : \n${response.body}";
+  }
+
 }

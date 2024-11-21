@@ -6,7 +6,7 @@ import 'package:get/get_state_manager/src/rx_flutter/rx_obx_widget.dart';
 import 'package:google_fonts/google_fonts.dart';
 
 import '../../controller/selling/selling_controller.dart';
-import '../../model/outlet.dart';
+// import '../../model/outlet.dart';
 import '../../model/outlet_example.dart';
 import '../outlet/outlet.dart';
 

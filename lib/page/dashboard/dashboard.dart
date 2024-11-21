@@ -19,7 +19,7 @@ class DashboardPage extends GetView<DashboardController> {
       child: RefreshIndicator(
         onRefresh: controller.onRefresh,
         child: SingleChildScrollView(
-      physics: AlwaysScrollableScrollPhysics(), // Add this line
+          physics: AlwaysScrollableScrollPhysics(), // Add this line
           child: Obx(() {
             return Column(
               crossAxisAlignment: CrossAxisAlignment.start,
@@ -123,7 +123,8 @@ class DashboardPage extends GetView<DashboardController> {
                             Column(
                               children: [
                                 Text("Outlet", style: TextStyle(fontSize: 10, color: Colors.blue)),
-                                Text("${controller.dashboard.value?.data?.currentOutlet?.name ?? ""}",
+                                Text(
+                                    "${controller.dashboard.value?.data?.currentOutlet?.name ?? ""}",
                                     style: TextStyle(fontSize: 10, fontWeight: FontWeight.bold))
                               ],
                             ),
@@ -351,8 +352,7 @@ class DashboardPage extends GetView<DashboardController> {
                           height: 15,
                         ),
                         AnimatedGlossyProgressBar(
-                          progress: 0.62,
-                          // height: 15,
+                          progress: (controller.dashboard.value?.data?.planPercentage ?? 0) / 100,
                         ),
                         SizedBox(
                           height: 15,

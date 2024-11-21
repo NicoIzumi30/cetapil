@@ -2,7 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:uuid/uuid.dart';
 
-import '../../model/outlet.dart';
+// import '../../model/outlet.dart';
 import '../../model/outlet_example.dart';
 
 class SellingController extends GetxController {
