@@ -101,7 +101,7 @@
                 <label for="program-date">Jangka Waktu Program</label>
                 <input id="program-date" type="text" value="-- Pilih Tanggal dan Waktu Kunjungan" name="program-date"
                     class="form-control w-full appearance-none" />
-                <i class="absolute top-10 right-6">
+                <i class="absolute top-10 right-6 pointer-events-none">
                     <svg width="19" height="25" viewBox="0 0 19 25" fill="none"
                         xmlns="http://www.w3.org/2000/svg">
                         <path

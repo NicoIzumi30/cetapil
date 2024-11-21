@@ -15,6 +15,6 @@
         background: linear-gradient(135deg, #53A2D2 0%, #0077BD 100%);
     }
     .button-info-bg:hover {
-        background: #277bb0;
+        background: linear-gradient(135deg, #53A2D2 100%, #0077BD 100%);
     }
 </style>

@@ -48,6 +48,13 @@
                                 </select>
                             </div>
                         </div>
+						<div>
+                            <label for="region" class="form-label">Region</label>
+                            <div class="flex items-center gap-2">
+                                <input id="region" class="form-control" type="text" name="region"
+                                    placeholder="Masukan Region" aria-describedby="region" />
+                            </div>
+                        </div>
                     </div>
                     {{-- Profil Pengguna End --}}
 
@@ -66,8 +73,24 @@
                                 <input id="latitude" class="form-control" type="text" name="latitude"
                                     placeholder="Masukkan Koordinat Latitude" aria-describedby="latitude" />
                             </div>
+							<div>
+								<label for="states-option">Kabupaten/Kota</label>
+								<select id="states-option" name="states-option" class=" w-full">
+									<option value="" selected disabled>
+										-- Pilih Kabupaten/Kota--
+									</option>
+									<option value="cleanser">
+										Sumatra
+									</option>
+								</select>
+							</div>
+							<div>
+								<label for="adresss" class="form-label">Alamat Lengkap</label>
+								<input id="adresss" class="form-control" type="text" name="adresss"
+									placeholder="Masukkan Alamat Lengkap" aria-describedby="adresss" />
+							</div>
                         </div>
-                        <div class="relative">
+                        <div class="relative mt-12">
                             <div class="h-[350px] z-10" id="user-map-location"></div>
                             <button id="fullscreen-button"
                                 class="absolute top-3 right-3 rounded-sm w-10 h-10 grid place-items-center bg-white z-50 hover:bg-slate-200">
@@ -81,7 +104,6 @@
                         </div>
                     </x-section-card>
                     {{-- Area Domisili End --}}
-
 
                     {{-- Manajemen Akun --}}
                     <div id="account-management" class="hidden">
