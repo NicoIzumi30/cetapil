@@ -86,6 +86,7 @@ Route::middleware('auth')->group(function () {
         Route::post('/{product}/av3m', [ProductController::class, 'updateAv3m'])->name('products.updateAv3m');
         Route::get('/generate-excel', [ProductController::class, 'downloadExcel'])
         ->name('generate-excel');
+        Route::get('/data', [ProductController::class, 'getData'])->name('data');
     });
     // Logout
     Route::get('/logout', LogoutController::class)->name('logout');
