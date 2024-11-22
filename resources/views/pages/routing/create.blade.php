@@ -528,7 +528,6 @@
     </script>
 @endpush
 
-
 @push('scripts')
     <script>
         document.addEventListener('DOMContentLoaded', function() {
