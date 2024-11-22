@@ -6,18 +6,9 @@
 
 @section('dashboard-content')
     <x-card>
-
         <x-slot:cardTitle>
             Detail Daftar Outlet
         </x-slot:cardTitle>
-
-        <x-slot:cardAction>
-            <label for="upload_products" class="cursor-pointer">
-                <x-button.light class="pointer-events-none">Unggah Secara Bulk</x-button.light>
-                <input type="file" id="upload_products" name="upload_products" class="hidden" accept=".csv"
-                    aria-label="Unggah Secara Bulk">
-            </label>
-        </x-slot:cardAction>
 
         <div class="grid grid-cols-2 gap-4">
             <div>
@@ -42,8 +33,11 @@
                     <option value="" selected disabled>
                         -- Pilih kategori outlet --
                     </option>
-                    <option value="cleanser">
-                        SunProtect
+                    <option value="mt">
+                        MT
+                    </option>
+                    <option value="mt">
+                        GT
                     </option>
                 </select>
             </div>
@@ -64,8 +58,47 @@
                     <option value="" selected disabled>
                         -- Pilih cycle --
                     </option>
-                    <option value="cleanser">
-                        SunProtect
+                    <option value="1x1">
+                        1 X 1
+                    </option>
+                    <option value="1x2">
+                        1 X 2
+                    </option>
+                </select>
+            </div>
+            <div id="week-container" class="hidden">
+                <label for="week">Week</label>
+                <select id="week" name="week" class=" w-full">
+                    <option value="" selected disabled>
+                        -- Pilih Week --
+                    </option>
+                    <option value="ganjil">
+                        Ganjil
+                    </option>
+                    <option value="Genap">
+                        Ganjil
+                    </option>
+                </select>
+            </div>
+            <div>
+                <label for="city">City</label>
+                <select id="city" name="city" class=" w-full">
+                    <option value="" selected disabled>
+                        -- Pilih City --
+                    </option>
+                    <option value="ganjil">
+                        Ganjil
+                    </option>
+                </select>
+            </div>
+            <div>
+                <label for="channel">Channel</label>
+                <select id="channel" name="channel" class=" w-full">
+                    <option value="" selected disabled>
+                        -- Pilih Channel --
+                    </option>
+                    <option value="ganjil">
+                        Ganjil
                     </option>
                 </select>
             </div>
@@ -75,54 +108,101 @@
             <div class="grid grid-cols-2 gap-4">
                 <div>
                     <label for="product-categories">Kategori Produk</label>
-                    <select id="product-categories" name="product-categories" class=" w-full">
-                        <option value="" selected disabled>
-                            -- Pilih kategori produk --
-                        </option>
-                        <option value="cleanser">
-                            SunProtect
-                        </option>
+                    <select id="product-categories" name="product-categories" class="w-full" multiple="multiple">
+                        <option value="sun-protect">Sun Protect</option>
+                        <option value="optimal-hydration">Optimal Hydration</option>
+                        <option value="cleanser">Cleanser</option>
+                        <option value="bhr">BHR</option>
+                        <option value="baby-calendula">Baby Calendula</option>
+                        <option value="baby-classic">Baby Classic</option>
+                        <option value="moisturizer">Moisturizer</option>
                     </select>
                 </div>
             </div>
         </x-section-card>
 
 
-        <div class="border-b-2 border-dashed py-6">
+        <div id="sun-protect" class="hidden border-b-2 border-dashed py-6">
+            <h3 class="font-bold text-2xl text-white py-2 mb-6">
+                Sun Protect
+            </h3>
+            <x-pages.routing.product-form :label="'CETAPHIL DAILY FACIAL MOIST SPF15 118 ML'" />
+            <x-pages.routing.product-form :label="'CETAPHIL UVA/UVB DEF SPF 50+/UVA28 50 ML'" />
+        </div>
+
+        <div id="optimal-hydration" class="hidden border-b-2 border-dashed py-6">
+            <h3 class="font-bold text-2xl text-white py-2 mb-6">
+                Optimal Hydration
+            </h3>
+            <x-pages.routing.product-form :label="'CETAPHIL Optimal Hydration 48H Activation Serum 30 ML'" />
+            <x-pages.routing.product-form :label="'CETAPHIL Optimal Hydration Body Spray Serum 207 ML'" />
+            <x-pages.routing.product-form :label="'CETAPHIL OPTIMAL HR EYE SERUM 15 ML'" />
+            <x-pages.routing.product-form :label="'Cetaphil Optimal Hydration Glow Day Cream 48 G'" />
+        </div>
+
+        <div id="cleanser" class="hidden border-b-2 border-dashed py-6">
             <h3 class="font-bold text-2xl text-white py-2 mb-6">
                 Cleanser
             </h3>
-            <div class="grid grid-cols-2 items-center my-2">
-                <p class="text-white">Cetaphil Baby Daily Lotion with Organic Calendula 500ml</p>
-                <div>
-                    <label for="name" class="form-label">AV3M</label>
-                    <input id="name" class="form-control" type="text" name="name"
-                        placeholder="Masukan Jumlah AV3M" aria-describedby="name" />
-                </div>
-            </div>
+            <x-pages.routing.product-form :label="'CETAPHIL GENTLE SKIN CLEANSER 125 ML'" />
+            <x-pages.routing.product-form :label="'CETAPHIL GENTLE SKIN CLEANSER 250 ML'" />
+            <x-pages.routing.product-form :label="'CETAPHIL GENTLE SKIN CLEANSER 500 ML'" />
+            <x-pages.routing.product-form :label="'CETAPHIL GENTLE SKIN CLEANSER 59 ML'" />
+            <x-pages.routing.product-form :label="'CETAPHIL OILY SKIN CLEANSER 125 ML'" />
+            <x-pages.routing.product-form :label="'CETAPHIL ULTRA GENTLE BODY WASH 500 ML'" />
+            <x-pages.routing.product-form :label="'CETAPHIL SOOTHING FOAM WASH 200ML'" />
+            <x-pages.routing.product-form :label="'CETAPHIL HYDRATING FOAMING CREAM CLEANSER 236 ML'" />
+            <x-pages.routing.product-form :label="'CETAPHIL DAILY FACIAL CLEANSER 236 ML'" />
         </div>
 
-        <div class="border-b-2 border-dashed py-6">
+        <div id="bhr" class="hidden border-b-2 border-dashed py-6">
             <h3 class="font-bold text-2xl text-white py-2 mb-6">
-                Baby Treatment
+                BHR
             </h3>
-            <div class="grid grid-cols-2 items-center my-2">
-                <p class="text-white">Cetaphil Baby Daily Lotion with Organic Calendula 400ml</p>
-                <div>
-                    <label for="name" class="form-label">AV3M</label>
-                    <input id="name" class="form-control" type="text" name="name"
-                        placeholder="Masukan Jumlah AV3M" aria-describedby="name" />
-                </div>
-            </div>
+            <x-pages.routing.product-form :label="'CETAPHIL GENTLE SKIN CLEANSER 1000 ML'" />
+            <x-pages.routing.product-form :label="'Cetaphil Brightening Body Lotion 245 ML'" />
+            <x-pages.routing.product-form :label="'Cetaphil Brightening Night Nourishing Cream 50 ML'" />
+            <x-pages.routing.product-form :label="'Cetaphil Brightness Refresh Toner 150 ML'" />
+            <x-pages.routing.product-form :label="'Cetaphil Brightness Reveal Body Wash 245 ML'" />
+            <x-pages.routing.product-form :label="'Cetaphil Brightness Reveal Creamy Cleanser 100 ML'" />
+            <x-pages.routing.product-form :label="'CETAPHIL BHR INSTANT MASK 23MLX6PCS'" />
+            <x-pages.routing.product-form :label="'CETAPHIL BHR PERFECTING SERUM 30 ML'" />
+            <x-pages.routing.product-form :label="'CETAPHIL Bright Healthy Radiance Gentle Renewing Cleanser 100 ML'" />
         </div>
 
-        <div class="grid grid-cols-2 items-center my-6">
-            <p class="text-white">Cetaphil Baby Daily Lotion with Organic Calendula 200ml</p>
-            <div>
-                <label for="name" class="form-label">AV3M</label>
-                <input id="name" class="form-control" type="text" name="name" placeholder="Masukan Jumlah AV3M"
-                    aria-describedby="name" />
-            </div>
+        <div id="baby-calendula" class="hidden border-b-2 border-dashed py-6">
+            <h3 class="font-bold text-2xl text-white py-2 mb-6">
+                Baby Calendula
+            </h3>
+            <x-pages.routing.product-form :label="'Cetaphil Baby Daily Lotion with Organic Calendula 400 ML'" />
+            <x-pages.routing.product-form :label="'Cetaphil Baby Diaper Cream with Organic Calendula 70G'" />
+            <x-pages.routing.product-form :label="'Cetaphil Baby Wash & Shampoo with Organic Calendula 230 ML'" />
+            <x-pages.routing.product-form :label="'Cetaphil Baby Wash & Shampoo with Organic Calendula 400 ML'" />
+            <x-pages.routing.product-form :label="'Cetaphil Baby with Organic Calendula Advanced Protection Cream 85G'" />
+        </div>
+
+        <div id="baby-classic" class="hidden border-b-2 border-dashed py-6">
+            <h3 class="font-bold text-2xl text-white py-2 mb-6">
+                Baby Classic
+            </h3>
+            <x-pages.routing.product-form :label="'CETAPHIL BABY DAILY LOTION 400 ML'" />
+            <x-pages.routing.product-form :label="'CETAPHIL BABY GTL WASH & SHAMPOO 230 ML'" />
+            <x-pages.routing.product-form :label="'CETAPHIL BABY GTL WASH & SHAMPOO 230 ML'" />
+            <x-pages.routing.product-form :label="'CETAPHIL BABY GTL WASH & SHAMPOO 400 ML'" />
+            <x-pages.routing.product-form :label="'CETAPHIL BABY MOIST BATH & WASH 230 ML'" />
+            <x-pages.routing.product-form :label="'CETAPHIL BABY MOIST BATH & WASH 400ML PUMP'" />
+            <x-pages.routing.product-form :label="'CETAPHIL BABY SHAMPOO 200 ML'" />
+        </div>
+
+        <div id="moisturizer" class="hidden py-6 border-b-2 border-dashed">
+            <h3 class="font-bold text-2xl text-white py-2 mb-6">
+                Moisturizer
+            </h3>
+            <x-pages.routing.product-form :label="'CETAPHIL DAILY ADV ULT HYDRA LOTION 85 G'" />
+            <x-pages.routing.product-form :label="'CETAPHIL MOISTURIZING CREAM 453 G'" />
+            <x-pages.routing.product-form :label="'CETAPHIL MOISTURIZING CREAM 100 G'" />
+            <x-pages.routing.product-form :label="'CETAPHIL MOISTURIZING LOTION 200 ML'" />
+            <x-pages.routing.product-form :label="'CETAPHIL MOISTURIZING LOTION 59 ML'" />
         </div>
 
         <x-section-card :title="'Area Domisili Outlet'">
@@ -272,10 +352,28 @@
             $('#sales-names').select2();
             $('#time-visit').select2();
             $('#cycle').select2({
-				minimumResultsForSearch: Infinity
-			});
+                minimumResultsForSearch: Infinity
+            });
+            $('#week').select2({
+                minimumResultsForSearch: Infinity
+            });
             $('#states-option').select2();
-            $('#product-categories').select2();
+            $('#city').select2();
+            $('#channel').select2();
+            $('#product-categories').select2({
+                placeholder: '-- Pilih Kategori Produk --'
+            });
+            $('#product-categories').on('change', function() {
+                var selectedCategories = $(this).val();
+
+                selectedCategories.forEach(function(category) {
+                    $('#' + category).show();
+                });
+            });
+            $('#product-categories').on('select2:unselect', function(e) {
+                var unselectedCategory = e.params.data.id;
+                $('#' + unselectedCategory).hide();
+            });
             $('#outlet-categories').select2({
                 minimumResultsForSearch: Infinity
             });
@@ -357,19 +455,27 @@
 @push('scripts')
     <script>
         $(document).ready(function() {
+            const weekContainer = document.getElementById('week-container');
+            $('#cycle').change(function() {
+                if ($(this).val() == '1x2') {
+                    weekContainer.classList.add('block')
+                    weekContainer.classList.remove('hidden')
+                }
+            })
+
             const gihCheckbox = document.querySelector('#gih-checkbox');
             const gihChecked = document.querySelector('#gih-checked');
             const gihUnChecked = document.querySelector('#gih-unchecked');
-			
+
 
             gihCheckbox.addEventListener('change', function() {
                 if (this.checked) {
-					gihChecked.classList.add("bg-blue-400", "!text-white");
-					gihUnChecked.classList.remove("bg-blue-400", "!text-white");
+                    gihChecked.classList.add("bg-blue-400", "!text-white");
+                    gihUnChecked.classList.remove("bg-blue-400", "!text-white");
                 } else {
-					gihUnChecked.classList.add("bg-blue-400", "!text-white");
-					gihChecked.classList.remove("bg-blue-400", "!text-white");
-					gihChecked.classList.add("text-blue-400");
+                    gihUnChecked.classList.add("bg-blue-400", "!text-white");
+                    gihChecked.classList.remove("bg-blue-400", "!text-white");
+                    gihChecked.classList.add("text-blue-400");
                 }
             });
         });
