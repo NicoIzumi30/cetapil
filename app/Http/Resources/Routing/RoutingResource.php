@@ -18,13 +18,13 @@ class RoutingResource extends JsonResource
     {
         return [
             'id' => $this->id,
-            'user' => $this->user->only('id', 'name'),
+            'user' => $this->user,
             'name' => $this->name,
             'category' => $this->category,
             'visit_day' => $this->visit_day,
             'longitude' => $this->longitude,
             'latitude' => $this->latitude,
-            'city' => $this->city->only('id', 'name'),
+            'city' => $this->city,
             'address' => $this->address,
             'status' => $this->status,
             'week_type' => $this->week_type,
