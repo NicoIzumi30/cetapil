@@ -26,6 +26,9 @@ class OutletController extends GetxController {
   final db = DatabaseHelper.instance;
   final citiesDb = CitiesDatabaseHelper.instance;
   final uuid = Uuid();
+  var selectedCategory = 'MT'.obs; // Default to MT as shown in your code
+
+  final List<String> categories = ['GT', 'MT'];
 
   // Observables
   var outlets = <Outlet>[].obs;
@@ -41,22 +44,76 @@ class OutletController extends GetxController {
   var questions = <FormOutletResponse>[].obs;
 
   setDraftValue(Outlet outlet) async {
+    // Set sales name - Make sure to properly set value
+    print("Setting sales name: ${outlet.user?.name}"); // Debug print
     salesName.value.text = outlet.user?.name ?? "";
-    outletName.value.text = outlet.name!;
 
-    ///city value
+    // Set outlet name
+    outletName.value.text = outlet.name ?? "";
 
-    outletAddress.value.text = outlet.address!;
-    gpsController.longController.value.text = outlet.longitude!;
-    gpsController.latController.value.text = outlet.latitude!;
-    outletImages[0] =  File('${outlet.images![0].image!}');
-    outletImages[1] =  File('${outlet.images![1].image!}');
-    outletImages[2] =  File('${outlet.images![2].image!}');
-    for (int i = 0; i < outlet.forms!.length; i++) {
-      controllers[i].text = outlet.forms![i].answer!;
+    // Set category
+    selectedCategory.value = outlet.category ?? "MT";
+
+    // Set city data - Make sure these values are set
+    print("Setting city data: ${outlet.city?.id}, ${outlet.city?.name}"); // Debug print
+    cityId.value = outlet.city?.id ?? "1";
+    cityName.value = outlet.city?.name ?? "Wonogiri";
+    if (outlet.city != null) {
+      selectedCity.value = Data(
+        id: outlet.city?.id ?? "1",
+        name: outlet.city?.name ?? "Wonogiri",
+      );
     }
 
-    Get.to(() => TambahOutlet());
+    // Set address
+    outletAddress.value.text = outlet.address ?? "";
+
+    // Set GPS coordinates
+    gpsController.longController.value.text = outlet.longitude ?? "";
+    gpsController.latController.value.text = outlet.latitude ?? "";
+
+    // Reset and set images
+    outletImages.assignAll([null, null, null]);
+    imagePath.assignAll(["", "", ""]);
+    imageFilename.assignAll(["", "", ""]);
+
+    // Safely set images if they exist
+    if (outlet.images != null && outlet.images!.isNotEmpty) {
+      for (int i = 0; i < outlet.images!.length; i++) {
+        if (i < 3 && outlet.images![i].image != null && outlet.images![i].image!.isNotEmpty) {
+          try {
+            outletImages[i] = File(outlet.images![i].image!);
+            imagePath[i] = outlet.images![i].image!;
+            imageFilename[i] = path.basename(outlet.images![i].image!);
+          } catch (e) {
+            print('Error loading image $i: $e');
+            outletImages[i] = null;
+            imagePath[i] = "";
+            imageFilename[i] = "";
+          }
+        }
+      }
+    }
+
+    // Reset controllers first
+    for (var controller in controllers) {
+      controller.text = "";
+    }
+
+    // Safely set form answers
+    if (outlet.forms != null && outlet.forms!.isNotEmpty) {
+      for (int i = 0; i < outlet.forms!.length; i++) {
+        if (i < controllers.length) {
+          controllers[i].text = outlet.forms![i].answer ?? '';
+        }
+      }
+    }
+
+    // Force update the UI
+    update();
+
+    // Navigate with the ID
+    Get.to(() => TambahOutlet(), arguments: {'id': outlet.id});
   }
 
   Future<File> base64ToFile(String base64String, String fileName) async {
@@ -98,8 +155,7 @@ class OutletController extends GetxController {
   var selectedCity = Rxn<Data>();
 
   // Image Controllers
-  final RxList<File?> outletImages =
-      RxList([null, null, null]); // [frontView, banner, landmark]
+  final RxList<File?> outletImages = RxList([null, null, null]); // [frontView, banner, landmark]
   final RxList<String> imageUrls = RxList(['', '', '']);
   final RxList<String> imagePath = RxList(['', '', '']);
   final RxList<String> imageFilename = RxList(['', '', '']);
@@ -109,7 +165,7 @@ class OutletController extends GetxController {
   void onInit() {
     super.onInit();
     initializeFormData();
-    syncOutlets();
+    loadOutlets(); // Only load from SQLite initially
   }
 
   // City related methods
@@ -150,8 +206,7 @@ class OutletController extends GetxController {
     try {
       isImageUploading[index] = true;
 
-      final base64Image =
-          await ImageUploadUtils.convertImageToBase64(outletImages[index]!);
+      final base64Image = await ImageUploadUtils.convertImageToBase64(outletImages[index]!);
 
       if (base64Image != null) {
         imageUrls[index] = base64Image;
@@ -168,7 +223,8 @@ class OutletController extends GetxController {
     }
   }
 
-  Future<void> syncOutlets() async {
+  // New method for manual refresh
+  Future<void> refreshOutlets() async {
     try {
       isSyncing.value = true;
       EasyLoading.show(status: 'Syncing data...');
@@ -180,37 +236,57 @@ class OutletController extends GetxController {
 
       final apiOutlets = apiResponse.data ?? [];
       final localOutlets = await db.getAllOutlets();
-      final apiIds = apiOutlets.map((o) => o.id).toSet();
-      final localIds = localOutlets.map((o) => o.id).toSet();
-      final idsToAdd = apiIds.difference(localIds);
-      final idsToUpdate = apiIds.intersection(localIds);
-      final idsToDelete = localIds.difference(apiIds).where((id) =>
-          localOutlets.firstWhere((o) => o.id == id).dataSource == 'API');
 
-      for (var id in idsToDelete) {
-        await db.deleteOutlet(id!);
-      }
+      // Create maps for efficient lookup
+      final Map<String, Outlet> apiOutletMap = {for (var outlet in apiOutlets) outlet.id!: outlet};
+      final Map<String, Outlet> localOutletMap = {
+        for (var outlet in localOutlets) outlet.id!: outlet
+      };
 
-      for (var outlet in apiOutlets) {
-        if (idsToAdd.contains(outlet.id) || idsToUpdate.contains(outlet.id)) {
-          await db.upsertOutletFromApi(outlet);
+      final List<Future> operations = [];
+      final List<String> toDelete = [];
+      final List<Outlet> toUpsert = [];
+
+      // Handle existing outlets
+      for (final localOutlet in localOutlets) {
+        final id = localOutlet.id!;
+
+        // Skip if it's a draft
+        if (localOutlet.dataSource == 'DRAFT') {
+          continue;
+        }
+
+        if (apiOutletMap.containsKey(id)) {
+          final apiOutlet = apiOutletMap[id]!;
+          if (_hasChanges(localOutlet, apiOutlet)) {
+            toUpsert.add(apiOutlet);
+          }
+        } else if (localOutlet.dataSource == 'API') {
+          toDelete.add(id);
         }
       }
 
-      final drafts = await db.getUnsyncedDraftOutlets();
-      for (var draft in drafts) {
-        try {
-          await db.markOutletAsSynced(draft.id!);
-        } catch (e) {
-          print('Failed to sync draft outlet ${draft.id}: $e');
+      // Add new outlets from API
+      for (final apiOutlet in apiOutlets) {
+        if (!localOutletMap.containsKey(apiOutlet.id)) {
+          toUpsert.add(apiOutlet);
         }
+      }
+
+      // Execute operations
+      if (toDelete.isNotEmpty) {
+        await _batchDelete(toDelete);
+      }
+
+      if (toUpsert.isNotEmpty) {
+        await _batchUpsert(toUpsert);
       }
 
       await loadOutlets();
 
       Get.snackbar(
         'Sync Complete',
-        'Outlets have been synchronized successfully',
+        'Outlets synchronized successfully',
         snackPosition: SnackPosition.BOTTOM,
       );
     } catch (e) {
@@ -230,9 +306,26 @@ class OutletController extends GetxController {
     try {
       isLoading.value = true;
       final results = await db.getAllOutlets();
+
+      // Simple sort - drafts always on top
+      results.sort((a, b) {
+        if (a.dataSource == 'DRAFT' && b.dataSource != 'DRAFT') {
+          return -1;
+        }
+        if (a.dataSource != 'DRAFT' && b.dataSource == 'DRAFT') {
+          return 1;
+        }
+        return 0; // Keep original order for same type
+      });
+
       outlets.assignAll(results);
     } catch (e) {
       print('Error loading outlets: $e');
+      Get.snackbar(
+        'Error',
+        'Failed to load outlets',
+        snackPosition: SnackPosition.BOTTOM,
+      );
     } finally {
       isLoading.value = false;
     }
@@ -275,66 +368,70 @@ class OutletController extends GetxController {
 
   Future<void> saveDraftOutlet(BuildContext context) async {
     try {
-      // if (!validateCity()) return;
-
       EasyLoading.show(status: 'Saving draft...');
-print("file Length = ${outletImages.length}"); /// 3
+
+      final String? currentOutletId = Get.arguments?['id'];
+      final bool isEditing = currentOutletId != null;
+
+      print("Sales Name: ${salesName.value.text}");
+      print("City Name: ${cityName.value}");
+
       for (int i = 0; i < outletImages.length; i++) {
         if (outletImages[i] != null) {
-          // print("path ${outletImages[i]!.path}"); //path /data/user/0/com.example.cetapil_mobile/cache/compressed_1732258007117.jpg
-          // print("name ${path.basename(outletImages[i]!.path)}"); //compressed_1732258007117.jpg
-
           await uploadImage(i);
           imagePath[i] = outletImages[i]!.path;
           imageFilename[i] = path.basename(outletImages[i]!.path);
-          print("filepath index ${i}} = ${imagePath[i]}"); /// ada semua
         }
       }
 
       final data = {
-        'id': uuid.v4(),
+        'id': isEditing ? currentOutletId : uuid.v4(),
         'salesName': salesName.value.text,
+        'user_name': salesName.value.text, // Add this duplicate field
         'outletName': outletName.value.text,
-        'category': 'MT',
-        // 'city_id': cityId.value,
-        // 'city_name': cityName.value,
-        'city_id': "1",
-        'city_name': "Wonogiri",
+        'category': selectedCategory.value,
+        'city_id': cityId.value.isEmpty ? "1" : cityId.value,
+        'city_name': cityName.value.isEmpty ? "Wonogiri" : cityName.value,
         'longitude': gpsController.longController.value.text,
         'latitude': gpsController.latController.value.text,
         'address': outletAddress.value.text,
         'status': 'PENDING',
         'data_source': 'DRAFT',
         'is_synced': 0,
-
         'image_front': imageUrls[0],
         'image_banner': imageUrls[1],
         'image_landmark': imageUrls[2],
-
-        // for (int i = 0; i < outletImages.length; i++)
         'filename_1': imageFilename[0],
         'filename_2': imageFilename[1],
         'filename_3': imageFilename[2],
-
-        // for (int i = 0; i < outletImages.length; i++)
         'image_path_1': imagePath[0],
         'image_path_2': imagePath[1],
         'image_path_3': imagePath[2],
-
         for (int i = 0; i < questions.length; i++)
           'form_id_${questions[i].id}': controllers[i].value.text,
-
-        'created_at': DateTime.now().toIso8601String(),
+        'created_at': isEditing ? null : DateTime.now().toIso8601String(),
         'updated_at': DateTime.now().toIso8601String(),
       };
-      print("image path 2 ${imagePath[2]}");/// /data/user/0/com.example.cetapil_mobile/cache/compressed_1732264925659.jpg
-      await db.insertOutletWithAnswers(data: data);
-      await loadOutlets();
-      Get.back();
-      showSuccessAlert(context, "Draft Berhasil Disimpan",
-          "Anda baru menyimpan Draft. Silahkan periksa status Draft pada aplikasi.");
 
+      if (isEditing) {
+        await db.updateOutlet(data: data);
+      } else {
+        await db.insertOutletWithAnswers(data: data);
+      }
+
+      await loadOutlets();
       clearForm();
+
+      // Navigate back first
+      Get.back();
+
+      // Then show the success alert
+      showSuccessAlert(
+          Get.context!, // Use Get.context instead of the previous context
+          isEditing ? "Draft Berhasil Diperbarui" : "Draft Berhasil Disimpan",
+          isEditing
+              ? "Anda baru memperbarui Draft. Silahkan periksa status Draft pada aplikasi."
+              : "Anda baru menyimpan Draft. Silahkan periksa status Draft pada aplikasi.");
     } catch (e) {
       print('Error saving draft: $e');
       Get.snackbar(
@@ -354,6 +451,7 @@ print("file Length = ${outletImages.length}"); /// 3
     cityId.value = '';
     cityName.value = '';
     selectedCity.value = null;
+    selectedCategory.value = 'MT'; // Reset to default MT
     for (var controller in controllers) {
       controller.clear();
     }
@@ -363,12 +461,28 @@ print("file Length = ${outletImages.length}"); /// 3
     imageUrls.assignAll(['', '', '']);
   }
 
-  List<Outlet> get filteredOutlets => outlets.where((outlet) {
-        return outlet.name
-                ?.toLowerCase()
-                .contains(searchQuery.value.toLowerCase()) ??
-            false;
-      }).toList();
+  List<Outlet> get filteredOutlets {
+    if (searchQuery.value.isEmpty) {
+      return outlets;
+    }
+
+    final filtered = outlets.where((outlet) {
+      return outlet.name?.toLowerCase().contains(searchQuery.value.toLowerCase()) ?? false;
+    }).toList();
+
+    // Keep drafts at top in filtered results
+    filtered.sort((a, b) {
+      if (a.dataSource == 'DRAFT' && b.dataSource != 'DRAFT') {
+        return -1;
+      }
+      if (a.dataSource != 'DRAFT' && b.dataSource == 'DRAFT') {
+        return 1;
+      }
+      return 0;
+    });
+
+    return filtered;
+  }
 
   void updateSearchQuery(String query) {
     searchQuery.value = query;
@@ -378,8 +492,90 @@ print("file Length = ${outletImages.length}"); /// 3
     for (var controller in controllers) {
       controller.dispose();
     }
-    controllers.assignAll(
-        List.generate(questions.length, (index) => TextEditingController()));
+    controllers.assignAll(List.generate(questions.length, (index) => TextEditingController()));
+  }
+
+  // Helper methods for batch operations
+  Future<void> _batchDelete(List<String> ids) async {
+    const batchSize = 100;
+    for (var i = 0; i < ids.length; i += batchSize) {
+      final end = (i + batchSize < ids.length) ? i + batchSize : ids.length;
+      final batch = ids.sublist(i, end);
+      await Future.wait(batch.map((id) => db.deleteOutlet(id)));
+    }
+  }
+
+  Future<void> _batchUpsert(List<Outlet> outlets) async {
+    const batchSize = 100;
+    for (var i = 0; i < outlets.length; i += batchSize) {
+      final end = (i + batchSize < outlets.length) ? i + batchSize : outlets.length;
+      final batch = outlets.sublist(i, end);
+
+      // Get existing outlets to check draft status
+      final existingOutlets =
+          await Future.wait(batch.map((outlet) => db.getOutletById(outlet.id!)));
+
+      // Create a list of futures for upsert operations
+      final futures = batch.asMap().entries.map((entry) {
+        final index = entry.key;
+        final outlet = entry.value;
+
+        // If the existing outlet is a draft, preserve its draft status
+        if (existingOutlets[index]?.dataSource == 'DRAFT') {
+          final modifiedOutlet = Outlet(
+              id: outlet.id,
+              name: outlet.name,
+              address: outlet.address,
+              latitude: outlet.latitude,
+              longitude: outlet.longitude,
+              category: outlet.category,
+              city: outlet.city, // Use the city object directly
+              images: outlet.images,
+              forms: outlet.forms,
+              user: outlet.user,
+              dataSource: 'DRAFT', // Preserve draft status
+              status: outlet.status,
+              visitDay: outlet.visitDay,
+              weekType: outlet.weekType,
+              cycle: outlet.cycle,
+              salesActivity: outlet.salesActivity,
+              isSynced: false);
+          return db.upsertOutletFromApi(modifiedOutlet);
+        }
+
+        return db.upsertOutletFromApi(outlet);
+      });
+
+      await Future.wait(futures);
+    }
+  }
+
+  Future<void> _syncDrafts(List<Outlet> drafts) async {
+    await Future.wait(drafts.map((draft) => Future(() async {
+          try {
+            await db.markOutletAsSynced(draft.id!);
+            return true; // Return a value to satisfy the Future type
+          } catch (e) {
+            print('Failed to sync draft outlet ${draft.id}: $e');
+            return false; // Return a value even in case of error
+          }
+        })));
+  }
+
+// Also update the _hasChanges method
+  bool _hasChanges(Outlet local, Outlet api) {
+    // Always skip sync for drafts
+    if (local.dataSource == 'DRAFT') {
+      return false;
+    }
+
+    return local.name != api.name ||
+        local.address != api.address ||
+        local.latitude != api.latitude ||
+        local.longitude != api.longitude ||
+        local.city?.id != api.city?.id ||
+        local.city?.name != api.city?.name ||
+        local.category != api.category;
   }
 
   @override

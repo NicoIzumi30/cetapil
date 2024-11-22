@@ -148,7 +148,16 @@ class DatabaseHelper {
     final db = await database;
 
     await db.transaction((txn) async {
-      // Insert/Update main outlet data
+      // Check if this is a draft before upserting
+      final List<Map<String, dynamic>> existing = await txn.query(
+        'outlets',
+        where: 'id = ?',
+        whereArgs: [outlet.id],
+      );
+
+      final bool isDraft = existing.isNotEmpty && existing.first['data_source'] == 'DRAFT';
+
+      // Insert/Update main outlet data, preserving draft status if it exists
       await txn.insert(
         'outlets',
         {
@@ -167,69 +176,73 @@ class DatabaseHelper {
           'week_type': outlet.weekType?.toString(),
           'cycle': outlet.cycle,
           'sales_activity': outlet.salesActivity?.toString(),
-          'data_source': 'API',
-          'is_synced': 1,
-          'created_at': DateTime.now().toIso8601String(),
+          'data_source': isDraft ? 'DRAFT' : outlet.dataSource ?? 'API',
+          'is_synced': isDraft ? 0 : 1,
+          'created_at':
+              existing.isNotEmpty ? existing.first['created_at'] : DateTime.now().toIso8601String(),
           'updated_at': DateTime.now().toIso8601String(),
         },
         conflictAlgorithm: ConflictAlgorithm.replace,
       );
 
-      // Handle images
-      if (outlet.images != null) {
-        // Delete existing images
-        await txn.delete(
-          'outlet_images',
-          where: 'outlet_id = ?',
-          whereArgs: [outlet.id],
-        );
-
-        // Insert new images
-        for (var image in outlet.images!) {
-          await txn.insert(
+      // Only update images and forms if it's not a draft
+      if (!isDraft) {
+        // Handle images
+        if (outlet.images != null) {
+          // Delete existing images
+          await txn.delete(
             'outlet_images',
-            {
-              'id': image.id ?? const Uuid().v4(),
-              'outlet_id': outlet.id,
-              'position': image.position,
-              'filename': image.filename,
-              'image': image.image,
-              'created_at': DateTime.now().toIso8601String(),
-            },
+            where: 'outlet_id = ?',
+            whereArgs: [outlet.id],
           );
-        }
-      }
 
-      // Handle forms and answers
-      if (outlet.forms != null) {
-        for (var form in outlet.forms!) {
-          if (form.outletForm != null) {
-            // Insert/Update form
+          // Insert new images
+          for (var image in outlet.images!) {
             await txn.insert(
-              'outlet_forms',
+              'outlet_images',
               {
-                'id': form.outletForm!.id,
-                'type': form.outletForm!.type,
-                'question': form.outletForm!.question,
-                'created_at': DateTime.now().toIso8601String(),
-                'updated_at': DateTime.now().toIso8601String(),
-              },
-              conflictAlgorithm: ConflictAlgorithm.replace,
-            );
-
-            // Insert answer
-            await txn.insert(
-              'outlet_form_answers',
-              {
-                'id': form.id ?? const Uuid().v4(),
+                'id': image.id ?? const Uuid().v4(),
                 'outlet_id': outlet.id,
-                'outlet_form_id': form.outletForm!.id,
-                'answer': form.answer,
+                'position': image.position,
+                'filename': image.filename,
+                'image': image.image,
                 'created_at': DateTime.now().toIso8601String(),
-                'updated_at': DateTime.now().toIso8601String(),
               },
-              conflictAlgorithm: ConflictAlgorithm.replace,
             );
+          }
+        }
+
+        // Handle forms and answers
+        if (outlet.forms != null) {
+          for (var form in outlet.forms!) {
+            if (form.outletForm != null) {
+              // Insert/Update form
+              await txn.insert(
+                'outlet_forms',
+                {
+                  'id': form.outletForm!.id,
+                  'type': form.outletForm!.type,
+                  'question': form.outletForm!.question,
+                  'created_at': DateTime.now().toIso8601String(),
+                  'updated_at': DateTime.now().toIso8601String(),
+                },
+                conflictAlgorithm: ConflictAlgorithm.replace,
+              );
+
+              // Insert answer
+              await txn.insert(
+                'outlet_form_answers',
+                {
+                  'id': form.id ?? const Uuid().v4(),
+                  'outlet_id': outlet.id,
+                  'outlet_form_id': form.outletForm!.id,
+                  'answer': form.answer,
+                  'created_at': DateTime.now().toIso8601String(),
+                  'updated_at': DateTime.now().toIso8601String(),
+                },
+                conflictAlgorithm: ConflictAlgorithm.replace,
+              );
+            }
           }
         }
       }
@@ -301,7 +314,6 @@ class DatabaseHelper {
   Future<List<Outlet>> getAllOutlets({String? dataSource}) async {
     final db = await database;
 
-    // Get all outlets with optional dataSource filter
     final List<Map<String, dynamic>> outletMaps = await db.query(
       'outlets',
       where: dataSource != null ? 'data_source = ?' : null,
@@ -309,6 +321,8 @@ class DatabaseHelper {
     );
 
     return Future.wait(outletMaps.map((outletMap) async {
+      print("Raw outlet data from DB: $outletMap"); // Debug print
+
       // Get images for this outlet
       final List<Map<String, dynamic>> imageMaps = await db.query(
         'outlet_images',
@@ -329,26 +343,23 @@ class DatabaseHelper {
       WHERE fa.outlet_id = ?
     ''', [outletMap['id']]);
 
-      // Transform the raw data into the Outlet model
-      return Outlet(
+      final outlet = Outlet(
         id: outletMap['id'],
-        user: outletMap['user_id'] != null
-            ? User(
-          id: outletMap['user_id'],
-          name: outletMap['user_name'],
-        )
-            : null,
+        user: User(
+          id: outletMap['user_id']?.toString() ?? '',
+          name: outletMap['user_name']?.toString() ??
+              outletMap['salesName']?.toString() ??
+              '', // Try both fields
+        ),
         name: outletMap['name'],
         category: outletMap['category'],
         visitDay: outletMap['visit_day'],
         longitude: outletMap['longitude'],
         latitude: outletMap['latitude'],
-        city: outletMap['city_id'] != null
-            ? City(
-          id: outletMap['city_id'],
-          name: outletMap['city_name'],
-        )
-            : null,
+        city: City(
+          id: outletMap['city_id']?.toString() ?? '1',
+          name: outletMap['city_name']?.toString() ?? 'Wonogiri',
+        ),
         address: outletMap['address'],
         status: outletMap['status'],
         weekType: outletMap['week_type'],
@@ -356,22 +367,29 @@ class DatabaseHelper {
         salesActivity: outletMap['sales_activity'],
         dataSource: outletMap['data_source'],
         isSynced: outletMap['is_synced'] == 1,
-        images: imageMaps.map((imageMap) => Images(
-          id: imageMap['id'] as String?,
-          position: imageMap['position'] as int?,
-          filename: imageMap['filename'] as String?,
-          image: imageMap['image'] as String?,
-        )).toList(),
-        forms: formMaps.map((formMap) => Forms(
-          id: formMap['id'] as String?,
-          outletForm: OutletForm(
-            id: formMap['outlet_form_id'] as String?,
-            type: formMap['type'] as String?,
-            question: formMap['question'] as String?,
-          ),
-          answer: formMap['answer'] as String?,
-        )).toList(),
+        images: imageMaps
+            .map((imageMap) => Images(
+                  id: imageMap['id'] as String?,
+                  position: imageMap['position'] as int?,
+                  filename: imageMap['filename'] as String?,
+                  image: imageMap['image'] as String?,
+                ))
+            .toList(),
+        forms: formMaps
+            .map((formMap) => Forms(
+                  id: formMap['id'] as String?,
+                  outletForm: OutletForm(
+                    id: formMap['outlet_form_id'] as String?,
+                    type: formMap['type'] as String?,
+                    question: formMap['question'] as String?,
+                  ),
+                  answer: formMap['answer'] as String?,
+                ))
+            .toList(),
       );
+
+      print("Created outlet object: $outlet"); // Debug print
+      return outlet;
     }));
   }
 
@@ -466,8 +484,7 @@ class DatabaseHelper {
   }
 
   // Insert outlet with answers
-  Future<void> insertOutletWithAnswers(
-      {required Map<String, dynamic> data}) async {
+  Future<void> insertOutletWithAnswers({required Map<String, dynamic> data}) async {
     final db = await database;
 
     await db.transaction((txn) async {
@@ -478,8 +495,11 @@ class DatabaseHelper {
           {
             'id': data['id'],
             'name': data['outletName'],
-            'user_name': data['salesName'],
+            'user_id': null, // Add this
+            'user_name': data['salesName'], // Change this from user_name
             'category': data['category'],
+            'city_id': data['city_id'], // Added
+            'city_name': data['city_name'], // Added
             'longitude': data['longitude'],
             'latitude': data['latitude'],
             'address': data['address'],
@@ -492,16 +512,15 @@ class DatabaseHelper {
           },
         );
 
-
-        for(int i=0; i<3; i++){
+        for (int i = 0; i < 3; i++) {
           await txn.insert(
             'outlet_images',
             {
               'id': const Uuid().v4(),
               'outlet_id': data['id'],
-              'position': "${i+1}",
-              'filename': data['filename_${i+1}'],
-              'image': data['image_path_${i+1}'],
+              'position': "${i + 1}",
+              'filename': data['filename_${i + 1}'],
+              'image': data['image_path_${i + 1}'],
               'created_at': DateTime.now().toIso8601String(),
             },
           );
@@ -535,8 +554,7 @@ class DatabaseHelper {
         // }
 
         // 2. Insert form answers
-        final formKeys =
-            data.keys.where((key) => key.startsWith('form_id_')).toList();
+        final formKeys = data.keys.where((key) => key.startsWith('form_id_')).toList();
 
         for (var key in formKeys) {
           final formId = key.replaceFirst('form_id_', '');
@@ -560,9 +578,97 @@ class DatabaseHelper {
     });
   }
 
+  Future<void> updateOutlet({required Map<String, dynamic> data}) async {
+    final db = await database;
+
+    await db.transaction((txn) async {
+      try {
+        print("Updating outlet with data: ${data.toString()}");
+
+        // 1. Update the outlet
+        await txn.rawUpdate('''
+        UPDATE outlets 
+        SET name = ?, 
+            user_name = ?,
+            category = ?,
+            city_id = ?,
+            city_name = ?,
+            longitude = ?,
+            latitude = ?,
+            address = ?,
+            status = ?,
+            data_source = ?,
+            is_synced = ?,
+            updated_at = ?
+        WHERE id = ?
+      ''', [
+          data['outletName'],
+          data['salesName'], // Make sure this matches
+          data['category'],
+          data['city_id'],
+          data['city_name'],
+          data['longitude'],
+          data['latitude'],
+          data['address'],
+          data['status'],
+          'DRAFT', // Added this
+          0, // Added this
+          data['updated_at'],
+          data['id'],
+        ]);
+
+        print("After update, retrieving outlet...");
+        final List<Map<String, dynamic>> updated = await txn.query(
+          'outlets',
+          where: 'id = ?',
+          whereArgs: [data['id']],
+        );
+        print("Updated outlet data: ${updated.first}");
+
+        // 2. Delete old images
+        await txn.delete('outlet_images', where: 'outlet_id = ?', whereArgs: [data['id']]);
+
+        // 3. Insert new images
+        for (int i = 0; i < 3; i++) {
+          if (data['image_path_${i + 1}'] != null && data['image_path_${i + 1}'].isNotEmpty) {
+            await txn.insert('outlet_images', {
+              'id': const Uuid().v4(),
+              'outlet_id': data['id'],
+              'position': i + 1,
+              'filename': data['filename_${i + 1}'],
+              'image': data['image_path_${i + 1}'],
+              'created_at': DateTime.now().toIso8601String(),
+            });
+          }
+        }
+
+        // 4. Delete old form answers
+        await txn.delete('outlet_form_answers', where: 'outlet_id = ?', whereArgs: [data['id']]);
+
+        // 5. Insert new form answers
+        final formKeys = data.keys.where((key) => key.startsWith('form_id_')).toList();
+        for (var key in formKeys) {
+          final formId = key.replaceFirst('form_id_', '');
+          await txn.insert('outlet_form_answers', {
+            'id': const Uuid().v4(),
+            'outlet_id': data['id'],
+            'outlet_form_id': formId,
+            'answer': data[key],
+            'created_at': DateTime.now().toIso8601String(),
+            'updated_at': data['updated_at'],
+          });
+        }
+
+        print("Update completed successfully");
+      } catch (e) {
+        print('Error updating outlet: $e');
+        rethrow;
+      }
+    });
+  }
+
   ///ROUTING
-  Future<void> insertRoutingWithAnswers(
-      {required Map<String, dynamic> data}) async {
+  Future<void> insertRoutingWithAnswers({required Map<String, dynamic> data}) async {
     final db = await database;
 
     await db.transaction((txn) async {
@@ -573,6 +679,7 @@ class DatabaseHelper {
           {
             'id': data['id'],
             'name': data['outletName'],
+            'user_name': data['salesName'],
             'category': data['category'],
             'longitude': data['longitude'],
             'latitude': data['latitude'],
@@ -587,8 +694,7 @@ class DatabaseHelper {
             'deleted_at': null,
           },
         );
-        final imageKeys =
-            data.keys.where((key) => key.startsWith('img')).toList();
+        final imageKeys = data.keys.where((key) => key.startsWith('img')).toList();
         for (var key in imageKeys) {
           await txn.insert(
             'routing_images',
@@ -604,8 +710,7 @@ class DatabaseHelper {
         }
 
         // 2. Insert form answers
-        final formKeys =
-            data.keys.where((key) => key.startsWith('form_id_')).toList();
+        final formKeys = data.keys.where((key) => key.startsWith('form_id_')).toList();
 
         for (var key in formKeys) {
           final formId = key.replaceFirst('form_id_', '');
@@ -627,5 +732,99 @@ class DatabaseHelper {
         rethrow;
       }
     });
+  }
+
+  // Add this method to your DatabaseHelper class
+// Add this method to your DatabaseHelper class
+  Future<Outlet?> getOutletById(String id) async {
+    final db = await database;
+
+    try {
+      // Get the main outlet data
+      final List<Map<String, dynamic>> outletMaps = await db.query(
+        'outlets',
+        where: 'id = ?',
+        whereArgs: [id],
+      );
+
+      if (outletMaps.isEmpty) {
+        return null;
+      }
+
+      final outletMap = outletMaps.first;
+
+      // Get images for this outlet
+      final List<Map<String, dynamic>> imageMaps = await db.query(
+        'outlet_images',
+        where: 'outlet_id = ?',
+        whereArgs: [id],
+      );
+
+      // Get forms with their answers for this outlet
+      final List<Map<String, dynamic>> formMaps = await db.rawQuery('''
+      SELECT 
+        fa.id,
+        f.id as outlet_form_id,
+        f.type,
+        f.question,
+        fa.answer
+      FROM outlet_forms f
+      INNER JOIN outlet_form_answers fa ON f.id = fa.outlet_form_id
+      WHERE fa.outlet_id = ?
+    ''', [id]);
+
+      // Convert to JSON format that matches your model
+      final Map<String, dynamic> outletJson = {
+        'id': outletMap['id'],
+        'user': outletMap['user_id'] != null
+            ? {
+                'id': outletMap['user_id'],
+                'name': outletMap['user_name'],
+              }
+            : null,
+        'name': outletMap['name'],
+        'category': outletMap['category'],
+        'visit_day': outletMap['visit_day'],
+        'longitude': outletMap['longitude'],
+        'latitude': outletMap['latitude'],
+        'city': outletMap['city_id'] != null
+            ? {
+                'id': outletMap['city_id'],
+                'name': outletMap['city_name'],
+              }
+            : null,
+        'address': outletMap['address'],
+        'status': outletMap['status'],
+        'week_type': outletMap['week_type'],
+        'cycle': outletMap['cycle'],
+        'sales_activity': outletMap['sales_activity'],
+        'data_source': outletMap['data_source'],
+        'is_synced': outletMap['is_synced'] == 1,
+        'images': imageMaps
+            .map((imageMap) => {
+                  'id': imageMap['id'],
+                  'position': imageMap['position'],
+                  'filename': imageMap['filename'],
+                  'image': imageMap['image'],
+                })
+            .toList(),
+        'forms': formMaps
+            .map((formMap) => {
+                  'id': formMap['id'],
+                  'outletForm': {
+                    'id': formMap['outlet_form_id'],
+                    'type': formMap['type'],
+                    'question': formMap['question'],
+                  },
+                  'answer': formMap['answer'],
+                })
+            .toList(),
+      };
+
+      return Outlet.fromJson(outletJson);
+    } catch (e) {
+      print('Error in getOutletById: $e');
+      return null;
+    }
   }
 }

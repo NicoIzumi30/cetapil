@@ -24,8 +24,6 @@ class CityDropdown extends StatefulWidget {
 
 class _CityDropdownState extends State<CityDropdown> {
   final citiesDb = CitiesDatabaseHelper.instance;
-  // final selectedCity = Rxn<Data>();
-  final selectedCity = "".obs;
   final isLoading = false.obs;
   final hasError = false.obs;
   final errorMessage = ''.obs;
@@ -53,19 +51,18 @@ class _CityDropdownState extends State<CityDropdown> {
 
       if (isEmpty) {
         final response = await Api.getListCity();
-        print("response city  = $response");
+        print("response city = $response");
         if (response.status == "OK" && response.data != null) {
           await citiesDb.insertCities(response.data!);
-          // cities.value = response.data!;
           final dbCities = await citiesDb.getAllCities();
-          print("response city  = $dbCities");
+          print("cities from db = $dbCities");
           cities.value = dbCities;
         } else {
           throw Exception('Failed to load cities: ${response.message}');
         }
       } else {
         final dbCities = await citiesDb.getAllCities();
-        print("response city  = ${dbCities}");
+        print("cities from db = ${dbCities}");
         cities.value = dbCities;
       }
     } catch (e) {
@@ -83,15 +80,6 @@ class _CityDropdownState extends State<CityDropdown> {
       isLoading.value = false;
     }
   }
-
-  // Future<List<Data>> _filterCities(String? filter) async {
-  //   if (filter == null || filter.isEmpty) {
-  //     return cities;
-  //   }
-  //   return cities
-  //       .where((city) => city.name?.toLowerCase().contains(filter.toLowerCase()) ?? false)
-  //       .toList();
-  // }
 
   @override
   Widget build(BuildContext context) {
@@ -143,21 +131,53 @@ class _CityDropdownState extends State<CityDropdown> {
           }
 
           return DropdownSearch<String>(
-            // onFind: (String? filter) => _filterCities(filter),
-            // itemAsString: (Data? city) => city?.name ?? '',
-            items: (String, LoadProps) => cities.value,  // Convert RxList to List
-            // itemAsString: (Data? item) => item?.name ?? 'Select a city',
+            items: (String, LoadProps) => cities.value, // Convert RxList to List
+            selectedItem: widget.controller.cityName.value.isNotEmpty
+                ? widget.controller.cityName.value
+                : null,
             onChanged: (String? value) {
-              selectedCity.value = value!;
-              // if (value != null) {
-              //   widget.controller.cityId.value = value.id ?? '';
-              //   widget.controller.cityName.value = value.name ?? '';
-              // } else {
-              //   widget.controller.cityId.value = '';
-              //   widget.controller.cityName.value = '';
-              // }
+              if (value != null) {
+                widget.controller.cityName.value = value;
+                // You should implement a way to get the proper city ID here
+                widget.controller.selectedCity.value = Data(
+                  id: widget.controller.cityId.value,
+                  name: value,
+                );
+              }
             },
-            compareFn: (item1, item2) => item1 == item2,
+            decoratorProps: DropDownDecoratorProps(
+                decoration: InputDecoration(
+              filled: true,
+              fillColor: const Color(0xFFE8F3FF), // Light blue background
+              border: OutlineInputBorder(
+                borderRadius: BorderRadius.circular(8),
+                borderSide: const BorderSide(
+                  color: Color(0xFF64B5F6),
+                  width: 2,
+                ),
+              ),
+              focusedBorder: OutlineInputBorder(
+                borderRadius: BorderRadius.circular(8),
+                borderSide: const BorderSide(
+                  color: Color(0xFF64B5F6),
+                  width: 1,
+                ),
+              ),
+              enabledBorder: OutlineInputBorder(
+                borderRadius: BorderRadius.circular(8),
+                borderSide: const BorderSide(
+                  color: Color(0xFF64B5F6),
+                  width: 1,
+                ),
+              ),
+              disabledBorder: OutlineInputBorder(
+                borderRadius: BorderRadius.circular(8),
+                borderSide: const BorderSide(
+                  color: Color(0xFF64B5F6),
+                  width: 1,
+                ),
+              ),
+            )),
             popupProps: PopupProps.menu(
               showSearchBox: true,
               searchFieldProps: TextFieldProps(
@@ -165,7 +185,7 @@ class _CityDropdownState extends State<CityDropdown> {
                   hintText: 'Search city...',
                   prefixIcon: Icon(Icons.search),
                   filled: true,
-                  fillColor: const Color(0xFFE8F3FF), // Light blue background
+                  fillColor: const Color(0xFFE8F3FF),
                   border: OutlineInputBorder(
                     borderRadius: BorderRadius.circular(8),
                     borderSide: const BorderSide(
@@ -187,66 +207,37 @@ class _CityDropdownState extends State<CityDropdown> {
                       width: 1,
                     ),
                   ),
-                  ),
                 ),
-              loadingBuilder: (context, searchEntry) => Center(
-                child: CircularProgressIndicator(),
               ),
-              // emptyBuilder: (context, searchEntry) => Center(
-              //   child: Padding(
-              //     padding: EdgeInsets.all(16),
-              //     child: Text(
-              //       searchEntry?.isEmpty ?? true
-              //           ? 'No cities available'
-              //           : 'No cities found for "$searchEntry"',
-              //       style: TextStyle(
-              //         fontSize: 16,
-              //         color: Colors.grey[600],
-              //       ),
-              //       textAlign: TextAlign.center,
-              //     ),
-              //   ),
-              // ),
-              // showSelectedItems: true,
               constraints: BoxConstraints(maxHeight: 300),
             ),
-decoratorProps: DropDownDecoratorProps(
-  decoration: InputDecoration(
-    filled: true,
-    fillColor: const Color(0xFFE8F3FF), // Light blue background
-    border: OutlineInputBorder(
-      borderRadius: BorderRadius.circular(8),
-      borderSide: const BorderSide(
-        color: Color(0xFF64B5F6),
-        width: 2,
-      ),
-    ),
-    focusedBorder: OutlineInputBorder(
-      borderRadius: BorderRadius.circular(8),
-      borderSide: const BorderSide(
-        color: Color(0xFF64B5F6),
-        width: 1,
-      ),
-    ),
-    enabledBorder: OutlineInputBorder(
-      borderRadius: BorderRadius.circular(8),
-      borderSide: const BorderSide(
-        color: Color(0xFF64B5F6),
-        width: 1,
-      ),
-    ),
-    disabledBorder: OutlineInputBorder(
-      borderRadius: BorderRadius.circular(8),
-      borderSide: const BorderSide(
-        color: Color(0xFF64B5F6),
-        width: 1,
-      ),
-    ),
-  )
-),
-            dropdownBuilder: (context, selectedItem) {
-              return Text(selectedItem ?? 'Select a city');
-            },
+            // dropdownDecoratorProps: DropDownDecoratorProps(
+            //   dropdownSearchDecoration: InputDecoration(
+            //     filled: true,
+            //     fillColor: const Color(0xFFE8F3FF),
+            //     border: OutlineInputBorder(
+            //       borderRadius: BorderRadius.circular(8),
+            //       borderSide: const BorderSide(
+            //         color: Color(0xFF64B5F6),
+            //         width: 2,
+            //       ),
+            //     ),
+            //     focusedBorder: OutlineInputBorder(
+            //       borderRadius: BorderRadius.circular(8),
+            //       borderSide: const BorderSide(
+            //         color: Color(0xFF64B5F6),
+            //         width: 1,
+            //       ),
+            //     ),
+            //     enabledBorder: OutlineInputBorder(
+            //       borderRadius: BorderRadius.circular(8),
+            //       borderSide: const BorderSide(
+            //         color: Color(0xFF64B5F6),
+            //         width: 1,
+            //       ),
+            //     ),
+            //   ),
+            // ),
           );
         }),
         SizedBox(height: 10),
