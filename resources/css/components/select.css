@@ -13,10 +13,22 @@
 	-webkit-border-radius: 3px;
 	-moz-border-radius: 3px;
 	border-radius: 8px;
-	padding: 5.9px;
+	padding: 10px;
 	height: 100%;
 	outline: none !important;
 	transition: all .15s ease-in-out;
+	display: grid;
+}
+
+.select2-search .select2-search--inline {
+	width: 100%;
+}
+
+.select2-container--default .select2-search--inline .select2-search__field::placeholder  {
+	color: var(--primary) !important;
+	font-size: 18px;
+	transform: translateY(-5px);
+	font-weight: 400;
 }
 
 .select2-container .select2-dropdown {

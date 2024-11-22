@@ -25,20 +25,36 @@
             <x-button.info onclick="openModal('upload-product-knowledge')">Upload Product knowledge</x-button.info>
             <x-modal id="upload-product-knowledge">
                 <x-slot:title>Upload Product Knowledge</x-slot:title>
-                <div>
-                    <label for="knowledge_file" class="!text-black">
-                        Unggah product knowledge berupa file pdf
-                        <div id="fileUpload" class="flex mt-2">
-                            <input type="text" id="fileNameDisplay" readonly disabled class="form-control mt-0 border-r-none"
-                                {{-- if ($knowledge_file) value="{{ pathinfo($knowledge_file->getClientOriginalName(), PATHINFO_FILENAME) . '.pdf' }}" @endif --}} placeholder="Unggah product knowledge berupa file pdf"
-                                aria-describedby="button-addon2">
+               <div class="flex gap-4 w-full">
+				<div class="w-full">
+                    <label for="pamflet_file" class="!text-black">
+                        Unggah Pamflet
+                        <div id="pamfletFileUpload" class="flex mt-2">
+                            <input type="text" id="pamfletFileNameDisplay" readonly disabled class="form-control mt-0 border-r-none"
+                                placeholder="Unggah product knowledge berupa file pdf"
+                                aria-describedby="pamflet file name display">
                             <div class="bg-primary text-white align-middle p-3 rounded-r-md cursor-pointer -translate-x-2">
                                 Browse</div>
                         </div>
-                        <input type="file" id="knowledge_file" name="knowledge_file" class="form-control hidden"
+                        <input type="file" id="pamflet_file" name="pamflet_file" class="form-control hidden"
                             accept="application/pdf" aria-label="Unggah product knowledge berupa file pdf">
                     </label>
                 </div>
+                <div class="w-full">
+                    <label for="video_file" class="!text-black">
+                        Unggah Video
+                        <div id="fileUpload" class="flex mt-2">
+                            <input type="text" id="videofileNameDisplay" readonly disabled class="form-control mt-0 border-r-none"
+							   placeholder="Unggah product knowledge berupa file mp4"
+                                aria-describedby="video file name display">
+                            <div class="bg-primary text-white align-middle p-3 rounded-r-md cursor-pointer -translate-x-2">
+                                Browse</div>
+                        </div>
+                        <input type="file" id="video_file" name="video_file" class="form-control hidden"
+                            accept="video/mp4,video/*" aria-label="Unggah product knowledge berupa file mp4">
+                    </label>
+                </div>
+			   </div>
                 <x-slot:footer>
                     <x-button.info class="w-full">Upload</x-button.info>
                 </x-slot:footer>
@@ -296,9 +312,13 @@
 
 @push('scripts')
     <script>
-        document.getElementById('knowledge_file').addEventListener('change', function(e) {
+        document.getElementById('pamflet_file').addEventListener('change', function(e) {
             const fileName = e.target.files[0] ? e.target.files[0].name : 'No file selected';
-            document.getElementById('fileNameDisplay').value = fileName;
+            document.getElementById('pamfletFileNameDisplay').value = fileName;
+        });
+        document.getElementById('video_file').addEventListener('change', function(e) {
+            const fileName = e.target.files[0] ? e.target.files[0].name : 'No file selected';
+            document.getElementById('videofileNameDisplay').value = fileName;
         });
     </script>
 @endpush

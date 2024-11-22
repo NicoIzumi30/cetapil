@@ -38,7 +38,8 @@
         @yield('dashboard-content')
         {{-- Footer --}}
         <footer class="text-[12px] text-end text-white p-3 self-end w-[100%] absolute right-0 ">
-            Powered and well designed by IGNICE - 2024 All Rights Reserved
+            <p>Powered and well designed by IGNICE - 2024 All Rights Reserved</p>
+			<a href="https://www.streamlinehq.com/illustrations" class="underline text-[8px]">Free icons from Streamline</a>
         </footer>
     </div>
     {{-- BG-Image --}}

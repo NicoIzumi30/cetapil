@@ -34,7 +34,6 @@
                             @if ($errors->has('email'))
                                 <span id="name-error" class="text-sm text-red-600 mt-1">{{ $errors->first('email') }}</span>
                             @endif
-
                         </div>
                         <div>
                             <label for="phone" class="form-label">Nomor Telepon Pengguna</label>
@@ -91,7 +90,6 @@
                                     class="text-sm text-red-600 mt-1">{{ $errors->first('region') }}</span>
                             @endif
                         </div>
-
                     </div>
                     {{-- Profil Pengguna End --}}
 
@@ -189,7 +187,6 @@
                     <x-button.info class="w-full mt-20 !text-xl" type="submit">Konfirmasi</x-button.info>
                 </form>
                 {{-- Manajemen Akun End --}}
-
 
         </div>
         </x-card>

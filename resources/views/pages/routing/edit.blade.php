@@ -271,7 +271,9 @@
         $(document).ready(function() {
             $('#sales-names').select2();
             $('#time-visit').select2();
-            $('#cycle').select2();
+            $('#cycle').select2({
+				minimumResultsForSearch: Infinity
+			});
             $('#states-option').select2();
             $('#product-categories').select2();
             $('#outlet-categories').select2({
