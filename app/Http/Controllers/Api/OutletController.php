@@ -2,26 +2,27 @@
 
 namespace App\Http\Controllers\Api;
 
-use App\Http\Controllers\Controller;
-use App\Http\Requests\Outlet\CreateOutletFormAnswerRequest;
-use App\Http\Requests\Routing\CreateNOORequest;
-use App\Models\OutletForm;
-use App\Models\OutletFormAnswer;
-use Illuminate\Http\Request;
-use App\Constants\OutletConstants;
-use App\Http\Requests\Outlet\CreateNOOWithFormsRequest;
-use App\Http\Resources\Outlet\OutletResource;
-use App\Http\Resources\Routing\RoutingCollection;
+use Carbon\Carbon;
 use App\Models\City;
-use App\Models\OutletImage;
-use Symfony\Component\HttpFoundation\Response;
-use App\Traits\OutletTrait;
-use App\Traits\ProductTrait;
-use Illuminate\Support\Arr;
 use App\Models\Outlet;
+use App\Models\OutletForm;
+use App\Models\OutletImage;
 use App\Traits\HasAuthUser;
+use App\Traits\OutletTrait;
+use Illuminate\Support\Arr;
+use App\Traits\ProductTrait;
+use Illuminate\Http\Request;
+use App\Models\OutletFormAnswer;
+use App\Constants\OutletConstants;
 use Illuminate\Support\Facades\DB;
+use App\Http\Controllers\Controller;
 use Illuminate\Database\Eloquent\Builder;
+use App\Http\Resources\Outlet\OutletResource;
+use Symfony\Component\HttpFoundation\Response;
+use App\Http\Requests\Routing\CreateNOORequest;
+use App\Http\Resources\Routing\RoutingCollection;
+use App\Http\Requests\Outlet\CreateNOOWithFormsRequest;
+use App\Http\Requests\Outlet\CreateOutletFormAnswerRequest;
 
 class OutletController extends Controller
 {
@@ -29,8 +30,6 @@ class OutletController extends Controller
 
     public function index(Request $request)
     {
-        // $page = $request->input('page', 1);
-        // $size = $request->input('size', 10);
         $user = $this->getAuthUser();
         $outlets = Outlet::query()->approved()->where('user_id', $user->id);
 
@@ -42,9 +41,41 @@ class OutletController extends Controller
         });
 
         $outlets = $outlets->get();
+        // return json_encode($outlets);
+
         return new RoutingCollection($outlets);
     }
-
+    public function getRouting(Request $request)
+    {
+        Carbon::setLocale('id');
+        $weekNumber = date('W');
+        $week = 'ODD';
+        if ($weekNumber % 2 == 0) {
+            $week = 'EVEN';
+        }
+        $user = $this->getAuthUser();
+        $outlets = Outlet::query()
+            ->approved()
+            ->where('user_id', $user->id)
+            ->where(function ($query) use ($week) {  // Tambahkan use ($week) di sini
+                $query->where('cycle', '1x1')
+                      ->orWhere(function ($q) use ($week) {  // Dan di sini
+                          $q->where('cycle', '1x2')
+                            ->where('week_type', $week);
+                      });
+            });
+    
+        $outlets = $outlets->where(function (Builder $builder) use ($request) {
+            $keyword = $request->input('keyword');
+            if ($keyword) {
+                $builder->where('name', 'like', '%' . $keyword . '%');
+            }
+        });
+    
+        $outlets = $outlets->get();
+        return new RoutingCollection($outlets);
+    }
+    
     public function show($id)
     {
         try {

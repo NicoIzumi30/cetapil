@@ -12,4 +12,8 @@ class Channel extends Model
     use HasFactory, HasUuids, SoftDeletes;
     protected $fillable = ['name'];
     
+    public function av3ms()
+    {
+        return $this->hasMany(Av3m::class);
+    }
 }

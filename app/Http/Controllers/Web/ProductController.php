@@ -16,6 +16,9 @@ use Maatwebsite\Excel\Facades\Excel;
 use Illuminate\Validation\ValidationException;
 use App\Http\Requests\Product\CreateProductRequest;
 use App\Http\Controllers\Controller;
+use App\Exports\ProductExport;
+use Illuminate\Support\Facades\Log;
+use Illuminate\Support\Facades\Storage;
 
 class ProductController extends Controller
 {
@@ -35,7 +38,45 @@ class ProductController extends Controller
             'channels' => $channels
         ]);
     }
-
+    public function getData(Request $request)
+    {
+        $query = Product::with('category');
+        
+        if ($request->filled('search_term')) {
+            $searchTerm = $request->search_term;
+            $query->where(function($q) use ($searchTerm) {
+                $q->where('sku', 'like', "%{$searchTerm}%")
+                  ->orWhereHas('category', function($q) use ($searchTerm) {
+                      $q->where('name', 'like', "%{$searchTerm}%");
+                  });
+            });
+        }
+        
+        $filteredRecords = (clone $query)->count();
+        
+        $result = $query->skip($request->start)
+                       ->take($request->length)
+                       ->get();
+        
+        return response()->json([
+            'draw' => intval($request->draw),
+            'recordsTotal' => $filteredRecords,
+            'recordsFiltered' => $filteredRecords,
+            'data' => $result->map(function($item) {
+                return [
+                    'id' => $item->id, // Tambahkan id product
+                    'category' => $item->category->name,
+                    'sku' => $item->sku,
+                    'md_price' => number_format($item->md_price, 0, ',', '.'),
+                    'sales_price' => number_format($item->sales_price, 0, ',', '.'),
+                    'actions' => view('pages.product.action', [
+                        'item' => $item,
+                        'productId' => $item->id // Pass product id ke view actions
+                    ])->render()
+                ];
+            })
+        ]);
+    }
     public function create()
     {
         $categories = Category::all();
@@ -71,7 +112,7 @@ class ProductController extends Controller
 
     public function edit(Product $product)
     {
-        $product->load('category'); 
+        $product->load('category');
         return response()->json([
             'id' => $product->id,
             'category_id' => $product->category_id,
@@ -173,13 +214,9 @@ class ProductController extends Controller
             'excel_file' => 'required|mimes:xlsx|max:10240'
         ]);
 
-        DB::beginTransaction();
         try {
             $file = $request->file('excel_file');
-            // Sanitasi nama file
-            $fileName = str_replace(' ', '_', $file->getClientOriginalName());
-            $fileName = preg_replace('/[^A-Za-z0-9\-\_\.]/', '', $fileName);
-
+            $fileName = $file->getClientOriginalName();
             $import = new ProductImport($fileName);
             Excel::import($import, $file);
 
@@ -187,11 +224,54 @@ class ProductController extends Controller
                 throw new Exception($import->response['message']);
             }
 
-            DB::commit();
             return response()->json(['message' => 'Import success'], 200);
         } catch (\Exception $e) {
-            DB::rollBack();
             return response()->json(['message' => $e->getMessage()], 500);
+        }
+    }
+    public function downloadExcel()
+    {
+        try {
+            return Excel::download(new ProductExport(), 'products_data_' . now()->format('Y-m-d_His') . '.xlsx', \Maatwebsite\Excel\Excel::XLSX);
+        } catch (\Exception $e) {
+            Log::error('Excel Download Error', [
+                'message' => $e->getMessage(),
+                'file' => $e->getFile(),
+                'line' => $e->getLine()
+            ]);
+
+            return response()->json([
+                'status' => 'error',
+                'message' => 'Gagal membuat file Excel: ' . $e->getMessage()
+            ], 500);
+        }
+    }
+
+    public function getExcelFile($filename)
+    {
+        try {
+            $path = storage_path('app/temp/' . $filename);
+
+            if (!file_exists($path)) {
+                throw new \Exception('File tidak ditemukan di path: ' . $path);
+            }
+
+            return response()->download($path, $filename, [
+                'Content-Type' => 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet',
+            ])->deleteFileAfterSend(true);
+
+        } catch (\Exception $e) {
+            Log::error('Excel Download Error: ' . $e->getMessage(), [
+                'file' => $e->getFile(),
+                'line' => $e->getLine(),
+                'filename' => $filename,
+                'path' => $path ?? null
+            ]);
+
+            return response()->json([
+                'status' => 'error',
+                'message' => 'Gagal mengunduh file: ' . $e->getMessage()
+            ], 500);
         }
     }
 }
