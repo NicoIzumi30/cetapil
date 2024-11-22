@@ -1,4 +1,5 @@
 import 'package:cetapil_mobile/controller/routing/routing_controller.dart';
+import 'package:cetapil_mobile/model/list_routing_response.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 
@@ -32,31 +33,87 @@ class RoutingPage extends GetView<RoutingController> {
               ),
               Expanded(
                 child: Obx(
-                      () => ListView.builder(
-                    itemCount: controller.filteredOutlets.length,
-                    itemBuilder: (context, index) {
-                      final outlet = controller.filteredOutlets[index];
-                      return ActivityCard(outlet: outlet, statusDraft: 'Drafted',statusCheckin: true, ontap: (){
-                        Get.to(()=> TambahActivity());
-                      },);
-                    },
-                  ),
+                  () => RefreshIndicator(
+                      onRefresh: () async {
+                        await controller.syncOutlets();
+                      },
+                      child: controller.isLoading.value
+                          ? Center(child: CircularProgressIndicator())
+                          : controller.filteredOutlets.isEmpty
+                              ? _buildEmptyState()
+                              : ListView.builder(
+                                  physics: AlwaysScrollableScrollPhysics(),
+                                  itemCount: controller.filteredOutlets.length,
+                                  itemBuilder: (context, index) {
+                                    final routing =
+                                        controller.filteredOutlets[index];
+                                    return ActivityCard(
+                                      routing: routing,
+                                      statusDraft: 'Drafted',
+                                      statusCheckin: true,
+                                      ontap: () {
+                                        Get.to(() => TambahActivity());
+                                      },
+                                    );
+                                  },
+                                )),
+                ),
+              )
+            ])));
+  }
+
+  Widget _buildEmptyState() {
+    return ListView(
+      physics: AlwaysScrollableScrollPhysics(),
+      children: [
+        SizedBox(height: 100),
+        Center(
+          child: Column(
+            mainAxisAlignment: MainAxisAlignment.center,
+            children: [
+              Icon(
+                Icons.route_outlined,
+                size: 64,
+                color: Colors.grey,
+              ),
+              SizedBox(height: 16),
+              Text(
+                'Tidak ada Routing',
+                style: TextStyle(
+                  fontSize: 16,
+                  color: Colors.grey[600],
+                  fontWeight: FontWeight.bold,
                 ),
               ),
-            ])));
+              SizedBox(height: 8),
+              Text(
+                'Tarik ke bawah untuk memuat data',
+                style: TextStyle(
+                  fontSize: 14,
+                  color: Colors.grey[500],
+                ),
+              ),
+            ],
+          ),
+        ),
+      ],
+    );
   }
 }
 
 class ActivityCard extends StatelessWidget {
   final RoutingController controller = Get.find<RoutingController>();
-  final Outlet outlet;
+  final Data routing;
   final String statusDraft;
   final bool statusCheckin;
   final VoidCallback ontap;
 
-   ActivityCard({
+  ActivityCard({
     Key? key,
-    required this.outlet, required this.ontap, required this.statusDraft, required this.statusCheckin,
+    required this.routing,
+    required this.ontap,
+    required this.statusDraft,
+    required this.statusCheckin,
   }) : super(key: key);
 
   @override
@@ -84,7 +141,7 @@ class ActivityCard extends StatelessWidget {
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
                     Text(
-                      outlet.outletName,
+                      routing.name!,
                       style: const TextStyle(
                         fontWeight: FontWeight.bold,
                       ),
@@ -92,65 +149,70 @@ class ActivityCard extends StatelessWidget {
                     const SizedBox(height: 8),
                     RichText(
                         text: TextSpan(
-                          style: TextStyle(color: Colors.black, fontSize: 13),
-                          children: <TextSpan>[
-                            TextSpan(text: 'Kategori Outlet : '),
-                            TextSpan(
-                              text: outlet.category,
-                              style: TextStyle(fontWeight: FontWeight.bold),
-                            ),
-                          ],
-                        )),
+                      style: TextStyle(color: Colors.black, fontSize: 13),
+                      children: <TextSpan>[
+                        TextSpan(text: 'Kategori Outlet : '),
+                        TextSpan(
+                          text: routing.category,
+                          style: TextStyle(fontWeight: FontWeight.bold),
+                        ),
+                      ],
+                    )),
                   ],
                 ),
-                Text(controller.formatDate(outlet.createdAt),style: TextStyle(fontSize: 11,fontStyle: FontStyle.italic),)
+                // Text(controller.formatDate(routing.visitDay!),style: TextStyle(fontSize: 11,fontStyle: FontStyle.italic),)
               ],
             ),
-            SizedBox(height: 10,),
+            SizedBox(
+              height: 10,
+            ),
             Row(
               mainAxisAlignment: MainAxisAlignment.spaceBetween,
               children: [
                 Container(
                   padding: EdgeInsets.symmetric(vertical: 7, horizontal: 15),
-
                   decoration: BoxDecoration(
-                    color: statusDraft == "Drafted" ? Colors.white : AppColors.primary,
+                    color: statusDraft == "Drafted"
+                        ? Colors.white
+                        : AppColors.primary,
                     borderRadius: BorderRadius.circular(4),
                   ),
                   child: Text(
                     statusDraft,
-                    style: TextStyle(fontSize: 12,fontWeight: FontWeight.bold, color: statusDraft == "Drafted" ? Colors.blue : Colors.white),
+                    style: TextStyle(
+                        fontSize: 12,
+                        fontWeight: FontWeight.bold,
+                        color: statusDraft == "Drafted"
+                            ? Colors.blue
+                            : Colors.white),
                   ),
                 ),
                 Row(
                   children: [
                     Container(
-                      padding: EdgeInsets.symmetric(vertical: 7, horizontal: 15),
+                      padding:
+                          EdgeInsets.symmetric(vertical: 7, horizontal: 15),
                       decoration: BoxDecoration(
-                          color: statusCheckin ? Colors.white : AppColors.primary,
+                          color:
+                              statusCheckin ? Colors.white : AppColors.primary,
                           borderRadius: BorderRadius.circular(4),
                           gradient: LinearGradient(
                               begin: Alignment.topCenter,
                               end: Alignment.bottomCenter,
-                              colors:
-                              statusCheckin
-                                  ? [
-                                Color(0X9039B5FF),
-                                Color(0X5039B5FF)
-                              ]
-                                  : [
-                                Color(0X905FF95F),
-                                Color(0X501BE86E)
-                              ]
-
-                          )
-                      ),
+                              colors: statusCheckin
+                                  ? [Color(0X9039B5FF), Color(0X5039B5FF)]
+                                  : [Color(0X905FF95F), Color(0X501BE86E)])),
                       child: Text(
                         statusCheckin ? "Check-In" : "Check-Out",
-                        style: TextStyle(fontSize: 12,fontWeight: FontWeight.bold, color: AppColors.primary),
+                        style: TextStyle(
+                            fontSize: 12,
+                            fontWeight: FontWeight.bold,
+                            color: AppColors.primary),
                       ),
                     ),
-                    SizedBox(width: 10,),
+                    SizedBox(
+                      width: 10,
+                    ),
                     ElevatedButton(
                       onPressed: ontap,
                       style: ElevatedButton.styleFrom(
@@ -160,8 +222,6 @@ class ActivityCard extends StatelessWidget {
                         minimumSize: const Size(80, 30),
                         shape: RoundedRectangleBorder(
                             borderRadius: BorderRadius.circular(4)),
-
-
                       ),
                       child: const Text(
                         'Lihat',

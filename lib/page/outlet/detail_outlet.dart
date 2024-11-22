@@ -13,10 +13,6 @@ import '../../widget/clipped_maps.dart';
 class DetailOutlet extends GetView<OutletController> {
   DetailOutlet({super.key, required this.outlet});
   final Outlet outlet;
-  final TextEditingController _controller =
-      TextEditingController(text: "Guardian Setiabudi Building");
-  final LatLng _targetLocation = LatLng(37.7749, -122.4194); // San Francisco
-  late GoogleMapController _controllerMaps;
 
   @override
   Widget build(BuildContext context) {

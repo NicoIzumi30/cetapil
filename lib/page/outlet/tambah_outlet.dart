@@ -304,6 +304,9 @@ class TambahOutlet extends GetView<OutletController> {
               ? CustomDropdown(
                   title: controller.questions[index].question ?? "",
                   items: ["Sudah", "Belum"],
+            value: controller.controllers[index].text.isNotEmpty
+                ? controller.controllers[index].text
+                : null,
                   hint: "-- Pilih salah satu pilihan dibawah ini --",
             onChanged: (value){
               controller.controllers[index].text = value!;

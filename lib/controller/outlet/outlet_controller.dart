@@ -16,6 +16,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_easyloading/flutter_easyloading.dart';
 import 'package:path_provider/path_provider.dart';
 import 'package:uuid/uuid.dart';
+import 'package:path/path.dart' as path;
 
 import '../../page/outlet/tambah_outlet.dart';
 
@@ -39,38 +40,56 @@ class OutletController extends GetxController {
   var controllers = <TextEditingController>[].obs;
   var questions = <FormOutletResponse>[].obs;
 
-
-  setDraftValue(Outlet outlet)async{
-    salesName.value.text = outlet.user!.name!;
+  setDraftValue(Outlet outlet) async {
+    salesName.value.text = outlet.user?.name ?? "";
     outletName.value.text = outlet.name!;
+
     ///city value
+
     outletAddress.value.text = outlet.address!;
     gpsController.longController.value.text = outlet.longitude!;
     gpsController.latController.value.text = outlet.latitude!;
-    outletImages[0] = await base64ToFile(outlet.images![0].image!, outlet.images![0].filename!);
-    outletImages[1] = await base64ToFile(outlet.images![1].image!, outlet.images![1].filename!);
-    outletImages[2] = await base64ToFile(outlet.images![2].image!, outlet.images![2].filename!);
-    for (int i = 0; i < outlet.forms!.length; i++){
-      controllers[i].text = outlet.forms![i].outletForm!.question!;
+    outletImages[0] =  File('${outlet.images![0].image!}');
+    outletImages[1] =  File('${outlet.images![1].image!}');
+    outletImages[2] =  File('${outlet.images![2].image!}');
+    for (int i = 0; i < outlet.forms!.length; i++) {
+      controllers[i].text = outlet.forms![i].answer!;
     }
 
-    Get.to(()=>TambahOutlet());
-
-
+    Get.to(() => TambahOutlet());
   }
 
   Future<File> base64ToFile(String base64String, String fileName) async {
-    Uint8List bytes = base64Decode(base64String);
+    try {
+      // Ensure fileName is not empty
+      if (fileName.isEmpty) {
+        throw Exception('File name cannot be empty');
+      }
 
-    // Get the temporary directory of the device
-    Directory tempDir = await getTemporaryDirectory();
+      // Remove any "data:image/*;base64," prefix if present
+      if (base64String.contains(',')) {
+        base64String = base64String.split(',')[1];
+      }
 
-    // Create a file path with the desired file name
-    String filePath = '${tempDir.path}/$fileName';
+      // Remove any whitespace
+      base64String = base64String.trim();
 
-    // Write the bytes to the file
-    File file = File(filePath);
-    return await file.writeAsBytes(bytes);
+      Uint8List bytes = base64Decode(base64String);
+
+      // Get the temporary directory of the device
+      Directory tempDir = await getTemporaryDirectory();
+
+      // Create a file path with the desired file name
+      String filePath = '${tempDir.path}/$fileName';
+
+      // Create the file and write bytes
+      File file = await File(filePath).create(recursive: true);
+      await file.writeAsBytes(bytes);
+      return file;
+    } catch (e) {
+      print('Error converting base64 to file: $e');
+      throw Exception('Failed to convert base64 to file: $e');
+    }
   }
 
   // City Related
@@ -79,8 +98,11 @@ class OutletController extends GetxController {
   var selectedCity = Rxn<Data>();
 
   // Image Controllers
-  final RxList<File?> outletImages = RxList([null, null, null]); // [frontView, banner, landmark]
+  final RxList<File?> outletImages =
+      RxList([null, null, null]); // [frontView, banner, landmark]
   final RxList<String> imageUrls = RxList(['', '', '']);
+  final RxList<String> imagePath = RxList(['', '', '']);
+  final RxList<String> imageFilename = RxList(['', '', '']);
   final RxList<bool> isImageUploading = RxList([false, false, false]);
 
   @override
@@ -128,7 +150,8 @@ class OutletController extends GetxController {
     try {
       isImageUploading[index] = true;
 
-      final base64Image = await ImageUploadUtils.convertImageToBase64(outletImages[index]!);
+      final base64Image =
+          await ImageUploadUtils.convertImageToBase64(outletImages[index]!);
 
       if (base64Image != null) {
         imageUrls[index] = base64Image;
@@ -161,9 +184,8 @@ class OutletController extends GetxController {
       final localIds = localOutlets.map((o) => o.id).toSet();
       final idsToAdd = apiIds.difference(localIds);
       final idsToUpdate = apiIds.intersection(localIds);
-      final idsToDelete = localIds
-          .difference(apiIds)
-          .where((id) => localOutlets.firstWhere((o) => o.id == id).dataSource == 'API');
+      final idsToDelete = localIds.difference(apiIds).where((id) =>
+          localOutlets.firstWhere((o) => o.id == id).dataSource == 'API');
 
       for (var id in idsToDelete) {
         await db.deleteOutlet(id!);
@@ -254,12 +276,18 @@ class OutletController extends GetxController {
   Future<void> saveDraftOutlet(BuildContext context) async {
     try {
       // if (!validateCity()) return;
-      
-      EasyLoading.show(status: 'Saving draft...');
 
+      EasyLoading.show(status: 'Saving draft...');
+print("file Length = ${outletImages.length}"); /// 3
       for (int i = 0; i < outletImages.length; i++) {
         if (outletImages[i] != null) {
+          // print("path ${outletImages[i]!.path}"); //path /data/user/0/com.example.cetapil_mobile/cache/compressed_1732258007117.jpg
+          // print("name ${path.basename(outletImages[i]!.path)}"); //compressed_1732258007117.jpg
+
           await uploadImage(i);
+          imagePath[i] = outletImages[i]!.path;
+          imageFilename[i] = path.basename(outletImages[i]!.path);
+          print("filepath index ${i}} = ${imagePath[i]}"); /// ada semua
         }
       }
 
@@ -283,17 +311,28 @@ class OutletController extends GetxController {
         'image_banner': imageUrls[1],
         'image_landmark': imageUrls[2],
 
+        // for (int i = 0; i < outletImages.length; i++)
+        'filename_1': imageFilename[0],
+        'filename_2': imageFilename[1],
+        'filename_3': imageFilename[2],
+
+        // for (int i = 0; i < outletImages.length; i++)
+        'image_path_1': imagePath[0],
+        'image_path_2': imagePath[1],
+        'image_path_3': imagePath[2],
+
         for (int i = 0; i < questions.length; i++)
           'form_id_${questions[i].id}': controllers[i].value.text,
 
         'created_at': DateTime.now().toIso8601String(),
         'updated_at': DateTime.now().toIso8601String(),
       };
-
+      print("image path 2 ${imagePath[2]}");/// /data/user/0/com.example.cetapil_mobile/cache/compressed_1732264925659.jpg
       await db.insertOutletWithAnswers(data: data);
       await loadOutlets();
       Get.back();
-      showSuccessAlert(context, "Draft Berhasil Disimpan", "Anda baru menyimpan Draft. Silahkan periksa status Draft pada aplikasi.");
+      showSuccessAlert(context, "Draft Berhasil Disimpan",
+          "Anda baru menyimpan Draft. Silahkan periksa status Draft pada aplikasi.");
 
       clearForm();
     } catch (e) {
@@ -319,11 +358,16 @@ class OutletController extends GetxController {
       controller.clear();
     }
     outletImages.assignAll([null, null, null]);
+    imagePath.assignAll(["", "", ""]);
+    imageFilename.assignAll(["", "", ""]);
     imageUrls.assignAll(['', '', '']);
   }
 
   List<Outlet> get filteredOutlets => outlets.where((outlet) {
-        return outlet.name?.toLowerCase().contains(searchQuery.value.toLowerCase()) ?? false;
+        return outlet.name
+                ?.toLowerCase()
+                .contains(searchQuery.value.toLowerCase()) ??
+            false;
       }).toList();
 
   void updateSearchQuery(String query) {
@@ -334,7 +378,8 @@ class OutletController extends GetxController {
     for (var controller in controllers) {
       controller.dispose();
     }
-    controllers.assignAll(List.generate(questions.length, (index) => TextEditingController()));
+    controllers.assignAll(
+        List.generate(questions.length, (index) => TextEditingController()));
   }
 
   @override

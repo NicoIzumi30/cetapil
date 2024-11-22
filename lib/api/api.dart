@@ -1,5 +1,6 @@
 import 'dart:convert';
 
+import 'package:cetapil_mobile/model/list_routing_response.dart';
 import 'package:cetapil_mobile/model/outlet.dart';
 import 'package:get_storage/get_storage.dart';
 import 'package:http/http.dart' as http;
@@ -114,6 +115,23 @@ class Api {
       return OutletResponse.fromJson(jsonDecode(response.body));
     }
     throw "Gagal request data Outlet : \n${response.body}";
+  }
+
+  static Future<ListRoutingResponse> getRoutingList() async {
+    var url = "$baseUrl/api/routing";
+    var token = await storage.read('token');
+    var response = await http.get(
+      Uri.parse(url),
+      headers: {
+        'Content-type': 'application/json',
+        'Authorization': 'Bearer $token',
+      },
+    );
+    print(response.body);
+    if (response.statusCode == 200) {
+      return ListRoutingResponse.fromJson(jsonDecode(response.body));
+    }
+    throw "Gagal request data Routing : \n${response.body}";
   }
 
 }
