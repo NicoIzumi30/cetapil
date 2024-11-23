@@ -222,32 +222,31 @@ class ClipImage extends StatelessWidget {
     // Convert localhost/127.0.0.1 URLs to your actual development server IP
     // Replace this with your actual development server IP
     return url
-        .replaceAll('http://127.0.0.1:8000', 'https://e15a-36-81-29-70.ngrok-free.app')
-        .replaceAll('http://localhost:8000', 'https://e15a-36-81-29-70.ngrok-free.app');
+        .replaceAll('http://127.0.0.1:8000', 'https://dev-cetaphil.i-am.host')
+        .replaceAll('http://localhost:8000', 'https://dev-cetaphil.i-am.host');
   }
 
-  Future<Widget> imageFile()async{
-    final directory = await getApplicationDocumentsDirectory();
-    final path = '${directory.path}/$url';
-    return Image.file(
-      File(path),
-      errorBuilder: (context, error, stackTrace) {
-        return const Center(child: Text('Error loading image'));
-      },
-    );
-  }
-
-  Future<File> getImageFile() async {
-    final directory = await getApplicationDocumentsDirectory();
-    final path = '${directory.path}$url';
-    return File(path);
-  }
+  // Future<Widget> imageFile()async{
+  //   final directory = await getApplicationDocumentsDirectory();
+  //   final path = '${directory.path}/$url';
+  //   return Image.file(
+  //     File(path),
+  //     errorBuilder: (context, error, stackTrace) {
+  //       return const Center(child: Text('Error loading image'));
+  //     },
+  //   );
+  // }
+  //
+  // Future<File> getImageFile() async {
+  //   final directory = await getApplicationDocumentsDirectory();
+  //   final path = '${directory.path}$url';
+  //   return File(path);
+  // }
 
 
 
   @override
   Widget build(BuildContext context) {
-    print(url);
     return Expanded(
       child: AspectRatio(
         aspectRatio: 1,
@@ -262,68 +261,46 @@ class ClipImage extends StatelessWidget {
           ),
           child: ClipRRect(
             borderRadius: BorderRadius.circular(5),
-            child: FutureBuilder<File>(
-              future: getImageFile(),
-              builder: (context, snapshot) {
-                if (snapshot.connectionState == ConnectionState.waiting) {
-                  return const CircularProgressIndicator();
-                }
+            child:
+            Image.network(
+              _sanitizeUrl(url),
 
-                if (snapshot.hasError || !snapshot.hasData) {
-                  return const Center(child: Text('Image not found'));
-                }
-
-                return Image.file(
-                  snapshot.data!,
-                  fit: BoxFit.cover,
-                  errorBuilder: (context, error, stackTrace) {
-                    print("eror : $error");
-                    return const Center(child: Text('Error loading image'));
-                  },
+              fit: fit,
+              errorBuilder: (context, error, stackTrace) {
+                return Container(
+                  color: Colors.grey[200],
+                  child: Column(
+                    mainAxisAlignment: MainAxisAlignment.center,
+                    children: [
+                      const Icon(
+                        Icons.error_outline,
+                        color: Colors.red,
+                        size: 24,
+                      ),
+                      const SizedBox(height: 8),
+                      Text(
+                        'Image Error',
+                        style: TextStyle(
+                          fontSize: 12,
+                          color: Colors.grey[600],
+                        ),
+                      ),
+                      if (error is NetworkImageLoadException)
+                        Padding(
+                          padding: const EdgeInsets.all(4.0),
+                          child: Text(
+                            'Network Error',
+                            style: TextStyle(
+                              fontSize: 10,
+                              color: Colors.grey[500],
+                            ),
+                          ),
+                        ),
+                    ],
+                  ),
                 );
               },
             ),
-            // Image.file(
-            //   // _sanitizeUrl(url),
-            //
-            //   fit: fit,
-            //   errorBuilder: (context, error, stackTrace) {
-            //     print("error $error");
-            //     print("url : $url");
-            //     return Container(
-            //       color: Colors.grey[200],
-            //       child: Column(
-            //         mainAxisAlignment: MainAxisAlignment.center,
-            //         children: [
-            //           const Icon(
-            //             Icons.error_outline,
-            //             color: Colors.red,
-            //             size: 24,
-            //           ),
-            //           const SizedBox(height: 8),
-            //           Text(
-            //             'Image Error',
-            //             style: TextStyle(
-            //               fontSize: 12,
-            //               color: Colors.grey[600],
-            //             ),
-            //           ),
-            //           if (error is NetworkImageLoadException)
-            //             Padding(
-            //               padding: const EdgeInsets.all(4.0),
-            //               child: Text(
-            //                 'Network Error',
-            //                 style: TextStyle(
-            //                   fontSize: 10,
-            //                   color: Colors.grey[500],
-            //                 ),
-            //               ),
-            //             ),
-            //         ],
-            //       ),
-            //     );
-            //   },
-            // ),
           ),
         ),
       ),
