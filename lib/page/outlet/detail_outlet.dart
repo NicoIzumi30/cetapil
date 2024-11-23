@@ -132,39 +132,34 @@ class DetailOutlet extends GetView<OutletController> {
                           children: List<Widget>.generate(
                             controller.questions.length,
                             (index) {
-                              final question = controller.questions[index];
-
-                              // Find matching form element
-                              final matchingForms = outlet.forms
-                                      ?.where((element) => element.id == question.id)
-                                      .toList() ??
-                                  [];
-
-                              // print("Api question  = ${outlet.forms![index].outletForm!.id!}");
-                              print("Lokal question  = ${controller.questions[index].id}");
-
-                              // int getLokalQuestionIndex(String apiQuestionId) {
-                              //   return controller.questions.indexOf(apiQuestionId);
-                              // }
-                              // print(" get index ${getLokalQuestionIndex(outlet.forms![index].outletForm!.id!)}");
-
-                              // final example = controller.questions.any((question) => question.question == outlet.forms![index].outletForm!.question);
-
+                              final localQuestion = controller.questions[index];
                               String answer = "";
-                             //
-                             // if (controller.questions[index].id == outlet.forms![index].outletForm!.id!) {
-                             //     answer = outlet.forms![index].answer!;
-                             //  }  else{
-                             //    answer = "";
-                             //  }
 
-                              // Get answer value with null safety
-                              // final String answer =
-                              //     matchingForms.isNotEmpty ? matchingForms.first.answer ?? '' : '';
-                              // final String answer =   outlet.forms![index].answer!;
+                              // Method 1: Try to match by index first
+                              if (index < (outlet.forms?.length ?? 0)) {
+                                final apiForm = outlet.forms![index];
+                                if (apiForm.outletForm?.id == localQuestion.id) {
+                                  answer = apiForm.answer ?? "";
+                                }
+                              }
+
+                              // Method 2: If no match by index, search through all forms
+                              if (answer.isEmpty) {
+                                answer = outlet.forms
+                                        ?.firstWhereOrNull(
+                                            (form) => form.outletForm?.id == localQuestion.id)
+                                        ?.answer ??
+                                    "";
+                              }
+
+                              // Debug information
+                              print("\n=== Question $index ===");
+                              print("Local ID: ${localQuestion.id}");
+                              print("Local Question: ${localQuestion.question}");
+                              print("Found Answer: $answer");
 
                               return UnderlineTextField.readOnly(
-                                title: question.question,
+                                title: localQuestion.question,
                                 value: answer,
                               );
                             },
@@ -210,7 +205,6 @@ class ClipImage extends StatelessWidget {
   final double? size;
   final BoxFit fit;
 
-
   const ClipImage({
     super.key,
     required this.url,
@@ -226,24 +220,22 @@ class ClipImage extends StatelessWidget {
         .replaceAll('http://localhost:8000', 'https://dev-cetaphil.i-am.host');
   }
 
-  // Future<Widget> imageFile()async{
-  //   final directory = await getApplicationDocumentsDirectory();
-  //   final path = '${directory.path}/$url';
-  //   return Image.file(
-  //     File(path),
-  //     errorBuilder: (context, error, stackTrace) {
-  //       return const Center(child: Text('Error loading image'));
-  //     },
-  //   );
-  // }
-  //
-  // Future<File> getImageFile() async {
-  //   final directory = await getApplicationDocumentsDirectory();
-  //   final path = '${directory.path}$url';
-  //   return File(path);
-  // }
+  Future<Widget> imageFile() async {
+    final directory = await getApplicationDocumentsDirectory();
+    final path = '${directory.path}/$url';
+    return Image.file(
+      File(path),
+      errorBuilder: (context, error, stackTrace) {
+        return const Center(child: Text('Error loading image'));
+      },
+    );
+  }
 
-
+  Future<File> getImageFile() async {
+    final directory = await getApplicationDocumentsDirectory();
+    final path = '${directory.path}$url';
+    return File(path);
+  }
 
   @override
   Widget build(BuildContext context) {
