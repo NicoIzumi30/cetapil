@@ -3,6 +3,8 @@
 use App\Http\Controllers\Api\Auth\AuthController;
 use App\Http\Controllers\Api\OutletController;
 use App\Http\Controllers\Api\DashboardController;
+use App\Http\Controllers\Api\RoutingController;
+use App\Http\Controllers\Api\SalesActivityController;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Route;
 
@@ -42,8 +44,20 @@ Route::middleware(['auth_api','role:sales'])->group(function () {
         });
     });
     Route::prefix("routing")->group(function () {
-        Route::get('/', [OutletController::class, 'getRouting']);
+        Route::get('/', [RoutingController::class, 'index']);
+        Route::post('/check_in', [RoutingController::class, 'checkIn']);
+        Route::post('/check_out', [RoutingController::class, 'checkOut']);
         Route::get('/detail/{id}', [OutletController::class, 'show']);
+    });
+    Route::prefix("activity")->group(function () {
+        Route::get('/', [SalesActivityController::class, 'getSalesAcitivityList']);
+        Route::get('/product-categories', [SalesActivityController::class, 'categoryList']);
+
+        Route::get('/cities', 'getCityList');
+        Route::get('/outlets', 'getOutletList');
+        Route::get('/visual', 'getVisualTypeList');
+        Route::get('/posm', 'getPosmTypeList');
+
     });
     Route::middleware('permission:menu_outlet')->group(function () {});
 });
