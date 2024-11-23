@@ -155,13 +155,13 @@ class TambahOutlet extends GetView<OutletController> {
                       _buildButton(
                         false,
                         "Save as Draft",
-                        () => controller.saveDraftOutlet(context),
+                        () => controller.saveDraftOutlet(),
                       ),
                       SizedBox(width: 10),
                       _buildButton(
                         true,
                         "Kirim",
-                        () => null,
+                        () => controller.submitApiOutlet(),
                         // controller.submitOutlet(),
                       ),
                     ],

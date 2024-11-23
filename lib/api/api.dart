@@ -2,6 +2,7 @@ import 'dart:convert';
 
 import 'package:cetapil_mobile/model/list_routing_response.dart';
 import 'package:cetapil_mobile/model/outlet.dart';
+import 'package:cetapil_mobile/model/submit_outlet_response.dart';
 import 'package:get_storage/get_storage.dart';
 import 'package:http/http.dart' as http;
 
@@ -134,4 +135,47 @@ class Api {
     throw "Gagal request data Routing : \n${response.body}";
   }
 
+  static Future<SubmitOutletResponse> submitOutlet(Map<String, dynamic> data,List<FormOutletResponse> question) async{
+    var url = "$baseUrl/api/outlet/forms/create-with-forms";
+    var token = await storage.read('token');
+    var request = await http.MultipartRequest('post', Uri.parse(url));
+    request.headers["Content-type"] = 'application/json';
+    request.headers["Authorization"] = 'Bearer $token';
+
+    request.fields["name"] = data["outletName"];
+    request.fields["category"] = data["category"];
+    request.fields["city"] = data["city_name"];
+    request.fields["visit_day"] = data["visit_day"];
+    request.fields["longitude"] = data["longitude"];
+    request.fields["latitude"] = data["latitude"];
+    request.fields["address"] = data["address"];
+    request.fields["cycle"] = data["cycle"];
+    ///Form
+    for(int i = 0; i < question.length; i++){
+      request.fields["forms[$i][id]"] = data["forms[$i][id]"];
+      request.fields["forms[$i][answer]"] = data["forms[$i][answer]"];
+    }
+
+    request.files.add(await http.MultipartFile.fromPath(
+      'img_front',
+      data["image_path_1"],
+    ));
+    request.files.add(await http.MultipartFile.fromPath(
+      'img_banner',
+      data["image_path_2"],
+    ));
+    request.files.add(await http.MultipartFile.fromPath(
+      'img_main_road',
+        data["image_path_3"],
+    ));
+
+    var response = await request.send();
+    var responseJson = await http.Response.fromStream(response);
+    print(response.statusCode);
+    if (response.statusCode == 200) {
+      return SubmitOutletResponse.fromJson(jsonDecode(responseJson.body));
+    } else {
+      throw "Unable to Submit Outlet";
+    }
+  }
 }

@@ -321,7 +321,7 @@ class DatabaseHelper {
     );
 
     return Future.wait(outletMaps.map((outletMap) async {
-      print("Raw outlet data from DB: $outletMap"); // Debug print
+      // print("Raw outlet data from DB: $outletMap"); // Debug print
 
       // Get images for this outlet
       final List<Map<String, dynamic>> imageMaps = await db.query(
@@ -388,7 +388,7 @@ class DatabaseHelper {
             .toList(),
       );
 
-      print("Created outlet object: $outlet"); // Debug print
+      // print("Created outlet object: $outlet"); // Debug print
       return outlet;
     }));
   }

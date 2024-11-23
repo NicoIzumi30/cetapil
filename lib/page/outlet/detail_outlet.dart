@@ -1,3 +1,5 @@
+import 'dart:io';
+
 import 'package:cetapil_mobile/controller/outlet/outlet_controller.dart';
 import 'package:cetapil_mobile/model/outlet.dart';
 import 'package:flutter/material.dart';
@@ -5,6 +7,7 @@ import 'package:flutter_svg/svg.dart';
 import 'package:get/get.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:google_maps_flutter/google_maps_flutter.dart';
+import 'package:path_provider/path_provider.dart';
 
 import '../../utils/colors.dart';
 import '../../widget/back_button.dart';
@@ -137,9 +140,28 @@ class DetailOutlet extends GetView<OutletController> {
                                       .toList() ??
                                   [];
 
+                              // print("Api question  = ${outlet.forms![index].outletForm!.id!}");
+                              print("Lokal question  = ${controller.questions[index].id}");
+
+                              // int getLokalQuestionIndex(String apiQuestionId) {
+                              //   return controller.questions.indexOf(apiQuestionId);
+                              // }
+                              // print(" get index ${getLokalQuestionIndex(outlet.forms![index].outletForm!.id!)}");
+
+                              // final example = controller.questions.any((question) => question.question == outlet.forms![index].outletForm!.question);
+
+                              String answer = "";
+                             //
+                             // if (controller.questions[index].id == outlet.forms![index].outletForm!.id!) {
+                             //     answer = outlet.forms![index].answer!;
+                             //  }  else{
+                             //    answer = "";
+                             //  }
+
                               // Get answer value with null safety
-                              final String answer =
-                                  matchingForms.isNotEmpty ? matchingForms.first.answer ?? '' : '';
+                              // final String answer =
+                              //     matchingForms.isNotEmpty ? matchingForms.first.answer ?? '' : '';
+                              // final String answer =   outlet.forms![index].answer!;
 
                               return UnderlineTextField.readOnly(
                                 title: question.question,
@@ -188,6 +210,7 @@ class ClipImage extends StatelessWidget {
   final double? size;
   final BoxFit fit;
 
+
   const ClipImage({
     super.key,
     required this.url,
@@ -203,8 +226,28 @@ class ClipImage extends StatelessWidget {
         .replaceAll('http://localhost:8000', 'https://e15a-36-81-29-70.ngrok-free.app');
   }
 
+  Future<Widget> imageFile()async{
+    final directory = await getApplicationDocumentsDirectory();
+    final path = '${directory.path}/$url';
+    return Image.file(
+      File(path),
+      errorBuilder: (context, error, stackTrace) {
+        return const Center(child: Text('Error loading image'));
+      },
+    );
+  }
+
+  Future<File> getImageFile() async {
+    final directory = await getApplicationDocumentsDirectory();
+    final path = '${directory.path}$url';
+    return File(path);
+  }
+
+
+
   @override
   Widget build(BuildContext context) {
+    print(url);
     return Expanded(
       child: AspectRatio(
         aspectRatio: 1,
@@ -219,69 +262,68 @@ class ClipImage extends StatelessWidget {
           ),
           child: ClipRRect(
             borderRadius: BorderRadius.circular(5),
-            child: Image.network(
-              _sanitizeUrl(url),
-              fit: fit,
-              loadingBuilder: (context, child, loadingProgress) {
-                if (loadingProgress == null) return child;
+            child: FutureBuilder<File>(
+              future: getImageFile(),
+              builder: (context, snapshot) {
+                if (snapshot.connectionState == ConnectionState.waiting) {
+                  return const CircularProgressIndicator();
+                }
 
-                return Center(
-                  child: Column(
-                    mainAxisSize: MainAxisSize.min,
-                    children: [
-                      CircularProgressIndicator(
-                        value: loadingProgress.expectedTotalBytes != null
-                            ? loadingProgress.cumulativeBytesLoaded /
-                                loadingProgress.expectedTotalBytes!
-                            : null,
-                      ),
-                      if (loadingProgress.expectedTotalBytes != null)
-                        Padding(
-                          padding: const EdgeInsets.only(top: 8.0),
-                          child: Text(
-                            '${((loadingProgress.cumulativeBytesLoaded / loadingProgress.expectedTotalBytes!) * 100).toStringAsFixed(0)}%',
-                            style: const TextStyle(fontSize: 12),
-                          ),
-                        ),
-                    ],
-                  ),
-                );
-              },
-              errorBuilder: (context, error, stackTrace) {
-                return Container(
-                  color: Colors.grey[200],
-                  child: Column(
-                    mainAxisAlignment: MainAxisAlignment.center,
-                    children: [
-                      const Icon(
-                        Icons.error_outline,
-                        color: Colors.red,
-                        size: 24,
-                      ),
-                      const SizedBox(height: 8),
-                      Text(
-                        'Image Error',
-                        style: TextStyle(
-                          fontSize: 12,
-                          color: Colors.grey[600],
-                        ),
-                      ),
-                      if (error is NetworkImageLoadException)
-                        Padding(
-                          padding: const EdgeInsets.all(4.0),
-                          child: Text(
-                            'Network Error',
-                            style: TextStyle(
-                              fontSize: 10,
-                              color: Colors.grey[500],
-                            ),
-                          ),
-                        ),
-                    ],
-                  ),
+                if (snapshot.hasError || !snapshot.hasData) {
+                  return const Center(child: Text('Image not found'));
+                }
+
+                return Image.file(
+                  snapshot.data!,
+                  fit: BoxFit.cover,
+                  errorBuilder: (context, error, stackTrace) {
+                    print("eror : $error");
+                    return const Center(child: Text('Error loading image'));
+                  },
                 );
               },
             ),
+            // Image.file(
+            //   // _sanitizeUrl(url),
+            //
+            //   fit: fit,
+            //   errorBuilder: (context, error, stackTrace) {
+            //     print("error $error");
+            //     print("url : $url");
+            //     return Container(
+            //       color: Colors.grey[200],
+            //       child: Column(
+            //         mainAxisAlignment: MainAxisAlignment.center,
+            //         children: [
+            //           const Icon(
+            //             Icons.error_outline,
+            //             color: Colors.red,
+            //             size: 24,
+            //           ),
+            //           const SizedBox(height: 8),
+            //           Text(
+            //             'Image Error',
+            //             style: TextStyle(
+            //               fontSize: 12,
+            //               color: Colors.grey[600],
+            //             ),
+            //           ),
+            //           if (error is NetworkImageLoadException)
+            //             Padding(
+            //               padding: const EdgeInsets.all(4.0),
+            //               child: Text(
+            //                 'Network Error',
+            //                 style: TextStyle(
+            //                   fontSize: 10,
+            //                   color: Colors.grey[500],
+            //                 ),
+            //               ),
+            //             ),
+            //         ],
+            //       ),
+            //     );
+            //   },
+            // ),
           ),
         ),
       ),

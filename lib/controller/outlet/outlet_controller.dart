@@ -366,7 +366,7 @@ class OutletController extends GetxController {
     }
   }
 
-  Future<void> saveDraftOutlet(BuildContext context) async {
+  Future<void> saveDraftOutlet() async {
     try {
       EasyLoading.show(status: 'Saving draft...');
 
@@ -423,6 +423,7 @@ class OutletController extends GetxController {
       clearForm();
 
       // Navigate back first
+      EasyLoading.dismiss();
       Get.back();
 
       // Then show the success alert
@@ -437,6 +438,63 @@ class OutletController extends GetxController {
       Get.snackbar(
         'Error',
         'Failed to save draft: $e',
+        snackPosition: SnackPosition.BOTTOM,
+      );
+    } finally {
+      EasyLoading.dismiss();
+    }
+  }
+
+  Future<void> submitApiOutlet() async{
+    try{
+      final String? currentOutletId = Get.arguments?['id'];
+      final bool isEditing = currentOutletId != null;
+      EasyLoading.show(status: 'Submit Data...');
+      for (int i = 0; i < outletImages.length; i++) {
+        if (outletImages[i] != null) {
+          await uploadImage(i);
+          imagePath[i] = outletImages[i]!.path;
+        }
+      }
+      final data = {
+        'outletName': outletName.value.text,
+        'category': selectedCategory.value,
+        'city_name': cityName.value.isEmpty ? "" : cityName.value,
+        'visit_day': DateTime.now().weekday.toString(),
+        'longitude': gpsController.longController.value.text,
+        'latitude': gpsController.latController.value.text,
+        'address': outletAddress.value.text,
+        'cycle': "1x1",
+        'image_path_1': imagePath[0],
+        'image_path_2': imagePath[1],
+        'image_path_3': imagePath[2],
+
+        for (int i = 0; i < questions.length; i++)
+          'forms[$i][id]': questions[i].id,
+
+        for (int i = 0; i < questions.length; i++)
+          'forms[$i][answer]': controllers[i].value.text,
+      };
+      final response = await Api.submitOutlet(data,questions);
+
+      if (response.status != "OK") {
+        throw Exception('Failed to get outlets from API');
+      }
+      await refreshOutlets();
+      isEditing ? await db.deleteOutlet(currentOutletId) : null;
+      clearForm();
+      Get.back();
+
+      showSuccessAlert(
+          Get.context!, // Use Get.context instead of the previous context
+          "Data Berhasil Disimpan",
+          "Anda baru menyimpan Data. Silahkan periksa status Outlet pada aplikasi.");
+
+    }catch (e) {
+      print('Error submit data: $e');
+      Get.snackbar(
+        'Error',
+        'Failed to submit data: $e',
         snackPosition: SnackPosition.BOTTOM,
       );
     } finally {
