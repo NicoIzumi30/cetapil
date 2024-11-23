@@ -30,39 +30,77 @@
                         </x-button.info>
 				</x:slot:footer>
 			</x-modal>
-            {{-- <x-button.info onclick="openModal('add-posm')">Tambah Jenis POSM</x-button.info>
+            <x-button.info onclick="openModal('add-posm')">Tambah Jenis POSM</x-button.info>
 			<x-modal id="add-posm">
 				<x:slot:title>Tambah Jenis POSM</x:slot:title>
-				<form class="w-full">
-					<div>
-						<label for="posm" class="!text-black">Jenis POSM</label>
-						<input id="posm" class="form-control" wire:model="posm" name="posm"
-							placeholder="Masukan Nama Jenis POSM" aria-describedby="posm" value="">
-						@error('posm')
-							<div class="invalid-feedback">
-								{{ $message }}
-							</div>
-						@enderror
-					</div>
-				</form>
+				<form class="w-full" id="createPosmForm">
+                    @csrf
+                    <div>
+                        <label for="posm_name" class="!text-black">Jenis POSM</label>
+                        <input id="posm_name" class="form-control" name="posm_name"
+                            placeholder="Masukan Nama Jenis POSM" aria-describedby="posm_name" value="">
+                        <span id="posm_name-error" class="text-red-500 text-xs hidden"></span>
+                    </div>
+                </form>
 				<x:slot:footer>
-					<x-button.info class="w-full">Konfirmasi</x-button.info>
+                    <x-button.info type="submit" id="savePosmBtn" class="w-full">
+                        <span id="savePosmBtnText">Konfirmasi</span>
+                        <span id="savePosmBtnLoading" class="hidden">Menyimpan...</span>
+                    </x-button.info>
 				</x:slot:footer>
-			</x-modal> --}}
-            <x-button.info>Unggah Secara Bulk</x-button.info>
+			</x-modal>
+            <x-button.info onclick="openModal('unggah-visibility-bulk')">Unggah Secara Bulk</x-button.info>
+                <x-modal id="unggah-visibility-bulk">
+                    <div class="flex flex-col items-center w-full">
+                        <div class="relative w-full mx-3">
+                            {{-- Upload Area --}}
+                            <div class="cursor-pointer w-full h-[300px] text-center grid place-items-center rounded-md border-2 border-dashed border-blue-400 bg-[#EFF9FF]rounded-lg p-4"
+                                id="upload-area">
+                                <div id="upload-helptext" class="flex flex-col items-center text-center">
+                                    <svg width="30" height="63" viewBox="0 0 64 63" fill="none"
+                                        xmlns="http://www.w3.org/2000/svg">
+                                        <path
+                                            d="M28 43.2577C28 45.4323 29.7909 47.1952 32 47.1952C34.2091 47.1952 36 45.4323 36 43.2577V15.074L48.971 27.8423L54.6279 22.2739L32.0005 0L9.37305 22.2739L15.0299 27.8423L28 15.0749V43.2577Z"
+                                            fill="#39B5FF" />
+                                        <path
+                                            d="M0 39.375H8V55.125H56V39.375H64V55.125C64 59.4742 60.4183 63 56 63H8C3.58172 63 0 59.4742 0 55.125V39.375Z"
+                                            fill="#39B5FF" />
+                                    </svg>
+                                    <h5 class="text-primary font-medium mt-2">Tarik atau klik disini untuk mulai unggah
+                                        dokumen berformat CSV/XLS</h5>
+                                    <p class="text-primary font-light text-sm">
+                                        Ukuran maksimal file <strong>5MB</strong>
+                                    </p>
+                                </div>
+                                <p class="hidden text-primary font-bold text-xl" id="filename-display"></p>
+                            </div>
+                            {{-- Hidden File Input --}}
+                            <input type="file" name="file_upload" id="file_upload" class="hidden">
+                        </div>
+                    </div>
+                    <x-slot:footer>
+                        <div class="flex gap-4">
+                            <x-button.light onclick="closeModal('unggah-visibility-bulk')"
+                                class="w-full border rounded-md ">Batalkan</x-button.light>
+                            <x-button.light class="w-full !text-white !bg-primary ">Mulai Unggah</x-button.light>
+                            <x-button.light class="w-full !text-white !bg-primary ">Download Template</x-button.light>
+                        </div>
+                    </x-slot:footer>
+                </x-modal>
         </x-slot:cardAction>
 
+        <form id="createVisibilityForm" enctype="multipart/form-data">
+            @csrf
         <div class="grid grid-cols-2 gap-6">
             <div>
                 <label for="states-option">Kabupaten/Kota</label>
-                <select id="states-option" name="states-option" class=" w-full">
-                    <option value="" selected disabled>
-                        -- Pilih Kabupaten/Kota--
-                    </option>
-                    <option value="cleanser">
-                        Sumatra
-                    </option>
+                <select id="states-option" name="city_id" class="w-full">
+                    <option value="" selected disabled>-- Pilih Kabupaten/Kota--</option>
+                    @foreach($cities as $city)
+                        <option value="{{ $city->id }}">{{ $city->name }}</option>
+                    @endforeach
                 </select>
+                <span id="city_id-error" class="text-red-500 text-xs hidden"></span>
             </div>
             <div>
                 <label for="outlet-name">Nama Outlet</label>
@@ -77,21 +115,21 @@
             </div>
             <div>
                 <label for="category">Kategori Produk</label>
-                <select id="category" name="category" class=" w-full">
-                    <option value="" selected disabled>
-                        -- Pilih Kategori Produk--
-                    </option>
-                    <option value="cleanser">
-                        Sumaju
-                    </option>
+                <select id="category" name="category_id" class="w-full">
+                    <option value="" selected disabled>-- Pilih Kategori Produk--</option>
+                    @foreach($categories as $category)
+                        <option value="{{ $category->id }}">{{ $category->name }}</option>
+                    @endforeach
                 </select>
+                <span id="category_id-error" class="text-red-500 text-xs hidden"></span>
             </div>
             <div>
                 <label for="sku">Produk SKU</label>
                 <select id="sku" name="sku" class=" w-full">
-                    <option value="" selected disabled>
-                        -- Pilih Produk SKU --
-                    </option>
+                    <option value="" selected disabled>-- Pilih Kategori Produk--</option>
+                    @foreach($categories as $category)
+                        <option value="{{ $category->id }}">{{ $category->name }}</option>
+                    @endforeach
                     <option value="cleanser">
                         Sumaju
                     </option>
@@ -101,7 +139,7 @@
                 <label for="program-date">Jangka Waktu Program</label>
                 <input id="program-date" type="text" value="-- Pilih Tanggal dan Waktu Kunjungan" name="program-date"
                     class="form-control w-full appearance-none" />
-                <i class="absolute top-10 right-6">
+                <i class="absolute top-10 right-6 pointer-events-none">
                     <svg width="19" height="25" viewBox="0 0 19 25" fill="none"
                         xmlns="http://www.w3.org/2000/svg">
                         <path
@@ -119,10 +157,10 @@
                 </i>
             </div>
             <div>
-                <label for="visual-campaign">Kategori Produk</label>
+                <label for="visual-campaign">Visual/Campaign</label>
                 <select id="visual-campaign" name="visual-campaign" class="w-full">
                     <option value="" selected disabled>
-                        -- Pilih Kategori Produk --
+                        -- Pilih Visibility/Campaign --
                     </option>
                     <option value="cleanser">
                         Sumaju
@@ -161,14 +199,14 @@
 								<h5 class="text-white font-bold text-xl mt-2">Tarik atau klik disini untuk mulai mengunggah gambar banner program</h5>
 								<p class="text-white font-light text-sm">
 									Ukuran maksimal foto <strong class="font-bold"> 5 MB</strong>
-									dengan dimensi <strong class="font-bold">728 x 90 </strong> Pixel 
+									dengan dimensi <strong class="font-bold">728 x 90 </strong> Pixel
 								</p>
 							</div>
 						</div>
-			
+
 						{{-- Preview Container --}}
 						<div id="preview-container-banner" class="hidden w-full relative">
-							<img id="preview-image-banner" src="/" alt="Preview" 
+							<img id="preview-image-banner" src="/" alt="Preview"
 								class="w-full h-[260px] mx-auto rounded-lg object-cover" />
 							<button type="button"
 								class="absolute bottom-2 right-2 bg-white p-2 rounded-full shadow-md hover:bg-gray-100 transition-colors"
@@ -182,7 +220,7 @@
 							</button>
 						</div>
 					</div>
-			
+
 					{{-- Hidden File Input --}}
 					<input type="file" name="banner" id="img_banner" class="hidden"
 						accept="image/png, image/jpeg" onchange="previewImage(this, 'banner', 5)">
@@ -190,7 +228,7 @@
 			</div>
         </x-section-card>
 		<x-button.info class="w-full mt-20 !text-xl">Konfirmasi</x-button.info>
-
+    </form>
     </x-card>
 @endsection
 
@@ -237,6 +275,261 @@
                 });
             });
         });
-      
+
+    </script>
+@endpush
+
+@push('scripts')
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            const uploadArea = document.getElementById('upload-area');
+            const fileInput = document.getElementById('file_upload');
+            const displayFileName = document.getElementById('filename-display');
+            const uploadHelptext = document.getElementById('upload-helptext');
+            const maxFileSize = 5 * 1024 * 1024;
+
+            // Click handler for the upload area
+            uploadArea.addEventListener('click', () => {
+                fileInput.click();
+            });
+
+            // Drag and drop handlers
+            uploadArea.addEventListener('dragover', (e) => {
+                e.preventDefault();
+                uploadArea.classList.add('drag-over');
+            });
+
+            uploadArea.addEventListener('dragleave', (e) => {
+                e.preventDefault();
+                uploadArea.classList.remove('drag-over');
+            });
+
+            uploadArea.addEventListener('drop', (e) => {
+                e.preventDefault();
+                uploadArea.classList.remove('drag-over');
+
+                const files = e.dataTransfer.files;
+                handleFiles(files);
+            });
+
+            fileInput.addEventListener('change', (e) => {
+                handleFiles(e.target.files);
+            });
+
+            function handleFiles(files) {
+                if (files.length === 0) return;
+
+                const file = files[0];
+
+                const validTypes = [
+                    'text/csv',
+                    'application/vnd.ms-excel',
+                    'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet'
+                ];
+
+                if (!validTypes.includes(file.type)) {
+                    alert('Upload file gagal, Tolong Unggah Hanya file berformat .csv/xls');
+                    fileInput.value = '';
+                    return;
+                }
+
+                if (file.size > maxFileSize) {
+                    alert('Upload file gagal, Ukuran file lebih dari 5 MB');
+                    fileInput.value = '';
+                    return;
+                }
+
+                if (file.size > maxFileSize && file.size > maxFileSize) {
+                    return
+                }
+
+                console.log(file.name);
+
+                const reader = new FileReader();
+                reader.onload = function(e) {
+                    displayFileName.classList.remove('hidden')
+                    uploadHelptext.classList.add('hidden')
+                    displayFileName.innerText = file.name
+                };
+                reader.readAsText(file);
+            }
+        });
+    </script>
+@endpush
+
+@push('scripts')
+<script>
+    $(document).ready(function() {
+        // Handle Visual Type Form Submission
+        $('#saveBtn').click(function () {
+            $('.text-red-500').addClass('hidden');
+            $('input').removeClass('border-red-500');
+            toggleLoading(true, 'save');
+
+            $.ajax({
+                type: 'POST',
+                url: '{{ route('visual.store') }}',
+                data: $('#createVisualForm').serialize(),
+                success: function (response) {
+                    toggleLoading(false, 'save');
+                    if (response.status === 'success') {
+                        closeModal('add-visual');
+                        toast('success', response.message, 150);
+                        setTimeout(() => {
+                            window.location.reload();
+                        }, 1500);
+                    }
+                },
+                error: function (xhr) {
+                    toggleLoading(false, 'save');
+                    if (xhr.status === 422) {
+                        const errors = xhr.responseJSON.errors;
+                        $.each(errors, function (key, value) {
+                            $(`#${key}-error`)
+                                .text(value[0])
+                                .removeClass('hidden');
+                            $(`[name="${key}"]`).addClass('border-red-500');
+                        });
+                    }
+                }
+            });
+        });
+
+        // Handle POSM Type Form Submission
+        $('#savePosmBtn').click(function () {
+            $('.text-red-500').addClass('hidden');
+            $('input').removeClass('border-red-500');
+            toggleLoading(true, 'savePosm');
+            $.ajax({
+                type: 'POST',
+                url: '{{ route('posm.store') }}',
+                data: $('#createPosmForm').serialize(),
+                success: function (response) {
+                    toggleLoading(false, 'savePosm');
+                    if (response.status === 'success') {
+                        closeModal('add-posm');
+                        toast('success', response.message, 150);
+                        setTimeout(() => {
+                            window.location.reload();
+                        }, 1500);
+                    }
+                },
+                error: function (xhr) {
+                    toggleLoading(false, 'savePosm');
+                    if (xhr.status === 422) {
+                        const errors = xhr.responseJSON.errors;
+                        $.each(errors, function (key, value) {
+                            $(`#posm-${key}-error`)
+                                .text(value[0])
+                                .removeClass('hidden');
+                            $(`[name="${key}"]`).addClass('border-red-500');
+                        });
+                    }
+                }
+            });
+        });
+    });
+    </script>
+@endpush
+
+@push('scripts')
+<script>
+    $(document).ready(function() {
+        // Initialize selects
+        $("#states-option").select2();
+        $("#category").select2();
+        $("#sku").select2();
+        $("#visual-campaign").select2();
+        $("#posm").select2();
+
+        // Initialize datepicker
+        $("#program-date").flatpickr({
+            dateFormat: "Y-m-d"
+        });
+
+        // Handle category change to load products
+        $('#category').change(function() {
+            const categoryId = $(this).val();
+            if (categoryId) {
+                $.ajax({
+                    url: `/visibility/products/${categoryId}`,
+                    type: 'GET',
+                    success: function(data) {
+                        $('#sku').empty();
+                        $('#sku').append('<option value="" selected disabled>-- Pilih Produk SKU --</option>');
+                        data.forEach(function(product) {
+                            $('#sku').append(`<option value="${product.id}">${product.sku}</option>`);
+                        });
+                    },
+                    error: function(xhr) {
+                        toast('error', 'Gagal memuat data produk', 200);
+                    }
+                });
+            }
+        });
+
+        // Handle banner image upload preview
+        function previewImage(input) {
+            if (input.files && input.files[0]) {
+                const reader = new FileReader();
+                reader.onload = function(e) {
+                    $('#preview-image-banner').attr('src', e.target.result);
+                    $('#preview-container-banner').removeClass('hidden');
+                    $('#upload-area-banner').addClass('hidden');
+                }
+                reader.readAsDataURL(input.files[0]);
+            }
+        }
+
+        $('#img_banner').change(function() {
+            previewImage(this);
+        });
+
+        // Handle form submission
+        $('form').on('submit', function(e) {
+            e.preventDefault();
+
+            const formData = new FormData(this);
+
+            // Show loading
+            $('#saveBtn').prop('disabled', true);
+            $('#saveBtnText').addClass('hidden');
+            $('#saveBtnLoading').removeClass('hidden');
+
+            $.ajax({
+                url: '{{ route("visibility.store") }}',
+                type: 'POST',
+                data: formData,
+                processData: false,
+                contentType: false,
+                success: function(response) {
+                    if (response.status === 'success') {
+                        toast('success', response.message, 150);
+                        setTimeout(() => {
+                            window.location.href = '{{ route("visibility.index") }}';
+                        }, 1500);
+                    }
+                },
+                error: function(xhr) {
+                    if (xhr.status === 422) {
+                        const errors = xhr.responseJSON.errors;
+                        $.each(errors, function(key, value) {
+                            $(`#${key}-error`)
+                                .text(value[0])
+                                .removeClass('hidden');
+                            $(`[name="${key}"]`).addClass('border-red-500');
+                        });
+                    } else {
+                        toast('error', 'Terjadi kesalahan saat menyimpan data', 200);
+                    }
+                },
+                complete: function() {
+                    $('#saveBtn').prop('disabled', false);
+                    $('#saveBtnText').removeClass('hidden');
+                    $('#saveBtnLoading').addClass('hidden');
+                }
+            });
+        });
+    });
     </script>
 @endpush

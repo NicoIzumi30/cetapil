@@ -9,10 +9,10 @@
         <x-slot:cardTitle>
             Daftar Request NOO
         </x-slot:cardTitle>
-		<table id="request-table" class="table">
+        <table id="request-table" class="table">
             <thead>
                 <tr>
-					<th scope="col" class="text-center">
+                    <th scope="col" class="text-center">
                         <a class="table-head">
                             {{ __('Nama Outlet') }}
                             <x-icons.sort />
@@ -65,8 +65,8 @@
                     </td>
                     <td scope="row" class="table-data">
                         <div class="rounded-full py-2 px-4 font-bold w-fit bg-blue-400">
-							New Request 
-						</div>
+                            New Request
+                        </div>
                     </td>
                     <td class="table-data">
                         <x-action-table-dropdown>
@@ -83,7 +83,7 @@
                 </tr>
             </tbody>
         </table>
-        </x-card>
+    </x-card>
 @endsection
 
 @push('scripts')
@@ -92,7 +92,7 @@
             $("#sales-date-range").flatpickr({
                 mode: "range"
             });
-			$('#request-table').DataTable({
+            $('#request-table').DataTable({
                 paging: true,
                 searching: false,
                 info: true,

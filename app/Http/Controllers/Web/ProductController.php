@@ -74,7 +74,7 @@ class ProductController extends Controller
 
     public function edit(Product $product)
     {
-        $product->load('category'); 
+        $product->load('category');
         return response()->json([
             'id' => $product->id,
             'category_id' => $product->category_id,
@@ -146,14 +146,12 @@ class ProductController extends Controller
                 'message' => 'AV3M berhasil diperbarui',
                 'data' => $savedAv3m
             ], 200);
-
         } catch (ValidationException $e) {
             return response()->json([
                 'status' => 'error',
                 'message' => 'Validasi gagal',
                 'errors' => $e->errors()
             ], 422);
-
         } catch (\Exception $e) {
             return response()->json([
                 'status' => 'error',
@@ -171,24 +169,25 @@ class ProductController extends Controller
         return abort(404, 'File tidak ditemukan');
     }
     public function bulk(Request $request)
-{
-    $request->validate([
-        'excel_file' => 'required|mimes:xlsx|max:10240'
-    ]);
+    {
+        $request->validate([
+            'excel_file' => 'required|mimes:xlsx|max:10240'
+        ]);
 
-    try {
-        $file = $request->file('excel_file');
-        $fileName = $file->getClientOriginalName();
-        $import = new ProductImport($fileName);
-        Excel::import($import, $file);
-        
-        if ($import->response['status'] == 'error') {
-            throw new Exception($import->response['message']);
+        try {
+            $file = $request->file('excel_file');
+            $fileName = $file->getClientOriginalName();
+            $import = new ProductImport($fileName);
+            Excel::import($import, $file);
+
+            if ($import->response['status'] == 'error') {
+                throw new Exception($import->response['message']);
+            }
+
+            return response()->json(['message' => 'Import success'], 200);
+        } catch (\Exception $e) {
+            return response()->json(['message' => $e->getMessage()], 500);
         }
-
-        return response()->json(['message' => 'Import success'], 200);
-    } catch (\Exception $e) {
-        return response()->json(['message' => $e->getMessage()], 500);
     }
 
     public function downloadExcel()
@@ -202,7 +201,7 @@ class ProductController extends Controller
                 'file' => $e->getFile(),
                 'line' => $e->getLine()
             ]);
-            
+
             return response()->json([
                 'status' => 'error',
                 'message' => 'Gagal membuat file Excel: ' . $e->getMessage()
@@ -214,7 +213,7 @@ class ProductController extends Controller
     {
         try {
             $path = storage_path('app/temp/' . $filename);
-            
+
             if (!file_exists($path)) {
                 throw new \Exception('File tidak ditemukan di path: ' . $path);
             }
@@ -222,7 +221,6 @@ class ProductController extends Controller
             return response()->download($path, $filename, [
                 'Content-Type' => 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet',
             ])->deleteFileAfterSend(true);
-
         } catch (\Exception $e) {
             Log::error('Excel Download Error: ' . $e->getMessage(), [
                 'file' => $e->getFile(),
@@ -230,12 +228,11 @@ class ProductController extends Controller
                 'filename' => $filename,
                 'path' => $path ?? null
             ]);
-            
+
             return response()->json([
                 'status' => 'error',
                 'message' => 'Gagal mengunduh file: ' . $e->getMessage()
             ], 500);
         }
     }
-}
 }
