@@ -1,5 +1,6 @@
 import 'dart:io';
 
+import 'package:cetapil_mobile/controller/login_controller.dart';
 import 'package:cetapil_mobile/controller/outlet/outlet_controller.dart';
 import 'package:cetapil_mobile/model/outlet.dart';
 import 'package:flutter/material.dart';
@@ -152,12 +153,6 @@ class DetailOutlet extends GetView<OutletController> {
                                     "";
                               }
 
-                              // Debug information
-                              print("\n=== Question $index ===");
-                              print("Local ID: ${localQuestion.id}");
-                              print("Local Question: ${localQuestion.question}");
-                              print("Found Answer: $answer");
-
                               return UnderlineTextField.readOnly(
                                 title: localQuestion.question,
                                 value: answer,
@@ -215,9 +210,7 @@ class ClipImage extends StatelessWidget {
   String _sanitizeUrl(String url) {
     // Convert localhost/127.0.0.1 URLs to your actual development server IP
     // Replace this with your actual development server IP
-    return url
-        .replaceAll('http://127.0.0.1:8000', 'https://dev-cetaphil.i-am.host')
-        .replaceAll('http://localhost:8000', 'https://dev-cetaphil.i-am.host');
+    return "https://dev-cetaphil.i-am.host${url}";
   }
 
   Future<Widget> imageFile() async {
@@ -253,12 +246,11 @@ class ClipImage extends StatelessWidget {
           ),
           child: ClipRRect(
             borderRadius: BorderRadius.circular(5),
-            child:
-            Image.network(
+            child: Image.network(
               _sanitizeUrl(url),
-
               fit: fit,
               errorBuilder: (context, error, stackTrace) {
+                print('Image Error: $error');
                 return Container(
                   color: Colors.grey[200],
                   child: Column(
