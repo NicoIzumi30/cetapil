@@ -25,6 +25,17 @@
             <x-button.info onclick="openModal('upload-product-knowledge')">Upload Product knowledge</x-button.info>
             <x-modal id="upload-product-knowledge">
                 <x-slot:title>Upload Product Knowledge</x-slot:title>
+				<div class="mb-6">
+					<label for="channel" class="!text-black">Channel</label>
+					<select id="channel" name="channel" class=" w-full">
+						<option value="" selected disabled>
+							-- Pilih Channel --
+						</option>
+						<option value="channel1">
+							Channel 1
+						</option>
+					</select>
+				</div>
                <div class="flex gap-4 w-full">
 				<div class="w-full">
                     <label for="pamflet_file" class="!text-black">
@@ -267,6 +278,9 @@
             $("#sales-date-range").flatpickr({
                 mode: "range"
             });
+			$('#channel').select2({
+				minimumResultsForSearch: Infinity
+			});
         });
     </script>
 @endpush
