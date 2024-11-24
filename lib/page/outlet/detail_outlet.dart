@@ -1,5 +1,6 @@
 import 'dart:io';
 
+import 'package:cetapil_mobile/controller/login_controller.dart';
 import 'package:cetapil_mobile/controller/outlet/outlet_controller.dart';
 import 'package:cetapil_mobile/model/outlet.dart';
 import 'package:flutter/material.dart';
@@ -132,39 +133,28 @@ class DetailOutlet extends GetView<OutletController> {
                           children: List<Widget>.generate(
                             controller.questions.length,
                             (index) {
-                              final question = controller.questions[index];
-
-                              // Find matching form element
-                              final matchingForms = outlet.forms
-                                      ?.where((element) => element.id == question.id)
-                                      .toList() ??
-                                  [];
-
-                              // print("Api question  = ${outlet.forms![index].outletForm!.id!}");
-                              print("Lokal question  = ${controller.questions[index].id}");
-
-                              // int getLokalQuestionIndex(String apiQuestionId) {
-                              //   return controller.questions.indexOf(apiQuestionId);
-                              // }
-                              // print(" get index ${getLokalQuestionIndex(outlet.forms![index].outletForm!.id!)}");
-
-                              // final example = controller.questions.any((question) => question.question == outlet.forms![index].outletForm!.question);
-
+                              final localQuestion = controller.questions[index];
                               String answer = "";
-                             //
-                             // if (controller.questions[index].id == outlet.forms![index].outletForm!.id!) {
-                             //     answer = outlet.forms![index].answer!;
-                             //  }  else{
-                             //    answer = "";
-                             //  }
 
-                              // Get answer value with null safety
-                              // final String answer =
-                              //     matchingForms.isNotEmpty ? matchingForms.first.answer ?? '' : '';
-                              // final String answer =   outlet.forms![index].answer!;
+                              // Method 1: Try to match by index first
+                              if (index < (outlet.forms?.length ?? 0)) {
+                                final apiForm = outlet.forms![index];
+                                if (apiForm.outletForm?.id == localQuestion.id) {
+                                  answer = apiForm.answer ?? "";
+                                }
+                              }
+
+                              // Method 2: If no match by index, search through all forms
+                              if (answer.isEmpty) {
+                                answer = outlet.forms
+                                        ?.firstWhereOrNull(
+                                            (form) => form.outletForm?.id == localQuestion.id)
+                                        ?.answer ??
+                                    "";
+                              }
 
                               return UnderlineTextField.readOnly(
-                                title: question.question,
+                                title: localQuestion.question,
                                 value: answer,
                               );
                             },
@@ -221,27 +211,19 @@ class ClipImage extends StatelessWidget {
   String _sanitizeUrl(String url) {
     // Convert localhost/127.0.0.1 URLs to your actual development server IP
     // Replace this with your actual development server IP
-    return url
-        .replaceAll('http://127.0.0.1:8000', 'https://dev-cetaphil.i-am.host')
-        .replaceAll('http://localhost:8000', 'https://dev-cetaphil.i-am.host');
+    return "https://dev-cetaphil.i-am.host${url}";
   }
 
-  // Future<Widget> imageFile()async{
-  //   final directory = await getApplicationDocumentsDirectory();
-  //   final path = '${directory.path}/$url';
-  //   return Image.file(
-  //     File(path),
-  //     errorBuilder: (context, error, stackTrace) {
-  //       return const Center(child: Text('Error loading image'));
-  //     },
-  //   );
-  // }
-  //
-  // Future<File> getImageFile() async {
-  //   final directory = await getApplicationDocumentsDirectory();
-  //   final path = '${directory.path}$url';
-  //   return File(path);
-  // }
+  Future<Widget> imageFile() async {
+    final directory = await getApplicationDocumentsDirectory();
+    final path = '${directory.path}/$url';
+    return Image.file(
+      File(path),
+      errorBuilder: (context, error, stackTrace) {
+        return const Center(child: Text('Error loading image'));
+      },
+    );
+  }
 
 
 
@@ -261,13 +243,11 @@ class ClipImage extends StatelessWidget {
           ),
           child: ClipRRect(
             borderRadius: BorderRadius.circular(5),
-            child:
-            Image.network(
-              // _sanitizeUrl(url),
-"https://dev-cetaphil.i-am.host$url",
+            child: Image.network(
+              _sanitizeUrl(url),
               fit: fit,
               errorBuilder: (context, error, stackTrace) {
-  print("error $error");
+                print('Image Error: $error');
                 return Container(
                   color: Colors.grey[200],
                   child: Column(
