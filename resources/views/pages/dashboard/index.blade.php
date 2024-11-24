@@ -22,39 +22,42 @@
 @endsection
 
 @section('dashboard-content')
-    <main class="w-full">
-        <div class="flex w-full gap-5 p-6">
-            <x-pages.dashboard.total-card :title="'Total Report'" :total="7.432" />
-            <x-pages.dashboard.total-card :title="'Total Sales'" :total="7.432" />
-            <x-pages.dashboard.total-card :title="'Total Routing'" :total="7.432" />
-            <x-pages.dashboard.total-card :title="'Total Visibility'" :total="7.432" />
+    <main class="w-full p-6">
+        <div class="flex w-full gap-5 ">
+            <x-pages.dashboard.total-card :title="'Total Report'" :total="7.432" :trendValue="56" :date="'03 November 2024'" />
+            <x-pages.dashboard.total-card :title="'Total Report'" :total="7.432" :trendValue="32" :date="'03 November 2024'" />
+            <x-pages.dashboard.total-card :title="'Total Report'" :total="7.432" :trendValue="-12" :date="'03 November 2024'" />
+            <x-pages.dashboard.total-card :title="'Total Report'" :total="7.432" :trendValue="-2" :date="'03 November 2024'" />
         </div>
-        <div class="p-6">
-            <div class="bg-[#1a1a1a] rounded-xl shadow-md p-4">
-                <div class="col-12" id="map">
-                    {{-- Stock On-Hand Map --}}
-                    <div id="maps-chart-stock" style="height: 600px"></div>
-                    {{-- Visibility Map --}}
-                    <div id="maps-chart-visibility" style="height: 600px"></div>
-                    {{-- Map Controls --}}
-                    <div id="mapsTextRight" class="mt-4">
-                        <div class="filter">
-                            <div id="frameHidden">
-                                <div class="btn-group w-100 flex gap-2" role="group" aria-label="Map toggle">
-                                    <input type="radio" class="hidden" name="frame" value="false" id="btnStock"
-                                        checked>
-                                    <label
-                                        class="btn flex-1 py-2 px-4 rounded-md text-center cursor-pointer transition-all duration-200 bg-[#0288d1] text-white hover:bg-[#0277bd]"
-                                        for="btnStock">
-                                        Stock On-Hand
-                                    </label>
-                                    <input type="radio" class="hidden" name="frame" value="true" id="btnVisibility">
-                                    <label
-                                        class="btn flex-1 py-2 px-4 rounded-md text-center cursor-pointer transition-all duration-200 bg-[#333] text-white hover:bg-[#444]"
-                                        for="btnVisibility">
-                                        Visibility
-                                    </label>
-                                </div>
+        <div class="flex gap-6 w-full mt-6">
+            <x-pages.dashboard.chart-routing />
+            <x-pages.dashboard.chart-time-activity />
+            <x-pages.dashboard.chart-product-knowledge />
+
+        </div>
+        <div class="bg-[#1a1a1a] rounded-xl shadow-md p-4 mt-6">
+            <div class="col-12" id="map">
+                {{-- Stock On-Hand Map --}}
+                <div id="maps-chart-stock" style="height: 600px"></div>
+                {{-- Visibility Map --}}
+                <div id="maps-chart-visibility" style="height: 600px"></div>
+                {{-- Map Controls --}}
+                <div id="mapsTextRight" class="mt-4">
+                    <div class="filter">
+                        <div id="frameHidden">
+                            <div class="btn-group w-100 flex gap-2" role="group" aria-label="Map toggle">
+                                <input type="radio" class="hidden" name="frame" value="false" id="btnStock" checked>
+                                <label
+                                    class="btn flex-1 py-2 px-4 rounded-md text-center cursor-pointer transition-all duration-200 bg-[#0288d1] text-white hover:bg-[#0277bd]"
+                                    for="btnStock">
+                                    Stock On-Hand
+                                </label>
+                                <input type="radio" class="hidden" name="frame" value="true" id="btnVisibility">
+                                <label
+                                    class="btn flex-1 py-2 px-4 rounded-md text-center cursor-pointer transition-all duration-200 bg-[#333] text-white hover:bg-[#444]"
+                                    for="btnVisibility">
+                                    Visibility
+                                </label>
                             </div>
                         </div>
                     </div>
