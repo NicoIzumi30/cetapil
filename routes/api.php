@@ -52,11 +52,14 @@ Route::middleware(['auth_api','role:sales'])->group(function () {
     Route::prefix("activity")->group(function () {
         Route::get('/', [SalesActivityController::class, 'getSalesAcitivityList']);
         Route::get('/product-categories', [SalesActivityController::class, 'categoryList']);
+        Route::post('/product', [SalesActivityController::class, 'productByCategoryList']);
 
-        Route::get('/cities', 'getCityList');
-        Route::get('/outlets', 'getOutletList');
-        Route::get('/visual', 'getVisualTypeList');
-        Route::get('/posm', 'getPosmTypeList');
+        // Route::post('products', 'productByCategoryList');
+
+        // Route::get('/cities', 'getCityList');
+        // Route::get('/outlets', 'getOutletList');
+        // Route::get('/visual', 'getVisualTypeList');
+        // Route::get('/posm', 'getPosmTypeList');
 
     });
     Route::middleware('permission:menu_outlet')->group(function () {});

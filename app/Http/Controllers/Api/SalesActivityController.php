@@ -29,6 +29,7 @@ use App\Models\SalesVisibility;
 use App\Models\Visibility;
 use App\Models\VisualType;
 use App\Traits\HasAuthUser;
+use App\Traits\ProductTrait;
 use Illuminate\Http\Request;
 use Illuminate\Support\Carbon;
 use Illuminate\Http\JsonResponse;
@@ -36,11 +37,11 @@ use Symfony\Component\HttpFoundation\Response;
 
 class SalesActivityController extends Controller
 {
-    use HasAuthUser;
+    use HasAuthUser, ProductTrait;
     public function getSalesAcitivityList()
     {
         $activities = SalesActivity::completeRelation()
-            ->where('user_id', $this->getAuthUser())
+            ->where('user_id', $this->getAuthUserId())
             ->whereDate('checked_in', Carbon::now())
             ->get();
         return new SalesActivityCollection($activities);

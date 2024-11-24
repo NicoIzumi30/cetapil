@@ -20,8 +20,14 @@ class SalesActivityResource extends JsonResource
             'user' => $this->user->only('id', 'name'),
             'checked_in' => $this->checked_in,
             'checked_out' => $this->checked_out,
-            'views' => $this->views,
+            'views_knowledge' => $this->views_knowledge,
+            'time_availability' => $this->time_availability,
+            'time_visibility' => $this->time_visibility,
+            'time_knowledge' => $this->time_knowledge,
+            'time_survey' => $this->time_survey,
+            'time_order' => $this->time_order,
             'status' => $this->status
         ];
     }
 }
+

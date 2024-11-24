@@ -18,7 +18,7 @@ return new class extends Migration
             $table->timestamp('checked_in')->nullable();
             $table->timestamp('checked_out')->nullable();
             $table->integer('views_knowledge')->default(0);
-            $table->integer('time_avaibility')->default(0);
+            $table->integer('time_availability')->default(0);
             $table->integer('time_visibility')->default(0);
             $table->integer('time_knowledge')->default(0);
             $table->integer('time_survey')->default(0);
