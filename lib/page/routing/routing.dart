@@ -56,7 +56,7 @@ class RoutingPage extends GetView<RoutingController> {
                                     return ActivityCard(
                                       routing: routing,
                                       statusDraft: 'Drafted',
-                                      statusCheckin: (checkin != null ) ? true : false,
+                                      statusCheckin: (checkin != null ) ? true : (checkout != null) ? false : null,
                                       ontap: () {
                                         Get.to(() => DetailRouting(routing));
                                       },
@@ -111,7 +111,7 @@ class ActivityCard extends StatelessWidget {
   final RoutingController controller = Get.find<RoutingController>();
   final Data routing;
   final String statusDraft;
-  final bool statusCheckin;
+  final bool? statusCheckin;
   final VoidCallback ontap;
 
   ActivityCard({
@@ -119,7 +119,7 @@ class ActivityCard extends StatelessWidget {
     required this.routing,
     required this.ontap,
     required this.statusDraft,
-    required this.statusCheckin,
+     this.statusCheckin,
   }) : super(key: key);
 
   convertTime(String time){
@@ -199,8 +199,8 @@ class ActivityCard extends StatelessWidget {
                     ),
                     Column(
                       children: [
-                        Text(" :",style: TextStyle(fontSize: 12),),
-                        Text(" :",style: TextStyle(fontSize: 12),),
+                        Text(" : ",style: TextStyle(fontSize: 12),),
+                        Text(" : ",style: TextStyle(fontSize: 12),),
                       ],
                     ),
                     Column(
@@ -232,27 +232,29 @@ class ActivityCard extends StatelessWidget {
                 
                 Row(
                   children: [
-                    Container(
+                    statusCheckin != null
+                    ? Container(
                       padding:
                           EdgeInsets.symmetric(vertical: 7, horizontal: 15),
                       decoration: BoxDecoration(
                           color:
-                              statusCheckin ? Colors.white : AppColors.primary,
+                              statusCheckin! ? Colors.white : AppColors.primary,
                           borderRadius: BorderRadius.circular(4),
                           gradient: LinearGradient(
                               begin: Alignment.topCenter,
                               end: Alignment.bottomCenter,
-                              colors: statusCheckin
+                              colors: statusCheckin!
                                   ? [Color(0X9039B5FF), Color(0X5039B5FF)]
                                   : [Color(0X905FF95F), Color(0X501BE86E)])),
                       child: Text(
-                        statusCheckin ? "Check-In" : "Check-Out",
+                        statusCheckin! ? "Check-In" : "Check-Out",
                         style: TextStyle(
                             fontSize: 12,
                             fontWeight: FontWeight.bold,
                             color: AppColors.primary),
                       ),
-                    ),
+                    )
+                    : SizedBox(),
                     SizedBox(
                       width: 10,
                     ),

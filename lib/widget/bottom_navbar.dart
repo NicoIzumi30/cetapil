@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_svg/flutter_svg.dart';
 import 'package:get/get_state_manager/src/rx_flutter/rx_obx_widget.dart';
 import 'package:get/get_state_manager/src/simple/get_view.dart';
 
@@ -27,11 +28,11 @@ class CustomBottomNavigationBar extends GetView<BottomNavController> {
         child: Row(
           mainAxisAlignment: MainAxisAlignment.spaceAround,
           children: [
-            _buildNavItem(0, Icons.home, 'Home',Color(0xFF39B5FF)),
-            _buildNavItem(1, Icons.route, 'Routing',Color(0xFF39B5FF)),
-            _buildNavItem(2, Icons.store, 'Outlet',Color(0xFF39B5FF)),
-            _buildNavItem(3, Icons.assignment, 'Activity',Color(0xFF39B5FF)),
-            _buildNavItem(4, Icons.shopping_bag, 'Selling',Color(0xFF39B5FF)),
+            _buildNavItem(0, Icons.home, 'Home',Color(0xFF39B5FF),"assets/icon/Vector.svg"),
+            _buildNavItem(1, Icons.route, 'Routing',Color(0xFF39B5FF),"assets/icon/Vector (1).svg"),
+            _buildNavItem(2, Icons.store, 'Outlet',Color(0xFF39B5FF),"assets/icon/Vector (2).svg"),
+            _buildNavItem(3, Icons.assignment, 'Activity',Color(0xFF39B5FF),"assets/icon/Vector (3).svg"),
+            _buildNavItem(4, Icons.shopping_bag, 'Selling',Color(0xFF39B5FF),"assets/icon/Vector (4).svg"),
           ],
         ),
       );
@@ -39,7 +40,7 @@ class CustomBottomNavigationBar extends GetView<BottomNavController> {
 
 
 
-  Widget _buildNavItem(int index, IconData icon, String label, Color color) {
+  Widget _buildNavItem(int index, IconData icon, String label, Color color,String pathIcon) {
     return Obx(() {
       return TweenAnimationBuilder<double>(
         tween: Tween<double>(begin: 0, end: controller.selectedIndex.value == index ? -8 : 0),
@@ -73,13 +74,20 @@ class CustomBottomNavigationBar extends GetView<BottomNavController> {
                         ]
                             : [],
                       ),
-                      child: Icon(
-                        icon,
+                      child:
+                      SvgPicture.asset(pathIcon,
                         color: controller.selectedIndex.value == index
-                            ? Colors.white
-                            : Color(0xFF054F7B),
-                        size: controller.selectedIndex.value == index ? 32 : 24,
-                      ),
+                              ? Colors.white
+                              : Color(0xFF054F7B),
+                      height: controller.selectedIndex.value == index ? 32 : 24,
+                      )
+                      // Icon(
+                      //   icon,
+                      //   color: controller.selectedIndex.value == index
+                      //       ? Colors.white
+                      //       : Color(0xFF054F7B),
+                      //   size: controller.selectedIndex.value == index ? 32 : 24,
+                      // ),
                     ),
                     controller.selectedIndex.value == index
                         ? const SizedBox()

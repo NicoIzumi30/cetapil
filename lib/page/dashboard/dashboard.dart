@@ -349,20 +349,114 @@ class DashboardPage extends GetView<DashboardController> {
                           style: TextStyle(fontSize: 10),
                         ),
                         SizedBox(
-                          height: 15,
+                          height: 5,
                         ),
                         AnimatedGlossyProgressBar(
                           progress: (controller.dashboard.value?.data?.planPercentage ?? 0) / 100,
+                          // progress: 0,
                         ),
                         SizedBox(
-                          height: 15,
+                          height: 10,
                         ),
                         Text(
                           "*Performance index dihitung berdasarkan target call vs aktual \n call user yang telah dilakukan dalam 1 Bulan",
                           style: TextStyle(fontSize: 8),
                         ),
                       ],
-                    ))
+                    )),
+                SizedBox(
+                  height: 15,
+                ),
+                Text(
+                  "Power SKU Index",
+                  style: TextStyle(
+                      fontWeight: FontWeight.w800, fontSize: 20, color: Color(0xFF054F7B)),
+                ),
+                SizedBox(
+                  height: 5,
+                ),
+                Container(
+                    width: double.infinity,
+                    padding: EdgeInsets.all(10),
+                    decoration: BoxDecoration(
+                        gradient: const LinearGradient(
+                          begin: Alignment.topLeft,
+                          end: Alignment.bottomRight,
+                          colors: [
+                            Color(0xFFFFFFFF), // Lighter blue at top
+                            // Color(0xFF9BD8F1), // Darker blue at bottom
+                            Color(0x80FFFFFF), // Darker blue at bottom
+                          ],
+                        ),
+                        borderRadius: BorderRadius.circular(10)),
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        Text(
+                          "Update terbaru : 14 November 2024",
+                          style: TextStyle(fontSize: 10),
+                        ),
+                        SizedBox(
+                          height: 10,
+                        ),
+                        Text(
+                          "CETHAPIL Gentle Skin Cleanser 125ml",
+                          style: TextStyle(fontSize: 11),
+                        ),
+                        AnimatedGlossyProgressBar(
+                          progress: 0.86
+                        ),
+                        Text(
+                          "CETHAPIL Gentle Skin Cleanser 125ml",
+                          style: TextStyle(fontSize: 11),
+                        ),
+                        AnimatedGlossyProgressBar(
+                            progress: 0.57
+                        ),
+                        Text(
+                          "CETHAPIL Gentle Skin Cleanser 125ml",
+                          style: TextStyle(fontSize: 11),
+                        ),
+                        AnimatedGlossyProgressBar(
+                            progress: 0.45
+                        ),
+                        Text(
+                          "CETHAPIL Gentle Skin Cleanser 125ml",
+                          style: TextStyle(fontSize: 11),
+                        ),
+                        AnimatedGlossyProgressBar(
+                            progress: 0.34
+                        ),
+                        Text(
+                          "CETHAPIL Gentle Skin Cleanser 125ml",
+                          style: TextStyle(fontSize: 11),
+                        ),
+                        AnimatedGlossyProgressBar(
+                            progress: 0.68
+                        ),
+                        Text(
+                          "CETHAPIL Gentle Skin Cleanser 125ml",
+                          style: TextStyle(fontSize: 11),
+                        ),
+                        AnimatedGlossyProgressBar(
+                            progress: 0.25
+                        ),
+                        Text(
+                          "CETHAPIL Gentle Skin Cleanser 125ml",
+                          style: TextStyle(fontSize: 11),
+                        ),
+                        AnimatedGlossyProgressBar(
+                            progress: 0.79
+                        ),
+                        SizedBox(
+                          height: 15,
+                        ),
+                        Text(
+                          "*Power SKU Index dihitung dari jumlah suatu produk pada \n Outlet Coverage",
+                          style: TextStyle(fontSize: 8),
+                        ),
+                      ],
+                    )),
               ],
             );
           }),

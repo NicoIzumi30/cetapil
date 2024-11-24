@@ -354,7 +354,7 @@ class DatabaseHelper {
         f.question,
         fa.answer
       FROM outlet_forms f
-      INNER JOIN routing_form_answers fa ON f.id = fa.outlet_form_id
+      INNER JOIN outlet_form_answers fa ON f.id = fa.outlet_form_id
       WHERE fa.outlet_id = ?
     ''', [outletMap['id']]);
 
@@ -440,8 +440,8 @@ class DatabaseHelper {
         f.question,
         fa.answer
       FROM outlet_forms f
-      INNER JOIN outlet_form_answers fa ON f.id = fa.outlet_form_id
-      WHERE fa.outlet_id = ?
+      INNER JOIN routing_form_answers fa ON f.id = fa.outlet_form_id
+      WHERE fa.routing_id = ?
     ''', [routingMap['id']]);
 
       final routing = Routing.Data(

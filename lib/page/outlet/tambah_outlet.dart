@@ -1,4 +1,5 @@
 import 'dart:io';
+import 'dart:ui';
 import 'package:cetapil_mobile/utils/image_upload.dart';
 import 'package:cetapil_mobile/widget/back_button.dart';
 import 'package:cetapil_mobile/widget/category_dropdown.dart';
@@ -27,12 +28,12 @@ class TambahOutlet extends GetView<OutletController> {
             children: [
               Expanded(
                 child: Padding(
-                  padding: const EdgeInsets.fromLTRB(15, 30, 15, 10),
+                  padding: const EdgeInsets.fromLTRB(15, 30, 15, 5),
                   child: Column(
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
                       EnhancedBackButton(
-                        onPressed: () => Get.back(),
+                        onPressed: () => showStyledDialog(context),
                         backgroundColor: Colors.white,
                         iconColor: Colors.blue,
                       ),
@@ -145,26 +146,32 @@ class TambahOutlet extends GetView<OutletController> {
                 ),
               ),
               // Bottom buttons
-              Container(
-                width: double.infinity,
-                color: Colors.white,
-                child: Padding(
-                  padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 15),
-                  child: Row(
-                    children: [
-                      _buildButton(
-                        false,
-                        "Save as Draft",
-                        () => controller.saveDraftOutlet(),
-                      ),
-                      SizedBox(width: 10),
-                      _buildButton(
-                        true,
-                        "Kirim",
-                        () => controller.submitApiOutlet(),
-                        // controller.submitOutlet(),
-                      ),
-                    ],
+              Padding(
+                padding: const EdgeInsets.fromLTRB(15, 0, 15, 15),
+                child: Container(
+                  width: double.infinity,
+                  decoration: BoxDecoration(
+                color: Colors.white.withOpacity(0.3),
+                    borderRadius: BorderRadius.circular(10)
+                  ),
+                  child: Padding(
+                    padding: const EdgeInsets.symmetric(horizontal: 15,vertical: 10),
+                    child: Row(
+                      children: [
+                        _buildButton(
+                          false,
+                          "Simpan Draft",
+                          () => controller.saveDraftOutlet(),
+                        ),
+                        SizedBox(width: 10),
+                        _buildButton(
+                          true,
+                          "Kirim",
+                          () => controller.submitApiOutlet(),
+                          // controller.submitOutlet(),
+                        ),
+                      ],
+                    ),
                   ),
                 ),
               ),
@@ -172,6 +179,54 @@ class TambahOutlet extends GetView<OutletController> {
           ),
         ],
       ),
+    );
+  }
+
+  Future showStyledDialog(BuildContext context) async {
+    return showDialog(
+      context: context,
+      barrierDismissible: false, // User must tap button
+      builder: (BuildContext context) {
+        return AlertDialog(
+          shape: RoundedRectangleBorder(
+            borderRadius: BorderRadius.circular(10),
+          ),
+          title: Text(
+            'Confirmation',
+            style: TextStyle(fontWeight: FontWeight.bold),
+          ),
+          content: SingleChildScrollView(
+            child: ListBody(
+              children: <Widget>[
+                Text('Apakah anda yakin ?'),
+                SizedBox(height: 10),
+                Text('Progress anda akan hilang ketika keluar'),
+              ],
+            ),
+          ),
+          actions: <Widget>[
+            TextButton(
+              style: TextButton.styleFrom(
+                foregroundColor: Colors.blue,
+              ),
+              child: Text('No'),
+              onPressed: () {
+                Navigator.of(context).pop();
+              },
+            ),
+            TextButton(
+              style: TextButton.styleFrom(
+                foregroundColor: Colors.grey,
+              ),
+              child: Text('Yes'),
+              onPressed: () {
+                Get.back();
+                Get.back();
+              },
+            ),
+          ],
+        );
+      },
     );
   }
 

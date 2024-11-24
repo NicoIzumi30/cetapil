@@ -57,6 +57,7 @@ dependencies:
   dropdown_search: ^6.0.1
   flutter_image_compress: ^2.3.0
   image_picker: ^1.1.2
+  timezone: ^0.10.0
 
 dev_dependencies:
   flutter_test:
@@ -84,6 +85,7 @@ flutter:
   assets:
     - assets/
     - assets/logo.svg
+    - assets/icon/
     - assets/icon/setting_account.svg
   #   - images/a_dot_ham.jpeg
 

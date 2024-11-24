@@ -11,7 +11,7 @@ class GlossyProgressBar extends StatelessWidget {
   const GlossyProgressBar({
     Key? key,
     required this.progress,
-    this.height = 12.0,
+    this.height = 10,
     this.showPercentage = true,
     this.progressColor = const Color(0xFF64B5F6),
     this.backgroundColor = const Color(0xFFE0E0E0),
@@ -22,10 +22,12 @@ class GlossyProgressBar extends StatelessWidget {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
+        SizedBox(height: 7,),
         Container(
+          // height: 18,
           decoration: BoxDecoration(
             color: backgroundColor,
-            borderRadius: BorderRadius.circular(height / 2),
+            borderRadius: BorderRadius.circular(10),
             boxShadow: [
               BoxShadow(
                 color: Colors.black.withOpacity(0.1),
@@ -35,12 +37,13 @@ class GlossyProgressBar extends StatelessWidget {
             ],
           ),
           child: ClipRRect(
-            borderRadius: BorderRadius.circular(height / 2),
+            borderRadius: BorderRadius.circular(10),
             child: Stack(
               children: [
                 // Progress bar background with subtle gradient
                 Container(
                   width: double.infinity,
+                  // height: 18,
                   decoration: BoxDecoration(
                     gradient: LinearGradient(
                       begin: Alignment.topCenter,
@@ -52,11 +55,14 @@ class GlossyProgressBar extends StatelessWidget {
                     ),
                   ),
                 ),
+
                 // Actual progress bar
                 FractionallySizedBox(
                   widthFactor: progress,
                   child: Container(
+                    // height: 18,
                     decoration: BoxDecoration(
+                      borderRadius: BorderRadius.circular(10),
                       gradient: LinearGradient(
                         begin: Alignment.centerLeft,
                         end: Alignment.centerRight,
@@ -73,23 +79,25 @@ class GlossyProgressBar extends StatelessWidget {
                         ),
                       ],
                     ),
-                    child: Stack(
-                      // alignment: Alignment(1, 1),
-                      children: [
-                        if (showPercentage)
-                        Padding(
-                          padding: const EdgeInsets.symmetric(vertical: 4,horizontal: 10),
-                          child: Text("${(progress * 100).toInt()}% ",style: TextStyle(fontSize: 10,height: 1,color: Colors.white,backgroundColor: Colors.transparent,)
-                          ),
-                        ),
-                      ],
+                    child: Padding(
+                      padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 3),
+                      child: Text("",style: TextStyle(height: 1,fontSize: 10),),
                     ),
+                ),
+                ),
+                /// agar jika data 0% tampilan tidak ngebug
+                Padding(
+                  padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 3),
+                  child: Text("${(progress * 100).toInt()} %",style: TextStyle(fontSize: 10,height: 1,color: progress < 0 ? Colors.blue : Colors.white,backgroundColor: Colors.transparent,)
+
+
                   ),
                 ),
               ],
             ),
           ),
         ),
+        SizedBox(height: 10,),
       ],
     );
   }

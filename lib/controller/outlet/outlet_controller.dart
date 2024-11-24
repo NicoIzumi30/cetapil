@@ -480,15 +480,16 @@ class OutletController extends GetxController {
       if (response.status != "OK") {
         throw Exception('Failed to get outlets from API');
       }
-      await refreshOutlets();
+
       isEditing ? await db.deleteOutlet(currentOutletId) : null;
       clearForm();
+      EasyLoading.dismiss();
       Get.back();
-
       showSuccessAlert(
           Get.context!, // Use Get.context instead of the previous context
           "Data Berhasil Disimpan",
           "Anda baru menyimpan Data. Silahkan periksa status Outlet pada aplikasi.");
+      await refreshOutlets();
 
     }catch (e) {
       print('Error submit data: $e');

@@ -13,6 +13,8 @@ import 'package:get/get_core/src/get_main.dart';
 import 'package:get/get_navigation/src/root/get_material_app.dart';
 import 'package:get_storage/get_storage.dart';
 import 'package:intl/intl.dart';
+import 'package:timezone/timezone.dart' as tz;
+import 'package:timezone/data/latest.dart' as tz;
 
 import 'controller/activity/activity_controller.dart';
 import 'controller/bottom_nav_controller.dart';
