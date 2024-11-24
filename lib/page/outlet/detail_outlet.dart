@@ -263,10 +263,11 @@ class ClipImage extends StatelessWidget {
             borderRadius: BorderRadius.circular(5),
             child:
             Image.network(
-              _sanitizeUrl(url),
-
+              // _sanitizeUrl(url),
+"https://dev-cetaphil.i-am.host$url",
               fit: fit,
               errorBuilder: (context, error, stackTrace) {
+  print("error $error");
                 return Container(
                   color: Colors.grey[200],
                   child: Column(

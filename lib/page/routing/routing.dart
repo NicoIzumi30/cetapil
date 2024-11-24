@@ -1,7 +1,9 @@
 import 'package:cetapil_mobile/controller/routing/routing_controller.dart';
 import 'package:cetapil_mobile/model/list_routing_response.dart';
+import 'package:cetapil_mobile/page/routing/detail_routing.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
+import 'package:intl/intl.dart';
 
 import '../../model/activity.dart';
 import '../../model/outlet_example.dart';
@@ -35,7 +37,7 @@ class RoutingPage extends GetView<RoutingController> {
                 child: Obx(
                   () => RefreshIndicator(
                       onRefresh: () async {
-                        await controller.syncOutlets();
+                        await controller.initGetRouting();
                       },
                       child: controller.isLoading.value
                           ? Center(child: CircularProgressIndicator())
@@ -47,12 +49,16 @@ class RoutingPage extends GetView<RoutingController> {
                                   itemBuilder: (context, index) {
                                     final routing =
                                         controller.filteredOutlets[index];
+                                    print("ada cekin : ${routing.salesActivity!.checkedIn}");
+                                    final checkin = routing.salesActivity!.checkedIn;
+                                    final checkout = routing.salesActivity!.checkedOut;
+
                                     return ActivityCard(
                                       routing: routing,
                                       statusDraft: 'Drafted',
-                                      statusCheckin: true,
+                                      statusCheckin: (checkin != null ) ? true : false,
                                       ontap: () {
-                                        Get.to(() => TambahActivity());
+                                        Get.to(() => DetailRouting(routing));
                                       },
                                     );
                                   },
@@ -116,6 +122,18 @@ class ActivityCard extends StatelessWidget {
     required this.statusCheckin,
   }) : super(key: key);
 
+  convertTime(String time){
+    if (time.isNotEmpty || time != "") {
+      DateTime dateTime = DateTime.parse(time);
+
+      // Format to "HH:mm"
+      String formattedTime = DateFormat('HH:mm').format(dateTime);
+      return formattedTime;
+    }
+    return "";
+
+  }
+
   @override
   Widget build(BuildContext context) {
     return Container(
@@ -168,25 +186,50 @@ class ActivityCard extends StatelessWidget {
             ),
             Row(
               mainAxisAlignment: MainAxisAlignment.spaceBetween,
+              crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                Container(
-                  padding: EdgeInsets.symmetric(vertical: 7, horizontal: 15),
-                  decoration: BoxDecoration(
-                    color: statusDraft == "Drafted"
-                        ? Colors.white
-                        : AppColors.primary,
-                    borderRadius: BorderRadius.circular(4),
-                  ),
-                  child: Text(
-                    statusDraft,
-                    style: TextStyle(
-                        fontSize: 12,
-                        fontWeight: FontWeight.bold,
-                        color: statusDraft == "Drafted"
-                            ? Colors.blue
-                            : Colors.white),
-                  ),
+                Row(
+                  children: [
+                    Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        Text("Check In",style: TextStyle(fontSize: 12),),
+                        Text("Check Out",style: TextStyle(fontSize: 12),),
+                      ],
+                    ),
+                    Column(
+                      children: [
+                        Text(" :",style: TextStyle(fontSize: 12),),
+                        Text(" :",style: TextStyle(fontSize: 12),),
+                      ],
+                    ),
+                    Column(
+                      children: [
+                        Text(convertTime(routing.salesActivity!.checkedIn ?? ""),style: TextStyle(fontSize: 12),),
+                        Text(convertTime(routing.salesActivity!.checkedOut ?? ""),style: TextStyle(fontSize: 12),),
+                      ],
+                    ),
+                  ],
                 ),
+                // Container(
+                //   padding: EdgeInsets.symmetric(vertical: 7, horizontal: 15),
+                //   decoration: BoxDecoration(
+                //     color: statusDraft == "Drafted"
+                //         ? Colors.white
+                //         : AppColors.primary,
+                //     borderRadius: BorderRadius.circular(4),
+                //   ),
+                //   child: Text(
+                //     statusDraft,
+                //     style: TextStyle(
+                //         fontSize: 12,
+                //         fontWeight: FontWeight.bold,
+                //         color: statusDraft == "Drafted"
+                //             ? Colors.blue
+                //             : Colors.white),
+                //   ),
+                // ),
+                
                 Row(
                   children: [
                     Container(

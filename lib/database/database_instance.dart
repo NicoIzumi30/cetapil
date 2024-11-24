@@ -1,7 +1,9 @@
-import 'package:cetapil_mobile/model/outlet.dart';
+import 'package:cetapil_mobile/model/outlet.dart' as Outlet;
 import 'package:sqflite/sqflite.dart';
 import 'package:path/path.dart';
 import 'package:uuid/uuid.dart';
+
+import '../model/list_routing_response.dart' as Routing;
 
 class DatabaseHelper {
   static final DatabaseHelper instance = DatabaseHelper._init();
@@ -94,24 +96,16 @@ class DatabaseHelper {
     await db.execute('''
         CREATE TABLE routing (
           id TEXT PRIMARY KEY,
-          user_id TEXT,
-          user_name TEXT,
           name TEXT NOT NULL,
+          user_name TEXT,
           category TEXT,
-          visit_day TEXT,
-          longitude TEXT,
-          latitude TEXT,
           city_id TEXT,
           city_name TEXT,
+          longitude TEXT,
+          latitude TEXT,
           address TEXT,
           status TEXT CHECK(status IN ('APPROVED', 'PENDING', 'REJECTED')),
-          week_type TEXT,
-          cycle TEXT,
-          sales_activity TEXT,
-          data_source TEXT NOT NULL CHECK(data_source IN ('API', 'DRAFT')),
-          is_synced INTEGER DEFAULT 0,
-          checkin_time TEXT NOT NULL,
-          checkout_time TEXT,
+          
           created_at TEXT NOT NULL,
           updated_at TEXT NOT NULL,
           deleted_at TEXT
@@ -122,7 +116,6 @@ class DatabaseHelper {
           id TEXT PRIMARY KEY,
           routing_id TEXT NOT NULL,
           position INTEGER,
-          filename TEXT,
           image TEXT,
           created_at TEXT NOT NULL,
           FOREIGN KEY (routing_id) REFERENCES routing (id)
@@ -141,10 +134,32 @@ class DatabaseHelper {
           FOREIGN KEY (outlet_form_id) REFERENCES outlet_forms (id)
         )
       ''');
+    await db.execute('''
+        CREATE TABLE sales_activities (
+          id TEXT PRIMARY KEY,
+          routing_id TEXT ,
+          outlet_id TEXT,
+          user_id TEXT,
+          checked_in TEXT ,
+          checked_out TEXT ,
+          views_knowledge INTEGER DEFAULT 0,
+          time_availability INTEGER DEFAULT 0,
+          time_visibility INTEGER DEFAULT 0,
+          time_knowledge INTEGER DEFAULT 0,
+          time_survey INTEGER DEFAULT 0,
+          time_order INTEGER DEFAULT 0,
+          status TEXT CHECK(status IN ('IN_PROGRESS', 'SUBMITTED', 'CANCELLED')) DEFAULT 'IN_PROGRESS',
+          created_at TEXT NOT NULL,
+          updated_at TEXT NOT NULL,
+          deleted_at TEXT,
+          FOREIGN KEY (outlet_id) REFERENCES outlets (id)
+          FOREIGN KEY (routing_id) REFERENCES routing (id)
+        )
+      ''');
   }
 
   // Insert or update outlet from API
-  Future<void> upsertOutletFromApi(Outlet outlet) async {
+  Future<void> upsertOutletFromApi(Outlet.Outlet outlet) async {
     final db = await database;
 
     await db.transaction((txn) async {
@@ -250,7 +265,7 @@ class DatabaseHelper {
   }
 
   // Insert draft outlet
-  Future<String> insertDraftOutlet(Outlet outlet) async {
+  Future<String> insertDraftOutlet(Outlet.Outlet outlet) async {
     final db = await database;
     final outletId = const Uuid().v4();
 
@@ -311,7 +326,7 @@ class DatabaseHelper {
   }
 
   // Get all outlets with their details
-  Future<List<Outlet>> getAllOutlets({String? dataSource}) async {
+  Future<List<Outlet.Outlet>> getAllOutlets({String? dataSource}) async {
     final db = await database;
 
     final List<Map<String, dynamic>> outletMaps = await db.query(
@@ -339,13 +354,13 @@ class DatabaseHelper {
         f.question,
         fa.answer
       FROM outlet_forms f
-      INNER JOIN outlet_form_answers fa ON f.id = fa.outlet_form_id
+      INNER JOIN routing_form_answers fa ON f.id = fa.outlet_form_id
       WHERE fa.outlet_id = ?
     ''', [outletMap['id']]);
 
-      final outlet = Outlet(
+      final outlet = Outlet.Outlet(
         id: outletMap['id'],
-        user: User(
+        user: Outlet.User(
           id: outletMap['user_id']?.toString() ?? '',
           name: outletMap['user_name']?.toString() ??
               outletMap['salesName']?.toString() ??
@@ -356,7 +371,7 @@ class DatabaseHelper {
         visitDay: outletMap['visit_day'],
         longitude: outletMap['longitude'],
         latitude: outletMap['latitude'],
-        city: City(
+        city: Outlet.City(
           id: outletMap['city_id']?.toString() ?? '1',
           name: outletMap['city_name']?.toString() ?? 'Wonogiri',
         ),
@@ -368,7 +383,7 @@ class DatabaseHelper {
         dataSource: outletMap['data_source'],
         isSynced: outletMap['is_synced'] == 1,
         images: imageMaps
-            .map((imageMap) => Images(
+            .map((imageMap) => Outlet.Images(
                   id: imageMap['id'] as String?,
                   position: imageMap['position'] as int?,
                   filename: imageMap['filename'] as String?,
@@ -376,9 +391,9 @@ class DatabaseHelper {
                 ))
             .toList(),
         forms: formMaps
-            .map((formMap) => Forms(
+            .map((formMap) => Outlet.Forms(
                   id: formMap['id'] as String?,
-                  outletForm: OutletForm(
+                  outletForm: Outlet.OutletForm(
                     id: formMap['outlet_form_id'] as String?,
                     type: formMap['type'] as String?,
                     question: formMap['question'] as String?,
@@ -393,8 +408,90 @@ class DatabaseHelper {
     }));
   }
 
+  Future<List<Routing.Data>> getAllRouting() async {
+    final db = await database;
+
+    final List<Map<String, dynamic>> routingMaps = await db.query(
+      'routing',
+    );
+
+    return Future.wait(routingMaps.map((routingMap) async {
+      // print("Raw outlet data from DB: $outletMap"); // Debug print
+
+      // Get images for this outlet
+      final List<Map<String, dynamic>> imageMaps = await db.query(
+        'routing_images',
+        where: 'routing_id = ?',
+        whereArgs: [routingMap['id']],
+      );
+
+      final activityMaps = await db.query(
+        'sales_activities',
+        where: 'routing_id = ?',
+        whereArgs: [routingMap['id']],
+      );
+
+      // Get forms with their answers for this outlet
+      final List<Map<String, dynamic>> formMaps = await db.rawQuery('''
+      SELECT 
+        fa.id,
+        f.id as outlet_form_id,
+        f.type,
+        f.question,
+        fa.answer
+      FROM outlet_forms f
+      INNER JOIN outlet_form_answers fa ON f.id = fa.outlet_form_id
+      WHERE fa.outlet_id = ?
+    ''', [routingMap['id']]);
+
+      final routing = Routing.Data(
+        id: routingMap['id'],
+        user: Routing.User(
+            id: routingMap['user_id']?.toString() ?? '',
+            name: routingMap['salesName']?.toString() ??
+                '',
+        ),
+        name: routingMap['name'],
+        category: routingMap['category'],
+        visitDay: routingMap['visit_day'],
+        longitude: routingMap['longitude'],
+        latitude: routingMap['latitude'],
+        city: Routing.City(
+          id: routingMap['city_id']?.toString() ?? '1',
+          name: routingMap['city_name']?.toString() ?? 'Wonogiri',
+        ),
+        address: routingMap['address'],
+        status: routingMap['status'],
+        salesActivity: activityMaps.isNotEmpty
+            ? Routing.SalesActivity.fromMap(activityMaps.first)
+            : null,
+        images: imageMaps
+            .map((imageMap) => Routing.Images(
+          id: imageMap['id'] as String?,
+          position: imageMap['position'] as int?,
+          image: imageMap['image'] as String?,
+        ))
+            .toList(),
+        forms: formMaps
+            .map((formMap) => Routing.Forms(
+          id: formMap['id'] as String?,
+          outletForm: Routing.OutletForm(
+            id: formMap['outlet_form_id'] as String?,
+            type: formMap['type'] as String?,
+            question: formMap['question'] as String?,
+          ),
+          answer: formMap['answer'] as String?,
+        ))
+            .toList(),
+      );
+
+      // print("Created outlet object: $outlet"); // Debug print
+      return routing;
+    }));
+  }
+
   // Get unsynchronized draft outlets
-  Future<List<Outlet>> getUnsyncedDraftOutlets() async {
+  Future<List<Outlet.Outlet>> getUnsyncedDraftOutlets() async {
     return getAllOutlets(dataSource: 'DRAFT');
   }
 
@@ -668,12 +765,26 @@ class DatabaseHelper {
   }
 
   ///ROUTING
+
+  Future<void> deleteAllRouting() async {
+    final db = await database;
+    await db.transaction((txn) async {
+      // Delete from child tables first
+      await txn.delete('routing_form_answers');
+      await txn.delete('routing_images');
+      await txn.delete('sales_activities');
+
+      // Then delete from parent table
+      await txn.delete('routing');
+    });
+  }
+
   Future<void> insertRoutingWithAnswers({required Map<String, dynamic> data}) async {
     final db = await database;
 
     await db.transaction((txn) async {
       try {
-        // 1. Insert outlet
+        // 1. Insert routing
         await txn.insert(
           'routing',
           {
@@ -681,35 +792,56 @@ class DatabaseHelper {
             'name': data['outletName'],
             'user_name': data['salesName'],
             'category': data['category'],
+            'city_id': data['city_id'],
+            'city_name': data['city_name'],
             'longitude': data['longitude'],
             'latitude': data['latitude'],
             'address': data['address'],
-            'status': data['status'],
-            'data_source': data['data_source'],
-            'is_synced': data['is_synced'],
-            'checkin_time': data['checkin'],
-            'checkout_time': data['checkout'],
+            'status': data['status_outlet'],
             'created_at': data['created_at'],
             'updated_at': data['updated_at'],
             'deleted_at': null,
           },
         );
-        final imageKeys = data.keys.where((key) => key.startsWith('img')).toList();
-        for (var key in imageKeys) {
+
+        // 2. Insert sales activities
+        await txn.insert(
+          'sales_activities',
+          {
+            'id': data['activities_id'],
+            'routing_id': data['id'],
+            'outlet_id': data['outlet_id'],
+            'user_id': data['user_id'] ?? "",
+            'checked_in': data['checked_in'],
+            'checked_out': data['checked_out'],
+            'views_knowledge': data['views_knowledge'] ?? 0,
+            'time_availability': data['time_availability'] ?? 0,
+            'time_visibility': data['time_visibility'] ?? 0,
+            'time_knowledge': data['time_knowledge'] ?? 0,
+            'time_survey': data['time_survey'] ?? 0,
+            'time_order': data['time_order'] ?? 0,
+            'status': data['status_activities'],
+            'created_at': DateTime.now().toIso8601String(),
+            'updated_at': DateTime.now().toIso8601String(),
+            'deleted_at': null,
+          },
+        );
+
+        // 3. Insert routing images
+        for (int i = 0; i < 3; i++) {
           await txn.insert(
             'routing_images',
             {
               'id': const Uuid().v4(),
               'routing_id': data['id'],
-              'position': data['position'],
-              'filename': data['filename'],
-              'image': data[key],
+              'position': i + 1,  // Changed to INTEGER
+              'image': data['image_path_${i + 1}'],
               'created_at': DateTime.now().toIso8601String(),
             },
           );
         }
 
-        // 2. Insert form answers
+        // 4. Insert routing form answers
         final formKeys = data.keys.where((key) => key.startsWith('form_id_')).toList();
 
         for (var key in formKeys) {
@@ -719,7 +851,7 @@ class DatabaseHelper {
             {
               'id': const Uuid().v4(),
               'routing_id': data['id'],
-              'outlet_form_id': formId,
+              'outlet_form_id': formId,  // Changed from routing_form_id to outlet_form_id
               'answer': data[key],
               'created_at': data['created_at'],
               'updated_at': data['updated_at'],
@@ -728,7 +860,7 @@ class DatabaseHelper {
           );
         }
       } catch (e) {
-        print('Error inserting outlet with answers: $e');
+        print('Error inserting routing with answers: $e');
         rethrow;
       }
     });
@@ -736,7 +868,7 @@ class DatabaseHelper {
 
   // Add this method to your DatabaseHelper class
 // Add this method to your DatabaseHelper class
-  Future<Outlet?> getOutletById(String id) async {
+  Future<Outlet.Outlet?> getOutletById(String id) async {
     final db = await database;
 
     try {
@@ -821,7 +953,7 @@ class DatabaseHelper {
             .toList(),
       };
 
-      return Outlet.fromJson(outletJson);
+      return Outlet.Outlet.fromJson(outletJson);
     } catch (e) {
       print('Error in getOutletById: $e');
       return null;

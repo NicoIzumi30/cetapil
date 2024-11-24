@@ -2,6 +2,7 @@ import 'dart:convert';
 
 import 'package:cetapil_mobile/model/list_routing_response.dart';
 import 'package:cetapil_mobile/model/outlet.dart';
+import 'package:cetapil_mobile/model/submit_checkin_routing.dart';
 import 'package:cetapil_mobile/model/submit_outlet_response.dart';
 import 'package:get_storage/get_storage.dart';
 import 'package:http/http.dart' as http;
@@ -11,7 +12,7 @@ import '../model/form_outlet_response.dart';
 import '../model/get_city_response.dart';
 import '../model/login_response.dart';
 
-const String baseUrl = 'https://dev-cetaphil.i-am.host';
+const String baseUrl = 'https://58d9-36-68-56-36.ngrok-free.app';
 final GetStorage storage = GetStorage();
 
 class Api {
@@ -128,11 +129,32 @@ class Api {
         'Authorization': 'Bearer $token',
       },
     );
-    print(response.body);
+    // print(response.body);
     if (response.statusCode == 200) {
       return ListRoutingResponse.fromJson(jsonDecode(response.body));
     }
     throw "Gagal request data Routing : \n${response.body}";
+  }
+
+  static Future<SubmitCheckinRouting> submitCheckin(Map<String,String> data) async {
+    var url = "$baseUrl/api/routing/check_in";
+    var token = await storage.read('token');
+    var response = await http.post(
+      Uri.parse(url),
+      body: json.encode({
+        'outlet_id': data['outlet_id'],
+        'checked_in': data['checked_in'],
+      }),
+      headers: {
+        'Content-type': 'application/json',
+        'Authorization': 'Bearer $token',
+      },
+    );
+    // print(response.body);
+    if (response.statusCode == 200) {
+      return SubmitCheckinRouting.fromJson(jsonDecode(response.body));
+    }
+    throw "Gagal submit checkin : \n${response.body}";
   }
 
   static Future<SubmitOutletResponse> submitOutlet(Map<String, dynamic> data,List<FormOutletResponse> question) async{
