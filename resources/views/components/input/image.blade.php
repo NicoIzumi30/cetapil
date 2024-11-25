@@ -1,5 +1,5 @@
 {{-- resources/views/components/image-upload.blade.php --}}
-@props(['id', 'name' => 'image', 'label' => 'Upload Image', 'maxSize' => 2])
+@props(['id', 'name' => 'image', 'label' => 'Upload Image', 'maxSize' => 2,'error'=>''])
 
 <div class="flex flex-col items-center w-fit">
     <div class="relative w-[250px] mx-3">
@@ -42,9 +42,10 @@
         <input type="file" name="{{ $name }}" id="img_{{ $id }}" class="hidden"
             accept="image/png, image/jpeg" onchange="previewImage(this, '{{ $id }}', '{{ $maxSize }}')" {{$attributes}}>
     </div>
-
     {{-- Label --}}
     <label {{ $attributes->merge(['class' => 'text-center mt-3 text-xs text-white cursor-pointer']) }} for="img_{{ $id }}">
         {{ $label }}
     </label>
+    <span id="img_error" class="text-sm text-red-600 mt-1">{{ $error }}</span>
+
 </div>

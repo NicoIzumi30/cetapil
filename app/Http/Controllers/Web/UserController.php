@@ -153,6 +153,7 @@ class UserController extends Controller
     
             return response()->json([
                 'success' => true,
+                'status' => 'success',
                 'message' => 'Data has been deleted successfully!'
             ]);
         } catch (\Exception $e) {

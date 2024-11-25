@@ -374,16 +374,19 @@ $(document).ready(function() {
             }
         },
         columns: [
-            { data: 'category', name: 'category.name' },
-            { data: 'sku', name: 'sku' },
+            { data: 'category', name: 'category.name',className: 'table-data', },
+                
+                { data: 'sku', name: 'sku',className: 'table-data', },
             { 
                 data: 'md_price',
                 name: 'md_price',
+                className: 'table-data',
                 render: data => 'Rp ' + data
             },
             { 
                 data: 'sales_price',
                 name: 'sales_price',
+                className: 'table-data',
                 render: data => 'Rp ' + data
             },
             { 

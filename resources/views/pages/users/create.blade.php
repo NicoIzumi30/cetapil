@@ -55,7 +55,7 @@
                                     -- Pilih Jabatan Pengguna --
                                 </option>
                                 @foreach ($roles as $role)
-                                    <option value="{{ $role->id }}" data-name="{{ $role->name }}">{{ $role->name }}</option>
+                                    <option value="{{ $role->id }}" data-name="{{ $role->name }}">{{ ucwords($role->name) }}</option>
                                 @endforeach
                             </select>
                             @if ($errors->has('role_id'))
@@ -89,13 +89,6 @@
                                 <span id="name-error"
                                     class="text-sm text-red-600 mt-1">{{ $errors->first('region') }}</span>
                             @endif
-                        </div>
-						<div>
-                            <label for="region" class="form-label">Region</label>
-                            <div class="flex items-center gap-2">
-                                <input id="region" class="form-control" type="text" name="region"
-                                    placeholder="Masukan Region" aria-describedby="region" />
-                            </div>
                         </div>
                     </div>
                     {{-- Profil Pengguna End --}}
@@ -154,22 +147,6 @@
                                         class="text-sm text-red-600 mt-1">{{ $errors->first('address') }}</span>
                                 @endif
                             </div>
-							<div>
-								<label for="states-option">Kabupaten/Kota</label>
-								<select id="states-option" name="states-option" class=" w-full">
-									<option value="" selected disabled>
-										-- Pilih Kabupaten/Kota--
-									</option>
-									<option value="cleanser">
-										Sumatra
-									</option>
-								</select>
-							</div>
-							<div>
-								<label for="adresss" class="form-label">Alamat Lengkap</label>
-								<input id="adresss" class="form-control" type="text" name="adresss"
-									placeholder="Masukkan Alamat Lengkap" aria-describedby="adresss" />
-							</div>
                         </div>
                         <div class="relative mt-12">
                             <div class="h-[350px] z-10" id="user-map-location"></div>

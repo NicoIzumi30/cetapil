@@ -32,6 +32,7 @@ Go to the project directory
 Install dependencies
 ```bash
   composer install
+  npm install
 ```
 Create configuration file .env
 ```bash
@@ -57,4 +58,5 @@ Migrate and Seed Database
 ## Run Project
 ```bash
   php artisan serve
+  npm run dev
 ```

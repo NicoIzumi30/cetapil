@@ -88,7 +88,22 @@ if (!function_exists('getVisitDayByDay')) {
         return Arr::get($day, $nameDay) ?? '7';
     }
 }
+if (!function_exists('getVisitDayByNumber')) {
+    function getVisitDayByNumber($numberDay)
+    {
+        $day = [
+            '1'  => 'Senin',
+            '2' => 'Selasa',
+            '3'   => 'Rabu',
+            '4'  => 'Kamis',
+            '5'  => 'Jumat',
+            '6'  => 'Sabtu',
+            '7' => 'Minggu',
+        ];
 
+        return Arr::get($day, $numberDay) ?? 'Minggu';
+    }
+}
 if (!function_exists('updatePhotoVisibility')) {
     function updatePhotoVisibility($request, $img, $data)
     {

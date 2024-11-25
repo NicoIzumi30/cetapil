@@ -1,5 +1,6 @@
 <?php
 
+use App\Http\Controllers\Web\RoutingController;
 use App\Http\Controllers\Web\VisualController;
 use App\Models\Visibility;
 use Illuminate\Support\Facades\Route;
@@ -28,30 +29,31 @@ Route::middleware('auth')->group(function () {
     })->name('profile');
 
     // Routing Management
-    Route::prefix('routing')->name('routing.')->middleware('permission:menu_routing')->group(function () {
-        Route::get('/', function () {
-            return view('pages.routing.index');
-        })->name('index');
-        Route::get('/create', function () {
-            return view('pages.routing.create');
-        })->name('create');
-        Route::get('/edit', function () {
-            return view('pages.routing.edit');
-        })->name('edit');
-        Route::get('/request', function () {
-            return view('pages.routing.request');
-        });
-        Route::get('/routingrequest/detail', function () {
-            return view('pages.routing.detail-request');
-        });
-        Route::get('/sales-activity', function () {
-            return view('pages.routing.sales-activity');
-        });
-        Route::get('/av3m', function () {
-            return view('pages.routing.av3m');
-        });
-    });
-
+    // Route::prefix('routing')->name('routing.')->middleware('permission:menu_routing')->group(function () {
+    //     Route::get('/', function () {
+    //         return view('pages.routing.index');
+    //     })->name('index');
+    //     Route::get('/create', function () {
+    //         return view('pages.routing.create');
+    //     })->name('create');
+    //     Route::get('/edit', function () {
+    //         return view('pages.routing.edit');
+    //     })->name('edit');
+    //     Route::get('/request', function () {
+    //         return view('pages.routing.request');
+    //     });
+    //     Route::get('/routingrequest/detail', function () {
+    //         return view('pages.routing.detail-request');
+    //     });
+    //     Route::get('/sales-activity', function () {
+    //         return view('pages.routing.sales-activity');
+    //     });
+    //     Route::get('/av3m', function () {
+    //         return view('pages.routing.av3m');
+    //     });
+    // });
+    Route::resource('routing',RoutingController::class)->middleware('permission:menu_routing');
+    Route::get('data',[RoutingController::class,'getData'])->name('routing.data');
     // Visibility Management
     Route::resource('visibility', VisibilityController::class)->middleware('permission:menu_visibility');
 
