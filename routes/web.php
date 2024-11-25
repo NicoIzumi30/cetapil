@@ -57,6 +57,9 @@ Route::middleware('auth')->group(function () {
     Route::middleware('permission:menu_visibility')->group(function () {
         // Resource route for visibility
         Route::resource('visibility', VisibilityController::class);
+        Route::post('visibility', [VisibilityController::class, 'store'])->name('visibility.store');
+        // Explicit edit route (optional karena sudah include di resource)
+        Route::get('visibility/edit', [VisibilityController::class, 'edit'])->name('visibility.edit');
     
         // Routes for visual and POSM types
         Route::post('visual', [VisualController::class, 'store'])->name('visual.store');
