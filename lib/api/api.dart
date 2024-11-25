@@ -1,5 +1,6 @@
 import 'dart:convert';
 
+import 'package:cetapil_mobile/model/list_activity_response.dart';
 import 'package:cetapil_mobile/model/list_routing_response.dart';
 import 'package:cetapil_mobile/model/outlet.dart';
 import 'package:cetapil_mobile/model/submit_checkin_routing.dart';
@@ -200,4 +201,22 @@ class Api {
       throw "Unable to Submit Outlet";
     }
   }
+
+  static Future<ListActivityResponse> getActivityList() async {
+    var url = "$baseUrl/api/activity";
+    var token = await storage.read('token');
+    var response = await http.get(
+      Uri.parse(url),
+      headers: {
+        'Content-type': 'application/json',
+        'Authorization': 'Bearer $token',
+      },
+    );
+    // print(response.body);
+    if (response.statusCode == 200) {
+      return ListActivityResponse.fromJson(jsonDecode(response.body));
+    }
+    throw "Gagal request data Routing : \n${response.body}";
+  }
+
 }

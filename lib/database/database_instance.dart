@@ -4,6 +4,7 @@ import 'package:path/path.dart';
 import 'package:uuid/uuid.dart';
 
 import '../model/list_routing_response.dart' as Routing;
+import '../model/list_activity_response.dart' as Activity;
 
 class DatabaseHelper {
   static final DatabaseHelper instance = DatabaseHelper._init();
@@ -135,7 +136,7 @@ class DatabaseHelper {
         )
       ''');
     await db.execute('''
-        CREATE TABLE sales_activities (
+        CREATE TABLE routing_activities (
           id TEXT PRIMARY KEY,
           routing_id TEXT ,
           outlet_id TEXT,
@@ -156,6 +157,42 @@ class DatabaseHelper {
           FOREIGN KEY (routing_id) REFERENCES routing (id)
         )
       ''');
+
+    /// TABLE ACTIVITY
+    await db.execute('''
+  CREATE TABLE outlet_activities (
+    id TEXT PRIMARY KEY,
+    name TEXT NOT NULL,
+    category TEXT,
+    city_id TEXT,
+    longitude TEXT,
+    latitude TEXT,
+    visit_day TEXT,
+    created_at TEXT NOT NULL,
+    updated_at TEXT NOT NULL,
+    deleted_at TEXT
+  )
+''');
+
+    await db.execute('''
+  CREATE TABLE sales_activities (
+    id TEXT PRIMARY KEY,
+    outlet_id TEXT NOT NULL,
+    checked_in TEXT,
+    checked_out TEXT,
+    views_knowledge INTEGER DEFAULT 0,
+    time_availability INTEGER DEFAULT 0,
+    time_visibility INTEGER DEFAULT 0,
+    time_knowledge INTEGER DEFAULT 0,
+    time_survey INTEGER DEFAULT 0,
+    time_order INTEGER DEFAULT 0,
+    status TEXT CHECK(status IN ('IN_PROGRESS', 'SUBMITTED', 'CANCELLED')) DEFAULT 'IN_PROGRESS',
+    created_at TEXT NOT NULL,
+    updated_at TEXT NOT NULL,
+    deleted_at TEXT,
+    FOREIGN KEY (outlet_id) REFERENCES outlet_activities (id)
+  )
+''');
   }
 
   // Insert or update outlet from API
@@ -408,87 +445,7 @@ class DatabaseHelper {
     }));
   }
 
-  Future<List<Routing.Data>> getAllRouting() async {
-    final db = await database;
 
-    final List<Map<String, dynamic>> routingMaps = await db.query(
-      'routing',
-    );
-
-    return Future.wait(routingMaps.map((routingMap) async {
-      // print("Raw outlet data from DB: $outletMap"); // Debug print
-
-      // Get images for this outlet
-      final List<Map<String, dynamic>> imageMaps = await db.query(
-        'routing_images',
-        where: 'routing_id = ?',
-        whereArgs: [routingMap['id']],
-      );
-
-      final activityMaps = await db.query(
-        'sales_activities',
-        where: 'routing_id = ?',
-        whereArgs: [routingMap['id']],
-      );
-
-      // Get forms with their answers for this outlet
-      final List<Map<String, dynamic>> formMaps = await db.rawQuery('''
-      SELECT 
-        fa.id,
-        f.id as outlet_form_id,
-        f.type,
-        f.question,
-        fa.answer
-      FROM outlet_forms f
-      INNER JOIN routing_form_answers fa ON f.id = fa.outlet_form_id
-      WHERE fa.routing_id = ?
-    ''', [routingMap['id']]);
-
-      final routing = Routing.Data(
-        id: routingMap['id'],
-        user: Routing.User(
-            id: routingMap['user_id']?.toString() ?? '',
-            name: routingMap['salesName']?.toString() ??
-                '',
-        ),
-        name: routingMap['name'],
-        category: routingMap['category'],
-        visitDay: routingMap['visit_day'],
-        longitude: routingMap['longitude'],
-        latitude: routingMap['latitude'],
-        city: Routing.City(
-          id: routingMap['city_id']?.toString() ?? '1',
-          name: routingMap['city_name']?.toString() ?? 'Wonogiri',
-        ),
-        address: routingMap['address'],
-        status: routingMap['status'],
-        salesActivity: activityMaps.isNotEmpty
-            ? Routing.SalesActivity.fromMap(activityMaps.first)
-            : null,
-        images: imageMaps
-            .map((imageMap) => Routing.Images(
-          id: imageMap['id'] as String?,
-          position: imageMap['position'] as int?,
-          image: imageMap['image'] as String?,
-        ))
-            .toList(),
-        forms: formMaps
-            .map((formMap) => Routing.Forms(
-          id: formMap['id'] as String?,
-          outletForm: Routing.OutletForm(
-            id: formMap['outlet_form_id'] as String?,
-            type: formMap['type'] as String?,
-            question: formMap['question'] as String?,
-          ),
-          answer: formMap['answer'] as String?,
-        ))
-            .toList(),
-      );
-
-      // print("Created outlet object: $outlet"); // Debug print
-      return routing;
-    }));
-  }
 
   // Get unsynchronized draft outlets
   Future<List<Outlet.Outlet>> getUnsyncedDraftOutlets() async {
@@ -772,7 +729,7 @@ class DatabaseHelper {
       // Delete from child tables first
       await txn.delete('routing_form_answers');
       await txn.delete('routing_images');
-      await txn.delete('sales_activities');
+      await txn.delete('routing_activities');
 
       // Then delete from parent table
       await txn.delete('routing');
@@ -806,7 +763,7 @@ class DatabaseHelper {
 
         // 2. Insert sales activities
         await txn.insert(
-          'sales_activities',
+          'routing_activities',
           {
             'id': data['activities_id'],
             'routing_id': data['id'],
@@ -864,6 +821,181 @@ class DatabaseHelper {
         rethrow;
       }
     });
+  }
+
+  Future<List<Routing.Data>> getAllRouting() async {
+    final db = await database;
+
+    final List<Map<String, dynamic>> routingMaps = await db.query(
+      'routing',
+    );
+
+    return Future.wait(routingMaps.map((routingMap) async {
+      // print("Raw outlet data from DB: $outletMap"); // Debug print
+
+      // Get images for this outlet
+      final List<Map<String, dynamic>> imageMaps = await db.query(
+        'routing_images',
+        where: 'routing_id = ?',
+        whereArgs: [routingMap['id']],
+      );
+
+      final activityMaps = await db.query(
+        'routing_activities',
+        where: 'routing_id = ?',
+        whereArgs: [routingMap['id']],
+      );
+
+      // Get forms with their answers for this outlet
+      final List<Map<String, dynamic>> formMaps = await db.rawQuery('''
+      SELECT 
+        fa.id,
+        f.id as outlet_form_id,
+        f.type,
+        f.question,
+        fa.answer
+      FROM outlet_forms f
+      INNER JOIN routing_form_answers fa ON f.id = fa.outlet_form_id
+      WHERE fa.routing_id = ?
+    ''', [routingMap['id']]);
+
+      final routing = Routing.Data(
+        id: routingMap['id'],
+        user: Routing.User(
+          id: routingMap['user_id']?.toString() ?? '',
+          name: routingMap['salesName']?.toString() ??
+              '',
+        ),
+        name: routingMap['name'],
+        category: routingMap['category'],
+        visitDay: routingMap['visit_day'],
+        longitude: routingMap['longitude'],
+        latitude: routingMap['latitude'],
+        city: Routing.City(
+          id: routingMap['city_id']?.toString() ?? '1',
+          name: routingMap['city_name']?.toString() ?? 'Wonogiri',
+        ),
+        address: routingMap['address'],
+        status: routingMap['status'],
+        salesActivity: activityMaps.isNotEmpty
+            ? Routing.SalesActivity.fromMap(activityMaps.first)
+            : null,
+        images: imageMaps
+            .map((imageMap) => Routing.Images(
+          id: imageMap['id'] as String?,
+          position: imageMap['position'] as int?,
+          image: imageMap['image'] as String?,
+        ))
+            .toList(),
+        forms: formMaps
+            .map((formMap) => Routing.Forms(
+          id: formMap['id'] as String?,
+          outletForm: Routing.OutletForm(
+            id: formMap['outlet_form_id'] as String?,
+            type: formMap['type'] as String?,
+            question: formMap['question'] as String?,
+          ),
+          answer: formMap['answer'] as String?,
+        ))
+            .toList(),
+      );
+
+      // print("Created outlet object: $outlet"); // Debug print
+      return routing;
+    }));
+  }
+
+  /// ACTIVITY
+  Future<void> deleteAllActivity() async {
+    final db = await database;
+    await db.transaction((txn) async {
+      await txn.delete('outlet_activities');
+      await txn.delete('sales_activities');
+    });
+  }
+
+  Future<void> insertActivity(Map<String, dynamic> data) async {
+    final db = await database;
+
+    await db.transaction((txn) async {
+      // Insert outlet
+      // final outlet = data['outlet'];
+      await txn.insert(
+        'outlet_activities',
+        {
+          'id': data['outlet_id'],
+          'name': data['name'],
+          'category': data['category'],
+          'city_id': data['city_id'],
+          'longitude': data['longitude'],
+          'latitude': data['latitude'],
+          'visit_day': data['visit_day'],
+          'created_at': DateTime.now().toIso8601String(),
+          'updated_at': DateTime.now().toIso8601String(),
+        },
+        conflictAlgorithm: ConflictAlgorithm.replace,
+      );
+
+
+      // Insert sales activity
+      await txn.insert(
+        'sales_activities',
+        {
+          'id': data['id'],
+          'outlet_id': data['outlet_id'],
+          'checked_in': data['checked_in'],
+          'checked_out': data['checked_out'],
+          'views_knowledge': data['views_knowledge'],
+          'time_availability': data['time_availability'],
+          'time_visibility': data['time_visibility'],
+          'time_knowledge': data['time_knowledge'],
+          'time_survey': data['time_survey'],
+          'time_order': data['time_order'],
+          'status': data['status'],
+          'created_at': DateTime.now().toIso8601String(),
+          'updated_at': DateTime.now().toIso8601String(),
+        },
+        conflictAlgorithm: ConflictAlgorithm.replace,
+      );
+    });
+  }
+
+  Future<List<Activity.Data>> getSalesActivities() async {
+    final db = await database;
+
+    final List<Map<String, dynamic>> activityMaps = await db.query(
+      'sales_activities',
+    );
+
+    return Future.wait(activityMaps.map((activityMap) async {
+
+
+      final outletMaps = await db.query(
+        'outlet_activities',
+        where: 'id = ?',
+        whereArgs: [activityMap['outlet_id']],
+      );
+
+
+      final activities = Activity.Data(
+        id: activityMap['id'],
+        outlet: outletMaps.isNotEmpty
+          ? Activity.Outlet.fromJson(outletMaps.first)
+            : null,
+        checkedIn: activityMap['checked_in'],
+        checkedOut: activityMap['checked_out'],
+        viewsKnowledge: activityMap['views_knowledge'],
+        timeAvailability: activityMap['time_availability'],
+        timeVisibility: activityMap['time_visibility'],
+        timeKnowledge: activityMap['time_knowledge'],
+        timeSurvey: activityMap['time_survey'],
+        timeOrder: activityMap['time_order'],
+        status: activityMap['status'],
+
+      );
+
+      return activities;
+    }));
   }
 
   // Add this method to your DatabaseHelper class

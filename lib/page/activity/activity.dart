@@ -7,6 +7,7 @@ import 'package:get/get_state_manager/src/simple/get_view.dart';
 
 import '../../controller/activity/activity_controller.dart';
 import '../../model/activity.dart';
+import '../../model/list_activity_response.dart';
 import '../../utils/colors.dart';
 import '../outlet/detail_outlet.dart';
 
@@ -37,15 +38,26 @@ class ActivityPage extends GetView<ActivityController> {
             ),
             Expanded(
               child: Obx(
-                    () => ListView.builder(
-                  itemCount: controller.filteredOutlets.length,
-                  itemBuilder: (context, index) {
-                    final activity = controller.filteredOutlets[index];
-                    return ActivityCard(activity: activity, statusDraft: 'Drafted',statusCheckin: true, ontap: (){
-                      Get.to(()=> TambahActivity());
-                    },);
-                  },
-                ),
+                    () => RefreshIndicator(
+                      onRefresh: () async {
+                        await controller.initGetActivity();
+                      },
+                      child:
+                      controller.isLoading.value
+                          ? Center(child: CircularProgressIndicator())
+                          : controller.filteredOutlets.isEmpty
+                          ? _buildEmptyState()
+                          :
+                      ListView.builder(
+                                        itemCount: controller.filteredOutlets.length,
+                                        itemBuilder: (context, index) {
+                      final activity = controller.filteredOutlets[index];
+                      return ActivityCard(activity: activity, statusDraft: 'Drafted',statusCheckin: true, ontap: (){
+                        Get.to(()=> TambahActivity());
+                      },);
+                                        },
+                                      ),
+                    ),
               ),
             ),
           ],
@@ -53,9 +65,52 @@ class ActivityPage extends GetView<ActivityController> {
       ),
     );
   }
+
+  Widget _buildEmptyState() {
+    return ListView(
+      physics: AlwaysScrollableScrollPhysics(),
+      children: [
+        SizedBox(height: 100),
+        Center(
+          child: Column(
+            mainAxisAlignment: MainAxisAlignment.center,
+            children: [
+              Icon(
+                Icons.assignment,
+                size: 64,
+                color: Colors.grey,
+              ),
+              SizedBox(height: 16),
+              Text(
+                'Tidak ada Activity',
+                style: TextStyle(
+                  fontSize: 16,
+                  color: Colors.grey[600],
+                  fontWeight: FontWeight.bold,
+                ),
+              ),
+              SizedBox(height: 8),
+              Text(
+                'Tarik ke bawah untuk memuat data',
+                style: TextStyle(
+                  fontSize: 14,
+                  color: Colors.grey[500],
+                ),
+              ),
+            ],
+          ),
+        ),
+      ],
+    );
+  }
+
 }
+
+
+
+
 class ActivityCard extends StatelessWidget {
-  final Activity activity;
+  final Data activity;
   final String statusDraft;
   final bool statusCheckin;
   final VoidCallback ontap;
@@ -90,7 +145,7 @@ class ActivityCard extends StatelessWidget {
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
                     Text(
-                      activity.name,
+                      activity.outlet!.name!,
                       style: const TextStyle(
                         fontWeight: FontWeight.bold,
                       ),
@@ -102,14 +157,14 @@ class ActivityCard extends StatelessWidget {
                           children: <TextSpan>[
                             TextSpan(text: 'Kategori Outlet : '),
                             TextSpan(
-                              text: activity.category,
+                              text: activity.outlet!.category,
                               style: TextStyle(fontWeight: FontWeight.bold),
                             ),
                           ],
                         )),
                   ],
                 ),
-                Text(activity.date,style: TextStyle(fontSize: 11,fontStyle: FontStyle.italic),)
+                // Text("Senin/12",style: TextStyle(fontSize: 11,fontStyle: FontStyle.italic),)
               ],
             ),
             SizedBox(height: 10,),
