@@ -1,13 +1,13 @@
 <?php
 
-namespace App\Http\Requests\Routing;
+namespace App\Http\Requests\SalesActivity;
 
 use App\Traits\ResponseTrait;
 use Illuminate\Contracts\Validation\Validator;
 use Illuminate\Foundation\Http\FormRequest;
 use Illuminate\Http\Exceptions\HttpResponseException;
 
-class CheckOutRequest extends FormRequest
+class SaveAvailabilityRequest extends FormRequest
 {
     use ResponseTrait;
     /**
@@ -26,14 +26,12 @@ class CheckOutRequest extends FormRequest
     public function rules(): array
     {
         return [
-            'sales_activity_id' => 'required|exists:sales_activities,id',
-            'checked_out' => 'required|date',
-            'views_knowledge' => 'required|numeric|min:0',
-            'time_availability' => 'required|numeric|min:0',
-            'time_visibility' => 'required|numeric|min:0',
-            'time_knowledge' => 'required|numeric|min:0',
-            'time_survey' => 'required|numeric|min:0',
-            'time_order' => 'required|numeric|min:0',
+            'outlet_id' => 'required|exists:outlets,id',
+            'products' => 'required|array',
+            'products.*.id' => 'required|exists:products,id',
+            'products.*.availability_stock' => 'required|numeric',
+            'products.*.average_stock' => 'required|numeric',
+            'products.*.ideal_stock' => 'required|numeric',
         ];
     }
 

@@ -1,12 +1,12 @@
 <?php
 
-namespace App\Http\Resources\Routing;
+namespace App\Http\Resources\SalesActivity;
 
-use App\Constants\RoutingConstants;
+use App\Constants\SalesActivityConstants;
 use Illuminate\Http\Request;
 use Illuminate\Http\Resources\Json\ResourceCollection;
 
-class RoutingCollection extends ResourceCollection
+class SalesActivityCollection extends ResourceCollection
 {
     /**
      * Transform the resource collection into an array.
@@ -17,8 +17,8 @@ class RoutingCollection extends ResourceCollection
     {
         return [
             "status" => "OK",
-            "message" => RoutingConstants::GET_LIST,
-            "data" => RoutingResource::collection($this->collection->except(['images', 'forms']))
+            "message" => SalesActivityConstants::GET_LIST,
+            "data" => SalesActivityResource::collection($this->collection)
         ];
     }
 }

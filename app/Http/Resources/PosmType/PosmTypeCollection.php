@@ -1,12 +1,12 @@
 <?php
 
-namespace App\Http\Resources\Routing;
+namespace App\Http\Resources\PosmType;
 
-use App\Constants\RoutingConstants;
+use App\Constants\PosmTypeConstants;
 use Illuminate\Http\Request;
 use Illuminate\Http\Resources\Json\ResourceCollection;
 
-class RoutingCollection extends ResourceCollection
+class PosmTypeCollection extends ResourceCollection
 {
     /**
      * Transform the resource collection into an array.
@@ -17,8 +17,8 @@ class RoutingCollection extends ResourceCollection
     {
         return [
             "status" => "OK",
-            "message" => RoutingConstants::GET_LIST,
-            "data" => RoutingResource::collection($this->collection->except(['images', 'forms']))
+            "message" => PosmTypeConstants::GET_LIST,
+            "data" => PosmTypeResource::collection($this->collection)
         ];
     }
 }

@@ -45,37 +45,7 @@ class OutletController extends Controller
 
         return new RoutingCollection($outlets);
     }
-    public function getRouting(Request $request)
-    {
-        Carbon::setLocale('id');
-        $weekNumber = date('W');
-        $week = 'ODD';
-        if ($weekNumber % 2 == 0) {
-            $week = 'EVEN';
-        }
-        $user = $this->getAuthUser();
-        $outlets = Outlet::query()
-            ->approved()
-            ->where('user_id', $user->id)
-            ->where(function ($query) use ($week) {  // Tambahkan use ($week) di sini
-                $query->where('cycle', '1x1')
-                      ->orWhere(function ($q) use ($week) {  // Dan di sini
-                          $q->where('cycle', '1x2')
-                            ->where('week_type', $week);
-                      });
-            });
-    
-        $outlets = $outlets->where(function (Builder $builder) use ($request) {
-            $keyword = $request->input('keyword');
-            if ($keyword) {
-                $builder->where('name', 'like', '%' . $keyword . '%');
-            }
-        });
-    
-        $outlets = $outlets->get();
-        return new RoutingCollection($outlets);
-    }
-    
+
     public function show($id)
     {
         try {
