@@ -174,7 +174,50 @@ class RoutingController extends Controller
      */
     public function edit(string $id)
     {
-        //
+        $outlet = Outlet::findOrFail($id);
+        $salesUsers = User::role('sales')->get();
+        $waktuKunjungan = [
+            ['name'=> 'Senin', 'value' => 1],
+            ['name'=> 'Selasa', 'value' => 2],
+            ['name'=> 'Rabu', 'value' => 3],
+            ['name'=> 'Kamis', 'value'=> 4],
+            ['name'=> 'Jumat', 'value'=> 5],
+            ['name'=> 'Sabtu', 'value'=> 6],
+            ['name'=> 'Minggu', 'value'=> 7],
+        ];
+        $cycles = ["1x1", "1x2"];
+        $cities = City::all();
+        $channels = Channel::all();
+        $category_product = Category::all();
+        $outletForms = OutletForm::with(['answers' => function($query) use($id) {
+            $query->where('outlet_id', $id);
+         }])->get();
+        $categories = Category::with(['products' => function($query) use($id) {
+            $query->whereHas('outlets', function($q) use($id) {
+                $q->where('outlets.id', $id);
+            });
+         }])->get();
+        $weekType = [
+            [
+                "name" => "Ganjil",
+                "value" => "ODD",],
+            [
+                "name"=> "Genap",
+                "value" => "EVEN",
+            ]
+            ];
+            return view("pages.routing.edit", [
+                "salesUsers" => $salesUsers,
+                "waktuKunjungan" => $waktuKunjungan,
+                "cycles" => $cycles,
+                "cities" => $cities,
+                "channels" => $channels,
+                "category_product" => $category_product,
+                "outletForms" => $outletForms,
+                "weekType" => $weekType,
+                'categories' => $categories,
+                "outlet" => $outlet
+            ]);
     }
 
     /**
