@@ -1,6 +1,7 @@
 import 'package:cetapil_mobile/controller/activity/tambah_activity_controller.dart';
 import 'package:cetapil_mobile/controller/outlet/outlet_controller.dart';
 import 'package:cetapil_mobile/controller/routing/routing_controller.dart';
+import 'package:cetapil_mobile/controller/routing/tambah_routing_controller.dart';
 import 'package:cetapil_mobile/controller/selling/selling_controller.dart';
 import 'package:cetapil_mobile/controller/video_controller/video_controller.dart';
 import 'package:cetapil_mobile/database/dashboard.dart';
@@ -95,6 +96,7 @@ Future<void> initializeControllers() async {
     Get.lazyPut(() => SellingController());
     Get.lazyPut(() => TambahActivityController());
     Get.lazyPut(() => VideoController());
+    Get.lazyPut(() => TambahRoutingController());
   } catch (e) {
     print('Controller Initialization Error: $e');
   }

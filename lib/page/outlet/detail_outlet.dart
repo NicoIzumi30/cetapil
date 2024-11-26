@@ -10,13 +10,16 @@ import 'package:google_fonts/google_fonts.dart';
 import 'package:google_maps_flutter/google_maps_flutter.dart';
 import 'package:path_provider/path_provider.dart';
 
+import '../../controller/routing/routing_controller.dart';
 import '../../utils/colors.dart';
 import '../../widget/back_button.dart';
 import '../../widget/clipped_maps.dart';
 
 class DetailOutlet extends GetView<OutletController> {
-  DetailOutlet({super.key, required this.outlet});
+  RoutingController routingController = Get.find<RoutingController>();
+  DetailOutlet( {super.key,required this.isCheckin, required this.outlet});
   final Outlet outlet;
+  final bool isCheckin;
 
   @override
   Widget build(BuildContext context) {
@@ -28,169 +31,218 @@ class DetailOutlet extends GetView<OutletController> {
           width: double.infinity,
           height: double.infinity,
         ),
-        Padding(
-          padding: const EdgeInsets.fromLTRB(15, 30, 15, 10),
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              EnhancedBackButton(
-                onPressed: () {
-                  Navigator.of(context).pop();
-                },
-                backgroundColor: Colors.white,
-                iconColor: Colors.blue,
-              ),
-              SizedBox(
-                height: 20,
-              ),
-              Expanded(
-                child: SingleChildScrollView(
-                  child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      Text("Detail Outlet", style: AppTextStyle.titlePage),
-                      SizedBox(
-                        height: 20,
-                      ),
-                      UnderlineTextField.readOnly(
-                        title: "Nama Outlet",
-                        value: outlet.name,
-                      ),
-                      UnderlineTextField.readOnly(
-                        title: "Kategori Outlet",
-                        value: outlet.category,
-                      ),
-                      UnderlineTextField.readOnly(
-                        title: "Alamat Outlet",
-                        value: outlet.address,
-                        maxlines: 2,
-                      ),
-                      Row(
-                        children: [
-                          Expanded(
-                            child: UnderlineTextField.readOnly(
-                              title: "Latitude",
-                              value: outlet.longitude,
+        Column(
+          children: [
+            Expanded(
+              child: Padding(
+                padding: const EdgeInsets.fromLTRB(15, 30, 15, 10),
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    EnhancedBackButton(
+                      onPressed: () {
+                        Navigator.of(context).pop();
+                      },
+                      backgroundColor: Colors.white,
+                      iconColor: Colors.blue,
+                    ),
+                    SizedBox(
+                      height: 20,
+                    ),
+                    Expanded(
+                      child: SingleChildScrollView(
+                        child: Column(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: [
+                            Text("Detail Outlet", style: AppTextStyle.titlePage),
+                            SizedBox(
+                              height: 20,
                             ),
-                          ),
-                          SizedBox(
-                            width: 10,
-                          ),
-                          Expanded(
-                            child: UnderlineTextField.readOnly(
-                              title: "Longitude",
-                              value: outlet.latitude,
+                            UnderlineTextField.readOnly(
+                              title: "Nama Outlet",
+                              value: outlet.name,
                             ),
-                          ),
-                        ],
-                      ),
-                      MapPreviewWidget(
-                        latitude: double.tryParse(outlet.latitude!) ?? 0,
-                        longitude: double.tryParse(outlet.longitude!) ?? 0,
-                        zoom: 14.0,
-                        height: 250,
-                        borderRadius: 10,
-                      ),
-                      SizedBox(
-                        height: 10,
-                      ),
-                      Text(
-                        "Foto Outlet",
-                        style: TextStyle(fontSize: 15, fontWeight: FontWeight.w700),
-                      ),
-                      SizedBox(
-                        height: 10,
-                      ),
-                      Row(
-                        children: [
-                          ClipImage(url: outlet.images![0].image!),
-                          SizedBox(
-                            width: 8,
-                          ),
-                          ClipImage(url: outlet.images![1].image!),
-                          SizedBox(
-                            width: 8,
-                          ),
-                          ClipImage(url: outlet.images![2].image!),
-                        ],
-                      ),
-                      SizedBox(
-                        height: 10,
-                      ),
-                      Text("Formulir Survey Outlet", style: AppTextStyle.titlePage),
-                      SizedBox(
-                        height: 20,
-                      ),
-                      Obx(() {
-                        if (controller.isLoading.value) {
-                          return const Center(child: CircularProgressIndicator());
-                        }
-
-                        if (controller.questions.isEmpty) {
-                          return const Center(child: Text("No Form"));
-                        }
-                        return Column(
-                          children: List<Widget>.generate(
-                            controller.questions.length,
-                            (index) {
-                              final localQuestion = controller.questions[index];
-                              String answer = "";
-
-                              // Method 1: Try to match by index first
-                              if (index < (outlet.forms?.length ?? 0)) {
-                                final apiForm = outlet.forms![index];
-                                if (apiForm.outletForm?.id == localQuestion.id) {
-                                  answer = apiForm.answer ?? "";
-                                }
+                            UnderlineTextField.readOnly(
+                              title: "Kategori Outlet",
+                              value: outlet.category,
+                            ),
+                            UnderlineTextField.readOnly(
+                              title: "Alamat Outlet",
+                              value: outlet.address,
+                              maxlines: 2,
+                            ),
+                            Row(
+                              children: [
+                                Expanded(
+                                  child: UnderlineTextField.readOnly(
+                                    title: "Latitude",
+                                    value: outlet.longitude,
+                                  ),
+                                ),
+                                SizedBox(
+                                  width: 10,
+                                ),
+                                Expanded(
+                                  child: UnderlineTextField.readOnly(
+                                    title: "Longitude",
+                                    value: outlet.latitude,
+                                  ),
+                                ),
+                              ],
+                            ),
+                            MapPreviewWidget(
+                              latitude: double.tryParse(outlet.latitude!) ?? 0,
+                              longitude: double.tryParse(outlet.longitude!) ?? 0,
+                              zoom: 14.0,
+                              height: 250,
+                              borderRadius: 10,
+                            ),
+                            SizedBox(
+                              height: 10,
+                            ),
+                            Text(
+                              "Foto Outlet",
+                              style: TextStyle(fontSize: 15, fontWeight: FontWeight.w700),
+                            ),
+                            SizedBox(
+                              height: 10,
+                            ),
+                            Row(
+                              children: [
+                                ClipImage(url: outlet.images![0].image!),
+                                SizedBox(
+                                  width: 8,
+                                ),
+                                ClipImage(url: outlet.images![1].image!),
+                                SizedBox(
+                                  width: 8,
+                                ),
+                                ClipImage(url: outlet.images![2].image!),
+                              ],
+                            ),
+                            SizedBox(
+                              height: 10,
+                            ),
+                            Text("Formulir Survey Outlet", style: AppTextStyle.titlePage),
+                            SizedBox(
+                              height: 20,
+                            ),
+                            Obx(() {
+                              if (controller.isLoading.value) {
+                                return const Center(child: CircularProgressIndicator());
                               }
 
-                              // Method 2: If no match by index, search through all forms
-                              if (answer.isEmpty) {
-                                answer = outlet.forms
-                                        ?.firstWhereOrNull(
-                                            (form) => form.outletForm?.id == localQuestion.id)
-                                        ?.answer ??
-                                    "";
+                              if (controller.questions.isEmpty) {
+                                return const Center(child: Text("No Form"));
                               }
+                              return Column(
+                                children: List<Widget>.generate(
+                                  controller.questions.length,
+                                  (index) {
+                                    final localQuestion = controller.questions[index];
+                                    String answer = "";
 
-                              return UnderlineTextField.readOnly(
-                                title: localQuestion.question,
-                                value: answer,
+                                    // Method 1: Try to match by index first
+                                    if (index < (outlet.forms?.length ?? 0)) {
+                                      final apiForm = outlet.forms![index];
+                                      if (apiForm.outletForm?.id == localQuestion.id) {
+                                        answer = apiForm.answer ?? "";
+                                      }
+                                    }
+
+                                    // Method 2: If no match by index, search through all forms
+                                    if (answer.isEmpty) {
+                                      answer = outlet.forms
+                                              ?.firstWhereOrNull(
+                                                  (form) => form.outletForm?.id == localQuestion.id)
+                                              ?.answer ??
+                                          "";
+                                    }
+
+                                    return UnderlineTextField.readOnly(
+                                      title: localQuestion.question,
+                                      value: answer,
+                                    );
+                                  },
+                                ),
                               );
-                            },
-                          ),
-                        );
-                      }),
-                      // UnderlineTextField.editable(
-                      //     title: "Apakah outlet sudah menjual produk GIH ?",
-                      //     controller: _controller),
-                      // UnderlineTextField.editable(
-                      //     title: "Berapa banyak produk GIH yang sudah terjual ?",
-                      //     controller: _controller),
-                      // UnderlineTextField.editable(
-                      //     title: "Selling out GSC500/week (in pcs)", controller: _controller),
-                      // UnderlineTextField.editable(
-                      //     title: "Selling out GSC1000/week (in pcs)", controller: _controller),
-                      // UnderlineTextField.editable(
-                      //     title: "Selling out GSC250/week (in pcs)", controller: _controller),
-                      // UnderlineTextField.editable(
-                      //     title: "Selling out GSC125/week (in pcs)", controller: _controller),
-                      // UnderlineTextField.editable(
-                      //     title: "Selling out Oily 125/week (in pcs)", controller: _controller),
-                      // UnderlineTextField.editable(
-                      //     title: "Selling out wash & shampo 400ml/week (in pcs)",
-                      //     controller: _controller),
-                      // UnderlineTextField.editable(
-                      //     title: "Selling out wash & shampo cal 400ml/week (in pcs)",
-                      //     controller: _controller),
-                    ],
-                  ),
+                            }),
+                            // UnderlineTextField.editable(
+                            //     title: "Apakah outlet sudah menjual produk GIH ?",
+                            //     controller: _controller),
+                            // UnderlineTextField.editable(
+                            //     title: "Berapa banyak produk GIH yang sudah terjual ?",
+                            //     controller: _controller),
+                            // UnderlineTextField.editable(
+                            //     title: "Selling out GSC500/week (in pcs)", controller: _controller),
+                            // UnderlineTextField.editable(
+                            //     title: "Selling out GSC1000/week (in pcs)", controller: _controller),
+                            // UnderlineTextField.editable(
+                            //     title: "Selling out GSC250/week (in pcs)", controller: _controller),
+                            // UnderlineTextField.editable(
+                            //     title: "Selling out GSC125/week (in pcs)", controller: _controller),
+                            // UnderlineTextField.editable(
+                            //     title: "Selling out Oily 125/week (in pcs)", controller: _controller),
+                            // UnderlineTextField.editable(
+                            //     title: "Selling out wash & shampo 400ml/week (in pcs)",
+                            //     controller: _controller),
+                            // UnderlineTextField.editable(
+                            //     title: "Selling out wash & shampo cal 400ml/week (in pcs)",
+                            //     controller: _controller),
+                          ],
+                        ),
+                      ),
+                    )
+                  ],
                 ),
-              )
-            ],
-          ),
+              ),
+            ),
+            (isCheckin)
+            ? Container(
+              width: double.infinity,
+              color: Colors.white,
+              child: Padding(
+                padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 15),
+                child: Row(
+                  children: [
+                    _buildButton(
+                      true,
+                      "Check-in",
+                          () => routingController.submitCheckin(outlet.id!),
+                      // controller.submitOutlet(),
+                    ),
+                  ],
+                ),
+              ),
+            )
+                : SizedBox()
+          ],
         ),
       ]),
+    );
+  }
+
+  Expanded _buildButton(bool isSubmit, String title, VoidCallback onTap) {
+    return Expanded(
+      child: Container(
+        child: ElevatedButton(
+          style: ElevatedButton.styleFrom(
+            backgroundColor: isSubmit ? AppColors.primary : Colors.white,
+            shape: RoundedRectangleBorder(
+              borderRadius: BorderRadius.circular(10),
+              side: isSubmit ? BorderSide.none : BorderSide(color: AppColors.primary),
+            ),
+          ),
+          onPressed: onTap,
+          child: Text(
+            title,
+            style: TextStyle(
+              color: isSubmit ? Colors.white : AppColors.primary,
+              fontWeight: FontWeight.bold,
+            ),
+          ),
+        ),
+      ),
     );
   }
 }

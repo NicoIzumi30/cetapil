@@ -319,90 +319,88 @@ class OutletCard extends StatelessWidget {
                   ),
                   const SizedBox(height: 8),
 
+                  // Draft Status
+                  if (outlet.dataSource == 'DRAFT')
+                    Row(
+                      children: [
+                        Icon(
+                          Icons.circle,
+                          size: 12,
+                          color: Colors.orange,
+                        ),
+                        SizedBox(width: 4),
+                        Text(
+                          'Draft',
+                          style: TextStyle(
+                            fontSize: 12,
+                            color: Colors.orange,
+                          ),
+                        ),
+                      ],
+                    ),
+                  const SizedBox(height: 16),
+
                   // Action Button
                   Row(
-                    mainAxisAlignment: MainAxisAlignment.spaceEvenly,
                     children: [
-                      if (outlet.dataSource == 'DRAFT')
-                        Row(
-                          children: [
-                            Icon(
-                              Icons.circle,
-                              size: 12,
-                              color: Colors.orange,
-                            ),
-                            SizedBox(width: 4),
-                            Text(
-                              'Draft',
-                              style: TextStyle(
-                                fontSize: 12,
-                                color: Colors.orange,
-                              ),
-                            ),
-                          ],
+                      ElevatedButton(
+                        onPressed: () {
+                          outlet.dataSource != "DRAFT"
+                              ? Get.to(() => DetailOutlet(outlet: outlet,isCheckin: false,))
+                              : outletController.setDraftValue(outlet);
+                        },
+                        style: ElevatedButton.styleFrom(
+                          backgroundColor: Colors.blue,
+                          minimumSize: const Size(80, 36),
+                          shape: RoundedRectangleBorder(
+                            borderRadius: BorderRadius.circular(8),
+                          ),
                         ),
-                      Row(
-                        children: [
-                          ElevatedButton(
-                            onPressed: () {
-                              outlet.dataSource != "DRAFT"
-                                  ? Get.to(() => DetailOutlet(outlet: outlet))
-                                  : outletController.setDraftValue(outlet);
-                            },
-                            style: ElevatedButton.styleFrom(
-                              backgroundColor: Colors.blue,
-                              minimumSize: const Size(80, 36),
-                              shape: RoundedRectangleBorder(
-                                borderRadius: BorderRadius.circular(8),
+                        child: const Text(
+                          'Lihat',
+                          style: TextStyle(color: Colors.white),
+                        ),
+                      ),
+                      if (outlet.dataSource == 'DRAFT') ...[
+                        SizedBox(width: 8),
+                        OutlinedButton(
+                          onPressed: () {
+                            // Add delete confirmation dialog
+                            showDialog(
+                              context: context,
+                              builder: (context) => AlertDialog(
+                                title: Text('Hapus Draft'),
+                                content: Text('Apakah Anda yakin ingin menghapus draft ini?'),
+                                actions: [
+                                  TextButton(
+                                    onPressed: () => Navigator.pop(context),
+                                    child: Text('Batal'),
+                                  ),
+                                  TextButton(
+                                    onPressed: () async {
+                                      Navigator.pop(context);
+                                      await outletController.db.deleteOutlet(outlet.id!);
+                                      await outletController.loadOutlets();
+                                    },
+                                    child: Text('Hapus'),
+                                    style: TextButton.styleFrom(
+                                      foregroundColor: Colors.red,
+                                    ),
+                                  ),
+                                ],
                               ),
-                            ),
-                            child: const Text(
-                              'Lihat',
-                              style: TextStyle(color: Colors.white),
+                            );
+                          },
+                          style: OutlinedButton.styleFrom(
+                            foregroundColor: Colors.red,
+                            minimumSize: const Size(80, 36),
+                            shape: RoundedRectangleBorder(
+                              borderRadius: BorderRadius.circular(8),
                             ),
                           ),
-                          if (outlet.dataSource == 'DRAFT') ...[
-                            SizedBox(width: 8),
-                            OutlinedButton(
-                              onPressed: () {
-                                // Add delete confirmation dialog
-                                showDialog(
-                                  context: context,
-                                  builder: (context) => AlertDialog(
-                                    title: Text('Hapus Draft'),
-                                    content: Text('Apakah Anda yakin ingin menghapus draft ini?'),
-                                    actions: [
-                                      TextButton(
-                                        onPressed: () => Navigator.pop(context),
-                                        child: Text('Batal'),
-                                      ),
-                                      TextButton(
-                                        onPressed: () async {
-                                          Navigator.pop(context);
-                                          await outletController.db.deleteOutlet(outlet.id!);
-                                          await outletController.loadOutlets();
-                                        },
-                                        child: Text('Hapus'),
-                                        style: TextButton.styleFrom(
-                                          foregroundColor: Colors.red,
-                                        ),
-                                      ),
-                                    ],
-                                  ),
-                                );
-                              },
-                              style: OutlinedButton.styleFrom(
-                                foregroundColor: Colors.red,
-                                minimumSize: const Size(80, 36),
-                                shape: RoundedRectangleBorder(
-                                  borderRadius: BorderRadius.circular(8),
-                                ),
-                              ),
-                              child: const Text('Hapus'),
-                            ),
-                          ],
-                        ],
-                      ),
+                          child: const Text('Hapus'),
+                        ),
+                      ],
                     ],
                   ),
                 ],
