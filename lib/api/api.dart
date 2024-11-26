@@ -5,6 +5,7 @@ import 'package:cetapil_mobile/model/list_routing_response.dart';
 import 'package:cetapil_mobile/model/outlet.dart';
 import 'package:cetapil_mobile/model/submit_checkin_routing.dart';
 import 'package:cetapil_mobile/model/submit_outlet_response.dart';
+import 'package:cetapil_mobile/model/survey_question_response.dart';
 import 'package:get_storage/get_storage.dart';
 import 'package:http/http.dart' as http;
 
@@ -13,7 +14,7 @@ import '../model/form_outlet_response.dart';
 import '../model/get_city_response.dart';
 import '../model/login_response.dart';
 
-const String baseUrl = 'https://dev-cetaphil.i-am.host';
+const String baseUrl = 'https://63b1-36-68-56-36.ngrok-free.app';
 final GetStorage storage = GetStorage();
 
 class Api {
@@ -136,8 +137,24 @@ class Api {
     }
     throw "Gagal request data Routing : \n${response.body}";
   }
+  static Future<SurveyQuestionResponse> getSurveyQuestion() async {
+    var url = "$baseUrl/api/activity/surveys";
+    var token = await storage.read('token');
+    var response = await http.get(
+      Uri.parse(url),
+      headers: {
+        'Content-type': 'application/json',
+        'Authorization': 'Bearer $token',
+      },
+    );
+    // print(response.body);
+    if (response.statusCode == 200) {
+      return SurveyQuestionResponse.fromJson(jsonDecode(response.body));
+    }
+    throw "Gagal request data Survey Question : \n${response.body}";
+  }
 
-  static Future<SubmitCheckinRouting> submitCheckin(Map<String,String> data) async {
+  static Future<SubmitCheckinRouting> submitCheckin(Map<String, String> data) async {
     var url = "$baseUrl/api/routing/check_in";
     var token = await storage.read('token');
     var response = await http.post(
@@ -158,7 +175,8 @@ class Api {
     throw "Gagal submit checkin : \n${response.body}";
   }
 
-  static Future<SubmitOutletResponse> submitOutlet(Map<String, dynamic> data,List<FormOutletResponse> question) async{
+  static Future<SubmitOutletResponse> submitOutlet(
+      Map<String, dynamic> data, List<FormOutletResponse> question) async {
     var url = "$baseUrl/api/outlet/forms/create-with-forms";
     var token = await storage.read('token');
     var request = await http.MultipartRequest('post', Uri.parse(url));
@@ -173,8 +191,9 @@ class Api {
     request.fields["latitude"] = data["latitude"];
     request.fields["address"] = data["address"];
     request.fields["cycle"] = data["cycle"];
+
     ///Form
-    for(int i = 0; i < question.length; i++){
+    for (int i = 0; i < question.length; i++) {
       request.fields["forms[$i][id]"] = data["forms[$i][id]"];
       request.fields["forms[$i][answer]"] = data["forms[$i][answer]"];
     }
@@ -189,7 +208,7 @@ class Api {
     ));
     request.files.add(await http.MultipartFile.fromPath(
       'img_main_road',
-        data["image_path_3"],
+      data["image_path_3"],
     ));
 
     var response = await request.send();
@@ -218,5 +237,4 @@ class Api {
     }
     throw "Gagal request data Routing : \n${response.body}";
   }
-
 }

@@ -409,8 +409,8 @@ class DatabaseHelper {
         longitude: outletMap['longitude'],
         latitude: outletMap['latitude'],
         city: Outlet.City(
-          id: outletMap['city_id']?.toString() ?? '1',
-          name: outletMap['city_name']?.toString() ?? 'Wonogiri',
+          id: outletMap['city_id']?.toString() ?? '',
+          name: outletMap['city_name']?.toString() ?? '',
         ),
         address: outletMap['address'],
         status: outletMap['status'],
@@ -444,8 +444,6 @@ class DatabaseHelper {
       return outlet;
     }));
   }
-
-
 
   // Get unsynchronized draft outlets
   Future<List<Outlet.Outlet>> getUnsyncedDraftOutlets() async {
@@ -761,63 +759,68 @@ class DatabaseHelper {
           },
         );
 
-        // 2. Insert sales activities
-        await txn.insert(
-          'routing_activities',
-          {
-            'id': data['activities_id'],
-            'routing_id': data['id'],
-            'outlet_id': data['outlet_id'],
-            'user_id': data['user_id'] ?? "",
-            'checked_in': data['checked_in'],
-            'checked_out': data['checked_out'],
-            'views_knowledge': data['views_knowledge'] ?? 0,
-            'time_availability': data['time_availability'] ?? 0,
-            'time_visibility': data['time_visibility'] ?? 0,
-            'time_knowledge': data['time_knowledge'] ?? 0,
-            'time_survey': data['time_survey'] ?? 0,
-            'time_order': data['time_order'] ?? 0,
-            'status': data['status_activities'],
-            'created_at': DateTime.now().toIso8601String(),
-            'updated_at': DateTime.now().toIso8601String(),
-            'deleted_at': null,
-          },
-        );
-
-        // 3. Insert routing images
-        for (int i = 0; i < 3; i++) {
+        // 2. Only insert activities if sales_activity data exists
+        if (data.containsKey('activities_id')) {
           await txn.insert(
-            'routing_images',
+            'routing_activities',
             {
-              'id': const Uuid().v4(),
+              'id': data['activities_id'],
               'routing_id': data['id'],
-              'position': i + 1,  // Changed to INTEGER
-              'image': data['image_path_${i + 1}'],
-              'created_at': DateTime.now().toIso8601String(),
-            },
-          );
-        }
-
-        // 4. Insert routing form answers
-        final formKeys = data.keys.where((key) => key.startsWith('form_id_')).toList();
-
-        for (var key in formKeys) {
-          final formId = key.replaceFirst('form_id_', '');
-          await txn.insert(
-            'routing_form_answers',
-            {
-              'id': const Uuid().v4(),
-              'routing_id': data['id'],
-              'outlet_form_id': formId,  // Changed from routing_form_id to outlet_form_id
-              'answer': data[key],
+              'outlet_id': data['outlet_id'],
+              'user_id': data['user_id'],
+              'checked_in': data['checked_in'] ?? DateTime.now().toIso8601String(),
+              'checked_out': data['checked_out'],
+              'views_knowledge': data['views_knowledge'] ?? 0,
+              'time_availability': data['time_availability'] ?? 0,
+              'time_visibility': data['time_visibility'] ?? 0,
+              'time_knowledge': data['time_knowledge'] ?? 0,
+              'time_survey': data['time_survey'] ?? 0,
+              'time_order': data['time_order'] ?? 0,
+              'status': data['status_activities'],
               'created_at': data['created_at'],
               'updated_at': data['updated_at'],
               'deleted_at': null,
             },
           );
         }
+
+        // 3. Insert routing images
+        for (int i = 0; i < 3; i++) {
+          if (data['image_path_${i + 1}'] != null) {
+            await txn.insert(
+              'routing_images',
+              {
+                'id': const Uuid().v4(),
+                'routing_id': data['id'],
+                'position': i + 1,
+                'image': data['image_path_${i + 1}'],
+                'created_at': DateTime.now().toIso8601String(),
+              },
+            );
+          }
+        }
+
+        // 4. Insert routing form answers
+        final formKeys = data.keys.where((key) => key.startsWith('form_id_')).toList();
+        for (var key in formKeys) {
+          final formId = key.replaceFirst('form_id_', '');
+          if (data[key] != null && data[key].toString().isNotEmpty) {
+            await txn.insert(
+              'routing_form_answers',
+              {
+                'id': const Uuid().v4(),
+                'routing_id': data['id'],
+                'outlet_form_id': formId,
+                'answer': data[key],
+                'created_at': data['created_at'],
+                'updated_at': data['updated_at'],
+                'deleted_at': null,
+              },
+            );
+          }
+        }
       } catch (e) {
-        print('Error inserting routing with answers: $e');
+        print('Error in transaction: $e');
         rethrow;
       }
     });
@@ -863,8 +866,7 @@ class DatabaseHelper {
         id: routingMap['id'],
         user: Routing.User(
           id: routingMap['user_id']?.toString() ?? '',
-          name: routingMap['salesName']?.toString() ??
-              '',
+          name: routingMap['salesName']?.toString() ?? '',
         ),
         name: routingMap['name'],
         category: routingMap['category'],
@@ -872,31 +874,30 @@ class DatabaseHelper {
         longitude: routingMap['longitude'],
         latitude: routingMap['latitude'],
         city: Routing.City(
-          id: routingMap['city_id']?.toString() ?? '1',
-          name: routingMap['city_name']?.toString() ?? 'Wonogiri',
+          id: routingMap['city_id']?.toString() ?? '',
+          name: routingMap['city_name']?.toString() ?? '',
         ),
         address: routingMap['address'],
         status: routingMap['status'],
-        salesActivity: activityMaps.isNotEmpty
-            ? Routing.SalesActivity.fromMap(activityMaps.first)
-            : null,
+        salesActivity:
+            activityMaps.isNotEmpty ? Routing.SalesActivity.fromMap(activityMaps.first) : null,
         images: imageMaps
             .map((imageMap) => Routing.Images(
-          id: imageMap['id'] as String?,
-          position: imageMap['position'] as int?,
-          image: imageMap['image'] as String?,
-        ))
+                  id: imageMap['id'] as String?,
+                  position: imageMap['position'] as int?,
+                  image: imageMap['image'] as String?,
+                ))
             .toList(),
         forms: formMaps
             .map((formMap) => Routing.Forms(
-          id: formMap['id'] as String?,
-          outletForm: Routing.OutletForm(
-            id: formMap['outlet_form_id'] as String?,
-            type: formMap['type'] as String?,
-            question: formMap['question'] as String?,
-          ),
-          answer: formMap['answer'] as String?,
-        ))
+                  id: formMap['id'] as String?,
+                  outletForm: Routing.OutletForm(
+                    id: formMap['outlet_form_id'] as String?,
+                    type: formMap['type'] as String?,
+                    question: formMap['question'] as String?,
+                  ),
+                  answer: formMap['answer'] as String?,
+                ))
             .toList(),
       );
 
@@ -936,7 +937,6 @@ class DatabaseHelper {
         conflictAlgorithm: ConflictAlgorithm.replace,
       );
 
-
       // Insert sales activity
       await txn.insert(
         'sales_activities',
@@ -968,20 +968,15 @@ class DatabaseHelper {
     );
 
     return Future.wait(activityMaps.map((activityMap) async {
-
-
       final outletMaps = await db.query(
         'outlet_activities',
         where: 'id = ?',
         whereArgs: [activityMap['outlet_id']],
       );
 
-
       final activities = Activity.Data(
         id: activityMap['id'],
-        outlet: outletMaps.isNotEmpty
-          ? Activity.Outlet.fromJson(outletMaps.first)
-            : null,
+        outlet: outletMaps.isNotEmpty ? Activity.Outlet.fromJson(outletMaps.first) : null,
         checkedIn: activityMap['checked_in'],
         checkedOut: activityMap['checked_out'],
         viewsKnowledge: activityMap['views_knowledge'],
@@ -991,7 +986,6 @@ class DatabaseHelper {
         timeSurvey: activityMap['time_survey'],
         timeOrder: activityMap['time_order'],
         status: activityMap['status'],
-
       );
 
       return activities;

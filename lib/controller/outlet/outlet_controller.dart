@@ -63,12 +63,12 @@ class OutletController extends GetxController {
 
     // Set city data - Make sure these values are set
     print("Setting city data: ${outlet.city?.id}, ${outlet.city?.name}"); // Debug print
-    cityId.value = outlet.city?.id ?? "1";
-    cityName.value = outlet.city?.name ?? "Wonogiri";
+    cityId.value = outlet.city?.id ?? "";
+    cityName.value = outlet.city?.name ?? "";
     if (outlet.city != null) {
       selectedCity.value = Data(
-        id: outlet.city?.id ?? "1",
-        name: outlet.city?.name ?? "Wonogiri",
+        id: outlet.city?.id ?? "",
+        name: outlet.city?.name ?? "",
       );
     }
 
@@ -397,8 +397,8 @@ class OutletController extends GetxController {
         'user_name': salesName.value.text, // Add this duplicate field
         'outletName': outletName.value.text,
         'category': selectedCategory.value,
-        'city_id': cityId.value.isEmpty ? "1" : cityId.value,
-        'city_name': cityName.value.isEmpty ? "Wonogiri" : cityName.value,
+        'city_id': cityId.value.isEmpty ? "" : cityId.value,
+        'city_name': cityName.value.isEmpty ? "" : cityName.value,
         'longitude': gpsController.longController.value.text,
         'latitude': gpsController.latController.value.text,
         'address': outletAddress.value.text,

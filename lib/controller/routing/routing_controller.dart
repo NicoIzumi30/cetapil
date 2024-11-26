@@ -24,12 +24,10 @@ class RoutingController extends GetxController {
   void onInit() {
     super.onInit();
     initGetRouting();
-
   }
 
-
-  initGetRouting()async {
-    try{
+  Future<void> initGetRouting() async {
+    try {
       await db.deleteAllRouting();
       routing.clear();
 
@@ -37,9 +35,9 @@ class RoutingController extends GetxController {
       final response = await Api.getRoutingList();
 
       if (response.status == "OK" && response.data!.isNotEmpty) {
-        for(int i = 0; i< response.data!.length; i++){ /// looping response Api
+        for (int i = 0; i < response.data!.length; i++) {
           final result = response.data![i];
-          print("cekin : ${result.salesActivity?.checkedIn}");
+
           Map<String, dynamic> data = {
             'id': result.id,
             'outletName': result.name ?? "",
@@ -47,143 +45,58 @@ class RoutingController extends GetxController {
             'category': result.category ?? "",
             'city_id': result.city?.id ?? "",
             'city_name': result.city?.name ?? "",
-            'longitude': result.longitude ?? "",
-            'latitude': result.latitude ?? "",
+            'longitude': double.tryParse(result.longitude ?? "") ?? 0.0,
+            'latitude': double.tryParse(result.latitude ?? "") ?? 0.0,
             'address': result.address ?? "",
             'status_outlet': result.status ?? "",
             'created_at': DateTime.now().toIso8601String(),
             'updated_at': DateTime.now().toIso8601String(),
           };
+
+          // Handle sales activity data
           if (result.salesActivity != null) {
             data.addAll({
               'activities_id': const Uuid().v4(),
-              'outlet_id': result.salesActivity?.outletId ?? "",
-              'user_id': result.user!.id ?? "",
-              'checked_in': result.salesActivity?.checkedIn ?? "",
-              'checked_out': result.salesActivity?.checkedOut ?? "",
-              'views_knowledge': result.salesActivity?.viewsKnowledge ?? "",
-              'time_availability': result.salesActivity?.timeAvailability ?? "",
-              'time_visibility': result.salesActivity?.timeVisibility ?? "",
-              'time_knowledge': result.salesActivity?.timeKnowledge ?? "",
-              'time_survey': result.salesActivity?.timeSurvey ?? "",
-              'time_order': result.salesActivity?.timeOrder ?? "",
-              'status_activities': result.salesActivity?.status ?? "",
+              'outlet_id': result.id, // Use the routing ID as outlet_id
+              'user_id': result.user?.id ?? "",
+              'checked_in': result.salesActivity?.checkedIn,
+              'checked_out': result.salesActivity?.checkedOut,
+              'views_knowledge': 0,
+              'time_availability': 0,
+              'time_visibility': 0,
+              'time_knowledge': 0,
+              'time_survey': 0,
+              'time_order': 0,
+              'status_activities': result.salesActivity?.status ?? "PENDING",
             });
           }
-          if (result.images != null && result.images!.isNotEmpty) {
+
+          // Handle images
+          if (result.images != null) {
             for (int imgIndex = 0; imgIndex < 3; imgIndex++) {
               data['image_path_${imgIndex + 1}'] =
-              imgIndex < result.images!.length ? result.images![imgIndex].image ?? "" : "";
+                  imgIndex < result.images!.length ? result.images![imgIndex].image ?? "" : "";
             }
           }
-          // if (result.images != null && result.images!.isNotEmpty) {
-          //   for (int imgIndex = 0; imgIndex < 3; imgIndex++) {
-          //     data['image_path_${imgIndex + 1}'] =
-          //     imgIndex < result.images!.length ? result.images![imgIndex].image ?? "" : "";
-          //   }
-          // }
-          // Add forms data if exists
-          if (result.forms != null && result.forms!.isNotEmpty) {
-            final formAnswers = Map.fromEntries(
-                result.forms!.map((form) => MapEntry(
-                    form.outletForm?.id ?? "",
-                    form.answer ?? ""
-                ))
-            );
 
-            // Add answers for each question
+          // Handle forms
+          if (result.forms != null && result.forms!.isNotEmpty) {
+            final formAnswers = Map.fromEntries(result.forms!
+                .map((form) => MapEntry(form.outletForm?.id ?? "", form.answer ?? "")));
+
             for (int j = 0; j < outletController.questions.length; j++) {
               final questionId = outletController.questions[j].id;
               data['form_id_$questionId'] = formAnswers[questionId] ?? "";
             }
           }
-          print("aaa");
-          await db.insertRoutingWithAnswers(
-              data: data);
 
+          await db.insertRoutingWithAnswers(data: data);
         }
 
-
-        /// Skema  GET API AND UPDATE DATA LOKAL
-          // final listRoutingLokal = await db.getAllRouting(); /// Get data dari lokal
-          //
-          // final newItems = response.data!.where((newItem) =>
-          // !listRoutingLokal.any((existingItem) => existingItem.id == newItem.id)
-          // ).toList();/// compare apakah listRoutingLokal dan Response Api ada data baru
-          //
-          // if (newItems.isNotEmpty) {
-          //   for(int i = 0; i< newItems.length; i++){ /// looping response Api
-          //       final result = newItems[i];
-          //       Map<String, dynamic> data = {
-          //         'id': result.id,
-          //         'outletName': result.name ?? "",
-          //         'salesName': result.user?.name ?? "",
-          //         'category': result.category ?? "",
-          //         'city_id': result.city?.id ?? "",
-          //         'city_name': result.city?.name ?? "",
-          //         'longitude': result.longitude ?? "",
-          //         'latitude': result.latitude ?? "",
-          //         'address': result.address ?? "",
-          //         'status_outlet': result.status ?? "",
-          //         'created_at': DateTime.now().toIso8601String(),
-          //         'updated_at': DateTime.now().toIso8601String(),
-          //       };
-          //       if (result.salesActivity != null) {
-          //         data.addAll({
-          //           'activities_id': const Uuid().v4(),
-          //           'outlet_id': result.salesActivity?.outletId ?? "",
-          //           'user_id': result.user!.id ?? "",
-          //           'checked_in': result.salesActivity?.checkedIn ?? "",
-          //           'checked_out': result.salesActivity?.checkedOut ?? "",
-          //           'views_knowledge': result.salesActivity?.viewsKnowledge ?? "",
-          //           'time_availability': result.salesActivity?.timeAvailability ?? "",
-          //           'time_visibility': result.salesActivity?.timeVisibility ?? "",
-          //           'time_knowledge': result.salesActivity?.timeKnowledge ?? "",
-          //           'time_survey': result.salesActivity?.timeSurvey ?? "",
-          //           'time_order': result.salesActivity?.timeOrder ?? "",
-          //           'status_activities': result.salesActivity?.status ?? "",
-          //         });
-          //       }
-          //       if (result.images != null && result.images!.isNotEmpty) {
-          //         for (int imgIndex = 0; imgIndex < 3; imgIndex++) {
-          //           data['image_path_${imgIndex + 1}'] =
-          //           imgIndex < result.images!.length ? result.images![imgIndex].image ?? "" : "";
-          //         }
-          //       }
-          //       if (result.images != null && result.images!.isNotEmpty) {
-          //         for (int imgIndex = 0; imgIndex < 3; imgIndex++) {
-          //           data['image_path_${imgIndex + 1}'] =
-          //           imgIndex < result.images!.length ? result.images![imgIndex].image ?? "" : "";
-          //         }
-          //       }
-          //       // Add forms data if exists
-          //       if (result.forms != null && result.forms!.isNotEmpty) {
-          //         final formAnswers = Map.fromEntries(
-          //             result.forms!.map((form) => MapEntry(
-          //                 form.outletForm?.id ?? "",
-          //                 form.answer ?? ""
-          //             ))
-          //         );
-          //
-          //         // Add answers for each question
-          //         for (int j = 0; j < outletController.questions.length; j++) {
-          //           final questionId = outletController.questions[j].id;
-          //           data['form_id_$questionId'] = formAnswers[questionId] ?? "";
-          //         }
-          //       }
-          //       print("aaa");
-          //       await db.insertRoutingWithAnswers(
-          //           data: data);
-          //
-          //   }
-          // }
         final results = await db.getAllRouting();
         routing.addAll(results);
       }
-
-
-
-    }catch (e) {
+    } catch (e) {
       print('Error saving Routing: $e');
       Get.snackbar(
         'Error',
@@ -193,23 +106,22 @@ class RoutingController extends GetxController {
     } finally {
       EasyLoading.dismiss();
     }
-
   }
 
-  submitCheckin(String outlet_id)async{
-    try{
+  submitCheckin(String outlet_id) async {
+    try {
       EasyLoading.show(status: 'Submit data...');
       final data = {
-        'outlet_id' : outlet_id,
-        'checked_in' : DateTime.now().toIso8601String(),
+        'outlet_id': outlet_id,
+        'checked_in': DateTime.now().toIso8601String(),
       };
       final response = await Api.submitCheckin(data);
-      
+
       if (response.status == "OK") {
         Get.back();
         initGetRouting();
       }
-    }catch (e) {
+    } catch (e) {
       print('Error saving Routing: $e');
       Get.snackbar(
         'Error',
@@ -230,8 +142,6 @@ class RoutingController extends GetxController {
   }
 
   List<Data> get filteredOutlets => routing.where((routing) {
-        return routing.name!
-            .toLowerCase()
-            .contains(searchQuery.value.toLowerCase());
+        return routing.name!.toLowerCase().contains(searchQuery.value.toLowerCase());
       }).toList();
 }

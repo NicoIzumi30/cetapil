@@ -14,6 +14,9 @@ import '../outlet/detail_outlet.dart';
 class TambahActivity extends GetView<TambahActivityController> {
   @override
   Widget build(BuildContext context) {
+    if (!Get.isRegistered<TambahActivityController>()) {
+      Get.put(TambahActivityController());
+    }
     return SafeArea(
         child: Stack(children: [
       Image.asset(
@@ -29,7 +32,8 @@ class TambahActivity extends GetView<TambahActivityController> {
             children: [
               EnhancedBackButton(
                 onPressed: () {
-                  Get.back();
+                  // Get.back();
+                  Navigator.of(context).pop();
                 },
                 backgroundColor: Colors.white,
                 iconColor: Colors.blue,
@@ -50,7 +54,9 @@ class TambahActivity extends GetView<TambahActivityController> {
                     selectedIndex: controller.selectedTab.value,
                     onTabChanged: controller.changeTab);
               }),
-              SizedBox(height: 15,),
+              SizedBox(
+                height: 15,
+              ),
               Expanded(
                 child: SingleChildScrollView(
                   child: Obx(() {
@@ -115,12 +121,12 @@ class SecondaryTabbar extends StatelessWidget {
           onTabChanged(index);
         },
         child: Container(
-          decoration: BoxDecoration(
-              color: selectedIndex == index ? Colors.blue : Colors.white),
+          decoration: BoxDecoration(color: selectedIndex == index ? Colors.blue : Colors.white),
           child: Center(
             child: Text(
               label,
-              style: TextStyle(fontSize: 11,color: selectedIndex == index ? Colors.white : Colors.blue),
+              style: TextStyle(
+                  fontSize: 11, color: selectedIndex == index ? Colors.white : Colors.blue),
             ),
           ),
         ),
