@@ -1,104 +1,107 @@
 import 'dart:io';
 
-import 'package:cetapil_mobile/controller/outlet/outlet_controller.dart';
-import 'package:cetapil_mobile/model/outlet.dart';
-import 'package:cetapil_mobile/page/outlet/detail_outlet.dart';
-import 'package:cetapil_mobile/page/outlet/tambah_outlet.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 
-class OutletPage extends GetView<OutletController> {
+import '../../controller/routing/tambah_routing_controller.dart';
+import '../../model/outlet.dart';
+import '../../widget/back_button.dart';
+import '../outlet/detail_outlet.dart';
+
+class ListTambahRouting extends StatelessWidget {
+  final TambahRoutingController controller = Get.find<TambahRoutingController>();
   @override
   Widget build(BuildContext context) {
-    return Scaffold(
-      backgroundColor: Colors.transparent,
-      body: SafeArea(
-        child: Padding(
-          padding: EdgeInsets.fromLTRB(15, 15, 15, 0),
-          child: Column(
-            children: [
-              // Search Bar
-              SizedBox(
-                height: 40,
-                child: SearchBar(
-                  controller: TextEditingController(),
-                  onChanged: controller.updateSearchQuery,
-                  leading: const Icon(Icons.search),
-                  hintText: 'Masukkan Kata Kunci',
-                  hintStyle:
-                      WidgetStatePropertyAll(TextStyle(color: Colors.grey[500], fontSize: 14)),
-                  shape: WidgetStatePropertyAll(
-                      RoundedRectangleBorder(borderRadius: BorderRadius.circular(10))),
+    return SafeArea(
+      child: Stack(
+        children: [
+          Image.asset(
+            'assets/background.png',
+            fit: BoxFit.cover,
+            width: double.infinity,
+            height: double.infinity,
+          ),
+          Padding(
+            padding: EdgeInsets.fromLTRB(15, 15, 15, 0),
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                EnhancedBackButton(
+                  onPressed: () => Get.back(),
+                  backgroundColor: Colors.white,
+                  iconColor: Colors.blue,
                 ),
-              ),
-              SizedBox(height: 15),
+                SizedBox(height: 10,),
+                SizedBox(
+                  height: 40,
+                  child: SearchBar(
+                    controller: TextEditingController(),
+                    onChanged: controller.updateSearchQuery,
+                    leading: const Icon(Icons.search),
+                    hintText: 'Masukkan Kata Kunci',
+                    hintStyle:
+                    WidgetStatePropertyAll(TextStyle(color: Colors.grey[500], fontSize: 14)),
+                    shape: WidgetStatePropertyAll(
+                        RoundedRectangleBorder(borderRadius: BorderRadius.circular(10))),
+                  ),
+                ),
+                SizedBox(height: 15),
 
-              // Main Content
-              Expanded(
-                child: Obx(
-                  () => RefreshIndicator(
-                    onRefresh: () async {
-                      // Use refreshOutlets instead of syncOutlets
-                      await controller.refreshOutlets();
-                    },
-                    child: Stack(
-                      children: [
-                        // Main Content
-                        controller.filteredOutlets.isEmpty
-                            ? _buildEmptyState()
-                            : ListView.builder(
-                                physics: AlwaysScrollableScrollPhysics(),
-                                itemCount: controller.filteredOutlets.length,
-                                itemBuilder: (context, index) {
-                                  final outlet = controller.filteredOutlets[index];
-                                  return OutletCard(outlet: outlet);
-                                },
-                              ),
+                // Main Content
+                Expanded(
+                  child: Obx(
+                        () => RefreshIndicator(
+                      onRefresh: () async {
+                        // Use refreshOutlets instead of syncOutlets
+                        await controller.refreshOutlets();
+                      },
+                      child: Stack(
+                        children: [
+                          // Main Content
+                          controller.filteredOutlets.isEmpty
+                              ? _buildEmptyState()
+                              : ListView.builder(
+                            physics: AlwaysScrollableScrollPhysics(),
+                            itemCount: controller.filteredOutlets.length,
+                            itemBuilder: (context, index) {
+                              final outlet = controller.filteredOutlets[index];
+                              return OutletCard(outlet: outlet);
+                            },
+                          ),
 
-                        // Loading Overlay
-                        if (controller.isSyncing.value)
-                          Container(
-                            color: Colors.black12,
-                            child: Center(
-                              child: Column(
-                                mainAxisSize: MainAxisSize.min,
-                                children: [
-                                  CircularProgressIndicator(),
-                                  SizedBox(height: 16),
-                                  Text(
-                                    'Menyinkronkan data...',
-                                    style: TextStyle(
-                                      fontSize: 14,
-                                      color: Colors.black87,
+                          // Loading Overlay
+                          if (controller.isSyncing.value)
+                            Container(
+                              color: Colors.black12,
+                              child: Center(
+                                child: Column(
+                                  mainAxisSize: MainAxisSize.min,
+                                  children: [
+                                    CircularProgressIndicator(),
+                                    SizedBox(height: 16),
+                                    Text(
+                                      'Menyinkronkan data...',
+                                      style: TextStyle(
+                                        fontSize: 14,
+                                        color: Colors.black87,
+                                      ),
                                     ),
-                                  ),
-                                ],
+                                  ],
+                                ),
                               ),
                             ),
-                          ),
-                      ],
+                        ],
+                      ),
                     ),
                   ),
                 ),
-              ),
-            ],
-          ),
-        ),
-      ),
-      floatingActionButton: FloatingActionButton(
-        onPressed: () {
-          controller.clearForm(); // Clear the form first
-          Get.to(() => TambahOutlet());
-        },
-        backgroundColor: Colors.blue,
-        child: const Icon(
-          Icons.add,
-          color: Colors.white,
-        ),
+              ],
+            ),
+          )
+        ],
       ),
     );
   }
-
   Widget _buildEmptyState() {
     return ListView(
       physics: AlwaysScrollableScrollPhysics(),
@@ -137,9 +140,7 @@ class OutletPage extends GetView<OutletController> {
     );
   }
 }
-
 class OutletCard extends StatelessWidget {
-  final OutletController outletController = Get.find<OutletController>();
   final Outlet outlet;
 
   OutletCard({
@@ -272,9 +273,7 @@ class OutletCard extends StatelessWidget {
                     children: [
                       ElevatedButton(
                         onPressed: () {
-                          outlet.dataSource != "DRAFT"
-                              ? Get.to(() => DetailOutlet(outlet: outlet,isCheckin: false,))
-                              : outletController.setDraftValue(outlet);
+                          Get.to(() => DetailOutlet(outlet: outlet,isCheckin: true,));
                         },
                         style: ElevatedButton.styleFrom(
                           backgroundColor: Colors.blue,
@@ -288,46 +287,6 @@ class OutletCard extends StatelessWidget {
                           style: TextStyle(color: Colors.white),
                         ),
                       ),
-                      if (outlet.dataSource == 'DRAFT') ...[
-                        SizedBox(width: 8),
-                        OutlinedButton(
-                          onPressed: () {
-                            // Add delete confirmation dialog
-                            showDialog(
-                              context: context,
-                              builder: (context) => AlertDialog(
-                                title: Text('Hapus Draft'),
-                                content: Text('Apakah Anda yakin ingin menghapus draft ini?'),
-                                actions: [
-                                  TextButton(
-                                    onPressed: () => Navigator.pop(context),
-                                    child: Text('Batal'),
-                                  ),
-                                  TextButton(
-                                    onPressed: () async {
-                                      Navigator.pop(context);
-                                      await outletController.db.deleteOutlet(outlet.id!);
-                                      await outletController.loadOutlets();
-                                    },
-                                    child: Text('Hapus'),
-                                    style: TextButton.styleFrom(
-                                      foregroundColor: Colors.red,
-                                    ),
-                                  ),
-                                ],
-                              ),
-                            );
-                          },
-                          style: OutlinedButton.styleFrom(
-                            foregroundColor: Colors.red,
-                            minimumSize: const Size(80, 36),
-                            shape: RoundedRectangleBorder(
-                              borderRadius: BorderRadius.circular(8),
-                            ),
-                          ),
-                          child: const Text('Hapus'),
-                        ),
-                      ],
                     ],
                   ),
                 ],
@@ -340,25 +299,25 @@ class OutletCard extends StatelessWidget {
                   borderRadius: BorderRadius.circular(8),
                   child: outlet.images != null && outlet.images!.isNotEmpty
                       ? Image.file(
-                          File(outlet.images!.first.image ?? ''),
-                          width: 100,
-                          height: 100,
-                          fit: BoxFit.cover,
-                          errorBuilder: (context, error, stackTrace) {
-                            return Image.asset(
-                              "assets/carousel1.png",
-                              width: 100,
-                              height: 100,
-                              fit: BoxFit.cover,
-                            );
-                          },
-                        )
+                    File(outlet.images!.first.image ?? ''),
+                    width: 100,
+                    height: 100,
+                    fit: BoxFit.cover,
+                    errorBuilder: (context, error, stackTrace) {
+                      return Image.asset(
+                        "assets/carousel1.png",
+                        width: 100,
+                        height: 100,
+                        fit: BoxFit.cover,
+                      );
+                    },
+                  )
                       : Image.asset(
-                          "assets/carousel1.png",
-                          width: 100,
-                          height: 100,
-                          fit: BoxFit.cover,
-                        ),
+                    "assets/carousel1.png",
+                    width: 100,
+                    height: 100,
+                    fit: BoxFit.cover,
+                  ),
                 ),
               ],
             ),

@@ -1,10 +1,12 @@
 import 'package:cetapil_mobile/controller/routing/routing_controller.dart';
 import 'package:cetapil_mobile/model/list_routing_response.dart';
 import 'package:cetapil_mobile/page/routing/detail_routing.dart';
+import 'package:cetapil_mobile/page/routing/list_tambah_routing.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:intl/intl.dart';
 
+import '../../controller/routing/tambah_routing_controller.dart';
 import '../../model/activity.dart';
 import '../../model/outlet_example.dart';
 import '../../utils/colors.dart';
@@ -13,59 +15,73 @@ import '../activity/tambah_activity.dart';
 class RoutingPage extends GetView<RoutingController> {
   @override
   Widget build(BuildContext context) {
-    return SafeArea(
-        child: Padding(
-            padding: EdgeInsets.fromLTRB(15, 15, 15, 0),
-            child: Column(children: [
-              SizedBox(
-                height: 40,
-                child: SearchBar(
-                  controller: TextEditingController(),
-                  onChanged: controller.updateSearchQuery,
-                  leading: const Icon(Icons.search),
-                  hintText: 'Masukkan Kata Kunci',
-                  hintStyle: WidgetStatePropertyAll(
-                      TextStyle(color: Colors.grey[500], fontSize: 14)),
-                  shape: WidgetStatePropertyAll(RoundedRectangleBorder(
-                      borderRadius: BorderRadius.circular(10))),
+    return Scaffold(
+      backgroundColor: Colors.transparent,
+      body: SafeArea(
+          child: Padding(
+              padding: EdgeInsets.fromLTRB(15, 15, 15, 0),
+              child: Column(children: [
+                SizedBox(
+                  height: 40,
+                  child: SearchBar(
+                    controller: TextEditingController(),
+                    onChanged: controller.updateSearchQuery,
+                    leading: const Icon(Icons.search),
+                    hintText: 'Masukkan Kata Kunci',
+                    hintStyle: WidgetStatePropertyAll(
+                        TextStyle(color: Colors.grey[500], fontSize: 14)),
+                    shape: WidgetStatePropertyAll(RoundedRectangleBorder(
+                        borderRadius: BorderRadius.circular(10))),
+                  ),
                 ),
-              ),
-              SizedBox(
-                height: 15,
-              ),
-              Expanded(
-                child: Obx(
-                  () => RefreshIndicator(
-                      onRefresh: () async {
-                        await controller.initGetRouting();
-                      },
-                      child: controller.isLoading.value
-                          ? Center(child: CircularProgressIndicator())
-                          : controller.filteredOutlets.isEmpty
-                              ? _buildEmptyState()
-                              : ListView.builder(
-                                  physics: AlwaysScrollableScrollPhysics(),
-                                  itemCount: controller.filteredOutlets.length,
-                                  itemBuilder: (context, index) {
-                                    final routing =
-                                        controller.filteredOutlets[index];
-                                    print("ada cekin : ${routing.salesActivity!.checkedIn}");
-                                    final checkin = routing.salesActivity!.checkedIn;
-                                    final checkout = routing.salesActivity!.checkedOut;
+                SizedBox(
+                  height: 15,
+                ),
+                Expanded(
+                  child: Obx(
+                    () => RefreshIndicator(
+                        onRefresh: () async {
+                          await controller.initGetRouting();
+                        },
+                        child: controller.isLoading.value
+                            ? Center(child: CircularProgressIndicator())
+                            : controller.filteredOutlets.isEmpty
+                                ? _buildEmptyState()
+                                : ListView.builder(
+                                    physics: AlwaysScrollableScrollPhysics(),
+                                    itemCount: controller.filteredOutlets.length,
+                                    itemBuilder: (context, index) {
+                                      final routing =
+                                          controller.filteredOutlets[index];
+                                      print("ada cekin : ${routing.salesActivity!.checkedIn}");
+                                      final checkin = routing.salesActivity!.checkedIn;
+                                      final checkout = routing.salesActivity!.checkedOut;
 
-                                    return ActivityCard(
-                                      routing: routing,
-                                      statusDraft: 'Drafted',
-                                      statusCheckin: (checkin != null ) ? true : (checkout != null) ? false : null,
-                                      ontap: () {
-                                        Get.to(() => DetailRouting(routing));
-                                      },
-                                    );
-                                  },
-                                )),
-                ),
-              )
-            ])));
+                                      return ActivityCard(
+                                        routing: routing,
+                                        statusDraft: 'Drafted',
+                                        statusCheckin: (checkin != null ) ? true : (checkout != null) ? false : null,
+                                        ontap: () {
+                                          Get.to(() => DetailRouting(routing));
+                                        },
+                                      );
+                                    },
+                                  )),
+                  ),
+                )
+              ]))),
+      floatingActionButton: FloatingActionButton(
+        onPressed: () {
+          // controller.clearForm(); // Clear the form first
+          Get.to(() => ListTambahRouting() ,binding: TambahRoutingBinding() );
+        },
+        backgroundColor: Colors.blue,
+        child: const Icon(
+          Icons.add,
+          color: Colors.white,
+        ),
+      ),
+    );
   }
 
   Widget _buildEmptyState() {
