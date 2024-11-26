@@ -18,4 +18,8 @@ class OutletFormAnswer extends Model
     {
         return $this->belongsTo(OutletForm::class);
     }
+   public function outlet()
+   {
+       return $this->belongsTo(Outlet::class);
+   }
 }

@@ -12,4 +12,8 @@ class OutletForm extends Model
     use HasFactory, HasUuids, SoftDeletes;
 
     protected $guarded = [];
+    public function answers()
+    {
+        return $this->hasMany(OutletFormAnswer::class);
+    }
 }

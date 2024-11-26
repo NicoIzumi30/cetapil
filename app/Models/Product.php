@@ -42,4 +42,8 @@ class Product extends Model
     {
         return $this->hasMany(Av3m::class);
     }
+    public function outlets()
+   {
+       return $this->belongsToMany(Outlet::class, 'outlet_products');
+   }
 }
