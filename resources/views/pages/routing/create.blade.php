@@ -261,7 +261,7 @@
                     <div class="flex justify-between items-center w-full">
                         <p class="text-white font-bold text-sm">{{$form->question}}</p>
                         <div class="relative inline-flex items-center">
-                            <input type="checkbox" name="survey[{{$form->id}}]" id="gih-checkbox" class="sr-only" />
+                            <input type="checkbox" name="survey[{{$form->id}}]" id="gih-checkbox" value="1" class="sr-only" />
                             <label for="gih-checkbox"
                                 class="flex w-[160px] cursor-pointer items-center rounded-md bg-gray-200 p-1">
                                 <span id="gih-checked"

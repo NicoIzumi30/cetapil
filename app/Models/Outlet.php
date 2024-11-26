@@ -32,7 +32,10 @@ class Outlet extends Model
     {
         return $this->belongsTo(User::class)->withTrashed();
     }
-
+    public function products()
+    {
+        return $this->belongsToMany(Product::class, 'outlet_products');
+    }
     public function images(): HasMany
     {
         return $this->hasMany(OutletImage::class);
