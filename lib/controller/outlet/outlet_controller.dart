@@ -28,6 +28,7 @@ class OutletController extends GetxController {
   final uuid = Uuid();
   var selectedCategory = 'MT'.obs; // Default to MT as shown in your code
 
+  final RxInt listOutletPage = 1.obs;
   final List<String> categories = ['GT', 'MT'];
 
   // Observables
@@ -42,6 +43,12 @@ class OutletController extends GetxController {
   var outletAddress = TextEditingController().obs;
   var controllers = <TextEditingController>[].obs;
   var questions = <FormOutletResponse>[].obs;
+
+  setListOutletPage(int page) {
+    if (listOutletPage.value != page) {
+      listOutletPage.value = page;
+    }
+  }
 
   setDraftValue(Outlet outlet) async {
     // Set sales name - Make sure to properly set value
@@ -445,8 +452,8 @@ class OutletController extends GetxController {
     }
   }
 
-  Future<void> submitApiOutlet() async{
-    try{
+  Future<void> submitApiOutlet() async {
+    try {
       final String? currentOutletId = Get.arguments?['id'];
       final bool isEditing = currentOutletId != null;
       EasyLoading.show(status: 'Submit Data...');
@@ -468,14 +475,10 @@ class OutletController extends GetxController {
         'image_path_1': imagePath[0],
         'image_path_2': imagePath[1],
         'image_path_3': imagePath[2],
-
-        for (int i = 0; i < questions.length; i++)
-          'forms[$i][id]': questions[i].id,
-
-        for (int i = 0; i < questions.length; i++)
-          'forms[$i][answer]': controllers[i].value.text,
+        for (int i = 0; i < questions.length; i++) 'forms[$i][id]': questions[i].id,
+        for (int i = 0; i < questions.length; i++) 'forms[$i][answer]': controllers[i].value.text,
       };
-      final response = await Api.submitOutlet(data,questions);
+      final response = await Api.submitOutlet(data, questions);
 
       if (response.status != "OK") {
         throw Exception('Failed to get outlets from API');
@@ -490,8 +493,7 @@ class OutletController extends GetxController {
           "Data Berhasil Disimpan",
           "Anda baru menyimpan Data. Silahkan periksa status Outlet pada aplikasi.");
       await refreshOutlets();
-
-    }catch (e) {
+    } catch (e) {
       print('Error submit data: $e');
       Get.snackbar(
         'Error',
@@ -522,12 +524,16 @@ class OutletController extends GetxController {
 
   List<Outlet> get filteredOutlets {
     if (searchQuery.value.isEmpty) {
-      return outlets;
+      return outlets
+          .where((outlet) => outlet.dataSource == 'DRAFT' || outlet.dataSource == 'API')
+          .toList();
     }
 
-    final filtered = outlets.where((outlet) {
-      return outlet.name?.toLowerCase().contains(searchQuery.value.toLowerCase()) ?? false;
-    }).toList();
+    final filtered = outlets
+        .where((outlet) =>
+            (outlet.dataSource == 'DRAFT' || outlet.dataSource == 'API') &&
+            (outlet.name?.toLowerCase().contains(searchQuery.value.toLowerCase()) ?? false))
+        .toList();
 
     // Keep drafts at top in filtered results
     filtered.sort((a, b) {
@@ -541,6 +547,21 @@ class OutletController extends GetxController {
     });
 
     return filtered;
+  }
+
+   List<Outlet> get filteredOutletsApproval {
+    if (searchQuery.value.isEmpty) {
+      return outlets.where((outlet) => 
+        outlet.dataSource == 'API' &&
+        outlet.status == 'APPROVED'
+      ).toList();
+    }
+
+    return outlets.where((outlet) =>
+      outlet.dataSource == 'API' &&
+      outlet.status == 'APPROVED' &&
+      (outlet.name?.toLowerCase().contains(searchQuery.value.toLowerCase()) ?? false)
+    ).toList();
   }
 
   void updateSearchQuery(String query) {

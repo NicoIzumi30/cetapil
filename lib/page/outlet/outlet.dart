@@ -4,6 +4,7 @@ import 'package:cetapil_mobile/controller/outlet/outlet_controller.dart';
 import 'package:cetapil_mobile/model/outlet.dart';
 import 'package:cetapil_mobile/page/outlet/detail_outlet.dart';
 import 'package:cetapil_mobile/page/outlet/tambah_outlet.dart';
+import 'package:cetapil_mobile/widget/button_primary.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 
@@ -31,55 +32,127 @@ class OutletPage extends GetView<OutletController> {
                       RoundedRectangleBorder(borderRadius: BorderRadius.circular(10))),
                 ),
               ),
-              SizedBox(height: 15),
+              SizedBox(height: 10),
+              Obx(() {
+                return Row(
+                  mainAxisAlignment: MainAxisAlignment.center,
+                  crossAxisAlignment: CrossAxisAlignment.center,
+                  children: [
+                    ButtonPrimary(
+                      ontap: () {
+                        controller.setListOutletPage(1);
+                      },
+                      title: "Outlet",
+                      tipeButton: controller.listOutletPage == 1 ? "primary" : "info",
+                      width: MediaQuery.of(context).size.width * 0.45,
+                    ),
+                    SizedBox(width: 10),
+                    ButtonPrimary(
+                      ontap: () {
+                        controller.setListOutletPage(2);
+                      },
+                      title: "Approval",
+                      tipeButton: controller.listOutletPage == 2 ? "primary" : "info",
+                      width: MediaQuery.of(context).size.width * 0.45,
+                    ),
+                  ],
+                );
+              }),
+              SizedBox(height: 10),
 
               // Main Content
               Expanded(
-                child: Obx(
-                  () => RefreshIndicator(
-                    onRefresh: () async {
-                      // Use refreshOutlets instead of syncOutlets
-                      await controller.refreshOutlets();
-                    },
-                    child: Stack(
-                      children: [
-                        // Main Content
-                        controller.filteredOutlets.isEmpty
-                            ? _buildEmptyState()
-                            : ListView.builder(
-                                physics: AlwaysScrollableScrollPhysics(),
-                                itemCount: controller.filteredOutlets.length,
-                                itemBuilder: (context, index) {
-                                  final outlet = controller.filteredOutlets[index];
-                                  return OutletCard(outlet: outlet);
-                                },
-                              ),
+                child: Obx(() {
+                  if (controller.listOutletPage == 1) {
+                    return RefreshIndicator(
+                      onRefresh: () async {
+                        // Use refreshOutlets instead of syncOutlets
+                        await controller.refreshOutlets();
+                      },
+                      child: Stack(
+                        children: [
+                          // Main Content
+                          controller.filteredOutlets.isEmpty
+                              ? _buildEmptyState()
+                              : ListView.builder(
+                                  physics: AlwaysScrollableScrollPhysics(),
+                                  itemCount: controller.filteredOutlets.length,
+                                  itemBuilder: (context, index) {
+                                    final outlet = controller.filteredOutlets[index];
+                                    return OutletCard(outlet: outlet);
+                                  },
+                                ),
 
-                        // Loading Overlay
-                        if (controller.isSyncing.value)
-                          Container(
-                            color: Colors.black12,
-                            child: Center(
-                              child: Column(
-                                mainAxisSize: MainAxisSize.min,
-                                children: [
-                                  CircularProgressIndicator(),
-                                  SizedBox(height: 16),
-                                  Text(
-                                    'Menyinkronkan data...',
-                                    style: TextStyle(
-                                      fontSize: 14,
-                                      color: Colors.black87,
+                          // Loading Overlay
+                          if (controller.isSyncing.value)
+                            Container(
+                              color: Colors.black12,
+                              child: Center(
+                                child: Column(
+                                  mainAxisSize: MainAxisSize.min,
+                                  children: [
+                                    CircularProgressIndicator(),
+                                    SizedBox(height: 16),
+                                    Text(
+                                      'Menyinkronkan data...',
+                                      style: TextStyle(
+                                        fontSize: 14,
+                                        color: Colors.black87,
+                                      ),
                                     ),
-                                  ),
-                                ],
+                                  ],
+                                ),
                               ),
                             ),
-                          ),
-                      ],
-                    ),
-                  ),
-                ),
+                        ],
+                      ),
+                    );
+                  } else {
+                    return RefreshIndicator(
+                      onRefresh: () async {
+                        // Use refreshOutlets instead of syncOutlets
+                        await controller.refreshOutlets();
+                      },
+                      child: Stack(
+                        children: [
+                          // Main Content
+                          controller.filteredOutletsApproval.isEmpty
+                              ? _buildEmptyState()
+                              : ListView.builder(
+                                  physics: AlwaysScrollableScrollPhysics(),
+                                  itemCount: controller.filteredOutletsApproval.length,
+                                  itemBuilder: (context, index) {
+                                    final outlet = controller.filteredOutletsApproval[index];
+                                    return OutletCard(outlet: outlet);
+                                  },
+                                ),
+
+                          // Loading Overlay
+                          if (controller.isSyncing.value)
+                            Container(
+                              color: Colors.black12,
+                              child: Center(
+                                child: Column(
+                                  mainAxisSize: MainAxisSize.min,
+                                  children: [
+                                    CircularProgressIndicator(),
+                                    SizedBox(height: 16),
+                                    Text(
+                                      'Menyinkronkan data...',
+                                      style: TextStyle(
+                                        fontSize: 14,
+                                        color: Colors.black87,
+                                      ),
+                                    ),
+                                  ],
+                                ),
+                              ),
+                            ),
+                        ],
+                      ),
+                    );
+                  }
+                }),
               ),
             ],
           ),
@@ -246,88 +319,90 @@ class OutletCard extends StatelessWidget {
                   ),
                   const SizedBox(height: 8),
 
-                  // Draft Status
-                  if (outlet.dataSource == 'DRAFT')
-                    Row(
-                      children: [
-                        Icon(
-                          Icons.circle,
-                          size: 12,
-                          color: Colors.orange,
-                        ),
-                        SizedBox(width: 4),
-                        Text(
-                          'Draft',
-                          style: TextStyle(
-                            fontSize: 12,
-                            color: Colors.orange,
-                          ),
-                        ),
-                      ],
-                    ),
-                  const SizedBox(height: 16),
-
                   // Action Button
                   Row(
+                    mainAxisAlignment: MainAxisAlignment.spaceEvenly,
                     children: [
-                      ElevatedButton(
-                        onPressed: () {
-                          outlet.dataSource != "DRAFT"
-                              ? Get.to(() => DetailOutlet(outlet: outlet))
-                              : outletController.setDraftValue(outlet);
-                        },
-                        style: ElevatedButton.styleFrom(
-                          backgroundColor: Colors.blue,
-                          minimumSize: const Size(80, 36),
-                          shape: RoundedRectangleBorder(
-                            borderRadius: BorderRadius.circular(8),
-                          ),
-                        ),
-                        child: const Text(
-                          'Lihat',
-                          style: TextStyle(color: Colors.white),
-                        ),
-                      ),
-                      if (outlet.dataSource == 'DRAFT') ...[
-                        SizedBox(width: 8),
-                        OutlinedButton(
-                          onPressed: () {
-                            // Add delete confirmation dialog
-                            showDialog(
-                              context: context,
-                              builder: (context) => AlertDialog(
-                                title: Text('Hapus Draft'),
-                                content: Text('Apakah Anda yakin ingin menghapus draft ini?'),
-                                actions: [
-                                  TextButton(
-                                    onPressed: () => Navigator.pop(context),
-                                    child: Text('Batal'),
-                                  ),
-                                  TextButton(
-                                    onPressed: () async {
-                                      Navigator.pop(context);
-                                      await outletController.db.deleteOutlet(outlet.id!);
-                                      await outletController.loadOutlets();
-                                    },
-                                    child: Text('Hapus'),
-                                    style: TextButton.styleFrom(
-                                      foregroundColor: Colors.red,
-                                    ),
-                                  ),
-                                ],
+                      if (outlet.dataSource == 'DRAFT')
+                        Row(
+                          children: [
+                            Icon(
+                              Icons.circle,
+                              size: 12,
+                              color: Colors.orange,
+                            ),
+                            SizedBox(width: 4),
+                            Text(
+                              'Draft',
+                              style: TextStyle(
+                                fontSize: 12,
+                                color: Colors.orange,
                               ),
-                            );
-                          },
-                          style: OutlinedButton.styleFrom(
-                            foregroundColor: Colors.red,
-                            minimumSize: const Size(80, 36),
-                            shape: RoundedRectangleBorder(
-                              borderRadius: BorderRadius.circular(8),
+                            ),
+                          ],
+                        ),
+                      Row(
+                        children: [
+                          ElevatedButton(
+                            onPressed: () {
+                              outlet.dataSource != "DRAFT"
+                                  ? Get.to(() => DetailOutlet(outlet: outlet))
+                                  : outletController.setDraftValue(outlet);
+                            },
+                            style: ElevatedButton.styleFrom(
+                              backgroundColor: Colors.blue,
+                              minimumSize: const Size(80, 36),
+                              shape: RoundedRectangleBorder(
+                                borderRadius: BorderRadius.circular(8),
+                              ),
+                            ),
+                            child: const Text(
+                              'Lihat',
+                              style: TextStyle(color: Colors.white),
                             ),
                           ),
-                          child: const Text('Hapus'),
-                        ),
-                      ],
+                          if (outlet.dataSource == 'DRAFT') ...[
+                            SizedBox(width: 8),
+                            OutlinedButton(
+                              onPressed: () {
+                                // Add delete confirmation dialog
+                                showDialog(
+                                  context: context,
+                                  builder: (context) => AlertDialog(
+                                    title: Text('Hapus Draft'),
+                                    content: Text('Apakah Anda yakin ingin menghapus draft ini?'),
+                                    actions: [
+                                      TextButton(
+                                        onPressed: () => Navigator.pop(context),
+                                        child: Text('Batal'),
+                                      ),
+                                      TextButton(
+                                        onPressed: () async {
+                                          Navigator.pop(context);
+                                          await outletController.db.deleteOutlet(outlet.id!);
+                                          await outletController.loadOutlets();
+                                        },
+                                        child: Text('Hapus'),
+                                        style: TextButton.styleFrom(
+                                          foregroundColor: Colors.red,
+                                        ),
+                                      ),
+                                    ],
+                                  ),
+                                );
+                              },
+                              style: OutlinedButton.styleFrom(
+                                foregroundColor: Colors.red,
+                                minimumSize: const Size(80, 36),
+                                shape: RoundedRectangleBorder(
+                                  borderRadius: BorderRadius.circular(8),
+                                ),
+                              ),
+                              child: const Text('Hapus'),
+                            ),
+                          ],
+                        ],
+                      ),
                     ],
                   ),
                 ],
