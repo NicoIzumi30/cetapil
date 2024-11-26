@@ -10,6 +10,7 @@ use App\Http\Controllers\Auth\LogoutController;
 use App\Http\Controllers\Web\ProductController;
 use App\Http\Controllers\Web\DashboardController;
 use App\Http\Controllers\Web\VisibilityController;
+use App\Http\Controllers\Web\PosmController;
 
 
 // Guest Routes
@@ -54,10 +55,24 @@ Route::middleware('auth')->group(function () {
     // });
     Route::resource('routing',RoutingController::class)->middleware('permission:menu_routing');
     Route::get('data',[RoutingController::class,'getData'])->name('routing.data');
-    // Visibility Management
-    Route::resource('visibility', VisibilityController::class)->middleware('permission:menu_visibility');
 
-    Route::post('visual', [VisualController::class,'store'])->name('visual.store')->middleware('permission:menu_visibility');
+    // Visibility Management
+    Route::middleware('permission:menu_visibility')->group(function () {
+        Route::resource('visibility', VisibilityController::class);
+        
+        Route::get('visibility/data', [VisibilityController::class, 'getData'])->name('visibility.data');
+        
+        Route::post('visibility', [VisibilityController::class, 'store'])->name('visibility.store');
+        Route::get('visibility/{visibility}/edit', [VisibilityController::class, 'edit'])->name('visibility.edit');
+        
+        Route::post('visual', [VisualController::class, 'store'])->name('visual.store');
+        Route::post('posm-types', [PosmController::class, 'store'])->name('posm.store');
+    
+        Route::get('/visibility/products/{category}', [VisibilityController::class, 'getProducts'])
+            ->name('visibility.products');
+    });
+
+
     // Selling Management
     Route::prefix('selling')->name('selling.')->middleware('permission:menu_selling')->group(function () {
         Route::get('/', function () {

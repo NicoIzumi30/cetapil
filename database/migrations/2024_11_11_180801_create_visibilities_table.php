@@ -21,6 +21,8 @@ return new class extends Migration
             $table->foreignUuid('visual_type_id')->references('id')->on('visual_types');
             $table->string('filename')->nullable();
             $table->string('path')->nullable();
+            $table->date('program_date')->after('path');
+            $table->string('banner', 255)->nullable()->after('program_date');
             $table->timestamp('started_at')->nullable();
             $table->timestamp('ended_at')->nullable();
             $table->enum('status', ['ACTIVE', 'INACTIVE'])->default('ACTIVE')->nullable();

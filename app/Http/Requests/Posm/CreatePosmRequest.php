@@ -1,11 +1,13 @@
 <?php
 
-namespace App\Http\Requests\Visual;
+namespace App\Http\Requests\Posm;
 
 use Illuminate\Foundation\Http\FormRequest;
+
 use Illuminate\Contracts\Validation\Validator;
 use Illuminate\Http\Exceptions\HttpResponseException;
-class CreateVisualRequest extends FormRequest
+
+class CreatePosmRequest extends FormRequest
 {
     /**
      * Determine if the user is authorized to make this request.
@@ -22,13 +24,12 @@ class CreateVisualRequest extends FormRequest
      */
     public function rules(): array
     {
-        return [
-            'name' => 'required|string',
-        ]
-        ;
+        return  [
+            'posm_name' => 'required|string|max:255|unique:posm_types,name'
+        ];
     }
-
-    /**
+    
+     /**
      * Handle a failed validation attempt.
      *
      * @param  Validator  $validator

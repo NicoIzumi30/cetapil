@@ -184,14 +184,12 @@ class ProductController extends Controller
                 'message' => 'AV3M berhasil diperbarui',
                 'data' => $savedAv3m
             ], 200);
-
         } catch (ValidationException $e) {
             return response()->json([
                 'status' => 'error',
                 'message' => 'Validasi gagal',
                 'errors' => $e->errors()
             ], 422);
-
         } catch (\Exception $e) {
             return response()->json([
                 'status' => 'error',
@@ -259,7 +257,6 @@ class ProductController extends Controller
             return response()->download($path, $filename, [
                 'Content-Type' => 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet',
             ])->deleteFileAfterSend(true);
-
         } catch (\Exception $e) {
             Log::error('Excel Download Error: ' . $e->getMessage(), [
                 'file' => $e->getFile(),

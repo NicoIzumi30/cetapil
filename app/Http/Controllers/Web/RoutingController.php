@@ -19,6 +19,8 @@ use Illuminate\Support\Facades\DB;
 use App\Http\Controllers\Controller;
 use App\Http\Requests\Routing\CreateOutletRequest;
 
+require_once app_path('Helpers/Helpers.php');
+
 class RoutingController extends Controller
 {
     /**
@@ -54,14 +56,14 @@ class RoutingController extends Controller
             'recordsFiltered' => $filteredRecords,
             'data' => $result->map(function($item) {
                 return [
-                    'id' => $item->id, // Tambahkan id product
+                    'id' => $item->id,
                     'sales' => $item->user->name,
                     'outlet' => $item->name,
                     'area' => $item->longitude.', '.$item->latitude,
-                    'visit_day' => getVisitDayByNumber($item->visit_day),
+                    'visit_day' => getVisitDayByNumber($item->visit_day), // pastikan $item->visit_day berisi angka
                     'actions' => view('pages.routing.action', [
                         'item' => $item,
-                        'outletId' => $item->id // Pass product id ke view actions
+                        'outletId' => $item->id
                     ])->render()
                 ];
             })
