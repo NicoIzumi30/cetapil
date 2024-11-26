@@ -20,6 +20,9 @@
                         <div>
                             <label for="name" class="form-label">Nama Pengguna</label>
 <<<<<<< HEAD
+<<<<<<< HEAD
+=======
+>>>>>>> dd005a59ad6321be875510ecb291446444e27754
                             <input id="name" class="form-control @if($errors->has('name')) is-invalid @endif"
                                 value="{{ $user->name }}" type="text" value="{{ $user->name }}" name="name"
                                 placeholder="Masukan nama pengguna" aria-describedby="name" />
@@ -35,6 +38,7 @@
                             @if ($errors->has('email'))
                                 <span id="name-error" class="text-sm text-red-600 mt-1">{{ $errors->first('email') }}</span>
                             @endif
+<<<<<<< HEAD
 =======
                             <input id="name" class="form-control" type="text" name="name"
                                 placeholder="Masukan nama pengguna" aria-describedby="name" value="sasadas" />
@@ -50,6 +54,11 @@
                         <div>
                             <label for="phone" class="form-label">Nomor Telepon Pengguna</label>
 <<<<<<< HEAD
+=======
+                        </div>
+                        <div>
+                            <label for="phone" class="form-label">Nomor Telepon Pengguna</label>
+>>>>>>> dd005a59ad6321be875510ecb291446444e27754
                             <input id="phone" class="form-control @if($errors->has('phone_number')) is-invalid @endif"
                                 value="{{ $user->phone_number }}" type="text" name="phone_number"
                                 placeholder="Masukan nomor telepon pengguna" aria-describedby="phone" />
@@ -102,6 +111,7 @@
                                 <span id="name-error"
                                     class="text-sm text-red-600 mt-1">{{ $errors->first('region') }}</span>
                             @endif
+<<<<<<< HEAD
 =======
                             <input id="phone" class="form-control" type="text" name="phone"
                                 placeholder="Masukan nomor telepon pengguna" aria-describedby="phone" />
@@ -143,6 +153,8 @@
                             <input id="region" class="form-control" type="text" name="region"
                                 placeholder="Masukan Region" aria-describedby="region" />
 >>>>>>> 7a905caae28221ad3bf22e6a47510d7260b56476
+=======
+>>>>>>> dd005a59ad6321be875510ecb291446444e27754
                         </div>
                     </div>
                     {{-- Profil Pengguna End --}}
@@ -154,6 +166,9 @@
                                 <label for="longitude" class="form-label">Longitudes <span class="font-normal">(DD
                                         Coordinates)</span></label>
 <<<<<<< HEAD
+<<<<<<< HEAD
+=======
+>>>>>>> dd005a59ad6321be875510ecb291446444e27754
                                 <input id="longitude"
                                     class="form-control @if($errors->has('longitude')) is-invalid @endif"
                                     value="{{ $user->longitude }}" type="text" name="longitude"
@@ -162,15 +177,21 @@
                                     <span id="name-error"
                                         class="text-sm text-red-600 mt-1">{{ $errors->first('longtitude') }}</span>
                                 @endif
+<<<<<<< HEAD
 =======
                                 <input id="longitude" class="form-control" type="text" name="longitude"
                                     placeholder="Masukkan Koordinat Longitude" aria-describedby="longitude" />
 >>>>>>> 7a905caae28221ad3bf22e6a47510d7260b56476
+=======
+>>>>>>> dd005a59ad6321be875510ecb291446444e27754
                             </div>
                             <div>
                                 <label for="latitude" class="form-label">Latitudes<span class="font-normal">(DMS
                                         Coordinates)</span></label>
 <<<<<<< HEAD
+<<<<<<< HEAD
+=======
+>>>>>>> dd005a59ad6321be875510ecb291446444e27754
                                 <input id="latitude"
                                     class="form-control @if($errors->has('latitude')) is-invalid @endif"
                                     value="{{ $user->latitude }}" type="text" name="latitude"
@@ -248,6 +269,7 @@
                 </form>
                 {{-- Manajemen Akun End --}}
 
+<<<<<<< HEAD
 
 =======
                                 <input id="latitude" class="form-control" type="text" name="latitude"
@@ -310,6 +332,8 @@
         </div>
         </x-card>
 >>>>>>> 7a905caae28221ad3bf22e6a47510d7260b56476
+=======
+>>>>>>> dd005a59ad6321be875510ecb291446444e27754
         </div>
         </x-card>
     </div>

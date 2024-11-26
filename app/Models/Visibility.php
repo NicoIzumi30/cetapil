@@ -16,9 +16,9 @@ class Visibility extends Model
 
     protected $guarded = [];
 
-    public function user(): BelongsTo
+    public function user()
     {
-        return $this->belongsTo(User::class);
+        return $this->belongsTo(User::class)->withTrashed();
     }
 
     public function city(): BelongsTo

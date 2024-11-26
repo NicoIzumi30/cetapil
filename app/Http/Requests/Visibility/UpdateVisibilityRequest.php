@@ -1,7 +1,6 @@
 <?php
 
 namespace App\Http\Requests\Visibility;
-
 use Illuminate\Foundation\Http\FormRequest;
 
 class UpdateVisibilityRequest extends FormRequest

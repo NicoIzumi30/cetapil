@@ -28,7 +28,12 @@ class CheckOutRequest extends FormRequest
         return [
             'sales_activity_id' => 'required|exists:sales_activities,id',
             'checked_out' => 'required|date',
-            'views' => 'required|numeric|min:0'
+            'views_knowledge' => 'required|numeric|min:0',
+            'time_availability' => 'required|numeric|min:0',
+            'time_visibility' => 'required|numeric|min:0',
+            'time_knowledge' => 'required|numeric|min:0',
+            'time_survey' => 'required|numeric|min:0',
+            'time_order' => 'required|numeric|min:0',
         ];
     }
 

@@ -8,6 +8,7 @@ use App\Http\Controllers\Controller;
 use App\Http\Requests\Visibility\CreateVisibilityRequest;
 use App\Http\Requests\Visibility\UpdateVisibilityRequest;
 use App\Models\City;
+use App\Models\User;
 use App\Models\Category;
 use App\Models\Product;
 use App\Models\VisualType;
@@ -26,9 +27,16 @@ class VisibilityController extends Controller
      */
     public function index()
     {
-        $visibilities = Visibility::with(['outlet', 'user', 'product', 'visualType'])
+        $salesUsers = User::role('sales')->get();
+        $visibilities = Visibility::with(['outlet.user', 'product', 'visualType'])
+            ->whereHas('outlet.user', function($query) {
+                $query->role('sales');
+            })
             ->latest()
             ->get();
+
+        // Debug untuk memeriksa data
+        Log::info('Visibilities:', $visibilities->toArray());
 
         return view("pages.visibility.index", compact('visibilities'));
     }
@@ -43,7 +51,9 @@ class VisibilityController extends Controller
         $products = Product::orderBy('sku')->get();
         $visualTypes = VisualType::all();
         $posmTypes = PosmType::all();
-        $outlets = Outlet::where('status', 'APPROVED')
+        // Load outlet with user relation
+        $outlets = Outlet::with('user')
+            ->where('status', 'APPROVED')
             ->orderBy('name')
             ->get();
 
@@ -56,6 +66,7 @@ class VisibilityController extends Controller
             'outlets'
         ));
     }
+    
 
     /**
      * Store a newly created resource in storage.
@@ -67,10 +78,9 @@ class VisibilityController extends Controller
             // Get validated data
             $data = $request->validated();
 
-            // Add user_id (perbaiki ini)
-            $data['user_id'] = Auth::id();
-            // atau gunakan
-            // $data['user_id'] = Auth::id();
+            // Get user_id from outlet
+            $outlet = Outlet::findOrFail($data['outlet_id']);
+            $data['user_id'] = $outlet->user_id;
 
             // Handle file upload if exists
             if ($request->hasFile('banner')) {
@@ -124,6 +134,9 @@ class VisibilityController extends Controller
     {
         $visibility = Visibility::with(['outlet', 'city', 'product.category', 'visualType', 'posmType'])
             ->findOrFail($id);
+
+            $visualTypes = VisualType::all();
+            $products = Product::all();
 
         $cities = City::orderBy('name')->get();
         $categories = Category::orderBy('name')->get();

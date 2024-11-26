@@ -2,10 +2,14 @@
 
 namespace App\Http\Requests\Visibility;
 
+use App\Traits\ResponseTrait;
+use Illuminate\Contracts\Validation\Validator;
 use Illuminate\Foundation\Http\FormRequest;
+use Illuminate\Http\Exceptions\HttpResponseException;
 
 class CreateVisibilityRequest extends FormRequest
 {
+    use ResponseTrait;
     /**
      * Determine if the user is authorized to make this request.
      */
@@ -18,17 +22,18 @@ class CreateVisibilityRequest extends FormRequest
      * Get the validation rules that apply to the request.
      */
     public function rules()
-    {
-        return [
-            'city_id' => 'required|exists:cities,id',
-            'outlet_id' => 'required|exists:outlets,id',
-            'product_id' => 'required|exists:products,id',
-            'program_date' => 'required|date',
-            'visual_type_id' => 'required|exists:visual_types,id',
-            'posm_type_id' => 'required|exists:posm_types,id',
-            'banner' => 'required|image|mimes:jpeg,png,jpg',
-        ];
-    }
+{
+    return [
+        'city_id' => 'required|exists:cities,id',
+        'outlet_id' => 'required|exists:outlets,id',
+        'user_id' => 'required|exists:users,id', // Tambahkan validasi user_id
+        'product_id' => 'required|exists:products,id',
+        'program_date' => 'required|date',
+        'visual_type_id' => 'required|exists:visual_types,id',
+        'posm_type_id' => 'required|exists:posm_types,id',
+        'banner' => 'required|image|mimes:jpeg,png,jpg',
+    ];
+}
 
     public function messages()
     {
@@ -54,6 +59,7 @@ class CreateVisibilityRequest extends FormRequest
             'posm_type_id' => $this->input('posm'),
             'product_id' => $this->input('sku'),
             'outlet_id' => $this->input('outlet-name'),
+            'user_id' => $this->input('user_id'),  // Tambahkan ini
         ]);
     }
 }

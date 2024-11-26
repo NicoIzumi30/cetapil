@@ -141,13 +141,10 @@
                 });
             });
         });
-        $('.delete-btn').on('click', function (e) {
-            e.preventDefault();
-            const deleteUrl = $(this).attr('href');
-
+        function deleteData(url,name) {
             Swal.fire({
                 title: 'Apakah Anda yakin?',
-                text: "Data " + $(this).data('name') + " akan dihapus",
+                text: "Data " + name + " akan dihapus",
                 icon: 'warning',
                 showCancelButton: true,
                 confirmButtonColor: '#e74c3c',
@@ -157,7 +154,7 @@
             }).then((result) => {
                 if (result.value) {
                     $.ajax({
-                        url: deleteUrl,
+                        url: url,
                         type: 'DELETE',
                         success: function (response) {
                             console.log(response);
@@ -174,7 +171,8 @@
                     });
                 }
             });
-        });
+        }
+       
     </script>
 </body>
 

@@ -38,7 +38,45 @@ class ProductController extends Controller
             'channels' => $channels
         ]);
     }
-
+    public function getData(Request $request)
+    {
+        $query = Product::with('category');
+        
+        if ($request->filled('search_term')) {
+            $searchTerm = $request->search_term;
+            $query->where(function($q) use ($searchTerm) {
+                $q->where('sku', 'like', "%{$searchTerm}%")
+                  ->orWhereHas('category', function($q) use ($searchTerm) {
+                      $q->where('name', 'like', "%{$searchTerm}%");
+                  });
+            });
+        }
+        
+        $filteredRecords = (clone $query)->count();
+        
+        $result = $query->skip($request->start)
+                       ->take($request->length)
+                       ->get();
+        
+        return response()->json([
+            'draw' => intval($request->draw),
+            'recordsTotal' => $filteredRecords,
+            'recordsFiltered' => $filteredRecords,
+            'data' => $result->map(function($item) {
+                return [
+                    'id' => $item->id, // Tambahkan id product
+                    'category' => $item->category->name,
+                    'sku' => $item->sku,
+                    'md_price' => number_format($item->md_price, 0, ',', '.'),
+                    'sales_price' => number_format($item->sales_price, 0, ',', '.'),
+                    'actions' => view('pages.product.action', [
+                        'item' => $item,
+                        'productId' => $item->id // Pass product id ke view actions
+                    ])->render()
+                ];
+            })
+        ]);
+    }
     public function create()
     {
         $categories = Category::all();
@@ -189,11 +227,9 @@ class ProductController extends Controller
             return response()->json(['message' => $e->getMessage()], 500);
         }
     }
-
     public function downloadExcel()
     {
         try {
-            // Generate file langsung ke output
             return Excel::download(new ProductExport(), 'products_data_' . now()->format('Y-m-d_His') . '.xlsx', \Maatwebsite\Excel\Excel::XLSX);
         } catch (\Exception $e) {
             Log::error('Excel Download Error', [

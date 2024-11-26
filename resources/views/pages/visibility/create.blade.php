@@ -91,6 +91,7 @@
 
             <form id="createVisibilityForm" enctype="multipart/form-data">
                 @csrf
+                <input type="hidden" name="user_id" id="user_id">
             <div class="grid grid-cols-2 gap-6">
                 <div>
                     <label for="states-option">Kabupaten/Kota</label>
@@ -109,10 +110,10 @@
                             -- Pilih Nama Outlet --
                         </option>
                         @foreach($outlets as $outlet)
-                            <option value="{{ $outlet->id }}">
-                                {{ $outlet->code }} - {{ $outlet->name }}
-                            </option>
-                        @endforeach
+                        <option value="{{ $outlet->id }}" data-sales-id="{{ $outlet->user_id }}" data-sales-name="{{ $outlet->user->name }}">
+                            {{ $outlet->code }} - {{ $outlet->name }}
+                        </option>
+                    @endforeach
                     </select>
                     <span id="outlet_id-error" class="text-red-500 text-xs hidden"></span>
                 </div> 
@@ -461,62 +462,71 @@
             altFormat: "d F Y"
         });
 
-        $('#createVisibilityForm').on('submit', function(e) {
-            e.preventDefault();
-            
-            $('.text-red-500').addClass('hidden');
-            $('select, input').removeClass('border-red-500');
-            
-            const formData = new FormData(this);
-            
-            $('#submitBtn').prop('disabled', true);
-            $('#submitBtnText').addClass('hidden');
-            $('#submitBtnLoading').removeClass('hidden');
-            
-            $.ajax({
-                url: '/visibility',
-                type: 'POST',
-                data: formData,
-                processData: false,
-                contentType: false,
-                success: function(response) {
-                    if (response.status === 'success') {
-                        toast('success', response.message);
-                        setTimeout(() => {
-                            window.location.href = '/visibility';
-                        }, 1500);
-                    }
-                },
-                error: function(xhr) {
-                    if (xhr.status === 422) {
-                        const errors = xhr.responseJSON.errors;
-                        Object.keys(errors).forEach(key => {
-                            // Map field names
-                            const fieldMap = {
-                                'outlet_id': 'outlet-name',
-                                'product_id': 'sku',
-                                'program_date': 'program-date',
-                                'visual_type_id': 'visual-campaign',
-                                'posm_type_id': 'posm'
-                            };
-                            
-                            const field = fieldMap[key] || key;
-                            $(`#${field}-error`)
-                                .text(errors[key][0])
-                                .removeClass('hidden');
-                            $(`[name="${field}"]`).addClass('border-red-500');
-                        });
-                    } else {
-                        toast('error', 'Terjadi kesalahan saat menyimpan data');
-                    }
-                },
-                complete: function() {
-                    $('#submitBtn').prop('disabled', false);
-                    $('#submitBtnText').removeClass('hidden');
-                    $('#submitBtnLoading').addClass('hidden');
+        $('#outlet-name').on('change', function() {
+        const selectedOption = $(this).find(':selected');
+        const salesId = selectedOption.data('sales-id');
+        const salesName = selectedOption.data('sales-name');
+        
+        // Set user_id ke hidden input
+        $('#user_id').val(salesId);
+    });
+
+    $('#createVisibilityForm').on('submit', function(e) {
+        e.preventDefault();
+        
+        $('.text-red-500').addClass('hidden');
+        $('select, input').removeClass('border-red-500');
+        
+        const formData = new FormData(this);
+        
+        $('#submitBtn').prop('disabled', true);
+        $('#submitBtnText').addClass('hidden');
+        $('#submitBtnLoading').removeClass('hidden');
+        
+        $.ajax({
+            url: '{{ route("visibility.data") }}',
+            type: 'POST',
+            data: formData,
+            processData: false,
+            contentType: false,
+            success: function(response) {
+                if (response.status === 'success') {
+                    toast('success', response.message);
+                    setTimeout(() => {
+                        window.location.href = '/visibility';
+                    }, 1500);
                 }
-            });
+            },
+            error: function(xhr) {
+                if (xhr.status === 422) {
+                    const errors = xhr.responseJSON.errors;
+                    Object.keys(errors).forEach(key => {
+                        const fieldMap = {
+                            'outlet_id': 'outlet-name',
+                            'product_id': 'sku',
+                            'program_date': 'program-date',
+                            'visual_type_id': 'visual-campaign',
+                            'posm_type_id': 'posm',
+                            'user_id': 'user_id'
+                        };
+                        
+                        const field = fieldMap[key] || key;
+                        $(`#${field}-error`)
+                            .text(errors[key][0])
+                            .removeClass('hidden');
+                        $(`[name="${field}"]`).addClass('border-red-500');
+                    });
+                } else {
+                    toast('error', 'Terjadi kesalahan saat menyimpan data');
+                }
+            },
+            complete: function() {
+                $('#submitBtn').prop('disabled', false);
+                $('#submitBtnText').removeClass('hidden');
+                $('#submitBtnLoading').addClass('hidden');
+            }
         });
+    });
 
         $('#img_banner').change(function() {
             const file = this.files[0];

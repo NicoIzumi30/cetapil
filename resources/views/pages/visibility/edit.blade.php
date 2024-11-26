@@ -10,7 +10,7 @@
             Edit Daftar Visibility
         </x-slot:cardTitle>
 
-        <form id="editVisibilityForm" enctype="multipart/form-data">
+        <form action="{{ route('visibility.update', $visibility->id) }}" method="POST">
             @csrf
             @method('PUT')
         <div class="grid grid-cols-2 gap-6">

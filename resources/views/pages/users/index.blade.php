@@ -16,13 +16,13 @@
     </x-slot:cardAction>
     {{-- Users Action End --}}
 
-    <table class="table">
+    <table class="table" id="table_user">
         <thead>
             <tr>
                 <th scope="col" class="text-center">
                     <a href="#" class="table-head sort-link" data-column="name">
                         <{{ __('Nama') }}
-                        <x-icons.sort />
+                            <x-icons.sort />
                     </a>
                 </th>
                 <th scope="col" class="text-center">
@@ -33,20 +33,20 @@
                 </th>
                 <th scope="col" class="text-center">
                     <a href="#" class="table-head sort-link" data-column="position">
-                    {{ __(key: 'Position') }}
-                    <x-icons.sort />
+                        {{ __(key: 'Position') }}
+                        <x-icons.sort />
                     </a>
                 </th>
                 <th scope="col" class="text-center">
                     <a href="#" class="table-head sort-link" data-column="outlet_area">
-                    {{ __(key: 'Outlet Area') }}
-                    <x-icons.sort />
+                        {{ __(key: 'Outlet Area') }}
+                        <x-icons.sort />
                     </a>
                 </th>
                 <th scope="col" class="text-center">
                     <a href="#" class="table-head sort-link" data-column="status">
-                    {{ __('Status') }}
-                    <x-icons.sort />
+                        {{ __('Status') }}
+                        <x-icons.sort />
                     </a>
                 </th>
                 <th scope="col" class="text-center">
@@ -58,7 +58,7 @@
         </thead>
         <tbody>
             @forelse($users as $user)
-        {{-- Users Table --}}
+                {{-- Users Table --}}
                 <tr class="table-row">
                     <td scope="row" class="table-data">
                         {{ $user->name }}
@@ -67,7 +67,7 @@
                         {{ $user->email }}
                     </td>
                     <td scope="row" class="table-data !text-[#70FFE2]">
-                        {{ $user->roles[0]->name }}
+                        {{ ucwords($user->roles[0]->name) }}
                     </td>
                     <td scope="row" class="table-data !text-[#70FFE2]">
                         {{ $user->longitude . ', ' . $user->latitude }}
@@ -83,7 +83,8 @@
                                 </a>
                             </li>
                             <li>
-                                <a href="{{ route('users.destroy', $user->id) }}" class="delete-btn dropdown-option text-red-400 delete-user" data-id="{{ $user->id }}">
+                                <a href="{{ route('users.destroy', $user->id) }}"
+                                    class="delete-btn dropdown-option text-red-400 delete-user" data-id="{{ $user->id }}" data-name="{{$user->name}}">
                                     Hapus Data
                                 </a>
                             </li>
@@ -104,38 +105,40 @@
     {{-- Users Table End --}}
 </x-card>
 {{-- Users End --}}
-    {{-- Users End --}}
+{{-- Users End --}}
 
 @endsection
 
 @push('scripts')
     <script>
-
         $(document).ready(function () {
-            $("#sales-date-range").flatpickr({
-                mode: "range"
-            $(document).ready(function() {
-                $('#users-table').DataTable({
-                    paging: true,
-                    searching: false,
-                    info: true,
-                    pageLength: 10,
-                    lengthMenu: [10, 20, 30, 40, 50],
-                    dom: 'rt<"bottom-container"<"bottom-left"l><"bottom-right"p>>',
-                    language: {
-                        lengthMenu: "Menampilkan _MENU_ dari 4,768 data",
-                        paginate: {
-                            previous: '<',
-                            next: '>',
-                            last: 'Terakhir',
-                        }
-                    },
-                });
-
+            $('#users-table').DataTable({
+                paging: true,
+                searching: false,
+                info: true,
+                pageLength: 10,
+                lengthMenu: [10, 20, 30, 40, 50],
+                dom: 'rt<"bottom-container"<"bottom-left"l><"bottom-right"p>>',
+                language: {
+                    lengthMenu: "Menampilkan _MENU_ dari 4,768 data",
+                    paginate: {
+                        previous: '<',
+                        next: '>',
+                        last: 'Terakhir',
+                    }
+                },
+            });
+        });
         $(document).ready(function () {
             $("#sales-date-range").flatpickr({
                 mode: "range"
 
+            });
+            $(document).on('click', '#table_user .delete-btn', function (e) {
+                e.preventDefault();
+                const url = $(this).attr('href');
+                const name = $(this).data('name');
+                deleteData(url, name);
             });
         });
     </script>

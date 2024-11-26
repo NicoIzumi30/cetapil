@@ -17,7 +17,12 @@ return new class extends Migration
             $table->foreignUuid('user_id')->references('id')->on('users');
             $table->timestamp('checked_in')->nullable();
             $table->timestamp('checked_out')->nullable();
-            $table->integer('views')->default(0);
+            $table->integer('views_knowledge')->default(0);
+            $table->integer('time_availability')->default(0);
+            $table->integer('time_visibility')->default(0);
+            $table->integer('time_knowledge')->default(0);
+            $table->integer('time_survey')->default(0);
+            $table->integer('time_order')->default(0);
             $table->enum('status', ['IN_PROGRESS', 'SUBMITTED', 'CANCELLED'])->default('IN_PROGRESS');
             $table->timestamps();
             $table->softDeletes();
