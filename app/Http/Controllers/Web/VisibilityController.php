@@ -18,6 +18,8 @@ use App\Models\Outlet;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Log;
+use Illuminate\Http\Request;
+
 
 
 class VisibilityController extends Controller
@@ -25,21 +27,29 @@ class VisibilityController extends Controller
     /**
      * Display a listing of the resource.
      */
-    public function index()
+    public function index(Request $request)
     {
-        $salesUsers = User::role('sales')->get();
-        $visibilities = Visibility::with(['outlet.user', 'product', 'visualType'])
-            ->whereHas('outlet.user', function($query) {
-                $query->role('sales');
-            })
-            ->latest()
+        $salesUsers = User::role('sales')
+            ->orderBy('name')
             ->get();
 
-        // Debug untuk memeriksa data
-        Log::info('Visibilities:', $visibilities->toArray());
+        $query = Visibility::with(['outlet.user', 'product', 'visualType'])
+            ->whereHas('outlet.user', function($query) {
+                $query->role('sales');
+            });
 
-        return view("pages.visibility.index", compact('visibilities'));
+        // Apply sales filter if selected
+        if ($request->filled('sales_id')) {
+            $query->whereHas('outlet.user', function($q) use ($request) {
+                $q->where('id', $request->sales_id);
+            });
+        }
+
+        $visibilities = $query->latest()->get();
+
+        return view("pages.visibility.index", compact('visibilities', 'salesUsers'));
     }
+
 
     /**
      * Show the form for creating a new resource.
@@ -83,8 +93,8 @@ class VisibilityController extends Controller
             $data['user_id'] = $outlet->user_id;
 
             // Handle file upload if exists
-            if ($request->hasFile('banner')) {
-                $file = $request->file('banner');
+            if ($request->hasFile('filename')) {
+                $file = $request->file('filename');
                 $filename = time() . '_' . $file->getClientOriginalName();
                 $file->move(public_path('banners'), $filename);
 

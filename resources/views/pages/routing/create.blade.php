@@ -81,10 +81,10 @@
                 <option value="" selected disabled>
                     -- Pilih kategori outlet --
                 </option>
-                <option value="mt">
+                <option value="MT">
                     MT
                 </option>
-                <option value="mt">
+                <option value="GT">
                     GT
                 </option>
             </select>
@@ -279,6 +279,7 @@
                 <x-pages.routing.outlet-form>
                     <x-slot:title>{{$form->question}}</x-slot:title>
                     <x-slot:name>survey[{{$form->id}}]</x-slot:name>
+                    <x-slot:value>0</x-slot:value>
                 </x-pages.routing.outlet-form>
             @endif
         @endforeach

@@ -229,7 +229,7 @@
                         </div>
 
                         {{-- Hidden File Input --}}
-                        <input type="file" name="banner" id="img_banner" class="hidden"
+                        <input type="file" name="filename" id="img_banner" class="hidden"
                             accept="image/png, image/jpeg" onchange="previewImage(this, 'banner', 5)">
                     </div>
                 </div>
@@ -446,6 +446,8 @@
 
     @push('scripts')
     <script>
+
+        
         $(document).ready(function() {
         // Initialize Select2
         $('#states-option').select2();
@@ -456,11 +458,57 @@
         $('#posm').select2();
 
         // Initialize Flatpickr
-        $("#program-date").flatpickr({
-            dateFormat: "Y-m-d",
-            altInput: true,
-            altFormat: "d F Y"
-        });
+        $('#program-date').after(`
+        <input type="hidden" name="started_at" id="started_at">
+        <input type="hidden" name="ended_at" id="ended_at">
+    `);
+
+    // Initialize Flatpickr with range mode
+    const dateRangePicker = $("#program-date").flatpickr({
+        mode: "range",
+        dateFormat: "Y-m-d",
+        altInput: true,
+        altFormat: "d F Y",
+        showMonths: 2,
+        allowInput: false,
+        disableMobile: true,
+        locale: {
+            rangeSeparator: " sampai ",
+            firstDayOfWeek: 1,
+            weekdays: {
+                shorthand: ['Min', 'Sen', 'Sel', 'Rab', 'Kam', 'Jum', 'Sab'],
+                longhand: ['Minggu', 'Senin', 'Selasa', 'Rabu', 'Kamis', 'Jumat', 'Sabtu']
+            },
+            months: {
+                shorthand: ['Jan', 'Feb', 'Mar', 'Apr', 'Mei', 'Jun', 'Jul', 'Ags', 'Sep', 'Okt', 'Nov', 'Des'],
+                longhand: ['Januari', 'Februari', 'Maret', 'April', 'Mei', 'Juni', 'Juli', 'Agustus', 'September', 'Oktober', 'November', 'Desember']
+            }
+        },
+        onChange: function(selectedDates, dateStr, instance) {
+            if (selectedDates.length === 2) {
+                const startDate = selectedDates[0];
+                const endDate = selectedDates[1];
+                
+                // Format dates in MySQL datetime format YYYY-MM-DD HH:mm:ss
+                const formatDate = (date) => {
+                    return date.toISOString().slice(0, 19).replace('T', ' ');
+                };
+                
+                // Set start date to beginning of day
+                startDate.setHours(0, 0, 0, 0);
+                // Set end date to end of day
+                endDate.setHours(23, 59, 59, 999);
+                
+                // Update hidden inputs with MySQL datetime format
+                $('#started_at').val(formatDate(startDate));
+                $('#ended_at').val(formatDate(endDate));
+                
+                // Clear error message if exists
+                $('#program-date-error').addClass('hidden');
+                $('#program-date').removeClass('border-red-500');
+            }
+        }
+    });
 
         $('#outlet-name').on('change', function() {
         const selectedOption = $(this).find(':selected');
@@ -471,20 +519,34 @@
         $('#user_id').val(salesId);
     });
 
-    $('#createVisibilityForm').on('submit', function(e) {
+    $(document).ready(function() {
+        $('#createVisibilityForm').on('submit', function(e) {
         e.preventDefault();
         
+        // Reset error states
         $('.text-red-500').addClass('hidden');
         $('select, input').removeClass('border-red-500');
         
+        // Create FormData object
         const formData = new FormData(this);
         
+        // Validate date range
+        if (!$('#started_at').val() || !$('#ended_at').val()) {
+            $('#program-date-error')
+                .text('Pilih tanggal mulai dan selesai program')
+                .removeClass('hidden');
+            $('#program-date').addClass('border-red-500');
+            return;
+        }
+
+        // Show loading state
         $('#submitBtn').prop('disabled', true);
         $('#submitBtnText').addClass('hidden');
         $('#submitBtnLoading').removeClass('hidden');
         
+        // Send AJAX request
         $.ajax({
-            url: '{{ route("visibility.data") }}',
+            url: '/visibility',
             type: 'POST',
             data: formData,
             processData: false,
@@ -501,32 +563,43 @@
                 if (xhr.status === 422) {
                     const errors = xhr.responseJSON.errors;
                     Object.keys(errors).forEach(key => {
+                        // Map field names to form input IDs
                         const fieldMap = {
                             'outlet_id': 'outlet-name',
                             'product_id': 'sku',
-                            'program_date': 'program-date',
+                            'started_at': 'program-date',
+                            'ended_at': 'program-date',
                             'visual_type_id': 'visual-campaign',
                             'posm_type_id': 'posm',
-                            'user_id': 'user_id'
+                            'user_id': 'user_id',
+                            'filename': 'img_banner'
                         };
                         
                         const field = fieldMap[key] || key;
-                        $(`#${field}-error`)
-                            .text(errors[key][0])
-                            .removeClass('hidden');
-                        $(`[name="${field}"]`).addClass('border-red-500');
+                        const errorElement = $(`#${field}-error`);
+                        if (errorElement.length) {
+                            errorElement
+                                .text(errors[key][0])
+                                .removeClass('hidden');
+                            $(`[name="${key}"]`).addClass('border-red-500');
+                        }
                     });
                 } else {
-                    toast('error', 'Terjadi kesalahan saat menyimpan data');
+                    toast('error', xhr.responseJSON?.message || 'Terjadi kesalahan saat menyimpan data');
                 }
             },
             complete: function() {
+                // Reset loading state
                 $('#submitBtn').prop('disabled', false);
                 $('#submitBtnText').removeClass('hidden');
                 $('#submitBtnLoading').addClass('hidden');
             }
         });
     });
+});
+
+
+
 
         $('#img_banner').change(function() {
             const file = this.files[0];

@@ -12,11 +12,14 @@
         {{-- Visibility Action --}}
         <x-slot:cardAction>
             <x-input.search wire:model.live="search" class="border-0" placeholder="Cari data visibility"></x-input.search>
-            <x-select.light :title="'Filter Jenis Visibility'" id="day" name="day">
-                <option value="senin">
-                    senin
-                </option>
-            </x-select.light>
+            <x-select.light :title="'Filter Jenis Visibility'" id="sales-filter" name="sales_id">
+                @foreach($salesUsers as $sales)
+                    <option value="{{ $sales->id }}" {{ request('sales_id') == $sales->id ? 'selected' : '' }}>
+                        {{ $sales->name }}
+                    </option>
+                @endforeach
+
+            </x-select.light> 
             <x-button.info onclick="openModal('update-photo')">Update Foto</x-button.info>
             <x-button.info href="/visibility/create">Tambah Visibility</x-button.info>
         </x-slot:cardAction>
@@ -44,31 +47,37 @@
             <th scope="col" class="text-center">
                 <a class="table-head">
                     {{ __('Nama Outlet') }}
+                    <x-icons.sort />
                 </a>
             </th>
             <th scope="col" class="text-center">
                 <a class="table-head">
                     {{ __('Nama Sales') }}
+                    <x-icons.sort />
                 </a>
             </th>
             <th scope="col" class="text-center">
                 <a class="table-head">
                     {{ __('SKU') }}
+                    <x-icons.sort />
                 </a>
             </th>
             <th scope="col" class="text-center">
                 <a class="table-head">
                     {{ __('Visual') }}
+                    <x-icons.sort />
                 </a>
             </th>
             <th scope="col" class="text-center">
                 <a class="table-head">
                     {{ __('Status') }}
+                    <x-icons.sort />
                 </a>
             </th>
             <th scope="col" class="text-center">
                 <a class="table-head">
                     {{ __('Jangka Waktu') }}
+                    <x-icons.sort />
                 </a>
             </th>
             <th scope="col" class="text-center">
@@ -175,18 +184,10 @@
             </thead>
             <tbody>
                 <tr class="table-row">
-                    <td scope="row" class="table-data">
-                        halo
-                    </td>
-                    <td scope="row" class="table-data">
-                        halo
-                    </td>
-                    <td scope="row" class="table-data">
-                        halo
-                    </td>
-                    <td scope="row" class="table-data">
-                        halo
-                    </td>
+                    <td class="table-data">{{ $visibility->outlet->name }}</td>
+                    <td class="table-data">{{ $visibility->outlet->user->name }}</td>
+                    <td class="table-data">{{ $visibility->product->sku }}</td>
+                    <td class="table-data">{{ $visibility->visualType->name }}</td>
                     <td scope="row" class="table-data">
                         halo
                     </td>
@@ -221,6 +222,7 @@
 
 @push('scripts')
     <script>
+
         $(document).ready(function() {
             $("#visibility-activity-daterange").flatpickr({
                 mode: "range"
@@ -356,4 +358,38 @@ function deleteVisibility(id, outletName, salesName, sku) {
     });
 }
     </script>
+@endpush
+
+
+@push('scripts')
+<script>
+$(document).ready(function() {
+    // Initialize select2
+    $('#sales-filter').select2({
+        placeholder: 'Select Sales',
+        allowClear: true
+    });
+
+    // Handle filter change
+    $('#sales-filter').change(function() {
+        const salesId = $(this).val();
+        let url = new URL(window.location.href);
+        
+        if (salesId) {
+            url.searchParams.set('sales_id', salesId);
+        } else {
+            url.searchParams.delete('sales_id');
+        }
+        
+        window.location.href = url.toString();
+    });
+
+    // Handle reset button
+    $('#reset-filter').click(function() {
+        let url = new URL(window.location.href);
+        url.searchParams.delete('sales_id');
+        window.location.href = url.toString();
+    });
+});
+</script>
 @endpush
