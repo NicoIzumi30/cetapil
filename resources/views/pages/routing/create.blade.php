@@ -81,10 +81,10 @@
                 <option value="" selected disabled>
                     -- Pilih kategori outlet --
                 </option>
-                <option value="mt">
+                <option value="MT">
                     MT
                 </option>
-                <option value="mt">
+                <option value="GT">
                     GT
                 </option>
             </select>

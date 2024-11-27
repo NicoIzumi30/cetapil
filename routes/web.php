@@ -1,5 +1,6 @@
 <?php
 
+use App\Http\Controllers\Web\ProductKnowledgeControler;
 use App\Http\Controllers\Web\RoutingController;
 use App\Http\Controllers\Web\VisualController;
 use App\Models\Visibility;
@@ -53,7 +54,8 @@ Route::middleware('auth')->group(function () {
     //     });
     // });
     Route::resource('routing',RoutingController::class)->middleware('permission:menu_routing');
-    Route::get('data',[RoutingController::class,'getData'])->name('routing.data');
+    Route::get('data',[RoutingController::class,'getData'])->name('routing.data')->middleware('permission:menu_routing');
+    Route::put('update-product-knowledge', [ProductKnowledgeControler::class, 'update'])->name('update-product-knowledge')->middleware('permission:menu_routing');
     // Visibility Management
     Route::resource('visibility', VisibilityController::class)->middleware('permission:menu_visibility');
 

@@ -25,6 +25,17 @@
         <x-button.info onclick="openModal('upload-product-knowledge')">Upload Product knowledge</x-button.info>
         <x-modal id="upload-product-knowledge">
             <x-slot:title>Upload Product Knowledge</x-slot:title>
+            <div class="mb-6">
+                <label for="channel" class="!text-black">Channel</label>
+                <select id="channel" name="channel" class=" w-full">
+                    <option value="" selected disabled>
+                        -- Pilih Channel --
+                    </option>
+                    @foreach ($channels as $channel)
+                        <option value="{{$channel->id}}">{{$channel->name}}</option>
+                    @endforeach
+                </select>
+            </div>
             <div class="flex gap-4 w-full">
                 <div class="w-full">
                     <label for="pamflet_file" class="!text-black">
@@ -60,7 +71,7 @@
                 </div>
             </div>
             <x-slot:footer>
-                <x-button.info class="w-full">Upload</x-button.info>
+                <x-button.info class="w-full" id="updateBtn">Upload</x-button.info>
             </x-slot:footer>
         </x-modal>
         <x-button.info href="/routing/create">Tambah Daftar Outlet</x-button.info>
@@ -319,6 +330,77 @@
 
 @push('scripts')
     <script>
+        $('#channel').select2();
+        $('#updateBtn').click(function (e) {
+            e.preventDefault();
+            const maxSize = 10 * 1024 * 1024;
+            const formData = new FormData();
+            const pdfFile = $('#pamflet_file')[0].files[0];
+            const videoFile = $('#video_file')[0].files[0];
+            if (pdfFile) {
+                if (pdfFile.size > maxSize) {
+                    toast('error', 'Ukuran file PDF tidak boleh lebih dari 10MB', 200);
+                    return;
+                }
+                if (!pdfFile.type.includes('pdf')) {
+                    toast('error', 'File harus berformat PDF', 200);
+                    return;
+                }
+                formData.append('file_pdf', pdfFile);
+            }
+
+            // Validasi ukuran file Video
+            if (videoFile) {
+                if (videoFile.size > maxSize) {
+                    toast('error', 'Ukuran file Video tidak boleh lebih dari 10MB', 200);
+                    return;
+                }
+                if (!videoFile.type.includes('video/')) {
+                    toast('error', 'File harus berformat video', 200);
+                    return;
+                }
+                formData.append('file_video', videoFile);
+            }
+            const channelId = $('#channel').val();
+            if (!channelId) {
+                alert('Channel ID wajib diisi');
+                return;
+            }
+            formData.append('channel_id', channelId);
+            formData.append('_method', 'PUT');
+
+            $.ajax({
+                url: '{{route('update-product-knowledge')}}',
+                type: 'POST',
+                data: formData,
+                contentType: false,
+                processData: false,
+                cache: false,
+                beforeSend: function () {
+                    $('#updateBtn').prop('disabled', true);
+                    $('#updateBtn').html('Uploading...');
+                },
+                success: function (response) {
+                    if(response.status === 'success') {
+                        closeModal('upload-product-knowledge');
+                        toast('success', response.message, 200);
+                        setTimeout(() => {
+                            window.location.reload();
+                        }, 2000);
+                    }
+                },
+                error: function (xhr) {
+                    // Handle error
+                    toast('error', 'Terjadi kesalahan saat upload', 200);
+                    console.error(xhr.responseText);
+                },
+                complete: function () {
+                    // Reset button state
+                    $('#updateBtn').prop('disabled', false);
+                    $('#updateBtn').html('Update');
+                }
+            });
+        });
         document.getElementById('pamflet_file').addEventListener('change', function (e) {
             const fileName = e.target.files[0] ? e.target.files[0].name : 'No file selected';
             document.getElementById('pamfletFileNameDisplay').value = fileName;

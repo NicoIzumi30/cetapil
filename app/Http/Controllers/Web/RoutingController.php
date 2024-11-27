@@ -18,6 +18,7 @@ use App\Models\OutletFormAnswer;
 use Illuminate\Support\Facades\DB;
 use App\Http\Controllers\Controller;
 use App\Http\Requests\Routing\CreateOutletRequest;
+use App\Http\Requests\Routing\UpdateOutletRequest;
 
 class RoutingController extends Controller
 {
@@ -26,38 +27,39 @@ class RoutingController extends Controller
      */
     public function index()
     {
-        return view("pages.routing.index");
+        $channels = Channel::all();
+        return view("pages.routing.index", compact('channels'));
     }
     public function getData(Request $request)
     {
         $query = Outlet::with('user');
-        
+
         if ($request->filled('search_term')) {
             $searchTerm = $request->search_term;
-            $query->where(function($q) use ($searchTerm) {
+            $query->where(function ($q) use ($searchTerm) {
                 $q->where('name', 'like', "%{$searchTerm}%")
-                  ->orWhereHas('user', function($q) use ($searchTerm) {
-                      $q->where('name', 'like', "%{$searchTerm}%");
-                  });
+                    ->orWhereHas('user', function ($q) use ($searchTerm) {
+                        $q->where('name', 'like', "%{$searchTerm}%");
+                    });
             });
         }
-        
+
         $filteredRecords = (clone $query)->count();
-        
+
         $result = $query->skip($request->start)
-                       ->take($request->length)
-                       ->get();
-        
+            ->take($request->length)
+            ->get();
+
         return response()->json([
             'draw' => intval($request->draw),
             'recordsTotal' => $filteredRecords,
             'recordsFiltered' => $filteredRecords,
-            'data' => $result->map(function($item) {
+            'data' => $result->map(function ($item) {
                 return [
                     'id' => $item->id, // Tambahkan id product
                     'sales' => $item->user->name,
                     'outlet' => $item->name,
-                    'area' => $item->longitude.', '.$item->latitude,
+                    'area' => $item->longitude . ', ' . $item->latitude,
                     'visit_day' => getVisitDayByNumber($item->visit_day),
                     'actions' => view('pages.routing.action', [
                         'item' => $item,
@@ -74,13 +76,13 @@ class RoutingController extends Controller
     {
         $salesUsers = User::role('sales')->get();
         $waktuKunjungan = [
-            ['name'=> 'Senin', 'value' => 1],
-            ['name'=> 'Selasa', 'value' => 2],
-            ['name'=> 'Rabu', 'value' => 3],
-            ['name'=> 'Kamis', 'value'=> 4],
-            ['name'=> 'Jumat', 'value'=> 5],
-            ['name'=> 'Sabtu', 'value'=> 6],
-            ['name'=> 'Minggu', 'value'=> 7],
+            ['name' => 'Senin', 'value' => 1],
+            ['name' => 'Selasa', 'value' => 2],
+            ['name' => 'Rabu', 'value' => 3],
+            ['name' => 'Kamis', 'value' => 4],
+            ['name' => 'Jumat', 'value' => 5],
+            ['name' => 'Sabtu', 'value' => 6],
+            ['name' => 'Minggu', 'value' => 7],
         ];
         $cycles = ["1x1", "1x2"];
         $cities = City::all();
@@ -119,14 +121,14 @@ class RoutingController extends Controller
     {
         try {
             DB::beginTransaction();
-            $data = Arr::except($request->validated(), ['city', 'img_front', 'img_banner', 'img_main_road','product_category']);
+            $data = Arr::except($request->validated(), ['city', 'img_front', 'img_banner', 'img_main_road', 'product_category']);
             $outlet = new Outlet($data);
             $outlet->status = 'APPROVED';
             $outlet->city_id = $request->city;
             $outlet->save();
             $images = ['img_front', 'img_banner', 'img_main_road'];
             foreach ($images as $key => $image) {
-                if($request->hasFile($image)) {
+                if ($request->hasFile($image)) {
                     $file = $request->file($image);
                     $media = saveFile($file, "outlets/$outlet->id");
                     OutletImage::create([
@@ -137,12 +139,12 @@ class RoutingController extends Controller
                     ]);
                 }
             }
-            foreach($request->product_category as $category){
+            foreach ($request->product_category as $category) {
                 $products = Product::where('category_id', $category)->get();
-                foreach($products as $product){
+                foreach ($products as $product) {
                     OutletProduct::create([
-                        'outlet_id'=> $outlet->id,
-                        'product_id'=> $product->id,
+                        'outlet_id' => $outlet->id,
+                        'product_id' => $product->id,
                     ]);
                 }
             }
@@ -154,7 +156,7 @@ class RoutingController extends Controller
                 ]);
             }
             DB::commit();
-            return to_route('routing.index')->with('success','Outlet berhasil ditambahkan');
+            return to_route('routing.index')->with('success', 'Outlet berhasil ditambahkan');
         } catch (Exception $e) {
             DB::rollBack();
             throw $e;
@@ -177,55 +179,185 @@ class RoutingController extends Controller
         $outlet = Outlet::findOrFail($id);
         $salesUsers = User::role('sales')->get();
         $waktuKunjungan = [
-            ['name'=> 'Senin', 'value' => 1],
-            ['name'=> 'Selasa', 'value' => 2],
-            ['name'=> 'Rabu', 'value' => 3],
-            ['name'=> 'Kamis', 'value'=> 4],
-            ['name'=> 'Jumat', 'value'=> 5],
-            ['name'=> 'Sabtu', 'value'=> 6],
-            ['name'=> 'Minggu', 'value'=> 7],
+            ['name' => 'Senin', 'value' => 1],
+            ['name' => 'Selasa', 'value' => 2],
+            ['name' => 'Rabu', 'value' => 3],
+            ['name' => 'Kamis', 'value' => 4],
+            ['name' => 'Jumat', 'value' => 5],
+            ['name' => 'Sabtu', 'value' => 6],
+            ['name' => 'Minggu', 'value' => 7],
         ];
         $cycles = ["1x1", "1x2"];
         $cities = City::all();
         $channels = Channel::all();
         $category_product = Category::all();
-        $outletForms = OutletForm::with(['answers' => function($query) use($id) {
-            $query->where('outlet_id', $id);
-         }])->get();
-        $categories = Category::with(['products' => function($query) use($id) {
-            $query->whereHas('outlets', function($q) use($id) {
-                $q->where('outlets.id', $id);
+        $outletForms = OutletForm::with([
+            'answers' => function ($query) use ($id) {
+                $query->where('outlet_id', $id);
+            }
+        ])->get();
+        $categories = Category::with([
+            'products' => function ($query) {
+                $query->select('products.id', 'products.sku', 'products.category_id');
+            },
+            'products.outlets' => function ($query) use ($id) {
+                $query->where('outlets.id', $id)
+                    ->select('outlets.id');
+            }
+        ])->get();
+        $categories->each(function ($category) {
+            $category->hasProductInOutlet = $category->products->some(function ($product) {
+                return $product->outlets->isNotEmpty();
             });
-         }])->get();
+        });
         $weekType = [
             [
                 "name" => "Ganjil",
-                "value" => "ODD",],
+                "value" => "ODD",
+            ],
             [
-                "name"=> "Genap",
+                "name" => "Genap",
                 "value" => "EVEN",
             ]
-            ];
-            return view("pages.routing.edit", [
-                "salesUsers" => $salesUsers,
-                "waktuKunjungan" => $waktuKunjungan,
-                "cycles" => $cycles,
-                "cities" => $cities,
-                "channels" => $channels,
-                "category_product" => $category_product,
-                "outletForms" => $outletForms,
-                "weekType" => $weekType,
-                'categories' => $categories,
-                "outlet" => $outlet
-            ]);
+        ];
+        return view("pages.routing.edit", [
+            "salesUsers" => $salesUsers,
+            "waktuKunjungan" => $waktuKunjungan,
+            "cycles" => $cycles,
+            "cities" => $cities,
+            "channels" => $channels,
+            "category_product" => $category_product,
+            "outletForms" => $outletForms,
+            "weekType" => $weekType,
+            'categories' => $categories,
+            "outlet" => $outlet
+        ]);
     }
 
     /**
      * Update the specified resource in storage.
      */
-    public function update(Request $request, string $id)
+    public function update(UpdateOutletRequest $request, string $id)
     {
-        //
+        try {
+            DB::beginTransaction();
+            $data = Arr::except($request->validated(), ['city', 'img_front', 'img_banner', 'img_main_road', 'product_category']);
+            $outlet = Outlet::findOrFail($id);
+            $outlet->fill($data);
+            $outlet->city_id = $request->city;
+            $outlet->save();
+            $images = ['img_front', 'img_banner', 'img_main_road'];
+            foreach ($images as $key => $image) {
+                if ($request->hasFile($image)) {
+                    $file = $request->file($image);
+                    $media = saveFile($file, "outlets/$outlet->id");
+                    // Remove existing file
+                    $img = OutletImage::where('outlet_id', $outlet->id)->where('position', $key + 1)->first();
+                    if ($img) {
+                        removeFile($img->path);
+                        $img->filename = $media['filename'];
+                        $img->path = $media['path'];
+                        $img->save();
+                    } else {
+                        OutletImage::create([
+                            'outlet_id' => $outlet->id,
+                            'position' => $key + 1,
+                            'filename' => $media['filename'],
+                            'path' => $media['path']
+                        ]);
+                    }
+                }
+            }
+
+            $validProductIds = Product::whereIn('category_id', $request->product_category)
+                ->pluck('id');
+            OutletProduct::where('outlet_id', $outlet->id)
+                ->whereNotIn('product_id', $validProductIds)
+                ->delete();
+            $existingProductIds = OutletProduct::where('outlet_id', $outlet->id)
+                ->pluck('product_id');
+            $newProductIds = $validProductIds->diff($existingProductIds);
+            if ($newProductIds->isNotEmpty()) {
+                $products = $newProductIds->map(function ($productId) use ($outlet) {
+                    OutletProduct::create(attributes: [
+                        'outlet_id' => $outlet->id,
+                        'product_id' => $productId,
+                    ]);
+                });
+            }
+            foreach ($request->survey as $formId => $answer) {
+                $data = OutletFormAnswer::where('outlet_id', $outlet->id)->where('outlet_form_id', $formId)->first();
+                if ($data) {
+                    $data->answer = $answer;
+                    $data->save();
+                } else {
+                    OutletFormAnswer::create([
+                        'outlet_id' => $outlet->id,
+                        'outlet_form_id' => $formId,
+                        'answer' => $answer,
+                    ]);
+                }
+            }
+            DB::commit();
+            return to_route('routing.index')->with('success', 'Outlet berhasil ditambahkan');
+        } catch (Exception $e) {
+            DB::rollBack();
+            throw $e;
+        }
+        // $data = Arr::except($request->validated(), ['city', 'img_front', 'img_banner', 'img_main_road', 'products']);
+        // $outlet->fill($data);
+
+        // $city = City::whereName($request->city)->first();
+        // if (!$city) {
+        //     $this->failedResponse(OutletConstants::CITY_NOT_FOUND, HTTPCode::HTTP_NOT_FOUND);
+        // }
+        // $outlet->city_id = $city->id;
+        // $outlet->save();
+
+        // $images = ['img_front', 'img_banner', 'img_main_road'];
+        // foreach ($images as $key => $image) {
+        //     if($request->hasFile($image)) {
+        //         $file = $request->file($image);
+        //         $media = saveFile($file, "outlets/$outlet->id");
+        //         // Remove existing file
+        //         $img = OutletImage::where('outlet_id', $outlet->id)->where('position', $key+1)->first();
+        //         if ($img) {
+        //             removeFile($img->path);
+        //             $img->filename = $media['filename'];
+        //             $img->path = $media['path'];
+        //             $img->save();
+        //         } else {
+        //             OutletImage::create([
+        //                 'outlet_id' => $outlet->id,
+        //                 'position' => $key + 1,
+        //                 'filename' => $media['filename'],
+        //                 'path' => $media['path']
+        //             ]);
+        //         }
+        //     }
+        // }
+
+        // # Save outlet products
+        // $productRequest = json_decode($request->products, true);
+        // foreach ($productRequest ?? [] as $product) {
+        //     $prod = Product::find($product['id']);
+        //     $outlet_product = OutletProduct::where([
+        //         ['product_id', $prod->id],
+        //         ['outlet_id', $id]
+        //     ])->first();
+        //     if ($outlet_product) {
+        //         $outlet_product->av3m = $product['av3m'];
+        //         $outlet_product->save();
+        //     } else {
+        //         OutletProduct::create([
+        //             'outlet_id' => $outlet->id,
+        //             'product_id' => $prod->id,
+        //             'av3m' => $product['av3m']
+        //         ]);
+        //     }
+        // }
+
+        // return $this->successResponse(OutletConstants::UPDATE, HTTPCode::HTTP_OK, new OutletResource($outlet));
     }
 
     /**
@@ -235,6 +367,6 @@ class RoutingController extends Controller
     {
         $outlet = Outlet::findOrFail($id);
         $outlet->delete();
-        return to_route('routing.index')->with('success','Outlet berhasil dihapus');
+        return to_route('routing.index')->with('success', 'Outlet berhasil dihapus');
     }
 }

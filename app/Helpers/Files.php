@@ -8,6 +8,7 @@ use Illuminate\Support\Str;
 if (!function_exists('saveFile')) {
     function saveFile(UploadedFile $file, $folderPath)
     {
+        
         $fileName = $file->getClientOriginalName();
         $filenameWithoutExtension = pathinfo($fileName, PATHINFO_FILENAME);
         $newFileName = Str::slug($filenameWithoutExtension, '_') . '_' . time() . '.' . $file->getClientOriginalExtension();
