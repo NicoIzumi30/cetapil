@@ -1,13 +1,14 @@
-import 'package:cetapil_mobile/controller/activity/activity_controller.dart';
-import 'package:cetapil_mobile/widget/dropdown_textfield.dart';
+import 'package:cetapil_mobile/widget/category_tag_dropdown.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:get/get.dart';
 
 import '../../../controller/activity/tambah_activity_controller.dart';
 import '../../../model/list_category_response.dart';
+import '../../../widget/searchable_grouped_dropdown.dart';
 
 class AvailabilityPage extends GetView<TambahActivityController> {
-  const AvailabilityPage({super.key});
+  AvailabilityPage({super.key});
 
   @override
   Widget build(BuildContext context) {
@@ -21,96 +22,43 @@ class AvailabilityPage extends GetView<TambahActivityController> {
         //     title: "Kategori Produk"),
         Obx(() {
           if (controller.isLoadingAvailability.value) {
-            return CircularProgressIndicator();
+            return Center(child: CircularProgressIndicator());
           } else {
-            return Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                Text(
-                  "Kategori Produk",
-                  style: TextStyle(
-                      fontSize: 13, fontWeight: FontWeight.w700),
-                ),
-                SizedBox(
-                  height: 10,
-                ),
-                Container(
-                  margin: EdgeInsets.only(bottom: 10),
-                  decoration: BoxDecoration(
-                    borderRadius: BorderRadius.circular(8),
-                    boxShadow: [
-                      BoxShadow(
-                        color: Colors.grey.withOpacity(0.1),
-                        spreadRadius: 1,
-                        blurRadius: 3,
-                        offset: const Offset(0, 2),
-                      ),
-                    ],
+            return Container(
+              margin: EdgeInsets.only(bottom: 10),
+              decoration: BoxDecoration(
+                borderRadius: BorderRadius.circular(8),
+                boxShadow: [
+                  BoxShadow(
+                    color: Colors.grey.withOpacity(0.1),
+                    spreadRadius: 1,
+                    blurRadius: 3,
+                    offset: const Offset(0, 2),
                   ),
-                  child: DropdownButtonFormField<Data>(
-                    style: const TextStyle(
-                      fontSize: 14,
-                      color: Color(0xFF0077BD),
-                    ),
-                    decoration: InputDecoration(
-                      contentPadding: const EdgeInsets.symmetric(
-                        horizontal: 16,
-                        vertical: 12,
-                      ),
-                      border: OutlineInputBorder(
-                        borderRadius: BorderRadius.circular(8),
-                        borderSide: BorderSide.none,
-                      ),
-                      filled: true,
-                      fillColor: const Color(0xFFE8F3FF),
-                    ),
-                    hint: Text(
-                      "-- Pilih kategori produk --",
-                      style: TextStyle(
-                        color: Colors.grey[400],
-                        fontSize: 14,
-                      ),
-                    ),
-                    icon: const Icon(
-                      Icons.keyboard_arrow_down_rounded,
-                      color: Colors.blue, // Match your theme color
-                    ),
-                    items: controller.itemsCategory.map((item) {
-                      return DropdownMenuItem<Data>(
-                        value: item, // Use the ID as the value
-                        child: Text(item.name ?? ''), // Display the name
-                      );
-                    }).toList(),
-                    onChanged: (value) {
-                      if (!controller.selectedItems.contains(value)) {
-                        controller.selectedItems.add(value!);
-                      }
-                    },
-                    isExpanded: true,
-                  ),
-                ),
-              ],
+                ],
+              ),
+              child: CategoryTagDropdown<Data>(
+                selectedItems: controller.selectedItems,
+                items: controller.itemsCategory,
+                getDisplayName: (item) => item.name ?? '',
+                onChanged: (value) {
+                  if (!controller.selectedItems.contains(value)) {
+                    controller.selectedItems.add(value!);
+                  }
+                },
+                onRemove: (item) => controller.selectedItems.remove(item),
+                onSelectionComplete: () => controller.getProductbyCategory(),
+              ),
             );
-
-            // CustomDropdown(
-            //   hint: "-- Pilih kategori produk --",
-            //   // items: controller.itemsCategory.map((item)=>item.name as String).toList(),
-            //   items: controller.itemsCategory.map((item) {
-            //     return DropdownMenuItem<String>(
-            //       value: item, // Use the ID as the value
-            //       child: Text(item.name ?? ''), // Display the name
-            //     );
-            //   }).toList(),
-            //   onChanged: (value){
-            //     if (!controller.selectedItems.contains(value)) {
-            //
-            //       controller.selectedItems.add(value!);
-            //     }
-            //   },
-            //   title: "Kategori Produk");
           }
         }),
 
+        Obx(() => SearchableGroupedDropdown(
+              title: "SKU",
+              categories: controller.products.value,
+              onSelect: (item) => controller.handleProductSelect(item),
+              onDeselect: (item) => controller.handleProductDeselect(item),
+            )),
         //  DropdownButtonFormField<String>(
         //   // value: controller.value, // Always set to null to avoid the duplicate value error
         //   decoration: InputDecoration(
@@ -146,57 +94,52 @@ class AvailabilityPage extends GetView<TambahActivityController> {
         //   },
         //   isExpanded: true,
         // ),
-        SingleChildScrollView(
-          scrollDirection: Axis.horizontal,
-          child: Obx(() => Wrap(
-                spacing: 8,
-                runSpacing: 8,
-                children: controller.selectedItems.map((item) {
-                  return InputChip(
-                    label: Text(item.name!),
-                    onDeleted: () => controller.removeItem(item.name!),
-                  );
-                }).toList(),
-              )),
-        ),
+        // SingleChildScrollView(
+        //   scrollDirection: Axis.horizontal,
+        //   child: Obx(() => Wrap(
+        //         spacing: 8,
+        //         runSpacing: 8,
+        //         children: controller.selectedItems.map((item) {
+        //           return InputChip(
+        //             label: Text(item.name!),
+        //             onDeleted: () => controller.removeItem(item.name!),
+        //           );
+        //         }).toList(),
+        //       )),
+        // ),
         SizedBox(
-          height: 10,
+          height: 15,
         ),
+        // Update the availability page
+        Obx(() => Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: controller.products.value.entries.map((category) {
+                final productsInCategory =
+                    controller.selectedProducts.value.where((p) => category.value.contains(p));
 
-// Display selected items
+                if (productsInCategory.isEmpty) return SizedBox.shrink();
 
-        Text("Cleanser",
-            style: TextStyle(
-                fontSize: 16,
-                fontWeight: FontWeight.bold,
-                color: Color(0xFF023B5E))),
-        SumAmountProduct(
-          productName: "Cetaphil Exfoliate Cleanser 500ml",
-          stockController: TextEditingController(),
-          AV3MController: TextEditingController(),
-          recommendController: TextEditingController(),
-        ),
-        Divider(),
-        Text("Baby Treatment",
-            style: TextStyle(
-                fontSize: 16,
-                fontWeight: FontWeight.bold,
-                color: Color(0xFF023B5E))),
-        SumAmountProduct(
-          productName:
-              "Cetaphil Baby Daily Lotion with Organic Calendula 400ml",
-          stockController: TextEditingController(),
-          AV3MController: TextEditingController(),
-          recommendController: TextEditingController(),
-        ),
-        Divider(),
-        SumAmountProduct(
-          productName:
-              "Cetaphil Baby Daily Lotion with Organic Calendula 200ml",
-          stockController: TextEditingController(),
-          AV3MController: TextEditingController(),
-          recommendController: TextEditingController(),
-        ),
+                return Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Text(category.key,
+                        style: TextStyle(
+                            fontSize: 16, fontWeight: FontWeight.bold, color: Color(0xFF023B5E))),
+                    ...productsInCategory.map((product) {
+                      controller.initProductController(product);
+
+                      return SumAmountProduct(
+                        productName: product,
+                        stockController: controller.productControllers[product]!['stock']!,
+                        AV3MController: controller.productControllers[product]!['av3m']!,
+                        recommendController: controller.productControllers[product]!['recommend']!,
+                      );
+                    }),
+                    Divider(),
+                  ],
+                );
+              }).toList(),
+            ))
       ],
     );
   }
@@ -326,6 +269,10 @@ class NumberField extends StatelessWidget {
           fontSize: 14,
           color: Color(0xFF0077BD),
         ),
+        textAlign: TextAlign.center,
+        inputFormatters: [
+          FilteringTextInputFormatter.allow(RegExp(r'^\d*\.?\d*$')),
+        ],
         decoration: InputDecoration(
           // hintText: widget.title,
           hintStyle: TextStyle(
@@ -333,8 +280,8 @@ class NumberField extends StatelessWidget {
             fontSize: 14,
           ),
           contentPadding: const EdgeInsets.symmetric(
-            horizontal: 15,
-            vertical: 10,
+            horizontal: 3,
+            vertical: 3,
           ),
           border: OutlineInputBorder(
             borderRadius: BorderRadius.circular(8),
