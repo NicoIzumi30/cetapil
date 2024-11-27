@@ -62,7 +62,7 @@ Route::middleware('auth')->group(function () {
         
         Route::get('visibility/data', [VisibilityController::class, 'getData'])->name('visibility.data');
         
-        Route::post('visibility', [VisibilityController::class, 'store'])->name('visibility.store');
+        Route::post('/visibility/data', [VisibilityController::class, 'store'])->name('visibility.data');
         Route::get('visibility/{visibility}/edit', [VisibilityController::class, 'edit'])->name('visibility.edit');
         
         Route::post('visual', [VisualController::class, 'store'])->name('visual.store');

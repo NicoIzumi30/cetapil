@@ -471,6 +471,7 @@
         $('#user_id').val(salesId);
     });
 
+    $(document).ready(function() {
     $('#createVisibilityForm').on('submit', function(e) {
         e.preventDefault();
         
@@ -484,7 +485,7 @@
         $('#submitBtnLoading').removeClass('hidden');
         
         $.ajax({
-            url: '{{ route("visibility.data") }}',
+            url: '/visibility', // Changed to match the resource route
             type: 'POST',
             data: formData,
             processData: false,
@@ -527,6 +528,10 @@
             }
         });
     });
+});
+
+
+
 
         $('#img_banner').change(function() {
             const file = this.files[0];
