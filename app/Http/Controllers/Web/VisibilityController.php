@@ -93,8 +93,8 @@ class VisibilityController extends Controller
             $data['user_id'] = $outlet->user_id;
 
             // Handle file upload if exists
-            if ($request->hasFile('banner')) {
-                $file = $request->file('banner');
+            if ($request->hasFile('filename')) {
+                $file = $request->file('filename');
                 $filename = time() . '_' . $file->getClientOriginalName();
                 $file->move(public_path('banners'), $filename);
 

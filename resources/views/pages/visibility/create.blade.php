@@ -229,7 +229,7 @@
                         </div>
 
                         {{-- Hidden File Input --}}
-                        <input type="file" name="banner" id="img_banner" class="hidden"
+                        <input type="file" name="filename" id="img_banner" class="hidden"
                             accept="image/png, image/jpeg" onchange="previewImage(this, 'banner', 5)">
                     </div>
                 </div>
@@ -505,7 +505,7 @@
                         const fieldMap = {
                             'outlet_id': 'outlet-name',
                             'product_id': 'sku',
-                            'program_date': 'program-date',
+                            'started_at': 'program-date',
                             'visual_type_id': 'visual-campaign',
                             'posm_type_id': 'posm',
                             'user_id': 'user_id'
