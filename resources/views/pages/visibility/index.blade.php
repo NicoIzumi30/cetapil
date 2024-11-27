@@ -47,31 +47,37 @@
             <th scope="col" class="text-center">
                 <a class="table-head">
                     {{ __('Nama Outlet') }}
+                    <x-icons.sort />
                 </a>
             </th>
             <th scope="col" class="text-center">
                 <a class="table-head">
                     {{ __('Nama Sales') }}
+                    <x-icons.sort />
                 </a>
             </th>
             <th scope="col" class="text-center">
                 <a class="table-head">
                     {{ __('SKU') }}
+                    <x-icons.sort />
                 </a>
             </th>
             <th scope="col" class="text-center">
                 <a class="table-head">
                     {{ __('Visual') }}
+                    <x-icons.sort />
                 </a>
             </th>
             <th scope="col" class="text-center">
                 <a class="table-head">
                     {{ __('Status') }}
+                    <x-icons.sort />
                 </a>
             </th>
             <th scope="col" class="text-center">
                 <a class="table-head">
                     {{ __('Jangka Waktu') }}
+                    <x-icons.sort />
                 </a>
             </th>
             <th scope="col" class="text-center">
@@ -178,18 +184,10 @@
             </thead>
             <tbody>
                 <tr class="table-row">
-                    <td scope="row" class="table-data">
-                        halo
-                    </td>
-                    <td scope="row" class="table-data">
-                        halo
-                    </td>
-                    <td scope="row" class="table-data">
-                        halo
-                    </td>
-                    <td scope="row" class="table-data">
-                        halo
-                    </td>
+                    <td class="table-data">{{ $visibility->outlet->name }}</td>
+                    <td class="table-data">{{ $visibility->outlet->user->name }}</td>
+                    <td class="table-data">{{ $visibility->product->sku }}</td>
+                    <td class="table-data">{{ $visibility->visualType->name }}</td>
                     <td scope="row" class="table-data">
                         halo
                     </td>
