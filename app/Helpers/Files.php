@@ -6,13 +6,13 @@ use Illuminate\Support\Facades\Http;
 use Illuminate\Support\Str;
 
 if (!function_exists('saveFile')) {
-    function saveFile(UploadedFile $file, $folderPath)
+    function saveFile(UploadedFile $file, $folderPath,$defaultPath = 'images')
     {
         
         $fileName = $file->getClientOriginalName();
         $filenameWithoutExtension = pathinfo($fileName, PATHINFO_FILENAME);
         $newFileName = Str::slug($filenameWithoutExtension, '_') . '_' . time() . '.' . $file->getClientOriginalExtension();
-        $destinationPath = '/images/'.$folderPath;
+        $destinationPath = '/'.$defaultPath.'/'.$folderPath;
         Storage::disk('public')->put("$destinationPath/$newFileName", file_get_contents($file));
 
         return [

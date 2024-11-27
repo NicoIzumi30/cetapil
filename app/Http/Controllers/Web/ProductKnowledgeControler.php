@@ -11,7 +11,7 @@ use App\Http\Requests\ProductKnowledge\UpdateProductKnowledgeRequest;
 
 class ProductKnowledgeControler extends Controller
 {
-    public function update(Request $request)
+    public function update(UpdateProductKnowledgeRequest $request)
     {
         try {
             DB::beginTransaction();
@@ -32,25 +32,13 @@ class ProductKnowledgeControler extends Controller
                         throw new \Exception("File {$type} tidak valid");
                     }
                     
-                    $media = saveFile($file, "product-knowledge/{$type}/{$request->channel_id}");
-                    if($media){
-                        return response()->json([
-                            'status' => 'success',
-                            'message' => 'upload oke'
-                        ], 200);
-                    }else{
-                        return response()->json([
-                            'status' => 'error',
-                            'message' => 'upload error'
-                        ], 500);
-                    }
+                    $media = saveFile($file, "product-knowledge/{$request->channel_id}",$type);
                     if ($productKnowledge) {
                         // Hapus file lama jika ada
                         $oldPath = $type === 'pdf' ? $productKnowledge->path_pdf : $productKnowledge->path_video;
                         if ($oldPath) {
                             removeFile($oldPath);
                         }
-                        
                         // Update data
                         $productKnowledge->{"filename_" . $type} = $media['filename'];
                         $productKnowledge->{"path_" . $type} = $media['path'];

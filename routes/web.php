@@ -58,13 +58,13 @@ Route::middleware('auth')->group(function () {
     Route::get('data',[RoutingController::class,'getData'])->name('routing.data')->middleware('permission:menu_routing');
     Route::put('update-product-knowledge', [ProductKnowledgeControler::class, 'update'])->name('update-product-knowledge')->middleware('permission:menu_routing');
     // Visibility Management
-    Route::resource('visibility', VisibilityController::class)->middleware('permission:menu_visibility');
+    // Route::resource('visibility', VisibilityController::class)->middleware('permission:menu_visibility');
 
     // Visibility Management
     Route::middleware('permission:menu_visibility')->group(function () {
         Route::resource('visibility', VisibilityController::class);
         
-        Route::get('visibility/data', [VisibilityController::class, 'getData'])->name('visibility.data');
+        // Route::get('visibility/data', [VisibilityController::class, 'getData'])->name('visibility.data');
         
         Route::post('/visibility/data', [VisibilityController::class, 'store'])->name('visibility.data');
         Route::get('visibility/{visibility}/edit', [VisibilityController::class, 'edit'])->name('visibility.edit');

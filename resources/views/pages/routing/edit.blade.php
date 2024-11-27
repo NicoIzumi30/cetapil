@@ -258,7 +258,7 @@
                         <x-pages.routing.outlet-form>
                             <x-slot:title>{{$form->question}}</x-slot:title>
                             <x-slot:name>survey[{{$form->id}}]</x-slot:name>
-                            <x-slot:value>{{ $form->answers->where('outlet_id', $outlet->id)->first()?->answer }}</x-slot:value>
+                            <x-slot:value>{{ $form->answers->where('outlet_id', $outlet->id)->first()?->answer ?? '0' }}</x-slot:value>
                         </x-pages.routing.outlet-form>
                     @endif
                 @endforeach

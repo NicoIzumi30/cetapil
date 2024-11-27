@@ -20,17 +20,36 @@ use App\Http\Controllers\Controller;
 use App\Http\Requests\Routing\CreateOutletRequest;
 use App\Http\Requests\Routing\UpdateOutletRequest;
 
-require_once app_path('Helpers/Helpers.php');
 
 class RoutingController extends Controller
 {
+    protected $waktuKunjungan = [
+        ['name' => 'Senin', 'value' => 1],
+        ['name' => 'Selasa', 'value' => 2],
+        ['name' => 'Rabu', 'value' => 3],
+        ['name' => 'Kamis', 'value' => 4],
+        ['name' => 'Jumat', 'value' => 5],
+        ['name' => 'Sabtu', 'value' => 6],
+        ['name' => 'Minggu', 'value' => 7],
+    ];
+    protected $weekType = [
+        [
+            "name" => "Ganjil",
+            "value" => "ODD"
+        ],
+        [
+            "name" => "Genap",
+            "value" => "EVEN"
+        ]
+    ];
     /**
      * Display a listing of the resource.
      */
     public function index()
     {
         $channels = Channel::all();
-        return view("pages.routing.index", compact('channels'));
+        $waktuKunjungan = $this->waktuKunjungan;
+        return view("pages.routing.index", compact('channels', 'waktuKunjungan'));
     }
     public function getData(Request $request)
     {
@@ -45,7 +64,14 @@ class RoutingController extends Controller
                     });
             });
         }
-
+        if ($request->filled('filter_day')) {
+            $filter_day = $request->filter_day;
+            if($filter_day != 'all') {
+                $query->where(function ($q) use ($filter_day) {
+                    $q->where('visit_day', 'like', "%{$filter_day}%");
+                });
+            }
+        }
         $filteredRecords = (clone $query)->count();
 
         $result = $query->skip($request->start)
@@ -77,32 +103,14 @@ class RoutingController extends Controller
     public function create()
     {
         $salesUsers = User::role('sales')->get();
-        $waktuKunjungan = [
-            ['name' => 'Senin', 'value' => 1],
-            ['name' => 'Selasa', 'value' => 2],
-            ['name' => 'Rabu', 'value' => 3],
-            ['name' => 'Kamis', 'value' => 4],
-            ['name' => 'Jumat', 'value' => 5],
-            ['name' => 'Sabtu', 'value' => 6],
-            ['name' => 'Minggu', 'value' => 7],
-        ];
+        $waktuKunjungan = $this->waktuKunjungan;
         $cycles = ["1x1", "1x2"];
         $cities = City::all();
         $channels = Channel::all();
         $category_product = Category::all();
         $outletForms = OutletForm::all();
         $categories = Category::with('products')->get();
-        $weekType = [
-            [
-
-                "name" => "Ganjil",
-                "value" => "ODD"
-            ],
-            [
-                "name" => "Genap",
-                "value" => "EVEN"
-            ]
-        ];
+        $weekType = $this->weekType;
         return view("pages.routing.create", [
             "salesUsers" => $salesUsers,
             "waktuKunjungan" => $waktuKunjungan,
@@ -180,15 +188,7 @@ class RoutingController extends Controller
     {
         $outlet = Outlet::findOrFail($id);
         $salesUsers = User::role('sales')->get();
-        $waktuKunjungan = [
-            ['name' => 'Senin', 'value' => 1],
-            ['name' => 'Selasa', 'value' => 2],
-            ['name' => 'Rabu', 'value' => 3],
-            ['name' => 'Kamis', 'value' => 4],
-            ['name' => 'Jumat', 'value' => 5],
-            ['name' => 'Sabtu', 'value' => 6],
-            ['name' => 'Minggu', 'value' => 7],
-        ];
+        $waktuKunjungan = $this->waktuKunjungan;
         $cycles = ["1x1", "1x2"];
         $cities = City::all();
         $channels = Channel::all();
@@ -212,16 +212,7 @@ class RoutingController extends Controller
                 return $product->outlets->isNotEmpty();
             });
         });
-        $weekType = [
-            [
-                "name" => "Ganjil",
-                "value" => "ODD",
-            ],
-            [
-                "name" => "Genap",
-                "value" => "EVEN",
-            ]
-        ];
+        $weekType = $this->weekType;
         return view("pages.routing.edit", [
             "salesUsers" => $salesUsers,
             "waktuKunjungan" => $waktuKunjungan,
