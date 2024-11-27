@@ -17,9 +17,9 @@ class VisibilityResource extends JsonResource
         return [
             'id' => $this->id,
             'outlet' => $this->outlet->only('id', 'name'),
-            'user' => $this->user->only('id', 'name'),
-            'product' => $this->product->only('id', 'sku', 'category'),
-            'city' => $this->city->only('id', 'name'),
+            // 'user' => $this->user->only('id', 'name'),
+            // 'product' => $this->product->only('id', 'sku', 'category'),
+            // 'city' => $this->city->only('id', 'name'),
             'posm_type' => $this->posmType->only('id', 'name'),
             'visual_type' => $this->visualType->only('id', 'name'),
             'filename' => $this->filename,
