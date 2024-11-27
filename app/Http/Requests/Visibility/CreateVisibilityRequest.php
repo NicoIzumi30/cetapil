@@ -20,26 +20,45 @@ class CreateVisibilityRequest extends FormRequest
 
     /**
      * Get the validation rules that apply to the request.
-     *
-     * @return array<string, \Illuminate\Contracts\Validation\ValidationRule|array<mixed>|string>
+
      */
-    public function rules(): array
+    public function rules()
     {
         return [
-            'user_id' => 'required|exists:users,id',
             'city_id' => 'required|exists:cities,id',
             'outlet_id' => 'required|exists:outlets,id',
             'product_id' => 'required|exists:products,id',
-            'posm_type_id' => 'required|exists:posm_types,id',
-            'visual_type_id' => 'required|exists:visual_types,id',
             'started_at' => 'required|date',
-            'ended_at' => 'required|date',
-            'banner_img' => 'nullable|file|mimes:pdf,jpg,jpeg|max:1024'
+            'visual_type_id' => 'required|exists:visual_types,id',
+            'posm_type_id' => 'required|exists:posm_types,id',
+            'filename' => 'required|image|mimes:jpeg,png,jpg',
         ];
     }
 
-    protected function failedValidation(Validator $validator)
+    public function messages()
     {
-        throw new HttpResponseException($this->errorValidation($validator->getMessageBag()));
+        return [
+            'city_id.required' => 'Kabupaten/Kota wajib dipilih',
+            'outlet_id.required' => 'Outlet wajib dipilih',
+            'product_id.required' => 'Produk wajib dipilih',
+            'started_at.required' => 'Tanggal program wajib diisi',
+            'visual_type_id.required' => 'Jenis visual wajib dipilih',
+            'posm_type_id.required' => 'Jenis POSM wajib dipilih',
+            'filename.required' => 'Filename wajib diunggah',
+            'filename.image' => 'File harus berupa gambar',
+            'filename.mimes' => 'Format file harus jpeg, png, atau jpg',
+            'filename.max' => 'Ukuran file maksimal 5MB',
+        ];
+    }
+
+    protected function prepareForValidation()
+    {
+        $this->merge([
+            'started_at' => $this->input('program-date'),
+            'visual_type_id' => $this->input('visual-campaign'),
+            'posm_type_id' => $this->input('posm'),
+            'product_id' => $this->input('sku'),
+            'outlet_id' => $this->input('outlet-name'),
+        ]);
     }
 }

@@ -5,6 +5,7 @@ use App\Http\Controllers\Api\OutletController;
 use App\Http\Controllers\Api\DashboardController;
 use App\Http\Controllers\Api\RoutingController;
 use App\Http\Controllers\Api\SalesActivityController;
+use App\Http\Controllers\Api\SurveyController;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Route;
 
@@ -21,7 +22,7 @@ Route::controller(AuthController::class)->group(function () {
 
 
 // Protected routes
-Route::middleware(['auth_api','role:sales'])->group(function () {
+Route::middleware(['auth_api', 'role:sales'])->group(function () {
     Route::get('/user', [AuthController::class, 'detailUser']);
     Route::post('/logout', [AuthController::class, 'logout']);
 
@@ -53,6 +54,8 @@ Route::middleware(['auth_api','role:sales'])->group(function () {
         Route::get('/', [SalesActivityController::class, 'getSalesAcitivityList']);
         Route::get('/product-categories', [SalesActivityController::class, 'categoryList']);
         Route::post('/product', [SalesActivityController::class, 'productByCategoryList']);
+        Route::get('/{outlet_id}/visibilities', [SalesActivityController::class, 'getVisibilityList']);
+        Route::get('/visual', [SalesActivityController::class, 'getVisualTypeList']);
 
         // Route::post('products', 'productByCategoryList');
 
@@ -61,6 +64,12 @@ Route::middleware(['auth_api','role:sales'])->group(function () {
         // Route::get('/visual', 'getVisualTypeList');
         // Route::get('/posm', 'getPosmTypeList');
 
+        Route::controller(SurveyController::class)
+            ->prefix('surveys')
+            ->group(function () {
+                Route::get('/', 'index');
+                Route::post('/', 'saveSurvey');
+            });
     });
     Route::middleware('permission:menu_outlet')->group(function () {});
 });

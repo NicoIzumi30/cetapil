@@ -28,9 +28,9 @@ class Outlet extends Model
     /**
      * Get the user that owns the outlet.
      */
-    public function user(): BelongsTo
+    public function user()
     {
-        return $this->belongsTo(User::class);
+        return $this->belongsTo(User::class)->withTrashed();
     }
     public function products()
     {

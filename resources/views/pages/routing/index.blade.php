@@ -246,6 +246,9 @@
             $("#sales-date-range").flatpickr({
                 mode: "range"
             });
+			$('#channel').select2({
+				minimumResultsForSearch: Infinity
+			});
         });
     </script>
 @endpush
@@ -253,6 +256,12 @@
 @push('scripts')
     <script>
         $(document).ready(function () {
+            $.ajaxSetup({
+        headers: {
+            'X-CSRF-TOKEN': $('meta[name="csrf-token"]').attr('content')
+        }
+    });
+    
             let table = $('#routing-table').DataTable({
                 processing: true,
                 serverSide: true,

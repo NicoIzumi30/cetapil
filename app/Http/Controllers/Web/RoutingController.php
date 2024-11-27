@@ -20,6 +20,8 @@ use App\Http\Controllers\Controller;
 use App\Http\Requests\Routing\CreateOutletRequest;
 use App\Http\Requests\Routing\UpdateOutletRequest;
 
+require_once app_path('Helpers/Helpers.php');
+
 class RoutingController extends Controller
 {
     /**
@@ -56,14 +58,14 @@ class RoutingController extends Controller
             'recordsFiltered' => $filteredRecords,
             'data' => $result->map(function ($item) {
                 return [
-                    'id' => $item->id, // Tambahkan id product
+                    'id' => $item->id,
                     'sales' => $item->user->name,
                     'outlet' => $item->name,
                     'area' => $item->longitude . ', ' . $item->latitude,
                     'visit_day' => getVisitDayByNumber($item->visit_day),
                     'actions' => view('pages.routing.action', [
                         'item' => $item,
-                        'outletId' => $item->id // Pass product id ke view actions
+                        'outletId' => $item->id
                     ])->render()
                 ];
             })
@@ -304,60 +306,6 @@ class RoutingController extends Controller
             DB::rollBack();
             throw $e;
         }
-        // $data = Arr::except($request->validated(), ['city', 'img_front', 'img_banner', 'img_main_road', 'products']);
-        // $outlet->fill($data);
-
-        // $city = City::whereName($request->city)->first();
-        // if (!$city) {
-        //     $this->failedResponse(OutletConstants::CITY_NOT_FOUND, HTTPCode::HTTP_NOT_FOUND);
-        // }
-        // $outlet->city_id = $city->id;
-        // $outlet->save();
-
-        // $images = ['img_front', 'img_banner', 'img_main_road'];
-        // foreach ($images as $key => $image) {
-        //     if($request->hasFile($image)) {
-        //         $file = $request->file($image);
-        //         $media = saveFile($file, "outlets/$outlet->id");
-        //         // Remove existing file
-        //         $img = OutletImage::where('outlet_id', $outlet->id)->where('position', $key+1)->first();
-        //         if ($img) {
-        //             removeFile($img->path);
-        //             $img->filename = $media['filename'];
-        //             $img->path = $media['path'];
-        //             $img->save();
-        //         } else {
-        //             OutletImage::create([
-        //                 'outlet_id' => $outlet->id,
-        //                 'position' => $key + 1,
-        //                 'filename' => $media['filename'],
-        //                 'path' => $media['path']
-        //             ]);
-        //         }
-        //     }
-        // }
-
-        // # Save outlet products
-        // $productRequest = json_decode($request->products, true);
-        // foreach ($productRequest ?? [] as $product) {
-        //     $prod = Product::find($product['id']);
-        //     $outlet_product = OutletProduct::where([
-        //         ['product_id', $prod->id],
-        //         ['outlet_id', $id]
-        //     ])->first();
-        //     if ($outlet_product) {
-        //         $outlet_product->av3m = $product['av3m'];
-        //         $outlet_product->save();
-        //     } else {
-        //         OutletProduct::create([
-        //             'outlet_id' => $outlet->id,
-        //             'product_id' => $prod->id,
-        //             'av3m' => $product['av3m']
-        //         ]);
-        //     }
-        // }
-
-        // return $this->successResponse(OutletConstants::UPDATE, HTTPCode::HTTP_OK, new OutletResource($outlet));
     }
 
     /**

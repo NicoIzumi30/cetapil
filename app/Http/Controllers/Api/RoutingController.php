@@ -26,28 +26,43 @@ class RoutingController extends Controller
     {
         Carbon::setLocale('id');
         $weekNumber = date('W');
+        $currentDay = Carbon::now()->dayOfWeek;
+        $currentDay = $currentDay === 0 ? '7' : (string) $currentDay;
+
         $week = 'ODD';
         if ($weekNumber % 2 == 0) {
             $week = 'EVEN';
         }
+
         $user = $this->getAuthUser();
         $outlets = Outlet::query()
             ->approved()
             ->where('user_id', $user->id)
-            ->where(function ($query) use ($week) {  // Tambahkan use ($week) di sini
+            ->where(function ($query) use ($week) {
                 $query->where('cycle', '1x1')
-                    ->orWhere(function ($q) use ($week) {  // Dan di sini
+                    ->orWhere(function ($q) use ($week) {
                         $q->where('cycle', '1x2')
                             ->where('week_type', $week);
                     });
+            })
+            ->with(['salesActivities' => function ($query) use ($user) {
+                $query->where('user_id', $user->id)
+                    ->whereDate('checked_in', Carbon::today())
+                    ->select('id', 'outlet_id', 'checked_in', 'checked_out', 'status');
+            }])
+            ->where(function ($query) use ($currentDay, $user) {
+                $query->where('visit_day', $currentDay)
+                    ->orWhereHas('salesActivities', function ($q) use ($user) {
+                        $q->where('user_id', $user->id)
+                            ->whereDate('checked_in', Carbon::today());
+                    });
             });
 
-        $outlets = $outlets->where(function (Builder $builder) use ($request) {
-            $keyword = $request->input('keyword');
-            if ($keyword) {
-                $builder->where('name', 'like', '%' . $keyword . '%');
-            }
-        });
+        // if ($request->filled('keyword')) {
+        //     $outlets->where(function ($query) use ($request) {
+        //         $query->where('name', 'like', '%' . $request->keyword . '%');
+        //     });
+        // }
 
         $outlets = $outlets->get();
         return new RoutingCollection($outlets);

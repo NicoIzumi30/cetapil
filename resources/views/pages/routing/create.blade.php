@@ -285,7 +285,7 @@
         </div>
         <x-button.info class="w-full mt-20 !text-xl" type="submit">Konfirmasi</x-button.info>
 
-    </x-section-card>
+    </x-section-card>   
     </form>
 </x-card>
 @endsection
@@ -430,7 +430,6 @@
         });
     </script>
 @endpush
-
 
 @push('scripts')
     <script>
