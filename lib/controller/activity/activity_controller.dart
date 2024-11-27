@@ -18,6 +18,8 @@ class ActivityController extends GetxController {
   final selectedTab = 0.obs;
   var isLoading = false.obs;
 
+
+
   @override
   void onInit() {
     super.onInit();

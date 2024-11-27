@@ -3,7 +3,7 @@ import 'package:flutter/material.dart';
 class CustomDropdown extends StatelessWidget {
   final String hint;
   final String title;
-  final List<String> items;
+  final List <DropdownMenuItem<String>> items;
   final String? value;
   final Function(String?) onChanged;
 
@@ -70,12 +70,7 @@ class CustomDropdown extends StatelessWidget {
               Icons.keyboard_arrow_down_rounded,
               color: Colors.blue, // Match your theme color
             ),
-            items: items.map((String item) {
-              return DropdownMenuItem(
-                value: item,
-                child: Text(item),
-              );
-            }).toList(),
+            items: items,
             onChanged: onChanged,
             isExpanded: true,
           ),

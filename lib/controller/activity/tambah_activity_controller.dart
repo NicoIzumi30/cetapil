@@ -3,6 +3,8 @@ import 'package:cetapil_mobile/model/survey_question_response.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 
+import '../../model/list_category_response.dart';
+
 class TambahActivityController extends GetxController {
   final TextEditingController controller = TextEditingController();
   final api = Api();
@@ -33,9 +35,22 @@ class TambahActivityController extends GetxController {
   final Map<String, TextEditingController> priceControllers = {};
   final Map<String, RxBool> switchStates = {};
 
+  ///Availability
+  var itemsCategory = <Data>[].obs;
+  final selectedItems = <Data>[].obs;
+
+
+
+  void removeItem(String item) {
+    selectedItems.removeWhere((items)=> items.name == item);
+  }
+
+  String? value;
+
   @override
   void onInit() {
     super.onInit();
+    initListCategory();
     initGetSurveyQuestion();
   }
 
@@ -141,6 +156,48 @@ class TambahActivityController extends GetxController {
     update();
   }
 
+  /// Available Section
+  initListCategory() async {
+    try {
+      setLoadingState(true);
+      setErrorState(false);
+      final response = await Api.getCategoryList();
+      print("aaa");
+      if (response.status == "OK") {
+        itemsCategory.value = response.data!;
+      } else {
+        setErrorState(true, response.message ?? 'Failed to load data');
+      }
+    } catch (e) {
+      setErrorState(true,
+          'Connection error. Please check your internet connection and try again.');
+      print('Error initializing survey questions: $e');
+    } finally {
+      setLoadingState(false);
+    }
+  }
+
+  getProductbyCategory() async {
+    try {
+      setLoadingState(true);
+      setErrorState(false);
+      final data = {
+        // "outlet_id" : ,
+        // "ids[0]":
+      };
+      final response = await Api.getProductList(data);
+      if (response.status == "OK") {
+
+      }
+    } catch (e) {
+      setErrorState(true,
+          'Connection error. Please check your internet connection and try again.');
+      print('Error initializing survey questions: $e');
+    } finally {
+      setLoadingState(false);
+    }
+  }
+
   /// Survey Section
   var switchValue = true.obs;
 
@@ -177,7 +234,8 @@ class TambahActivityController extends GetxController {
         setErrorState(true, response.message ?? 'Failed to load data');
       }
     } catch (e) {
-      setErrorState(true, 'Connection error. Please check your internet connection and try again.');
+      setErrorState(true,
+          'Connection error. Please check your internet connection and try again.');
       print('Error initializing survey questions: $e');
     } finally {
       setLoadingState(false);

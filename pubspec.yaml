@@ -57,7 +57,7 @@ dependencies:
   dropdown_search: ^6.0.1
   flutter_image_compress: ^2.3.0
   image_picker: ^1.1.2
-  timezone: ^0.10.0
+  flutter_hooks: ^0.20.5
 
 dev_dependencies:
   flutter_test:

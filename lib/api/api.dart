@@ -1,6 +1,8 @@
 import 'dart:convert';
 
 import 'package:cetapil_mobile/model/list_activity_response.dart';
+import 'package:cetapil_mobile/model/list_category_response.dart';
+import 'package:cetapil_mobile/model/list_product_response.dart';
 import 'package:cetapil_mobile/model/list_routing_response.dart';
 import 'package:cetapil_mobile/model/outlet.dart';
 import 'package:cetapil_mobile/model/submit_checkin_routing.dart';
@@ -14,7 +16,7 @@ import '../model/form_outlet_response.dart';
 import '../model/get_city_response.dart';
 import '../model/login_response.dart';
 
-const String baseUrl = 'https://63b1-36-68-56-36.ngrok-free.app';
+const String baseUrl = 'https://dev-cetaphil.i-am.host';
 final GetStorage storage = GetStorage();
 
 class Api {
@@ -221,6 +223,24 @@ class Api {
     }
   }
 
+  static Future<ListCategoryResponse> getCategoryList() async {
+    var url = "$baseUrl/api/activity/product-categories";
+    var token = await storage.read('token');
+    var response = await http.get(
+      Uri.parse(url),
+
+      headers: {
+        'Content-type': 'application/json',
+        'Authorization': 'Bearer $token',
+      },
+    );
+    // print(response.body);
+    if (response.statusCode == 200) {
+      return ListCategoryResponse.fromJson(jsonDecode(response.body));
+    }
+    throw "Gagal request list Category : \n${response.body}";
+  }
+
   static Future<ListActivityResponse> getActivityList() async {
     var url = "$baseUrl/api/activity";
     var token = await storage.read('token');
@@ -234,6 +254,24 @@ class Api {
     // print(response.body);
     if (response.statusCode == 200) {
       return ListActivityResponse.fromJson(jsonDecode(response.body));
+    }
+    throw "Gagal request data Routing : \n${response.body}";
+  }
+
+  static Future<ListProductResponse> getProductList(Map<dynamic,dynamic> data) async {
+    var url = "$baseUrl/api/activity/product";
+    var token = await storage.read('token');
+    var response = await http.post(
+      Uri.parse(url),
+      body: jsonEncode(data),
+      headers: {
+        'Content-type': 'application/json',
+        'Authorization': 'Bearer $token',
+      },
+    );
+    // print(response.body);
+    if (response.statusCode == 200) {
+      return ListProductResponse.fromJson(jsonDecode(response.body));
     }
     throw "Gagal request data Routing : \n${response.body}";
   }

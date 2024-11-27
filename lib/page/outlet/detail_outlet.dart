@@ -198,20 +198,26 @@ class DetailOutlet extends GetView<OutletController> {
               ),
             ),
             (isCheckin)
-            ? Container(
-              width: double.infinity,
-              color: Colors.white,
-              child: Padding(
-                padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 15),
-                child: Row(
-                  children: [
-                    _buildButton(
-                      true,
-                      "Check-in",
-                          () => routingController.submitCheckin(outlet.id!),
-                      // controller.submitOutlet(),
-                    ),
-                  ],
+            ? Padding(
+              padding: const EdgeInsets.fromLTRB(15, 0, 15, 15),
+              child: Container(
+                width: double.infinity,
+                decoration: BoxDecoration(
+                    color: Colors.white.withOpacity(0.3),
+                    borderRadius: BorderRadius.circular(10)
+                ),
+                child: Padding(
+                  padding: const EdgeInsets.symmetric(horizontal: 15, vertical: 10),
+                  child: Row(
+                    children: [
+                      _buildButton(
+                        true,
+                        "Check-in",
+                            () => routingController.submitCheckin(outlet.id!),
+                        // controller.submitOutlet(),
+                      ),
+                    ],
+                  ),
                 ),
               ),
             )

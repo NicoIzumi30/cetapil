@@ -44,7 +44,8 @@ class TambahOutlet extends GetView<OutletController> {
                             child: Column(
                               crossAxisAlignment: CrossAxisAlignment.start,
                               children: [
-                                Text("Tambah Outlet", style: AppTextStyle.titlePage),
+                                Text("Tambah Outlet",
+                                    style: AppTextStyle.titlePage),
                                 SizedBox(height: 20),
                                 // Your existing form fields here
                                 ModernTextField(
@@ -75,7 +76,8 @@ class TambahOutlet extends GetView<OutletController> {
                                       child: ModernTextField(
                                         enable: false,
                                         title: "Longitude",
-                                        controller: controller.gpsController.longController.value,
+                                        controller: controller
+                                            .gpsController.longController.value,
                                       ),
                                     ),
                                     SizedBox(width: 10),
@@ -83,18 +85,26 @@ class TambahOutlet extends GetView<OutletController> {
                                       child: ModernTextField(
                                         enable: false,
                                         title: "Latitude",
-                                        controller: controller.gpsController.latController.value,
+                                        controller: controller
+                                            .gpsController.latController.value,
                                       ),
                                     ),
                                   ],
                                 ),
                                 // Map preview
-                                if (controller.gpsController.latController.value.text.isNotEmpty)
+                                if (controller.gpsController.latController.value
+                                    .text.isNotEmpty)
                                   MapPreviewWidget(
-                                    latitude: double.parse(
-                                        controller.gpsController.latController.value.text),
-                                    longitude: double.parse(
-                                        controller.gpsController.longController.value.text),
+                                    latitude: double.parse(controller
+                                        .gpsController
+                                        .latController
+                                        .value
+                                        .text),
+                                    longitude: double.parse(controller
+                                        .gpsController
+                                        .longController
+                                        .value
+                                        .text),
                                     zoom: 14.0,
                                     height: 250,
                                     borderRadius: 10,
@@ -103,7 +113,9 @@ class TambahOutlet extends GetView<OutletController> {
                                 // Image upload section
                                 Text(
                                   "Foto Outlet",
-                                  style: TextStyle(fontSize: 15, fontWeight: FontWeight.w700),
+                                  style: TextStyle(
+                                      fontSize: 15,
+                                      fontWeight: FontWeight.w700),
                                 ),
                                 SizedBox(height: 10),
                                 Row(
@@ -133,7 +145,8 @@ class TambahOutlet extends GetView<OutletController> {
                                 ),
                                 SizedBox(height: 20),
                                 // Survey form section
-                                Text("Formulir Survey Outlet", style: AppTextStyle.titlePage),
+                                Text("Formulir Survey Outlet",
+                                    style: AppTextStyle.titlePage),
                                 SizedBox(height: 20),
                                 _buildSurveyForm(),
                               ],
@@ -151,11 +164,11 @@ class TambahOutlet extends GetView<OutletController> {
                 child: Container(
                   width: double.infinity,
                   decoration: BoxDecoration(
-                color: Colors.white.withOpacity(0.3),
-                    borderRadius: BorderRadius.circular(10)
-                  ),
+                      color: Colors.white.withOpacity(0.3),
+                      borderRadius: BorderRadius.circular(10)),
                   child: Padding(
-                    padding: const EdgeInsets.symmetric(horizontal: 15,vertical: 10),
+                    padding: const EdgeInsets.symmetric(
+                        horizontal: 15, vertical: 10),
                     child: Row(
                       children: [
                         _buildButton(
@@ -247,7 +260,9 @@ class TambahOutlet extends GetView<OutletController> {
               onTap: isUploading
                   ? null
                   : () async {
-                      final File? result = await ImageUploadUtils.showImageSourceSelection(context);
+                      final File? result =
+                          await ImageUploadUtils.showImageSourceSelection(
+                              context);
                       if (result != null) {
                         controller.updateImage(index, result);
                       }
@@ -275,7 +290,8 @@ class TambahOutlet extends GetView<OutletController> {
                           ? Column(
                               mainAxisAlignment: MainAxisAlignment.center,
                               children: [
-                                Icon(Icons.file_upload_outlined, color: Colors.blue),
+                                Icon(Icons.file_upload_outlined,
+                                    color: Colors.blue),
                                 Text(
                                   "Klik disini untuk unggah",
                                   style: TextStyle(
@@ -286,7 +302,8 @@ class TambahOutlet extends GetView<OutletController> {
                                 ),
                                 Text(
                                   "Ukuran maksimal foto 200KB",
-                                  style: TextStyle(fontSize: 7, color: Colors.blue),
+                                  style: TextStyle(
+                                      fontSize: 7, color: Colors.blue),
                                 ),
                               ],
                             )
@@ -297,7 +314,8 @@ class TambahOutlet extends GetView<OutletController> {
                                   right: 4,
                                   top: 4,
                                   child: GestureDetector(
-                                    onTap: () => controller.updateImage(index, null),
+                                    onTap: () =>
+                                        controller.updateImage(index, null),
                                     child: Container(
                                       padding: EdgeInsets.all(4),
                                       decoration: BoxDecoration(
@@ -344,7 +362,12 @@ class TambahOutlet extends GetView<OutletController> {
           (index) => controller.questions[index].type == "bool"
               ? CustomDropdown(
                   title: controller.questions[index].question ?? "",
-                  items: ["Sudah", "Belum"],
+                  items: ["Sudah", "Belum"].map((item) {
+                    return DropdownMenuItem<String>(
+                      value: item,
+                      child: Text(item ?? ''), // Display the name
+                    );
+                  }).toList(),
                   value: controller.controllers[index].text.isNotEmpty
                       ? controller.controllers[index].text
                       : null,
@@ -370,7 +393,9 @@ class TambahOutlet extends GetView<OutletController> {
           backgroundColor: isSubmit ? AppColors.primary : Colors.white,
           shape: RoundedRectangleBorder(
             borderRadius: BorderRadius.circular(10),
-            side: isSubmit ? BorderSide.none : BorderSide(color: AppColors.primary),
+            side: isSubmit
+                ? BorderSide.none
+                : BorderSide(color: AppColors.primary),
           ),
         ),
         onPressed: onTap,

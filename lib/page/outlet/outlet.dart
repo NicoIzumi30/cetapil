@@ -2,6 +2,8 @@ import 'dart:io';
 
 import 'package:cetapil_mobile/controller/outlet/outlet_controller.dart';
 import 'package:cetapil_mobile/model/outlet.dart';
+import 'package:cetapil_mobile/page/activity/activity.dart';
+import 'package:cetapil_mobile/page/activity/tambah_activity.dart';
 import 'package:cetapil_mobile/page/outlet/detail_outlet.dart';
 import 'package:cetapil_mobile/page/outlet/tambah_outlet.dart';
 import 'package:cetapil_mobile/widget/button_primary.dart';
@@ -38,22 +40,26 @@ class OutletPage extends GetView<OutletController> {
                   mainAxisAlignment: MainAxisAlignment.center,
                   crossAxisAlignment: CrossAxisAlignment.center,
                   children: [
-                    ButtonPrimary(
-                      ontap: () {
-                        controller.setListOutletPage(1);
-                      },
-                      title: "Outlet",
-                      tipeButton: controller.listOutletPage == 1 ? "primary" : "info",
-                      width: MediaQuery.of(context).size.width * 0.45,
+                    Expanded(
+                      child: ButtonPrimary(
+                        ontap: () {
+                          controller.setListOutletPage(1);
+                        },
+                        title: "Outlet",
+                        tipeButton: controller.listOutletPage == 1 ? "primary" : "info",
+                        // width: MediaQuery.of(context).size.width * 0.45,
+                      ),
                     ),
                     SizedBox(width: 10),
-                    ButtonPrimary(
-                      ontap: () {
-                        controller.setListOutletPage(2);
-                      },
-                      title: "Approval",
-                      tipeButton: controller.listOutletPage == 2 ? "primary" : "info",
-                      width: MediaQuery.of(context).size.width * 0.45,
+                    Expanded(
+                      child: ButtonPrimary(
+                        ontap: () {
+                          controller.setListOutletPage(2);
+                        },
+                        title: "Approval",
+                        tipeButton: controller.listOutletPage == 2 ? "primary" : "info",
+                        // width: MediaQuery.of(context).size.width * 0.45,
+                      ),
                     ),
                   ],
                 );

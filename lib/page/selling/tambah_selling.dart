@@ -54,11 +54,12 @@ class TambahSelling extends GetView<SellingController> {
                       CustomDropdown(
                           title: "Kategori Produk",
                           hint: "-- Pilih Kategori Produk --",
-                          items: [
-                            "asd",
-                            "sdas",
-                            "adsa",
-                          ],
+                          items: ["asdasd", "asda"].map((item) {
+                            return DropdownMenuItem<String>(
+                              value: item,
+                              child: Text(item ?? ''), // Display the name
+                            );
+                          }).toList(),
                           onChanged: (string) {}),
                       Text("Cleanser",
                           style: TextStyle(
