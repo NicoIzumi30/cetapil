@@ -46,6 +46,11 @@ class SalesActivityController extends Controller
             ->get();
         return new SalesActivityCollection($activities);
     }
+    public function getAllProducts()
+    {
+        $product = Product::get();
+        return new ProductCollection($product);
+    }
 
 
     public function categoryList(Request $request): CategoryCollection

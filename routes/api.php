@@ -58,6 +58,8 @@ Route::middleware(['auth_api', 'role:sales'])->group(function () {
         Route::get('/visual', [SalesActivityController::class, 'getVisualTypeList']);
         Route::get('/posm', [SalesActivityController::class, 'getPosmTypeList']);
 
+        Route::get('/get-all-product', [SalesActivityController::class, 'getAllProducts']);
+
         // Route::post('products', 'productByCategoryList');
 
         // Route::get('/cities', 'getCityList');

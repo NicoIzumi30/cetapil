@@ -23,11 +23,11 @@ class ProductResource extends JsonResource
             'sku' => $this->sku,
             'category' => $this->category->only('id', 'name'),
             'average_stock' => $this->average_stock,
-            'product_account_type' => $this->accountType,
-            'filename' => $this->filename,
+            // 'product_account_type' => $this->accountType,
+            // 'filename' => $this->filename,
             // 'path' => $this->path,
-            'image' => $this->image,
-            'deleted_at' => $this->deleted_at
+            // 'image' => $this->image,
+            // 'deleted_at' => $this->deleted_at
         ];
     }
 }
