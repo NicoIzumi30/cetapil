@@ -2,6 +2,7 @@ import 'dart:convert';
 
 import 'package:cetapil_mobile/model/list_activity_response.dart';
 import 'package:cetapil_mobile/model/list_category_response.dart';
+import 'package:cetapil_mobile/model/list_posm_response.dart';
 import 'package:cetapil_mobile/model/list_product_response.dart';
 import 'package:cetapil_mobile/model/list_routing_response.dart';
 import 'package:cetapil_mobile/model/outlet.dart';
@@ -12,11 +13,13 @@ import 'package:get_storage/get_storage.dart';
 import 'package:http/http.dart' as http;
 
 import '../model/dashboard.dart';
+import '../model/dropdown_model.dart';
 import '../model/form_outlet_response.dart';
 import '../model/get_city_response.dart';
 import '../model/login_response.dart';
 
 const String baseUrl = 'https://dev-cetaphil.i-am.host';
+// const String baseUrl = 'https://c877-36-68-56-36.ngrok-free.app';
 final GetStorage storage = GetStorage();
 
 class Api {
@@ -274,5 +277,39 @@ class Api {
       return ListProductResponse.fromJson(jsonDecode(response.body));
     }
     throw "Gagal request data Routing : \n${response.body}";
+  }
+
+  static Future<DropdownModel> getItemPOSMList() async {
+    var url = "$baseUrl/api/activity/posm";
+    var token = await storage.read('token');
+    var response = await http.get(
+      Uri.parse(url),
+      headers: {
+        'Content-type': 'application/json',
+        'Authorization': 'Bearer $token',
+      },
+    );
+    // print(response.body);
+    if (response.statusCode == 200) {
+      return DropdownModel.fromJson(jsonDecode(response.body));
+    }
+    throw "Gagal request data POSM : \n${response.body}";
+  }
+
+  static Future<DropdownModel> getItemVisualList() async {
+    var url = "$baseUrl/api/activity/visual";
+    var token = await storage.read('token');
+    var response = await http.get(
+      Uri.parse(url),
+      headers: {
+        'Content-type': 'application/json',
+        'Authorization': 'Bearer $token',
+      },
+    );
+    // print(response.body);
+    if (response.statusCode == 200) {
+      return DropdownModel.fromJson(jsonDecode(response.body));
+    }
+    throw "Gagal request item Visual : \n${response.body}";
   }
 }

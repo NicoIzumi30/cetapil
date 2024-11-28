@@ -1,9 +1,14 @@
+import 'dart:io';
+
 import 'package:cetapil_mobile/api/api.dart';
 import 'package:cetapil_mobile/model/survey_question_response.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 
-import '../../model/list_category_response.dart';
+import '../../model/list_category_response.dart' as Category;
+import '../../model/list_posm_response.dart' as POSM;
+import '../../model/list_posm_response.dart' as Visual;
+import '../../model/dropdown_model.dart' as Model;
 
 class TambahActivityController extends GetxController {
   final TextEditingController controller = TextEditingController();
@@ -36,22 +41,31 @@ class TambahActivityController extends GetxController {
   final Map<String, RxBool> switchStates = {};
 
   ///Availability
-  var itemsCategory = <Data>[].obs;
-  final selectedItems = <Data>[].obs;
-
-
+  var itemsCategory = <Category.Data>[].obs;
+  final selectedItems = <Category.Data>[].obs;
 
   void removeItem(String item) {
-    selectedItems.removeWhere((items)=> items.name == item);
+    selectedItems.removeWhere((items) => items.name == item);
   }
 
   String? value;
+
+  /// Visibility
+  var itemsPOSM = <Model.Data>[].obs;
+  var itemsVisual = <Model.Data>[].obs;
+  final RxList<File?> visibilityImages = RxList([null, null]); // [frontView, banner, landmark]
+  final RxList<String> imageUrls = RxList(['', '']);
+  final RxList<String> imagePath = RxList(['', '']);
+  final RxList<String> imageFilename = RxList(['', '']);
+  final RxList<bool> isImageUploading = RxList([false, false]);
 
   @override
   void onInit() {
     super.onInit();
     initListCategory();
     initGetSurveyQuestion();
+    initListPosm();
+    initListVisual();
   }
 
   // Helper methods to get states for current tab
@@ -156,7 +170,7 @@ class TambahActivityController extends GetxController {
     update();
   }
 
-  /// Available Section
+  /// Availability Section
   initListCategory() async {
     try {
       setLoadingState(true);
@@ -186,8 +200,27 @@ class TambahActivityController extends GetxController {
         // "ids[0]":
       };
       final response = await Api.getProductList(data);
-      if (response.status == "OK") {
+      if (response.status == "OK") {}
+    } catch (e) {
+      setErrorState(true,
+          'Connection error. Please check your internet connection and try again.');
+      print('Error initializing survey questions: $e');
+    } finally {
+      setLoadingState(false);
+    }
+  }
 
+  /// Visibility Section
+  initListPosm() async {
+    try {
+      setLoadingState(true);
+      setErrorState(false);
+      final response = await Api.getItemPOSMList();
+      print("succes get item posm ");
+      if (response.status == "OK") {
+        itemsPOSM.value = response.data!;
+      }else {
+        setErrorState(true, 'Failed to load data');
       }
     } catch (e) {
       setErrorState(true,
@@ -196,6 +229,31 @@ class TambahActivityController extends GetxController {
     } finally {
       setLoadingState(false);
     }
+  }
+
+  initListVisual() async {
+    try {
+      setLoadingState(true);
+      setErrorState(false);
+      final response = await Api.getItemVisualList();
+print("succes get item visual ");
+      if (response.status == "OK") {
+        itemsVisual.value = response.data!;
+      }else {
+        setErrorState(true, 'Failed to load data');
+      }
+    } catch (e) {
+      setErrorState(true,
+          'Connection error. Please check your internet connection and try again.');
+      print('Error initializing survey questions: $e');
+    } finally {
+      setLoadingState(false);
+    }
+  }
+
+  void updateImage(int index, File? file) {
+    visibilityImages[index] = file;
+    update();
   }
 
   /// Survey Section
