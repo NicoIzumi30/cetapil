@@ -125,7 +125,7 @@ class OutletPage extends GetView<OutletController> {
                           controller.filteredOutletsApproval.isEmpty
                               ? _buildEmptyState()
                               : ListView.builder(
-                                  physics: AlwaysScrollableScrollPhysics(),
+                                  physics: const AlwaysScrollableScrollPhysics(),
                                   itemCount: controller.filteredOutletsApproval.length,
                                   itemBuilder: (context, index) {
                                     final outlet = controller.filteredOutletsApproval[index];

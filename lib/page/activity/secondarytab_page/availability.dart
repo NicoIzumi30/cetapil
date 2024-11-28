@@ -15,11 +15,6 @@ class AvailabilityPage extends GetView<TambahActivityController> {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        // CustomDropdown(
-        //     hint: "-- Pilih kategori produk --",
-        //     items: [],
-        //     onChanged: (String) {},
-        //     title: "Kategori Produk"),
         Obx(() {
           if (controller.isLoadingAvailability.value) {
             return Center(child: CircularProgressIndicator());

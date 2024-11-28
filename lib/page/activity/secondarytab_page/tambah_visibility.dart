@@ -7,6 +7,7 @@ import '../../../controller/activity/tambah_activity_controller.dart';
 import '../../../controller/outlet/outlet_controller.dart';
 import '../../../model/dropdown_model.dart' as Model;
 import '../../../model/list_posm_response.dart';
+import '../../../utils/colors.dart';
 import '../../../utils/image_upload.dart';
 import '../../../widget/back_button.dart';
 import '../../../widget/dropdown_textfield.dart';
@@ -58,6 +59,8 @@ class TambahVisibility extends GetView<TambahActivityController> {
                                     );
                                   }).toList(),
                                   onChanged: (value) {
+                                    controller.selectedPOSM.value = value!.name!;
+                                    controller.selectedIdPOSM.value = value.id!;
                                     // if (!controller.selectedItems.contains(value)) {
                                     //   controller.selectedItems.add(value!);
                                     // }
@@ -78,6 +81,8 @@ class TambahVisibility extends GetView<TambahActivityController> {
                                     );
                                   }).toList(),
                                   onChanged: (value) {
+                                    controller.selectedVisual.value = value!.name!;
+                                    controller.selectedIdVisual.value = value.id!;
                                     // if (!controller.selectedItems.contains(value)) {
                                     //   controller.selectedItems.add(value!);
                                     // }
@@ -110,7 +115,9 @@ class TambahVisibility extends GetView<TambahActivityController> {
                                     child: Text(item ?? ''), // Display the name
                                   );
                                 }).toList(),
-                                onChanged: (value) {},
+                                onChanged: (value) {
+                                  controller.selectedCondition.value = value!;
+                                },
                                 title: "Condition"),
                             _buildImageUploader(
                               context,
@@ -128,6 +135,36 @@ class TambahVisibility extends GetView<TambahActivityController> {
                         ),
                       )
                     ],
+                  ),
+                ),
+              ),
+              Padding(
+                padding: const EdgeInsets.fromLTRB(15, 0, 15, 15),
+                child: Container(
+                  width: double.infinity,
+                  decoration: BoxDecoration(
+                      color: Colors.white.withOpacity(0.3),
+                      borderRadius: BorderRadius.circular(10)),
+                  child: Padding(
+                    padding: const EdgeInsets.symmetric(
+                        horizontal: 15, vertical: 10),
+                    child: ElevatedButton(
+                      style: ElevatedButton.styleFrom(
+                        backgroundColor: AppColors.primary,
+                        shape: RoundedRectangleBorder(
+                          borderRadius: BorderRadius.circular(10),
+                          side: BorderSide(color: AppColors.primary),
+                        ),
+                      ),
+                      onPressed: () => controller.insertVisibility(),
+                      child: Text(
+                        " Tambah Visibility",
+                        style: TextStyle(
+                          color: Colors.white,
+                          fontWeight: FontWeight.bold,
+                        ),
+                      ),
+                    ),
                   ),
                 ),
               ),
@@ -152,6 +189,7 @@ class TambahVisibility extends GetView<TambahActivityController> {
           style: TextStyle(fontSize: 13, fontWeight: FontWeight.w700),
           textAlign: TextAlign.center,
         ),
+        SizedBox(height: 10,),
         Obx(() {
           final image = controller.visibilityImages[index];
           final isUploading = controller.isImageUploading[index];
@@ -177,7 +215,7 @@ class TambahVisibility extends GetView<TambahActivityController> {
                   color: Colors.blue,
                   width: 1,
                 ),
-                borderRadius: BorderRadius.circular(5),
+                borderRadius: BorderRadius.circular(8),
                 image: image != null
                     ? DecorationImage(
                         image: FileImage(image),
