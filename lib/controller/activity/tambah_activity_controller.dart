@@ -15,6 +15,7 @@ class TambahActivityController extends GetxController {
   final api = Api();
   final selectedTab = 0.obs;
   final surveyQuestions = <SurveyQuestion>[].obs;
+  var outletId = ''.obs;
 
   // Loading states for each tab
   final isLoadingAvailability = true.obs;
@@ -44,8 +45,48 @@ class TambahActivityController extends GetxController {
   var itemsCategory = <Category.Data>[].obs;
   final selectedItems = <Category.Data>[].obs;
 
+  // Products
+  final products = RxMap<String, List<String>>().obs;
+  final selectedProducts = RxList<String>().obs;
+  final productInputs = RxMap<String, Map<String, String>>().obs;
+  // Initialize controllers
+  final Map<String, Map<String, TextEditingController>> productControllers = {};
+
+
   void removeItem(String item) {
     selectedItems.removeWhere((items) => items.name == item);
+  }
+
+  // Method to set the outlet_id
+  void setOutletId(String id) {
+    outletId.value = id;
+  }
+
+  void handleProductSelect(String product) {
+    selectedProducts.value.add(product);
+    update();
+  }
+
+  void handleProductDeselect(String product) {
+    selectedProducts.value.remove(product);
+    update();
+  }
+
+  void updateProductInput(String productId, String field, String value) {
+    if (!productInputs.value.containsKey(productId)) {
+      productInputs.value[productId] = {};
+    }
+    productInputs.value[productId]![field] = value;
+  }
+
+  void initProductController(String productId) {
+    if (!productControllers.containsKey(productId)) {
+      productControllers[productId] = {
+        'stock': TextEditingController(),
+        'av3m': TextEditingController(),
+        'recommend': TextEditingController()
+      };
+    }
   }
 
   String? value;
@@ -176,15 +217,13 @@ class TambahActivityController extends GetxController {
       setLoadingState(true);
       setErrorState(false);
       final response = await Api.getCategoryList();
-      print("aaa");
       if (response.status == "OK") {
         itemsCategory.value = response.data!;
       } else {
         setErrorState(true, response.message ?? 'Failed to load data');
       }
     } catch (e) {
-      setErrorState(true,
-          'Connection error. Please check your internet connection and try again.');
+      setErrorState(true, 'Connection error. Please check your internet connection and try again.');
       print('Error initializing survey questions: $e');
     } finally {
       setLoadingState(false);
@@ -195,16 +234,37 @@ class TambahActivityController extends GetxController {
     try {
       setLoadingState(true);
       setErrorState(false);
+
       final data = {
-        // "outlet_id" : ,
-        // "ids[0]":
+        "outlet_id": outletId.value,
+        "ids": selectedItems.map((item) => item.id.toString()).toList()
       };
+
       final response = await Api.getProductList(data);
-      if (response.status == "OK") {}
+      if (response.status == "OK" && response.data != null) {
+        // Convert data to Map<String, List<String>>
+        final groupedProducts = <String, List<String>>{};
+
+// Handle null check for response.data
+        if (response.data != null) {
+          for (var item in response.data!) {
+            final categoryName = item.category?.name;
+            final productName = item.sku;
+
+            if (categoryName != null && productName != null) {
+              if (!groupedProducts.containsKey(categoryName)) {
+                groupedProducts[categoryName] = [];
+              }
+              groupedProducts[categoryName]!.add(productName);
+            }
+          }
+        }
+
+        products.value = groupedProducts.obs;
+      }
     } catch (e) {
-      setErrorState(true,
-          'Connection error. Please check your internet connection and try again.');
-      print('Error initializing survey questions: $e');
+      setErrorState(true, 'Connection error');
+      print('Error: $e');
     } finally {
       setLoadingState(false);
     }
@@ -236,7 +296,7 @@ class TambahActivityController extends GetxController {
       setLoadingState(true);
       setErrorState(false);
       final response = await Api.getItemVisualList();
-print("succes get item visual ");
+      print("succes get item visual ");
       if (response.status == "OK") {
         itemsVisual.value = response.data!;
       }else {

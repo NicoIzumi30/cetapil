@@ -14,9 +14,6 @@ import '../outlet/detail_outlet.dart';
 class TambahActivity extends GetView<TambahActivityController> {
   @override
   Widget build(BuildContext context) {
-    if (!Get.isRegistered<TambahActivityController>()) {
-      Get.put(TambahActivityController());
-    }
     return SafeArea(
         child: Stack(children: [
       Image.asset(
