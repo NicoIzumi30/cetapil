@@ -60,6 +60,7 @@ Route::middleware(['auth_api', 'role:sales'])->group(function () {
 
         Route::get('/get-all-product', [SalesActivityController::class, 'getAllProducts']);
 
+        Route::get('/channels', [SalesActivityController::class, 'getAllChannels']);
         // Route::post('products', 'productByCategoryList');
 
         // Route::get('/cities', 'getCityList');
