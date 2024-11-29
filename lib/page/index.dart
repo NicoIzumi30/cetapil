@@ -11,8 +11,8 @@ import 'activity/activity.dart';
 import 'dashboard/dashboard.dart';
 import 'outlet/outlet.dart';
 
-class MainPage extends StatelessWidget {
-  final BottomNavController controller = Get.find<BottomNavController>();
+class MainPage extends GetView<BottomNavController>{
+  // final BottomNavController controller = Get.find<BottomNavController>();
   final LoginController loginController = Get.find<LoginController>();
 
   @override

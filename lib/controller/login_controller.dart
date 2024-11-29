@@ -74,5 +74,6 @@ class LoginController extends GetxController {
   Future<void> _saveUserData(LoginModel.Data userData) async {
     await _storage.write('user_id', userData.user?.id);
     await _storage.write('token', userData.token);
+    await _storage.write('username', userData.user!.name);
   }
 }

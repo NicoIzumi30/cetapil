@@ -1,3 +1,4 @@
+import 'package:cetapil_mobile/page/activity/secondarytab_page/tambah_availability.dart';
 import 'package:cetapil_mobile/widget/category_tag_dropdown.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
@@ -5,6 +6,7 @@ import 'package:get/get.dart';
 
 import '../../../controller/activity/tambah_activity_controller.dart';
 import '../../../model/list_category_response.dart';
+import '../../../utils/colors.dart';
 import '../../../widget/searchable_grouped_dropdown.dart';
 
 class AvailabilityPage extends GetView<TambahActivityController> {
@@ -15,126 +17,148 @@ class AvailabilityPage extends GetView<TambahActivityController> {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        Obx(() {
-          if (controller.isLoadingAvailability.value) {
-            return Center(child: CircularProgressIndicator());
-          } else {
-            return Container(
-              margin: EdgeInsets.only(bottom: 10),
-              decoration: BoxDecoration(
-                borderRadius: BorderRadius.circular(8),
-                boxShadow: [
-                  BoxShadow(
-                    color: Colors.grey.withOpacity(0.1),
-                    spreadRadius: 1,
-                    blurRadius: 3,
-                    offset: const Offset(0, 2),
-                  ),
-                ],
-              ),
-              child: CategoryTagDropdown<Data>(
-                selectedItems: controller.selectedItems,
-                items: controller.itemsCategory,
-                getDisplayName: (item) => item.name ?? '',
-                onChanged: (value) {
-                  if (!controller.selectedItems.contains(value)) {
-                    controller.selectedItems.add(value!);
-                  }
-                },
-                onRemove: (item) => controller.selectedItems.remove(item),
-                onSelectionComplete: () => controller.getProductbyCategory(),
-              ),
-            );
-          }
-        }),
-
-        Obx(() => SearchableGroupedDropdown(
-              title: "SKU",
-              categories: controller.products.value,
-              onSelect: (item) => controller.handleProductSelect(item),
-              onDeselect: (item) => controller.handleProductDeselect(item),
-            )),
-        //  DropdownButtonFormField<String>(
-        //   // value: controller.value, // Always set to null to avoid the duplicate value error
-        //   decoration: InputDecoration(
-        //     contentPadding: const EdgeInsets.symmetric(
-        //       horizontal: 16,
-        //       vertical: 12,
-        //     ),
-        //     border: OutlineInputBorder(
-        //       borderRadius: BorderRadius.circular(8),
-        //       borderSide: BorderSide.none,
-        //     ),
-        //     filled: true,
-        //     fillColor: const Color(0xFFE8F3FF),
-        //   ),
-        //   hint: Text(
-        //     "-- Pilih kategori produk --",
-        //     style: TextStyle(
-        //       color: Colors.grey[400],
-        //       fontSize: 14,
-        //     ),
-        //   ),
-        //   items: controller.items.map((String item) {
-        //     return DropdownMenuItem<String>(
-        //       value: item,
-        //       child: Text(item),
-        //     );
-        //   }).toList(),
-        //   onChanged: (value){
-        //     if (!controller.selectedItems.contains(value)) {
-        //
-        //     controller.selectedItems.add(value!);
-        //     }
-        //   },
-        //   isExpanded: true,
-        // ),
-        // SingleChildScrollView(
-        //   scrollDirection: Axis.horizontal,
-        //   child: Obx(() => Wrap(
-        //         spacing: 8,
-        //         runSpacing: 8,
-        //         children: controller.selectedItems.map((item) {
-        //           return InputChip(
-        //             label: Text(item.name!),
-        //             onDeleted: () => controller.removeItem(item.name!),
-        //           );
-        //         }).toList(),
-        //       )),
-        // ),
         SizedBox(
-          height: 15,
+          width: double.infinity,
+          child: ElevatedButton(
+            style: ElevatedButton.styleFrom(
+              backgroundColor: AppColors.primary,
+              shape: RoundedRectangleBorder(
+                borderRadius: BorderRadius.circular(10),
+                side: BorderSide(color: AppColors.primary),
+              ),
+            ),
+            onPressed: () => Get.to(() => TambahAvailability()),
+            child: Text(
+              " Tambah Availibility",
+              style: TextStyle(
+                color: Colors.white,
+                fontWeight: FontWeight.bold,
+              ),
+            ),
+          ),
         ),
-        // Update the availability page
-        Obx(() => Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: controller.products.value.entries.map((category) {
-                final productsInCategory =
-                    controller.selectedProducts.value.where((p) => category.value.contains(p));
-
-                if (productsInCategory.isEmpty) return SizedBox.shrink();
-
-                return Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    Text(category.key,
-                        style: TextStyle(
-                            fontSize: 16, fontWeight: FontWeight.bold, color: Color(0xFF023B5E))),
-                    ...productsInCategory.map((product) {
-                      controller.initProductController(product);
-
-                      return SumAmountProduct(
-                        productName: product,
-                        stockController: controller.productControllers[product]!['stock']!,
-                        AV3MController: controller.productControllers[product]!['av3m']!,
-                        recommendController: controller.productControllers[product]!['recommend']!,
-                      );
-                    }),
-                    Divider(),
-                  ],
-                );
-              }).toList(),
-            ))
+        // Obx(() {
+        //   if (controller.isLoadingAvailability.value) {
+        //     return Center(child: CircularProgressIndicator());
+        //   } else {
+        //     return Container(
+        //       margin: EdgeInsets.only(bottom: 10),
+        //       decoration: BoxDecoration(
+        //         borderRadius: BorderRadius.circular(8),
+        //         boxShadow: [
+        //           BoxShadow(
+        //             color: Colors.grey.withOpacity(0.1),
+        //             spreadRadius: 1,
+        //             blurRadius: 3,
+        //             offset: const Offset(0, 2),
+        //           ),
+        //         ],
+        //       ),
+        //       child: CategoryTagDropdown<Data>(
+        //         selectedItems: controller.selectedItems,
+        //         items: controller.itemsCategory,
+        //         getDisplayName: (item) => item.name ?? '',
+        //         onChanged: (value) {
+        //           if (!controller.selectedItems.contains(value)) {
+        //             controller.selectedItems.add(value!);
+        //           }
+        //         },
+        //         onRemove: (item) => controller.selectedItems.remove(item),
+        //         onSelectionComplete: () => controller.getProductbyCategory(),
+        //       ),
+        //     );
+        //   }
+        // }),
+        //
+        // Obx(() => SearchableGroupedDropdown(
+        //       title: "SKU",
+        //       categories: controller.products.value,
+        //       onSelect: (item) => controller.handleProductSelect(item),
+        //       onDeselect: (item) => controller.handleProductDeselect(item),
+        //     )),
+        //
+        // //  DropdownButtonFormField<String>(
+        // //   // value: controller.value, // Always set to null to avoid the duplicate value error
+        // //   decoration: InputDecoration(
+        // //     contentPadding: const EdgeInsets.symmetric(
+        // //       horizontal: 16,
+        // //       vertical: 12,
+        // //     ),
+        // //     border: OutlineInputBorder(
+        // //       borderRadius: BorderRadius.circular(8),
+        // //       borderSide: BorderSide.none,
+        // //     ),
+        // //     filled: true,
+        // //     fillColor: const Color(0xFFE8F3FF),
+        // //   ),
+        // //   hint: Text(
+        // //     "-- Pilih kategori produk --",
+        // //     style: TextStyle(
+        // //       color: Colors.grey[400],
+        // //       fontSize: 14,
+        // //     ),
+        // //   ),
+        // //   items: controller.items.map((String item) {
+        // //     return DropdownMenuItem<String>(
+        // //       value: item,
+        // //       child: Text(item),
+        // //     );
+        // //   }).toList(),
+        // //   onChanged: (value){
+        // //     if (!controller.selectedItems.contains(value)) {
+        // //
+        // //     controller.selectedItems.add(value!);
+        // //     }
+        // //   },
+        // //   isExpanded: true,
+        // // ),
+        // // SingleChildScrollView(
+        // //   scrollDirection: Axis.horizontal,
+        // //   child: Obx(() => Wrap(
+        // //         spacing: 8,
+        // //         runSpacing: 8,
+        // //         children: controller.selectedItems.map((item) {
+        // //           return InputChip(
+        // //             label: Text(item.name!),
+        // //             onDeleted: () => controller.removeItem(item.name!),
+        // //           );
+        // //         }).toList(),
+        // //       )),
+        // // ),
+        //
+        // SizedBox(
+        //   height: 15,
+        // ),
+        // // Update the availability page
+        // Obx(() => Column(
+        //       crossAxisAlignment: CrossAxisAlignment.start,
+        //       children: controller.products.value.entries.map((category) {
+        //         final productsInCategory =
+        //             controller.selectedProducts.value.where((p) => category.value.contains(p));
+        //
+        //         if (productsInCategory.isEmpty) return SizedBox.shrink();
+        //
+        //         return Column(
+        //           crossAxisAlignment: CrossAxisAlignment.start,
+        //           children: [
+        //             Text(category.key,
+        //                 style: TextStyle(
+        //                     fontSize: 16, fontWeight: FontWeight.bold, color: Color(0xFF023B5E))),
+        //             ...productsInCategory.map((product) {
+        //               controller.initProductController(product);
+        //
+        //               return SumAmountProduct(
+        //                 productName: product,
+        //                 stockController: controller.productControllers[product]!['stock']!,
+        //                 AV3MController: controller.productControllers[product]!['av3m']!,
+        //                 recommendController: controller.productControllers[product]!['recommend']!,
+        //               );
+        //             }),
+        //             Divider(),
+        //           ],
+        //         );
+        //       }).toList(),
+        //     ))
       ],
     );
   }

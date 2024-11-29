@@ -4,6 +4,7 @@ import 'package:cetapil_mobile/model/list_activity_response.dart';
 import 'package:cetapil_mobile/model/list_category_response.dart';
 import 'package:cetapil_mobile/model/list_posm_response.dart';
 import 'package:cetapil_mobile/model/list_product_response.dart';
+import 'package:cetapil_mobile/model/list_product_sku_response.dart';
 import 'package:cetapil_mobile/model/list_routing_response.dart';
 import 'package:cetapil_mobile/model/outlet.dart';
 import 'package:cetapil_mobile/model/submit_checkin_routing.dart';
@@ -311,5 +312,22 @@ class Api {
       return DropdownModel.fromJson(jsonDecode(response.body));
     }
     throw "Gagal request item Visual : \n${response.body}";
+  }
+
+  static Future<ListProductSkuResponse> getAllProductSKU() async {
+    var url = "$baseUrl/api/activity/get-all-product";
+    var token = await storage.read('token');
+    var response = await http.get(
+      Uri.parse(url),
+      headers: {
+        'Content-type': 'application/json',
+        'Authorization': 'Bearer $token',
+      },
+    );
+    // print(response.body);
+    if (response.statusCode == 200) {
+      return ListProductSkuResponse.fromJson(jsonDecode(response.body));
+    }
+    throw "Gagal request all Product SKU : \n${response.body}";
   }
 }

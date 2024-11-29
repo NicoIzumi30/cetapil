@@ -195,6 +195,12 @@ class DatabaseHelper {
 ''');
   }
 
+  // Delete entire database
+  Future<void> deleteDatabase() async {
+    String path = join(await getDatabasesPath(), 'outlet_database.db');
+    await databaseFactory.deleteDatabase(path);
+  }
+
   // Insert or update outlet from API
   Future<void> upsertOutletFromApi(Outlet.Outlet outlet) async {
     final db = await database;

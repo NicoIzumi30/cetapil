@@ -4,12 +4,12 @@ import 'package:get/get.dart';
 
 import '../controller/gps_controller.dart';
 
-class GPSAwareScaffold extends StatelessWidget {
+class GPSAwareScaffold extends GetView<GPSLocationController> {
   final Widget body;
   final PreferredSizeWidget? appBar;
   final bool requiresGPS;
   final Widget? bottomNavigationBar;
-  final GPSLocationController gpsController = Get.find<GPSLocationController>();
+  // final GPSLocationController gpsController = Get.find<GPSLocationController>();
 
   GPSAwareScaffold({
     Key? key,
@@ -38,7 +38,7 @@ class GPSAwareScaffold extends StatelessWidget {
               child: Text('ENABLE'),
               onPressed: () async {
                 Navigator.of(context).pop();
-                bool activated = await gpsController.requestGPSActivation();
+                bool activated = await controller.requestGPSActivation();
                 if (!activated) {
                   _showGPSDialog(context); // Show dialog again if activation failed
                 }
@@ -72,7 +72,7 @@ class GPSAwareScaffold extends StatelessWidget {
             ),
             if (requiresGPS)
               Obx(() {
-                if (!gpsController.isGPSEnabled.value) {
+                if (!controller.isGPSEnabled.value) {
                   WidgetsBinding.instance.addPostFrameCallback((_) {
                     _showGPSDialog(context);
                   });

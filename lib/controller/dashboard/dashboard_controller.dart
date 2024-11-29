@@ -1,21 +1,28 @@
 import 'package:cetapil_mobile/api/api.dart';
 import 'package:cetapil_mobile/database/dashboard.dart';
 import 'package:cetapil_mobile/model/dashboard.dart';
+import 'package:cetapil_mobile/page/login.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:intl/intl.dart';
 import 'package:intl/date_symbol_data_local.dart';
+import 'package:path/path.dart';
 
+import '../../database/database_instance.dart';
 import '../../widget/calendar_dialog.dart';
+import '../../widget/dialog.dart';
+import '../login_controller.dart';
 
 class DashboardController extends GetxController {
   final DashboardDatabaseHelper _dbHelper = DashboardDatabaseHelper.instance;
+  final db = DatabaseHelper.instance;
   
   var currentIndex = 0.obs;
   var currentDate = DateTime.now().obs;
   var isLoading = false.obs;
   var dashboard = Rxn<Dashboard>();
   var error = Rxn<String>();
+  var username = "".obs;
   
   final List<String> imageUrls = [
     'assets/carousel1.png',
@@ -31,6 +38,19 @@ class DashboardController extends GetxController {
     ever(currentDate, (_) {});
     updateDate();
     initializeDashboard();
+    getUserData();
+  }
+
+  getUserData()async{
+   username.value = await storage.read('username');
+  }
+
+  logOut()async{
+    await storage.erase();
+    // await Get.deleteAll();
+    db.deleteDatabase();
+    // Get.put(LoginController());
+    Get.offAll(()=>LoginPage());
   }
 
   Future<void> initializeDashboard() async {

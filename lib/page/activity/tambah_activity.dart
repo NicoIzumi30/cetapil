@@ -9,6 +9,7 @@ import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 
 import '../../widget/back_button.dart';
+import '../../widget/dialog.dart';
 import '../outlet/detail_outlet.dart';
 
 class TambahActivity extends GetView<TambahActivityController> {
@@ -28,10 +29,7 @@ class TambahActivity extends GetView<TambahActivityController> {
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
               EnhancedBackButton(
-                onPressed: () {
-                  // Get.back();
-                  Navigator.of(context).pop();
-                },
+                onPressed: () => Alerts.showConfirmDialog(context),
                 backgroundColor: Colors.white,
                 iconColor: Colors.blue,
               ),
