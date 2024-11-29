@@ -31,7 +31,7 @@ class OutletController extends Controller
     public function index(Request $request)
     {
         $user = $this->getAuthUser();
-        $outlets = Outlet::query()->where('user_id', $user->id);
+        $outlets = Outlet::with(['channel'])->where('user_id', $user->id);
 
         $outlets = $outlets->where(function (Builder $builder) use ($request) {
             $keyword = $request->input('keyword');

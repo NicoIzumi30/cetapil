@@ -21,6 +21,7 @@ class RoutingResource extends JsonResource
             'user' => $this->user->only('id', 'name'),
             'name' => $this->name,
             'category' => $this->category,
+            'channel' => $this->channel ? $this->channel->only('id', 'name') : null,
             'visit_day' => $this->visit_day,
             'longitude' => $this->longitude,
             'latitude' => $this->latitude,
