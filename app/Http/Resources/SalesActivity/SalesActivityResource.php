@@ -18,6 +18,7 @@ class SalesActivityResource extends JsonResource
             'id' => $this->id,
             'outlet' => $this->outlet->only('id', 'name', 'category', 'city_id', 'longitude', 'latitude', 'visit_day'),
             'user' => $this->user->only('id', 'name'),
+            'channel' => $this->outlet->channel ? $this->outlet->channel->only('id', 'name') : null,
             'checked_in' => $this->checked_in,
             'checked_out' => $this->checked_out,
             'views_knowledge' => $this->views_knowledge,
@@ -30,4 +31,3 @@ class SalesActivityResource extends JsonResource
         ];
     }
 }
-
