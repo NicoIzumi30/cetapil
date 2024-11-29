@@ -10,7 +10,7 @@
             Edit Daftar Visibility
         </x-slot:cardTitle>
 
-        <form action="{{ route('visibility.update', $visibility->id) }}" method="POST">
+        <form id="editVisibilityForm" enctype="multipart/form-data">
             @csrf
             @method('PUT')
         <div class="grid grid-cols-2 gap-6">
@@ -86,8 +86,9 @@
                             </linearGradient>
                         </defs>
                     </svg>
-
                 </i>
+                <span id="started_at-error" class="text-red-500 text-xs hidden"></span>
+                <span id="ended_at-error" class="text-red-500 text-xs hidden"></span>
             </div>
             <div>
                 <label for="visual-campaign">Visual/Campaign</label>
@@ -160,12 +161,12 @@
 					</div>
 			
 					{{-- Hidden File Input --}}
-					<input type="file" name="banner" id="img_banner" class="hidden"
+					<input type="file" name="filename" id="img_banner" class="hidden"
 						accept="image/png, image/jpeg" onchange="previewImage(this, 'banner', 5)">
 				</div>
 			</div>
         </x-section-card>
-        <x-button.info type="submit" id="submitBtn" class="w-full mt-20 !text-xl">
+        <x-button.info type="button" id="submitBtn" class="w-full mt-20 !text-xl" onclick="submitForm()">
             <span id="submitBtnText">Simpan Perubahan</span>
             <span id="submitBtnLoading" class="hidden">
                 <i class="fas fa-spinner fa-spin mr-2"></i>Menyimpan...
@@ -191,10 +192,62 @@
 @push('scripts')
 <script>
 $(document).ready(function() {
-    $("#program-date").flatpickr({
+    $('#program-date').after(`
+        <input type="hidden" name="started_at" id="started_at">
+        <input type="hidden" name="ended_at" id="ended_at">
+    `);
+
+    // Initialize Flatpickr with range mode
+    const dateRangePicker = $("#program-date").flatpickr({
+        mode: "range",
         dateFormat: "Y-m-d",
-        defaultDate: "{{ $visibility->program_date }}"
+        altInput: true,
+        altFormat: "d F Y",
+        showMonths: 2,
+        defaultDate: [
+            '{{ $visibility->started_at }}', 
+            '{{ $visibility->ended_at }}'
+        ],
+        allowInput: false,
+        disableMobile: true,
+        locale: {
+            rangeSeparator: " sampai ",
+            firstDayOfWeek: 1,
+            weekdays: {
+                shorthand: ['Min', 'Sen', 'Sel', 'Rab', 'Kam', 'Jum', 'Sab'],
+                longhand: ['Minggu', 'Senin', 'Selasa', 'Rabu', 'Kamis', 'Jumat', 'Sabtu']
+            },
+            months: {
+                shorthand: ['Jan', 'Feb', 'Mar', 'Apr', 'Mei', 'Jun', 'Jul', 'Ags', 'Sep', 'Okt', 'Nov', 'Des'],
+                longhand: ['Januari', 'Februari', 'Maret', 'April', 'Mei', 'Juni', 'Juli', 'Agustus', 'September', 'Oktober', 'November', 'Desember']
+            }
+        },
+        onChange: function(selectedDates, dateStr, instance) {
+            if (selectedDates.length === 2) {
+                const startDate = selectedDates[0];
+                const endDate = selectedDates[1];
+                
+                // Format dates for MySQL datetime
+                const formatDate = (date) => {
+                    return date.toISOString().slice(0, 19).replace('T', ' ');
+                };
+                
+                // Set start date to beginning of day
+                startDate.setHours(0, 0, 0, 0);
+                // Set end date to end of day
+                endDate.setHours(23, 59, 59, 999);
+                
+                // Update hidden inputs
+                $('#started_at').val(formatDate(startDate));
+                $('#ended_at').val(formatDate(endDate));
+                
+                // Clear error message if exists
+                $('#program-date-error').addClass('hidden');
+                $('#program-date').removeClass('border-red-500');
+            }
+        }
     });
+
     $('#states-option').select2();
     $('#category').select2();
     $('#outlet-name').select2();
@@ -202,63 +255,85 @@ $(document).ready(function() {
     $('#visual-campaign').select2();
     $('#posm').select2();
 
-    $('#editVisibilityForm').on('submit', function(e) {
-        e.preventDefault();
-        
-        const formData = new FormData(this);
-        formData.append('_token', '{{ csrf_token() }}');
-        formData.append('_method', 'PUT');
-        
-        $('#submitBtn').prop('disabled', true);
-        $('#submitBtnText').addClass('hidden');
-        $('#submitBtnLoading').removeClass('hidden');
-        
-        $.ajax({
-            url: '/visibility/{{ $visibility->id }}',
-            type: 'POST',
-            data: formData,
-            processData: false,
-            contentType: false,
-            success: function(response) {
-                if (response.status === 'success') {
-                    toast('success', 'Data berhasil diperbarui', 150);
-                    
-                    setTimeout(() => {
-                        window.location.href = '{{ route("visibility.index") }}';
-                    }, 1500);
-                }
-            },
-            error: function(xhr) {
-                if (xhr.status === 422) {
-                    const errors = xhr.responseJSON.errors;
-                    Object.keys(errors).forEach(key => {
-                        const errorElement = $(`#${key}-error`);
-                        if (errorElement.length) {
-                            errorElement.text(errors[key][0])
-                                .removeClass('hidden');
-                            $(`[name="${key}"]`).addClass('border-red-500');
-                        }
-                    });
-
-                    const firstError = $('.text-red-500:not(.hidden)').first();
-                    if (firstError.length) {
-                        $('html, body').animate({
-                            scrollTop: firstError.offset().top - 100
-                        }, 500);
-                    }
-
-                    toast('error', 'Silakan periksa kembali form isian', 200);
-                } else {
-                    toast('error', 'Terjadi kesalahan saat memperbarui data', 200);
-                }
-            },
-            complete: function() {
-                $('#submitBtn').prop('disabled', false);
-                $('#submitBtnText').removeClass('hidden');
-                $('#submitBtnLoading').addClass('hidden');
+    function submitForm() {
+    // Reset error states
+    $('.text-red-500').addClass('hidden');
+    $('select, input').removeClass('border-red-500');
+    
+    // Validate date range
+    if (!$('#started_at').val() || !$('#ended_at').val()) {
+        $('#program-date-error')
+            .text('Pilih tanggal mulai dan selesai program')
+            .removeClass('hidden');
+        $('#program-date').addClass('border-red-500');
+        return false;
+    }
+    
+    // Create FormData
+    const form = document.getElementById('editVisibilityForm');
+    const formData = new FormData(form);
+    
+    // Show loading state
+    $('#submitBtn').prop('disabled', true);
+    $('#submitBtnText').addClass('hidden');
+    $('#submitBtnLoading').removeClass('hidden');
+    
+    $.ajax({
+        url: '{{ route("visibility.update", $visibility->id) }}',
+        type: 'POST',
+        data: formData,
+        processData: false,
+        contentType: false,
+        success: function(response) {
+            if (response.status === 'success') {
+                toast('success', response.message);
+                setTimeout(() => {
+                    window.location.href = '{{ route("visibility.index") }}';
+                }, 1500);
             }
-        });
+        },
+        error: function(xhr) {
+            if (xhr.status === 422) {
+                const errors = xhr.responseJSON.errors;
+                Object.keys(errors).forEach(key => {
+                    const fieldMap = {
+                        'outlet_id': 'outlet-name',
+                        'product_id': 'sku',
+                        'started_at': 'program-date',
+                        'ended_at': 'program-date',
+                        'visual_type_id': 'visual-campaign',
+                        'posm_type_id': 'posm',
+                        'filename': 'img_banner'
+                    };
+                    
+                    const field = fieldMap[key] || key;
+                    const errorElement = $(`#${field}-error`);
+                    if (errorElement.length) {
+                        errorElement
+                            .text(errors[key][0])
+                            .removeClass('hidden');
+                        $(`[name="${key}"]`).addClass('border-red-500');
+                    }
+                });
+                
+                toast('error', 'Silakan periksa kembali form isian');
+            } else {
+                toast('error', xhr.responseJSON?.message || 'Terjadi kesalahan saat menyimpan data');
+            }
+        },
+        complete: function() {
+            $('#submitBtn').prop('disabled', false);
+            $('#submitBtnText').removeClass('hidden');
+            $('#submitBtnLoading').addClass('hidden');
+        }
     });
+}
+
+// Binding form submit ke fungsi submitForm
+$('#editVisibilityForm').on('submit', function(e) {
+    e.preventDefault();
+    submitForm();
+});
 
     // Handle category change
     $('#category').on('change', function() {

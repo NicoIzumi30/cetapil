@@ -17,7 +17,7 @@ use App\Models\OutletProduct;
 use App\Models\OutletFormAnswer;
 use Illuminate\Support\Facades\DB;
 use App\Http\Controllers\Controller;
-use App\Http\Requests\Routing\CreateOutletRequest;
+use App\Http\Requests\Routing\CreateOutletRequest; 
 
 require_once app_path('Helpers/Helpers.php');
 

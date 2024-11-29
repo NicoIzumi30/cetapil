@@ -111,7 +111,7 @@
                         </option>
                         @foreach($outlets as $outlet)
                         <option value="{{ $outlet->id }}" data-sales-id="{{ $outlet->user_id }}" data-sales-name="{{ $outlet->user->name }}">
-                            {{ $outlet->code }} - {{ $outlet->name }}
+                            {{ $outlet->name }}
                         </option>
                     @endforeach
                     </select>

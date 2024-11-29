@@ -10,15 +10,15 @@
             Daftar Visibility
         </x-slot:cardTitle>
         {{-- Visibility Action --}}
+        
         <x-slot:cardAction>
-            <x-input.search wire:model.live="search" class="border-0" placeholder="Cari data visibility"></x-input.search>
-            <x-select.light :title="'Filter Jenis Visibility'" id="sales-filter" name="sales_id">
-                @foreach($salesUsers as $sales)
-                    <option value="{{ $sales->id }}" {{ request('sales_id') == $sales->id ? 'selected' : '' }}>
-                        {{ $sales->name }}
+            <x-input.search wire:model.live="search" type="text" class="border-0" name="search" id="search" placeholder="Cari data visibility" value="{{ request('search') }}"></x-input.search>
+            <x-select.light :title="'Filter Jenis Visibility'" id="posm-filter" name="posm_type_id">
+                @foreach($posmTypes as $type)
+                    <option value="{{ $type->id }}" {{ request('posm_type_id') == $type->id ? 'selected' : '' }}>
+                        {{ $type->name }}
                     </option>
                 @endforeach
-
             </x-select.light> 
             <x-button.info onclick="openModal('update-photo')">Update Foto</x-button.info>
             <x-button.info href="/visibility/create">Tambah Visibility</x-button.info>
@@ -88,17 +88,21 @@
         </tr>
     </thead>
     <tbody>
-        @foreach($visibilities as $visibility)
+        {{-- @foreach($visibilities as $visibility)
             <tr>
                 <td class="table-data">{{ $visibility->outlet->name }}</td>
                 <td class="table-data">{{ $visibility->outlet->user->name }}</td>
                 <td class="table-data">{{ $visibility->product->sku }}</td>
                 <td class="table-data">{{ $visibility->visualType->name }}</td>
-                <td class="table-data {{ $visibility->status === 'ACTIVE' ? '!text-[#70FFE2]' : '!text-red-500' }}">
+                <td class="table-data {{ $visibility->status === 'ACTIVE' ? '!text-[#3eff86]' : '!text-red-500' }}">
                     {{ $visibility->status }}
                 </td>
-                <td class="table-data"> 
-                    {{ \Carbon\Carbon::parse($visibility->program_date)->format('d F Y') }}
+                <td class="table-data">
+                    @if($visibility->started_at && $visibility->ended_at)
+                        {{ \Carbon\Carbon::parse($visibility->started_at)->format('d F Y') }} - {{ \Carbon\Carbon::parse($visibility->ended_at)->format('d F Y') }}
+                    @else
+                        -
+                    @endif
                 </td>
                 <td class="table-data">
                     <x-action-table-dropdown>
@@ -116,7 +120,7 @@
                     </x-action-table-dropdown>
                 </td>
             </tr>
-        @endforeach
+        @endforeach --}}
     </tbody>
 </table>
         <x-modal id="delete-visibility">
@@ -183,13 +187,14 @@
                 </tr>
             </thead>
             <tbody>
+        @foreach($visibilities as $visibility)
                 <tr class="table-row">
                     <td class="table-data">{{ $visibility->outlet->name }}</td>
                     <td class="table-data">{{ $visibility->outlet->user->name }}</td>
                     <td class="table-data">{{ $visibility->product->sku }}</td>
                     <td class="table-data">{{ $visibility->visualType->name }}</td>
-                    <td scope="row" class="table-data">
-                        halo
+                    <td scope="row" class="table-data" style="color: #3eff86;">
+                        GOOD
                     </td>
                     <td class="table-data">
                         <x-action-table-dropdown>
@@ -205,6 +210,7 @@
                         </x-action-table-dropdown>
                     </td>
                 </tr>
+        @endforeach
             </tbody>
         </table>
         <x-modal id="delete-visibility-activity">
@@ -222,96 +228,147 @@
 
 @push('scripts')
     <script>
+$(document).ready(function() {
+    $.ajaxSetup({
+        headers: {
+            'X-CSRF-TOKEN': $('meta[name="csrf-token"]').attr('content')
+        }
+    });
 
-        $(document).ready(function() {
-            $("#visibility-activity-daterange").flatpickr({
-                mode: "range"
-            });
-
-            const visibilityTable = $('#visibility-table').DataTable({
-        processing: false,
-        pageLength: 10,
-        lengthMenu: [10, 20, 30, 40, 50],
-        data: {!! $visibilities->toJson() !!}, // Passing data langsung dari controller
-        columns: [
-            { 
-                data: 'outlet.name',
-                render: function(data, type, row) {
-                    return data || '-';
-                }
-            },
-            { 
-                data: 'outlet.user.name',
-                render: function(data, type, row) {
-                    return data || '-';
-                }
-            },
-            { 
-                data: 'product.sku',
-                render: function(data, type, row) {
-                    return data || '-';
-                }
-            },
-            { 
-                data: 'visual_type.name',
-                render: function(data, type, row) {
-                    return data || '-';
-                }
-            },
-            { 
-                data: 'status',
-                render: function(data, type, row) {
-                    return `<span class="${data === 'ACTIVE' ? 'text-green-500' : 'text-red-500'}">${data}</span>`;
-                }
-            },
-            { 
-                data: 'program_date',
-                render: function(data, type, row) {
-                    return moment(data).format('DD MMMM YYYY');
-                }
-            },
-            {
-                data: null,
-                orderable: false,
-                render: function(data, type, row) {
-                    return `
-                        <div class="flex justify-center space-x-2">
-                            <a href="/visibility/${row.id}/edit" 
-                               class="btn btn-sm btn-primary">
-                                Lihat Data
-                            </a>
-                            <button onclick="deleteVisibility('${row.id}', '${row.outlet.name}', '${row.outlet.user.name}', '${row.product.sku}')"
-                                    class="btn btn-sm btn-danger">
-                                Hapus
-                            </button>
-                        </div>
-                    `;
-                }
-            }
-        ],
-        language: {
-            emptyTable: "Tidak ada data visibility",
-            info: "Menampilkan _START_ sampai _END_ dari _TOTAL_ data",
-            infoEmpty: "Menampilkan 0 sampai 0 dari 0 data",
-            infoFiltered: "(difilter dari _MAX_ total data)",
-            lengthMenu: "Menampilkan _MENU_ data",
-            search: "Cari:",
-            zeroRecords: "Tidak ditemukan data yang sesuai",
-            paginate: {
-                first: "Pertama",
-                last: "Terakhir",
-                next: ">",
-                previous: "<"
+    let table = $('#visibility-table').DataTable({
+    processing: true,
+    serverSide: true,
+    paging: true,
+    searching: false,
+    info: true,
+    pageLength: 10,
+    lengthMenu: [10, 20, 30, 40, 50],
+    dom: 'rt<"bottom-container"<"bottom-left"l><"bottom-right"p>>',
+    language: {
+        lengthMenu: "Menampilkan _MENU_ dari _TOTAL_ data",
+        processing: "Memuat data...",
+        paginate: {
+            previous: '<',
+            next: '>',
+            last: 'Terakhir',
+        },
+        info: "Menampilkan _START_ sampai _END_ dari _TOTAL_ data",
+        infoEmpty: "Menampilkan 0 sampai 0 dari 0 data",
+        emptyTable: "Tidak ada data yang tersedia"
+    },
+    ajax: {
+        url: "{{ route('visibility.data') }}",
+        data: function(d) {
+            d.search_term = $('#search').val();
+            d.posm_type_id = $('#posm-filter').val();
+        }
+    },
+    columns: [
+        { 
+            data: 'name',
+            name: 'outlet.name',
+            render: function(data, type, row) {
+                return data || '-';
             }
         },
-        dom: 'rt<"bottom-container"<"bottom-left"l><"bottom-right"p>>'
+        { 
+            data: 'name',
+            name: 'outlet.user.name',
+            render: function(data, type, row) {
+                return data || '-';
+            }
+        },
+        { 
+            data: 'sku',
+            name: 'product.sku',
+            render: function(data, type, row) {
+                return data || '-';
+            }
+        },
+        { 
+            data: 'name',
+            name: 'visualType.name',
+            render: function(data, type, row) {
+                return data || '-';
+            }
+        },
+        { 
+            data: 'status',
+            name: 'status',
+            render: function(data, type, row) {
+                return `<span class="table-data ${data === 'ACTIVE' ? 'text-[#3eff86]' : 'text-red-500'}">${data}</span>`;
+            }
+        },
+        { 
+            data: 'date_range',
+            name: 'started_at',
+            render: function(data, type, row) {
+                if (row.started_at && row.ended_at) {
+                    return moment(row.started_at).format('D MMMM Y') + ' - ' + moment(row.ended_at).format('D MMMM Y');
+                }
+                return '-';
+            }
+        },
+        { 
+            data: 'action',
+            name: 'action',
+            orderable: false,
+            searchable: false,
+            render: function(data, type, row) {
+                return `
+                    <x-action-table-dropdown>
+                        <li>
+                            <a href="/visibility/edit/${row.id}" class="dropdown-option">
+                                Lihat Data
+                            </a>
+                        </li>
+                        <li>
+                            <button onclick="deleteVisibility('${row.id}', '${row.outlet_name}', '${row.sales_name}', '${row.product_sku}')" 
+                                class="dropdown-option text-red-400">
+                                Hapus Data
+                            </button>
+                        </li>
+                    </x-action-table-dropdown>
+                `;
+            }
+        }
+    ]
+});
+
+    // Handle search with debounce
+    let searchTimer;
+    $('#search').on('input', function() {
+        clearTimeout(searchTimer);
+        searchTimer = setTimeout(() => table.ajax.reload(null, false), 500);
     });
 
-    // Search functionality
-    $('#search').on('keyup', function() {
-        visibilityTable.search(this.value).draw();
+    // Handle POSM filter
+    $('#posm-filter').change(function() {
+        table.ajax.reload(null, false);
+    });
+
+    // Initialize Select2
+    $('#posm-filter').select2({
+        placeholder: 'Pilih Jenis Visibility',
+        allowClear: true
     });
 });
+
+
+function toast(type, message) {
+    const Toast = Swal.mixin({
+        toast: true,
+        position: 'top-end',
+        showConfirmButton: false,
+        timer: 3000,
+        timerProgressBar: true
+    });
+
+    Toast.fire({
+        icon: type,
+        title: message
+    });
+}
 
 // Delete function
 function deleteVisibility(id, outletName, salesName, sku) {
@@ -344,14 +401,18 @@ function deleteVisibility(id, outletName, salesName, sku) {
                 },
                 success: function(response) {
                     if (response.status === 'success') {
-                        Swal.fire('Berhasil!', 'Data berhasil dihapus', 'success')
-                            .then(() => {
-                                visibilityTable.ajax.reload();
-                            });
+                        // Tampilkan toast notification
+                        toast('success', 'Data berhasil dihapus');
+                        
+                        // Refresh halaman setelah notifikasi selesai (3 detik)
+                        setTimeout(() => {
+                            window.location.reload();
+                        }, 3000);
                     }
                 },
                 error: function(xhr) {
-                    Swal.fire('Error!', 'Terjadi kesalahan saat menghapus data', 'error');
+                    // Tampilkan toast error jika gagal
+                    toast('error', 'Terjadi kesalahan saat menghapus data');
                 }
             });
         }
@@ -360,36 +421,3 @@ function deleteVisibility(id, outletName, salesName, sku) {
     </script>
 @endpush
 
-
-@push('scripts')
-<script>
-$(document).ready(function() {
-    // Initialize select2
-    $('#sales-filter').select2({
-        placeholder: 'Select Sales',
-        allowClear: true
-    });
-
-    // Handle filter change
-    $('#sales-filter').change(function() {
-        const salesId = $(this).val();
-        let url = new URL(window.location.href);
-        
-        if (salesId) {
-            url.searchParams.set('sales_id', salesId);
-        } else {
-            url.searchParams.delete('sales_id');
-        }
-        
-        window.location.href = url.toString();
-    });
-
-    // Handle reset button
-    $('#reset-filter').click(function() {
-        let url = new URL(window.location.href);
-        url.searchParams.delete('sales_id');
-        window.location.href = url.toString();
-    });
-});
-</script>
-@endpush

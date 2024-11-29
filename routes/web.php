@@ -59,8 +59,8 @@ Route::middleware('auth')->group(function () {
     // Visibility Management
     Route::middleware('permission:menu_visibility')->group(function () {
         Route::resource('visibility', VisibilityController::class);
-        
-        Route::get('visibility/data', [VisibilityController::class, 'getData'])->name('visibility.data');
+            
+        Route::get('/visibility/data', [VisibilityController::class, 'getData'])->name('visibility.data');
         
         Route::post('/visibility/data', [VisibilityController::class, 'store'])->name('visibility.data');
         Route::get('visibility/{visibility}/edit', [VisibilityController::class, 'edit'])->name('visibility.edit');
@@ -70,6 +70,7 @@ Route::middleware('auth')->group(function () {
     
         Route::get('/visibility/products/{category}', [VisibilityController::class, 'getProducts'])
             ->name('visibility.products');
+
     });
 
 
