@@ -14,24 +14,26 @@ use PhpOffice\PhpSpreadsheet\Style\Alignment;
 use PhpOffice\PhpSpreadsheet\Style\Border;
 use PhpOffice\PhpSpreadsheet\Style\Fill;
 use Illuminate\Support\Facades\Log;
+use PhpOffice\PhpSpreadsheet\Cell\Coordinate;
 
 class OutletExport implements FromCollection, WithHeadings, WithMapping, WithStyles, ShouldAutoSize
 {
     protected $channels;
+    protected $minimumWidth = 10; // Lebar minimum kolom dalam karakter
+    protected $maximumWidth = 50; // Lebar maksimum kolom dalam karakter
 
     public function __construct()
     {
-
     }
 
     public function collection()
     {
-        return Outlet::with(['user', 'images','city','channel'])->get();
+        return Outlet::with(['user','city','channel_name'])->get();
     }
 
     public function headings(): array
     {
-        $headers = [
+        return [
             'Nama Outlet',
             'Nama Sales',
             'Kategori Outlet',
@@ -42,44 +44,30 @@ class OutletExport implements FromCollection, WithHeadings, WithMapping, WithSty
             'Longitude',
             'Latitude',
             'Kota',
-            'Alamat',
-            'Foto Tampak Depan Outlet',
-            'Foto Spanduk',
-            'Foto Jalan Utama'
+            'Alamat'
         ];
-        return $headers;
     }
 
     public function map($outlet): array
     {
         try {
-            $row = [
+            return [
                 $outlet->name,
                 $outlet->user->name,
                 $outlet->category,
                 getVisitDayByNumber($outlet->visit_day),
                 $outlet->cycle,
                 $outlet->week_type,
-                $outlet->channel->name,
+                $outlet->channel_name->name ?? '',
                 $outlet->longitude,
                 $outlet->latitude,
-                $outlet->city->name,
-                $outlet->address,
+                $outlet->city->name ?? '',
+                $outlet->address
             ];
-
-            // Create associative array of av3m values by channel_id
-            $av3mByChannel = $product->av3ms->pluck('av3m', 'channel_id')->toArray();
-
-            // Add av3m values for each channel
-            foreach ($this->channels as $channel) {
-                $row[] = $av3mByChannel[$channel->id] ?? 0;
-            }
-
-            return $row;
         } catch (\Exception $e) {
             Log::error('Error in ProductExport mapping', [
                 'message' => $e->getMessage(),
-                'product_id' => $product->id ?? 'unknown'
+                'outlet_id' => $outlet->id ?? 'unknown'
             ]);
             throw $e;
         }
@@ -87,7 +75,7 @@ class OutletExport implements FromCollection, WithHeadings, WithMapping, WithSty
 
     public function styles(Worksheet $sheet)
     {
-        $lastColumn = chr(65 + 3 + $this->channels->count()); // A + number of base columns + number of channels
+        $lastColumn = chr(65 + 10);
         $lastRow = $sheet->getHighestRow();
 
         // Header styles
@@ -119,13 +107,29 @@ class OutletExport implements FromCollection, WithHeadings, WithMapping, WithSty
             ],
         ]);
 
-        // Align SKU center
+        // Mengatur lebar kolom secara optimal
+        foreach (range('A', $lastColumn) as $column) {
+            $sheet->getColumnDimension($column)->setAutoSize(true);
+            
+            // Mendapatkan lebar kolom setelah autosize
+            $columnWidth = $sheet->getColumnDimension($column)->getWidth();
+            
+            // Menyesuaikan lebar kolom dalam batas minimum dan maksimum
+            if ($columnWidth < $this->minimumWidth) {
+                $sheet->getColumnDimension($column)->setWidth($this->minimumWidth);
+            } elseif ($columnWidth > $this->maximumWidth) {
+                $sheet->getColumnDimension($column)->setWidth($this->maximumWidth);
+                
+                // Mengaktifkan text wrapping untuk kolom yang terlalu lebar
+                $sheet->getStyle($column . '1:' . $column . $lastRow)
+                    ->getAlignment()
+                    ->setWrapText(true);
+            }
+        }
+
+        // Specific column alignments
         $sheet->getStyle("B2:B{$lastRow}")->getAlignment()->setHorizontal(Alignment::HORIZONTAL_CENTER);
-
-        // Align prices right
-        $sheet->getStyle("C2:D{$lastRow}")->getAlignment()->setHorizontal(Alignment::HORIZONTAL_RIGHT);
-
-        // Align AV3M values center
+        $sheet->getStyle("C2:B{$lastRow}")->getAlignment()->setHorizontal(Alignment::HORIZONTAL_CENTER);
         $sheet->getStyle("E2:{$lastColumn}{$lastRow}")->getAlignment()->setHorizontal(Alignment::HORIZONTAL_CENTER);
 
         // Set row height

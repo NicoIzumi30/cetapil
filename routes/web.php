@@ -1,5 +1,6 @@
 <?php
 
+use App\Http\Controllers\Web\OutletControler;
 use App\Http\Controllers\Web\ProductKnowledgeControler;
 use App\Http\Controllers\Web\RoutingController;
 use App\Http\Controllers\Web\VisualController;
@@ -54,11 +55,16 @@ Route::middleware('auth')->group(function () {
     //         return view('pages.routing.av3m');
     //     });
     // });
+    Route::get('/routing/request', function () {
+        return view('pages.routing.request');
+        });
+Route::get('/routing/request/detail', function () {
+            return view('pages.routing.detail-request');
+        });
+    Route::get('routing/generate-excel',[RoutingController::class,'downloadExcel'])->name('routing.generae-excel')->middleware('permission:menu_routing');
+    Route::get('routing/data',[RoutingController::class,'getData'])->name('routing.data')->middleware('permission:menu_routing');
     Route::resource('routing',RoutingController::class)->middleware('permission:menu_routing');
-    Route::get('data',[RoutingController::class,'getData'])->name('routing.data')->middleware('permission:menu_routing');
     Route::put('update-product-knowledge', [ProductKnowledgeControler::class, 'update'])->name('update-product-knowledge')->middleware('permission:menu_routing');
-    // Visibility Management
-    // Route::resource('visibility', VisibilityController::class)->middleware('permission:menu_visibility');
 
     // Visibility Management
     Route::middleware('permission:menu_visibility')->group(function () {

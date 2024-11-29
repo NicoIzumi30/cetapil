@@ -16,4 +16,7 @@ class Channel extends Model
     {
         return $this->hasMany(Av3m::class);
     }
+    public function outlet(){
+        return $this->hasMany(Outlet::class);
+    } 
 }

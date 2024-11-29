@@ -16,22 +16,16 @@ class ProductKnowledgeControler extends Controller
         try {
             DB::beginTransaction();
             $files = ['file_pdf', 'file_video'];
-            
             // Cek data existing sekali saja di awal
             $productKnowledge = ProductKnowledge::where('channel_id', $request->channel_id)->first();
-            
             foreach ($files as $fileKey) {
                 if ($request->hasFile($fileKey)) {
                     // Tentukan tipe berdasarkan nama file
                     $type = $fileKey === 'file_pdf' ? 'pdf' : 'video';
-                    
                     $file = $request->file($fileKey);
-                    
-                    // Pastikan file valid
                     if (!$file->isValid()) {
                         throw new \Exception("File {$type} tidak valid");
                     }
-                    
                     $media = saveFile($file, "product-knowledge/{$request->channel_id}",$type);
                     if ($productKnowledge) {
                         // Hapus file lama jika ada

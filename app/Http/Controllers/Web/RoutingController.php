@@ -13,10 +13,13 @@ use App\Models\OutletForm;
 use App\Models\OutletImage;
 use Illuminate\Support\Arr;
 use Illuminate\Http\Request;
+use App\Exports\OutletExport;
 use App\Models\OutletProduct;
 use App\Models\OutletFormAnswer;
 use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Log;
 use App\Http\Controllers\Controller;
+use Maatwebsite\Excel\Facades\Excel;
 use App\Http\Requests\Routing\CreateOutletRequest;
 use App\Http\Requests\Routing\UpdateOutletRequest;
 
@@ -296,6 +299,24 @@ class RoutingController extends Controller
         } catch (Exception $e) {
             DB::rollBack();
             throw $e;
+        }
+    }
+
+    public function downloadExcel()
+    {
+        try {
+            return Excel::download(new OutletExport(), 'outlet_data_' . now()->format('Y-m-d_His') . '.xlsx', \Maatwebsite\Excel\Excel::XLSX);
+        } catch (\Exception $e) {
+            Log::error('Excel Download Error', [
+                'message' => $e->getMessage(),
+                'file' => $e->getFile(),
+                'line' => $e->getLine()
+            ]);
+
+            return response()->json([
+                'status' => 'error',
+                'message' => 'Gagal membuat file Excel: ' . $e->getMessage()
+            ], 500);
         }
     }
 

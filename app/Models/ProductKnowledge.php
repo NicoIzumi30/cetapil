@@ -12,4 +12,5 @@ class ProductKnowledge extends Model
     use HasFactory, HasUuids, SoftDeletes;
 
     protected $guarded = [];
+    
 }

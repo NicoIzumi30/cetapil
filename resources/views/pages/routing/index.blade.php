@@ -19,7 +19,7 @@
                 <option value="{{$hari['value']}}">{{$hari['name']}}</option>
             @endforeach
         </x-select.light>
-        <x-button.light>Download</x-button.light>
+        <x-button.light id="downloadBtn">Download</x-button.light>
         <x-button.light href="/routing/request" class="!text-white !bg-[#39B5FF] py-2">
             Need Approval <span class="py-1 px-2 ml-2 rounded-md bg-white text-primary">4</span>
         </x-button.light>
@@ -410,6 +410,33 @@
                     $('#updateBtn').html('Update');
                 }
             });
+        });
+        $('#downloadBtn').click(function (e) {
+            e.preventDefault();
+            toggleLoading(true);
+            const form = document.createElement('form');
+            form.method = 'GET';
+            form.action = '/routing/generate-excel';
+            document.body.appendChild(form);
+            fetch('/routing/generate-excel')
+                .then(response => {
+                    if (response.ok) {
+                        form.submit();
+                        toast('success', 'File berhasil diunduh', 150);
+                    } else {
+                        return response.json().then(data => {
+                            throw new Error(data.message || 'Gagal mengunduh file');
+                        });
+                    }
+                })
+                .catch(error => {
+                    console.error('Download error:', error);
+                    toast('error', error.message || 'Gagal mengunduh file', 200);
+                })
+                .finally(() => {
+                    toggleLoading(false);
+                    document.body.removeChild(form);
+                });
         });
         document.getElementById('pamflet_file').addEventListener('change', function (e) {
             const fileName = e.target.files[0] ? e.target.files[0].name : 'No file selected';

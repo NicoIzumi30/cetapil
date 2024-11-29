@@ -46,7 +46,6 @@ class VisibilityController extends Controller
         }
 
         $visibilities = $query->latest()->get();
-
         return view("pages.visibility.index", compact('visibilities', 'salesUsers'));
     }
 
