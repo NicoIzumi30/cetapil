@@ -8,6 +8,7 @@ use App\Http\Controllers\Api\SalesActivityController;
 use App\Http\Controllers\Api\SurveyController;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Route;
+use App\Http\Controllers\Api\ProductKnowledgeController;
 
 // Route::get('/user', function (Request $request) {
 //     return $request->user();
@@ -75,5 +76,7 @@ Route::middleware(['auth_api', 'role:sales'])->group(function () {
                 Route::post('/', 'saveSurvey');
             });
     });
+    Route::get('/product-knowledge', [ProductKnowledgeController::class, 'index']);
+
     Route::middleware('permission:menu_outlet')->group(function () {});
 });

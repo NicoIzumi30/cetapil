@@ -26,7 +26,6 @@ class RoutingResource extends JsonResource
             'longitude' => $this->longitude,
             'latitude' => $this->latitude,
             'city' => $this->city,
-            'product_knowladge' => $this->productKnowledge,
             'address' => $this->address,
             'status' => $this->status,
             'week_type' => $this->week_type,
