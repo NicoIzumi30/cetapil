@@ -12,5 +12,7 @@ class ProductKnowledge extends Model
     use HasFactory, HasUuids, SoftDeletes;
 
     protected $guarded = [];
-    
+    public function channel(){
+        return $this->belongsTo(Channel::class);
+    } 
 }
