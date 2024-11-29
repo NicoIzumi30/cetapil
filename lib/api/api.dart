@@ -2,6 +2,7 @@ import 'dart:convert';
 
 import 'package:cetapil_mobile/model/list_activity_response.dart';
 import 'package:cetapil_mobile/model/list_category_response.dart';
+import 'package:cetapil_mobile/model/list_channel_response.dart';
 import 'package:cetapil_mobile/model/list_posm_response.dart';
 import 'package:cetapil_mobile/model/list_product_response.dart';
 import 'package:cetapil_mobile/model/list_product_sku_response.dart';
@@ -227,23 +228,7 @@ class Api {
     }
   }
 
-  static Future<ListCategoryResponse> getCategoryList() async {
-    var url = "$baseUrl/api/activity/product-categories";
-    var token = await storage.read('token');
-    var response = await http.get(
-      Uri.parse(url),
 
-      headers: {
-        'Content-type': 'application/json',
-        'Authorization': 'Bearer $token',
-      },
-    );
-    // print(response.body);
-    if (response.statusCode == 200) {
-      return ListCategoryResponse.fromJson(jsonDecode(response.body));
-    }
-    throw "Gagal request list Category : \n${response.body}";
-  }
 
   static Future<ListActivityResponse> getActivityList() async {
     var url = "$baseUrl/api/activity";
@@ -314,6 +299,24 @@ class Api {
     throw "Gagal request item Visual : \n${response.body}";
   }
 
+  static Future<ListCategoryResponse> getCategoryList() async {
+    var url = "$baseUrl/api/activity/product-categories";
+    var token = await storage.read('token');
+    var response = await http.get(
+      Uri.parse(url),
+
+      headers: {
+        'Content-type': 'application/json',
+        'Authorization': 'Bearer $token',
+      },
+    );
+    // print(response.body);
+    if (response.statusCode == 200) {
+      return ListCategoryResponse.fromJson(jsonDecode(response.body));
+    }
+    throw "Gagal request list Category : \n${response.body}";
+  }
+
   static Future<ListProductSkuResponse> getAllProductSKU() async {
     var url = "$baseUrl/api/activity/get-all-product";
     var token = await storage.read('token');
@@ -329,5 +332,22 @@ class Api {
       return ListProductSkuResponse.fromJson(jsonDecode(response.body));
     }
     throw "Gagal request all Product SKU : \n${response.body}";
+  }
+
+  static Future<ListChannelResponse> getAllChannel() async {
+    var url = "$baseUrl/api/activity/channels";
+    var token = await storage.read('token');
+    var response = await http.get(
+      Uri.parse(url),
+      headers: {
+        'Content-type': 'application/json',
+        'Authorization': 'Bearer $token',
+      },
+    );
+    // print(response.body);
+    if (response.statusCode == 200) {
+      return ListChannelResponse.fromJson(jsonDecode(response.body));
+    }
+    throw "Gagal request all Channel : \n${response.body}";
   }
 }

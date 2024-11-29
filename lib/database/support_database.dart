@@ -1,4 +1,6 @@
-import 'package:cetapil_mobile/model/list_product_sku_response.dart';
+import 'package:cetapil_mobile/model/list_product_sku_response.dart' as SKU;
+import '../model/list_category_response.dart' as Category;
+import '../model/list_channel_response.dart' as Channel;
 import 'package:sqflite/sqflite.dart';
 import 'package:path/path.dart';
 
@@ -26,6 +28,8 @@ class SupportDatabaseHelper {
   }
 
   Future _createDB(Database db, int version) async {
+
+    ///SKU
     await db.execute('''
       CREATE TABLE categories(
         id TEXT PRIMARY KEY,
@@ -42,9 +46,25 @@ class SupportDatabaseHelper {
         FOREIGN KEY (category_id) REFERENCES categories (id)
       )
     ''');
+
+    ///CATEGORY
+    await db.execute('''
+    CREATE TABLE category(
+      id TEXT PRIMARY KEY,
+      name TEXT NOT NULL
+    )
+    ''');
+
+    ///CHANNEL
+    await db.execute('''
+    CREATE TABLE channel(
+      id TEXT PRIMARY KEY,
+      name TEXT NOT NULL
+    )
+    ''');
   }
 
-  Future<void> insertProduct(Data product) async {
+  Future<void> insertProduct(SKU.Data product) async {
     final db = await database;
     await db.transaction((txn) async {
       await txn.insert('categories', {
@@ -58,6 +78,8 @@ class SupportDatabaseHelper {
         'category_id': product.category!.id,
         'average_stock': product.averageStock
       }, conflictAlgorithm: ConflictAlgorithm.replace);
+
+
     });
   }
 
@@ -83,4 +105,37 @@ class SupportDatabaseHelper {
 
     return result;
   }
+
+  Future<void> insertCategory(Category.Data category) async {
+    final db = await database;
+    await db.insert(
+      'category',
+      category.toJson(),
+      conflictAlgorithm: ConflictAlgorithm.replace,
+    );
+  }
+
+  Future<List<Category.Data>> getAllCategories() async {
+    final db = await database;
+    final List<Map<String, dynamic>> maps = await db.query('categories');
+
+    return maps.map((map) => Category.Data.fromJson(map)).toList();
+  }
+
+  Future<void> insertChannel(Channel.Data category) async {
+    final db = await database;
+    await db.insert(
+      'channel',
+      category.toJson(),
+      conflictAlgorithm: ConflictAlgorithm.replace,
+    );
+  }
+
+  Future<List<Channel.Data>> getAllChannel() async {
+    final db = await database;
+    final List<Map<String, dynamic>> maps = await db.query('channel');
+
+    return maps.map((map) => Channel.Data.fromJson(map)).toList();
+  }
+
 }

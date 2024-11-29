@@ -27,19 +27,62 @@ class SupportActivityController extends GetxController {
     _timer = Timer.periodic(Duration(minutes: 1), (timer) {
       final now = DateTime.now();
       if (now.hour == 0 && now.minute == 0) {
-        initTemporaryData();
+        initProductListData();
+        initCategoryListData();
+        initChannelListData();
       }
     });
   }
 
-  initTemporaryData() async {
+
+
+  initProductListData() async {
     try {
       isLoading.value = true;
-      final response = await Api.getAllProductSKU();
-      if (response.status == "OK") {
-        for (int i = 0; i < response.data!.length; i++) {
-          supportDB.insertProduct(response.data![i]);
+      final responseProduct = await Api.getAllProductSKU();
+      if (responseProduct.status == "OK") {
+        for (int i = 0; i < responseProduct.data!.length; i++) {
+          supportDB.insertProduct(responseProduct.data![i]);
         }
+      }
+      else {
+        print("error = ${responseProduct.message}");
+      }
+    } catch (e) {
+      print("error = $e");
+    } finally {
+      isLoading.value = false;
+    }
+  }
+
+  initCategoryListData() async {
+    try {
+      isLoading.value = true;
+      final responseCategory = await Api.getCategoryList();
+      if (responseCategory.status == "OK") {
+        for (int i = 0; i < responseCategory.data!.length; i++) {
+          supportDB.insertCategory(responseCategory.data![i]);
+        }
+      }else {
+        print("error = ${responseCategory.message}");
+      }
+    } catch (e) {
+      print("error = $e");
+    } finally {
+      isLoading.value = false;
+    }
+  }
+
+  initChannelListData() async {
+    try {
+      isLoading.value = true;
+      final responseChannel = await Api.getAllChannel();
+      if (responseChannel.status == "OK") {
+        for (int i = 0; i < responseChannel.data!.length; i++) {
+          supportDB.insertChannel(responseChannel.data![i]);
+        }
+      }else {
+        print("error = ${responseChannel.message}");
       }
     } catch (e) {
       print("error = $e");
