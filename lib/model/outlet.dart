@@ -1,4 +1,3 @@
-
 class OutletResponse {
   String? status;
   String? message;
@@ -38,6 +37,8 @@ class Outlet {
   User? user;
   String? name;
   String? category;
+  String? channel_id;
+  String? channel_name;
   String? visitDay;
   String? longitude;
   String? latitude;
@@ -49,14 +50,16 @@ class Outlet {
   dynamic salesActivity;
   List<Images>? images;
   List<Forms>? forms;
-  String? dataSource; // Made nullable
-  bool? isSynced;    // Made nullable
+  String? dataSource;
+  bool? isSynced;
 
   Outlet({
     this.id,
     this.user,
     this.name,
     this.category,
+    this.channel_id,
+    this.channel_name,
     this.visitDay,
     this.longitude,
     this.latitude,
@@ -68,8 +71,8 @@ class Outlet {
     this.salesActivity,
     this.images,
     this.forms,
-    this.dataSource = 'API',  // Default value
-    this.isSynced = true,     // Default value
+    this.dataSource = 'API',
+    this.isSynced = true,
   });
 
   Outlet.fromJson(Map<String, dynamic> json) {
@@ -77,6 +80,8 @@ class Outlet {
     user = json["user"] == null ? null : User.fromJson(json["user"] as Map<String, dynamic>);
     name = json["name"] as String?;
     category = json["category"] as String?;
+    channel_id = json["channel_id"] as String?;
+    channel_name = json["channel_name"] as String?;
     visitDay = json["visit_day"] as String?;
     longitude = json["longitude"] as String?;
     latitude = json["latitude"] as String?;
@@ -100,6 +105,8 @@ class Outlet {
     }
     _data["name"] = name;
     _data["category"] = category;
+    _data["channel_id"] = channel_id;
+    _data["channel_name"] = channel_name;
     _data["visit_day"] = visitDay;
     _data["longitude"] = longitude;
     _data["latitude"] = latitude;
@@ -122,17 +129,14 @@ class Outlet {
     return _data;
   }
 
-  // Helper method to check if outlet is from API
   bool isFromApi() {
     return dataSource == 'API';
   }
 
-  // Helper method to check if outlet is a draft
   bool isDraft() {
     return dataSource == 'DRAFT';
   }
 
-  // Helper method to check sync status
   bool needsSync() {
     return isSynced == false;
   }
