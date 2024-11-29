@@ -9,6 +9,7 @@ class TambahAvailabilityController extends GetxController {
   // Selected values using String IDs
   final selectedCategory = Rxn<String>();
   final selectedSku = Rxn<String>();
+  final groupSelectedSku = <Map<String, dynamic>>[].obs;
   
   // Get list of SKUs for selected category
   List<Map<String, dynamic>> get filteredSkus {
@@ -21,10 +22,16 @@ class TambahAvailabilityController extends GetxController {
 
   void onCategorySelected(String? categoryId) {
     selectedCategory.value = categoryId;
-    selectedSku.value = null; // Reset SKU when category changes
+    // selectedSku.value = null; // Reset SKU when category changes
+    groupSelectedSku.clear();
   }
 
-  void onSkuSelected(String? skuId) {
-    selectedSku.value = skuId;
+  void onSkuSelected(Map<String, dynamic>? skuId) {
+    // selectedSku.value = skuId!['id'];
+    groupSelectedSku.add(skuId!);
+  }
+  
+  void removeItem(sku){
+    groupSelectedSku.removeWhere((item)=> item['sku'] == sku );
   }
 }

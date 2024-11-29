@@ -18,6 +18,7 @@ import 'package:get_storage/get_storage.dart';
 import 'package:intl/intl.dart';
 
 import 'controller/activity/activity_controller.dart';
+import 'controller/activity/knowledge_controller.dart';
 import 'controller/activity/tambah_availibility_controller.dart';
 import 'controller/bottom_nav_controller.dart';
 import 'controller/connectivity_controller.dart';
@@ -118,6 +119,7 @@ Future<void> initializeControllers(bool isLoggedIn) async {
       // Load only login related controllers
       Get.lazyPut(() => LoginController());
       Get.lazyPut(() => ConnectivityController());
+      Get.lazyPut(() => KnowledgeController());
     }
   } catch (e) {
     print('Controller Initialization Error: $e');

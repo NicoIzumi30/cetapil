@@ -6,6 +6,7 @@ import '../../api/api.dart';
 import 'package:cetapil_mobile/model/list_product_sku_response.dart' as SKU;
 import '../model/list_category_response.dart' as Category;
 import '../model/list_channel_response.dart' as Channel;
+import '../model/list_knowledge_response.dart' as Knowledge;
 
 class SupportDataController extends GetxController {
   final supportDB = SupportDatabaseHelper.instance;
@@ -17,6 +18,7 @@ class SupportDataController extends GetxController {
   var products = <Map<String, dynamic>>[].obs;
   var categories = <Map<String, dynamic>>[].obs;
   var channels = <Channel.Data>[].obs;
+  var knowledge = <Map<String, dynamic>>[].obs;
 
   static const String LAST_FETCH_DATE_KEY = 'last_fetch_date';
 
@@ -49,6 +51,9 @@ class SupportDataController extends GetxController {
 
       // Load channels
       channels.value = await supportDB.getAllChannel();
+
+      // Load Knowledge
+      knowledge.value = await supportDB.getAllKnowledge();
     } catch (e) {
       print("Error loading local data: $e");
     } finally {
@@ -79,6 +84,7 @@ class SupportDataController extends GetxController {
         initProductListData(),
         initCategoryListData(),
         initChannelListData(),
+        initKnowledgeData(),
       ]);
       // Reload local data after updating SQLite
       await loadLocalData();
@@ -128,6 +134,21 @@ class SupportDataController extends GetxController {
         }
       } else {
         print("Channel error = ${responseChannel.message}");
+      }
+    } catch (e) {
+      print("Channel error = $e");
+    }
+  }
+
+  Future<void> initKnowledgeData() async {
+    try {
+      final responseKnowledge = await Api.getknowledge();
+      if (responseKnowledge.status == "OK") {
+        for (final knowledge in responseKnowledge.data ?? []) {
+          await supportDB.insertKnowledge(knowledge);
+        }
+      } else {
+        print("Channel error = ${responseKnowledge.message}");
       }
     } catch (e) {
       print("Channel error = $e");

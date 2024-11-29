@@ -61,6 +61,7 @@ class ActivityPage extends GetView<ActivityController> {
                                     }
                                     final tambahActivityController =
                                         Get.find<TambahActivityController>();
+                                    tambahActivityController.detailOutlet.value = activity;
                                     tambahActivityController.setOutletId(outlet_id!);
                                     Get.to(() => TambahActivity());
                                   },

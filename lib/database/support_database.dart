@@ -1,6 +1,7 @@
 import 'package:cetapil_mobile/model/list_product_sku_response.dart' as SKU;
 import '../model/list_category_response.dart' as Category;
 import '../model/list_channel_response.dart' as Channel;
+import '../model/list_knowledge_response.dart' as Knowledge;
 import 'package:sqflite/sqflite.dart';
 import 'package:path/path.dart';
 
@@ -28,7 +29,6 @@ class SupportDatabaseHelper {
   }
 
   Future _createDB(Database db, int version) async {
-
     ///SKU
     await db.execute('''
       CREATE TABLE categories(
@@ -62,24 +62,42 @@ class SupportDatabaseHelper {
       name TEXT NOT NULL
     )
     ''');
+
+    ///Knowledge
+    await db.execute('''
+    CREATE TABLE knowledge(
+      id TEXT PRIMARY KEY,
+        channel_id TEXT,
+        path_pdf TEXT,
+        path_video TEXT,
+        FOREIGN KEY (channel_id) REFERENCES knowledge_channel (id)
+    )
+    ''');
+
+    await db.execute('''
+    CREATE TABLE knowledge_channel(
+      id TEXT PRIMARY KEY,
+      name TEXT NOT NULL
+    )
+    ''');
   }
 
   Future<void> insertProduct(SKU.Data product) async {
     final db = await database;
     await db.transaction((txn) async {
-      await txn.insert('categories', {
-        'id': product.category!.id,
-        'name': product.category!.name
-      }, conflictAlgorithm: ConflictAlgorithm.replace);
+      await txn.insert('categories',
+          {'id': product.category!.id, 'name': product.category!.name},
+          conflictAlgorithm: ConflictAlgorithm.replace);
 
-      await txn.insert('products', {
-        'id': product.id,
-        'sku': product.sku,
-        'category_id': product.category!.id,
-        'average_stock': product.averageStock
-      }, conflictAlgorithm: ConflictAlgorithm.replace);
-
-
+      await txn.insert(
+          'products',
+          {
+            'id': product.id,
+            'sku': product.sku,
+            'category_id': product.category!.id,
+            'average_stock': product.averageStock
+          },
+          conflictAlgorithm: ConflictAlgorithm.replace);
     });
   }
 
@@ -89,11 +107,8 @@ class SupportDatabaseHelper {
     final List<Map<String, dynamic>> result = [];
 
     for (var product in products) {
-      final category = await db.query(
-          'categories',
-          where: 'id = ?',
-          whereArgs: [product['category_id']]
-      );
+      final category = await db.query('categories',
+          where: 'id = ?', whereArgs: [product['category_id']]);
 
       result.add({
         'id': product['id'],
@@ -138,4 +153,43 @@ class SupportDatabaseHelper {
     return maps.map((map) => Channel.Data.fromJson(map)).toList();
   }
 
+  ///Knowledge
+  Future<void> insertKnowledge(Knowledge.Data knowledge) async {
+    final db = await database;
+    await db.transaction((txn) async {
+      await txn.insert('knowledge_channel',
+          {'id': knowledge.channel!.id, 'name': knowledge.channel!.name},
+          conflictAlgorithm: ConflictAlgorithm.replace);
+
+      await txn.insert(
+          'knowledge',
+          {
+            'id': knowledge.id,
+            'channel_id': knowledge.channel!.id,
+            'path_pdf': knowledge.pathPdf,
+            'path_video': knowledge.pathVideo
+          },
+          conflictAlgorithm: ConflictAlgorithm.replace);
+    });
+  }
+
+  Future<List<Map<String, dynamic>>> getAllKnowledge() async {
+    final db = await database;
+    final List<Map<String, dynamic>> knowledges = await db.query('knowledge');
+    final List<Map<String, dynamic>> result = [];
+
+    for (var knowledge in knowledges) {
+      final channel = await db.query('knowledge_channel',
+          where: 'id = ?', whereArgs: [knowledge['channel_id']]);
+
+      result.add({
+        'id': knowledge['id'],
+        'path_pdf': knowledge['path_pdf'],
+        'path_video': knowledge['path_video'],
+        'knowledge_channel': channel.first
+      });
+    }
+
+    return result;
+  }
 }

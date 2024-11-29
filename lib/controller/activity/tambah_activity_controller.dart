@@ -8,6 +8,7 @@ import 'package:get/get.dart';
 import '../../model/list_category_response.dart' as Category;
 import '../../model/list_posm_response.dart' as POSM;
 import '../../model/list_posm_response.dart' as Visual;
+import '../../model/list_activity_response.dart' as Activity;
 import '../../model/dropdown_model.dart' as Model;
 import '../../model/visibility.dart' as Visibility;
 import '../../model/visibility.dart';
@@ -18,6 +19,7 @@ class TambahActivityController extends GetxController {
   final selectedTab = 0.obs;
   final surveyQuestions = <SurveyQuestion>[].obs;
   var outletId = ''.obs;
+  Rx<Activity.Data?> detailOutlet = Rx<Activity.Data?>(null);
 
   // Loading states for each tab
   final isLoadingAvailability = true.obs;
