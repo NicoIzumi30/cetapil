@@ -1,5 +1,4 @@
 import 'package:cetapil_mobile/controller/bottom_nav_controller.dart';
-import 'package:cetapil_mobile/page/selling/tambah_product_selling.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:get/get_core/src/get_main.dart';
@@ -10,13 +9,13 @@ import '../../controller/selling/selling_controller.dart';
 import '../../utils/colors.dart';
 import '../../widget/back_button.dart';
 import '../../widget/clipped_maps.dart';
-import '../../widget/dialog.dart';
 import '../../widget/dropdown_textfield.dart';
 import '../../widget/text_field.dart';
 import '../outlet/detail_outlet.dart';
 
-class TambahSelling extends GetView<SellingController> {
-  final TextEditingController _controller = TextEditingController(text: "asdasdas");
+class DetailSelling extends GetView<SellingController> {
+  final TextEditingController _controller =
+      TextEditingController(text: "asdasdas");
 
   @override
   Widget build(BuildContext context) {
@@ -34,7 +33,9 @@ class TambahSelling extends GetView<SellingController> {
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
               EnhancedBackButton(
-                onPressed: () => Alerts.showConfirmDialog(context),
+                onPressed: () {
+                  Get.back();
+                },
                 backgroundColor: Colors.white,
                 iconColor: Colors.blue,
               ),
@@ -46,70 +47,53 @@ class TambahSelling extends GetView<SellingController> {
                   child: Column(
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
-                      ModernTextField(
+                      UnderlineTextField.readOnly(
                         title: "Nama Outlet",
-                        controller: controller.outletName.value,
+                        value: "Guardian Setiabudi Building",
                       ),
-                      Text("Produk",
+                      CustomDropdown(
+                          title: "Kategori Produk",
+                          hint: "-- Pilih Kategori Produk --",
+                          items: ["asdasd", "asda"].map((item) {
+                            return DropdownMenuItem<String>(
+                              value: item,
+                              child: Text(item ?? ''), // Display the name
+                            );
+                          }).toList(),
+                          onChanged: (string) {}),
+                      Text("Cleanser",
                           style: TextStyle(
-                              fontSize: 16, fontWeight: FontWeight.bold, color: Color(0xFF023B5E))),
-
-                      SizedBox(
-                        width: double.infinity,
-                        child: ElevatedButton(
-                          style: ElevatedButton.styleFrom(
-                            backgroundColor: AppColors.primary,
-                            shape: RoundedRectangleBorder(
-                              borderRadius: BorderRadius.circular(10),
-                              side: BorderSide(color: AppColors.primary),
-                            ),
-                          ),
-                          onPressed: () => Get.to(() => TambahProductSelling()),
-                          child: Text(
-                            " Tambah Product Selling",
-                            style: TextStyle(
-                              color: Colors.white,
+                              fontSize: 16,
                               fontWeight: FontWeight.bold,
-                            ),
-                          ),
-                        ),
-                      ), // CustomDropdown(
-                      //     title: "Kategori Produk",
-                      //     hint: "-- Pilih Kategori Produk --",
-                      //     items: ["asdasd", "asda"].map((item) {
-                      //       return DropdownMenuItem<String>(
-                      //         value: item,
-                      //         child: Text(item ?? ''), // Display the name
-                      //       );
-                      //     }).toList(),
-                      //     onChanged: (string) {}),
-                      // Text("Cleanser",
-                      //     style: TextStyle(
-                      //         fontSize: 16, fontWeight: FontWeight.bold, color: Color(0xFF023B5E))),
-                      // SumAmountProduct(
-                      //   productName: "Cetaphil Exfoliate Cleanser 500ml",
-                      //   stockController: TextEditingController(),
-                      //   sellingController: TextEditingController(),
-                      //   balanceController: TextEditingController(),
-                      // ),
-                      // Text("Baby Treatment",
-                      //     style: TextStyle(
-                      //         fontSize: 16, fontWeight: FontWeight.bold, color: Color(0xFF023B5E))),
-                      // SumAmountProduct(
-                      //   productName: "Cetaphil Baby Daily Lotion with Organic Calendula 400ml",
-                      //   stockController: TextEditingController(),
-                      //   sellingController: TextEditingController(),
-                      //   balanceController: TextEditingController(),
-                      // ),
-                      // Divider(
-                      //   color: Colors.white,
-                      // ),
-                      // SumAmountProduct(
-                      //   productName: "Cetaphil Baby Daily Lotion with Organic Calendula 200ml",
-                      //   stockController: TextEditingController(),
-                      //   sellingController: TextEditingController(),
-                      //   balanceController: TextEditingController(),
-                      // ),
+                              color: Color(0xFF023B5E))),
+                      SumAmountProduct(
+                        productName: "Cetaphil Exfoliate Cleanser 500ml",
+                        stockController: TextEditingController(),
+                        sellingController: TextEditingController(),
+                        balanceController: TextEditingController(),
+                      ),
+                      Text("Baby Treatment",
+                          style: TextStyle(
+                              fontSize: 16,
+                              fontWeight: FontWeight.bold,
+                              color: Color(0xFF023B5E))),
+                      SumAmountProduct(
+                        productName:
+                            "Cetaphil Baby Daily Lotion with Organic Calendula 400ml",
+                        stockController: TextEditingController(),
+                        sellingController: TextEditingController(),
+                        balanceController: TextEditingController(),
+                      ),
+                      Divider(
+                        color: Colors.white,
+                      ),
+                      SumAmountProduct(
+                        productName:
+                            "Cetaphil Baby Daily Lotion with Organic Calendula 200ml",
+                        stockController: TextEditingController(),
+                        sellingController: TextEditingController(),
+                        balanceController: TextEditingController(),
+                      ),
                       Row(
                         children: [
                           Expanded(
@@ -154,13 +138,8 @@ class TambahSelling extends GetView<SellingController> {
                           mainAxisAlignment: MainAxisAlignment.center,
                           children: [
                             Icon(Icons.camera_alt),
-                            SizedBox(
-                              height: 10,
-                            ),
-                            Text(
-                              "Kualitas foto harus jelas dan tidak blur",
-                              style: TextStyle(fontSize: 9, color: Colors.blue),
-                            )
+                            SizedBox(height: 10,),
+                            Text("Kualitas foto harus jelas dan tidak blur",style: TextStyle(fontSize: 9,color: Colors.blue),)
                           ],
                         ),
                       ),

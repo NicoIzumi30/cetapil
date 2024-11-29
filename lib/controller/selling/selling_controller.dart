@@ -1,3 +1,4 @@
+import 'package:cetapil_mobile/controller/gps_controller.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:uuid/uuid.dart';
@@ -6,9 +7,18 @@ import 'package:uuid/uuid.dart';
 import '../../model/outlet_example.dart';
 
 class SellingController extends GetxController {
+  final GPSLocationController gpsController = Get.find<GPSLocationController>();
   RxString searchQuery = ''.obs;
   RxList<Outlet> outlets = <Outlet>[].obs;
   final uuid = Uuid();
+
+  
+  // Form Controllers
+  var outletName = TextEditingController().obs;
+  // var outletSelling = TextEditingController().obs;
+  // var outletAddress = TextEditingController().obs;
+  // var controllers = <TextEditingController>[].obs;
+  // var questions = <FormOutletResponse>[].obs;
 
   @override
   void onInit() {
@@ -53,4 +63,10 @@ class SellingController extends GetxController {
         .contains(searchQuery.value.toLowerCase());
   }).toList();
 
+
+  void clearForm() {
+    outletName.value.clear();
+    // outletSelling.value.clear();
+    // outletAddress.value.clear();
+  }
 }
