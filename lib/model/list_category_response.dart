@@ -59,8 +59,6 @@ class Data {
     _name = name;
 }
 
-
-
   Data.fromJson(dynamic json) {
     _id = json['id'];
     _name = json['name'];
@@ -81,7 +79,5 @@ Data copyWith({  String? id,
     map['name'] = _name;
     return map;
   }
-
-
 
 }

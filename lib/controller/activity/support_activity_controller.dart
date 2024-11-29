@@ -14,7 +14,10 @@ class SupportActivityController extends GetxController {
   @override
   void onInit() {
     super.onInit();
-    startTimeCheck();
+    initProductListData();
+    initCategoryListData();
+    initChannelListData();
+    // startTimeCheck();
   }
 
   @override

@@ -62,6 +62,7 @@ class Alerts{
                       ),
                     ),
                     onPressed: () {
+
                       Get.back();
                       Get.back();
                     } ,

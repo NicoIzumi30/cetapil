@@ -4,7 +4,9 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:get/get.dart';
 
+import '../../../controller/activity/support_activity_controller.dart';
 import '../../../controller/activity/tambah_activity_controller.dart';
+import '../../../controller/activity/tambah_availibility_controller.dart';
 import '../../../model/list_category_response.dart';
 import '../../../utils/colors.dart';
 import '../../../widget/searchable_grouped_dropdown.dart';
@@ -27,7 +29,15 @@ class AvailabilityPage extends GetView<TambahActivityController> {
                 side: BorderSide(color: AppColors.primary),
               ),
             ),
-            onPressed: () => Get.to(() => TambahAvailability()),
+            onPressed: () {
+              if (!Get.isRegistered<SupportActivityController>()) {
+                Get.put(SupportActivityController());
+              }
+              if (!Get.isRegistered<TambahAvailabilityController>()) {
+                Get.put(TambahAvailabilityController());
+              }
+              Get.to(() => TambahAvailability());
+            },
             child: Text(
               " Tambah Availibility",
               style: TextStyle(

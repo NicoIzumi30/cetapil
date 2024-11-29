@@ -115,11 +115,11 @@ class SupportDatabaseHelper {
     );
   }
 
-  Future<List<Category.Data>> getAllCategories() async {
+  Future<List<Map<String, dynamic>>> getAllCategories() async {
     final db = await database;
-    final List<Map<String, dynamic>> maps = await db.query('categories');
+    final List<Map<String, dynamic>> maps = await db.query('category');
 
-    return maps.map((map) => Category.Data.fromJson(map)).toList();
+    return maps;
   }
 
   Future<void> insertChannel(Channel.Data category) async {

@@ -109,7 +109,7 @@ class TambahActivityController extends GetxController {
   @override
   void onInit() {
     super.onInit();
-    initListCategory();
+    // initListCategory();
     initGetSurveyQuestion();
     initListPosm();
     initListVisual();

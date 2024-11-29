@@ -116,12 +116,16 @@ void configureApp() {
   );
 }
 
+
 class MyApp extends StatelessWidget {
   const MyApp({super.key});
+
+
 
   @override
   Widget build(BuildContext context) {
     return GetMaterialApp(
+      // initialBinding: InitialBindings(),
       debugShowCheckedModeBanner: false,
       title: 'Cetaphil App',
       home: const SplashScreen(),
@@ -146,5 +150,28 @@ class MyApp extends StatelessWidget {
       defaultTransition: Transition.fadeIn,
       transitionDuration: const Duration(milliseconds: 300),
     );
+  }
+}
+
+class InitialBindings extends Bindings {
+  @override
+  void dependencies() {
+    // Controllers that should be available throughout the app
+    Get.lazyPut(() => LoginController());
+    Get.lazyPut(() => ConnectivityController());
+    Get.lazyPut(() => GPSLocationController());
+    Get.lazyPut(() => BottomNavController());
+    Get.lazyPut(() => DashboardController());
+    Get.lazyPut(() => OutletController());
+    Get.lazyPut(() => ActivityController());
+    Get.lazyPut(() => RoutingController());
+    Get.lazyPut(() => SellingController());
+    Get.lazyPut(() => TambahActivityController());
+    Get.lazyPut(() => VideoController());
+    Get.lazyPut(() => TambahRoutingController());
+    Get.lazyPut(() => TambahAvailabilityController());
+
+    Get.lazyPut(() => SupportActivityController());
+    // Add other controllers...
   }
 }
