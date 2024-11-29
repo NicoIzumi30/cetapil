@@ -6,14 +6,16 @@ class OutletResponse {
   OutletResponse({this.status, this.message, this.data});
 
   OutletResponse.fromJson(Map<String, dynamic> json) {
-    if(json["status"] is String) {
+    if (json["status"] is String) {
       status = json["status"];
     }
-    if(json["message"] is String) {
+    if (json["message"] is String) {
       message = json["message"];
     }
-    if(json["data"] is List) {
-      data = json["data"] == null ? null : (json["data"] as List).map((e) => Outlet.fromJson(e)).toList();
+    if (json["data"] is List) {
+      data = json["data"] == null
+          ? null
+          : (json["data"] as List).map((e) => Outlet.fromJson(e)).toList();
     }
   }
 
@@ -25,7 +27,7 @@ class OutletResponse {
     final Map<String, dynamic> _data = <String, dynamic>{};
     _data["status"] = status;
     _data["message"] = message;
-    if(data != null) {
+    if (data != null) {
       _data["data"] = data?.map((e) => e.toJson()).toList();
     }
     return _data;
@@ -37,8 +39,7 @@ class Outlet {
   User? user;
   String? name;
   String? category;
-  String? channel_id;
-  String? channel_name;
+  Channel? channel; // Changed from String to Channel? type
   String? visitDay;
   String? longitude;
   String? latitude;
@@ -58,8 +59,7 @@ class Outlet {
     this.user,
     this.name,
     this.category,
-    this.channel_id,
-    this.channel_name,
+    this.channel, // Updated parameter
     this.visitDay,
     this.longitude,
     this.latitude,
@@ -80,8 +80,9 @@ class Outlet {
     user = json["user"] == null ? null : User.fromJson(json["user"] as Map<String, dynamic>);
     name = json["name"] as String?;
     category = json["category"] as String?;
-    channel_id = json["channel_id"] as String?;
-    channel_name = json["channel_name"] as String?;
+    channel = json["channel"] == null
+        ? null
+        : Channel.fromJson(json["channel"] as Map<String, dynamic>); // Parse channel
     visitDay = json["visit_day"] as String?;
     longitude = json["longitude"] as String?;
     latitude = json["latitude"] as String?;
@@ -91,8 +92,10 @@ class Outlet {
     weekType = json["week_type"];
     cycle = json["cycle"] as String?;
     salesActivity = json["sales_activity"];
-    images = (json["images"] as List?)?.map((e) => Images.fromJson(e as Map<String, dynamic>)).toList();
-    forms = (json["forms"] as List?)?.map((e) => Forms.fromJson(e as Map<String, dynamic>)).toList();
+    images =
+        (json["images"] as List?)?.map((e) => Images.fromJson(e as Map<String, dynamic>)).toList();
+    forms =
+        (json["forms"] as List?)?.map((e) => Forms.fromJson(e as Map<String, dynamic>)).toList();
     dataSource = json["data_source"] as String? ?? 'API';
     isSynced = json["is_synced"] as bool? ?? true;
   }
@@ -100,17 +103,18 @@ class Outlet {
   Map<String, dynamic> toJson() {
     final Map<String, dynamic> _data = <String, dynamic>{};
     _data["id"] = id;
-    if(user != null) {
+    if (user != null) {
       _data["user"] = user?.toJson();
     }
     _data["name"] = name;
     _data["category"] = category;
-    _data["channel_id"] = channel_id;
-    _data["channel_name"] = channel_name;
+    if (channel != null) {
+      _data["channel"] = channel?.toJson(); // Convert channel to JSON
+    }
     _data["visit_day"] = visitDay;
     _data["longitude"] = longitude;
     _data["latitude"] = latitude;
-    if(city != null) {
+    if (city != null) {
       _data["city"] = city?.toJson();
     }
     _data["address"] = address;
@@ -118,27 +122,34 @@ class Outlet {
     _data["week_type"] = weekType;
     _data["cycle"] = cycle;
     _data["sales_activity"] = salesActivity;
-    if(images != null) {
+    if (images != null) {
       _data["images"] = images?.map((e) => e.toJson()).toList();
     }
-    if(forms != null) {
+    if (forms != null) {
       _data["forms"] = forms?.map((e) => e.toJson()).toList();
     }
     _data["data_source"] = dataSource;
     _data["is_synced"] = isSynced;
     return _data;
   }
+}
 
-  bool isFromApi() {
-    return dataSource == 'API';
+class Channel {
+  String? id;
+  String? name;
+
+  Channel({this.id, this.name});
+
+  Channel.fromJson(Map<String, dynamic> json) {
+    id = json["id"] as String?;
+    name = json["name"] as String?;
   }
 
-  bool isDraft() {
-    return dataSource == 'DRAFT';
-  }
-
-  bool needsSync() {
-    return isSynced == false;
+  Map<String, dynamic> toJson() {
+    final Map<String, dynamic> _data = <String, dynamic>{};
+    _data["id"] = id;
+    _data["name"] = name;
+    return _data;
   }
 }
 
@@ -150,13 +161,13 @@ class Forms {
   Forms({this.id, this.outletForm, this.answer});
 
   Forms.fromJson(Map<String, dynamic> json) {
-    if(json["id"] is String) {
+    if (json["id"] is String) {
       id = json["id"];
     }
-    if(json["outletForm"] is Map) {
+    if (json["outletForm"] is Map) {
       outletForm = json["outletForm"] == null ? null : OutletForm.fromJson(json["outletForm"]);
     }
-    if(json["answer"] is String) {
+    if (json["answer"] is String) {
       answer = json["answer"];
     }
   }
@@ -168,7 +179,7 @@ class Forms {
   Map<String, dynamic> toJson() {
     final Map<String, dynamic> _data = <String, dynamic>{};
     _data["id"] = id;
-    if(outletForm != null) {
+    if (outletForm != null) {
       _data["outletForm"] = outletForm?.toJson();
     }
     _data["answer"] = answer;
@@ -184,13 +195,13 @@ class OutletForm {
   OutletForm({this.id, this.type, this.question});
 
   OutletForm.fromJson(Map<String, dynamic> json) {
-    if(json["id"] is String) {
+    if (json["id"] is String) {
       id = json["id"];
     }
-    if(json["type"] is String) {
+    if (json["type"] is String) {
       type = json["type"];
     }
-    if(json["question"] is String) {
+    if (json["question"] is String) {
       question = json["question"];
     }
   }
@@ -217,16 +228,16 @@ class Images {
   Images({this.id, this.position, this.filename, this.image});
 
   Images.fromJson(Map<String, dynamic> json) {
-    if(json["id"] is String) {
+    if (json["id"] is String) {
       id = json["id"];
     }
-    if(json["position"] is int) {
+    if (json["position"] is int) {
       position = json["position"];
     }
-    if(json["filename"] is String) {
+    if (json["filename"] is String) {
       filename = json["filename"];
     }
-    if(json["image"] is String) {
+    if (json["image"] is String) {
       image = json["image"];
     }
   }
@@ -252,10 +263,10 @@ class City {
   City({this.id, this.name});
 
   City.fromJson(Map<String, dynamic> json) {
-    if(json["id"] is String) {
+    if (json["id"] is String) {
       id = json["id"];
     }
-    if(json["name"] is String) {
+    if (json["name"] is String) {
       name = json["name"];
     }
   }
@@ -279,10 +290,10 @@ class User {
   User({this.id, this.name});
 
   User.fromJson(Map<String, dynamic> json) {
-    if(json["id"] is String) {
+    if (json["id"] is String) {
       id = json["id"];
     }
-    if(json["name"] is String) {
+    if (json["name"] is String) {
       name = json["name"];
     }
   }

@@ -26,7 +26,6 @@ class SupportDataController extends GetxController {
     checkAndFetchData();
     startTimeCheck();
     loadLocalData(); // Load data from SQLite when controller initializes
-    print("asdasdasdas");
   }
 
   @override

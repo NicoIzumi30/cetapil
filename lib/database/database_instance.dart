@@ -1,4 +1,7 @@
+import 'dart:convert';
+
 import 'package:cetapil_mobile/model/outlet.dart' as Outlet;
+import 'package:cetapil_mobile/model/outlet.dart';
 import 'package:sqflite/sqflite.dart';
 import 'package:path/path.dart';
 import 'package:uuid/uuid.dart';
@@ -32,31 +35,30 @@ class DatabaseHelper {
   Future _createDB(Database db, int version) async {
     ///Tabel OUTLET
     await db.execute('''
-        CREATE TABLE outlets (
-          id TEXT PRIMARY KEY,
-          user_id TEXT,
-          user_name TEXT,
-          name TEXT NOT NULL,
-          category TEXT,
-          channel_id TEXT,
-          channel_name TEXT,
-          visit_day TEXT,
-          longitude TEXT,
-          latitude TEXT,
-          city_id TEXT,
-          city_name TEXT,
-          address TEXT,
-          status TEXT CHECK(status IN ('APPROVED', 'PENDING', 'REJECTED')),
-          week_type TEXT,
-          cycle TEXT,
-          sales_activity TEXT,
-          data_source TEXT NOT NULL CHECK(data_source IN ('API', 'DRAFT')),
-          is_synced INTEGER DEFAULT 0,
-          created_at TEXT NOT NULL,
-          updated_at TEXT NOT NULL,
-          deleted_at TEXT
-        )
-      ''');
+    CREATE TABLE outlets (
+      id TEXT PRIMARY KEY,
+      user_id TEXT,
+      user_name TEXT,
+      name TEXT NOT NULL,
+      category TEXT,
+      channel TEXT,
+      visit_day TEXT,
+      longitude TEXT,
+      latitude TEXT,
+      city_id TEXT,
+      city_name TEXT,
+      address TEXT,
+      status TEXT CHECK(status IN ('APPROVED', 'PENDING', 'REJECTED')),
+      week_type TEXT,
+      cycle TEXT,
+      sales_activity TEXT,
+      data_source TEXT NOT NULL CHECK(data_source IN ('API', 'DRAFT')),
+      is_synced INTEGER DEFAULT 0,
+      created_at TEXT NOT NULL,
+      updated_at TEXT NOT NULL,
+      deleted_at TEXT
+    )
+  ''');
 
     await db.execute('''
         CREATE TABLE outlet_images (
@@ -226,8 +228,9 @@ class DatabaseHelper {
           'user_name': outlet.user?.name,
           'name': outlet.name,
           'category': outlet.category,
-          'channel_id': outlet.channel_id,
-          'channel_name': outlet.channel_name,
+          'channel': outlet.channel != null
+              ? json.encode({'id': outlet.channel!.id, 'name': outlet.channel!.name})
+              : null,
           'visit_day': outlet.visitDay,
           'longitude': outlet.longitude,
           'latitude': outlet.latitude,
@@ -385,7 +388,6 @@ class DatabaseHelper {
     );
 
     return Future.wait(outletMaps.map((outletMap) async {
-
       final List<Map<String, dynamic>> imageMaps = await db.query(
         'outlet_images',
         where: 'outlet_id = ?',
@@ -415,8 +417,9 @@ class DatabaseHelper {
         ),
         name: outletMap['name'],
         category: outletMap['category'],
-        channel_id: outletMap['channel_id'],
-        channel_name: outletMap['channel_name'],
+        channel: outletMap['channel'] != null
+            ? Channel.fromJson(json.decode(outletMap['channel']))
+            : null,
         visitDay: outletMap['visit_day'],
         longitude: outletMap['longitude'],
         latitude: outletMap['latitude'],

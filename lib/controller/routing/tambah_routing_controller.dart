@@ -1,6 +1,3 @@
-
-
-
 import 'package:flutter_easyloading/flutter_easyloading.dart';
 import 'package:get/get.dart';
 
@@ -58,7 +55,9 @@ class TambahRoutingController extends GetxController {
         local.longitude != api.longitude ||
         local.city?.id != api.city?.id ||
         local.city?.name != api.city?.name ||
-        local.category != api.category;
+        local.category != api.category ||
+        local.channel?.id != api.channel?.id ||
+        local.channel?.name != api.channel?.name;
   }
 
   Future<void> _batchDelete(List<String> ids) async {
@@ -78,7 +77,7 @@ class TambahRoutingController extends GetxController {
 
       // Get existing outlets to check draft status
       final existingOutlets =
-      await Future.wait(batch.map((outlet) => db.getOutletById(outlet.id!)));
+          await Future.wait(batch.map((outlet) => db.getOutletById(outlet.id!)));
 
       // Create a list of futures for upsert operations
       final futures = batch.asMap().entries.map((entry) {
@@ -94,8 +93,7 @@ class TambahRoutingController extends GetxController {
               latitude: outlet.latitude,
               longitude: outlet.longitude,
               category: outlet.category,
-              channel_id: outlet.channel_id,
-              channel_name: outlet.channel_name,
+              channel: outlet.channel ?? null, // Updated to use channel object
               city: outlet.city, // Use the city object directly
               images: outlet.images,
               forms: outlet.forms,
@@ -227,7 +225,6 @@ class TambahRoutingController extends GetxController {
   void updateSearchQuery(String query) {
     searchQuery.value = query;
   }
-
 }
 
 class TambahRoutingBinding extends Bindings {

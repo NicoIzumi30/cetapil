@@ -36,15 +36,26 @@ void main() async {
       DashboardDatabaseHelper.instance.database,
       GetStorage.init(),
       initializeGPS(),
-      initializeControllers()
     ]);
 
     configureApp();
-    await GetStorage.init();
+    bool isLoggedIn = await checkLoginStatus(); // Check login status
+    if (isLoggedIn) {
+      // If logged in, load all controllers
+      await initializeControllers(true); // Load all controllers
+    } else {
+      // If not logged in, load only login related controllers
+      await initializeControllers(false); // Load only login related controllers
+    }
     runApp(const MyApp());
   } catch (e) {
     print('App Initialization Error: $e');
   }
+}
+
+Future<bool> checkLoginStatus() async {
+  final token = await GetStorage().read('token');
+  return token != null;
 }
 
 Future<void> initializeGPS() async {
@@ -84,24 +95,30 @@ Future<void> initializeGPS() async {
   }
 }
 
-Future<void> initializeControllers() async {
+Future<void> initializeControllers(bool isLoggedIn) async {
   try {
-    // Use lazyPut for more efficient controller management
-    Get.lazyPut(() => LoginController());
-    Get.lazyPut(() => ConnectivityController());
-    Get.lazyPut(() => GPSLocationController());
-    Get.lazyPut(() => BottomNavController());
-    Get.lazyPut(() => DashboardController());
-    Get.lazyPut(() => OutletController());
-    Get.lazyPut(() => ActivityController());
-    Get.lazyPut(() => RoutingController());
-    Get.lazyPut(() => SellingController());
-    Get.lazyPut(() => TambahActivityController());
-    Get.lazyPut(() => VideoController());
-    Get.lazyPut(() => TambahRoutingController());
-    Get.lazyPut(() => TambahAvailabilityController());
-    Get.put(SupportDataController());
-    Get.lazyPut(() => TambahProdukSellingController());
+    if (isLoggedIn) {
+      // Load all controllers if logged in
+      Get.put(LoginController());
+      Get.lazyPut(() => ConnectivityController());
+      Get.lazyPut(() => GPSLocationController());
+      Get.lazyPut(() => BottomNavController());
+      Get.lazyPut(() => DashboardController());
+      Get.lazyPut(() => OutletController());
+      Get.lazyPut(() => ActivityController());
+      Get.put(RoutingController());
+      Get.lazyPut(() => SellingController());
+      Get.lazyPut(() => TambahActivityController());
+      Get.lazyPut(() => VideoController());
+      Get.lazyPut(() => TambahRoutingController());
+      Get.lazyPut(() => TambahAvailabilityController());
+      Get.put(SupportDataController());
+      Get.lazyPut(() => TambahProdukSellingController());
+    } else {
+      // Load only login related controllers
+      Get.lazyPut(() => LoginController());
+      Get.lazyPut(() => ConnectivityController());
+    }
   } catch (e) {
     print('Controller Initialization Error: $e');
   }
@@ -156,14 +173,14 @@ class InitialBindings extends Bindings {
   @override
   void dependencies() {
     // Controllers that should be available throughout the app
-    Get.lazyPut(() => LoginController());
+    Get.put(LoginController());
     Get.lazyPut(() => ConnectivityController());
     Get.lazyPut(() => GPSLocationController());
     Get.lazyPut(() => BottomNavController());
     Get.lazyPut(() => DashboardController());
     Get.lazyPut(() => OutletController());
     Get.lazyPut(() => ActivityController());
-    Get.lazyPut(() => RoutingController());
+    Get.put(RoutingController());
     Get.lazyPut(() => SellingController());
     Get.lazyPut(() => TambahActivityController());
     Get.lazyPut(() => VideoController());

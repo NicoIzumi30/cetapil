@@ -257,7 +257,7 @@ class OutletController extends GetxController {
       // Handle existing outlets
       for (final localOutlet in localOutlets) {
         final id = localOutlet.id!;
-
+        
         // Skip if it's a draft
         if (localOutlet.dataSource == 'DRAFT') {
           continue;
@@ -341,17 +341,25 @@ class OutletController extends GetxController {
   Future<void> initializeFormData() async {
     try {
       isLoading.value = true;
-
       final isEmpty = await db.isOutletFormsEmpty();
 
       if (isEmpty) {
         final response = await Api.getFormOutlet();
-        if (response.isNotEmpty) {
+        if (response == null || response.isEmpty) {
+          throw Exception('Failed to load forms: Empty response');
+        }
+        try {
           await db.insertOutletFormBatch(response);
+        } catch (e) {
+          throw Exception('Failed to insert forms: $e');
         }
       }
 
       final forms = await db.getAllForms();
+      if (forms.isEmpty) {
+        throw Exception('No forms found in database');
+      }
+
       questions.value = forms
           .map((form) => FormOutletResponse(
                 id: form['id'] as String,
@@ -363,11 +371,6 @@ class OutletController extends GetxController {
       generateControllers();
     } catch (e) {
       print('Error initializing form data: $e');
-      Get.snackbar(
-        'Error',
-        'Failed to load form data',
-        snackPosition: SnackPosition.BOTTOM,
-      );
     } finally {
       isLoading.value = false;
     }
@@ -397,8 +400,10 @@ class OutletController extends GetxController {
         'user_name': salesName.value.text, // Add this duplicate field
         'outletName': outletName.value.text,
         'category': selectedCategory.value,
-        'channel_id': "1",
-        'channel_name': "Minimarket",
+        'channel': json.encode({
+          'id': "1",
+          'name': "Minimarket",
+        }),
         'city_id': cityId.value.isEmpty ? "" : cityId.value,
         'city_name': cityName.value.isEmpty ? "" : cityName.value,
         'longitude': gpsController.longController.value.text,
@@ -551,19 +556,19 @@ class OutletController extends GetxController {
     return filtered;
   }
 
-   List<Outlet> get filteredOutletsApproval {
+  List<Outlet> get filteredOutletsApproval {
     if (searchQuery.value.isEmpty) {
-      return outlets.where((outlet) => 
-        outlet.dataSource == 'API' &&
-        outlet.status == 'APPROVED'
-      ).toList();
+      return outlets
+          .where((outlet) => outlet.dataSource == 'API' && outlet.status == 'APPROVED')
+          .toList();
     }
 
-    return outlets.where((outlet) =>
-      outlet.dataSource == 'API' &&
-      outlet.status == 'APPROVED' &&
-      (outlet.name?.toLowerCase().contains(searchQuery.value.toLowerCase()) ?? false)
-    ).toList();
+    return outlets
+        .where((outlet) =>
+            outlet.dataSource == 'API' &&
+            outlet.status == 'APPROVED' &&
+            (outlet.name?.toLowerCase().contains(searchQuery.value.toLowerCase()) ?? false))
+        .toList();
   }
 
   void updateSearchQuery(String query) {
@@ -611,8 +616,10 @@ class OutletController extends GetxController {
               latitude: outlet.latitude,
               longitude: outlet.longitude,
               category: outlet.category,
-              channel_id: outlet.channel_id,
-              channel_name: outlet.channel_name,
+              channel: Channel(
+                id: outlet.channel?.id,
+                name: outlet.channel?.name,
+              ),
               city: outlet.city, // Use the city object directly
               images: outlet.images,
               forms: outlet.forms,
@@ -659,7 +666,9 @@ class OutletController extends GetxController {
         local.longitude != api.longitude ||
         local.city?.id != api.city?.id ||
         local.city?.name != api.city?.name ||
-        local.category != api.category;
+        local.category != api.category ||
+        local.channel?.id != api.channel?.id || // Add channel comparison
+        local.channel?.name != api.channel?.name;
   }
 
   @override
