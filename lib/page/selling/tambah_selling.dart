@@ -1,4 +1,5 @@
 import 'package:cetapil_mobile/controller/bottom_nav_controller.dart';
+import 'package:cetapil_mobile/controller/selling/tambah_produk_selling_controller.dart';
 import 'package:cetapil_mobile/page/selling/tambah_product_selling.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
@@ -64,7 +65,12 @@ class TambahSelling extends GetView<SellingController> {
                               side: BorderSide(color: AppColors.primary),
                             ),
                           ),
-                          onPressed: () => Get.to(() => TambahProductSelling()),
+                          onPressed: () {
+                            if (!Get.isRegistered<TambahProdukSellingController>()) {
+                              Get.put(TambahProdukSellingController());
+                            }
+                            Get.to(() => TambahProductSelling());
+                          },
                           child: Text(
                             " Tambah Product Selling",
                             style: TextStyle(

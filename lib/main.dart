@@ -3,6 +3,8 @@ import 'package:cetapil_mobile/controller/outlet/outlet_controller.dart';
 import 'package:cetapil_mobile/controller/routing/routing_controller.dart';
 import 'package:cetapil_mobile/controller/routing/tambah_routing_controller.dart';
 import 'package:cetapil_mobile/controller/selling/selling_controller.dart';
+import 'package:cetapil_mobile/controller/selling/tambah_produk_selling_controller.dart';
+import 'package:cetapil_mobile/controller/support_data_controller.dart';
 import 'package:cetapil_mobile/controller/video_controller/video_controller.dart';
 import 'package:cetapil_mobile/database/dashboard.dart';
 import 'package:cetapil_mobile/page/splash_screen.dart';
@@ -39,6 +41,7 @@ void main() async {
     ]);
 
     configureApp();
+    await GetStorage.init();
     runApp(const MyApp());
   } catch (e) {
     print('App Initialization Error: $e');
@@ -98,8 +101,8 @@ Future<void> initializeControllers() async {
     Get.lazyPut(() => VideoController());
     Get.lazyPut(() => TambahRoutingController());
     Get.lazyPut(() => TambahAvailabilityController());
-
-    Get.lazyPut(() => SupportActivityController());
+    Get.put(SupportDataController());
+    Get.lazyPut(() => TambahProdukSellingController());
   } catch (e) {
     print('Controller Initialization Error: $e');
   }
@@ -116,11 +119,8 @@ void configureApp() {
   );
 }
 
-
 class MyApp extends StatelessWidget {
   const MyApp({super.key});
-
-
 
   @override
   Widget build(BuildContext context) {
@@ -170,8 +170,8 @@ class InitialBindings extends Bindings {
     Get.lazyPut(() => VideoController());
     Get.lazyPut(() => TambahRoutingController());
     Get.lazyPut(() => TambahAvailabilityController());
-
-    Get.lazyPut(() => SupportActivityController());
+    Get.put(SupportDataController());
+    Get.lazyPut(() => TambahProdukSellingController());
     // Add other controllers...
   }
 }

@@ -1,9 +1,9 @@
 import 'package:get/get.dart';
-import '../../model/list_product_sku_response.dart';
+import '../../model/list_product_sku_response.dart' as SKU;
 import '../../model/list_category_response.dart' as Category;
 import '../../controller/support_data_controller.dart';
 
-class TambahAvailabilityController extends GetxController {
+class TambahProdukSellingController extends GetxController {
   final supportDataController = Get.find<SupportDataController>();
   
   // Selected values using String IDs
