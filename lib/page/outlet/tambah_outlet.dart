@@ -10,6 +10,7 @@ import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import '../../utils/colors.dart';
 import '../../controller/outlet/outlet_controller.dart';
+import '../../widget/dialog.dart';
 import '../../widget/dropdown_textfield.dart';
 
 class TambahOutlet extends GetView<OutletController> {
@@ -33,7 +34,7 @@ class TambahOutlet extends GetView<OutletController> {
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
                       EnhancedBackButton(
-                        onPressed: () => showStyledDialog(context),
+                        onPressed: () => Alerts.showConfirmDialog(context),
                         backgroundColor: Colors.white,
                         iconColor: Colors.blue,
                       ),
@@ -174,13 +175,13 @@ class TambahOutlet extends GetView<OutletController> {
                         _buildButton(
                           false,
                           "Simpan Draft",
-                          () => controller.saveDraftOutlet(),
+                              () => controller.saveDraftOutlet(),
                         ),
                         SizedBox(width: 10),
                         _buildButton(
                           true,
                           "Kirim",
-                          () => controller.submitApiOutlet(),
+                              () => controller.submitApiOutlet(),
                           // controller.submitOutlet(),
                         ),
                       ],
@@ -195,53 +196,8 @@ class TambahOutlet extends GetView<OutletController> {
     );
   }
 
-  Future showStyledDialog(BuildContext context) async {
-    return showDialog(
-      context: context,
-      barrierDismissible: false, // User must tap button
-      builder: (BuildContext context) {
-        return AlertDialog(
-          shape: RoundedRectangleBorder(
-            borderRadius: BorderRadius.circular(10),
-          ),
-          title: Text(
-            'Confirmation',
-            style: TextStyle(fontWeight: FontWeight.bold),
-          ),
-          content: SingleChildScrollView(
-            child: ListBody(
-              children: <Widget>[
-                Text('Apakah anda yakin ?'),
-                SizedBox(height: 10),
-                Text('Progress anda akan hilang ketika keluar'),
-              ],
-            ),
-          ),
-          actions: <Widget>[
-            TextButton(
-              style: TextButton.styleFrom(
-                foregroundColor: Colors.blue,
-              ),
-              child: Text('No'),
-              onPressed: () {
-                Navigator.of(context).pop();
-              },
-            ),
-            TextButton(
-              style: TextButton.styleFrom(
-                foregroundColor: Colors.grey,
-              ),
-              child: Text('Yes'),
-              onPressed: () {
-                Get.back();
-                Get.back();
-              },
-            ),
-          ],
-        );
-      },
-    );
-  }
+
+
 
   Widget _buildImageUploader(
     BuildContext context,

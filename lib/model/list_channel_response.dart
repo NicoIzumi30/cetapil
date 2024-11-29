@@ -1,9 +1,9 @@
 /// status : "OK"
-/// message : "Get the category list successfully"
-/// data : [{"id":"9d783aca-fa71-40d1-b7b5-6b32f5913969","name":"Cleanser"},{"id":"9d783acb-0d66-4f00-ba98-fab2a43a7f07","name":"BHR"},{"id":"9d783acb-1bde-41f7-b6c0-4b9947b09727","name":"Baby Calendula"},{"id":"9d783acb-2369-460f-9ab5-0cf4fec92c00","name":"Baby Classic"},{"id":"9d783acb-35b2-41d8-bd85-ef48b34e3585","name":"Moisturizer"}]
+/// message : "Get the channel list successfully."
+/// data : [{"id":"9d883c18-d373-4e16-a89d-c3959c4479e9","name":"Chain Pharmacy"},{"id":"9d883c18-d732-4313-ae4b-6c11acb9ac7a","name":"Minimarket"},{"id":"9d883c18-d831-4dca-a444-0ca859b96eff","name":"HFS/GT"},{"id":"9d883c18-d9ce-4dca-a5f9-7cd0ba9209fe","name":"HSM (Hyper Suparmarket)"}]
 
-class ListCategoryResponse {
-  ListCategoryResponse({
+class ListChannelResponse {
+  ListChannelResponse({
       String? status, 
       String? message, 
       List<Data>? data,}){
@@ -12,7 +12,7 @@ class ListCategoryResponse {
     _data = data;
 }
 
-  ListCategoryResponse.fromJson(dynamic json) {
+  ListChannelResponse.fromJson(dynamic json) {
     _status = json['status'];
     _message = json['message'];
     if (json['data'] != null) {
@@ -25,10 +25,10 @@ class ListCategoryResponse {
   String? _status;
   String? _message;
   List<Data>? _data;
-ListCategoryResponse copyWith({  String? status,
+ListChannelResponse copyWith({  String? status,
   String? message,
   List<Data>? data,
-}) => ListCategoryResponse(  status: status ?? _status,
+}) => ListChannelResponse(  status: status ?? _status,
   message: message ?? _message,
   data: data ?? _data,
 );
@@ -48,8 +48,8 @@ ListCategoryResponse copyWith({  String? status,
 
 }
 
-/// id : "9d783aca-fa71-40d1-b7b5-6b32f5913969"
-/// name : "Cleanser"
+/// id : "9d883c18-d373-4e16-a89d-c3959c4479e9"
+/// name : "Chain Pharmacy"
 
 class Data {
   Data({
@@ -58,8 +58,6 @@ class Data {
     _id = id;
     _name = name;
 }
-
-
 
   Data.fromJson(dynamic json) {
     _id = json['id'];
@@ -81,7 +79,5 @@ Data copyWith({  String? id,
     map['name'] = _name;
     return map;
   }
-
-
 
 }

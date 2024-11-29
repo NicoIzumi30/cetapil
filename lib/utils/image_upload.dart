@@ -46,13 +46,13 @@ class ImageUploadUtils {
                   Navigator.pop(context, ImageSource.camera);
                 },
               ),
-              ListTile(
-                leading: Icon(Icons.photo_library, color: Colors.blue),
-                title: Text('Choose from Gallery'),
-                onTap: () {
-                  Navigator.pop(context, ImageSource.gallery);
-                },
-              ),
+              // ListTile(
+              //   leading: Icon(Icons.photo_library, color: Colors.blue),
+              //   title: Text('Choose from Gallery'),
+              //   onTap: () {
+              //     Navigator.pop(context, ImageSource.gallery);
+              //   },
+              // ),
               SizedBox(height: 16),
             ],
           ),

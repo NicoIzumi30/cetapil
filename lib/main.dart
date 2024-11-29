@@ -16,6 +16,8 @@ import 'package:get_storage/get_storage.dart';
 import 'package:intl/intl.dart';
 
 import 'controller/activity/activity_controller.dart';
+import 'controller/activity/support_activity_controller.dart';
+import 'controller/activity/tambah_availibility_controller.dart';
 import 'controller/bottom_nav_controller.dart';
 import 'controller/connectivity_controller.dart';
 import 'controller/dashboard/dashboard_controller.dart';
@@ -95,6 +97,9 @@ Future<void> initializeControllers() async {
     Get.lazyPut(() => TambahActivityController());
     Get.lazyPut(() => VideoController());
     Get.lazyPut(() => TambahRoutingController());
+    Get.lazyPut(() => TambahAvailabilityController());
+
+    Get.lazyPut(() => SupportActivityController());
   } catch (e) {
     print('Controller Initialization Error: $e');
   }

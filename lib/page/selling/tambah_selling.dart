@@ -10,6 +10,7 @@ import '../../controller/selling/selling_controller.dart';
 import '../../utils/colors.dart';
 import '../../widget/back_button.dart';
 import '../../widget/clipped_maps.dart';
+import '../../widget/dialog.dart';
 import '../../widget/dropdown_textfield.dart';
 import '../../widget/text_field.dart';
 import '../outlet/detail_outlet.dart';
@@ -33,9 +34,7 @@ class TambahSelling extends GetView<SellingController> {
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
               EnhancedBackButton(
-                onPressed: () {
-                  Get.back();
-                },
+                onPressed: () => Alerts.showConfirmDialog(context),
                 backgroundColor: Colors.white,
                 iconColor: Colors.blue,
               ),

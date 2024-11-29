@@ -10,6 +10,7 @@ import '../../../model/list_posm_response.dart';
 import '../../../utils/colors.dart';
 import '../../../utils/image_upload.dart';
 import '../../../widget/back_button.dart';
+import '../../../widget/dialog.dart';
 import '../../../widget/dropdown_textfield.dart';
 
 class TambahVisibility extends GetView<TambahActivityController> {
@@ -33,10 +34,7 @@ class TambahVisibility extends GetView<TambahActivityController> {
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
                       EnhancedBackButton(
-                        onPressed: () {
-                          // Get.back();
-                          Navigator.of(context).pop();
-                        },
+                        onPressed: () => Alerts.showConfirmDialog(context),
                         backgroundColor: Colors.white,
                         iconColor: Colors.blue,
                       ),

@@ -7,11 +7,13 @@ import 'package:get/get.dart';
 import 'package:get/get_core/src/get_main.dart';
 import 'package:google_fonts/google_fonts.dart';
 
+import '../../controller/dashboard/dashboard_controller.dart';
 import '../../widget/back_button.dart';
+import '../../widget/dialog.dart';
 import '../../widget/password_field.dart';
 import '../../widget/text_field.dart';
 
-class SettingProfile extends StatelessWidget {
+class SettingProfile extends GetView<DashboardController> {
   final TextEditingController _controller =
       TextEditingController(text: "Andromeda Phytagoras Silalahi");
 
@@ -92,7 +94,8 @@ class SettingProfile extends StatelessWidget {
               // ),
              ButtonPrimary(
                  tipeButton: "danger",
-                 ontap: (){}, title: "Keluar Akun")
+                 ontap: ()=>Alerts.showLogOutDialog(context),
+                 title: "Keluar Akun")
             ],
           ),
         )

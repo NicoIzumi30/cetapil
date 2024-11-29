@@ -42,11 +42,13 @@ class DashboardPage extends GetView<DashboardController> {
                                       fontSize: 20,
                                       color: Color(0xFF0077BD),
                                       fontWeight: FontWeight.bold)),
-                              Text("Selphi Nusawati Indira",
-                                  style: TextStyle(
-                                      fontSize: 22,
-                                      color: Color(0xFFFFFFFF),
-                                      fontWeight: FontWeight.bold))
+                              Obx(() {
+                                return Text(controller.username.value,
+                                    style: TextStyle(
+                                        fontSize: 22,
+                                        color: Color(0xFFFFFFFF),
+                                        fontWeight: FontWeight.bold));
+                              })
                             ],
                           ),
                           GestureDetector(
@@ -54,10 +56,13 @@ class DashboardPage extends GetView<DashboardController> {
                               Get.to(SettingProfile());
                             },
                             child: Container(
-                              padding: EdgeInsets.symmetric(horizontal: 10, vertical: 11),
+                              padding: EdgeInsets.symmetric(
+                                  horizontal: 10, vertical: 11),
                               decoration: BoxDecoration(
-                                  color: Colors.white, borderRadius: BorderRadius.circular(10)),
-                              child: SvgPicture.asset('assets/icon/setting_account.svg'),
+                                  color: Colors.white,
+                                  borderRadius: BorderRadius.circular(10)),
+                              child: SvgPicture.asset(
+                                  'assets/icon/setting_account.svg'),
                             ),
                           )
                         ],
@@ -74,10 +79,12 @@ class DashboardPage extends GetView<DashboardController> {
                                 style: ElevatedButton.styleFrom(
                                     foregroundColor: Colors.blue,
                                     shape: RoundedRectangleBorder(
-                                        borderRadius: BorderRadius.circular(20))),
+                                        borderRadius: BorderRadius.circular(
+                                            20))),
                                 onPressed: () {},
                                 child: Text(
-                                  "${controller.dashboard.value?.data?.role ?? ""}",
+                                  "${controller.dashboard.value?.data?.role ??
+                                      ""}",
                                   style: TextStyle(fontSize: 11),
                                 )),
                           ),
@@ -88,7 +95,8 @@ class DashboardPage extends GetView<DashboardController> {
                                     foregroundColor: Colors.white,
                                     backgroundColor: Colors.blue,
                                     shape: RoundedRectangleBorder(
-                                        borderRadius: BorderRadius.circular(20))),
+                                        borderRadius: BorderRadius.circular(
+                                            20))),
                                 onPressed: () {},
                                 child: Text(
                                   "Checked-In",
@@ -104,7 +112,8 @@ class DashboardPage extends GetView<DashboardController> {
                         width: double.infinity,
                         padding: EdgeInsets.all(10),
                         decoration: BoxDecoration(
-                            borderRadius: BorderRadius.circular(10), color: Colors.white),
+                            borderRadius: BorderRadius.circular(10),
+                            color: Colors.white),
                         child: Row(
                           mainAxisAlignment: MainAxisAlignment.spaceAround,
                           children: [
@@ -112,29 +121,37 @@ class DashboardPage extends GetView<DashboardController> {
                               children: [
                                 Text(
                                   "Cluster Region",
-                                  style: TextStyle(fontSize: 10, color: Colors.blue),
+                                  style: TextStyle(
+                                      fontSize: 10, color: Colors.blue),
                                 ),
                                 Text(
-                                  "${controller.dashboard.value?.data?.region ?? ""}",
-                                  style: TextStyle(fontSize: 10, fontWeight: FontWeight.bold),
+                                  "${controller.dashboard.value?.data?.region ??
+                                      ""}",
+                                  style: TextStyle(fontSize: 10,
+                                      fontWeight: FontWeight.bold),
                                 ),
                               ],
                             ),
                             Column(
                               children: [
-                                Text("Outlet", style: TextStyle(fontSize: 10, color: Colors.blue)),
+                                Text("Outlet", style: TextStyle(
+                                    fontSize: 10, color: Colors.blue)),
                                 Text(
-                                    "${controller.dashboard.value?.data?.currentOutlet?.name ?? ""}",
-                                    style: TextStyle(fontSize: 10, fontWeight: FontWeight.bold))
+                                    "${controller.dashboard.value?.data
+                                        ?.currentOutlet?.name ?? ""}",
+                                    style: TextStyle(fontSize: 10,
+                                        fontWeight: FontWeight.bold))
                               ],
                             ),
                             Column(
                               children: [
                                 Text("Outlet Radius",
-                                    style: TextStyle(fontSize: 10, color: Colors.blue)),
+                                    style: TextStyle(
+                                        fontSize: 10, color: Colors.blue)),
                                 Text(
                                   "20m",
-                                  style: TextStyle(fontSize: 10, fontWeight: FontWeight.bold),
+                                  style: TextStyle(fontSize: 10,
+                                      fontWeight: FontWeight.bold),
                                 ),
                               ],
                             ),
@@ -179,7 +196,8 @@ class DashboardPage extends GetView<DashboardController> {
                     Container(
                       width: double.infinity,
                       // height: 80,
-                      padding: EdgeInsets.symmetric(horizontal: 10, vertical: 4),
+                      padding: EdgeInsets.symmetric(
+                          horizontal: 10, vertical: 4),
                       decoration: BoxDecoration(
                         gradient: const LinearGradient(
                           begin: Alignment.bottomLeft,
@@ -213,7 +231,8 @@ class DashboardPage extends GetView<DashboardController> {
                             crossAxisAlignment: CrossAxisAlignment.start,
                             mainAxisSize: MainAxisSize.max,
                             children: [
-                              Obx(() => Text(
+                              Obx(() =>
+                                  Text(
                                     controller.getIndonesianDay(),
                                     style: GoogleFonts.poppins(
                                       fontSize: 14,
@@ -222,7 +241,8 @@ class DashboardPage extends GetView<DashboardController> {
                                       fontStyle: FontStyle.italic,
                                     ),
                                   )),
-                              Obx(() => Text(
+                              Obx(() =>
+                                  Text(
                                     controller.currentDate.value.day.toString(),
                                     style: TextStyle(
                                       fontSize: 55,
@@ -241,22 +261,28 @@ class DashboardPage extends GetView<DashboardController> {
                             mainAxisSize: MainAxisSize.max,
                             children: [
                               GestureDetector(
-                                onTap: () => controller.showCustomCalendarDialog(context),
+                                onTap: () =>
+                                    controller.showCustomCalendarDialog(
+                                        context),
                                 child: Container(
-                                  padding: EdgeInsets.symmetric(horizontal: 8, vertical: 6),
+                                  padding: EdgeInsets.symmetric(
+                                      horizontal: 8, vertical: 6),
                                   decoration: BoxDecoration(
-                                      color: Colors.white, borderRadius: BorderRadius.circular(10)),
+                                      color: Colors.white,
+                                      borderRadius: BorderRadius.circular(10)),
                                   child: Row(
                                     children: [
                                       Text(
                                         "Cek Kalender",
                                         style: TextStyle(
-                                            color: Color(0xFF054F7B), fontWeight: FontWeight.bold),
+                                            color: Color(0xFF054F7B),
+                                            fontWeight: FontWeight.bold),
                                       ),
                                       SizedBox(
                                         width: 8,
                                       ),
-                                      Icon(Icons.calendar_month_rounded, color: Color(0xFF054F7B))
+                                      Icon(Icons.calendar_month_rounded,
+                                          color: Color(0xFF054F7B))
                                     ],
                                   ),
                                 ),
@@ -264,8 +290,11 @@ class DashboardPage extends GetView<DashboardController> {
                               SizedBox(
                                 height: 10,
                               ),
-                              Obx(() => Text(
-                                    "${controller.getIndonesianMonth()} ${controller.currentDate.value.year}",
+                              Obx(() =>
+                                  Text(
+                                    "${controller
+                                        .getIndonesianMonth()} ${controller
+                                        .currentDate.value.year}",
                                     style: TextStyle(
                                       fontSize: 19,
                                       fontWeight: FontWeight.bold,
@@ -298,21 +327,24 @@ class DashboardPage extends GetView<DashboardController> {
                   children: [
                     itemSummary(
                       title: "Call Plan",
-                      value: "${controller.dashboard.value?.data?.totalCallPlan ?? ""}",
+                      value: "${controller.dashboard.value?.data
+                          ?.totalCallPlan ?? ""}",
                     ),
                     SizedBox(
                       width: 10,
                     ),
                     itemSummary(
                       title: "Actual Plan",
-                      value: "${controller.dashboard.value?.data?.totalActualPlan ?? ""}",
+                      value: "${controller.dashboard.value?.data
+                          ?.totalActualPlan ?? ""}",
                     ),
                     SizedBox(
                       width: 10,
                     ),
                     itemSummary(
                       title: "Outlet Coverage",
-                      value: "${controller.dashboard.value?.data?.totalOutlet ?? ""}",
+                      value: "${controller.dashboard.value?.data?.totalOutlet ??
+                          ""}",
                     ),
                   ],
                 ),
@@ -322,7 +354,9 @@ class DashboardPage extends GetView<DashboardController> {
                 Text(
                   "Performance Index",
                   style: TextStyle(
-                      fontWeight: FontWeight.w800, fontSize: 20, color: Color(0xFF054F7B)),
+                      fontWeight: FontWeight.w800,
+                      fontSize: 20,
+                      color: Color(0xFF054F7B)),
                 ),
                 SizedBox(
                   height: 5,
@@ -352,7 +386,8 @@ class DashboardPage extends GetView<DashboardController> {
                           height: 5,
                         ),
                         AnimatedGlossyProgressBar(
-                          progress: (controller.dashboard.value?.data?.planPercentage ?? 0) / 100,
+                          progress: (controller.dashboard.value?.data
+                              ?.planPercentage ?? 0) / 100,
                           // progress: 0,
                         ),
                         SizedBox(
@@ -370,7 +405,9 @@ class DashboardPage extends GetView<DashboardController> {
                 Text(
                   "Power SKU Index",
                   style: TextStyle(
-                      fontWeight: FontWeight.w800, fontSize: 20, color: Color(0xFF054F7B)),
+                      fontWeight: FontWeight.w800,
+                      fontSize: 20,
+                      color: Color(0xFF054F7B)),
                 ),
                 SizedBox(
                   height: 5,
@@ -404,7 +441,7 @@ class DashboardPage extends GetView<DashboardController> {
                           style: TextStyle(fontSize: 11),
                         ),
                         AnimatedGlossyProgressBar(
-                          progress: 0.86
+                            progress: 0.86
                         ),
                         Text(
                           "CETHAPIL Gentle Skin Cleanser 125ml",
@@ -496,7 +533,9 @@ class itemSummary extends StatelessWidget {
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
             Text(title,
-                style: TextStyle(fontSize: 10, fontWeight: FontWeight.w600, color: Colors.blue)),
+                style: TextStyle(fontSize: 10,
+                    fontWeight: FontWeight.w600,
+                    color: Colors.blue)),
             Text(
               value,
               style: TextStyle(fontSize: 22, fontWeight: FontWeight.w800),

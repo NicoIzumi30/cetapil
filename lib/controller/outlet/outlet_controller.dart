@@ -26,7 +26,7 @@ class OutletController extends GetxController {
   final db = DatabaseHelper.instance;
   final citiesDb = CitiesDatabaseHelper.instance;
   final uuid = Uuid();
-  var selectedCategory = 'MT'.obs; // Default to MT as shown in your code
+  var selectedCategory = 'MT'.obs;
 
   final RxInt listOutletPage = 1.obs;
   final List<String> categories = ['GT', 'MT'];
