@@ -397,6 +397,8 @@ class OutletController extends GetxController {
         'user_name': salesName.value.text, // Add this duplicate field
         'outletName': outletName.value.text,
         'category': selectedCategory.value,
+        'channel_id': "1",
+        'channel_name': "Minimarket",
         'city_id': cityId.value.isEmpty ? "" : cityId.value,
         'city_name': cityName.value.isEmpty ? "" : cityName.value,
         'longitude': gpsController.longController.value.text,
@@ -609,6 +611,8 @@ class OutletController extends GetxController {
               latitude: outlet.latitude,
               longitude: outlet.longitude,
               category: outlet.category,
+              channel_id: outlet.channel_id,
+              channel_name: outlet.channel_name,
               city: outlet.city, // Use the city object directly
               images: outlet.images,
               forms: outlet.forms,

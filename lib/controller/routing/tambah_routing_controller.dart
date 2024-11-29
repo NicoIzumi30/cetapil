@@ -94,6 +94,8 @@ class TambahRoutingController extends GetxController {
               latitude: outlet.latitude,
               longitude: outlet.longitude,
               category: outlet.category,
+              channel_id: outlet.channel_id,
+              channel_name: outlet.channel_name,
               city: outlet.city, // Use the city object directly
               images: outlet.images,
               forms: outlet.forms,

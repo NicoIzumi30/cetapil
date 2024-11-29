@@ -38,6 +38,8 @@ class DatabaseHelper {
           user_name TEXT,
           name TEXT NOT NULL,
           category TEXT,
+          channel_id TEXT,
+          channel_name TEXT,
           visit_day TEXT,
           longitude TEXT,
           latitude TEXT,
@@ -224,6 +226,8 @@ class DatabaseHelper {
           'user_name': outlet.user?.name,
           'name': outlet.name,
           'category': outlet.category,
+          'channel_id': outlet.channel_id,
+          'channel_name': outlet.channel_name,
           'visit_day': outlet.visitDay,
           'longitude': outlet.longitude,
           'latitude': outlet.latitude,
@@ -308,65 +312,67 @@ class DatabaseHelper {
   }
 
   // Insert draft outlet
-  Future<String> insertDraftOutlet(Outlet.Outlet outlet) async {
-    final db = await database;
-    final outletId = const Uuid().v4();
-
-    await db.transaction((txn) async {
-      await txn.insert(
-        'outlets',
-        {
-          'id': outletId,
-          'name': outlet.name,
-          'category': outlet.category,
-          'longitude': outlet.longitude,
-          'latitude': outlet.latitude,
-          'address': outlet.address,
-          'status': 'PENDING',
-          'data_source': 'DRAFT',
-          'is_synced': 0,
-          'created_at': DateTime.now().toIso8601String(),
-          'updated_at': DateTime.now().toIso8601String(),
-        },
-      );
-
-      // Handle images
-      if (outlet.images != null) {
-        for (var image in outlet.images!) {
-          await txn.insert(
-            'outlet_images',
-            {
-              'id': const Uuid().v4(),
-              'outlet_id': outletId,
-              'position': image.position,
-              'filename': image.filename,
-              'image': image.image,
-              'created_at': DateTime.now().toIso8601String(),
-            },
-          );
-        }
-      }
-
-      // Handle forms and answers
-      if (outlet.forms != null) {
-        for (var form in outlet.forms!) {
-          await txn.insert(
-            'outlet_form_answers',
-            {
-              'id': const Uuid().v4(),
-              'outlet_id': outletId,
-              'outlet_form_id': form.outletForm!.id,
-              'answer': form.answer,
-              'created_at': DateTime.now().toIso8601String(),
-              'updated_at': DateTime.now().toIso8601String(),
-            },
-          );
-        }
-      }
-    });
-
-    return outletId;
-  }
+  // Future<String> insertDraftOutlet(Outlet.Outlet outlet) async {
+  //   final db = await database;
+  //   final outletId = const Uuid().v4();
+  //
+  //   await db.transaction((txn) async {
+  //     await txn.insert(
+  //       'outlets',
+  //       {
+  //         'id': outletId,
+  //         'name': outlet.name,
+  //         'category': outlet.category,
+  //         'channel_id': outlet.channel_id,
+  //         'channel_name': outlet.channel_name,
+  //         'longitude': outlet.longitude,
+  //         'latitude': outlet.latitude,
+  //         'address': outlet.address,
+  //         'status': 'PENDING',
+  //         'data_source': 'DRAFT',
+  //         'is_synced': 0,
+  //         'created_at': DateTime.now().toIso8601String(),
+  //         'updated_at': DateTime.now().toIso8601String(),
+  //       },
+  //     );
+  //
+  //     // Handle images
+  //     if (outlet.images != null) {
+  //       for (var image in outlet.images!) {
+  //         await txn.insert(
+  //           'outlet_images',
+  //           {
+  //             'id': const Uuid().v4(),
+  //             'outlet_id': outletId,
+  //             'position': image.position,
+  //             'filename': image.filename,
+  //             'image': image.image,
+  //             'created_at': DateTime.now().toIso8601String(),
+  //           },
+  //         );
+  //       }
+  //     }
+  //
+  //     // Handle forms and answers
+  //     if (outlet.forms != null) {
+  //       for (var form in outlet.forms!) {
+  //         await txn.insert(
+  //           'outlet_form_answers',
+  //           {
+  //             'id': const Uuid().v4(),
+  //             'outlet_id': outletId,
+  //             'outlet_form_id': form.outletForm!.id,
+  //             'answer': form.answer,
+  //             'created_at': DateTime.now().toIso8601String(),
+  //             'updated_at': DateTime.now().toIso8601String(),
+  //           },
+  //         );
+  //       }
+  //     }
+  //   });
+  //
+  //   return outletId;
+  // }
 
   // Get all outlets with their details
   Future<List<Outlet.Outlet>> getAllOutlets({String? dataSource}) async {
@@ -379,9 +385,7 @@ class DatabaseHelper {
     );
 
     return Future.wait(outletMaps.map((outletMap) async {
-      // print("Raw outlet data from DB: $outletMap"); // Debug print
 
-      // Get images for this outlet
       final List<Map<String, dynamic>> imageMaps = await db.query(
         'outlet_images',
         where: 'outlet_id = ?',
@@ -411,6 +415,8 @@ class DatabaseHelper {
         ),
         name: outletMap['name'],
         category: outletMap['category'],
+        channel_id: outletMap['channel_id'],
+        channel_name: outletMap['channel_name'],
         visitDay: outletMap['visit_day'],
         longitude: outletMap['longitude'],
         latitude: outletMap['latitude'],
@@ -556,6 +562,8 @@ class DatabaseHelper {
             'user_id': null, // Add this
             'user_name': data['salesName'], // Change this from user_name
             'category': data['category'],
+            'channel_id': data['channel_id'],
+            'channel_name': data['channel_name'],
             'city_id': data['city_id'], // Added
             'city_name': data['city_name'], // Added
             'longitude': data['longitude'],
@@ -649,6 +657,8 @@ class DatabaseHelper {
         SET name = ?, 
             user_name = ?,
             category = ?,
+            channel_id = ?,
+            channel_name = ?,
             city_id = ?,
             city_name = ?,
             longitude = ?,
@@ -663,6 +673,8 @@ class DatabaseHelper {
           data['outletName'],
           data['salesName'], // Make sure this matches
           data['category'],
+          data['channel_id'],
+          data['channel_name'],
           data['city_id'],
           data['city_name'],
           data['longitude'],
@@ -1048,6 +1060,8 @@ class DatabaseHelper {
             : null,
         'name': outletMap['name'],
         'category': outletMap['category'],
+        'channel_id': outletMap['channel_id'],
+        'channel_name': outletMap['channel_name'],
         'visit_day': outletMap['visit_day'],
         'longitude': outletMap['longitude'],
         'latitude': outletMap['latitude'],
