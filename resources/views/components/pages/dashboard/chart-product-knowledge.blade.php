@@ -1,7 +1,7 @@
 <div class="w-full chart-bg p-6 rounded-lg">
     
         <div class="text-center text-xl text-white font-bold mb-6">Product Knowledge</div>
-        <div class="filters flex justify-center">
+        <div class="filters flex justify-center flex-wrap  w-full">
             <x-input.datepicker id="product-date-range" />
             <x-select.light>
                 <x-slot:title>Filter Outlet</x-slot:title>

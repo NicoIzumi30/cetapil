@@ -1,7 +1,7 @@
 <div class="w-full chart-bg p-6 rounded-lg">
 
     <div class="text-center text-xl text-white font-bold mb-6">Routing</div>
-    <div class="filters flex justify-center">
+    <div class="filters flex flex-wrap md:flex-nowrap justify-center">
         <x-input.datepicker id="routing-date-range" />
         <x-select.light>
             <x-slot:title>Filter Date</x-slot:title>

@@ -1,7 +1,7 @@
 @extends('layouts.main')
 
 @section('banner-content')
-    <div class="flex items-start justify-between mb-6 p-6">
+    <div class="flex items-start flex-col md:flex-row gap-6 justify-between mb-6 md:mb-0 p-6">
         <div class="z-[30]">
             <h2 class="text-4xl text-white text-left font-[400]">Selamat Datang,</h2>
             <h1 class="text-5xl text-white my-6 text-left font-bold">Andromeda Phytagoras Silalahi</h1>
@@ -23,13 +23,13 @@
 
 @section('dashboard-content')
     <main class="w-full p-6">
-        <div class="flex w-full gap-5 ">
+        <div class="flex flex-col md:flex-row w-full gap-5 ">
             <x-pages.dashboard.total-card :title="'Total Report'" :total="7.432" :trendValue="56" :date="'03 November 2024'" />
             <x-pages.dashboard.total-card :title="'Total Report'" :total="7.432" :trendValue="32" :date="'03 November 2024'" />
             <x-pages.dashboard.total-card :title="'Total Report'" :total="7.432" :trendValue="-12" :date="'03 November 2024'" />
             <x-pages.dashboard.total-card :title="'Total Report'" :total="7.432" :trendValue="-2" :date="'03 November 2024'" />
         </div>
-        <div class="flex gap-6 w-full mt-6">
+        <div class="flex flex-wrap xl:flex-nowrap gap-6 w-full mt-6">
             <x-pages.dashboard.chart-routing />
             <x-pages.dashboard.chart-time-activity />
             <x-pages.dashboard.chart-product-knowledge />

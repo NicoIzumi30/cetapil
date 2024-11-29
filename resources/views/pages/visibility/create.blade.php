@@ -234,7 +234,10 @@
 @push('scripts')
     <script>
         $(document).ready(function() {
-            $("#program-date").flatpickr();
+            $("#program-date").flatpickr({
+				mode : "range",
+				showMonths: 2
+			});
             $('#states-option').select2();
             $('#category').select2();
             $('#outlet-name').select2();

@@ -1,6 +1,6 @@
 <div class="w-full chart-bg p-6 rounded-lg">
         <div class="text-center text-xl text-white font-bold mb-6">Time Activity</div>
-		<div class="filters flex justify-center">
+		<div class="filters flex-wrap md:flex-nowrap flex justify-center">
             <x-input.datepicker id="time-activity-date-range" />
             <x-select.light>
                 <x-slot:title>Filter Date</x-slot:title>
