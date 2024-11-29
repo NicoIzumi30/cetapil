@@ -12,9 +12,11 @@ class SellingController extends GetxController {
   RxList<Outlet> outlets = <Outlet>[].obs;
   final uuid = Uuid();
 
-  
+  var selectedCategory = 'MT'.obs;
+
   // Form Controllers
   var outletName = TextEditingController().obs;
+  final List<String> categories = ['GT', 'MT'];
   // var outletSelling = TextEditingController().obs;
   // var outletAddress = TextEditingController().obs;
   // var controllers = <TextEditingController>[].obs;
@@ -49,7 +51,6 @@ class SellingController extends GetxController {
         createdAt: DateTime.now(),
         updatedAt: DateTime.now(),
       ),
-
     ]);
   }
 
@@ -58,11 +59,8 @@ class SellingController extends GetxController {
   }
 
   List<Outlet> get filteredOutlets => outlets.where((outlet) {
-    return outlet.outletName
-        .toLowerCase()
-        .contains(searchQuery.value.toLowerCase());
-  }).toList();
-
+        return outlet.outletName.toLowerCase().contains(searchQuery.value.toLowerCase());
+      }).toList();
 
   void clearForm() {
     outletName.value.clear();

@@ -1,6 +1,7 @@
 import 'package:cetapil_mobile/controller/bottom_nav_controller.dart';
 import 'package:cetapil_mobile/controller/selling/tambah_produk_selling_controller.dart';
 import 'package:cetapil_mobile/page/selling/tambah_product_selling.dart';
+import 'package:cetapil_mobile/widget/category_dropdown.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:get/get_core/src/get_main.dart';
@@ -50,6 +51,12 @@ class TambahSelling extends GetView<SellingController> {
                       ModernTextField(
                         title: "Nama Outlet",
                         controller: controller.outletName.value,
+                      ),
+                      CategoryDropdown<SellingController>(
+                        title: "Kategori Outlet",
+                        controller: controller,
+                        selectedCategoryGetter: (controller) => controller.selectedCategory,
+                        categoriesGetter: (controller) => controller.categories,
                       ),
                       Text("Produk",
                           style: TextStyle(

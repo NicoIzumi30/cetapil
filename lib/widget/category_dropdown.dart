@@ -1,27 +1,29 @@
-import 'package:cetapil_mobile/controller/outlet/outlet_controller.dart';
 import 'package:flutter/material.dart';
-import 'package:google_fonts/google_fonts.dart';
+import 'package:get/get_rx/src/rx_types/rx_types.dart';
 
-class CategoryDropdown extends StatefulWidget {
+class CategoryDropdown<T> extends StatefulWidget {
   final String title;
-  final OutletController? controller;
+  final T? controller;
   final void Function(String)? onChanged;
   final String? Function(String?)? validator;
+  final Rx<String> Function(T) selectedCategoryGetter;
+  final List<String> Function(T) categoriesGetter;
 
-  CategoryDropdown({
+  const CategoryDropdown({
     Key? key,
-    // required this.hintText,
     this.controller,
     this.onChanged,
     this.validator,
     required this.title,
+    required this.selectedCategoryGetter,
+    required this.categoriesGetter,
   }) : super(key: key);
 
   @override
-  State<CategoryDropdown> createState() => _CategoryDropdownState();
+  State<CategoryDropdown<T>> createState() => _CategoryDropdownState<T>();
 }
 
-class _CategoryDropdownState extends State<CategoryDropdown> {
+class _CategoryDropdownState<T> extends State<CategoryDropdown<T>> {
   @override
   Widget build(BuildContext context) {
     return Column(
@@ -29,13 +31,11 @@ class _CategoryDropdownState extends State<CategoryDropdown> {
       children: [
         Text(
           widget.title,
-          style: TextStyle(fontSize: 13, fontWeight: FontWeight.w700),
+          style: const TextStyle(fontSize: 13, fontWeight: FontWeight.w700),
         ),
-        SizedBox(
-          height: 10,
-        ),
+        const SizedBox(height: 10),
         Container(
-          margin: EdgeInsets.only(bottom: 10),
+          margin: const EdgeInsets.only(bottom: 10),
           decoration: BoxDecoration(
             borderRadius: BorderRadius.circular(12),
             boxShadow: [
@@ -63,7 +63,7 @@ class _CategoryDropdownState extends State<CategoryDropdown> {
                 vertical: 13,
               ),
               filled: true,
-              fillColor: const Color(0xFFE8F3FF), // Light blue background
+              fillColor: const Color(0xFFE8F3FF),
               border: OutlineInputBorder(
                 borderRadius: BorderRadius.circular(8),
                 borderSide: const BorderSide(
@@ -93,8 +93,8 @@ class _CategoryDropdownState extends State<CategoryDropdown> {
                 ),
               ),
             ),
-            value: widget.controller!.selectedCategory.value,
-            items: widget.controller!.categories.map((String category) {
+            value: widget.selectedCategoryGetter(widget.controller!).value,
+            items: widget.categoriesGetter(widget.controller!).map((String category) {
               return DropdownMenuItem<String>(
                 value: category,
                 child: Text(category),
@@ -102,7 +102,10 @@ class _CategoryDropdownState extends State<CategoryDropdown> {
             }).toList(),
             onChanged: (String? newValue) {
               if (newValue != null) {
-                widget.controller!.selectedCategory.value = newValue;
+                widget.selectedCategoryGetter(widget.controller!).value = newValue;
+                if (widget.onChanged != null) {
+                  widget.onChanged!(newValue);
+                }
               }
             },
           ),
