@@ -74,20 +74,20 @@ class LoginController extends GetxController {
   Future<void> _initializeControllers(bool isLoggedIn) async {
     if (isLoggedIn) {
       // Initialize controllers after login
-      Get.put(ConnectivityController());
+      Get.lazyPut(() => ConnectivityController());
       Get.put(GPSLocationController());
-      Get.put(BottomNavController());
-      Get.put(DashboardController());
+      Get.lazyPut(() => BottomNavController());
+      Get.lazyPut(() => DashboardController());
       Get.put(OutletController());
-      Get.put(ActivityController());
+      Get.lazyPut(() => ActivityController());
       Get.put(RoutingController());
-      Get.put(SellingController());
-      Get.put(TambahActivityController());
-      Get.put(VideoController());
-      Get.put(TambahRoutingController());
-      Get.put(TambahAvailabilityController());
+      Get.lazyPut(() => SellingController());
+      Get.lazyPut(() => TambahActivityController());
+      Get.lazyPut(() => VideoController());
+      Get.lazyPut(() => TambahRoutingController());
+      Get.lazyPut(() => TambahAvailabilityController());
       Get.put(SupportDataController());
-      Get.put(TambahProdukSellingController());
+      Get.lazyPut(() => TambahProdukSellingController());
     } else {
       // Initialize only the login-related controllers
       Get.put(LoginController());

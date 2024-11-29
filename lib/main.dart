@@ -101,10 +101,10 @@ Future<void> initializeControllers(bool isLoggedIn) async {
       // Load all controllers if logged in
       Get.put(LoginController());
       Get.lazyPut(() => ConnectivityController());
-      Get.lazyPut(() => GPSLocationController());
+      Get.put(GPSLocationController());
       Get.lazyPut(() => BottomNavController());
       Get.lazyPut(() => DashboardController());
-      Get.lazyPut(() => OutletController());
+      Get.put(OutletController());
       Get.lazyPut(() => ActivityController());
       Get.put(RoutingController());
       Get.lazyPut(() => SellingController());
@@ -175,10 +175,10 @@ class InitialBindings extends Bindings {
     // Controllers that should be available throughout the app
     Get.put(LoginController());
     Get.lazyPut(() => ConnectivityController());
-    Get.lazyPut(() => GPSLocationController());
+    Get.put(GPSLocationController());
     Get.lazyPut(() => BottomNavController());
     Get.lazyPut(() => DashboardController());
-    Get.lazyPut(() => OutletController());
+    Get.put(OutletController());
     Get.lazyPut(() => ActivityController());
     Get.put(RoutingController());
     Get.lazyPut(() => SellingController());
