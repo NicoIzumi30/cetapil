@@ -49,7 +49,7 @@ class RoutingController extends Controller
                 $query->where('user_id', $user->id)
                     ->whereDate('checked_in', Carbon::today())
                     ->select('id', 'outlet_id', 'checked_in', 'checked_out', 'status');
-            }])
+            },'productKnowledge'])
             ->where(function ($query) use ($currentDay, $user) {
                 $query->where('visit_day', $currentDay)
                     ->orWhereHas('salesActivities', function ($q) use ($user) {

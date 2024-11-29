@@ -27,15 +27,18 @@
 
         <x-modal id="update-photo">
             <x:slot:title>Update Foto Visibility Berdasarkan Jenis POSM</x:slot:title>
-            <div class="flex">
-                <x-input.image class="!text-primary" id="backwall" name="backwall" label="Backwall" :max-size="5" />
-                <x-input.image class="!text-primary" id="standee" name="standee" label="Standee" :max-size="5" />
-                <x-input.image class="!text-primary" id="Glolifier" name="Glolifier" label="Glolifier" :max-size="5" />
-                <x-input.image class="!text-primary" id="COC" name="COC" label="COC" :max-size="5" />
-            </div>
-            <x:slot:footer>
-                <x-button.info class="w-full">Konfirmasi</x-button.info>
-            </x:slot:footer>
+            <form id="posmImageForm" enctype="multipart/form-data">
+                @csrf
+                <div class="flex">
+                    <x-input.image class="!text-primary" id="backwall" name="backwall" label="Backwall" :max-size="5" />
+                    <x-input.image class="!text-primary" id="standee" name="standee" label="Standee" :max-size="5" />
+                    <x-input.image class="!text-primary" id="glolifier" name="glolifier" label="Glolifier" :max-size="5" />
+                    <x-input.image class="!text-primary" id="coc" name="coc" label="COC" :max-size="5" />
+                </div>
+                <x:slot:footer>
+                    <x-button.info class="w-full" type="button" onclick="submitPosmImages()">Konfirmasi</x-button.info>
+                </x:slot:footer>
+            </form>
         </x-modal>
 
 
@@ -88,7 +91,7 @@
         </tr>
     </thead>
     <tbody>
-        {{-- @foreach($visibilities as $visibility)
+        @foreach($visibilities as $visibility)
             <tr>
                 <td class="table-data">{{ $visibility->outlet->name }}</td>
                 <td class="table-data">{{ $visibility->outlet->user->name }}</td>
@@ -120,7 +123,7 @@
                     </x-action-table-dropdown>
                 </td>
             </tr>
-        @endforeach --}}
+        @endforeach
     </tbody>
 </table>
         <x-modal id="delete-visibility">
@@ -228,112 +231,112 @@
 
 @push('scripts')
     <script>
-$(document).ready(function() {
-    $.ajaxSetup({
-        headers: {
-            'X-CSRF-TOKEN': $('meta[name="csrf-token"]').attr('content')
-        }
-    });
+// $(document).ready(function() {
+//     $.ajaxSetup({
+//         headers: {
+//             'X-CSRF-TOKEN': $('meta[name="csrf-token"]').attr('content')
+//         }
+//     });
 
-    let table = $('#visibility-table').DataTable({
-    processing: true,
-    serverSide: true,
-    paging: true,
-    searching: false,
-    info: true,
-    pageLength: 10,
-    lengthMenu: [10, 20, 30, 40, 50],
-    dom: 'rt<"bottom-container"<"bottom-left"l><"bottom-right"p>>',
-    language: {
-        lengthMenu: "Menampilkan _MENU_ dari _TOTAL_ data",
-        processing: "Memuat data...",
-        paginate: {
-            previous: '<',
-            next: '>',
-            last: 'Terakhir',
-        },
-        info: "Menampilkan _START_ sampai _END_ dari _TOTAL_ data",
-        infoEmpty: "Menampilkan 0 sampai 0 dari 0 data",
-        emptyTable: "Tidak ada data yang tersedia"
-    },
-    ajax: {
-        url: "{{ route('visibility.data') }}",
-        data: function(d) {
-            d.search_term = $('#search').val();
-            d.posm_type_id = $('#posm-filter').val();
-        }
-    },
-    columns: [
-        { 
-            data: 'name',
-            name: 'outlet.name',
-            render: function(data, type, row) {
-                return data || '-';
-            }
-        },
-        { 
-            data: 'name',
-            name: 'outlet.user.name',
-            render: function(data, type, row) {
-                return data || '-';
-            }
-        },
-        { 
-            data: 'sku',
-            name: 'product.sku',
-            render: function(data, type, row) {
-                return data || '-';
-            }
-        },
-        { 
-            data: 'name',
-            name: 'visualType.name',
-            render: function(data, type, row) {
-                return data || '-';
-            }
-        },
-        { 
-            data: 'status',
-            name: 'status',
-            render: function(data, type, row) {
-                return `<span class="table-data ${data === 'ACTIVE' ? 'text-[#3eff86]' : 'text-red-500'}">${data}</span>`;
-            }
-        },
-        { 
-            data: 'date_range',
-            name: 'started_at',
-            render: function(data, type, row) {
-                if (row.started_at && row.ended_at) {
-                    return moment(row.started_at).format('D MMMM Y') + ' - ' + moment(row.ended_at).format('D MMMM Y');
-                }
-                return '-';
-            }
-        },
-        { 
-            data: 'action',
-            name: 'action',
-            orderable: false,
-            searchable: false,
-            render: function(data, type, row) {
-                return `
-                    <x-action-table-dropdown>
-                        <li>
-                            <a href="/visibility/edit/${row.id}" class="dropdown-option">
-                                Lihat Data
-                            </a>
-                        </li>
-                        <li>
-                            <button onclick="deleteVisibility('${row.id}', '${row.outlet_name}', '${row.sales_name}', '${row.product_sku}')" 
-                                class="dropdown-option text-red-400">
-                                Hapus Data
-                            </button>
-                        </li>
-                    </x-action-table-dropdown>
-                `;
-            }
-        }
-    ]
-});
+//     let table = $('#visibility-table').DataTable({
+//     processing: true,
+//     serverSide: true,
+//     paging: true,
+//     searching: false,
+//     info: true,
+//     pageLength: 10,
+//     lengthMenu: [10, 20, 30, 40, 50],
+//     dom: 'rt<"bottom-container"<"bottom-left"l><"bottom-right"p>>',
+//     language: {
+//         lengthMenu: "Menampilkan _MENU_ dari _TOTAL_ data",
+//         processing: "Memuat data...",
+//         paginate: {
+//             previous: '<',
+//             next: '>',
+//             last: 'Terakhir',
+//         },
+//         info: "Menampilkan _START_ sampai _END_ dari _TOTAL_ data",
+//         infoEmpty: "Menampilkan 0 sampai 0 dari 0 data",
+//         emptyTable: "Tidak ada data yang tersedia"
+//     },
+//     ajax: {
+//         url: "{{ route('visibility.data') }}",
+//         data: function(d) {
+//             d.search_term = $('#search').val();
+//             d.posm_type_id = $('#posm-filter').val();
+//         }
+//     },
+//     columns: [
+//         { 
+//             data: 'name',
+//             name: 'outlet.name',
+//             render: function(data, type, row) {
+//                 return data || '-';
+//             }
+//         },
+//         { 
+//             data: 'name',
+//             name: 'outlet.user.name',
+//             render: function(data, type, row) {
+//                 return data || '-';
+//             }
+//         },
+//         { 
+//             data: 'sku',
+//             name: 'product.sku',
+//             render: function(data, type, row) {
+//                 return data || '-';
+//             }
+//         },
+//         { 
+//             data: 'name',
+//             name: 'visualType.name',
+//             render: function(data, type, row) {
+//                 return data || '-';
+//             }
+//         },
+//         { 
+//             data: 'status',
+//             name: 'status',
+//             render: function(data, type, row) {
+//                 return `<span class="table-data ${data === 'ACTIVE' ? 'text-[#3eff86]' : 'text-red-500'}">${data}</span>`;
+//             }
+//         },
+//         { 
+//             data: 'date_range',
+//             name: 'started_at',
+//             render: function(data, type, row) {
+//                 if (row.started_at && row.ended_at) {
+//                     return moment(row.started_at).format('D MMMM Y') + ' - ' + moment(row.ended_at).format('D MMMM Y');
+//                 }
+//                 return '-';
+//             }
+//         },
+//         { 
+//             data: 'action',
+//             name: 'action',
+//             orderable: false,
+//             searchable: false,
+//             render: function(data, type, row) {
+//                 return `
+//                     <x-action-table-dropdown>
+//                         <li>
+//                             <a href="/visibility/edit/${row.id}" class="dropdown-option">
+//                                 Lihat Data
+//                             </a>
+//                         </li>
+//                         <li>
+//                             <button onclick="deleteVisibility('${row.id}', '${row.outlet_name}', '${row.sales_name}', '${row.product_sku}')" 
+//                                 class="dropdown-option text-red-400">
+//                                 Hapus Data
+//                             </button>
+//                         </li>
+//                     </x-action-table-dropdown>
+//                 `;
+//             }
+//         }
+//     ]
+// });
 
     // Handle search with debounce
     let searchTimer;
@@ -415,6 +418,44 @@ function deleteVisibility(id, outletName, salesName, sku) {
                     toast('error', 'Terjadi kesalahan saat menghapus data');
                 }
             });
+        }
+    });
+}
+    </script>
+@endpush
+
+@push('scripts')
+<script>
+function submitPosmImages() {
+    const formData = new FormData(document.getElementById('posmImageForm'));
+    
+    $.ajax({
+        url: '{{ route("posm.update-image") }}',
+        type: 'POST',
+        data: formData,
+        processData: false,
+        contentType: false,
+        headers: {
+            'X-CSRF-TOKEN': $('meta[name="csrf-token"]').attr('content')
+        },
+        success: function(response) {
+            if (response.status === 'success') {
+                toast('success', response.message);
+                closeModal('update-photo');
+                $('#posmImageForm')[0].reset();
+            }
+        },
+        error: function(xhr) {
+            const response = xhr.responseJSON;
+            let message = 'Terjadi kesalahan saat mengupload foto';
+            
+            if (response && response.errors) {
+                message = Object.values(response.errors)[0][0];
+            } else if (response && response.message) {
+                message = response.message;
+            }
+            
+            toast('error', message);
         }
     });
 }

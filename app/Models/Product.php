@@ -43,7 +43,13 @@ class Product extends Model
         return $this->hasMany(Av3m::class);
     }
     public function outlets()
-   {
-       return $this->belongsToMany(Outlet::class, 'outlet_products');
-   }
+    {
+        return $this->belongsToMany(Outlet::class, 'outlet_products');
+    }
+
+    public function channels()
+    {
+        return $this->belongsToMany(Channel::class, 'av3ms')
+            ->withPivot('av3m');
+    }
 }

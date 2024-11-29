@@ -60,4 +60,12 @@ class Outlet extends Model
     {
         return Carbon::now()->startOfWeek()->addDays($this->attributes['visit_day'] - 1)->format('l');
     }
+    public function channel_name()
+    {
+        return $this->belongsTo(Channel::class, 'channel', 'id');
+    }
+    public function productKnowledge()
+{
+    return $this->hasMany(ProductKnowledge::class, 'channel_id', 'channel');
+}
 }

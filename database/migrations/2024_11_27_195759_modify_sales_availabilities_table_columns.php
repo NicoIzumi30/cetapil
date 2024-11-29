@@ -11,7 +11,9 @@ return new class extends Migration
      */
     public function up(): void
     {
-        //
+        Schema::table('sales_availabilities', function (Blueprint $table) {
+            $table->foreignUuid('sales_activity_id')->references('id')->on('sales_activities');
+        });
     }
 
     /**

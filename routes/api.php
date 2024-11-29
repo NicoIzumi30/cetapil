@@ -56,7 +56,11 @@ Route::middleware(['auth_api', 'role:sales'])->group(function () {
         Route::post('/product', [SalesActivityController::class, 'productByCategoryList']);
         Route::get('/{outlet_id}/visibilities', [SalesActivityController::class, 'getVisibilityList']);
         Route::get('/visual', [SalesActivityController::class, 'getVisualTypeList']);
+        Route::get('/posm', [SalesActivityController::class, 'getPosmTypeList']);
 
+        Route::get('/get-all-product', [SalesActivityController::class, 'getAllProducts']);
+
+        Route::get('/channels', [SalesActivityController::class, 'getAllChannels']);
         // Route::post('products', 'productByCategoryList');
 
         // Route::get('/cities', 'getCityList');

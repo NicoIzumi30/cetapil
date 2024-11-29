@@ -13,55 +13,71 @@
     {{-- Routing Action --}}
     <x-slot:cardAction>
         <x-input.search id="global-search" class="border-0" placeholder="Cari data sales"></x-input.search>
-        <x-select.light :title="'Filter Hari'" id="day" name="day">
-            <option value="senin">
-                senin
-            </option>
+        <x-select.light :title="'Filter Hari'" id="filter_day" name="day">
+            <option value="all">Semua</option>
+            @foreach ($waktuKunjungan as $hari)
+                <option value="{{$hari['value']}}">{{$hari['name']}}</option>
+            @endforeach
         </x-select.light>
-        <x-button.light>Download</x-button.light>
+        <x-button.light id="downloadBtn">Download</x-button.light>
         <x-button.light href="/routing/request" class="!text-white !bg-[#39B5FF] py-2">
             Need Approval <span class="py-1 px-2 ml-2 rounded-md bg-white text-primary">4</span>
         </x-button.light>
         <x-button.info onclick="openModal('upload-product-knowledge')">Upload Product knowledge</x-button.info>
         <x-modal id="upload-product-knowledge">
             <x-slot:title>Upload Product Knowledge</x-slot:title>
-            <div class="flex gap-4 w-full">
-                <div class="w-full">
-                    <label for="pamflet_file" class="!text-black">
-                        Unggah Pamflet
-                        <div id="pamfletFileUpload" class="flex mt-2">
-                            <input type="text" id="pamfletFileNameDisplay" readonly disabled
-                                class="form-control mt-0 border-r-none"
-                                placeholder="Unggah product knowledge berupa file pdf"
-                                aria-describedby="pamflet file name display">
-                            <div
-                                class="bg-primary text-white align-middle p-3 rounded-r-md cursor-pointer -translate-x-2">
-                                Browse</div>
-                        </div>
-                        <input type="file" id="pamflet_file" name="pamflet_file" class="form-control hidden"
-                            accept="application/pdf" aria-label="Unggah product knowledge berupa file pdf">
-                    </label>
+            <form action="{{ route('update-product-knowledge') }}" method="POST" enctype="multipart/form-data">
+                @csrf
+                @method('PUT')
+                <div class="mb-6">
+                    <label for="channel" class="!text-black">Channel</label>
+                    <select id="channel" name="channel_id" class=" w-full">
+                        <option value="" selected disabled>
+                            -- Pilih Channel --
+                        </option>
+                        @foreach ($channels as $channel)
+                            <option value="{{$channel->id}}">{{$channel->name}}</option>
+                        @endforeach
+                    </select>
                 </div>
-                <div class="w-full">
-                    <label for="video_file" class="!text-black">
-                        Unggah Video
-                        <div id="fileUpload" class="flex mt-2">
-                            <input type="text" id="videofileNameDisplay" readonly disabled
-                                class="form-control mt-0 border-r-none"
-                                placeholder="Unggah product knowledge berupa file mp4"
-                                aria-describedby="video file name display">
-                            <div
-                                class="bg-primary text-white align-middle p-3 rounded-r-md cursor-pointer -translate-x-2">
-                                Browse</div>
-                        </div>
-                        <input type="file" id="video_file" name="video_file" class="form-control hidden"
-                            accept="video/mp4,video/*" aria-label="Unggah product knowledge berupa file mp4">
-                    </label>
+                <div class="flex gap-4 w-full">
+                    <div class="w-full">
+                        <label for="pamflet_file" class="!text-black">
+                            Unggah Pamflet
+                            <div id="pamfletFileUpload" class="flex mt-2">
+                                <input type="text" id="pamfletFileNameDisplay" readonly disabled
+                                    class="form-control mt-0 border-r-none"
+                                    placeholder="Unggah product knowledge berupa file pdf"
+                                    aria-describedby="pamflet file name display">
+                                <div
+                                    class="bg-primary text-white align-middle p-3 rounded-r-md cursor-pointer -translate-x-2">
+                                    Browse</div>
+                            </div>
+                            <input type="file" id="pamflet_file" name="file_pdf" class="form-control hidden"
+                                accept="application/pdf" aria-label="Unggah product knowledge berupa file pdf">
+                        </label>
+                    </div>
+                    <div class="w-full">
+                        <label for="video_file" class="!text-black">
+                            Unggah Video
+                            <div id="fileUpload" class="flex mt-2">
+                                <input type="text" id="videofileNameDisplay" readonly disabled
+                                    class="form-control mt-0 border-r-none"
+                                    placeholder="Unggah product knowledge berupa file mp4"
+                                    aria-describedby="video file name display">
+                                <div
+                                    class="bg-primary text-white align-middle p-3 rounded-r-md cursor-pointer -translate-x-2">
+                                    Browse</div>
+                            </div>
+                            <input type="file" id="video_file" name="file_video" class="form-control hidden"
+                                accept="video/mp4,video/*" aria-label="Unggah product knowledge berupa file mp4">
+                        </label>
+                    </div>
                 </div>
-            </div>
-            <x-slot:footer>
-                <x-button.info class="w-full">Upload</x-button.info>
-            </x-slot:footer>
+                <x-slot:footer>
+                    <x-button.info class="w-full" id="updateBtn">Upload</x-button.info>
+                </x-slot:footer>
+            </form>
         </x-modal>
         <x-button.info href="/routing/create">Tambah Daftar Outlet</x-button.info>
     </x-slot:cardAction>
@@ -235,99 +251,193 @@
             $("#sales-date-range").flatpickr({
                 mode: "range"
             });
-			$('#channel').select2({
-				minimumResultsForSearch: Infinity
-			});
+            $('#channel').select2({
+                minimumResultsForSearch: Infinity
+            });
         });
     </script>
 @endpush
 
 @push('scripts')
     <script>
-        $(document).ready(function () {
-            $.ajaxSetup({
-        headers: {
-            'X-CSRF-TOKEN': $('meta[name="csrf-token"]').attr('content')
-        }
-    });
-    
-            let table = $('#routing-table').DataTable({
-                processing: true,
-                serverSide: true,
-                paging: true,
-                searching: false,
-                info: true,
-                pageLength: 10,
-                lengthMenu: [10, 20, 30, 40, 50],
-                dom: 'rt<"bottom-container"<"bottom-left"l><"bottom-right"p>>',
-                language: {
-                    lengthMenu: "Menampilkan _MENU_ dari _TOTAL_ data",
-                    processing: "Memuat data...",
-                    paginate: {
-                        previous: '<',
-                        next: '>',
-                        last: 'Terakhir',
-                    },
-                    info: "Menampilkan _START_ sampai _END_ dari _TOTAL_ data",
-                    infoEmpty: "Menampilkan 0 sampai 0 dari 0 data",
-                    emptyTable: "Tidak ada data yang tersedia"
+        let table = $('#routing-table').DataTable({
+            processing: true,
+            serverSide: true,
+            paging: true,
+            searching: false,
+            info: true,
+            pageLength: 10,
+            lengthMenu: [10, 20, 30, 40, 50],
+            dom: 'rt<"bottom-container"<"bottom-left"l><"bottom-right"p>>',
+            language: {
+                lengthMenu: "Menampilkan _MENU_ dari _TOTAL_ data",
+                processing: "Memuat data...",
+                paginate: {
+                    previous: '<',
+                    next: '>',
+                    last: 'Terakhir',
                 },
-                ajax: {
-                    url: "{{ route('routing.data') }}",
-                    data: function (d) {
-                        d.search_term = $('#global-search').val();
-                    },
-                    dataSrc: function (json) {
-                        $('.dataTables_length select').closest('.dataTables_length')
-                            .find('label')
-                            .html(`Menampilkan <select>${$('.dataTables_length select').html()}</select> dari ${json.recordsFiltered} data`);
-                        return json.data;
-                    }
+                info: "Menampilkan _START_ sampai _END_ dari _TOTAL_ data",
+                infoEmpty: "Menampilkan 0 sampai 0 dari 0 data",
+                emptyTable: "Tidak ada data yang tersedia"
+            },
+            ajax: {
+                url: "{{ route('routing.data') }}",
+                data: function (d) {
+                    d.search_term = $('#global-search').val();
+                    d.filter_day = $('#filter_day').val();
                 },
-                columns: [
-                    { data: 'sales', name: 'user.name', className: 'table-data' }, { data: 'outlet', name: 'name', className: 'table-data' }, { data: 'area', name: 'area', className: 'table-data' }, { data: 'visit_day', name: 'visit_day', className: 'table-data' },
-                    {
-                        data: 'actions',
-                        name: 'actions',
-                        orderable: false,
-                        searchable: false
-                    }
-                ]
-            });
-            let searchTimer;
-            $('#global-search').on('input', function () {
-                clearTimeout(searchTimer);
-                searchTimer = setTimeout(() => table.ajax.reload(null, false), 500);
-            });
-            $(document).on('click', '#routing-table .delete-btn', function (e) {
-                e.preventDefault();
-                const url = $(this).attr('href');
-                const name = $(this).data('name');
-                deleteData(url, name);
-            });
-            $('#sales-table').DataTable({
-                paging: true,
-                searching: false,
-                info: true,
-                pageLength: 10,
-                lengthMenu: [10, 20, 30, 40, 50],
-                dom: 'rt<"bottom-container"<"bottom-left"l><"bottom-right"p>>',
-                language: {
-                    lengthMenu: "Menampilkan _MENU_ dari 4,768 data",
-                    paginate: {
-                        previous: '<',
-                        next: '>',
-                        last: 'Terakhir',
-                    }
-                },
-            });
-
+                dataSrc: function (json) {
+                    $('.dataTables_length select').closest('.dataTables_length')
+                        .find('label')
+                        .html(`Menampilkan <select>${$('.dataTables_length select').html()}</select> dari ${json.recordsFiltered} data`);
+                    return json.data;
+                }
+            },
+            columns: [
+                { data: 'sales', name: 'user.name', className: 'table-data' }, { data: 'outlet', name: 'name', className: 'table-data' }, { data: 'area', name: 'area', className: 'table-data' }, { data: 'visit_day', name: 'visit_day', className: 'table-data' },
+                {
+                    data: 'actions',
+                    name: 'actions',
+                    orderable: false,
+                    searchable: false
+                }
+            ]
         });
+        let searchTimer;
+        $('#global-search').on('input', function () {
+            clearTimeout(searchTimer);
+            searchTimer = setTimeout(() => table.ajax.reload(null, false), 500);
+        });
+        $('#filter_day').on('input', function () {
+            table.ajax.reload(null, false)
+        });
+        $(document).on('click', '#routing-table .delete-btn', function (e) {
+            e.preventDefault();
+            const url = $(this).attr('href');
+            const name = $(this).data('name');
+            deleteData(url, name);
+        });
+        $('#sales-table').DataTable({
+            paging: true,
+            searching: false,
+            info: true,
+            pageLength: 10,
+            lengthMenu: [10, 20, 30, 40, 50],
+            dom: 'rt<"bottom-container"<"bottom-left"l><"bottom-right"p>>',
+            language: {
+                lengthMenu: "Menampilkan _MENU_ dari 4,768 data",
+                paginate: {
+                    previous: '<',
+                    next: '>',
+                    last: 'Terakhir',
+                }
+            },
+        });
+
     </script>
 @endpush
 
 @push('scripts')
     <script>
+        $('#channel').select2();
+        $('#updateBtn').click(function (e) {
+            e.preventDefault();
+            const maxSize = 10 * 1024 * 1024;
+            const formData = new FormData();
+            const pdfFile = $('#pamflet_file')[0].files[0];
+            const videoFile = $('#video_file')[0].files[0];
+            if (pdfFile) {
+                if (pdfFile.size > maxSize) {
+                    toast('error', 'Ukuran file PDF tidak boleh lebih dari 10MB', 200);
+                    return;
+                }
+                if (!pdfFile.type.includes('pdf')) {
+                    toast('error', 'File harus berformat PDF', 200);
+                    return;
+                }
+                formData.append('file_pdf', pdfFile);
+            }
+
+            // Validasi ukuran file Video
+            if (videoFile) {
+                if (videoFile.size > maxSize) {
+                    toast('error', 'Ukuran file Video tidak boleh lebih dari 10MB', 200);
+                    return;
+                }
+                if (!videoFile.type.includes('video/')) {
+                    toast('error', 'File harus berformat video', 200);
+                    return;
+                }
+                formData.append('file_video', videoFile);
+            }
+            const channelId = $('#channel').val();
+            if (!channelId) {
+                alert('Channel ID wajib diisi');
+                return;
+            }
+            formData.append('channel_id', channelId);
+            formData.append('_method', 'PUT');
+
+            $.ajax({
+                url: '{{route('update-product-knowledge')}}',
+                type: 'POST',
+                data: formData,
+                contentType: false,
+                processData: false,
+                cache: false,
+                beforeSend: function () {
+                    $('#updateBtn').prop('disabled', true);
+                    $('#updateBtn').html('Uploading...');
+                },
+                success: function (response) {
+                    if (response.status === 'success') {
+                        closeModal('upload-product-knowledge');
+                        toast('success', response.message, 200);
+                        setTimeout(() => {
+                            window.location.reload();
+                        }, 2000);
+                    }
+                },
+                error: function (xhr) {
+                    // Handle error
+                    toast('error', 'Terjadi kesalahan saat upload', 200);
+                    console.error(xhr.responseText);
+                },
+                complete: function () {
+                    // Reset button state
+                    $('#updateBtn').prop('disabled', false);
+                    $('#updateBtn').html('Update');
+                }
+            });
+        });
+        $('#downloadBtn').click(function (e) {
+            e.preventDefault();
+            toggleLoading(true);
+            const form = document.createElement('form');
+            form.method = 'GET';
+            form.action = '/routing/generate-excel';
+            document.body.appendChild(form);
+            fetch('/routing/generate-excel')
+                .then(response => {
+                    if (response.ok) {
+                        form.submit();
+                        toast('success', 'File berhasil diunduh', 150);
+                    } else {
+                        return response.json().then(data => {
+                            throw new Error(data.message || 'Gagal mengunduh file');
+                        });
+                    }
+                })
+                .catch(error => {
+                    console.error('Download error:', error);
+                    toast('error', error.message || 'Gagal mengunduh file', 200);
+                })
+                .finally(() => {
+                    toggleLoading(false);
+                    document.body.removeChild(form);
+                });
+        });
         document.getElementById('pamflet_file').addEventListener('change', function (e) {
             const fileName = e.target.files[0] ? e.target.files[0].name : 'No file selected';
             document.getElementById('pamfletFileNameDisplay').value = fileName;

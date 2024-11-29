@@ -44,6 +44,7 @@ class VisibilityController extends Controller
         ->get();
 
         return view("pages.visibility.index", compact('posmTypes', 'visibilities'));
+
     }
 
     public function getData(Request $request)

@@ -14,10 +14,13 @@ use App\Http\Requests\SalesActivity\SaveAvailabilityRequest;
 use App\Http\Requests\SalesActivity\SaveVisibilityRequest;
 use App\Http\Requests\Visibility\CreateVisibilityRequest;
 use App\Http\Resources\PosmType\PosmTypeCollection;
+use App\Http\Resources\Channel\ChannelCollection;
+use App\Http\Resources\Product\ProductChannelCollection;
 use App\Http\Resources\Visibility\VisibilityCollection;
 use App\Http\Resources\Visibility\VisibilityResource;
 use App\Http\Resources\VisualType\VisualTypeCollection;
 use App\Models\Category;
+use App\Models\Channel;
 use App\Models\City;
 use App\Models\Outlet;
 use App\Models\PosmType;
@@ -45,6 +48,20 @@ class SalesActivityController extends Controller
             ->whereDate('checked_in', Carbon::now())
             ->get();
         return new SalesActivityCollection($activities);
+    }
+    public function getAllProducts()
+    {
+
+        $products = Product::with(['category', 'channels'])->get();
+        return new ProductChannelCollection($products);
+    }
+
+    public function getAllChannels()
+    {
+        $channels = Channel::whereNull('deleted_at')
+            ->get(['id', 'name']);
+
+        return new ChannelCollection($channels);
     }
 
 

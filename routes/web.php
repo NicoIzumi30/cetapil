@@ -1,5 +1,7 @@
 <?php
 
+use App\Http\Controllers\Web\OutletControler;
+use App\Http\Controllers\Web\ProductKnowledgeControler;
 use App\Http\Controllers\Web\RoutingController;
 use App\Http\Controllers\Web\VisualController;
 use App\Models\Visibility;
@@ -53,17 +55,29 @@ Route::middleware('auth')->group(function () {
     //         return view('pages.routing.av3m');
     //     });
     // });
+    Route::get('/routing/request', function () {
+        return view('pages.routing.request');
+        });
+    Route::get('/routing/request/detail', function () {
+            return view('pages.routing.detail-request');
+        });
+    Route::get('routing/generate-excel',[RoutingController::class,'downloadExcel'])->name('routing.generae-excel')->middleware('permission:menu_routing');
+    Route::get('routing/data',[RoutingController::class,'getData'])->name('routing.data')->middleware('permission:menu_routing');
     Route::resource('routing',RoutingController::class)->middleware('permission:menu_routing');
-    Route::get('data',[RoutingController::class,'getData'])->name('routing.data');
+    Route::put('update-product-knowledge', [ProductKnowledgeControler::class, 'update'])->name('update-product-knowledge')->middleware('permission:menu_routing');
 
     // Visibility Management
     Route::middleware('permission:menu_visibility')->group(function () {
         Route::resource('visibility', VisibilityController::class);
             
-        Route::get('/visibility/data', [VisibilityController::class, 'getData'])->name('visibility.data');
+        // Route::get('/visibility/data', [VisibilityController::class, 'getData'])->name('visibility.data');
         
         Route::post('/visibility/data', [VisibilityController::class, 'store'])->name('visibility.data');
         Route::get('visibility/{visibility}/edit', [VisibilityController::class, 'edit'])->name('visibility.edit');
+
+        Route::post('posm/update-image', [PosmController::class, 'updateImage'])
+            ->name('posm.update-image')
+            ->middleware('permission:menu_visibility');
         
         Route::post('visual', [VisualController::class, 'store'])->name('visual.store');
         Route::post('posm-types', [PosmController::class, 'store'])->name('posm.store');
