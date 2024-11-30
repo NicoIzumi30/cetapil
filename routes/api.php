@@ -79,6 +79,7 @@ Route::middleware(['auth_api', 'role:sales'])->group(function () {
     });
     Route::get('/product-knowledge', [ProductKnowledgeController::class, 'index']);
     Route::get('/selling', [SellingController::class, 'index']);
+    Route::POST('/selling/create', [SellingController::class, 'store']);
 
     Route::middleware('permission:menu_outlet')->group(function () {});
 });

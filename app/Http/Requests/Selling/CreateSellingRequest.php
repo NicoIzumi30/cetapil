@@ -34,6 +34,7 @@ class CreateSellingRequest extends FormRequest
             'products.*.stock' => 'required|numeric|min:0',
             'products.*.selling' => 'required|numeric|min:0',
             'products.*.balance' => 'required|numeric|min:0',
+            'products.*.price' => 'required|numeric|min:0',
             'image' => 'required|file|mimes:jpg,png,jpeg|max:1024'
         ];
     }
