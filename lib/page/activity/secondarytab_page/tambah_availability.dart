@@ -13,7 +13,8 @@ import '../../../widget/back_button.dart';
 
 class TambahAvailability extends GetView<TambahAvailabilityController> {
   TambahActivityController activityController =
-      Get.find<TambahActivityController>();
+  Get.find<TambahActivityController>();
+
   @override
   Widget build(BuildContext context) {
     return SafeArea(
@@ -70,22 +71,21 @@ class TambahAvailability extends GetView<TambahAvailabilityController> {
                                   ),
                                   child: Obx(() {
                                     final categories = controller
-                                        .supportDataController
-                                        .getCategories();
+                                        .supportDataController.getCategories();
                                     return DropdownButtonFormField<String>(
                                       style: const TextStyle(
                                         fontSize: 14,
                                         color: Color(0xFF0077BD),
                                       ),
                                       decoration: InputDecoration(
-                                        contentPadding:
-                                            const EdgeInsets.symmetric(
+                                        contentPadding: const EdgeInsets
+                                            .symmetric(
                                           horizontal: 16,
                                           vertical: 12,
                                         ),
                                         border: OutlineInputBorder(
-                                          borderRadius:
-                                              BorderRadius.circular(8),
+                                          borderRadius: BorderRadius.circular(
+                                              8),
                                           borderSide: BorderSide.none,
                                         ),
                                         filled: true,
@@ -138,29 +138,27 @@ class TambahAvailability extends GetView<TambahAvailabilityController> {
                                   ),
                                   child: Obx(() {
                                     final skus = controller.filteredSkus;
-                                    return DropdownButtonFormField<
-                                        Map<String, dynamic>>(
+                                    return DropdownButtonFormField<String>(
                                       style: const TextStyle(
                                         fontSize: 14,
                                         color: Color(0xFF0077BD),
                                       ),
                                       decoration: InputDecoration(
-                                        contentPadding:
-                                            const EdgeInsets.symmetric(
+                                        contentPadding: const EdgeInsets
+                                            .symmetric(
                                           horizontal: 16,
                                           vertical: 12,
                                         ),
                                         border: OutlineInputBorder(
-                                          borderRadius:
-                                              BorderRadius.circular(8),
+                                          borderRadius: BorderRadius.circular(
+                                              8),
                                           borderSide: BorderSide.none,
                                         ),
                                         filled: true,
-                                        fillColor:
-                                            controller.selectedCategory.value !=
-                                                    null
-                                                ? const Color(0xFFE8F3FF)
-                                                : Colors.grey[200],
+                                        fillColor: controller.selectedCategory
+                                            .value != null
+                                            ? const Color(0xFFE8F3FF)
+                                            : Colors.grey[200],
                                       ),
                                       hint: Text(
                                         "-- Pilih SKU --",
@@ -169,67 +167,57 @@ class TambahAvailability extends GetView<TambahAvailabilityController> {
                                           fontSize: 14,
                                         ),
                                       ),
-                                      // value: controller.selectedSku.value,
+                                      value: controller.selectedSku.value,
                                       items: skus.map((sku) {
-                                        return DropdownMenuItem<
-                                            Map<String, dynamic>>(
-                                          value: sku,
+                                        return DropdownMenuItem<String>(
+                                          value: sku['id'].toString(),
                                           child: Text(sku['sku'] ?? ''),
                                         );
                                       }).toList(),
-                                      onChanged:
-                                          controller.selectedCategory.value !=
-                                                  null
-                                              ? controller.onSkuSelected
-                                              : null,
+                                      onChanged: controller.selectedCategory
+                                          .value != null
+                                          ? controller.onSkuSelected
+                                          : null,
                                       isExpanded: true,
                                     );
                                   }),
                                 ),
                               ],
                             ),
-                            SingleChildScrollView(
-                              scrollDirection: Axis.horizontal,
-                              child: Obx(() => Wrap(
-                                    spacing: 8,
-                                    runSpacing: 8,
-                                    children:
-                                        controller.groupSelectedSku.map((item) {
-                                      return InputChip(
-                                        label: Text(item['sku']),
-                                        onDeleted: () => controller.removeItem(item['sku']),
-                                      );
-                                    }).toList(),
-                                  )),
-                            ),
                             SizedBox(
                               height: 10,
                             ),
-                            (controller.groupSelectedSku.isNotEmpty)
-                            ? Obx(() {
-                              return Column(
+                            Obx((){
+                              return (controller.groupSelectedIdSku.isNotEmpty)
+                                  ? Column(
+                                crossAxisAlignment: CrossAxisAlignment.start,
                                 children: [
-                                  Text(controller.selectedCategory.value!,
+                                  Text(controller.getSelectedCategoryName,
                                       style: TextStyle(
                                           fontSize: 16,
                                           fontWeight: FontWeight.bold,
                                           color: Color(0xFF023B5E))),
-                                  Wrap(
-                                    spacing: 8, // Space between widgets
-                                    runSpacing: 8, // Space between rows
-                                    children: controller.groupSelectedSku.map((sku) {
-                                      return SumAmountProduct(
-                                        productName: sku['sku'],
-                                        stockController: TextEditingController(),
-                                        AV3MController: TextEditingController(),
-                                        recommendController: TextEditingController(),
-                                      );
-                                    }).toList(), // Convert the iterable to a list for the children property
-                                  ),
+                                  Obx(() {
+                                    return Wrap(
+                                      spacing: 8, // Space between widgets
+                                      runSpacing: 8, // Space between rows
+                                      children: controller.groupSelectedIdSku
+                                          .map((sku) {
+                                        return SumAmountProduct(
+                                          productName: controller.getSkuName(sku),
+                                          stockController: TextEditingController(),
+                                          AV3MController: TextEditingController(),
+                                          recommendController: TextEditingController(),
+                                        );
+                                      })
+                                          .toList(), // Convert the iterable to a list for the children property
+                                    );
+                                  }),
                                 ],
-                              );
-                            })
-                            : SizedBox()
+                              )
+                                  : SizedBox();
+                            }),
+
 
                           ],
                         ),

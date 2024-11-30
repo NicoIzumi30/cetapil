@@ -320,8 +320,8 @@ class TambahActivityController extends GetxController {
 
       if (response.status == "OK" && response.data != null) {
         final sortedData = [...response.data!]..sort((a, b) {
-            if (a.name == 'Recommndation') return 1;
-            if (b.name == 'Recommndation') return -1;
+            if (a.name == 'Recommendation') return 1;
+            if (b.name == 'Recommendation') return -1;
             return 0;
           });
 

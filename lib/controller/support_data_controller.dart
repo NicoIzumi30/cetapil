@@ -7,6 +7,7 @@ import 'package:cetapil_mobile/model/list_product_sku_response.dart' as SKU;
 import '../model/list_category_response.dart' as Category;
 import '../model/list_channel_response.dart' as Channel;
 import '../model/list_knowledge_response.dart' as Knowledge;
+import '../model/survey_question_response.dart';
 
 class SupportDataController extends GetxController {
   final supportDB = SupportDatabaseHelper.instance;
@@ -15,6 +16,7 @@ class SupportDataController extends GetxController {
   var isLoading = false.obs;
 
   // Observable variables for storing SQLite data
+  final survey = <Map<String, dynamic>>[].obs;
   var products = <Map<String, dynamic>>[].obs;
   var categories = <Map<String, dynamic>>[].obs;
   var channels = <Channel.Data>[].obs;
@@ -64,6 +66,9 @@ class SupportDataController extends GetxController {
 
       // Load Knowledge
       knowledge.value = await supportDB.getAllKnowledge();
+
+      // Load Survey Question
+      survey.value = await supportDB.getAllSurveyQuestions();
     } catch (e) {
       print("Error loading local data: $e");
     } finally {
@@ -95,6 +100,7 @@ class SupportDataController extends GetxController {
         initCategoryListData(),
         initChannelListData(),
         initKnowledgeData(),
+        initQuestionSurvey(),
       ]);
       // Reload local data after updating SQLite
       await loadLocalData();
@@ -158,16 +164,43 @@ class SupportDataController extends GetxController {
           await supportDB.insertKnowledge(knowledge);
         }
       } else {
-        print("Channel error = ${responseKnowledge.message}");
+        print("Knowledge error = ${responseKnowledge.message}");
       }
     } catch (e) {
-      print("Channel error = $e");
+      print("Knowledge error = $e");
     }
   }
+
+  Future<void> initQuestionSurvey() async {
+    try {
+      final responseSurvey = await Api.getSurveyQuestion();
+
+      if (responseSurvey.status == "OK" && responseSurvey.data != null) {
+        final sortedData = [...responseSurvey.data!]..sort((a, b) {
+          if (a.name == 'Recommendation') return 1;
+          if (b.name == 'Recommendation') return -1;
+          return 0;
+        });
+        for (final data in sortedData) {
+          await supportDB.insertSurveyQuestion(data);
+        }
+        // supportDB.insertSurveyQuestion(sortedData);
+        // surveyQuestions.assignAll(sortedData);
+
+      } else {
+        print("Survey error = ${responseSurvey.message}");
+      }
+    } catch (e) {
+      print("Survey error = $e");
+    }
+  }
+
+
 
   // Helper methods to access data
   List<Map<String, dynamic>> getProducts() => products;
   List<Map<String, dynamic>> getCategories() => categories;
   List<Channel.Data> getChannels() => channels;
   List<Map<String, dynamic>> getKnowledge() => knowledge;
+  List<Map<String, dynamic>> getSurvey() => survey;
 }

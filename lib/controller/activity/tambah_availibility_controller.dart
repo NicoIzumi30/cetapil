@@ -5,33 +5,52 @@ import '../../controller/support_data_controller.dart';
 
 class TambahAvailabilityController extends GetxController {
   final supportDataController = Get.find<SupportDataController>();
-  
-  // Selected values using String IDs
+
   final selectedCategory = Rxn<String>();
   final selectedSku = Rxn<String>();
-  final groupSelectedSku = <Map<String, dynamic>>[].obs;
-  
+  final groupSelectedIdSku = <String>[].obs;
+  final groupedSkuInfo = <Map<String, dynamic>>[].obs;
+
   // Get list of SKUs for selected category
   List<Map<String, dynamic>> get filteredSkus {
     if (selectedCategory.value == null) return [];
-    return supportDataController.getProducts()
-        .where((product) => 
+    return supportDataController
+        .getProducts()
+        .where((product) =>
             product['category']['id'].toString() == selectedCategory.value)
         .toList();
   }
 
-  void onCategorySelected(String? categoryId) {
-    selectedCategory.value = categoryId;
-    // selectedSku.value = null; // Reset SKU when category changes
-    groupSelectedSku.clear();
+  String get getSelectedCategoryName {
+    return supportDataController
+        .getCategories()
+        .where(
+            (category) => category['id'].toString() == selectedCategory.value)
+        .first['name'];
   }
 
-  void onSkuSelected(Map<String, dynamic>? skuId) {
-    // selectedSku.value = skuId!['id'];
-    groupSelectedSku.add(skuId!);
+  // List<Map<String,dynamic>> get getGroupedSkuName {
+  //   return supportDataController
+  //       .getProducts().where((product) => product['id'].toString() == groupSelectedIdSku.).toList();
+  // }
+
+
+  String getSkuName(String id) {
+    final data = supportDataController
+        .products()
+        .where(
+            (products) => products['id'].toString() == id).first;
+    return data["sku"];
   }
-  
-  void removeItem(sku){
-    groupSelectedSku.removeWhere((item)=> item['sku'] == sku );
+
+  void onCategorySelected(String? categoryId) {
+    selectedCategory.value = categoryId;
+    selectedSku.value = null; // Reset SKU when category changes
+    groupSelectedIdSku.clear();
+  }
+
+  void onSkuSelected(String? skuId) {
+    selectedSku.value = skuId;
+    groupSelectedIdSku.add(skuId!);
   }
 }
