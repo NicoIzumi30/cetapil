@@ -27,6 +27,7 @@ class CreateSellingRequest extends FormRequest
     {
         return [
             'outlet_name' => 'required',
+            'category_outlet' => 'required|string',
             'longitude' => 'required|string',
             'latitude' => 'required|string',
             'products' => 'required|array',
