@@ -8,6 +8,7 @@ import 'package:cetapil_mobile/model/list_posm_response.dart';
 import 'package:cetapil_mobile/model/list_product_response.dart';
 import 'package:cetapil_mobile/model/list_product_sku_response.dart';
 import 'package:cetapil_mobile/model/list_routing_response.dart';
+import 'package:cetapil_mobile/model/list_selling_response.dart';
 import 'package:cetapil_mobile/model/outlet.dart';
 import 'package:cetapil_mobile/model/submit_checkin_routing.dart';
 import 'package:cetapil_mobile/model/submit_outlet_response.dart';
@@ -367,5 +368,21 @@ class Api {
       return ListKnowledgeResponse.fromJson(jsonDecode(response.body));
     }
     throw "Gagal request all Knowledge : \n${response.body}";
+  }
+  static Future<ListSellingResponse> getListSelling() async {
+    var url = "$baseUrl/api/selling";
+    var token = await storage.read('token');
+    var response = await http.get(
+      Uri.parse(url),
+      headers: {
+        'Content-type': 'application/json',
+        'Authorization': 'Bearer $token',
+      },
+    );
+    // print(response.body);
+    if (response.statusCode == 200) {
+      return ListSellingResponse.fromJson(jsonDecode(response.body));
+    }
+    throw "Gagal request all Selling : \n${response.body}";
   }
 }

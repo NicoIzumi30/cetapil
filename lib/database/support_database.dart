@@ -43,6 +43,8 @@ class SupportDatabaseHelper {
         sku TEXT,
         category_id TEXT,
         average_stock INTEGER DEFAULT 0,
+        md_price REAL DEFAULT 0,
+        sales_price REAL DEFAULT 0,
         FOREIGN KEY (category_id) REFERENCES categories (id)
       )
     ''');
@@ -85,8 +87,7 @@ class SupportDatabaseHelper {
   Future<void> insertProduct(SKU.Data product) async {
     final db = await database;
     await db.transaction((txn) async {
-      await txn.insert('categories',
-          {'id': product.category!.id, 'name': product.category!.name},
+      await txn.insert('categories', {'id': product.category!.id, 'name': product.category!.name},
           conflictAlgorithm: ConflictAlgorithm.replace);
 
       await txn.insert(
@@ -107,13 +108,15 @@ class SupportDatabaseHelper {
     final List<Map<String, dynamic>> result = [];
 
     for (var product in products) {
-      final category = await db.query('categories',
-          where: 'id = ?', whereArgs: [product['category_id']]);
+      final category =
+          await db.query('categories', where: 'id = ?', whereArgs: [product['category_id']]);
 
       result.add({
         'id': product['id'],
         'sku': product['sku'],
         'average_stock': product['average_stock'],
+        'md_price': product['md_price'],
+        'sales_price': product['sales_price'],
         'category': category.first
       });
     }
@@ -157,8 +160,8 @@ class SupportDatabaseHelper {
   Future<void> insertKnowledge(Knowledge.Data knowledge) async {
     final db = await database;
     await db.transaction((txn) async {
-      await txn.insert('knowledge_channel',
-          {'id': knowledge.channel!.id, 'name': knowledge.channel!.name},
+      await txn.insert(
+          'knowledge_channel', {'id': knowledge.channel!.id, 'name': knowledge.channel!.name},
           conflictAlgorithm: ConflictAlgorithm.replace);
 
       await txn.insert(
@@ -179,8 +182,8 @@ class SupportDatabaseHelper {
     final List<Map<String, dynamic>> result = [];
 
     for (var knowledge in knowledges) {
-      final channel = await db.query('knowledge_channel',
-          where: 'id = ?', whereArgs: [knowledge['channel_id']]);
+      final channel = await db
+          .query('knowledge_channel', where: 'id = ?', whereArgs: [knowledge['channel_id']]);
 
       result.add({
         'id': knowledge['id'],

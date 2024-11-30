@@ -11,6 +11,7 @@ class ModernTextField extends StatefulWidget {
   final TextInputType? keyboardType;
   final void Function(String)? onChanged;
   final String? Function(String?)? validator;
+  final bool readOnly;
 
   ModernTextField({
     Key? key,
@@ -21,7 +22,9 @@ class ModernTextField extends StatefulWidget {
     this.validator,
     required this.title,
     this.enable,
-    this.suffixIcon = false, this.maxlines,
+    this.readOnly = false,
+    this.suffixIcon = false,
+    this.maxlines,
   }) : super(key: key);
 
   @override
@@ -36,8 +39,7 @@ class _ModernTextFieldState extends State<ModernTextField> {
       children: [
         Text(
           widget.title,
-          style: TextStyle(
-              fontSize: 13, fontWeight: FontWeight.w700),
+          style: TextStyle(fontSize: 13, fontWeight: FontWeight.w700),
         ),
         SizedBox(
           height: 10,
@@ -63,6 +65,7 @@ class _ModernTextFieldState extends State<ModernTextField> {
             enabled: widget.enable,
             validator: widget.validator,
             maxLines: widget.maxlines,
+            readOnly: widget.readOnly,
             style: const TextStyle(
               fontSize: 14,
               color: Color(0xFF0077BD),
@@ -76,9 +79,7 @@ class _ModernTextFieldState extends State<ModernTextField> {
               suffixIcon: widget.suffixIcon!
                   ? IconButton(
                       icon: Icon(
-                        widget.obscureText
-                            ? Icons.visibility_off
-                            : Icons.visibility,
+                        widget.obscureText ? Icons.visibility_off : Icons.visibility,
                         color: Colors.blue[600],
                         size: 22,
                       ),

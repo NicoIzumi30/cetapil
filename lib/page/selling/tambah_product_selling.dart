@@ -1,4 +1,6 @@
 import 'package:cetapil_mobile/controller/selling/tambah_produk_selling_controller.dart';
+import 'package:cetapil_mobile/page/activity/secondarytab_page/availability.dart';
+import 'package:cetapil_mobile/utils/colors.dart';
 import 'package:cetapil_mobile/widget/back_button.dart';
 import 'package:flutter/material.dart';
 import '../../../model/list_category_response.dart' as Category;
@@ -94,7 +96,7 @@ class TambahProductSelling extends GetView<TambahProdukSellingController> {
                         ),
 
                         // SKU Dropdown
-                        SizedBox(height: 20),
+                        SizedBox(height: 10),
                         Text(
                           "SKU",
                           style: TextStyle(fontSize: 13, fontWeight: FontWeight.w700),
@@ -155,15 +157,182 @@ class TambahProductSelling extends GetView<TambahProdukSellingController> {
                             );
                           }),
                         ),
+                        SizedBox(
+                          height: 20,
+                        ),
+                        Text(
+                          "Selected SKU",
+                          style: TextStyle(fontSize: 13, fontWeight: FontWeight.w700),
+                        ),
+                        SizedBox(
+                          height: 10,
+                        ),
+                        // Obx(() => controller.selectedSkuData != null
+                        //     ? SumAmountProduct(
+                        //         productName: controller.selectedSkuData!['sku'] ?? '',
+                        //         stockController: controller.stockController,
+                        //         sellingController: controller.sellingController,
+                        //         balanceController: controller.balanceController,
+                        //         priceController: controller.priceController,
+                        //       )
+                        //     : Container(
+                        //         padding: EdgeInsets.all(16),
+                        //         decoration: BoxDecoration(
+                        //           color: Colors.grey[100],
+                        //           borderRadius: BorderRadius.circular(8),
+                        //         ),
+                        //         child: Center(
+                        //           child: Text(
+                        //             "Select a SKU to view product details",
+                        //             style: TextStyle(
+                        //               color: Colors.grey[600],
+                        //               fontSize: 14,
+                        //             ),
+                        //           ),
+                        //         ),
+                        //       )),
                       ],
                     ),
                   ),
-                )
+                ),
+                Padding(
+                  padding: const EdgeInsets.fromLTRB(15, 0, 15, 15),
+                  child: Row(
+                    children: [
+                      Expanded(
+                        child: ElevatedButton(
+                          style: ElevatedButton.styleFrom(
+                            backgroundColor: AppColors.primary,
+                            shape: RoundedRectangleBorder(
+                              borderRadius: BorderRadius.circular(10),
+                              side: BorderSide(color: AppColors.primary),
+                            ),
+                          ),
+                          onPressed: () {
+                            // controller.addItemToDraft();
+                            // Get.back();
+                          },
+                          child: Text(
+                            "Tambah & Kembali",
+                            style: TextStyle(
+                              color: Colors.white,
+                              fontWeight: FontWeight.bold,
+                            ),
+                          ),
+                        ),
+                      ),
+                      SizedBox(width: 10),
+                      Expanded(
+                        child: ElevatedButton(
+                          style: ElevatedButton.styleFrom(
+                            backgroundColor: Colors.white,
+                            shape: RoundedRectangleBorder(
+                              borderRadius: BorderRadius.circular(10),
+                              side: BorderSide(color: AppColors.primary),
+                            ),
+                          ),
+                          onPressed: () {
+                            // controller.addItemToDraft();
+                            // controller.resetForm();
+                          },
+                          child: Text(
+                            "Tambah & Lanjut",
+                            style: TextStyle(
+                              color: AppColors.primary,
+                              fontWeight: FontWeight.bold,
+                            ),
+                          ),
+                        ),
+                      ),
+                    ],
+                  ),
+                ),
               ],
             ),
           )
         ],
       ),
     );
+  }
+}
+
+class SumAmountProduct extends StatelessWidget {
+  final String productName;
+  final TextEditingController stockController;
+  final TextEditingController sellingController;
+  final TextEditingController balanceController;
+  final TextEditingController priceController;
+
+  const SumAmountProduct({
+    super.key,
+    required this.productName,
+    required this.stockController,
+    required this.sellingController,
+    required this.balanceController,
+    required this.priceController,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    return Row(children: [
+      Expanded(
+          flex: 2,
+          child: Text(
+            productName,
+            style: TextStyle(fontSize: 10),
+          )),
+      SizedBox(
+        width: 10,
+      ),
+      Expanded(
+        child: Column(
+          children: [
+            Text("Stock"),
+            NumberField(
+              controller: stockController,
+            ),
+          ],
+        ),
+      ),
+      SizedBox(
+        width: 10,
+      ),
+      Expanded(
+        child: Column(
+          children: [
+            Text("Selling"),
+            NumberField(
+              controller: sellingController,
+            ),
+          ],
+        ),
+      ),
+      SizedBox(
+        width: 10,
+      ),
+      Expanded(
+        child: Column(
+          children: [
+            Text("Balance"),
+            NumberField(
+              controller: balanceController,
+            ),
+          ],
+        ),
+      ),
+      SizedBox(
+        width: 10,
+      ),
+      Expanded(
+        child: Column(
+          children: [
+            Text("Price"),
+            NumberField(
+              controller: priceController,
+            ),
+          ],
+        ),
+      ),
+    ]);
   }
 }

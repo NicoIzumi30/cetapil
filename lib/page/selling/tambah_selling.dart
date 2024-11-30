@@ -1,192 +1,208 @@
-import 'package:cetapil_mobile/controller/bottom_nav_controller.dart';
-import 'package:cetapil_mobile/controller/selling/tambah_produk_selling_controller.dart';
-import 'package:cetapil_mobile/page/selling/tambah_product_selling.dart';
-import 'package:cetapil_mobile/widget/category_dropdown.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
-import 'package:get/get_core/src/get_main.dart';
-import 'package:google_fonts/google_fonts.dart';
-
-import '../../controller/outlet/outlet_controller.dart';
 import '../../controller/selling/selling_controller.dart';
-import '../../utils/colors.dart';
+import '../../controller/selling/tambah_produk_selling_controller.dart';
 import '../../widget/back_button.dart';
-import '../../widget/clipped_maps.dart';
 import '../../widget/dialog.dart';
-import '../../widget/dropdown_textfield.dart';
+import '../../widget/category_dropdown.dart';
 import '../../widget/text_field.dart';
-import '../outlet/detail_outlet.dart';
+import '../../widget/clipped_maps.dart';
+import '../../utils/colors.dart';
+import 'tambah_product_selling.dart';
 
 class TambahSelling extends GetView<SellingController> {
-  final TextEditingController _controller = TextEditingController(text: "asdasdas");
-
   @override
   Widget build(BuildContext context) {
     return SafeArea(
-        child: Stack(children: [
-      Image.asset(
-        'assets/background.png',
-        fit: BoxFit.cover,
-        width: double.infinity,
-        height: double.infinity,
-      ),
-      Padding(
-          padding: const EdgeInsets.fromLTRB(15, 30, 15, 10),
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              EnhancedBackButton(
-                onPressed: () => Alerts.showConfirmDialog(context),
-                backgroundColor: Colors.white,
-                iconColor: Colors.blue,
-              ),
-              SizedBox(
-                height: 20,
-              ),
-              Expanded(
-                child: SingleChildScrollView(
-                  child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      ModernTextField(
-                        title: "Nama Outlet",
-                        controller: controller.outletName.value,
-                      ),
-                      CategoryDropdown<SellingController>(
-                        title: "Kategori Outlet",
-                        controller: controller,
-                        selectedCategoryGetter: (controller) => controller.selectedCategory,
-                        categoriesGetter: (controller) => controller.categories,
-                      ),
-                      Text("Produk",
-                          style: TextStyle(
-                              fontSize: 16, fontWeight: FontWeight.bold, color: Color(0xFF023B5E))),
-
-                      SizedBox(
-                        width: double.infinity,
-                        child: ElevatedButton(
-                          style: ElevatedButton.styleFrom(
-                            backgroundColor: AppColors.primary,
-                            shape: RoundedRectangleBorder(
-                              borderRadius: BorderRadius.circular(10),
-                              side: BorderSide(color: AppColors.primary),
-                            ),
-                          ),
-                          onPressed: () {
-                            if (!Get.isRegistered<TambahProdukSellingController>()) {
-                              Get.put(TambahProdukSellingController());
-                            }
-                            Get.to(() => TambahProductSelling());
-                          },
-                          child: Text(
-                            " Tambah Product Selling",
-                            style: TextStyle(
-                              color: Colors.white,
-                              fontWeight: FontWeight.bold,
-                            ),
-                          ),
-                        ),
-                      ), // CustomDropdown(
-                      //     title: "Kategori Produk",
-                      //     hint: "-- Pilih Kategori Produk --",
-                      //     items: ["asdasd", "asda"].map((item) {
-                      //       return DropdownMenuItem<String>(
-                      //         value: item,
-                      //         child: Text(item ?? ''), // Display the name
-                      //       );
-                      //     }).toList(),
-                      //     onChanged: (string) {}),
-                      // Text("Cleanser",
-                      //     style: TextStyle(
-                      //         fontSize: 16, fontWeight: FontWeight.bold, color: Color(0xFF023B5E))),
-                      // SumAmountProduct(
-                      //   productName: "Cetaphil Exfoliate Cleanser 500ml",
-                      //   stockController: TextEditingController(),
-                      //   sellingController: TextEditingController(),
-                      //   balanceController: TextEditingController(),
-                      // ),
-                      // Text("Baby Treatment",
-                      //     style: TextStyle(
-                      //         fontSize: 16, fontWeight: FontWeight.bold, color: Color(0xFF023B5E))),
-                      // SumAmountProduct(
-                      //   productName: "Cetaphil Baby Daily Lotion with Organic Calendula 400ml",
-                      //   stockController: TextEditingController(),
-                      //   sellingController: TextEditingController(),
-                      //   balanceController: TextEditingController(),
-                      // ),
-                      // Divider(
-                      //   color: Colors.white,
-                      // ),
-                      // SumAmountProduct(
-                      //   productName: "Cetaphil Baby Daily Lotion with Organic Calendula 200ml",
-                      //   stockController: TextEditingController(),
-                      //   sellingController: TextEditingController(),
-                      //   balanceController: TextEditingController(),
-                      // ),
-                      Row(
+      child: Stack(
+        children: [
+          Image.asset(
+            'assets/background.png',
+            fit: BoxFit.cover,
+            width: double.infinity,
+            height: double.infinity,
+          ),
+          Scaffold(
+            backgroundColor: Colors.transparent,
+            body: Padding(
+              padding: const EdgeInsets.fromLTRB(15, 30, 15, 10),
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  EnhancedBackButton(
+                    onPressed: () => Alerts.showConfirmDialog(context),
+                    backgroundColor: Colors.white,
+                    iconColor: Colors.blue,
+                  ),
+                  SizedBox(height: 20),
+                  Expanded(
+                    child: SingleChildScrollView(
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
                         children: [
-                          Expanded(
-                            child: ModernTextField(
-                              title: "Longitude",
-                              controller: _controller,
-                            ),
+                          ModernTextField(
+                            title: "Nama Outlet",
+                            controller: controller.outletName.value,
                           ),
+                          CategoryDropdown<SellingController>(
+                            title: "Kategori Outlet",
+                            controller: controller,
+                            selectedCategoryGetter: (controller) => controller.selectedCategory,
+                            categoriesGetter: (controller) => controller.categories,
+                          ),
+                          Text(
+                            "Produk",
+                            style: TextStyle(
+                                fontSize: 16,
+                                fontWeight: FontWeight.bold,
+                                color: Color(0xFF023B5E)),
+                          ),
+                          Obx(() {
+                            final items = controller.draftItems;
+                            return Column(
+                              children: [
+                                ...items.map((item) => Container(
+                                      margin: EdgeInsets.only(bottom: 15),
+                                      padding: EdgeInsets.all(10),
+                                      decoration: BoxDecoration(
+                                        color: Colors.white.withOpacity(0.9),
+                                        borderRadius: BorderRadius.circular(8),
+                                        border: Border.all(color: Colors.blue.shade100),
+                                      ),
+                                      child: SumAmountProduct(
+                                        productName: item['sku'] ?? '',
+                                        stockController:
+                                            TextEditingController(text: item['stock'].toString()),
+                                        sellingController:
+                                            TextEditingController(text: item['selling'].toString()),
+                                        balanceController:
+                                            TextEditingController(text: item['balance'].toString()),
+                                        priceController:
+                                            TextEditingController(text: item['price'].toString()),
+                                        isReadOnly: true,
+                                      ),
+                                    )),
+                                SizedBox(
+                                  width: double.infinity,
+                                  child: ElevatedButton(
+                                    style: ElevatedButton.styleFrom(
+                                      backgroundColor: AppColors.primary,
+                                      shape: RoundedRectangleBorder(
+                                        borderRadius: BorderRadius.circular(10),
+                                        side: BorderSide(color: AppColors.primary),
+                                      ),
+                                    ),
+                                    onPressed: () async {
+                                      if (!Get.isRegistered<TambahProdukSellingController>()) {
+                                        Get.put(TambahProdukSellingController());
+                                      }
+                                      await Get.to(() => TambahProductSelling());
+                                    },
+                                    child: Text(
+                                      "Tambah Product Selling",
+                                      style: TextStyle(
+                                        color: Colors.white,
+                                        fontWeight: FontWeight.bold,
+                                      ),
+                                    ),
+                                  ),
+                                ),
+                              ],
+                            );
+                          }),
+                          SizedBox(height: 10),
+                          Row(
+                            children: [
+                              Expanded(
+                                child: Obx(() => TextField(
+                                      readOnly: true,
+                                      controller: TextEditingController(
+                                          text: controller
+                                                  .gpsController.currentPosition.value?.longitude
+                                                  .toString() ??
+                                              '-'),
+                                      decoration: InputDecoration(
+                                        labelText: 'Longitude',
+                                        border: OutlineInputBorder(),
+                                      ),
+                                    )),
+                              ),
+                              SizedBox(width: 10),
+                              Expanded(
+                                child: Obx(() => TextField(
+                                      readOnly: true,
+                                      controller: TextEditingController(
+                                          text: controller
+                                                  .gpsController.currentPosition.value?.latitude
+                                                  .toString() ??
+                                              '-'),
+                                      decoration: InputDecoration(
+                                        labelText: 'Latitude',
+                                        border: OutlineInputBorder(),
+                                      ),
+                                    )),
+                              ),
+                            ],
+                          ),
+                          SizedBox(height: 10),
+                          Obx(() => MapPreviewWidget(
+                                latitude: double.tryParse(controller
+                                        .gpsController.currentPosition.value!.latitude
+                                        .toString()) ??
+                                    -6.2088,
+                                longitude: double.tryParse(controller
+                                        .gpsController.currentPosition.value!.longitude
+                                        .toString()) ??
+                                    106.8456,
+                                zoom: 14.0,
+                                height: 250,
+                                borderRadius: 10,
+                              )),
+                          SizedBox(height: 20),
                           SizedBox(
-                            width: 10,
+                            width: double.infinity,
+                            height: 45,
+                            child: Obx(() => ElevatedButton(
+                                  onPressed: controller.isSaving.value
+                                      ? null
+                                      : controller.saveDraftSelling,
+                                  style: ElevatedButton.styleFrom(
+                                    backgroundColor: Colors.blue,
+                                    foregroundColor: Colors.white,
+                                    shape: RoundedRectangleBorder(
+                                      borderRadius: BorderRadius.circular(8),
+                                    ),
+                                  ),
+                                  child: controller.isSaving.value
+                                      ? SizedBox(
+                                          height: 20,
+                                          width: 20,
+                                          child: CircularProgressIndicator(
+                                            color: Colors.white,
+                                            strokeWidth: 2,
+                                          ),
+                                        )
+                                      : Text(
+                                          'Simpan Draft',
+                                          style: TextStyle(
+                                            fontSize: 16,
+                                            fontWeight: FontWeight.bold,
+                                          ),
+                                        ),
+                                )),
                           ),
-                          Expanded(
-                            child: ModernTextField(
-                              title: "Latitude",
-                              controller: _controller,
-                            ),
-                          ),
+                          SizedBox(height: 20),
                         ],
                       ),
-                      MapPreviewWidget(
-                        latitude: -6.2088,
-                        longitude: 106.8456,
-                        zoom: 14.0,
-                        height: 250,
-                        borderRadius: 10,
-                      ),
-                      SizedBox(
-                        height: 10,
-                      ),
-                      Container(
-                        height: 150,
-                        width: double.infinity,
-                        decoration: BoxDecoration(
-                          color: Colors.white,
-                          border: Border.all(
-                            color: Colors.blue,
-                            width: 1,
-                          ),
-                          borderRadius: BorderRadius.circular(5),
-                        ),
-                        child: Column(
-                          mainAxisAlignment: MainAxisAlignment.center,
-                          children: [
-                            Icon(Icons.camera_alt),
-                            SizedBox(
-                              height: 10,
-                            ),
-                            Text(
-                              "Kualitas foto harus jelas dan tidak blur",
-                              style: TextStyle(fontSize: 9, color: Colors.blue),
-                            )
-                          ],
-                        ),
-                      ),
-                      SizedBox(
-                        height: 10,
-                      ),
-                    ],
+                    ),
                   ),
-                ),
-              )
-            ],
-          ))
-    ]));
+                ],
+              ),
+            ),
+          ),
+        ],
+      ),
+    );
   }
 }
 
@@ -195,6 +211,8 @@ class SumAmountProduct extends StatelessWidget {
   final TextEditingController stockController;
   final TextEditingController sellingController;
   final TextEditingController balanceController;
+  final TextEditingController priceController;
+  final bool isReadOnly;
 
   const SumAmountProduct({
     super.key,
@@ -202,65 +220,82 @@ class SumAmountProduct extends StatelessWidget {
     required this.stockController,
     required this.sellingController,
     required this.balanceController,
+    required this.priceController,
+    this.isReadOnly = false,
   });
 
   @override
   Widget build(BuildContext context) {
-    return Row(children: [
-      Expanded(
+    return Row(
+      children: [
+        Expanded(
           flex: 2,
           child: Text(
             productName,
             style: TextStyle(fontSize: 10),
-          )),
-      SizedBox(
-        width: 10,
-      ),
-      Expanded(
-        child: Column(
-          children: [
-            Text("Stock"),
-            NumberField(
-              controller: stockController,
-            ),
-          ],
+          ),
         ),
-      ),
-      SizedBox(
-        width: 10,
-      ),
-      Expanded(
-        child: Column(
-          children: [
-            Text("Selling"),
-            NumberField(
-              controller: sellingController,
-            ),
-          ],
+        SizedBox(width: 10),
+        Expanded(
+          child: Column(
+            children: [
+              Text("Stock"),
+              NumberField(
+                controller: stockController,
+                readOnly: isReadOnly,
+              ),
+            ],
+          ),
         ),
-      ),
-      SizedBox(
-        width: 10,
-      ),
-      Expanded(
-        child: Column(
-          children: [
-            Text("Balance"),
-            NumberField(
-              controller: balanceController,
-            ),
-          ],
+        SizedBox(width: 10),
+        Expanded(
+          child: Column(
+            children: [
+              Text("Selling"),
+              NumberField(
+                controller: sellingController,
+                readOnly: isReadOnly,
+              ),
+            ],
+          ),
         ),
-      ),
-    ]);
+        SizedBox(width: 10),
+        Expanded(
+          child: Column(
+            children: [
+              Text("Balance"),
+              NumberField(
+                controller: balanceController,
+                readOnly: isReadOnly,
+              ),
+            ],
+          ),
+        ),
+        SizedBox(width: 10),
+        Expanded(
+          child: Column(
+            children: [
+              Text("Price"),
+              NumberField(
+                controller: priceController,
+                readOnly: isReadOnly,
+              ),
+            ],
+          ),
+        ),
+      ],
+    );
   }
 }
 
 class NumberField extends StatelessWidget {
   final TextEditingController controller;
+  final bool readOnly;
+
   const NumberField({
     super.key,
     required this.controller,
+    this.readOnly = false,
   });
 
   @override
@@ -281,47 +316,29 @@ class NumberField extends StatelessWidget {
       child: TextFormField(
         controller: controller,
         keyboardType: TextInputType.number,
-        style: const TextStyle(
+        readOnly: readOnly,
+        style: TextStyle(
           fontSize: 14,
-          color: Color(0xFF0077BD),
+          color: readOnly ? Colors.grey : Color(0xFF0077BD),
         ),
         decoration: InputDecoration(
-          // hintText: widget.title,
-          hintStyle: TextStyle(
-            color: Colors.grey[400],
-            fontSize: 14,
-          ),
-          contentPadding: const EdgeInsets.symmetric(
+          contentPadding: EdgeInsets.symmetric(
             horizontal: 15,
             vertical: 10,
           ),
           border: OutlineInputBorder(
             borderRadius: BorderRadius.circular(8),
-            borderSide: const BorderSide(
+            borderSide: BorderSide(
               color: Color(0xFF64B5F6),
               width: 2,
             ),
           ),
           filled: true,
-          fillColor: const Color(0xFFE8F3FF), // Light blue background
-          focusedBorder: OutlineInputBorder(
-            borderRadius: BorderRadius.circular(8),
-            borderSide: const BorderSide(
-              color: Color(0xFF64B5F6),
-              width: 1,
-            ),
-          ),
+          fillColor: readOnly ? Colors.grey[100] : Color(0xFFE8F3FF),
           enabledBorder: OutlineInputBorder(
             borderRadius: BorderRadius.circular(8),
-            borderSide: const BorderSide(
-              color: Color(0xFF64B5F6),
-              width: 1,
-            ),
-          ),
-          disabledBorder: OutlineInputBorder(
-            borderRadius: BorderRadius.circular(8),
-            borderSide: const BorderSide(
-              color: Color(0xFF64B5F6),
+            borderSide: BorderSide(
+              color: readOnly ? Colors.grey[300]! : Color(0xFF64B5F6),
               width: 1,
             ),
           ),

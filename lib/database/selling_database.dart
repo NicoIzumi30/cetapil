@@ -1,4 +1,5 @@
 import 'package:cetapil_mobile/model/list_product_sku_response.dart' as SKU;
+import 'package:cetapil_mobile/model/list_selling_response.dart';
 import '../model/list_category_response.dart' as Category;
 import '../model/list_channel_response.dart' as Channel;
 import 'package:sqflite/sqflite.dart';
@@ -28,114 +29,159 @@ class SellingDatabaseHelper {
   }
 
   Future _createDB(Database db, int version) async {
-
-    ///SKU
+    // Create users table
     await db.execute('''
-      CREATE TABLE categories(
+      CREATE TABLE users (
         id TEXT PRIMARY KEY,
         name TEXT
       )
     ''');
 
+    // Create selling_data table
     await db.execute('''
-      CREATE TABLE products(
+      CREATE TABLE selling_data (
         id TEXT PRIMARY KEY,
-        sku TEXT,
-        category_id TEXT,
-        average_stock INTEGER DEFAULT 0,
-        FOREIGN KEY (category_id) REFERENCES categories (id)
+        user_id TEXT,
+        outlet_name TEXT,
+        longitude TEXT,
+        latitude TEXT,
+        filename TEXT,
+        image TEXT,
+        created_at TEXT,
+        is_drafted INTEGER DEFAULT 0,
+        FOREIGN KEY (user_id) REFERENCES users (id)
       )
     ''');
 
-    ///CATEGORY
+    // Create products table
     await db.execute('''
-    CREATE TABLE category(
-      id TEXT PRIMARY KEY,
-      name TEXT NOT NULL
-    )
-    ''');
-
-    ///CHANNEL
-    await db.execute('''
-    CREATE TABLE channel(
-      id TEXT PRIMARY KEY,
-      name TEXT NOT NULL
-    )
+      CREATE TABLE products (
+        id TEXT PRIMARY KEY,
+        selling_id TEXT,
+        product_id TEXT,
+        product_name TEXT,
+        stock INTEGER,
+        selling INTEGER,
+        balance INTEGER,
+        price INTEGER,
+        FOREIGN KEY (selling_id) REFERENCES selling_data (id)
+      )
     ''');
   }
 
-  Future<void> insertProduct(SKU.Data product) async {
+  // CRUD operations for User
+  Future<void> insertUser(User user) async {
     final db = await database;
-    await db.transaction((txn) async {
-      await txn.insert('categories', {
-        'id': product.category!.id,
-        'name': product.category!.name
-      }, conflictAlgorithm: ConflictAlgorithm.replace);
-
-      await txn.insert('products', {
-        'id': product.id,
-        'sku': product.sku,
-        'category_id': product.category!.id,
-        'average_stock': product.averageStock
-      }, conflictAlgorithm: ConflictAlgorithm.replace);
-
-
-    });
+    await db.insert('users', user.toJson(),
+        conflictAlgorithm: ConflictAlgorithm.replace);
   }
 
-  Future<List<Map<String, dynamic>>> getAllProducts() async {
+  Future<User?> getUser(String id) async {
     final db = await database;
-    final List<Map<String, dynamic>> products = await db.query('products');
-    final List<Map<String, dynamic>> result = [];
+    final maps = await db.query('users', where: 'id = ?', whereArgs: [id]);
+    if (maps.isNotEmpty) {
+      return User.fromJson(maps.first);
+    }
+    return null;
+  }
 
-    for (var product in products) {
-      final category = await db.query(
-          'categories',
-          where: 'id = ?',
-          whereArgs: [product['category_id']]
-      );
-
-      result.add({
-        'id': product['id'],
-        'sku': product['sku'],
-        'average_stock': product['average_stock'],
-        'category': category.first
-      });
+  // CRUD operations for Selling Data
+  Future<String> insertSellingData(Data sellingData, bool isDrafted) async {
+    final db = await database;
+    
+    // Insert user first if it exists
+    if (sellingData.user != null) {
+      await insertUser(sellingData.user!);
     }
 
-    return result;
+    final sellingMap = sellingData.toJson();
+    sellingMap['is_drafted'] = isDrafted ? 1 : 0;
+    sellingMap.remove('user');  // Remove nested user object
+    sellingMap.remove('products');  // Remove nested products array
+
+    await db.insert('selling_data', sellingMap,
+        conflictAlgorithm: ConflictAlgorithm.replace);
+
+    // Insert associated products
+    if (sellingData.products != null) {
+      for (var product in sellingData.products!) {
+        final productMap = product.toJson();
+        productMap['selling_id'] = sellingData.id;
+        await db.insert('products', productMap,
+            conflictAlgorithm: ConflictAlgorithm.replace);
+      }
+    }
+
+    return sellingData.id!;
   }
 
-  Future<void> insertCategory(Category.Data category) async {
+  Future<List<Data>> getAllSellingData({bool? isDrafted}) async {
     final db = await database;
-    await db.insert(
-      'category',
-      category.toJson(),
-      conflictAlgorithm: ConflictAlgorithm.replace,
-    );
+    
+    String query = '''
+      SELECT s.*, u.id as user_id, u.name as user_name 
+      FROM selling_data s
+      LEFT JOIN users u ON s.user_id = u.id
+    ''';
+    
+    if (isDrafted != null) {
+      query += ' WHERE s.is_drafted = ${isDrafted ? 1 : 0}';
+    }
+
+    final sellingMaps = await db.rawQuery(query);
+    List<Data> sellingList = [];
+
+    for (var sellingMap in sellingMaps) {
+      // Create user object
+      final user = User(
+        id: sellingMap['user_id'] as String?,
+        name: sellingMap['user_name'] as String?,
+      );
+
+      // Get associated products
+      final productMaps = await db.query('products',
+          where: 'selling_id = ?', whereArgs: [sellingMap['id']]);
+      final products = productMaps
+          .map((map) => Products.fromJson(map))
+          .toList();
+
+      // Create selling data object
+      final sellingData = Data(
+        id: sellingMap['id'] as String?,
+        user: user,
+        outletName: sellingMap['outlet_name'] as String?,
+        longitude: sellingMap['longitude'] as String?,
+        latitude: sellingMap['latitude'] as String?,
+        filename: sellingMap['filename'] as String?,
+        image: sellingMap['image'] as String?,
+        createdAt: sellingMap['created_at'] as String?,
+        products: products,
+      );
+
+      sellingList.add(sellingData);
+    }
+
+    return sellingList;
   }
 
-  Future<List<Map<String, dynamic>>> getAllCategories() async {
+  Future<void> deleteSellingData(String id) async {
     final db = await database;
-    final List<Map<String, dynamic>> maps = await db.query('category');
-
-    return maps;
+    
+    // Delete associated products first
+    await db.delete('products', where: 'selling_id = ?', whereArgs: [id]);
+    
+    // Then delete the selling data
+    await db.delete('selling_data', where: 'id = ?', whereArgs: [id]);
   }
 
-  Future<void> insertChannel(Channel.Data category) async {
+  Future<void> updateSellingData(Data sellingData, bool isDrafted) async {
+    await deleteSellingData(sellingData.id!);
+    await insertSellingData(sellingData, isDrafted);
+  }
+
+  // Close database
+  Future close() async {
     final db = await database;
-    await db.insert(
-      'channel',
-      category.toJson(),
-      conflictAlgorithm: ConflictAlgorithm.replace,
-    );
+    db.close();
   }
-
-  Future<List<Channel.Data>> getAllChannel() async {
-    final db = await database;
-    final List<Map<String, dynamic>> maps = await db.query('channel');
-
-    return maps.map((map) => Channel.Data.fromJson(map)).toList();
-  }
-
 }
