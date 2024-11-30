@@ -25,6 +25,7 @@ class SellingResource extends JsonResource
                     return [
                         'id' => $selling_product->id,
                         'product_id' => $selling_product->product_id,
+                        'category' => $selling_product->category,
                         'product_name' => $selling_product->product_name,
                         'stock' => $selling_product->stock,
                         'selling' => $selling_product->selling,
