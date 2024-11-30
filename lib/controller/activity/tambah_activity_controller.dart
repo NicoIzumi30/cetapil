@@ -19,6 +19,7 @@ class TambahActivityController extends GetxController {
   final selectedTab = 0.obs;
   final surveyQuestions = <SurveyQuestion>[].obs;
   var outletId = ''.obs;
+  var selectedChannel = Rxn<String>(); // Added for channel selection
   Rx<Activity.Data?> detailOutlet = Rx<Activity.Data?>(null);
 
   // Loading states for each tab
@@ -55,7 +56,6 @@ class TambahActivityController extends GetxController {
   final productInputs = RxMap<String, Map<String, String>>().obs;
   // Initialize controllers
   final Map<String, Map<String, TextEditingController>> productControllers = {};
-
 
   void removeItem(String item) {
     selectedItems.removeWhere((items) => items.name == item);
@@ -219,6 +219,19 @@ class TambahActivityController extends GetxController {
     update();
   }
 
+  String? getSelectedChannel() {
+    if (detailOutlet.value != null && detailOutlet.value!.channel != null) {
+      return detailOutlet.value!.channel!.name;
+    }
+    return null;
+  }
+
+  // Set the detail outlet data
+  void setDetailOutlet(Activity.Data data) {
+    detailOutlet.value = data;
+    print(getSelectedChannel());
+  }
+
   /// Availability Section
   initListCategory() async {
     try {
@@ -238,8 +251,6 @@ class TambahActivityController extends GetxController {
     }
   }
 
- 
-
   /// Visibility Section
   initListPosm() async {
     try {
@@ -249,12 +260,11 @@ class TambahActivityController extends GetxController {
       print("succes get item posm ");
       if (response.status == "OK") {
         itemsPOSM.value = response.data!;
-      }else {
+      } else {
         setErrorState(true, 'Failed to load data');
       }
     } catch (e) {
-      setErrorState(true,
-          'Connection error. Please check your internet connection and try again.');
+      setErrorState(true, 'Connection error. Please check your internet connection and try again.');
       print('Error initializing survey questions: $e');
     } finally {
       setLoadingState(false);
@@ -269,12 +279,11 @@ class TambahActivityController extends GetxController {
       print("succes get item visual ");
       if (response.status == "OK") {
         itemsVisual.value = response.data!;
-      }else {
+      } else {
         setErrorState(true, 'Failed to load data');
       }
     } catch (e) {
-      setErrorState(true,
-          'Connection error. Please check your internet connection and try again.');
+      setErrorState(true, 'Connection error. Please check your internet connection and try again.');
       print('Error initializing survey questions: $e');
     } finally {
       setLoadingState(false);
@@ -286,7 +295,7 @@ class TambahActivityController extends GetxController {
     update();
   }
 
-  insertVisibility(){
+  insertVisibility() {
     Visibility.Visibility data = Visibility.Visibility(
       typeVisibility: TypeVisibility(id: selectedIdPOSM.value, type: selectedPOSM.value),
       typeVisual: TypeVisual(id: selectedIdVisual.value, type: selectedVisual.value),
@@ -295,6 +304,7 @@ class TambahActivityController extends GetxController {
       image2: visibilityImages[1],
     );
     listVisibility.add(data);
+
     /// Clear variable
     selectedPOSM.value = "";
     selectedIdPOSM.value = "";
@@ -344,8 +354,7 @@ class TambahActivityController extends GetxController {
         setErrorState(true, response.message ?? 'Failed to load data');
       }
     } catch (e) {
-      setErrorState(true,
-          'Connection error. Please check your internet connection and try again.');
+      setErrorState(true, 'Connection error. Please check your internet connection and try again.');
       print('Error initializing survey questions: $e');
     } finally {
       setLoadingState(false);

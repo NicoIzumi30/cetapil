@@ -10,15 +10,12 @@ import '../../api/api.dart';
 import '../../database/database_instance.dart';
 import '../../model/activity.dart';
 
-
 class ActivityController extends GetxController {
   RxList<Data> activity = <Data>[].obs;
   final db = DatabaseHelper.instance;
   RxString searchQuery = ''.obs;
   final selectedTab = 0.obs;
   var isLoading = false.obs;
-
-
 
   @override
   void onInit() {
@@ -54,21 +51,22 @@ class ActivityController extends GetxController {
     // ]);
   }
 
-  initGetActivity()async{
-    try{
+  initGetActivity() async {
+    try {
       await db.deleteAllActivity();
       activity.clear();
 
       EasyLoading.show(status: 'Saving data...');
       final response = await Api.getActivityList();
       if (response.status == "OK" && response.data!.isNotEmpty) {
-        for(int i = 0; i< response.data!.length; i++){ /// looping response Api
+        for (int i = 0; i < response.data!.length; i++) {
           final result = response.data![i];
-          print("activities : ${result.outlet!.id}");
           Map<String, dynamic> data = {
             'id': result.id,
             'checked_in': result.checkedIn,
             'checked_out': result.checkedOut,
+            'channel_id': result.channel?.id, // Changed from channel object to channel_id
+            'channel_name': result.channel?.name, // Added channel_name
             'views_knowledge': result.viewsKnowledge,
             'time_availability': result.timeAvailability,
             'time_visibility': result.timeVisibility,
@@ -77,6 +75,7 @@ class ActivityController extends GetxController {
             'time_order': result.timeOrder,
             'status': result.status,
           };
+
           if (result.outlet != null) {
             data.addAll({
               'outlet_id': result.outlet!.id,
@@ -88,29 +87,36 @@ class ActivityController extends GetxController {
               'visit_day': result.outlet!.visitDay,
             });
           }
-          print("fffff");
-          await db.insertActivity(data);
 
+          if (result.channel != null) {
+            // Add explicit check for channel
+            data.addAll({
+              'channel_id': result.channel!.id,
+              'channel_name': result.channel!.name,
+            });
+          }
+
+          await db.insertActivity(data);
         }
 
         final results = await db.getSalesActivities();
         activity.addAll(results);
       }
-    }catch(e){
+    } catch (e) {
       print('Error saving Activity: $e');
       Get.snackbar(
         'Error',
         'Gagal Simpan Data: Periksa Koneksi Anda dan Coba Lagi',
         snackPosition: SnackPosition.BOTTOM,
       );
-    }finally {
+    } finally {
       EasyLoading.dismiss();
     }
   }
 
   List<Data> get filteredOutlets => activity.where((outlet) {
-    return outlet.outlet!.name!.toLowerCase().contains(searchQuery.value.toLowerCase());
-  }).toList();
+        return outlet.outlet!.name!.toLowerCase().contains(searchQuery.value.toLowerCase());
+      }).toList();
 
   void updateSearchQuery(String query) {
     searchQuery.value = query;

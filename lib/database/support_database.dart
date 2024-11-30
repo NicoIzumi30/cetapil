@@ -194,7 +194,6 @@ class SupportDatabaseHelper {
       for (var channel in channels) {
         channelAv3m[channel['channel_name'] as String] = channel['value'];
       }
-      print("channel : ${channels}");
 
       result.add({
         'id': product['id'],

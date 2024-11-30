@@ -56,7 +56,6 @@ class SupportDataController extends GetxController {
 
       // Load products with their categories
       products.value = await supportDB.getAllProducts();
-      print("products.value ${products.value}");
 
       // Load categories
       categories.value = await supportDB.getAllCategories();
@@ -80,7 +79,7 @@ class SupportDataController extends GetxController {
     final lastFetchDate = storage.read<String>(LAST_FETCH_DATE_KEY);
     final today = DateTime.now().toString().split(' ')[0];
 
-    if (lastFetchDate == today) {
+    if (lastFetchDate != today) {
       initAllData();
       storage.write(LAST_FETCH_DATE_KEY, today);
     }

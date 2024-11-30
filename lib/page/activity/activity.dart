@@ -1,4 +1,5 @@
 import 'package:cetapil_mobile/controller/activity/tambah_activity_controller.dart';
+import 'package:cetapil_mobile/controller/activity/tambah_availibility_controller.dart';
 import 'package:cetapil_mobile/page/activity/tambah_activity.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
@@ -59,9 +60,12 @@ class ActivityPage extends GetView<ActivityController> {
                                     if (!Get.isRegistered<TambahActivityController>()) {
                                       Get.put(TambahActivityController());
                                     }
+                                    if (!Get.isRegistered<TambahAvailabilityController>()) {
+                                      Get.put(TambahAvailabilityController());
+                                    }
                                     final tambahActivityController =
                                         Get.find<TambahActivityController>();
-                                    tambahActivityController.detailOutlet.value = activity;
+                                    tambahActivityController.setDetailOutlet(activity);
                                     tambahActivityController.setOutletId(outlet_id!);
                                     Get.to(() => TambahActivity());
                                   },

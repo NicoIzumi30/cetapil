@@ -145,6 +145,8 @@ class DatabaseHelper {
           routing_id TEXT ,
           outlet_id TEXT,
           user_id TEXT,
+          channel_id TEXT,
+          channel_name TEXT,
           checked_in TEXT ,
           checked_out TEXT ,
           views_knowledge INTEGER DEFAULT 0,
@@ -181,7 +183,9 @@ class DatabaseHelper {
     await db.execute('''
   CREATE TABLE sales_activities (
     id TEXT PRIMARY KEY,
-    outlet_id TEXT NOT NULL,
+    outlet_id TEXT NOT NULL,  
+    channel_id TEXT,
+    channel_name TEXT,
     checked_in TEXT,
     checked_out TEXT,
     views_knowledge INTEGER DEFAULT 0,
@@ -780,7 +784,7 @@ class DatabaseHelper {
           },
         );
 
-        // 2. Only insert activities if sales_activity data exists
+        // 2. Modified: Insert activities with channel information
         if (data.containsKey('activities_id')) {
           await txn.insert(
             'routing_activities',
@@ -789,6 +793,8 @@ class DatabaseHelper {
               'routing_id': data['id'],
               'outlet_id': data['outlet_id'],
               'user_id': data['user_id'],
+              'channel_id': data['channel_id'],
+              'channel_name': data['channel_name'],
               'checked_in': data['checked_in'] ?? DateTime.now().toIso8601String(),
               'checked_out': data['checked_out'],
               'views_knowledge': data['views_knowledge'] ?? 0,
@@ -940,8 +946,7 @@ class DatabaseHelper {
     final db = await database;
 
     await db.transaction((txn) async {
-      // Insert outlet
-      // final outlet = data['outlet'];
+      // Insert outlet activity
       await txn.insert(
         'outlet_activities',
         {
@@ -958,12 +963,14 @@ class DatabaseHelper {
         conflictAlgorithm: ConflictAlgorithm.replace,
       );
 
-      // Insert sales activity
+      // Insert sales activity with channel
       await txn.insert(
         'sales_activities',
         {
           'id': data['id'],
           'outlet_id': data['outlet_id'],
+          'channel_id': data['channel_id'],
+          'channel_name': data['channel_name'],
           'checked_in': data['checked_in'],
           'checked_out': data['checked_out'],
           'views_knowledge': data['views_knowledge'],
@@ -998,6 +1005,12 @@ class DatabaseHelper {
       final activities = Activity.Data(
         id: activityMap['id'],
         outlet: outletMaps.isNotEmpty ? Activity.Outlet.fromJson(outletMaps.first) : null,
+        channel: activityMap['channel_id'] != null
+            ? Activity.Channel(
+                id: activityMap['channel_id'],
+                name: activityMap['channel_name'],
+              )
+            : null,
         checkedIn: activityMap['checked_in'],
         checkedOut: activityMap['checked_out'],
         viewsKnowledge: activityMap['views_knowledge'],
@@ -1014,7 +1027,6 @@ class DatabaseHelper {
   }
 
   // Add this method to your DatabaseHelper class
-// Add this method to your DatabaseHelper class
   Future<Outlet.Outlet?> getOutletById(String id) async {
     final db = await database;
 

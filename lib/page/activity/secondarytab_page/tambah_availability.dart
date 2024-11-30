@@ -12,8 +12,7 @@ import '../../../utils/colors.dart';
 import '../../../widget/back_button.dart';
 
 class TambahAvailability extends GetView<TambahAvailabilityController> {
-  TambahActivityController activityController =
-  Get.find<TambahActivityController>();
+  const TambahAvailability({super.key});
 
   @override
   Widget build(BuildContext context) {
@@ -26,245 +25,249 @@ class TambahAvailability extends GetView<TambahAvailabilityController> {
             width: double.infinity,
             height: double.infinity,
           ),
-          Column(
-            children: [
-              Expanded(
-                child: Padding(
-                  padding: const EdgeInsets.fromLTRB(15, 30, 15, 10),
-                  child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      EnhancedBackButton(
-                        onPressed: () => Alerts.showConfirmDialog(context),
-                        backgroundColor: Colors.white,
-                        iconColor: Colors.blue,
-                      ),
-                      SizedBox(
-                        height: 20,
-                      ),
-                      Expanded(
-                        child: ListView(
-                          children: [
-                            // Category Dropdown
-                            Column(
-                              crossAxisAlignment: CrossAxisAlignment.start,
-                              children: [
-                                Text(
-                                  "Kategori",
-                                  style: TextStyle(
-                                      fontSize: 13,
-                                      fontWeight: FontWeight.w700),
-                                ),
-                                SizedBox(height: 10),
-                                Container(
-                                  margin: EdgeInsets.only(bottom: 10),
-                                  decoration: BoxDecoration(
-                                    borderRadius: BorderRadius.circular(8),
-                                    boxShadow: [
-                                      BoxShadow(
-                                        color: Colors.grey.withOpacity(0.1),
-                                        spreadRadius: 1,
-                                        blurRadius: 3,
-                                        offset: const Offset(0, 2),
-                                      ),
-                                    ],
-                                  ),
-                                  child: Obx(() {
-                                    final categories = controller
-                                        .supportDataController.getCategories();
-                                    return DropdownButtonFormField<String>(
-                                      style: const TextStyle(
-                                        fontSize: 14,
-                                        color: Color(0xFF0077BD),
-                                      ),
-                                      decoration: InputDecoration(
-                                        contentPadding: const EdgeInsets
-                                            .symmetric(
-                                          horizontal: 16,
-                                          vertical: 12,
-                                        ),
-                                        border: OutlineInputBorder(
-                                          borderRadius: BorderRadius.circular(
-                                              8),
-                                          borderSide: BorderSide.none,
-                                        ),
-                                        filled: true,
-                                        fillColor: const Color(0xFFE8F3FF),
-                                      ),
-                                      hint: Text(
-                                        "-- Pilih Kategori --",
-                                        style: TextStyle(
-                                          color: Colors.grey[400],
-                                          fontSize: 14,
-                                        ),
-                                      ),
-                                      value: controller.selectedCategory.value,
-                                      items: categories.map((category) {
-                                        return DropdownMenuItem<String>(
-                                          value: category['id'].toString(),
-                                          child: Text(category['name'] ?? ''),
-                                        );
-                                      }).toList(),
-                                      onChanged: controller.onCategorySelected,
-                                      isExpanded: true,
-                                    );
-                                  }),
-                                ),
-                              ],
-                            ),
-
-                            Column(
-                              crossAxisAlignment: CrossAxisAlignment.start,
-                              children: [
-                                Text(
-                                  "SKU",
-                                  style: TextStyle(
-                                      fontSize: 13,
-                                      fontWeight: FontWeight.w700),
-                                ),
-                                SizedBox(height: 10),
-                                Container(
-                                  margin: EdgeInsets.only(bottom: 10),
-                                  decoration: BoxDecoration(
-                                    borderRadius: BorderRadius.circular(8),
-                                    boxShadow: [
-                                      BoxShadow(
-                                        color: Colors.grey.withOpacity(0.1),
-                                        spreadRadius: 1,
-                                        blurRadius: 3,
-                                        offset: const Offset(0, 2),
-                                      ),
-                                    ],
-                                  ),
-                                  child: Obx(() {
-                                    final skus = controller.filteredSkus;
-                                    return DropdownButtonFormField<String>(
-                                      style: const TextStyle(
-                                        fontSize: 14,
-                                        color: Color(0xFF0077BD),
-                                      ),
-                                      decoration: InputDecoration(
-                                        contentPadding: const EdgeInsets
-                                            .symmetric(
-                                          horizontal: 16,
-                                          vertical: 12,
-                                        ),
-                                        border: OutlineInputBorder(
-                                          borderRadius: BorderRadius.circular(
-                                              8),
-                                          borderSide: BorderSide.none,
-                                        ),
-                                        filled: true,
-                                        fillColor: controller.selectedCategory
-                                            .value != null
-                                            ? const Color(0xFFE8F3FF)
-                                            : Colors.grey[200],
-                                      ),
-                                      hint: Text(
-                                        "-- Pilih SKU --",
-                                        style: TextStyle(
-                                          color: Colors.grey[400],
-                                          fontSize: 14,
-                                        ),
-                                      ),
-                                      value: controller.selectedSku.value,
-                                      items: skus.map((sku) {
-                                        return DropdownMenuItem<String>(
-                                          value: sku['id'].toString(),
-                                          child: Text(sku['sku'] ?? ''),
-                                        );
-                                      }).toList(),
-                                      onChanged: controller.selectedCategory
-                                          .value != null
-                                          ? controller.onSkuSelected
-                                          : null,
-                                      isExpanded: true,
-                                    );
-                                  }),
-                                ),
-                              ],
-                            ),
-                            SizedBox(
-                              height: 10,
-                            ),
-                            Obx((){
-                              return (controller.groupSelectedIdSku.isNotEmpty)
-                                  ? Column(
-                                crossAxisAlignment: CrossAxisAlignment.start,
-                                children: [
-                                  Text(controller.getSelectedCategoryName,
-                                      style: TextStyle(
-                                          fontSize: 16,
-                                          fontWeight: FontWeight.bold,
-                                          color: Color(0xFF023B5E))),
-                                  Obx(() {
-                                    return Wrap(
-                                      spacing: 8, // Space between widgets
-                                      runSpacing: 8, // Space between rows
-                                      children: controller.groupSelectedIdSku
-                                          .map((sku) {
-                                        return SumAmountProduct(
-                                          productName: controller.getSkuName(sku),
-                                          stockController: TextEditingController(),
-                                          AV3MController: TextEditingController(),
-                                          recommendController: TextEditingController(),
-                                        );
-                                      })
-                                          .toList(), // Convert the iterable to a list for the children property
-                                    );
-                                  }),
-                                ],
-                              )
-                                  : SizedBox();
-                            }),
-
-
-                          ],
-                        ),
-                      )
-                    ],
-                  ),
+          Padding(
+            padding: const EdgeInsets.fromLTRB(15, 30, 15, 10),
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                EnhancedBackButton(
+                  onPressed: () => Get.back(),
+                  backgroundColor: Colors.white,
+                  iconColor: Colors.blue,
                 ),
-              ),
-              Padding(
-                padding: const EdgeInsets.fromLTRB(15, 0, 15, 15),
-                child: Container(
-                  width: double.infinity,
-                  decoration: BoxDecoration(
-                      color: Colors.white.withOpacity(0.3),
-                      borderRadius: BorderRadius.circular(10)),
-                  child: Padding(
-                    padding: const EdgeInsets.symmetric(
-                        horizontal: 15, vertical: 10),
-                    child: ElevatedButton(
-                      style: ElevatedButton.styleFrom(
-                        backgroundColor: AppColors.primary,
-                        shape: RoundedRectangleBorder(
-                          borderRadius: BorderRadius.circular(10),
-                          side: BorderSide(color: AppColors.primary),
+                SizedBox(height: 20),
+                Expanded(
+                  child: SingleChildScrollView(
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        Text(
+                          "Kategori",
+                          style: TextStyle(fontSize: 13, fontWeight: FontWeight.w700),
                         ),
-                      ),
-                      onPressed: () => Get.back(),
-                      child: Text(
-                        " Tambah Item",
-                        style: TextStyle(
-                          color: Colors.white,
-                          fontWeight: FontWeight.bold,
+                        SizedBox(height: 10),
+                        _buildCategoryDropdown(),
+                        SizedBox(height: 20),
+                        Text(
+                          "SKU",
+                          style: TextStyle(fontSize: 13, fontWeight: FontWeight.w700),
                         ),
-                      ),
+                        SizedBox(height: 10),
+                        _buildSkuDropdown(),
+                        SizedBox(height: 20),
+                        Text(
+                          "Selected SKU",
+                          style: TextStyle(fontSize: 13, fontWeight: FontWeight.w700),
+                        ),
+                        SizedBox(height: 10),
+                        _buildSelectedSkuDetails(),
+                      ],
                     ),
                   ),
                 ),
-              ),
-            ],
+                _buildBottomButtons(),
+              ],
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+
+  Widget _buildCategoryDropdown() {
+    return Container(
+      margin: EdgeInsets.only(bottom: 10),
+      decoration: BoxDecoration(
+        borderRadius: BorderRadius.circular(8),
+        boxShadow: [
+          BoxShadow(
+            color: Colors.grey.withOpacity(0.1),
+            spreadRadius: 1,
+            blurRadius: 3,
+            offset: const Offset(0, 2),
+          ),
+        ],
+      ),
+      child: Obx(() {
+        final categories = controller.supportDataController.getCategories();
+        return DropdownButtonFormField<String>(
+          style: const TextStyle(
+            fontSize: 14,
+            color: Color(0xFF0077BD),
+          ),
+          decoration: InputDecoration(
+            contentPadding: const EdgeInsets.symmetric(
+              horizontal: 16,
+              vertical: 12,
+            ),
+            border: OutlineInputBorder(
+              borderRadius: BorderRadius.circular(8),
+              borderSide: BorderSide.none,
+            ),
+            filled: true,
+            fillColor: const Color(0xFFE8F3FF),
+          ),
+          hint: Text(
+            "-- Pilih Kategori --",
+            style: TextStyle(
+              color: Colors.grey[400],
+              fontSize: 14,
+            ),
+          ),
+          value: controller.selectedCategory.value,
+          items: categories.map((category) {
+            return DropdownMenuItem<String>(
+              value: category['id'].toString(),
+              child: Text(category['name'] ?? ''),
+            );
+          }).toList(),
+          onChanged: controller.onCategorySelected,
+          isExpanded: true,
+        );
+      }),
+    );
+  }
+
+  Widget _buildSkuDropdown() {
+    return Container(
+      margin: EdgeInsets.only(bottom: 10),
+      decoration: BoxDecoration(
+        borderRadius: BorderRadius.circular(8),
+        boxShadow: [
+          BoxShadow(
+            color: Colors.grey.withOpacity(0.1),
+            spreadRadius: 1,
+            blurRadius: 3,
+            offset: const Offset(0, 2),
+          ),
+        ],
+      ),
+      child: Obx(() {
+        final skus = controller.filteredSkus;
+        return DropdownButtonFormField<String>(
+          style: const TextStyle(
+            fontSize: 14,
+            color: Color(0xFF0077BD),
+          ),
+          decoration: InputDecoration(
+            contentPadding: const EdgeInsets.symmetric(
+              horizontal: 16,
+              vertical: 12,
+            ),
+            border: OutlineInputBorder(
+              borderRadius: BorderRadius.circular(8),
+              borderSide: BorderSide.none,
+            ),
+            filled: true,
+            fillColor: controller.selectedCategory.value != null
+                ? const Color(0xFFE8F3FF)
+                : Colors.grey[200],
+          ),
+          hint: Text(
+            "-- Pilih SKU --",
+            style: TextStyle(
+              color: Colors.grey[400],
+              fontSize: 14,
+            ),
+          ),
+          value: controller.selectedSku.value,
+          items: skus.map((sku) {
+            return DropdownMenuItem<String>(
+              value: sku['id'].toString(),
+              child: Text(sku['sku'] ?? ''),
+            );
+          }).toList(),
+          onChanged: controller.selectedCategory.value != null ? controller.onSkuSelected : null,
+          isExpanded: true,
+        );
+      }),
+    );
+  }
+
+  Widget _buildSelectedSkuDetails() {
+    return Obx(() => controller.selectedSkuData.value != null
+        ? SumAmountProduct(
+            productName: controller.selectedSkuData.value!['sku'] ?? '',
+            stockController: controller.stockController.value,
+            AV3MController: controller.av3mController.value,
+            recommendController: controller.recommendController.value,
           )
+        : Container(
+            padding: EdgeInsets.all(16),
+            decoration: BoxDecoration(
+              color: Colors.grey[100],
+              borderRadius: BorderRadius.circular(8),
+            ),
+            child: Center(
+              child: Text(
+                "Select a SKU to view product details",
+                style: TextStyle(
+                  color: Colors.grey[600],
+                  fontSize: 14,
+                ),
+              ),
+            ),
+          ));
+  }
+
+  Widget _buildBottomButtons() {
+    return Padding(
+      padding: const EdgeInsets.fromLTRB(15, 0, 15, 15),
+      child: Row(
+        children: [
+          Expanded(
+            child: ElevatedButton(
+              style: ElevatedButton.styleFrom(
+                backgroundColor: AppColors.primary,
+                shape: RoundedRectangleBorder(
+                  borderRadius: BorderRadius.circular(10),
+                  side: BorderSide(color: AppColors.primary),
+                ),
+              ),
+              onPressed: () {
+                controller.addAvailabilityItem();
+                controller.clearForm();
+                Get.back();
+              },
+              child: Text(
+                "Tambah & Kembali",
+                style: TextStyle(
+                  color: Colors.white,
+                  fontWeight: FontWeight.bold,
+                ),
+              ),
+            ),
+          ),
+          SizedBox(width: 10),
+          Expanded(
+            child: ElevatedButton(
+              style: ElevatedButton.styleFrom(
+                backgroundColor: Colors.white,
+                shape: RoundedRectangleBorder(
+                  borderRadius: BorderRadius.circular(10),
+                  side: BorderSide(color: AppColors.primary),
+                ),
+              ),
+              onPressed: () {
+                controller.addAvailabilityItem();
+                controller.clearForm();
+              },
+              child: Text(
+                "Tambah & Lanjut",
+                style: TextStyle(
+                  color: AppColors.primary,
+                  fontWeight: FontWeight.bold,
+                ),
+              ),
+            ),
+          ),
         ],
       ),
     );
   }
 }
 
-class SumAmountProduct extends StatelessWidget {
+class SumAmountProduct extends StatefulWidget {
   final String productName;
   final TextEditingController stockController;
   final TextEditingController AV3MController;
@@ -279,14 +282,43 @@ class SumAmountProduct extends StatelessWidget {
   });
 
   @override
+  State<SumAmountProduct> createState() => _SumAmountProductState();
+}
+
+class _SumAmountProductState extends State<SumAmountProduct> {
+  @override
+  void initState() {
+    super.initState();
+    // Add listener to stock controller to update recommend value
+    widget.stockController.addListener(_calculateRecommend);
+  }
+
+  @override
+  void dispose() {
+    widget.stockController.removeListener(_calculateRecommend);
+    super.dispose();
+  }
+
+  void _calculateRecommend() {
+    try {
+      int stock = int.tryParse(widget.stockController.text) ?? 0;
+      int av3m = int.tryParse(widget.AV3MController.text) ?? 0;
+      int recommend = stock - av3m;
+      widget.recommendController.text = recommend.toString();
+    } catch (e) {
+      widget.recommendController.text = '0';
+    }
+  }
+
+  @override
   Widget build(BuildContext context) {
     return Column(
       children: [
-        SizedBox(
-          height: 10,
-        ),
-        Row(crossAxisAlignment: CrossAxisAlignment.start, children: [
-          Expanded(
+        SizedBox(height: 10),
+        Row(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Expanded(
               flex: 2,
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
@@ -295,64 +327,60 @@ class SumAmountProduct extends StatelessWidget {
                     "Stock On Hand",
                     style: TextStyle(fontWeight: FontWeight.bold),
                   ),
-                  SizedBox(
-                    height: 10,
-                  ),
+                  SizedBox(height: 10),
                   Text(
-                    productName,
+                    widget.productName,
                     style: TextStyle(fontSize: 10),
                   ),
                 ],
-              )),
-          SizedBox(
-            width: 10,
-          ),
-          Expanded(
-            child: Column(
-              children: [
-                Text(
-                  "Stock",
-                  style: TextStyle(fontSize: 10, fontWeight: FontWeight.bold),
-                ),
-                NumberField(
-                  controller: stockController,
-                ),
-              ],
+              ),
             ),
-          ),
-          SizedBox(
-            width: 10,
-          ),
-          Expanded(
-            child: Column(
-              children: [
-                Text(
-                  "AV3M(Pcs)",
-                  style: TextStyle(fontSize: 10, fontWeight: FontWeight.bold),
-                ),
-                NumberField(
-                  controller: AV3MController,
-                ),
-              ],
+            SizedBox(width: 10),
+            Expanded(
+              child: Column(
+                children: [
+                  Text(
+                    "Stock",
+                    style: TextStyle(fontSize: 10, fontWeight: FontWeight.bold),
+                  ),
+                  NumberField(
+                    controller: widget.stockController,
+                  ),
+                ],
+              ),
             ),
-          ),
-          SizedBox(
-            width: 10,
-          ),
-          Expanded(
-            child: Column(
-              children: [
-                Text(
-                  "Recommend",
-                  style: TextStyle(fontSize: 10, fontWeight: FontWeight.bold),
-                ),
-                NumberField(
-                  controller: recommendController,
-                ),
-              ],
+            SizedBox(width: 10),
+            Expanded(
+              child: Column(
+                children: [
+                  Text(
+                    "AV3M(Pcs)",
+                    style: TextStyle(fontSize: 10, fontWeight: FontWeight.bold),
+                  ),
+                  NumberField(
+                    controller: widget.AV3MController,
+                    readOnly: true,
+                  ),
+                ],
+              ),
             ),
-          ),
-        ]),
+            SizedBox(width: 10),
+            Expanded(
+              child: Column(
+                children: [
+                  Text(
+                    "Recommend",
+                    style: TextStyle(fontSize: 10, fontWeight: FontWeight.bold),
+                  ),
+                  NumberField(
+                    controller: widget.recommendController,
+                    readOnly: true,
+                  ),
+                ],
+              ),
+            ),
+          ],
+        ),
       ],
     );
   }
@@ -360,10 +388,12 @@ class SumAmountProduct extends StatelessWidget {
 
 class NumberField extends StatelessWidget {
   final TextEditingController controller;
+  final bool readOnly;
 
   const NumberField({
     super.key,
     required this.controller,
+    this.readOnly = false,
   });
 
   @override
@@ -384,6 +414,7 @@ class NumberField extends StatelessWidget {
       child: TextFormField(
         controller: controller,
         keyboardType: TextInputType.number,
+        readOnly: readOnly,
         style: const TextStyle(
           fontSize: 14,
           color: Color(0xFF0077BD),
@@ -391,9 +422,9 @@ class NumberField extends StatelessWidget {
         textAlign: TextAlign.center,
         inputFormatters: [
           FilteringTextInputFormatter.allow(RegExp(r'^\d*\.?\d*$')),
+          FilteringTextInputFormatter.digitsOnly, // Only allows digits
         ],
         decoration: InputDecoration(
-          // hintText: widget.title,
           hintStyle: TextStyle(
             color: Colors.grey[400],
             fontSize: 14,
@@ -410,8 +441,7 @@ class NumberField extends StatelessWidget {
             ),
           ),
           filled: true,
-          fillColor: const Color(0xFFE8F3FF),
-          // Light blue background
+          fillColor: readOnly ? Colors.grey[200] : const Color(0xFFE8F3FF),
           focusedBorder: OutlineInputBorder(
             borderRadius: BorderRadius.circular(8),
             borderSide: const BorderSide(
