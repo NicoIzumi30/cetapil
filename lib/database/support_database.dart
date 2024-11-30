@@ -2,8 +2,11 @@ import 'package:cetapil_mobile/model/list_product_sku_response.dart' as SKU;
 import '../model/list_category_response.dart' as Category;
 import '../model/list_channel_response.dart' as Channel;
 import '../model/list_knowledge_response.dart' as Knowledge;
+import '../model/survey_question_response.dart' as Survey;
 import 'package:sqflite/sqflite.dart';
 import 'package:path/path.dart';
+
+import '../model/survey_question_response.dart';
 
 class SupportDatabaseHelper {
   static final SupportDatabaseHelper instance = SupportDatabaseHelper._init();
@@ -81,6 +84,26 @@ class SupportDatabaseHelper {
       id TEXT PRIMARY KEY,
       name TEXT NOT NULL
     )
+    ''');
+
+    ///Survey
+    await db.execute('''
+      CREATE TABLE survey_questions(
+        id TEXT PRIMARY KEY,
+        title TEXT,
+        name TEXT
+      )
+    ''');
+
+    await db.execute('''
+      CREATE TABLE surveys(
+        id TEXT PRIMARY KEY,
+        product_id TEXT,
+        type TEXT,
+        question TEXT,
+        survey_question_id TEXT,
+        FOREIGN KEY (survey_question_id) REFERENCES survey_questions(id)
+      )
     ''');
   }
 
@@ -190,6 +213,60 @@ class SupportDatabaseHelper {
         'path_pdf': knowledge['path_pdf'],
         'path_video': knowledge['path_video'],
         'knowledge_channel': channel.first
+      });
+    }
+
+    return result;
+  }
+
+  Future<void> insertSurveyQuestion(Survey.SurveyQuestion question) async {
+    final db = await database;
+    await db.transaction((txn) async {
+      await txn.insert(
+        'survey_questions',
+        {
+          'id': question.id,
+          'title': question.title,
+          'name': question.name,
+        },
+        conflictAlgorithm: ConflictAlgorithm.replace,
+      );
+
+      if (question.surveys != null) {
+        for (var survey in question.surveys!) {
+          await txn.insert(
+            'surveys',
+            {
+              'id': survey.id,
+              'product_id': survey.productId,
+              'type': survey.type,
+              'question': survey.question,
+              'survey_question_id': question.id,
+            },
+            conflictAlgorithm: ConflictAlgorithm.replace,
+          );
+        }
+      }
+    });
+  }
+
+  Future<List<Map<String, dynamic>>> getAllSurveyQuestions() async {
+    final db = await database;
+    final List<Map<String, dynamic>> questions = await db.query('survey_questions');
+    final List<Map<String, dynamic>> result = [];
+
+    for (var questionMap in questions) {
+      final surveys = await db.query(
+        'surveys',
+        where: 'survey_question_id = ?',
+        whereArgs: [questionMap['id']],
+      );
+
+      result.add({
+        'id': questionMap['id'],
+        'title': questionMap['title'],
+        'name': questionMap['name'],
+        'surveys': surveys // Return full list of surveys
       });
     }
 
