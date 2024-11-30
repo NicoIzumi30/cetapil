@@ -10,16 +10,16 @@
             Daftar Visibility
         </x-slot:cardTitle>
         {{-- Visibility Action --}}
-        
         <x-slot:cardAction>
             <x-input.search wire:model.live="search" type="text" class="border-0" name="search" id="search" placeholder="Cari data visibility" value="{{ request('search') }}"></x-input.search>
             <x-select.light :title="'Filter Jenis Visibility'" id="posm-filter" name="posm_type_id">
+                <option value="">Semua Jenis</option>
                 @foreach($posmTypes as $type)
                     <option value="{{ $type->id }}" {{ request('posm_type_id') == $type->id ? 'selected' : '' }}>
                         {{ $type->name }}
                     </option>
                 @endforeach
-            </x-select.light> 
+            </x-select.light>
             <x-button.info onclick="openModal('update-photo')">Update Foto</x-button.info>
             <x-button.info href="/visibility/create">Tambah Visibility</x-button.info>
         </x-slot:cardAction>
@@ -36,7 +36,13 @@
                     <x-input.image class="!text-primary" id="coc" name="coc" label="COC" :max-size="5" />
                 </div>
                 <x:slot:footer>
-                    <x-button.info class="w-full" type="button" onclick="submitPosmImages()">Konfirmasi</x-button.info>
+                    <!-- Ubah type menjadi "button" dan tambahkan id -->
+                    <x-button.info class="w-full" type="button" id="submitPosmBtn">
+                        <span id="submitBtnText">Konfirmasi</span>
+                        <span id="submitBtnLoading" class="hidden">
+                            <i class="fas fa-spinner fa-spin mr-2"></i>Menyimpan...
+                        </span>
+                    </x-button.info>
                 </x:slot:footer>
             </form>
         </x-modal>
@@ -44,7 +50,7 @@
 
 
         {{-- Visibility Table --}}
-<table id="visibility-table" class="table">
+       <table id="visibility-table" class="table">
     <thead>
         <tr>
             <th scope="col" class="text-center">
@@ -90,8 +96,8 @@
             </th>
         </tr>
     </thead>
-    <tbody>
-        @foreach($visibilities as $visibility)
+            <tbody>
+                @foreach ($visibilities as $visibility)
             <tr>
                 <td class="table-data">{{ $visibility->outlet->name }}</td>
                 <td class="table-data">{{ $visibility->outlet->user->name }}</td>
@@ -106,6 +112,7 @@
                     @else
                         -
                     @endif
+
                 </td>
                 <td class="table-data">
                     <x-action-table-dropdown>
@@ -115,7 +122,7 @@
                             </a>
                         </li>
                         <li>
-                            <button onclick="deleteVisibility('{{ $visibility->id }}', '{{ $visibility->outlet->name }}', '{{ $visibility->outlet->user->name }}', '{{ $visibility->product->sku }}')" 
+                            <button onclick="deleteVisibility('{{ $visibility->id }}', '{{ $visibility->outlet->name }}', '{{ $visibility->outlet->user->name }}', '{{ $visibility->product->sku }}')"
                                 class="dropdown-option text-red-400">
                                 Hapus Data
                             </button>
@@ -124,8 +131,8 @@
                 </td>
             </tr>
         @endforeach
-    </tbody>
-</table>
+            </tbody>
+        </table>
         <x-modal id="delete-visibility">
             <x-slot:title>Hapus Visibility</x-slot:title>
             <p>Apakah kamu yakin Ingin Menghapus Data Pengguna ini?</p>
@@ -231,130 +238,27 @@
 
 @push('scripts')
     <script>
-// $(document).ready(function() {
-//     $.ajaxSetup({
-//         headers: {
-//             'X-CSRF-TOKEN': $('meta[name="csrf-token"]').attr('content')
-//         }
-//     });
-
-//     let table = $('#visibility-table').DataTable({
-//     processing: true,
-//     serverSide: true,
-//     paging: true,
-//     searching: false,
-//     info: true,
-//     pageLength: 10,
-//     lengthMenu: [10, 20, 30, 40, 50],
-//     dom: 'rt<"bottom-container"<"bottom-left"l><"bottom-right"p>>',
-//     language: {
-//         lengthMenu: "Menampilkan _MENU_ dari _TOTAL_ data",
-//         processing: "Memuat data...",
-//         paginate: {
-//             previous: '<',
-//             next: '>',
-//             last: 'Terakhir',
-//         },
-//         info: "Menampilkan _START_ sampai _END_ dari _TOTAL_ data",
-//         infoEmpty: "Menampilkan 0 sampai 0 dari 0 data",
-//         emptyTable: "Tidak ada data yang tersedia"
-//     },
-//     ajax: {
-//         url: "{{ route('visibility.data') }}",
-//         data: function(d) {
-//             d.search_term = $('#search').val();
-//             d.posm_type_id = $('#posm-filter').val();
-//         }
-//     },
-//     columns: [
-//         { 
-//             data: 'name',
-//             name: 'outlet.name',
-//             render: function(data, type, row) {
-//                 return data || '-';
-//             }
-//         },
-//         { 
-//             data: 'name',
-//             name: 'outlet.user.name',
-//             render: function(data, type, row) {
-//                 return data || '-';
-//             }
-//         },
-//         { 
-//             data: 'sku',
-//             name: 'product.sku',
-//             render: function(data, type, row) {
-//                 return data || '-';
-//             }
-//         },
-//         { 
-//             data: 'name',
-//             name: 'visualType.name',
-//             render: function(data, type, row) {
-//                 return data || '-';
-//             }
-//         },
-//         { 
-//             data: 'status',
-//             name: 'status',
-//             render: function(data, type, row) {
-//                 return `<span class="table-data ${data === 'ACTIVE' ? 'text-[#3eff86]' : 'text-red-500'}">${data}</span>`;
-//             }
-//         },
-//         { 
-//             data: 'date_range',
-//             name: 'started_at',
-//             render: function(data, type, row) {
-//                 if (row.started_at && row.ended_at) {
-//                     return moment(row.started_at).format('D MMMM Y') + ' - ' + moment(row.ended_at).format('D MMMM Y');
-//                 }
-//                 return '-';
-//             }
-//         },
-//         { 
-//             data: 'action',
-//             name: 'action',
-//             orderable: false,
-//             searchable: false,
-//             render: function(data, type, row) {
-//                 return `
-//                     <x-action-table-dropdown>
-//                         <li>
-//                             <a href="/visibility/edit/${row.id}" class="dropdown-option">
-//                                 Lihat Data
-//                             </a>
-//                         </li>
-//                         <li>
-//                             <button onclick="deleteVisibility('${row.id}', '${row.outlet_name}', '${row.sales_name}', '${row.product_sku}')" 
-//                                 class="dropdown-option text-red-400">
-//                                 Hapus Data
-//                             </button>
-//                         </li>
-//                     </x-action-table-dropdown>
-//                 `;
-//             }
-//         }
-//     ]
-// });
-
-    // Handle search with debounce
-    let searchTimer;
-    $('#search').on('input', function() {
-        clearTimeout(searchTimer);
-        searchTimer = setTimeout(() => table.ajax.reload(null, false), 500);
+$(document).ready(function() {
+    // Handle POSM type filter change
+    $('#posm-filter').on('change', function() {
+        const selectedPosmType = $(this).val();
+        const currentUrl = new URL(window.location.href);
+        
+        if (selectedPosmType) {
+            currentUrl.searchParams.set('posm_type_id', selectedPosmType);
+        } else {
+            currentUrl.searchParams.delete('posm_type_id');
+        }
+        
+        window.location.href = currentUrl.toString();
     });
 
-    // Handle POSM filter
-    $('#posm-filter').change(function() {
-        table.ajax.reload(null, false);
-    });
-
-    // Initialize Select2
-    $('#posm-filter').select2({
-        placeholder: 'Pilih Jenis Visibility',
-        allowClear: true
-    });
+    // Set selected value on page load if filter is active
+    const urlParams = new URLSearchParams(window.location.search);
+    const activePosmType = urlParams.get('posm_type_id');
+    if (activePosmType) {
+        $('#posm-filter').val(activePosmType);
+    }
 });
 
 
@@ -416,49 +320,166 @@ function deleteVisibility(id, outletName, salesName, sku) {
                 error: function(xhr) {
                     // Tampilkan toast error jika gagal
                     toast('error', 'Terjadi kesalahan saat menghapus data');
+                icon: 'warning',
+                showCancelButton: true,
+                confirmButtonColor: '#d33',
+                cancelButtonColor: '#3085d6',
+                confirmButtonText: 'Ya, Hapus!',
+                cancelButtonText: 'Batal'
+            }).then((result) => {
+                if (result.isConfirmed) {
+                    $.ajax({
+                        url: `/visibility/${id}`,
+                        type: 'DELETE',
+                        headers: {
+                            'X-CSRF-TOKEN': $('meta[name="csrf-token"]').attr('content')
+                        },
+                        success: function(response) {
+                            if (response.status === 'success') {
+                                Swal.fire('Berhasil!', 'Data berhasil dihapus', 'success')
+                                    .then(() => {
+                                        visibilityTable.ajax.reload();
+                                    });
+                            }
+                        },
+                        error: function(xhr) {
+                            Swal.fire('Error!', 'Terjadi kesalahan saat menghapus data', 'error');
+                        }
+                    });
                 }
             });
         }
-    });
-}
     </script>
 @endpush
-
 @push('scripts')
 <script>
-function submitPosmImages() {
-    const formData = new FormData(document.getElementById('posmImageForm'));
-    
-    $.ajax({
-        url: '{{ route("posm.update-image") }}',
-        type: 'POST',
-        data: formData,
-        processData: false,
-        contentType: false,
-        headers: {
-            'X-CSRF-TOKEN': $('meta[name="csrf-token"]').attr('content')
-        },
-        success: function(response) {
-            if (response.status === 'success') {
-                toast('success', response.message);
-                closeModal('update-photo');
-                $('#posmImageForm')[0].reset();
+$(document).ready(function() {
+    const form = $('#posmImageForm');
+    const submitBtn = $('#submitPosmBtn');
+    const btnText = $('#submitBtnText');
+    const loadingText = $('#submitBtnLoading');
+
+    // Function untuk memuat gambar yang ada
+    function loadExistingImages() {
+        $.ajax({
+            url: "{{ route('posm.get-images') }}",
+            type: 'GET',
+            success: function(response) {
+                if (response.status === 'success' && response.data) {
+                    response.data.forEach(function(item) {
+                        const input = $(`#${item.input_name}`);
+                        const inputContainer = input.closest('.image-input-container');
+                        
+                        // Update preview container
+                        inputContainer.find('.preview-container').html(`
+                            <div class="relative">
+                                <img src="${item.image_url}" class="h-20 w-20 object-cover rounded" />
+                                <button type="button" 
+                                        onclick="removeImage(this)"
+                                        class="absolute -top-2 -right-2 bg-white rounded-full p-1 shadow-md">
+                                    <svg xmlns="http://www.w3.org/2000/svg" 
+                                         class="h-4 w-4 text-red-500" 
+                                         viewBox="0 0 20 20" 
+                                         fill="currentColor">
+                                        <path fill-rule="evenodd" 
+                                              d="M4.293 4.293a1 1 0 011.414 0L10 8.586l4.293-4.293a1 1 0 111.414 1.414L11.414 10l4.293 4.293a1 1 0 01-1.414 1.414L10 11.414l-4.293 4.293a1 1 0 01-1.414-1.414L8.586 10 4.293 5.707a1 1 0 010-1.414z" 
+                                              clip-rule="evenodd" />
+                                    </svg>
+                                </button>
+                            </div>
+                        `);
+                    });
+                }
             }
-        },
-        error: function(xhr) {
-            const response = xhr.responseJSON;
-            let message = 'Terjadi kesalahan saat mengupload foto';
-            
-            if (response && response.errors) {
-                message = Object.values(response.errors)[0][0];
-            } else if (response && response.message) {
-                message = response.message;
+        });
+    }
+
+    // Load gambar saat modal dibuka
+    $(document).on('click', '[onclick="openModal(\'update-photo\')"]', function() {
+        loadExistingImages();
+    });
+
+    // Handle form submission
+    submitBtn.on('click', function(e) {
+        e.preventDefault();
+        
+        btnText.addClass('hidden');
+        loadingText.removeClass('hidden');
+        submitBtn.prop('disabled', true);
+
+        const formData = new FormData(form[0]);
+
+        $.ajax({
+            url: "{{ route('posm.update-image') }}",
+            type: 'POST',
+            data: formData,
+            processData: false,
+            contentType: false,
+            headers: {
+                'X-CSRF-TOKEN': $('meta[name="csrf-token"]').attr('content')
+            },
+            success: function(response) {
+                if (response.status === 'success') {
+                    toast('success', response.message);
+                    setTimeout(() => {
+                        closeModal('update-photo');
+                        window.location.reload();
+                    }, 1500);
+                }
+            },
+            error: function(xhr) {
+                toast('error', xhr.responseJSON?.message || 'Terjadi kesalahan saat mengupload gambar');
+            },
+            complete: function() {
+                btnText.removeClass('hidden');
+                loadingText.addClass('hidden');
+                submitBtn.prop('disabled', false);
             }
+        });
+    });
+
+    // Handle file input change for preview
+    $('input[type="file"]').on('change', function() {
+        const file = this.files[0];
+        if (file) {
+            if (file.size > 5 * 1024 * 1024) {
+                toast('error', 'Ukuran file tidak boleh lebih dari 5MB');
+                this.value = '';
+                return;
+            }
+
+            const reader = new FileReader();
+            const inputContainer = $(this).closest('.image-input-container');
             
-            toast('error', message);
+            reader.onload = function(e) {
+                inputContainer.find('.preview-container').html(`
+                    <div class="relative">
+                        <img src="${e.target.result}" class="h-20 w-20 object-cover rounded" />
+                        <button type="button" 
+                                onclick="removeImage(this)"
+                                class="absolute -top-2 -right-2 bg-white rounded-full p-1 shadow-md">
+                            <svg xmlns="http://www.w3.org/2000/svg" 
+                                 class="h-4 w-4 text-red-500" 
+                                 viewBox="0 0 20 20" 
+                                 fill="currentColor">
+                                <path fill-rule="evenodd" 
+                                      d="M4.293 4.293a1 1 0 011.414 0L10 8.586l4.293-4.293a1 1 0 111.414 1.414L11.414 10l4.293 4.293a1 1 0 01-1.414 1.414L10 11.414l-4.293 4.293a1 1 0 01-1.414-1.414L8.586 10 4.293 5.707a1 1 0 010-1.414z" 
+                                      clip-rule="evenodd" />
+                            </svg>
+                        </button>
+                    </div>
+                `);
+            };
+            reader.readAsDataURL(file);
         }
     });
-}
-    </script>
-@endpush
+});
 
+// Function to remove image preview
+function removeImage(button) {
+    const container = $(button).closest('.image-input-container');
+    container.find('input[type="file"]').val('');
+    container.find('.preview-container').empty();
+}
+</script>
+@endpush

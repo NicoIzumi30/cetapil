@@ -9,7 +9,9 @@ use App\Models\PosmType;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Validator;
 use App\Models\PosmImage;
-use Illuminate\Support\Str;
+use Illuminate\Support\Facades\Log;
+use Illuminate\Support\Facades\Storage;
+
 
 class PosmController extends Controller
 {
@@ -52,53 +54,122 @@ class PosmController extends Controller
     }
 
     public function updateImage(CreateImagePOSM $request)
-{
-    try {
-        $imageTypes = [
-            'backwall' => '9d88dc9e-7bdd-4cbc-b0b8-0c5e7c5d3953',
-            'standee' => '9d88dc9e-7e53-4bed-bdc7-d8cd454a8229', 
-            'glolifier' => '9d88dc9e-8059-4a60-8e51-6ba4ec2b7855',
-            'coc' => '9d88dc9e-821f-462d-96c2-04b9c72184d9'
-        ];
-        
-        foreach ($imageTypes as $type => $posmTypeId) {
-            if ($request->hasFile($type)) {
-                $existingImage = PosmImage::where('posm_type_id', $posmTypeId)->first();
-
-                $file = $request->file($type);
-                $media = saveFile($file, "posm/{$posmTypeId}");
-
-                if ($existingImage) {
-                    // Remove old file if exists
-                    removeFile($existingImage->path);
+    {
+        try {
+            $posmTypes = PosmType::all();
+            $uploadedImages = [];
+            $actions = []; // Track apakah insert atau update
+    
+            // Map file inputs ke POSM types
+            $posmMapping = [
+                'backwall' => 'Backwall',
+                'standee' => 'Standee',
+                'glolifier' => 'Glorifier',
+                'coc' => 'COC'
+            ];
+    
+            foreach ($posmMapping as $inputName => $posmTypeName) {
+                if ($request->hasFile($inputName)) {
+                    $file = $request->file($inputName);
                     
-                    $existingImage->update([
-                        'image' => $media['filename'],
-                        'path' => $media['path'],
-                        'type' => $type
-                    ]);
-                } else {
-                    PosmImage::create([
-                        'id' => Str::uuid(),
-                        'posm_type_id' => $posmTypeId,
-                        'type' => $type,
-                        'image' => $media['filename'],
-                        'path' => $media['path']
-                    ]);
+                    // Find corresponding POSM type
+                    $posmType = $posmTypes->firstWhere('name', $posmTypeName);
+                    
+                    if ($posmType) {
+                        // Generate filename
+                        $fileName = uniqid() . '_' . $file->getClientOriginalName();
+                        
+                        // Store file
+                        $path = $file->storeAs('public/posm-images', $fileName);
+    
+                        // Check if record exists
+                        $existingImage = PosmImage::where('posm_type_id', $posmType->id)->first();
+    
+                        if ($existingImage) {
+                            // Update existing record
+                            if ($existingImage->path) {
+                                // Delete old file
+                                Storage::delete($existingImage->path);
+                            }
+                            
+                            $existingImage->update([
+                                'image' => $fileName,
+                                'path' => $path
+                            ]);
+                            
+                            $actions[$inputName] = 'updated';
+                        } else {
+                            // Create new record
+                            PosmImage::create([
+                                'posm_type_id' => $posmType->id,
+                                'image' => $fileName,
+                                'path' => $path
+                            ]);
+                            
+                            $actions[$inputName] = 'inserted';
+                        }
+    
+                        $uploadedImages[] = $inputName;
+                    }
                 }
             }
+    
+            // Prepare response message
+            $message = '';
+            if (!empty($actions)) {
+                $inserted = array_filter($actions, fn($action) => $action === 'inserted');
+                $updated = array_filter($actions, fn($action) => $action === 'updated');
+                
+                if (!empty($inserted)) {
+                    $message .= count($inserted) . ' foto baru ditambahkan. ';
+                }
+                if (!empty($updated)) {
+                    $message .= count($updated) . ' foto diperbarui.';
+                }
+            } else {
+                $message = 'Tidak ada perubahan foto.';
+            }
+    
+            return response()->json([
+                'status' => 'success',
+                'message' => trim($message),
+                'uploaded_images' => $uploadedImages,
+                'actions' => $actions
+            ]);
+    
+        } catch (\Exception $e) {
+            Log::error('Error updating POSM images: ' . $e->getMessage());
+            
+            return response()->json([
+                'status' => 'error',
+                'message' => 'Terjadi kesalahan saat mengupload gambar'
+            ], 500);
         }
-
-        return response()->json([
-            'status' => 'success',
-            'message' => 'Foto POSM berhasil diperbarui'
-        ]);
-
-    } catch (\Exception $e) {
-        return response()->json([
-            'status' => 'error',
-            'message' => 'Terjadi kesalahan: ' . $e->getMessage()
-        ], 500);
     }
+
+private function processImage($file, $posmType)
+{
+    if (!$posmType) {
+        throw new \Exception('POSM type not found');
+    }
+
+    // Generate filename
+    $fileName = uniqid() . '_' . $file->getClientOriginalName();
+    
+    // Store file
+    $path = $file->storeAs('public/posm-images', $fileName);
+
+    // Delete existing image if exists
+    PosmImage::where('posm_type_id', $posmType->id)->delete();
+
+    // Create new record
+    PosmImage::create([
+        'posm_type_id' => $posmType->id,
+        'image' => $fileName,
+        'path' => $path
+    ]);
 }
+
+
+
 }

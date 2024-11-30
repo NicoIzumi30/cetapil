@@ -13,7 +13,7 @@ use Illuminate\Database\Eloquent\SoftDeletes;
 
 class Outlet extends Model
 {
-    use HasFactory, HasUuids ,SoftDeletes;
+    use HasFactory, HasUuids, SoftDeletes;
 
     protected $guarded = [];
 
@@ -31,6 +31,10 @@ class Outlet extends Model
     public function user()
     {
         return $this->belongsTo(User::class)->withTrashed();
+    }
+    public function channel(): BelongsTo  // Note: changed from 'channels' to 'channel' since it's a single relationship
+    {
+        return $this->belongsTo(Channel::class);
     }
     public function products()
     {
@@ -65,7 +69,7 @@ class Outlet extends Model
         return $this->belongsTo(Channel::class, 'channel', 'id');
     }
     public function productKnowledge()
-{
-    return $this->hasMany(ProductKnowledge::class, 'channel_id', 'channel');
-}
+    {
+        return $this->hasMany(ProductKnowledge::class, 'channel_id', 'channel');
+    }
 }

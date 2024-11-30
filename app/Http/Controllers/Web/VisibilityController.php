@@ -8,17 +8,16 @@ use App\Http\Controllers\Controller;
 use App\Http\Requests\Visibility\CreateVisibilityRequest;
 use App\Http\Requests\Visibility\UpdateVisibilityRequest;
 use App\Models\City;
-use App\Models\User;
 use App\Models\Category;
 use App\Models\Product;
 use App\Models\VisualType;
 use App\Models\PosmType;
+use App\Models\PosmImage;
 use App\Models\Visibility;
 use App\Models\Outlet;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Log;
 use Illuminate\Http\Request;
-use Carbon\Carbon;
 
 
 
@@ -31,7 +30,17 @@ class VisibilityController extends Controller
     {
         $posmTypes = PosmType::orderBy('name')->get();
         
-        // Add this query to get visibilities data
+        // Tambahkan ini untuk mendapatkan existing images
+        $posmImages = PosmImage::with('posmType')
+            ->get()
+            ->map(function($image) {
+                return [
+                    'posm_type' => $image->posmType->name,
+                    'image_url' => asset('storage/' . str_replace('public/', '', $image->path))
+                ];
+            })
+            ->collect();
+        
         $visibilities = Visibility::with([
             'outlet.user',
             'product',
@@ -43,70 +52,7 @@ class VisibilityController extends Controller
         ->latest()
         ->get();
 
-        return view("pages.visibility.index", compact('posmTypes', 'visibilities'));
-
-    }
-
-    public function getData(Request $request)
-    {
-        $query = Visibility::with([
-            'outlet.user', 
-            'product', 
-            'visualType',
-            'city',
-            'posmType'
-        ])->whereHas('outlet.user', function($query) {
-            $query->role('sales');
-        });
-    
-        // Apply POSM type filter if selected
-        if ($request->filled('posm_type_id')) {
-            $query->where('posm_type_id', $request->posm_type_id);
-        }
-    
-        // Apply search if exists
-        if ($request->filled('search_term')) {
-            $searchTerm = $request->search_term;
-            $query->where(function($q) use ($searchTerm) {
-                $q->whereHas('outlet', function($q) use ($searchTerm) {
-                    $q->where('name', 'like', "%{$searchTerm}%");
-                })
-                ->orWhereHas('outlet.user', function($q) use ($searchTerm) {
-                    $q->where('name', 'like', "%{$searchTerm}%");
-                })
-                ->orWhereHas('product', function($q) use ($searchTerm) {
-                    $q->where('sku', 'like', "%{$searchTerm}%");
-                })
-                ->orWhereHas('visualType', function($q) use ($searchTerm) {
-                    $q->where('name', 'like', "%{$searchTerm}%");
-                });
-            });
-        }
-    
-        $filteredRecords = (clone $query)->count();
-    
-        $result = $query->skip($request->start)
-                        ->take($request->length)
-                        ->latest()
-                        ->get();
-    
-        return response()->json([
-            'draw' => intval($request->draw),
-            'recordsTotal' => $filteredRecords,
-            'recordsFiltered' => $filteredRecords,
-            'data' => $result->map(function($item) {
-                return [
-                    'id' => $item->id,
-                    'name' => $item->outlet->name ?? '-',
-                    'name' => $item->outlet->user->name ?? '-',
-                    'sku' => $item->product->sku ?? '-',
-                    'name' => $item->visualType->name ?? '-',
-                    'status' => $item->status,
-                    'started_at' => $item->started_at,
-                    'ended_at' => $item->ended_at
-                ];
-            })
-        ]);
+        return view("pages.visibility.index", compact('posmTypes', 'visibilities', 'posmImages'));
     }
 
     /**

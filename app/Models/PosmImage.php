@@ -12,14 +12,13 @@ class PosmImage extends Model
 {
     use HasFactory, SoftDeletes;
 
-    protected $table = 'posm_image';
+    protected $table = 'posm_images';
     public $incrementing = false;
     protected $keyType = 'string';
     
     protected $fillable = [
         'id',
         'posm_type_id',
-        'type',
         'image',
         'path'
     ];
@@ -35,6 +34,7 @@ class PosmImage extends Model
 
     public function posmType()
     {
-        return $this->belongsTo(PosmType::class);
+        return $this->belongsTo(PosmType::class, 'posm_type_id', 'id');
     }
 }
+
