@@ -73,6 +73,8 @@ class TambahSelling extends GetView<SellingController> {
                                     groupedItems[category] = [];
                                   }
                                   groupedItems[category]!.add(item);
+                                  controller.listProduct.clear();
+                                  controller.listProduct.add(item);
                                 }
                                 return Column(
                                   children: [
@@ -270,7 +272,7 @@ class TambahSelling extends GetView<SellingController> {
                             height: 45,
                             child: ElevatedButton(
                               onPressed: () {
-                                // Add your send logic here
+                                controller.submitApiSelling();
                               },
                               style: ElevatedButton.styleFrom(
                                 backgroundColor: Colors.blue,
@@ -426,7 +428,7 @@ class SumAmountProduct extends StatelessWidget {
       crossAxisAlignment: CrossAxisAlignment.end,
       children: [
         IconButton(onPressed: onDelete,
-            icon: Icon(Icons.close)),
+            icon: Icon(Icons.close,size: 14)),
         Row(
           children: [
             Expanded(

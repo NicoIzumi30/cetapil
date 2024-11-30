@@ -11,6 +11,7 @@ import 'package:cetapil_mobile/model/list_selling_response.dart';
 import 'package:cetapil_mobile/model/outlet.dart';
 import 'package:cetapil_mobile/model/submit_checkin_routing.dart';
 import 'package:cetapil_mobile/model/submit_outlet_response.dart';
+import 'package:cetapil_mobile/model/submit_selling_response.dart';
 import 'package:cetapil_mobile/model/survey_question_response.dart';
 import 'package:get_storage/get_storage.dart';
 import 'package:http/http.dart' as http;
@@ -42,7 +43,8 @@ class Api {
         if (response.statusCode >= 500) {
           throw Exception('Server Error');
         }
-        throw Exception('Failed to login: ${response.statusCode} ${response.reasonPhrase}');
+        throw Exception(
+            'Failed to login: ${response.statusCode} ${response.reasonPhrase}');
       }
     } catch (e) {
       throw Exception('Failed to login: $e');
@@ -85,7 +87,9 @@ class Api {
         final jsonResponse = json.decode(response.body);
         final List<dynamic> data = jsonResponse;
         print(data);
-        return data.map((item) => FormOutletResponse.fromJson(item).toJson()).toList();
+        return data
+            .map((item) => FormOutletResponse.fromJson(item).toJson())
+            .toList();
       }
 
       throw Exception('Failed to load forms');
@@ -145,6 +149,7 @@ class Api {
     }
     throw "Gagal request data Routing : \n${response.body}";
   }
+
   static Future<SurveyQuestionResponse> getSurveyQuestion() async {
     var url = "$baseUrl/api/activity/surveys";
     var token = await storage.read('token');
@@ -162,7 +167,8 @@ class Api {
     throw "Gagal request data Survey Question : \n${response.body}";
   }
 
-  static Future<SubmitCheckinRouting> submitCheckin(Map<String, String> data) async {
+  static Future<SubmitCheckinRouting> submitCheckin(
+      Map<String, String> data) async {
     var url = "$baseUrl/api/routing/check_in";
     var token = await storage.read('token');
     var response = await http.post(
@@ -229,8 +235,6 @@ class Api {
     }
   }
 
-
-
   static Future<ListActivityResponse> getActivityList() async {
     var url = "$baseUrl/api/activity";
     var token = await storage.read('token');
@@ -287,7 +291,6 @@ class Api {
     var token = await storage.read('token');
     var response = await http.get(
       Uri.parse(url),
-
       headers: {
         'Content-type': 'application/json',
         'Authorization': 'Bearer $token',
@@ -350,6 +353,7 @@ class Api {
     }
     throw "Gagal request all Knowledge : \n${response.body}";
   }
+
   static Future<ListSellingResponse> getListSelling() async {
     var url = "$baseUrl/api/selling";
     var token = await storage.read('token');
@@ -365,5 +369,41 @@ class Api {
       return ListSellingResponse.fromJson(jsonDecode(response.body));
     }
     throw "Gagal request all Selling : \n${response.body}";
+  }
+
+  static Future<SubmitSellingResponse> submitSelling(
+      Map<String, dynamic> data, List<Map<String, dynamic>> productList) async {
+    var url = "$baseUrl/api/selling/create";
+    var token = await storage.read('token');
+    var request = await http.MultipartRequest('post', Uri.parse(url));
+    request.headers["Content-type"] = 'application/json';
+    request.headers["Authorization"] = 'Bearer $token';
+
+    request.fields["outlet_name"] = data["outlet_name"].toString();
+    request.fields["category_outlet"] = data["category_outlet"].toString();
+    request.fields["longitude"] = data["longitude"].toString();
+    request.fields["latitude"] = data["latitude"].toString();
+
+    for(var i = 0; i < productList.length; i++){
+      request.fields["products[$i][id]"] = productList[i]["id"].toString();
+      request.fields["products[$i][stock]"] = productList[i]["stock"].toString();
+      request.fields["products[$i][selling]"] = productList[i]["selling"].toString();
+      request.fields["products[$i][balance]"] = productList[i]["balance"].toString();
+      request.fields["products[$i][price]"] = productList[i]["price"].toString();
+    }
+    request.files.add(await http.MultipartFile.fromPath(
+      'image',
+      data["image"],
+    ));
+
+    var response = await request.send();
+    var responseJson = await http.Response.fromStream(response);
+
+    print(response.statusCode);
+    if (response.statusCode == 200) {
+      return SubmitSellingResponse.fromJson(jsonDecode(responseJson.body));
+    } else {
+      throw "Unable to Submit Selling";
+    }
   }
 }

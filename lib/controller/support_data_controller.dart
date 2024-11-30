@@ -29,7 +29,7 @@ class SupportDataController extends GetxController {
     super.onInit();
     checkData();
     startTimeCheck();
-    initProductListData();
+    // initProductListData();
   }
 
   @override
@@ -40,9 +40,10 @@ class SupportDataController extends GetxController {
 
   Future<void> checkData() async {
     await loadLocalData();
+    print("----cek-----");
 
     // Only force refresh if data is empty
-    if (products.isEmpty || categories.isEmpty || channels.isEmpty || knowledge.isEmpty) {
+    if (products.isEmpty || categories.isEmpty || channels.isEmpty || knowledge.isEmpty || survey.isEmpty) {
       await initAllData();
     } else {
       // If data exists, check for daily refresh
@@ -118,7 +119,7 @@ class SupportDataController extends GetxController {
           await supportDB.insertProduct(product);
         }
       } else {
-        print("Product error = ${responseProduct.message}");
+        print("Product error ${responseProduct.message}");
       }
     } catch (e) {
       print("Product error = $e");

@@ -289,7 +289,7 @@ class SumAmountProduct extends StatelessWidget {
       Expanded(
         child: Column(
           children: [
-            Text("Stock"),
+            Text("Stock",style: TextStyle(fontSize: 12),),
             NumberField(
               controller: stockController,
             ),
@@ -302,7 +302,7 @@ class SumAmountProduct extends StatelessWidget {
       Expanded(
         child: Column(
           children: [
-            Text("Selling"),
+            Text("Selling",style: TextStyle(fontSize: 12),),
             NumberField(
               controller: sellingController,
             ),
@@ -315,7 +315,7 @@ class SumAmountProduct extends StatelessWidget {
       Expanded(
         child: Column(
           children: [
-            Text("Balance"),
+            Text("Balance",style: TextStyle(fontSize: 12),),
             NumberField(
               controller: balanceController,
             ),
@@ -328,7 +328,7 @@ class SumAmountProduct extends StatelessWidget {
       Expanded(
         child: Column(
           children: [
-            Text("Price"),
+            Text("Price",style: TextStyle(fontSize: 12),),
             NumberField(
               controller: priceController,
             ),

@@ -107,6 +107,7 @@ print("aaa");
       for (var product in sellingData.products!) {
         final productMap = product.toJson();
         productMap['selling_id'] = sellingData.id;
+        productMap.remove('category');
         await db.insert('products', productMap, conflictAlgorithm: ConflictAlgorithm.replace);
       }
     }

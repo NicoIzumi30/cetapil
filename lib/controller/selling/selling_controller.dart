@@ -5,9 +5,11 @@ import 'package:cetapil_mobile/controller/support_data_controller.dart';
 import 'package:cetapil_mobile/database/selling_database.dart';
 import 'package:cetapil_mobile/model/list_selling_response.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_easyloading/flutter_easyloading.dart';
 import 'package:get/get.dart';
 import 'package:uuid/uuid.dart';
 import '../../api/api.dart';
+import '../../widget/custom_alert.dart';
 
 class SellingController extends GetxController {
   final GPSLocationController gpsController = Get.find<GPSLocationController>();
@@ -27,10 +29,8 @@ class SellingController extends GetxController {
   RxBool isLoading = false.obs;
   RxBool isSaving = false.obs;
 
-  // Error handling
   RxString errorMessage = ''.obs;
 
-  // Form Controllers
   var outletName = TextEditingController().obs;
 
   // Draft items for products
@@ -213,6 +213,8 @@ class SellingController extends GetxController {
         image: sellingImage.value?.path,
       );
 
+      print("path image ${sellingImage.value!.path}");
+
       // Update or insert based on whether we're editing
       if (currentDraftId?.value.isNotEmpty == true) {
         // Update existing draft
@@ -250,6 +252,48 @@ class SellingController extends GetxController {
       );
     } finally {
       isSaving.value = false;
+    }
+  }
+
+  final listProduct = <Map<String, dynamic>>[].obs;
+
+  Future<void> submitApiSelling() async {
+    try {
+      final String? currentSellingId = Get.arguments?['id'].toString();
+      final bool isEditing = currentSellingId != null;
+      EasyLoading.show(status: 'Submit Data...');
+      final data = {
+        'outlet_name': outletName.value.text,
+        'category_outlet': selectedCategory.value,
+        'longitude': gpsController.currentPosition.value!.longitude.toString(),
+        'latitude': gpsController.currentPosition.value!.latitude.toString(),
+        'image': sellingImage.value!.path,
+      };
+
+      final response = await Api.submitSelling(data, listProduct);
+
+      if (response.status != "OK") {
+        throw Exception('Failed to get outlets from API');
+      }
+print("id draft = $currentDraftId");
+      isEditing ? await dbHelper.deleteSellingData(currentDraftId!.value) : null;
+      clearForm();
+      EasyLoading.dismiss();
+      Get.back();
+      showSuccessAlert(
+          Get.context!, // Use Get.context instead of the previous context
+          "Data Berhasil Disimpan",
+          "Anda baru menyimpan Data. Silahkan periksa status Outlet pada aplikasi.");
+      // await refreshOutlets();
+    } catch (e) {
+      print('Error submit data: $e');
+      Get.snackbar(
+        'Error',
+        'Failed to submit data: $e',
+        snackPosition: SnackPosition.BOTTOM,
+      );
+    } finally {
+      EasyLoading.dismiss();
     }
   }
 

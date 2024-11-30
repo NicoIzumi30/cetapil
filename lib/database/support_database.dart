@@ -121,50 +121,42 @@ class SupportDatabaseHelper {
   Future<void> insertProduct(SKU.Data product) async {
     final db = await database;
     await db.transaction((txn) async {
-      // Insert category
       await txn.insert(
         'categories',
         {'id': product.category!.id, 'name': product.category!.name},
         conflictAlgorithm: ConflictAlgorithm.replace,
       );
 
-      // Insert product
       await txn.insert(
         'products',
         {
           'id': product.id,
           'sku': product.sku,
           'category_id': product.category!.id,
-          'average_stock': product.averageStock,
-          'md_price': product.mdPrice,
-          'sales_price': product.salesPrice,
+          'average_stock': product.averageStock ?? 0,
+          'md_price': product.mdPrice ?? 0,
+          'sales_price': product.salesPrice ?? 0,
         },
         conflictAlgorithm: ConflictAlgorithm.replace,
       );
 
-      // Insert channel_av3m data if it exists
-      if (product.channelAv3M != null && product.channelAv3M is Map) {
-        // Delete existing channel data for this product
+      if (product.channelAv3M is Map) {
         await txn.delete(
           'product_channels',
           where: 'product_id = ?',
           whereArgs: [product.id],
         );
 
-        // Insert new channel data
-        final Map<String, dynamic> channelMap =
-            Map<String, dynamic>.from(product.channelAv3M as Map);
-        for (var entry in channelMap.entries) {
-          await txn.insert(
+        (product.channelAv3M as Map<String, dynamic>).forEach((key, value) {
+          txn.insert(
             'product_channels',
             {
               'product_id': product.id,
-              'channel_name': entry.key,
-              'value': entry.value,
+              'channel_name': key,
+              'value': value,
             },
-            conflictAlgorithm: ConflictAlgorithm.replace,
           );
-        }
+        });
       }
     });
   }
