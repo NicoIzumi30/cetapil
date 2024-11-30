@@ -49,16 +49,16 @@ class Data {
 
   Data(
       {this.id,
-      this.user,
-      this.outletName,
-      this.categoryOutlet,
-      this.products,
-      this.longitude,
-      this.latitude,
-      this.filename,
-      this.image,
-      this.createdAt,
-      this.isDrafted});
+        this.user,
+        this.outletName,
+        this.categoryOutlet,
+        this.products,
+        this.longitude,
+        this.latitude,
+        this.filename,
+        this.image,
+        this.createdAt,
+        this.isDrafted});
 
   Data.fromJson(Map<String, dynamic> json) {
     if (json["id"] is String) {
@@ -124,60 +124,62 @@ class Data {
 class Products {
   String? id;
   String? productId;
+  Category? category;
   String? productName;
   int? stock;
   int? selling;
   int? balance;
   int? price;
 
-  Products(
-      {this.id,
-      this.productId,
-      this.productName,
-      this.stock,
-      this.selling,
-      this.balance,
-      this.price});
+  Products({
+    this.id,
+    this.productId,
+    this.category,
+    this.productName,
+    this.stock,
+    this.selling,
+    this.balance,
+    this.price,
+  });
 
   Products.fromJson(Map<String, dynamic> json) {
-    if (json["id"] is String) {
-      id = json["id"];
-    }
-    if (json["product_id"] is String) {
-      productId = json["product_id"];
-    }
-    if (json["product_name"] is String) {
-      productName = json["product_name"];
-    }
-    if (json["stock"] is int) {
-      stock = json["stock"];
-    }
-    if (json["selling"] is int) {
-      selling = json["selling"];
-    }
-    if (json["balance"] is int) {
-      balance = json["balance"];
-    }
-    if (json["price"] is int) {
-      price = json["price"];
-    }
+    id = json["id"] as String?;
+    productId = json["product_id"] as String?;
+    category = json["category"] == null ? null : Category.fromJson(json["category"]);
+    productName = json["product_name"] as String?;
+    stock = json["stock"] as int?;
+    selling = json["selling"] as int?;
+    balance = json["balance"] as int?;
+    price = json["price"] as int?;
   }
 
-  static List<Products> fromList(List<Map<String, dynamic>> list) {
-    return list.map(Products.fromJson).toList();
+  Map<String, dynamic> toJson() => {
+    "id": id,
+    "product_id": productId,
+    "category": category?.toJson(),
+    "product_name": productName,
+    "stock": stock,
+    "selling": selling,
+    "balance": balance,
+    "price": price,
+  };
+}
+
+class Category {
+  String? id;
+  String? name;
+
+  Category({this.id, this.name});
+
+  Category.fromJson(Map<String, dynamic> json) {
+    id = json["id"] as String?;
+    name = json["name"] as String?;
   }
 
-  Map<String, dynamic> toJson() {
-    final Map<String, dynamic> _data = <String, dynamic>{};
-    _data["id"] = id;
-    _data["product_id"] = productId;
-    _data["product_name"] = productName;
-    _data["stock"] = stock;
-    _data["selling"] = selling;
-    _data["balance"] = balance;
-    _data["price"] = price;
-    return _data;
-  }
+  Map<String, dynamic> toJson() => {
+    "id": id,
+    "name": name,
+  };
 }
 
 class User {

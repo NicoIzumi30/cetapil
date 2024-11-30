@@ -36,6 +36,8 @@ class SellingController extends GetxController {
   // Draft items for products
   RxList<Map<String, dynamic>> draftItems = <Map<String, dynamic>>[].obs;
 
+
+
   Rx<File?> sellingImage = Rx<File?>(null);
   RxBool isImageUploading = false.obs;
 

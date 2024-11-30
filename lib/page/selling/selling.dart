@@ -57,7 +57,8 @@ class SellingPage extends GetView<SellingController> {
                                         controller.loadDraftForEdit(selling);
                                         Get.to(() => TambahSelling());
                                       } else {
-                                        // Get.to(() => DetailSelling(data: selling));
+                                        // print("asd");
+                                        Get.to(() => DetailSelling(selling));
                                       }
                                     },
                                   );

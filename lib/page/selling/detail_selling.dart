@@ -1,8 +1,11 @@
+import 'dart:io';
+
 import 'package:cetapil_mobile/controller/bottom_nav_controller.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:get/get_core/src/get_main.dart';
 import 'package:google_fonts/google_fonts.dart';
+import 'package:path_provider/path_provider.dart';
 
 import '../../controller/outlet/outlet_controller.dart';
 import '../../controller/selling/selling_controller.dart';
@@ -12,13 +15,22 @@ import '../../widget/clipped_maps.dart';
 import '../../widget/dropdown_textfield.dart';
 import '../../widget/text_field.dart';
 import '../outlet/detail_outlet.dart';
+import '../../model/list_selling_response.dart';
 
 class DetailSelling extends GetView<SellingController> {
-  final TextEditingController _controller =
-      TextEditingController(text: "asdasdas");
+  DetailSelling( this.selling, {super.key,});
+  final Data selling;
 
   @override
   Widget build(BuildContext context) {
+    final groupedByCategory = selling.products!.fold<Map<String, List<Products>>>(
+        {},
+            (map, product) {
+          final categoryName = product.category?.name ?? '';
+          map.putIfAbsent(categoryName, () => []).add(product);
+          return map;
+        }
+    );
     return SafeArea(
         child: Stack(children: [
       Image.asset(
@@ -49,73 +61,90 @@ class DetailSelling extends GetView<SellingController> {
                     children: [
                       UnderlineTextField.readOnly(
                         title: "Nama Outlet",
-                        value: "Guardian Setiabudi Building",
+                        value: selling.outletName,
                       ),
-                      CustomDropdown(
-                          title: "Kategori Produk",
-                          hint: "-- Pilih Kategori Produk --",
-                          items: ["asdasd", "asda"].map((item) {
-                            return DropdownMenuItem<String>(
-                              value: item,
-                              child: Text(item ?? ''), // Display the name
+                      UnderlineTextField.readOnly(
+                        title: "Kategori Outlet",
+                        value: selling.categoryOutlet,
+                      ),
+                      // Column(
+                      //   children: selling.products!.map((product) {
+                      //
+                      //     // final sortedProducts = selling.products!.toList()
+                      //     //   ..sort((a, b) => (a.category?.name ?? '').compareTo(b.category?.name ?? ''));
+                      //     // print( " ---${sortedProducts}");
+                      //     return Column(
+                      //       crossAxisAlignment: CrossAxisAlignment.start,
+                      //       children: [
+                      //         Text(product.category?.name ?? "-",
+                      //             style: TextStyle(
+                      //                 fontSize: 16,
+                      //                 fontWeight: FontWeight.bold,
+                      //                 color: Color(0xFF023B5E))),
+                      //         SumAmountProduct(
+                      //           productName: product.productName!,
+                      //           stockController: TextEditingController(text: product.stock!.toString()),
+                      //           sellingController: TextEditingController(text: product.selling!.toString()),
+                      //           balanceController: TextEditingController(text: product.balance!.toString()),
+                      //           priceController: TextEditingController(text: product.price!.toString()),
+                      //         ),
+                      //       ],
+                      //     ); // Replace with your widget
+                      //   }).toList(),
+                      // ),
+                      Column(
+                        children: [
+                          ...groupedByCategory.entries.map((entry) {
+                            final category = entry.key;
+                            final products = entry.value;
+
+                            return Column(
+                              crossAxisAlignment: CrossAxisAlignment.start,
+                              children: [
+                                Padding(
+                                  padding: const EdgeInsets.all(8.0),
+                                  child: Text(
+                                    category,
+                                    style: TextStyle(
+                                      fontSize: 16,
+                                      fontWeight: FontWeight.bold,
+                                    ),
+                                  ),
+                                ),
+                                ...products.map((product) => SumAmountProduct(
+                            productName: product.productName!,
+                            stockController: TextEditingController(text: product.stock!.toString()),
+                            sellingController: TextEditingController(text: product.selling!.toString()),
+                            balanceController: TextEditingController(text: product.balance!.toString()),
+                            priceController: TextEditingController(text: product.price!.toString()),
+                            ),)
+                              ],
                             );
                           }).toList(),
-                          onChanged: (string) {}),
-                      Text("Cleanser",
-                          style: TextStyle(
-                              fontSize: 16,
-                              fontWeight: FontWeight.bold,
-                              color: Color(0xFF023B5E))),
-                      SumAmountProduct(
-                        productName: "Cetaphil Exfoliate Cleanser 500ml",
-                        stockController: TextEditingController(),
-                        sellingController: TextEditingController(),
-                        balanceController: TextEditingController(),
-                      ),
-                      Text("Baby Treatment",
-                          style: TextStyle(
-                              fontSize: 16,
-                              fontWeight: FontWeight.bold,
-                              color: Color(0xFF023B5E))),
-                      SumAmountProduct(
-                        productName:
-                            "Cetaphil Baby Daily Lotion with Organic Calendula 400ml",
-                        stockController: TextEditingController(),
-                        sellingController: TextEditingController(),
-                        balanceController: TextEditingController(),
-                      ),
-                      Divider(
-                        color: Colors.white,
-                      ),
-                      SumAmountProduct(
-                        productName:
-                            "Cetaphil Baby Daily Lotion with Organic Calendula 200ml",
-                        stockController: TextEditingController(),
-                        sellingController: TextEditingController(),
-                        balanceController: TextEditingController(),
+                        ],
                       ),
                       Row(
                         children: [
                           Expanded(
-                            child: ModernTextField(
+                            child: UnderlineTextField.readOnly(
                               title: "Longitude",
-                              controller: _controller,
+                              value: selling.longitude,
                             ),
                           ),
                           SizedBox(
                             width: 10,
                           ),
                           Expanded(
-                            child: ModernTextField(
+                            child: UnderlineTextField.readOnly(
                               title: "Latitude",
-                              controller: _controller,
+                              value: selling.latitude,
                             ),
                           ),
                         ],
                       ),
                       MapPreviewWidget(
-                        latitude: -6.2088,
-                        longitude: 106.8456,
+                        latitude: double.parse(selling.latitude!),
+                        longitude: double.parse(selling.longitude!),
                         zoom: 14.0,
                         height: 250,
                         borderRadius: 10,
@@ -123,26 +152,7 @@ class DetailSelling extends GetView<SellingController> {
                       SizedBox(
                         height: 10,
                       ),
-                      Container(
-                        height: 150,
-                        width: double.infinity,
-                        decoration: BoxDecoration(
-                          color: Colors.white,
-                          border: Border.all(
-                            color: Colors.blue,
-                            width: 1,
-                          ),
-                          borderRadius: BorderRadius.circular(5),
-                        ),
-                        child: Column(
-                          mainAxisAlignment: MainAxisAlignment.center,
-                          children: [
-                            Icon(Icons.camera_alt),
-                            SizedBox(height: 10,),
-                            Text("Kualitas foto harus jelas dan tidak blur",style: TextStyle(fontSize: 9,color: Colors.blue),)
-                          ],
-                        ),
-                      ),
+                      ClipImage(url: selling.image!),
                       SizedBox(
                         height: 10,
                       ),
@@ -156,18 +166,123 @@ class DetailSelling extends GetView<SellingController> {
   }
 }
 
+class ClipImage extends StatelessWidget {
+  final String url;
+  final double? size;
+  final BoxFit fit;
+
+
+  const ClipImage({
+    super.key,
+    required this.url,
+    this.size,
+    this.fit = BoxFit.cover,
+  });
+
+  String _sanitizeUrl(String url) {
+    // Convert localhost/127.0.0.1 URLs to your actual development server IP
+    // Replace this with your actual development server IP
+    return "https://dev-cetaphil.i-am.host${url}";
+  }
+
+  Future<Widget> imageFile() async {
+    final directory = await getApplicationDocumentsDirectory();
+    final path = '${directory.path}/$url';
+    return Image.file(
+      File(path),
+      errorBuilder: (context, error, stackTrace) {
+        return const Center(child: Text('Error loading image'));
+      },
+    );
+  }
+
+
+
+  @override
+  Widget build(BuildContext context) {
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        Text(
+          "Foto",
+          style: TextStyle(fontSize: 13, fontWeight: FontWeight.w700),
+          textAlign: TextAlign.center,
+        ),
+        SizedBox(height: 10),
+        SizedBox(
+          height: 150,
+          width: double.infinity,
+          child: Container(
+            decoration: BoxDecoration(
+              color: Colors.white,
+              border: Border.all(
+                color: Colors.blue,
+                width: 1,
+              ),
+              borderRadius: BorderRadius.circular(5),
+            ),
+            child: ClipRRect(
+              borderRadius: BorderRadius.circular(5),
+              child: Image.network(
+                _sanitizeUrl(url),
+                fit: fit,
+                errorBuilder: (context, error, stackTrace) {
+                  print('Image Error: $error');
+                  return Container(
+                    color: Colors.grey[200],
+                    child: Column(
+                      mainAxisAlignment: MainAxisAlignment.center,
+                      children: [
+                        const Icon(
+                          Icons.error_outline,
+                          color: Colors.red,
+                          size: 24,
+                        ),
+                        const SizedBox(height: 8),
+                        Text(
+                          'Image Error',
+                          style: TextStyle(
+                            fontSize: 12,
+                            color: Colors.grey[600],
+                          ),
+                        ),
+                        if (error is NetworkImageLoadException)
+                          Padding(
+                            padding: const EdgeInsets.all(4.0),
+                            child: Text(
+                              'Network Error',
+                              style: TextStyle(
+                                fontSize: 10,
+                                color: Colors.grey[500],
+                              ),
+                            ),
+                          ),
+                      ],
+                    ),
+                  );
+                },
+              ),
+            ),
+          ),
+        ),
+      ],
+    );
+  }
+}
+
 class SumAmountProduct extends StatelessWidget {
   final String productName;
   final TextEditingController stockController;
   final TextEditingController sellingController;
   final TextEditingController balanceController;
+  final TextEditingController priceController;
 
   const SumAmountProduct({
     super.key,
     required this.productName,
     required this.stockController,
     required this.sellingController,
-    required this.balanceController,
+    required this.balanceController, required this.priceController,
   });
 
   @override
@@ -185,7 +300,7 @@ class SumAmountProduct extends StatelessWidget {
       Expanded(
         child: Column(
           children: [
-            Text("Stock"),
+            Text("Stock",style: TextStyle(fontSize: 12),),
             NumberField(
               controller: stockController,
             ),
@@ -198,7 +313,7 @@ class SumAmountProduct extends StatelessWidget {
       Expanded(
         child: Column(
           children: [
-            Text("Selling"),
+            Text("Selling",style: TextStyle(fontSize: 12),),
             NumberField(
               controller: sellingController,
             ),
@@ -211,9 +326,20 @@ class SumAmountProduct extends StatelessWidget {
       Expanded(
         child: Column(
           children: [
-            Text("Balance"),
+            Text("Balance",style: TextStyle(fontSize: 12),),
             NumberField(
               controller: balanceController,
+            ),
+          ],
+        ),
+      ),
+      SizedBox(width: 10),
+      Expanded(
+        child: Column(
+          children: [
+            Text("Price",style: TextStyle(fontSize: 12),),
+            NumberField(
+              controller: priceController,
             ),
           ],
         ),
@@ -246,20 +372,22 @@ class NumberField extends StatelessWidget {
       ),
       child: TextFormField(
         controller: controller,
+        readOnly: true,
         keyboardType: TextInputType.number,
         style: const TextStyle(
           fontSize: 14,
           color: Color(0xFF0077BD),
         ),
+        textAlign: TextAlign.center,
         decoration: InputDecoration(
           // hintText: widget.title,
           hintStyle: TextStyle(
             color: Colors.grey[400],
             fontSize: 14,
           ),
-          contentPadding: const EdgeInsets.symmetric(
-            horizontal: 15,
-            vertical: 10,
+          contentPadding: EdgeInsets.symmetric(
+            horizontal: 3,
+            vertical: 3,
           ),
           border: OutlineInputBorder(
             borderRadius: BorderRadius.circular(8),

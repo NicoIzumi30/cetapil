@@ -109,6 +109,12 @@ class TambahSelling extends GetView<SellingController> {
                                               priceController: TextEditingController(
                                                   text: item['price'].toString()),
                                               isReadOnly: true,
+                                              onDelete: (){
+                                                groupedItems.forEach((key, value) {
+                                                  value.removeWhere((element) => element == items);
+                                                });
+                                                groupedItems.removeWhere((key, value) => value.isEmpty);
+                                              },
                                             );
                                           }).toList(),
                                         ],
@@ -401,6 +407,7 @@ class SumAmountProduct extends StatelessWidget {
   final TextEditingController balanceController;
   final TextEditingController priceController;
   final bool isReadOnly;
+  final VoidCallback onDelete;
 
   const SumAmountProduct({
     super.key,
@@ -409,67 +416,75 @@ class SumAmountProduct extends StatelessWidget {
     required this.sellingController,
     required this.balanceController,
     required this.priceController,
+    required this.onDelete,
     this.isReadOnly = false,
   });
 
   @override
   Widget build(BuildContext context) {
-    return Row(
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.end,
       children: [
-        Expanded(
-          flex: 2,
-          child: Text(
-            productName,
-            style: TextStyle(fontSize: 10),
-          ),
-        ),
-        SizedBox(width: 10),
-        Expanded(
-          child: Column(
-            children: [
-              Text("Stock"),
-              NumberField(
-                controller: stockController,
-                readOnly: isReadOnly,
+        IconButton(onPressed: onDelete,
+            icon: Icon(Icons.close)),
+        Row(
+          children: [
+            Expanded(
+              flex: 2,
+              child: Text(
+                productName,
+                style: TextStyle(fontSize: 10),
               ),
-            ],
-          ),
-        ),
-        SizedBox(width: 10),
-        Expanded(
-          child: Column(
-            children: [
-              Text("Selling"),
-              NumberField(
-                controller: sellingController,
-                readOnly: isReadOnly,
+            ),
+            SizedBox(width: 10),
+            Expanded(
+              child: Column(
+                children: [
+                  Text("Stock",style: TextStyle(fontSize: 12),),
+                  NumberField(
+                    controller: stockController,
+                    readOnly: isReadOnly,
+                  ),
+                ],
               ),
-            ],
-          ),
-        ),
-        SizedBox(width: 10),
-        Expanded(
-          child: Column(
-            children: [
-              Text("Balance"),
-              NumberField(
-                controller: balanceController,
-                readOnly: isReadOnly,
+            ),
+            SizedBox(width: 10),
+            Expanded(
+              child: Column(
+                children: [
+                  Text("Selling",style: TextStyle(fontSize: 12),),
+                  NumberField(
+                    controller: sellingController,
+                    readOnly: isReadOnly,
+                  ),
+                ],
               ),
-            ],
-          ),
-        ),
-        SizedBox(width: 10),
-        Expanded(
-          child: Column(
-            children: [
-              Text("Price"),
-              NumberField(
-                controller: priceController,
-                readOnly: isReadOnly,
+            ),
+            SizedBox(width: 10),
+            Expanded(
+              child: Column(
+                children: [
+                  Text("Balance",style: TextStyle(fontSize: 12),),
+                  NumberField(
+                    controller: balanceController,
+                    readOnly: isReadOnly,
+                  ),
+                ],
               ),
-            ],
-          ),
+            ),
+            SizedBox(width: 10),
+            Expanded(
+              child: Column(
+                children: [
+                  Text("Price",style: TextStyle(fontSize: 12),),
+                  NumberField(
+                    controller: priceController,
+                    readOnly: isReadOnly,
+                  ),
+                ],
+              ),
+            ),
+          ],
         ),
       ],
     );
