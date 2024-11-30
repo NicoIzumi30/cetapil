@@ -1,6 +1,6 @@
 @props(['cardTitle', 'cardAction', 'cardFooter', 'cardGroup'])
 
-<div class="w-full overflow-scroll">
+<div class="w-full overflow-scroll no-scrollbar">
 	<div class="card mt-4 mx-4 rounded-lg  min-w-[1180px]">
 		<x-card-header>
 			<x-slot:cardTitle>
@@ -32,4 +32,14 @@
 	.card {
 		background: linear-gradient(167.42deg, rgba(0, 119, 182, 0.65) 6.37%, rgba(72, 202, 228, 0.15) 74.4%);
 	}
+
+	.no-scrollbar::-webkit-scrollbar {
+		display: none;  
+	}
+
+	.no-scrollbar {
+		-ms-overflow-style: none;
+		scrollbar-width: none;
+	}
+	
 </style>
