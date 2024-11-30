@@ -22,7 +22,7 @@ class SellingController extends Controller
     public function index(Request $request): SellingCollection
     {
         $selling = Selling::query()
-            ->with('products')  // Eager load selling_products relationship
+            ->with(['products.product'])   // Eager load selling_products relationship
             ->where('created_at', '>=', Carbon::today()->subDays(10))
             ->latest()
             ->get();
