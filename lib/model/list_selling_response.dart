@@ -38,6 +38,7 @@ class Data {
   String? id;
   User? user;
   String? outletName;
+  String? categoryOutlet;
   List<Products>? products;
   String? longitude;
   String? latitude;
@@ -50,6 +51,7 @@ class Data {
       {this.id,
       this.user,
       this.outletName,
+      this.categoryOutlet,
       this.products,
       this.longitude,
       this.latitude,
@@ -67,6 +69,9 @@ class Data {
     }
     if (json["outlet_name"] is String) {
       outletName = json["outlet_name"];
+    }
+    if (json["category_outlet"] is String) {
+      categoryOutlet = json["category_outlet"];
     }
     if (json["products"] is List) {
       products = json["products"] == null
@@ -102,6 +107,7 @@ class Data {
       _data["user"] = user?.toJson();
     }
     _data["outlet_name"] = outletName;
+    _data["category_outlet"] = categoryOutlet;
     if (products != null) {
       _data["products"] = products?.map((e) => e.toJson()).toList();
     }

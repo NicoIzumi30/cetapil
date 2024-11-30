@@ -52,7 +52,13 @@ class SellingPage extends GetView<SellingController> {
                                   return SellingCard(
                                     selling: selling,
                                     ontap: () {
-                                      // Get.to(() => DetailSelling(data: selling));
+                                      if (selling.isDrafted ?? false) {
+                                        // Load draft data into controller before navigating
+                                        controller.loadDraftForEdit(selling);
+                                        Get.to(() => TambahSelling());
+                                      } else {
+                                        // Get.to(() => DetailSelling(data: selling));
+                                      }
                                     },
                                   );
                                 },
@@ -188,19 +194,11 @@ class SellingCard extends StatelessWidget {
                         ),
                       ),
                       const SizedBox(height: 8),
-                      if (selling.user != null)
-                        Text(
-                          'Sales: ${selling.user?.name ?? "Unknown"}',
-                          style: TextStyle(
-                            color: Colors.grey[600],
-                            fontSize: 13,
-                          ),
-                        ),
-                      if (selling.products != null && selling.products!.isNotEmpty)
+                      if (selling.categoryOutlet != null)
                         Padding(
                           padding: const EdgeInsets.only(top: 4),
                           child: Text(
-                            'Total Produk: ${selling.products!.length}',
+                            'Kategori Outlet: ${selling.categoryOutlet}',
                             style: TextStyle(
                               color: Colors.grey[600],
                               fontSize: 13,

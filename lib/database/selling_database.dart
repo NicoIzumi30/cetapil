@@ -43,6 +43,7 @@ class SellingDatabaseHelper {
         id TEXT PRIMARY KEY,
         user_id TEXT,
         outlet_name TEXT,
+        category_outlet TEXT,
         longitude TEXT,
         latitude TEXT,
         filename TEXT,
@@ -72,8 +73,7 @@ class SellingDatabaseHelper {
   // CRUD operations for User
   Future<void> insertUser(User user) async {
     final db = await database;
-    await db.insert('users', user.toJson(),
-        conflictAlgorithm: ConflictAlgorithm.replace);
+    await db.insert('users', user.toJson(), conflictAlgorithm: ConflictAlgorithm.replace);
   }
 
   Future<User?> getUser(String id) async {
@@ -88,7 +88,7 @@ class SellingDatabaseHelper {
   // CRUD operations for Selling Data
   Future<String> insertSellingData(Data sellingData, bool isDrafted) async {
     final db = await database;
-    
+
     // Insert user first if it exists
     if (sellingData.user != null) {
       await insertUser(sellingData.user!);
@@ -96,19 +96,17 @@ class SellingDatabaseHelper {
 
     final sellingMap = sellingData.toJson();
     sellingMap['is_drafted'] = isDrafted ? 1 : 0;
-    sellingMap.remove('user');  // Remove nested user object
-    sellingMap.remove('products');  // Remove nested products array
+    sellingMap.remove('user'); // Remove nested user object
+    sellingMap.remove('products'); // Remove nested products array
 
-    await db.insert('selling_data', sellingMap,
-        conflictAlgorithm: ConflictAlgorithm.replace);
+    await db.insert('selling_data', sellingMap, conflictAlgorithm: ConflictAlgorithm.replace);
 
     // Insert associated products
     if (sellingData.products != null) {
       for (var product in sellingData.products!) {
         final productMap = product.toJson();
         productMap['selling_id'] = sellingData.id;
-        await db.insert('products', productMap,
-            conflictAlgorithm: ConflictAlgorithm.replace);
+        await db.insert('products', productMap, conflictAlgorithm: ConflictAlgorithm.replace);
       }
     }
 
@@ -117,13 +115,13 @@ class SellingDatabaseHelper {
 
   Future<List<Data>> getAllSellingData({bool? isDrafted}) async {
     final db = await database;
-    
+
     String query = '''
       SELECT s.*, u.id as user_id, u.name as user_name 
       FROM selling_data s
       LEFT JOIN users u ON s.user_id = u.id
     ''';
-    
+
     if (isDrafted != null) {
       query += ' WHERE s.is_drafted = ${isDrafted ? 1 : 0}';
     }
@@ -139,17 +137,16 @@ class SellingDatabaseHelper {
       );
 
       // Get associated products
-      final productMaps = await db.query('products',
-          where: 'selling_id = ?', whereArgs: [sellingMap['id']]);
-      final products = productMaps
-          .map((map) => Products.fromJson(map))
-          .toList();
+      final productMaps =
+          await db.query('products', where: 'selling_id = ?', whereArgs: [sellingMap['id']]);
+      final products = productMaps.map((map) => Products.fromJson(map)).toList();
 
       // Create selling data object
       final sellingData = Data(
         id: sellingMap['id'] as String?,
         user: user,
         outletName: sellingMap['outlet_name'] as String?,
+        categoryOutlet: sellingMap['category_outlet'] as String?,
         longitude: sellingMap['longitude'] as String?,
         latitude: sellingMap['latitude'] as String?,
         filename: sellingMap['filename'] as String?,
@@ -166,10 +163,10 @@ class SellingDatabaseHelper {
 
   Future<void> deleteSellingData(String id) async {
     final db = await database;
-    
+
     // Delete associated products first
     await db.delete('products', where: 'selling_id = ?', whereArgs: [id]);
-    
+
     // Then delete the selling data
     await db.delete('selling_data', where: 'id = ?', whereArgs: [id]);
   }

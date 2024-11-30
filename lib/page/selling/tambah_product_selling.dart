@@ -58,6 +58,7 @@ class TambahProductSelling extends GetView<TambahProdukSellingController> {
                           ),
                           child: Obx(() {
                             final categories = controller.supportDataController.getCategories();
+                            print("categories $categories");
                             return DropdownButtonFormField<String>(
                               style: const TextStyle(
                                 fontSize: 14,
@@ -167,30 +168,30 @@ class TambahProductSelling extends GetView<TambahProdukSellingController> {
                         SizedBox(
                           height: 10,
                         ),
-                        // Obx(() => controller.selectedSkuData != null
-                        //     ? SumAmountProduct(
-                        //         productName: controller.selectedSkuData!['sku'] ?? '',
-                        //         stockController: controller.stockController,
-                        //         sellingController: controller.sellingController,
-                        //         balanceController: controller.balanceController,
-                        //         priceController: controller.priceController,
-                        //       )
-                        //     : Container(
-                        //         padding: EdgeInsets.all(16),
-                        //         decoration: BoxDecoration(
-                        //           color: Colors.grey[100],
-                        //           borderRadius: BorderRadius.circular(8),
-                        //         ),
-                        //         child: Center(
-                        //           child: Text(
-                        //             "Select a SKU to view product details",
-                        //             style: TextStyle(
-                        //               color: Colors.grey[600],
-                        //               fontSize: 14,
-                        //             ),
-                        //           ),
-                        //         ),
-                        //       )),
+                        Obx(() => controller.selectedSkuData != null
+                            ? SumAmountProduct(
+                                productName: controller.selectedSkuData!['sku'] ?? '',
+                                stockController: controller.stockController.value,
+                                sellingController: controller.sellingController.value,
+                                balanceController: controller.balanceController.value,
+                                priceController: controller.priceController.value,
+                              )
+                            : Container(
+                                padding: EdgeInsets.all(16),
+                                decoration: BoxDecoration(
+                                  color: Colors.grey[100],
+                                  borderRadius: BorderRadius.circular(8),
+                                ),
+                                child: Center(
+                                  child: Text(
+                                    "Select a SKU to view product details",
+                                    style: TextStyle(
+                                      color: Colors.grey[600],
+                                      fontSize: 14,
+                                    ),
+                                  ),
+                                ),
+                              )),
                       ],
                     ),
                   ),
@@ -209,8 +210,9 @@ class TambahProductSelling extends GetView<TambahProdukSellingController> {
                             ),
                           ),
                           onPressed: () {
-                            // controller.addItemToDraft();
-                            // Get.back();
+                            controller.addProductItems();
+                            controller.clearForm();
+                            Get.back();
                           },
                           child: Text(
                             "Tambah & Kembali",
@@ -232,8 +234,8 @@ class TambahProductSelling extends GetView<TambahProdukSellingController> {
                             ),
                           ),
                           onPressed: () {
-                            // controller.addItemToDraft();
-                            // controller.resetForm();
+                            controller.addProductItems();
+                            controller.clearForm();
                           },
                           child: Text(
                             "Tambah & Lanjut",

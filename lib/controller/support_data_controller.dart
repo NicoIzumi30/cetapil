@@ -25,9 +25,8 @@ class SupportDataController extends GetxController {
   @override
   void onInit() {
     super.onInit();
-    checkAndFetchData();
+    checkData();
     startTimeCheck();
-    loadLocalData(); // Load data from SQLite when controller initializes
   }
 
   @override
@@ -36,14 +35,24 @@ class SupportDataController extends GetxController {
     super.onClose();
   }
 
-  // Load all data from SQLite
+  Future<void> checkData() async {
+    await loadLocalData();
+
+    // Only force refresh if data is empty
+    if (products.isEmpty || categories.isEmpty || channels.isEmpty || knowledge.isEmpty) {
+      await initAllData();
+    } else {
+      // If data exists, check for daily refresh
+      checkAndFetchData();
+    }
+  }
+
   Future<void> loadLocalData() async {
     try {
       isLoading.value = true;
 
       // Load products with their categories
       products.value = await supportDB.getAllProducts();
-
       print("products.value ${products.value}");
 
       // Load categories
@@ -72,7 +81,7 @@ class SupportDataController extends GetxController {
   }
 
   void startTimeCheck() {
-    _timer = Timer.periodic(Duration(minutes: 1), (timer) {
+    _timer = Timer.periodic(Duration(minutes: 15), (timer) {
       checkAndFetchData();
     });
   }
@@ -159,4 +168,5 @@ class SupportDataController extends GetxController {
   List<Map<String, dynamic>> getProducts() => products;
   List<Map<String, dynamic>> getCategories() => categories;
   List<Channel.Data> getChannels() => channels;
+  List<Map<String, dynamic>> getKnowledge() => knowledge;
 }
