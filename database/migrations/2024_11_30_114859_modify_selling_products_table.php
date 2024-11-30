@@ -14,6 +14,9 @@ return new class extends Migration
         Schema::table('selling_products', function (Blueprint $table) {
             $table->integer('price')->default(0);
         });
+        Schema::table('sellings', function (Blueprint $table) {
+            $table->string('category_outlet')->default("MT");
+        });
     }
 
     /**

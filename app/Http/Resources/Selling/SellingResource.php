@@ -19,6 +19,7 @@ class SellingResource extends JsonResource
             'id' => $this->id,
             'user' => $this->user->only('id', 'name'),
             'outlet_name' => $this->outlet_name,
+            'category_outlet' => $this->category_outlet,
             'products' => $this->whenLoaded('products', function () {
                 return $this->products->map(function ($selling_product) {
                     return [
