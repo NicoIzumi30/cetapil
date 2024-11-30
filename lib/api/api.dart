@@ -5,7 +5,6 @@ import 'package:cetapil_mobile/model/list_category_response.dart';
 import 'package:cetapil_mobile/model/list_channel_response.dart';
 import 'package:cetapil_mobile/model/list_knowledge_response.dart';
 import 'package:cetapil_mobile/model/list_posm_response.dart';
-import 'package:cetapil_mobile/model/list_product_response.dart';
 import 'package:cetapil_mobile/model/list_product_sku_response.dart';
 import 'package:cetapil_mobile/model/list_routing_response.dart';
 import 'package:cetapil_mobile/model/list_selling_response.dart';
@@ -245,24 +244,6 @@ class Api {
     // print(response.body);
     if (response.statusCode == 200) {
       return ListActivityResponse.fromJson(jsonDecode(response.body));
-    }
-    throw "Gagal request data Routing : \n${response.body}";
-  }
-
-  static Future<ListProductResponse> getProductList(Map<dynamic,dynamic> data) async {
-    var url = "$baseUrl/api/activity/product";
-    var token = await storage.read('token');
-    var response = await http.post(
-      Uri.parse(url),
-      body: jsonEncode(data),
-      headers: {
-        'Content-type': 'application/json',
-        'Authorization': 'Bearer $token',
-      },
-    );
-    // print(response.body);
-    if (response.statusCode == 200) {
-      return ListProductResponse.fromJson(jsonDecode(response.body));
     }
     throw "Gagal request data Routing : \n${response.body}";
   }

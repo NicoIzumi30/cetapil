@@ -29,6 +29,7 @@ class SupportDataController extends GetxController {
     super.onInit();
     checkData();
     startTimeCheck();
+    initProductListData();
   }
 
   @override
@@ -55,7 +56,6 @@ class SupportDataController extends GetxController {
 
       // Load products with their categories
       products.value = await supportDB.getAllProducts();
-      print("products.value ${products.value}");
 
       // Load categories
       categories.value = await supportDB.getAllCategories();
@@ -86,7 +86,7 @@ class SupportDataController extends GetxController {
   }
 
   void startTimeCheck() {
-    _timer = Timer.periodic(Duration(minutes: 15), (timer) {
+    _timer = Timer.periodic(Duration(minutes: 1), (timer) {
       checkAndFetchData();
     });
   }

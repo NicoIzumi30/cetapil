@@ -52,6 +52,17 @@ class SupportDatabaseHelper {
       )
     ''');
 
+    // New table for channel_av3m data
+    await db.execute('''
+      CREATE TABLE product_channels(
+        id INTEGER PRIMARY KEY AUTOINCREMENT,
+        product_id TEXT,
+        channel_name TEXT,
+        value INTEGER,
+        FOREIGN KEY (product_id) REFERENCES products (id)
+      )
+    ''');
+
     ///CATEGORY
     await db.execute('''
     CREATE TABLE category(
@@ -110,18 +121,51 @@ class SupportDatabaseHelper {
   Future<void> insertProduct(SKU.Data product) async {
     final db = await database;
     await db.transaction((txn) async {
-      await txn.insert('categories', {'id': product.category!.id, 'name': product.category!.name},
-          conflictAlgorithm: ConflictAlgorithm.replace);
-
+      // Insert category
       await txn.insert(
-          'products',
-          {
-            'id': product.id,
-            'sku': product.sku,
-            'category_id': product.category!.id,
-            'average_stock': product.averageStock
-          },
-          conflictAlgorithm: ConflictAlgorithm.replace);
+        'categories',
+        {'id': product.category!.id, 'name': product.category!.name},
+        conflictAlgorithm: ConflictAlgorithm.replace,
+      );
+
+      // Insert product
+      await txn.insert(
+        'products',
+        {
+          'id': product.id,
+          'sku': product.sku,
+          'category_id': product.category!.id,
+          'average_stock': product.averageStock,
+          'md_price': product.mdPrice,
+          'sales_price': product.salesPrice,
+        },
+        conflictAlgorithm: ConflictAlgorithm.replace,
+      );
+
+      // Insert channel_av3m data if it exists
+      if (product.channelAv3M != null && product.channelAv3M is Map) {
+        // Delete existing channel data for this product
+        await txn.delete(
+          'product_channels',
+          where: 'product_id = ?',
+          whereArgs: [product.id],
+        );
+
+        // Insert new channel data
+        final Map<String, dynamic> channelMap =
+            Map<String, dynamic>.from(product.channelAv3M as Map);
+        for (var entry in channelMap.entries) {
+          await txn.insert(
+            'product_channels',
+            {
+              'product_id': product.id,
+              'channel_name': entry.key,
+              'value': entry.value,
+            },
+            conflictAlgorithm: ConflictAlgorithm.replace,
+          );
+        }
+      }
     });
   }
 
@@ -131,8 +175,25 @@ class SupportDatabaseHelper {
     final List<Map<String, dynamic>> result = [];
 
     for (var product in products) {
-      final category =
-          await db.query('categories', where: 'id = ?', whereArgs: [product['category_id']]);
+      // Get category data
+      final category = await db.query(
+        'categories',
+        where: 'id = ?',
+        whereArgs: [product['category_id']],
+      );
+
+      // Get channel data
+      final channels = await db.query(
+        'product_channels',
+        where: 'product_id = ?',
+        whereArgs: [product['id']],
+      );
+
+      // Convert channel data to map
+      Map<String, dynamic> channelAv3m = {};
+      for (var channel in channels) {
+        channelAv3m[channel['channel_name'] as String] = channel['value'];
+      }
 
       result.add({
         'id': product['id'],
@@ -140,7 +201,8 @@ class SupportDatabaseHelper {
         'average_stock': product['average_stock'],
         'md_price': product['md_price'],
         'sales_price': product['sales_price'],
-        'category': category.first
+        'category': category.first,
+        'channel_av3m': channelAv3m,
       });
     }
 

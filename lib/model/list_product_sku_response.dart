@@ -1,4 +1,3 @@
-
 class ListProductSkuResponse {
   String? status;
   String? message;
@@ -7,14 +6,16 @@ class ListProductSkuResponse {
   ListProductSkuResponse({this.status, this.message, this.data});
 
   ListProductSkuResponse.fromJson(Map<String, dynamic> json) {
-    if(json["status"] is String) {
+    if (json["status"] is String) {
       status = json["status"];
     }
-    if(json["message"] is String) {
+    if (json["message"] is String) {
       message = json["message"];
     }
-    if(json["data"] is List) {
-      data = json["data"] == null ? null : (json["data"] as List).map((e) => Data.fromJson(e)).toList();
+    if (json["data"] is List) {
+      data = json["data"] == null
+          ? null
+          : (json["data"] as List).map((e) => Data.fromJson(e)).toList();
     }
   }
 
@@ -26,7 +27,7 @@ class ListProductSkuResponse {
     final Map<String, dynamic> _data = <String, dynamic>{};
     _data["status"] = status;
     _data["message"] = message;
-    if(data != null) {
+    if (data != null) {
       _data["data"] = data?.map((e) => e.toJson()).toList();
     }
     return _data;
@@ -40,29 +41,46 @@ class Data {
   dynamic averageStock;
   int? mdPrice;
   int? salesPrice;
-  List<dynamic>? channelAv3M;
+  dynamic channelAv3M;
 
-  Data({this.id, this.sku, this.category, this.averageStock, this.mdPrice, this.salesPrice, this.channelAv3M});
+  Data({
+    this.id,
+    this.sku,
+    this.category,
+    this.averageStock,
+    this.mdPrice,
+    this.salesPrice,
+    this.channelAv3M,
+  });
 
   Data.fromJson(Map<String, dynamic> json) {
-    if(json["id"] is String) {
+    if (json["id"] is String) {
       id = json["id"];
     }
-    if(json["sku"] is String) {
+    if (json["sku"] is String) {
       sku = json["sku"];
     }
-    if(json["category"] is Map) {
+    if (json["category"] is Map) {
       category = json["category"] == null ? null : Category.fromJson(json["category"]);
     }
     averageStock = json["average_stock"];
-    if(json["md_price"] is int) {
+    if (json["md_price"] is int) {
       mdPrice = json["md_price"];
     }
-    if(json["sales_price"] is int) {
+    if (json["sales_price"] is int) {
       salesPrice = json["sales_price"];
     }
-    if(json["channel_av3m"] is List) {
+
+    // Handle the case for channel_av3m
+    if (json["channel_av3m"] is Map) {
+      // If it's an object (Map), assign it as a map
+      channelAv3M = json["channel_av3m"];
+    } else if (json["channel_av3m"] is List) {
+      // If it's an empty list or a list, return it as is
       channelAv3M = json["channel_av3m"] ?? [];
+    } else {
+      // If it doesn't exist, set it to null
+      channelAv3M = null;
     }
   }
 
@@ -74,13 +92,13 @@ class Data {
     final Map<String, dynamic> _data = <String, dynamic>{};
     _data["id"] = id;
     _data["sku"] = sku;
-    if(category != null) {
+    if (category != null) {
       _data["category"] = category?.toJson();
     }
     _data["average_stock"] = averageStock;
     _data["md_price"] = mdPrice;
     _data["sales_price"] = salesPrice;
-    if(channelAv3M != null) {
+    if (channelAv3M != null) {
       _data["channel_av3m"] = channelAv3M;
     }
     return _data;
@@ -94,10 +112,10 @@ class Category {
   Category({this.id, this.name});
 
   Category.fromJson(Map<String, dynamic> json) {
-    if(json["id"] is String) {
+    if (json["id"] is String) {
       id = json["id"];
     }
-    if(json["name"] is String) {
+    if (json["name"] is String) {
       name = json["name"];
     }
   }
