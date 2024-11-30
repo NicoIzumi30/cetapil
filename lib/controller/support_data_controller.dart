@@ -27,6 +27,7 @@ class SupportDataController extends GetxController {
     super.onInit();
     checkData();
     startTimeCheck();
+    initProductListData();
   }
 
   @override
@@ -74,14 +75,14 @@ class SupportDataController extends GetxController {
     final lastFetchDate = storage.read<String>(LAST_FETCH_DATE_KEY);
     final today = DateTime.now().toString().split(' ')[0];
 
-    if (lastFetchDate != today) {
+    if (lastFetchDate == today) {
       initAllData();
       storage.write(LAST_FETCH_DATE_KEY, today);
     }
   }
 
   void startTimeCheck() {
-    _timer = Timer.periodic(Duration(minutes: 15), (timer) {
+    _timer = Timer.periodic(Duration(minutes: 1), (timer) {
       checkAndFetchData();
     });
   }

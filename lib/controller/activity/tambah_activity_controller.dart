@@ -238,45 +238,7 @@ class TambahActivityController extends GetxController {
     }
   }
 
-  getProductbyCategory() async {
-    try {
-      setLoadingState(true);
-      setErrorState(false);
-
-      final data = {
-        "outlet_id": outletId.value,
-        "ids": selectedItems.map((item) => item.id.toString()).toList()
-      };
-
-      final response = await Api.getProductList(data);
-      if (response.status == "OK" && response.data != null) {
-        // Convert data to Map<String, List<String>>
-        final groupedProducts = <String, List<String>>{};
-
-// Handle null check for response.data
-        if (response.data != null) {
-          for (var item in response.data!) {
-            final categoryName = item.category?.name;
-            final productName = item.sku;
-
-            if (categoryName != null && productName != null) {
-              if (!groupedProducts.containsKey(categoryName)) {
-                groupedProducts[categoryName] = [];
-              }
-              groupedProducts[categoryName]!.add(productName);
-            }
-          }
-        }
-
-        products.value = groupedProducts.obs;
-      }
-    } catch (e) {
-      setErrorState(true, 'Connection error');
-      print('Error: $e');
-    } finally {
-      setLoadingState(false);
-    }
-  }
+ 
 
   /// Visibility Section
   initListPosm() async {
