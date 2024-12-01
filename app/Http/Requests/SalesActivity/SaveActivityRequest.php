@@ -27,16 +27,15 @@ class SaveActivityRequest extends FormRequest
     {
         return [
             // Sales Activity
-            'sales_activity_id ' => 'required|exists:sales_activities,id',
+            'sales_activity_id' => 'required|exists:sales_activities,id',
             'outlet_id' => 'required|exists:outlets,id',
-            'user_id' => 'required|exists:users,id',
             'views_knowledges' => 'required:numeric',
             'time_availability' => 'required:numeric',
             'time_visibility' => 'required:numeric',
             'time_knowledge' => 'required:numeric',
             'time_survey' => 'required:numeric',
             'time_order' => 'required:numeric',
-            'current_time' => 'required|date_format:Y-m-d H:i:s',
+            'current_time' => 'required|date',
 
             // Sales Availability
             'availability' => 'required|array',
@@ -54,7 +53,7 @@ class SaveActivityRequest extends FormRequest
 
             // Sales Question
             'survey' => 'required|array',
-            'survey.*.survey_question_id' => 'required|exists:survey_questions,id',
+            'survey.*.survey_question_id' => 'required|exists:survey_questions,id|distinct',
             'survey.*.answer' => 'required|string',
 
             // Sales Order

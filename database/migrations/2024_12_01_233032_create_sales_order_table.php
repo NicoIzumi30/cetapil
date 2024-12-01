@@ -19,6 +19,7 @@ return new class extends Migration
             $table->integer('total_items')->default(0);
             $table->integer('subtotal')->default(0);
             $table->timestamps();
+            $table->softDeletes();
         });
     }
 
