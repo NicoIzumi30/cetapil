@@ -195,9 +195,13 @@ class SalesActivityController extends Controller
     {
         $data = $request->validated();
         $activity = SalesActivity::findOrFail($data['sales_activity_id']);
-
+        
+        // Check if the authenticated user matches the activity's user
         if ($activity->user_id !== $this->getAuthUserId()) {
-            return $this->errorResponse('Unauthorized access', Response::HTTP_FORBIDDEN);
+            return $this->failedResponse(
+                'You are not authorized to modify this activity',
+                Response::HTTP_FORBIDDEN
+            );
         }
 
         // Store availability data
