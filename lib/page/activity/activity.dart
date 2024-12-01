@@ -1,5 +1,6 @@
 import 'package:cetapil_mobile/controller/activity/tambah_activity_controller.dart';
 import 'package:cetapil_mobile/controller/activity/tambah_availibility_controller.dart';
+import 'package:cetapil_mobile/controller/activity/tambah_order_controller.dart';
 import 'package:cetapil_mobile/controller/activity/tambah_visibility_controller.dart';
 import 'package:cetapil_mobile/page/activity/tambah_activity.dart';
 import 'package:flutter/material.dart';
@@ -66,6 +67,9 @@ class ActivityPage extends GetView<ActivityController> {
                                     }
                                     if (!Get.isRegistered<TambahVisibilityController>()) {
                                       Get.put(TambahVisibilityController());
+                                    }
+                                    if (!Get.isRegistered<TambahOrderController>()) {
+                                      Get.put(TambahOrderController());
                                     }
                                     final tambahActivityController =
                                         Get.find<TambahActivityController>();
