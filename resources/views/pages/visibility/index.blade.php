@@ -50,52 +50,52 @@
 
 
         {{-- Visibility Table --}}
-       <table id="visibility-table" class="table">
-    <thead>
-        <tr>
-            <th scope="col" class="text-center">
-                <a class="table-head">
-                    {{ __('Nama Outlet') }}
-                    <x-icons.sort />
-                </a>
-            </th>
-            <th scope="col" class="text-center">
-                <a class="table-head">
-                    {{ __('Nama Sales') }}
-                    <x-icons.sort />
-                </a>
-            </th>
-            <th scope="col" class="text-center">
-                <a class="table-head">
-                    {{ __('SKU') }}
-                    <x-icons.sort />
-                </a>
-            </th>
-            <th scope="col" class="text-center">
-                <a class="table-head">
-                    {{ __('Visual') }}
-                    <x-icons.sort />
-                </a>
-            </th>
-            <th scope="col" class="text-center">
-                <a class="table-head">
-                    {{ __('Status') }}
-                    <x-icons.sort />
-                </a>
-            </th>
-            <th scope="col" class="text-center">
-                <a class="table-head">
-                    {{ __('Jangka Waktu') }}
-                    <x-icons.sort />
-                </a>
-            </th>
-            <th scope="col" class="text-center">
-                <a class="table-head">
-                    Aksi
-                </a>
-            </th>
-        </tr>
-    </thead>
+        <table id="visibility-table" class="table">
+            <thead>
+                <tr>
+                    <th scope="col">
+                        <a class="table-head">
+                            {{ __('Nama Outlet') }}
+                            <x-icons.sort />
+                        </a>
+                    </th>
+                    <th scope="col">
+                        <a class="table-head">
+                            {{ __('Nama Sales') }}
+                            <x-icons.sort />
+                        </a>
+                    </th>
+                    <th scope="col">
+                        <a class="table-head">
+                            {{ __('SKU') }}
+                            <x-icons.sort />
+                        </a>
+                    </th>
+                    <th scope="col">
+                        <a class="table-head">
+                            {{ __('Visual') }}
+                            <x-icons.sort />
+                        </a>
+                    </th>
+                    <th scope="col">
+                        <a class="table-head">
+                            {{ __('Status') }}
+                            <x-icons.sort />
+                        </a>
+                    </th>
+                    <th scope="col">
+                        <a class="table-head">
+                            {{ __('Jangka Waktu') }}
+                            <x-icons.sort />
+                        </a>
+                    </th>
+                    <th scope="col">
+                        <a class="table-head">
+                            Aksi
+                        </a>
+                    </th>
+                </tr>
+            </thead>
             <tbody>
                 @foreach ($visibilities as $visibility)
             <tr>
@@ -122,10 +122,11 @@
                             </a>
                         </li>
                         <li>
-                            <button onclick="deleteVisibility('{{ $visibility->id }}', '{{ $visibility->outlet->name }}', '{{ $visibility->outlet->user->name }}', '{{ $visibility->product->sku }}')"
-                                class="dropdown-option text-red-400">
-                                Hapus Data
-                            </button>
+                            <button 
+    onclick="deleteVisibility('{{ $visibility->id }}', '{{ $visibility->outlet->name }}', '{{ $visibility->outlet->user->name }}', '{{ $visibility->product->sku }}')"
+    class="dropdown-option text-red-400">
+    Hapus Data
+</button>
                         </li>
                     </x-action-table-dropdown>
                 </td>
@@ -159,37 +160,37 @@
         <table id="visibility-activity-table" class="table">
             <thead>
                 <tr>
-                    <th scope="col" class="text-center">
+                    <th scope="col">
                         <a class="table-head">
                             {{ __('Nama Outlet') }}
                             <x-icons.sort />
                         </a>
                     </th>
-                    <th scope="col" class="text-center">
+                    <th scope="col">
                         <a class="table-head">
                             {{ __('Nama Sales') }}
                             <x-icons.sort />
                         </a>
                     </th>
-                    <th scope="col" class="text-center">
+                    <th scope="col">
                         <a class="table-head">
                             {{ __('SKU') }}
                             <x-icons.sort />
                         </a>
                     </th>
-                    <th scope="col" class="text-center">
+                    <th scope="col">
                         <a class="table-head">
                             {{ __('Visual') }}
                             <x-icons.sort />
                         </a>
                     </th>
-                    <th scope="col" class="text-center">
+                    <th scope="col">
                         <a class="table-head">
                             {{ __('Condition') }}
                             <x-icons.sort />
                         </a>
                     </th>
-                    <th scope="col" class="text-center">
+                    <th scope="col">
                         <a class="table-head">
                             Aksi
                         </a>
@@ -239,6 +240,127 @@
 @push('scripts')
     <script>
 $(document).ready(function() {
+    // $.ajaxSetup({
+    //     headers: {
+    //         'X-CSRF-TOKEN': $('meta[name="csrf-token"]').attr('content')
+    //     }
+    // });
+
+    // let visibilityTable = $('#visibility-table').DataTable({
+    //     processing: true,
+    //     serverSide: true,
+    //     paging: true,
+    //     searching: false,
+    //     info: true,
+    //     pageLength: 10,
+    //     lengthMenu: [10, 20, 30, 40, 50],
+    //     dom: 'rt<"bottom-container"<"bottom-left"l><"bottom-right"p>>',
+    //     language: {
+    //         lengthMenu: "Menampilkan _MENU_ dari _TOTAL_ data",
+    //         processing: "Memuat data...",
+    //         paginate: {
+    //             previous: '<',
+    //             next: '>',
+    //             last: 'Terakhir',
+    //         },
+    //         info: "Menampilkan _START_ sampai _END_ dari _TOTAL_ data",
+    //         infoEmpty: "Menampilkan 0 sampai 0 dari 0 data",
+    //         emptyTable: "Tidak ada data yang tersedia"
+    //     },
+    //     ajax: {
+    //         url: "/visibility/data",
+    //         data: function(d) {
+    //             d.search_term = $('#search').val();
+    //             d.posm_type_id = $('#posm-filter').val();
+    //         }
+    //     },
+    //     columns: [
+    //         { 
+    //             data: 'outlet.name',
+    //             name: 'outlet.name',
+    //             render: function(data, type, row) {
+    //                 return data || '-';
+    //             }
+    //         },
+    //         { 
+    //             data: 'outlet.user.name',
+    //             name: 'outlet.user.name',
+    //             render: function(data, type, row) {
+    //                 return data || '-';
+    //             }
+    //         },
+    //         { 
+    //             data: 'product.sku',
+    //             name: 'product.sku',
+    //             render: function(data, type, row) {
+    //                 return data || '-';
+    //             }
+    //         },
+    //         { 
+    //             data: 'visual_type.name',
+    //             name: 'visual_type.name',
+    //             render: function(data, type, row) {
+    //                 return data || '-';
+    //             }
+    //         },
+    //         { 
+    //             data: 'status',
+    //             name: 'status',
+    //             render: function(data, type, row) {
+    //                 return `<span class="table-data ${data === 'ACTIVE' ? 'text-[#3eff86]' : 'text-red-500'}">${data}</span>`;
+    //             }
+    //         },
+    //         { 
+    //             data: null,
+    //             name: 'date_range',
+    //             render: function(data, type, row) {
+    //                 if (row.started_at && row.ended_at) {
+    //                     return moment(row.started_at).format('D MMMM Y') + ' - ' + moment(row.ended_at).format('D MMMM Y');
+    //                 }
+    //                 return '-';
+    //             }
+    //         },
+    //         { 
+    //             data: null,
+    //             name: 'action',
+    //             orderable: false,
+    //             searchable: false,
+    //             render: function(data, type, row) {
+    //                 return `
+    //                     <x-action-table-dropdown>
+    //                         <li>
+    //                             <a href="/visibility/edit/${row.id}" class="dropdown-option">
+    //                                 Lihat Data
+    //                             </a>
+    //                         </li>
+    //                         <li>
+    //                             <button onclick="deleteVisibility('${row.id}', '${row.outlet.name}', '${row.outlet.user.name}', '${row.product.sku}')" 
+    //                                 class="dropdown-option text-red-500">
+    //                                 Hapus Data
+    //                             </button>
+    //                         </li>
+    //                     </x-action-table-dropdown>
+    //                 `;
+    //             }
+    //         }
+    //     ]
+    // });
+
+    // Handle search with debounce
+    let searchTimer;
+    $('#search').on('input', function() {
+        clearTimeout(searchTimer);
+        searchTimer = setTimeout(() => visibilityTable.ajax.reload(), 500);
+    });
+
+    // Handle POSM type filter
+    $('#posm-filter').on('change', function() {
+        visibilityTable.ajax.reload();
+    });
+});
+
+
+$(document).ready(function() {
     // Handle POSM type filter change
     $('#posm-filter').on('change', function() {
         const selectedPosmType = $(this).val();
@@ -278,7 +400,8 @@ function toast(type, message) {
 }
 
 // Delete function
-function deleteVisibility(id, outletName, salesName, sku) {
+// Taruh di luar document.ready
+window.deleteVisibility = function(id, outletName, salesName, sku) {
     Swal.fire({
         title: 'Hapus Visibility?',
         html: `
@@ -308,47 +431,18 @@ function deleteVisibility(id, outletName, salesName, sku) {
                 },
                 success: function(response) {
                     if (response.status === 'success') {
-                        // Tampilkan toast notification
-                        toast('success', 'Data berhasil dihapus');
-                        
-                        // Refresh halaman setelah notifikasi selesai (3 detik)
-                        setTimeout(() => {
-                            window.location.reload();
-                        }, 3000);
+                        Swal.fire('Berhasil!', 'Data berhasil dihapus', 'success').then(() => {
+                            $('#visibility-table').DataTable().ajax.reload();
+                        });
                     }
                 },
                 error: function(xhr) {
-                    // Tampilkan toast error jika gagal
-                    toast('error', 'Terjadi kesalahan saat menghapus data');
-                icon: 'warning',
-                showCancelButton: true,
-                confirmButtonColor: '#d33',
-                cancelButtonColor: '#3085d6',
-                confirmButtonText: 'Ya, Hapus!',
-                cancelButtonText: 'Batal'
-            }).then((result) => {
-                if (result.isConfirmed) {
-                    $.ajax({
-                        url: `/visibility/${id}`,
-                        type: 'DELETE',
-                        headers: {
-                            'X-CSRF-TOKEN': $('meta[name="csrf-token"]').attr('content')
-                        },
-                        success: function(response) {
-                            if (response.status === 'success') {
-                                Swal.fire('Berhasil!', 'Data berhasil dihapus', 'success')
-                                    .then(() => {
-                                        visibilityTable.ajax.reload();
-                                    });
-                            }
-                        },
-                        error: function(xhr) {
-                            Swal.fire('Error!', 'Terjadi kesalahan saat menghapus data', 'error');
-                        }
-                    });
+                    Swal.fire('Error!', 'Terjadi kesalahan saat menghapus data', 'error');
                 }
             });
         }
+    });
+}
     </script>
 @endpush
 @push('scripts')

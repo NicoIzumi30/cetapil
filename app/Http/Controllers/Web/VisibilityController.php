@@ -26,11 +26,10 @@ class VisibilityController extends Controller
     /**
      * Display a listing of the resource.
      */
-    public function index()
+    public function index(Request $request)
     {
         $posmTypes = PosmType::orderBy('name')->get();
         
-        // Tambahkan ini untuk mendapatkan existing images
         $posmImages = PosmImage::with('posmType')
             ->get()
             ->map(function($image) {
@@ -41,16 +40,22 @@ class VisibilityController extends Controller
             })
             ->collect();
         
-        $visibilities = Visibility::with([
+        $visibilitiesQuery = Visibility::with([
             'outlet.user',
             'product',
-            'visualType'
+            'visualType',
+            'posmType'  // Add this relation
         ])
         ->whereHas('outlet.user', function($query) {
             $query->role('sales');
-        })
-        ->latest()
-        ->get();
+        });
+
+        // Apply POSM type filter if selected
+        if ($request->filled('posm_type_id')) {
+            $visibilitiesQuery->where('posm_type_id', $request->posm_type_id);
+        }
+
+        $visibilities = $visibilitiesQuery->latest()->get();
 
         return view("pages.visibility.index", compact('posmTypes', 'visibilities', 'posmImages'));
     }
@@ -219,12 +224,9 @@ class VisibilityController extends Controller
         try {
             $visibility = Visibility::findOrFail($id);
 
-            // Delete banner file if exists
-            if ($visibility->filename) {
-                $filepath = public_path('banners/' . $visibility->filename);
-                if (file_exists($filepath)) {
-                    unlink($filepath);
-                }
+            // Delete file if exists
+            if ($visibility->path) {
+                removeFile($visibility->path);
             }
 
             $visibility->delete();

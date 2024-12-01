@@ -89,14 +89,3 @@
     </main>
 @endsection
 
-@push('addon-toast')
-    <x-toast>
-        <x-slot:title>
-            Perubahan Berhasil Disimpan
-        </x-slot:title>
-        <x-slot:subTitle>
-            Anda baru saja melakukan perubahan pada aplikasi. Silahkan periksa perubahan pada menu yang Anda lakukan
-            perubahan.
-        </x-slot:subTitle>
-    </x-toast>
-@endpush

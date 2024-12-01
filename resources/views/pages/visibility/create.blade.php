@@ -440,6 +440,17 @@
                     }
                 });
             });
+            $("#program-date").flatpickr({
+				mode : "range",
+				showMonths: 2
+			});
+            $('#states-option').select2();
+            $('#category').select2();
+            $('#outlet-name').select2();
+            $('#sku').select2();
+            $('#visual-campaign').select2();
+            $('#posm').select2();
+
         });
         </script>
     @endpush

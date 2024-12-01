@@ -1,0 +1,124 @@
+.chart-bg {
+    background: linear-gradient(
+        108.46deg,
+        rgba(255, 255, 255, 0.264) 0%,
+        rgba(255, 255, 255, 0.066) 100%
+    );
+}
+.filters {
+    display: flex;
+    gap: 10px;
+}
+
+.filter-btn {
+    background: rgba(255, 255, 255, 0.1);
+    border: none;
+    color: white;
+    padding: 6px 12px;
+    border-radius: 4px;
+    cursor: pointer;
+    font-size: 13px;
+}
+
+.filter-btn::after {
+    content: "▼";
+    margin-left: 5px;
+    font-size: 8px;
+    opacity: 0.8;
+}
+
+.chart-container {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+}
+
+.donut-container {
+    position: relative;
+	filter: drop-shadow(4px 10px 30px rgba(0, 149, 255, 0.8));
+}
+
+.center-number {
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+}
+
+.legend {
+    display: flex;
+    gap: 30px;
+    margin-bottom: 40px;
+    font-size: 14px;
+	color: #ffffff;
+	font-weight: 700;
+}
+
+.legend-item {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+}
+
+.legend-color {
+    width: 20px;
+    height: 20px;
+    border-radius: 2px;
+}
+
+.bar-chart {
+    width: 100%;
+    max-width: 500px;
+}
+
+.bar-row {
+    display: flex;
+    align-items: center;
+    margin-bottom: 8px;
+    font-size: 14px;
+}
+
+.bar-label {
+    width: 40px;
+    color: rgba(255, 255, 255, 0.9);
+}
+
+.bar-wrapper {
+    flex-grow: 1;
+    background: #ffffff;
+    height: 8px;
+    border-radius: 4px;
+    overflow: hidden;
+    margin: 0 15px;
+    height: 20px;
+    border-top-right-radius: 10px;
+    border-bottom-right-radius: 10px;
+}
+
+.bar {
+    height: 100%;
+    background: #48cae4;
+    border-top-right-radius: 10px;
+    border-bottom-right-radius: 10px;
+}
+
+.bar-value {
+	position: relative;
+    display: flex;
+    flex-direction: column;
+    align-items: flex-end;
+    gap: 2px;
+}
+
+.percentage {
+	position: absolute;
+	color: #000000;
+	right: 45px;
+	font-weight: 700;
+}
+
+.count {
+    color: #ffffff;
+    font-size: 13px;
+	font-weight: 700;
+}
