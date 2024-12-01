@@ -4,78 +4,79 @@ import 'package:cetapil_mobile/widget/custom_switch.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:get/get.dart';
+import '../../../controller/support_data_controller.dart';
 import '../../../utils/price_formatter.dart';
 
 class SurveyPage extends GetView<TambahActivityController> {
-  const SurveyPage({super.key});
+  final SupportDataController supportController = Get.find<SupportDataController>();
 
   @override
   Widget build(BuildContext context) {
     return Obx(() {
       // Check loading state for Survey tab
-      if (controller.isLoadingSurvey.value) {
-        return const Padding(
-          padding: EdgeInsets.symmetric(vertical: 20),
-          child: Center(
-            child: CircularProgressIndicator(),
-          ),
-        );
-      }
-
-      // Check error state for Survey tab
-      if (controller.hasErrorSurvey.value) {
-        return Padding(
-          padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 40),
-          child: Column(
-            mainAxisAlignment: MainAxisAlignment.center,
-            children: [
-              const Icon(
-                Icons.error_outline,
-                color: Colors.red,
-                size: 60,
-              ),
-              const SizedBox(height: 16),
-              Text(
-                controller.errorMessageSurvey.value,
-                style: const TextStyle(
-                  fontSize: 16,
-                  color: Colors.red,
-                ),
-                textAlign: TextAlign.center,
-              ),
-              const SizedBox(height: 16),
-              ElevatedButton.icon(
-                onPressed: () => controller.initGetSurveyQuestion(),
-                icon: const Icon(Icons.refresh),
-                label: const Text('Retry'),
-                style: ElevatedButton.styleFrom(
-                  backgroundColor: const Color(0xFF0077BD),
-                  foregroundColor: Colors.white,
-                  padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 12),
-                  shape: RoundedRectangleBorder(
-                    borderRadius: BorderRadius.circular(8),
-                  ),
-                ),
-              ),
-            ],
-          ),
-        );
-      }
-
-      if (controller.surveyQuestions.isEmpty) {
-        return const Padding(
-          padding: EdgeInsets.symmetric(vertical: 20),
-          child: Center(
-            child: Text(
-              'No survey questions available',
-              style: TextStyle(
-                fontSize: 16,
-                color: Colors.grey,
-              ),
-            ),
-          ),
-        );
-      }
+      // if (controller.isLoadingSurvey.value) {
+      //   return const Padding(
+      //     padding: EdgeInsets.symmetric(vertical: 20),
+      //     child: Center(
+      //       child: CircularProgressIndicator(),
+      //     ),
+      //   );
+      // }
+      //
+      // // Check error state for Survey tab
+      // if (controller.hasErrorSurvey.value) {
+      //   return Padding(
+      //     padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 40),
+      //     child: Column(
+      //       mainAxisAlignment: MainAxisAlignment.center,
+      //       children: [
+      //         const Icon(
+      //           Icons.error_outline,
+      //           color: Colors.red,
+      //           size: 60,
+      //         ),
+      //         const SizedBox(height: 16),
+      //         Text(
+      //           controller.errorMessageSurvey.value,
+      //           style: const TextStyle(
+      //             fontSize: 16,
+      //             color: Colors.red,
+      //           ),
+      //           textAlign: TextAlign.center,
+      //         ),
+      //         const SizedBox(height: 16),
+      //         ElevatedButton.icon(
+      //           onPressed: () => controller.initGetSurveyQuestion(),
+      //           icon: const Icon(Icons.refresh),
+      //           label: const Text('Retry'),
+      //           style: ElevatedButton.styleFrom(
+      //             backgroundColor: const Color(0xFF0077BD),
+      //             foregroundColor: Colors.white,
+      //             padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 12),
+      //             shape: RoundedRectangleBorder(
+      //               borderRadius: BorderRadius.circular(8),
+      //             ),
+      //           ),
+      //         ),
+      //       ],
+      //     ),
+      //   );
+      // }
+      //
+      // if (controller.surveyQuestions.isEmpty) {
+      //   return const Padding(
+      //     padding: EdgeInsets.symmetric(vertical: 20),
+      //     child: Center(
+      //       child: Text(
+      //         'No survey questions available',
+      //         style: TextStyle(
+      //           fontSize: 16,
+      //           color: Colors.grey,
+      //         ),
+      //       ),
+      //     ),
+      //   );
+      // }
 
       // Your existing ListView implementation
       return ListView.builder(
@@ -83,12 +84,12 @@ class SurveyPage extends GetView<TambahActivityController> {
         physics: const NeverScrollableScrollPhysics(),
         itemCount: controller.surveyQuestions.length,
         itemBuilder: (context, index) {
-          final questionGroup = controller.surveyQuestions[index];
+          final questionGroup = supportController.getSurvey();
           return Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              _buildSectionTitle(questionGroup),
-              ...buildSurveyQuestions(questionGroup),
+              _buildSectionTitle(questionGroup[index]),
+              ...buildSurveyQuestions(questionGroup[index]),
               const SizedBox(height: 20),
             ],
           );
@@ -97,13 +98,13 @@ class SurveyPage extends GetView<TambahActivityController> {
     });
   }
 
-  Widget _buildSectionTitle(SurveyQuestion questionGroup) {
-    if (questionGroup.title != null) {
+   _buildSectionTitle(Map<String, dynamic> questionGroup) {
+    if (questionGroup['title'] != null) {
       return Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
           Text(
-            questionGroup.title!,
+            questionGroup['title']!,
             style: const TextStyle(fontSize: 13, fontWeight: FontWeight.w700),
           ),
           const SizedBox(height: 10),
@@ -113,9 +114,9 @@ class SurveyPage extends GetView<TambahActivityController> {
 
     // Handle special section titles
     String? sectionTitle;
-    if (questionGroup.name == 'Visibility') {
+    if (questionGroup['name'] == 'Visibility') {
       sectionTitle = "Survey Visibility";
-    } else if (questionGroup.name == 'Recommendation') {
+    } else if (questionGroup['name'] == 'Recommendation') {
       sectionTitle = "Survey Recommendation";
     }
 
@@ -126,7 +127,7 @@ class SurveyPage extends GetView<TambahActivityController> {
           Text(
             sectionTitle,
             style: const TextStyle(
-              fontSize: 28,
+              fontSize: 20,
               color: Color(0xff0077BD),
               fontWeight: FontWeight.w900,
             ),
@@ -139,21 +140,22 @@ class SurveyPage extends GetView<TambahActivityController> {
     return const SizedBox.shrink();
   }
 
-  List<Widget> buildSurveyQuestions(SurveyQuestion questionGroup) {
-    return (questionGroup.surveys ?? []).map((survey) {
-      final id = survey.id ?? '';
-      if (survey.type == 'bool') {
+   buildSurveyQuestions(Map<String, dynamic> questionGroup) {
+    print(questionGroup['surveys']);
+    return (questionGroup['surveys'] ?? []).map((survey) {
+      final id = survey['id'] ?? '';
+      if (survey['type'] == 'bool') {
         if (!controller.switchStates.containsKey(id)) {
           controller.switchStates[id] = true.obs; // Initialize with true for 'Ada'
         }
         return BooleanQuestion(
-          title: survey.question ?? '',
+          title: survey['question'] ?? '',
           surveyId: id,
           controller: controller,
         );
-      } else if (survey.type == 'text') {
+      } else if (survey['type'] == 'text') {
         return PriceQuestion(
-          title: survey.question ?? '',
+          title: survey['question'] ?? '',
           controller: controller.priceControllers[id] ?? TextEditingController(),
         );
       }
@@ -262,6 +264,8 @@ class PriceQuestion extends StatelessWidget {
                     fontSize: 14,
                     color: Color(0xFF0077BD),
                   ),
+                  floatingLabelBehavior: FloatingLabelBehavior.always,
+                  alignLabelWithHint: true,
                   hintText: "Masukan Harga",
                   hintStyle: TextStyle(fontSize: 12, color: Colors.grey[400]),
                   filled: true,

@@ -2,35 +2,61 @@ import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:video_player/video_player.dart';
 
+import '../support_data_controller.dart';
+
 // Custom Video Player Controller
 class VideoController extends GetxController {
+  final SupportDataController supportController = Get.find<SupportDataController>();
   late VideoPlayerController videoController;
   var isInitialized = false.obs;
   var isPlaying = false.obs;
   var duration = const Duration().obs;
   var position = const Duration().obs;
+  var urlVideo = "".obs;
 
   @override
   void onInit() {
     super.onInit();
-    initializeVideo();
+    try {
+      urlVideo.value = supportController.getKnowledge().first['path_video'];
+      print('Video URL: ${urlVideo.value}'); // Add this line to check URL
+
+      if (urlVideo.value.isEmpty) {
+        print('Video URL is empty');
+        return;
+      }
+
+      // Make sure URL starts with http:// or https://
+      // if (!urlVideo.value.startsWith('http://') && !urlVideo.value.startsWith('https://')) {
+      //   urlVideo.value = 'https://dev-cetaphil.i-am.host${urlVideo.value}';
+      // }
+      urlVideo.value = 'https://dev-cetaphil.i-am.host/storage${urlVideo.value}';
+
+      final uri = Uri.parse(urlVideo.value);
+      if (!uri.isAbsolute) {
+        print('Invalid video URL format');
+        return;
+      }
+      initializeVideo();
+    } catch (e) {
+      print('Error initializing video: $e');
+    }
   }
 
   void initializeVideo() {
-    // For network video
     videoController = VideoPlayerController.network(
-      'https://youtu.be/HInw_hiVtQE?si=YqPJ0V8Rt03w2bE7',
-      // Or for local asset
-      // VideoPlayerController.asset('assets/video.mp4'),
-      // Or for local file
-      // VideoPlayerController.file(File('path/to/video.mp4')),
+      urlVideo.value,
     )..initialize().then((_) {
       duration.value = videoController.value.duration;
       isInitialized.value = true;
       update();
+    }).catchError((error) {
+      print('Video Error: $error');
+      isInitialized.value = false;
+      // Handle error - maybe show a message to user
+      update();
     });
 
-    // Add listener for position updates
     videoController.addListener(() {
       position.value = videoController.value.position;
       update();
@@ -69,7 +95,22 @@ class CustomVideoPlayer extends StatelessWidget {
       init: VideoController(),
       builder: (controller) {
         if (!controller.isInitialized.value) {
-          return const Center(child: CircularProgressIndicator());
+          return const Center(
+            child: Column(
+              mainAxisAlignment: MainAxisAlignment.center,
+              children: [
+                CircularProgressIndicator(),
+                SizedBox(height: 16),
+                Text('Loading video...'),
+              ],
+            ),
+          );
+        }
+
+        if (controller.videoController.value.hasError) {
+          return const Center(
+            child: Text('Error loading video. Please try again later.'),
+          );
         }
 
         return Column(
