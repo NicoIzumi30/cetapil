@@ -196,6 +196,10 @@ class SalesActivityController extends Controller
         $data = $request->validated();
         $activity = SalesActivity::findOrFail($data['sales_activity_id']);
 
+        if ($activity->user_id !== $this->getAuthUserId()) {
+            return $this->errorResponse('Unauthorized access', Response::HTTP_FORBIDDEN);
+        }
+
         // Store availability data
         foreach ($data['availability'] as $item) {
             SalesAvailability::create([
