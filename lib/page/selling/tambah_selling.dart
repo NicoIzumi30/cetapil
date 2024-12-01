@@ -111,11 +111,13 @@ class TambahSelling extends GetView<SellingController> {
                                               priceController: TextEditingController(
                                                   text: item['price'].toString()),
                                               isReadOnly: true,
-                                              onDelete: (){
+                                              itemData: item, // Pass the full item data
+                                              onDelete: () {
                                                 groupedItems.forEach((key, value) {
                                                   value.removeWhere((element) => element == items);
                                                 });
-                                                groupedItems.removeWhere((key, value) => value.isEmpty);
+                                                groupedItems
+                                                    .removeWhere((key, value) => value.isEmpty);
                                               },
                                             );
                                           }).toList(),
@@ -134,7 +136,11 @@ class TambahSelling extends GetView<SellingController> {
                                         ),
                                         onPressed: () async {
                                           if (!Get.isRegistered<TambahProdukSellingController>()) {
-                                            Get.put(TambahProdukSellingController());
+                                            var con = Get.put(TambahProdukSellingController());
+                                            con.clearForm();
+                                          } else {
+                                            var con = Get.find<TambahProdukSellingController>();
+                                            con.clearForm();
                                           }
                                           await Get.to(() => TambahProductSelling());
                                         },
@@ -333,7 +339,7 @@ class TambahSelling extends GetView<SellingController> {
                   },
             child: Container(
               width: double.infinity,
-              height: 150,
+              height: 250,
               margin: EdgeInsets.only(bottom: 10),
               decoration: BoxDecoration(
                 color: Color(0xFFEDF8FF),
@@ -410,6 +416,7 @@ class SumAmountProduct extends StatelessWidget {
   final TextEditingController priceController;
   final bool isReadOnly;
   final VoidCallback onDelete;
+  final Map<String, dynamic> itemData; // Add this parameter to pass the full item data
 
   const SumAmountProduct({
     super.key,
@@ -419,78 +426,231 @@ class SumAmountProduct extends StatelessWidget {
     required this.balanceController,
     required this.priceController,
     required this.onDelete,
+    required this.itemData, // Add this required parameter
     this.isReadOnly = false,
   });
 
   @override
   Widget build(BuildContext context) {
-    return Column(
-      crossAxisAlignment: CrossAxisAlignment.end,
+    return Stack(
+      clipBehavior: Clip.none,
       children: [
-        IconButton(onPressed: onDelete,
-            icon: Icon(Icons.close,size: 14)),
-        Row(
-          children: [
-            Expanded(
-              flex: 2,
-              child: Text(
-                productName,
-                style: TextStyle(fontSize: 10),
+        Container(
+          margin: EdgeInsets.only(bottom: 16, top: 8, right: 8),
+          decoration: BoxDecoration(
+            color: Colors.white,
+            borderRadius: BorderRadius.circular(12),
+            boxShadow: [
+              BoxShadow(
+                color: Colors.black.withOpacity(0.05),
+                blurRadius: 8,
+                offset: Offset(0, 2),
               ),
-            ),
-            SizedBox(width: 10),
-            Expanded(
-              child: Column(
-                children: [
-                  Text("Stock",style: TextStyle(fontSize: 12),),
-                  NumberField(
-                    controller: stockController,
-                    readOnly: isReadOnly,
+            ],
+          ),
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Container(
+                padding: EdgeInsets.symmetric(horizontal: 16, vertical: 12),
+                decoration: BoxDecoration(
+                  color: Color(0xFFEDF8FF),
+                  borderRadius: BorderRadius.only(
+                    topLeft: Radius.circular(12),
+                    topRight: Radius.circular(12),
                   ),
-                ],
+                ),
+                child: Row(
+                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                  children: [
+                    Expanded(
+                      child: Text(
+                        productName,
+                        style: TextStyle(
+                          fontSize: 14,
+                          fontWeight: FontWeight.bold,
+                          color: Color(0xFF023B5E),
+                        ),
+                      ),
+                    ),
+                    Row(
+                      children: [
+                        IconButton(
+                          onPressed: () async {
+                            // Get the controller
+                            if (!Get.isRegistered<TambahProdukSellingController>()) {
+                              Get.put(TambahProdukSellingController());
+                            }
+                            final controller = Get.find<TambahProdukSellingController>();
+
+                            // Find the category ID from the name
+                            final categoryId = controller.supportDataController
+                                .getCategories()
+                                .firstWhere(
+                                  (cat) => cat['name'] == itemData['category'],
+                                  orElse: () => {'id': null},
+                                )['id']
+                                ?.toString();
+
+                            // Pre-fill the data
+                            controller.selectedCategory.value = categoryId;
+                            // Wait a bit for the filtered SKUs to update
+                            await Future.delayed(Duration(milliseconds: 100));
+                            controller.selectedSku.value = itemData['id']?.toString();
+                            controller.stockController.value.text =
+                                itemData['stock']?.toString() ?? '';
+                            controller.sellingController.value.text =
+                                itemData['selling']?.toString() ?? '';
+                            controller.balanceController.value.text =
+                                itemData['balance']?.toString() ?? '';
+                            controller.priceController.value.text =
+                                itemData['price']?.toString() ?? '';
+
+                            // Navigate to edit screen
+                            await Get.to(() => TambahProductSelling());
+                          },
+                          icon: Icon(Icons.edit_outlined, color: Colors.blue, size: 20),
+                          padding: EdgeInsets.zero,
+                          constraints: BoxConstraints(),
+                          tooltip: 'Edit Product',
+                        ),
+                        SizedBox(width: 8),
+                        IconButton(
+                          onPressed: onDelete,
+                          icon: Icon(Icons.delete_outline, color: Colors.red[400], size: 20),
+                          padding: EdgeInsets.zero,
+                          constraints: BoxConstraints(),
+                          tooltip: 'Remove Product',
+                        ),
+                      ],
+                    ),
+                  ],
+                ),
               ),
-            ),
-            SizedBox(width: 10),
-            Expanded(
-              child: Column(
-                children: [
-                  Text("Selling",style: TextStyle(fontSize: 12),),
-                  NumberField(
-                    controller: sellingController,
-                    readOnly: isReadOnly,
-                  ),
-                ],
+              Padding(
+                padding: EdgeInsets.all(16),
+                child: Row(
+                  children: [
+                    _buildDetailField("Stock", stockController),
+                    SizedBox(width: 12),
+                    _buildDetailField("Selling", sellingController),
+                    SizedBox(width: 12),
+                    _buildDetailField("Balance", balanceController),
+                    SizedBox(width: 12),
+                    _buildDetailField("Price", priceController),
+                  ],
+                ),
               ),
-            ),
-            SizedBox(width: 10),
-            Expanded(
-              child: Column(
-                children: [
-                  Text("Balance",style: TextStyle(fontSize: 12),),
-                  NumberField(
-                    controller: balanceController,
-                    readOnly: isReadOnly,
-                  ),
-                ],
-              ),
-            ),
-            SizedBox(width: 10),
-            Expanded(
-              child: Column(
-                children: [
-                  Text("Price",style: TextStyle(fontSize: 12),),
-                  NumberField(
-                    controller: priceController,
-                    readOnly: isReadOnly,
-                  ),
-                ],
-              ),
-            ),
-          ],
+            ],
+          ),
         ),
       ],
     );
   }
+
+  Widget _buildDetailField(String label, TextEditingController controller) {
+    return Expanded(
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Text(
+            label,
+            style: TextStyle(
+              fontSize: 12,
+              fontWeight: FontWeight.w500,
+              color: Color(0xFF666666),
+            ),
+          ),
+          SizedBox(height: 4),
+          NumberField(
+            controller: controller,
+            readOnly: isReadOnly,
+          ),
+        ],
+      ),
+    );
+  }
+
+//   @override
+// Widget build(BuildContext context) {
+//   return Row(
+//     crossAxisAlignment: CrossAxisAlignment.start,
+//     children: [
+//       Expanded(
+//         child: Row(
+//           children: [
+//             Expanded(
+//               flex: 2,
+//               child: Column(
+//                 crossAxisAlignment: CrossAxisAlignment.start,
+//                 children: [
+//                   Text(
+//                     productName,
+//                     style: TextStyle(fontSize: 10),
+//                   ),
+//                 ],
+//               ),
+//             ),
+//             SizedBox(width: 10),
+//             Expanded(
+//               child: Column(
+//                 children: [
+//                   Text("Stock",style: TextStyle(fontSize: 12),),
+//                   NumberField(
+//                     controller: stockController,
+//                     readOnly: isReadOnly,
+//                   ),
+//                 ],
+//               ),
+//             ),
+//             SizedBox(width: 10),
+//             Expanded(
+//               child: Column(
+//                 children: [
+//                   Text("Selling",style: TextStyle(fontSize: 12),),
+//                   NumberField(
+//                     controller: sellingController,
+//                     readOnly: isReadOnly,
+//                   ),
+//                 ],
+//               ),
+//             ),
+//             SizedBox(width: 10),
+//             Expanded(
+//               child: Column(
+//                 children: [
+//                   Text("Balance",style: TextStyle(fontSize: 12),),
+//                   NumberField(
+//                     controller: balanceController,
+//                     readOnly: isReadOnly,
+//                   ),
+//                 ],
+//               ),
+//             ),
+//             SizedBox(width: 10),
+//             Expanded(
+//               child: Column(
+//                 children: [
+//                   Text("Price",style: TextStyle(fontSize: 12),),
+//                   NumberField(
+//                     controller: priceController,
+//                     readOnly: isReadOnly,
+//                   ),
+//                 ],
+//               ),
+//             ),
+//           ],
+//         ),
+//       ),
+//       IconButton(
+//         onPressed: onDelete,
+//         icon: Icon(Icons.close, size: 14),
+//         padding: EdgeInsets.zero,
+//         constraints: BoxConstraints(),
+//       ),
+//     ],
+//   );
+// }
 }
 
 class NumberField extends StatelessWidget {

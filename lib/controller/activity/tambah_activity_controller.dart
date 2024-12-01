@@ -1,6 +1,7 @@
 import 'dart:io';
 
 import 'package:cetapil_mobile/api/api.dart';
+import 'package:cetapil_mobile/controller/activity/tambah_availibility_controller.dart';
 import 'package:cetapil_mobile/model/survey_question_response.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
@@ -57,8 +58,12 @@ class TambahActivityController extends GetxController {
   // Initialize controllers
   final Map<String, Map<String, TextEditingController>> productControllers = {};
 
-  void removeItem(String item) {
-    selectedItems.removeWhere((items) => items.name == item);
+// In TambahActivityController
+  void removeItem(Map<String, dynamic> item) {
+    final availabilityController = Get.find<TambahAvailabilityController>();
+    availabilityController.draftItems
+        .removeWhere((draft) => draft['id'] == item['id'] && draft['sku'] == item['sku']);
+    availabilityController.draftItems.refresh(); // Force UI update
   }
 
   // Method to set the outlet_id

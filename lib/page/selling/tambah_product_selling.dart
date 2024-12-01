@@ -276,65 +276,85 @@ class SumAmountProduct extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return Row(children: [
-      Expanded(
-          flex: 2,
-          child: Text(
-            productName,
-            style: TextStyle(fontSize: 10),
-          )),
-      SizedBox(
-        width: 10,
+    return Container(
+      margin: EdgeInsets.only(bottom: 16),
+      decoration: BoxDecoration(
+        color: Colors.white,
+        borderRadius: BorderRadius.circular(12),
+        boxShadow: [
+          BoxShadow(
+            color: Colors.black.withOpacity(0.05),
+            blurRadius: 8,
+            offset: Offset(0, 2),
+          ),
+        ],
       ),
-      Expanded(
-        child: Column(
-          children: [
-            Text("Stock",style: TextStyle(fontSize: 12),),
-            NumberField(
-              controller: stockController,
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Container(
+            padding: EdgeInsets.symmetric(horizontal: 16, vertical: 12),
+            decoration: BoxDecoration(
+              color: Color(0xFFEDF8FF),
+              borderRadius: BorderRadius.only(
+                topLeft: Radius.circular(12),
+                topRight: Radius.circular(12),
+              ),
             ),
-          ],
-        ),
-      ),
-      SizedBox(
-        width: 10,
-      ),
-      Expanded(
-        child: Column(
-          children: [
-            Text("Selling",style: TextStyle(fontSize: 12),),
-            NumberField(
-              controller: sellingController,
+            child: Row(
+              mainAxisAlignment: MainAxisAlignment.spaceBetween,
+              children: [
+                Expanded(
+                  child: Text(
+                    productName,
+                    style: TextStyle(
+                      fontSize: 14,
+                      fontWeight: FontWeight.bold,
+                      color: Color(0xFF023B5E),
+                    ),
+                  ),
+                ),
+              ],
             ),
-          ],
-        ),
-      ),
-      SizedBox(
-        width: 10,
-      ),
-      Expanded(
-        child: Column(
-          children: [
-            Text("Balance",style: TextStyle(fontSize: 12),),
-            NumberField(
-              controller: balanceController,
+          ),
+          Padding(
+            padding: EdgeInsets.all(16),
+            child: Row(
+              children: [
+                _buildDetailField("Stock", stockController),
+                SizedBox(width: 12),
+                _buildDetailField("Selling", sellingController),
+                SizedBox(width: 12),
+                _buildDetailField("Balance", balanceController),
+                SizedBox(width: 12),
+                _buildDetailField("Price", priceController),
+              ],
             ),
-          ],
-        ),
+          ),
+        ],
       ),
-      SizedBox(
-        width: 10,
-      ),
-      Expanded(
-        child: Column(
-          children: [
-            Text("Price",style: TextStyle(fontSize: 12),),
-            NumberField(
-              controller: priceController,
+    );
+  }
+
+  Widget _buildDetailField(String label, TextEditingController controller) {
+    return Expanded(
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Text(
+            label,
+            style: TextStyle(
+              fontSize: 12,
+              fontWeight: FontWeight.w500,
+              color: Color(0xFF666666),
             ),
-          ],
-        ),
+          ),
+          SizedBox(height: 4),
+          NumberField(
+            controller: controller,
+          ),
+        ],
       ),
-    ]);
+    );
   }
 }

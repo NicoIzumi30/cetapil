@@ -51,12 +51,21 @@ class AvailabilityPage extends GetView<TambahActivityController> {
                     ),
                     ...items.map((item) {
                       return SumAmountProduct(
-                        productName: item['sku'],
-                        stockController: TextEditingController(text: item['stock'].toString()),
-                        AV3MController: TextEditingController(text: item['av3m'].toString()),
+                        productName: item['sku'] ?? '',
+                        stockController:
+                            TextEditingController(text: item['stock']?.toString() ?? ''),
+                        AV3MController: TextEditingController(text: item['av3m']?.toString() ?? ''),
                         recommendController:
-                            TextEditingController(text: item['recommend'].toString()),
+                            TextEditingController(text: item['recommend']?.toString() ?? ''),
                         isReadOnly: true,
+                        itemData: {
+                          'id': item['id'],
+                          'sku': item['sku'],
+                          'category': item['category'],
+                          'stock': item['stock'],
+                          'av3m': item['av3m'],
+                          'recommend': item['recommend']
+                        },
                       );
                     }).toList(),
                     SizedBox(height: 10),
@@ -103,6 +112,7 @@ class SumAmountProduct extends StatelessWidget {
   final TextEditingController AV3MController;
   final TextEditingController recommendController;
   final bool isReadOnly;
+  final Map<String, dynamic> itemData;
 
   const SumAmountProduct({
     super.key,
@@ -110,82 +120,138 @@ class SumAmountProduct extends StatelessWidget {
     required this.stockController,
     required this.AV3MController,
     required this.recommendController,
+    required this.itemData,
     this.isReadOnly = false,
   });
 
   @override
   Widget build(BuildContext context) {
-    return Column(
-      children: [
-        SizedBox(height: 10),
-        Row(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            Expanded(
-              flex: 2,
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  Text(
-                    "Stock On Hand",
-                    style: TextStyle(fontWeight: FontWeight.bold),
-                  ),
-                  SizedBox(height: 10),
-                  Text(
-                    productName,
-                    style: TextStyle(fontSize: 10),
-                  ),
-                ],
+    final availabilityController = Get.find<TambahAvailabilityController>();
+    final activityController = Get.find<TambahActivityController>();
+
+    return Container(
+      margin: EdgeInsets.only(bottom: 16),
+      decoration: BoxDecoration(
+        color: Colors.white,
+        borderRadius: BorderRadius.circular(12),
+        boxShadow: [
+          BoxShadow(
+            color: Colors.black.withOpacity(0.05),
+            blurRadius: 8,
+            offset: Offset(0, 2),
+          ),
+        ],
+      ),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Container(
+            padding: EdgeInsets.symmetric(horizontal: 16, vertical: 12),
+            decoration: BoxDecoration(
+              color: Color(0xFFEDF8FF),
+              borderRadius: BorderRadius.only(
+                topLeft: Radius.circular(12),
+                topRight: Radius.circular(12),
               ),
             ),
-            SizedBox(width: 10),
-            Expanded(
-              child: Column(
-                children: [
-                  Text(
-                    "Stock",
-                    style: TextStyle(fontSize: 10, fontWeight: FontWeight.bold),
+            child: Row(
+              mainAxisAlignment: MainAxisAlignment.spaceBetween,
+              children: [
+                Expanded(
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Text(
+                        "Stock On Hand",
+                        style: TextStyle(
+                          fontSize: 14,
+                          fontWeight: FontWeight.bold,
+                          color: Color(0xFF023B5E),
+                        ),
+                      ),
+                      SizedBox(height: 4),
+                      Text(
+                        productName,
+                        style: TextStyle(
+                          fontSize: 12,
+                          color: Color(0xFF666666),
+                        ),
+                      ),
+                    ],
                   ),
-                  NumberField(
-                    controller: stockController,
-                    readOnly: isReadOnly,
-                  ),
-                ],
-              ),
+                ),
+                Row(
+                  children: [
+                    IconButton(
+                      onPressed: () async {
+                        if (!Get.isRegistered<TambahAvailabilityController>()) {
+                          Get.put(TambahAvailabilityController());
+                        }
+                        final controller = Get.find<TambahAvailabilityController>();
+
+                        // Pre-fill the form data
+                        controller.editItem(itemData);
+
+                        // Navigate to edit screen
+                        await Get.to(() => TambahAvailability());
+                      },
+                      icon: Icon(Icons.edit_outlined, color: Colors.blue, size: 20),
+                      padding: EdgeInsets.zero,
+                      constraints: BoxConstraints(),
+                      tooltip: 'Edit Product',
+                    ),
+                    SizedBox(width: 8),
+                    IconButton(
+                      onPressed: () {
+                        activityController.removeItem(itemData); // Pass the full item data
+                      },
+                      icon: Icon(Icons.delete_outline, color: Colors.red[400], size: 20),
+                      padding: EdgeInsets.zero,
+                      constraints: BoxConstraints(),
+                      tooltip: 'Remove Product',
+                    ),
+                  ],
+                ),
+              ],
             ),
-            SizedBox(width: 10),
-            Expanded(
-              child: Column(
-                children: [
-                  Text(
-                    "AV3M(Pcs)",
-                    style: TextStyle(fontSize: 10, fontWeight: FontWeight.bold),
-                  ),
-                  NumberField(
-                    controller: AV3MController,
-                    readOnly: isReadOnly,
-                  ),
-                ],
-              ),
+          ),
+          Padding(
+            padding: EdgeInsets.all(16),
+            child: Row(
+              children: [
+                _buildDetailField("Stock", stockController),
+                SizedBox(width: 12),
+                _buildDetailField("AV3M(Pcs)", AV3MController),
+                SizedBox(width: 12),
+                _buildDetailField("Recommend", recommendController),
+              ],
             ),
-            SizedBox(width: 10),
-            Expanded(
-              child: Column(
-                children: [
-                  Text(
-                    "Recommend",
-                    style: TextStyle(fontSize: 10, fontWeight: FontWeight.bold),
-                  ),
-                  NumberField(
-                    controller: recommendController,
-                    readOnly: isReadOnly,
-                  ),
-                ],
-              ),
+          ),
+        ],
+      ),
+    );
+  }
+
+  Widget _buildDetailField(String label, TextEditingController controller) {
+    return Expanded(
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Text(
+            label,
+            style: TextStyle(
+              fontSize: 12,
+              fontWeight: FontWeight.w500,
+              color: Color(0xFF666666),
             ),
-          ],
-        ),
-      ],
+          ),
+          SizedBox(height: 4),
+          NumberField(
+            controller: controller,
+            readOnly: isReadOnly,
+          ),
+        ],
+      ),
     );
   }
 }

@@ -289,7 +289,6 @@ class _SumAmountProductState extends State<SumAmountProduct> {
   @override
   void initState() {
     super.initState();
-    // Add listener to stock controller to update recommend value
     widget.stockController.addListener(_calculateRecommend);
   }
 
@@ -312,76 +311,97 @@ class _SumAmountProductState extends State<SumAmountProduct> {
 
   @override
   Widget build(BuildContext context) {
-    return Column(
-      children: [
-        SizedBox(height: 10),
-        Row(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            Expanded(
-              flex: 2,
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  Text(
-                    "Stock On Hand",
-                    style: TextStyle(fontWeight: FontWeight.bold),
-                  ),
-                  SizedBox(height: 10),
-                  Text(
-                    widget.productName,
-                    style: TextStyle(fontSize: 10),
-                  ),
-                ],
+    return Container(
+      margin: EdgeInsets.only(bottom: 16),
+      decoration: BoxDecoration(
+        color: Colors.white,
+        borderRadius: BorderRadius.circular(12),
+        boxShadow: [
+          BoxShadow(
+            color: Colors.black.withOpacity(0.05),
+            blurRadius: 8,
+            offset: Offset(0, 2),
+          ),
+        ],
+      ),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Container(
+            padding: EdgeInsets.symmetric(horizontal: 16, vertical: 12),
+            decoration: BoxDecoration(
+              color: Color(0xFFEDF8FF),
+              borderRadius: BorderRadius.only(
+                topLeft: Radius.circular(12),
+                topRight: Radius.circular(12),
               ),
             ),
-            SizedBox(width: 10),
-            Expanded(
-              child: Column(
-                children: [
-                  Text(
-                    "Stock",
-                    style: TextStyle(fontSize: 10, fontWeight: FontWeight.bold),
+            child: Row(
+              children: [
+                Expanded(
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Text(
+                        "Stock On Hand",
+                        style: TextStyle(
+                          fontSize: 14,
+                          fontWeight: FontWeight.bold,
+                          color: Color(0xFF023B5E),
+                        ),
+                      ),
+                      SizedBox(height: 4),
+                      Text(
+                        widget.productName,
+                        style: TextStyle(
+                          fontSize: 12,
+                          color: Color(0xFF666666),
+                        ),
+                      ),
+                    ],
                   ),
-                  NumberField(
-                    controller: widget.stockController,
-                  ),
-                ],
-              ),
+                ),
+              ],
             ),
-            SizedBox(width: 10),
-            Expanded(
-              child: Column(
-                children: [
-                  Text(
-                    "AV3M(Pcs)",
-                    style: TextStyle(fontSize: 10, fontWeight: FontWeight.bold),
-                  ),
-                  NumberField(
-                    controller: widget.AV3MController,
-                    readOnly: true,
-                  ),
-                ],
-              ),
+          ),
+          Padding(
+            padding: EdgeInsets.all(16),
+            child: Row(
+              children: [
+                _buildDetailField("Stock", widget.stockController),
+                SizedBox(width: 12),
+                _buildDetailField("AV3M(Pcs)", widget.AV3MController, readOnly: true),
+                SizedBox(width: 12),
+                _buildDetailField("Recommend", widget.recommendController, readOnly: true),
+              ],
             ),
-            SizedBox(width: 10),
-            Expanded(
-              child: Column(
-                children: [
-                  Text(
-                    "Recommend",
-                    style: TextStyle(fontSize: 10, fontWeight: FontWeight.bold),
-                  ),
-                  NumberField(
-                    controller: widget.recommendController,
-                    readOnly: true,
-                  ),
-                ],
-              ),
+          ),
+        ],
+      ),
+    );
+  }
+
+  Widget _buildDetailField(String label, TextEditingController controller,
+      {bool readOnly = false}) {
+    return Expanded(
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Text(
+            label,
+            style: TextStyle(
+              fontSize: 12,
+              fontWeight: FontWeight.w500,
+              color: Color(0xFF666666),
             ),
-          ],
-        ),
-      ],
+          ),
+          SizedBox(height: 4),
+          NumberField(
+            controller: controller,
+            readOnly: readOnly,
+          ),
+        ],
+      ),
     );
   }
 }

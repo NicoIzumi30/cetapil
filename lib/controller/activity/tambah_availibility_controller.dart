@@ -26,6 +26,44 @@ class TambahAvailabilityController extends GetxController {
     print(activityController.getSelectedChannel());
   }
 
+  // In TambahAvailabilityController
+  void editItem(Map<String, dynamic> item) async {
+    // Clear previous selections first
+    clearForm();
+
+    // Find the category from the product data
+    final categories = supportDataController.getCategories();
+    final categoryData = categories.firstWhere(
+      (cat) => cat['name'] == item['category'],
+      orElse: () => <String, dynamic>{}, // Return empty map instead of null
+    );
+
+    if (categoryData.isNotEmpty) {
+      // Check if map is not empty instead of null check
+      // Set category and wait for filteredSkus to update
+      selectedCategory.value = categoryData['id'].toString();
+      await Future.delayed(const Duration(milliseconds: 100));
+
+      // Find and set SKU
+      final skus = filteredSkus;
+      final skuData = skus.firstWhere(
+        (sku) => sku['id'].toString() == item['id'].toString(),
+        orElse: () => <String, dynamic>{}, // Return empty map instead of null
+      );
+
+      if (skuData.isNotEmpty) {
+        // Check if map is not empty instead of null check
+        selectedSku.value = skuData['id'].toString();
+        selectedSkuData.value = skuData;
+
+        // Set the form values
+        stockController.value.text = item['stock']?.toString() ?? '';
+        av3mController.value.text = item['av3m']?.toString() ?? '';
+        recommendController.value.text = item['recommend']?.toString() ?? '';
+      }
+    }
+  }
+
   // Get list of SKUs for selected category
   List<Map<String, dynamic>> get filteredSkus {
     if (selectedCategory.value == null) return [];
@@ -75,7 +113,11 @@ class TambahAvailabilityController extends GetxController {
   }
 
   void addAvailabilityItem() {
-    if (selectedSku.value == null) return;
+    if (selectedSku.value == null || selectedCategory.value == null) return;
+
+    final categoryData = supportDataController
+        .getCategories()
+        .firstWhere((cat) => cat['id'].toString() == selectedCategory.value);
 
     // Check for existing item
     final existingItemIndex = draftItems.indexWhere(
@@ -85,8 +127,8 @@ class TambahAvailabilityController extends GetxController {
     // Create new item data
     final newItem = {
       'id': selectedSku.value,
-      'category': getSelectedSkuData!['category']['name'],
-      'sku': getSelectedSkuData!['sku'],
+      'category': categoryData['name'],
+      'sku': selectedSkuData.value!['sku'],
       'stock': stockController.value.text,
       'av3m': av3mController.value.text,
       'recommend': recommendController.value.text,
