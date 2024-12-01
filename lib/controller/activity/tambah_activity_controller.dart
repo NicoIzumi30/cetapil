@@ -1,5 +1,3 @@
-import 'dart:io';
-
 import 'package:cetapil_mobile/api/api.dart';
 import 'package:cetapil_mobile/controller/activity/tambah_availibility_controller.dart';
 import 'package:cetapil_mobile/model/survey_question_response.dart';
@@ -7,12 +5,7 @@ import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 
 import '../../model/list_category_response.dart' as Category;
-import '../../model/list_posm_response.dart' as POSM;
-import '../../model/list_posm_response.dart' as Visual;
 import '../../model/list_activity_response.dart' as Activity;
-import '../../model/dropdown_model.dart' as Model;
-import '../../model/visibility.dart' as Visibility;
-import '../../model/visibility.dart';
 
 class TambahActivityController extends GetxController {
   final TextEditingController controller = TextEditingController();
@@ -58,7 +51,6 @@ class TambahActivityController extends GetxController {
   // Initialize controllers
   final Map<String, Map<String, TextEditingController>> productControllers = {};
 
-// In TambahActivityController
   void removeItem(Map<String, dynamic> item) {
     final availabilityController = Get.find<TambahAvailabilityController>();
     availabilityController.draftItems
@@ -98,28 +90,10 @@ class TambahActivityController extends GetxController {
     }
   }
 
-  /// Visibility
-  var itemsPOSM = <Model.Data>[].obs;
-  final selectedPOSM = ''.obs;
-  final selectedIdPOSM = ''.obs;
-  var itemsVisual = <Model.Data>[].obs;
-  final selectedVisual = ''.obs;
-  final selectedIdVisual = ''.obs;
-  final selectedCondition = ''.obs;
-  final RxList<File?> visibilityImages = RxList([null, null]); // [frontView, banner, landmark]
-  final RxList<String> imageUrls = RxList(['', '']);
-  final RxList<String> imagePath = RxList(['', '']);
-  final RxList<String> imageFilename = RxList(['', '']);
-  final RxList<bool> isImageUploading = RxList([false, false]);
-  var listVisibility = <Visibility.Visibility>[].obs;
-
   @override
   void onInit() {
     super.onInit();
-    // initListCategory();
     initGetSurveyQuestion();
-    initListPosm();
-    initListVisual();
   }
 
   // Helper methods to get states for current tab
@@ -256,73 +230,6 @@ class TambahActivityController extends GetxController {
     }
   }
 
-  /// Visibility Section
-  initListPosm() async {
-    try {
-      setLoadingState(true);
-      setErrorState(false);
-      final response = await Api.getItemPOSMList();
-      print("succes get item posm ");
-      if (response.status == "OK") {
-        itemsPOSM.value = response.data!;
-      } else {
-        setErrorState(true, 'Failed to load data');
-      }
-    } catch (e) {
-      setErrorState(true, 'Connection error. Please check your internet connection and try again.');
-      print('Error initializing survey questions: $e');
-    } finally {
-      setLoadingState(false);
-    }
-  }
-
-  initListVisual() async {
-    try {
-      setLoadingState(true);
-      setErrorState(false);
-      final response = await Api.getItemVisualList();
-      print("succes get item visual ");
-      if (response.status == "OK") {
-        itemsVisual.value = response.data!;
-      } else {
-        setErrorState(true, 'Failed to load data');
-      }
-    } catch (e) {
-      setErrorState(true, 'Connection error. Please check your internet connection and try again.');
-      print('Error initializing survey questions: $e');
-    } finally {
-      setLoadingState(false);
-    }
-  }
-
-  void updateImage(int index, File? file) {
-    visibilityImages[index] = file;
-    update();
-  }
-
-  insertVisibility() {
-    Visibility.Visibility data = Visibility.Visibility(
-      typeVisibility: TypeVisibility(id: selectedIdPOSM.value, type: selectedPOSM.value),
-      typeVisual: TypeVisual(id: selectedIdVisual.value, type: selectedVisual.value),
-      condition: selectedCondition.value,
-      image1: visibilityImages[0],
-      image2: visibilityImages[1],
-    );
-    listVisibility.add(data);
-
-    /// Clear variable
-    selectedPOSM.value = "";
-    selectedIdPOSM.value = "";
-    selectedVisual.value = "";
-    selectedIdVisual.value = "";
-    selectedCondition.value = "";
-    imagePath.value = ['', ''];
-    isImageUploading.value = [false, false];
-    visibilityImages.value = [null, null];
-
-    Get.back();
-  }
-
   /// Survey Section
   var switchValue = true.obs;
 
@@ -378,8 +285,6 @@ class TambahActivityController extends GetxController {
   bool getSwitchValue(String id) {
     return switchStates[id]?.value ?? true; // Default to true for 'Ada'
   }
-
-  /// Order Section
 
   @override
   void onClose() {

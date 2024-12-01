@@ -1,5 +1,6 @@
 import 'dart:io';
 
+import 'package:cetapil_mobile/controller/activity/tambah_visibility_controller.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 
@@ -13,7 +14,7 @@ import '../../../widget/back_button.dart';
 import '../../../widget/dialog.dart';
 import '../../../widget/dropdown_textfield.dart';
 
-class TambahVisibility extends GetView<TambahActivityController> {
+class TambahVisibility extends GetView<TambahVisibilityController> {
   @override
   Widget build(BuildContext context) {
     return SafeArea(
@@ -38,52 +39,44 @@ class TambahVisibility extends GetView<TambahActivityController> {
                         backgroundColor: Colors.white,
                         iconColor: Colors.blue,
                       ),
-                      SizedBox(
-                        height: 20,
-                      ),
+                      SizedBox(height: 20),
                       Expanded(
                         child: ListView(
                           children: [
                             Obx(() {
-                              if (controller.isLoadingAvailability.value) {
+                              if (controller.isLoading.value) {
                                 return CircularProgressIndicator();
                               } else {
                                 return DropdownApi(
                                   label: "Jenis Visibility",
                                   items: controller.itemsPOSM.map((item) {
                                     return DropdownMenuItem<Model.Data>(
-                                      value: item, // Use the ID as the value
-                                      child: Text(item.name ?? ''), // Display the name
+                                      value: item,
+                                      child: Text(item.name ?? ''),
                                     );
                                   }).toList(),
                                   onChanged: (value) {
                                     controller.selectedPOSM.value = value!.name!;
                                     controller.selectedIdPOSM.value = value.id!;
-                                    // if (!controller.selectedItems.contains(value)) {
-                                    //   controller.selectedItems.add(value!);
-                                    // }
                                   },
                                 );
                               }
                             }),
                             Obx(() {
-                              if (controller.isLoadingAvailability.value) {
+                              if (controller.isLoading.value) {
                                 return CircularProgressIndicator();
                               } else {
                                 return DropdownApi(
                                   label: "Jenis Visual",
                                   items: controller.itemsVisual.map((item) {
                                     return DropdownMenuItem<Model.Data>(
-                                      value: item, // Use the ID as the value
-                                      child: Text(item.name ?? ''), // Display the name
+                                      value: item,
+                                      child: Text(item.name ?? ''),
                                     );
                                   }).toList(),
                                   onChanged: (value) {
                                     controller.selectedVisual.value = value!.name!;
                                     controller.selectedIdVisual.value = value.id!;
-                                    // if (!controller.selectedItems.contains(value)) {
-                                    //   controller.selectedItems.add(value!);
-                                    // }
                                   },
                                 );
                               }
@@ -92,9 +85,7 @@ class TambahVisibility extends GetView<TambahActivityController> {
                               "Planogram",
                               style: TextStyle(fontSize: 13, fontWeight: FontWeight.w700),
                             ),
-                            SizedBox(
-                              height: 10,
-                            ),
+                            SizedBox(height: 10),
                             SizedBox(
                               width: double.infinity,
                               child: ClipRRect(
@@ -102,33 +93,21 @@ class TambahVisibility extends GetView<TambahActivityController> {
                                 child: Image.asset("assets/carousel1.png"),
                               ),
                             ),
-                            SizedBox(
-                              height: 15,
-                            ),
+                            SizedBox(height: 15),
                             CustomDropdown(
                                 hint: "-- Pilih condition --",
                                 items: ["Good", "Bad"].map((item) {
                                   return DropdownMenuItem<String>(
                                     value: item,
-                                    child: Text(item ?? ''), // Display the name
+                                    child: Text(item),
                                   );
                                 }).toList(),
                                 onChanged: (value) {
                                   controller.selectedCondition.value = value!;
                                 },
                                 title: "Condition"),
-                            _buildImageUploader(
-                              context,
-                              "Foto Visibility 1",
-                              0,
-                              controller,
-                            ),
-                            _buildImageUploader(
-                              context,
-                              "Foto Visibility 2",
-                              1,
-                              controller,
-                            )
+                            _buildImageUploader(context, "Foto Visibility 1", 0, controller),
+                            _buildImageUploader(context, "Foto Visibility 2", 1, controller),
                           ],
                         ),
                       )
@@ -144,8 +123,7 @@ class TambahVisibility extends GetView<TambahActivityController> {
                       color: Colors.white.withOpacity(0.3),
                       borderRadius: BorderRadius.circular(10)),
                   child: Padding(
-                    padding: const EdgeInsets.symmetric(
-                        horizontal: 15, vertical: 10),
+                    padding: const EdgeInsets.symmetric(horizontal: 15, vertical: 10),
                     child: ElevatedButton(
                       style: ElevatedButton.styleFrom(
                         backgroundColor: AppColors.primary,
@@ -177,7 +155,7 @@ class TambahVisibility extends GetView<TambahActivityController> {
     BuildContext context,
     String title,
     int index,
-      TambahActivityController controller,
+    TambahVisibilityController controller,
   ) {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
@@ -185,9 +163,8 @@ class TambahVisibility extends GetView<TambahActivityController> {
         Text(
           title,
           style: TextStyle(fontSize: 13, fontWeight: FontWeight.w700),
-          textAlign: TextAlign.center,
         ),
-        SizedBox(height: 10,),
+        SizedBox(height: 10),
         Obx(() {
           final image = controller.visibilityImages[index];
           final isUploading = controller.isImageUploading[index];
@@ -196,9 +173,7 @@ class TambahVisibility extends GetView<TambahActivityController> {
             onTap: isUploading
                 ? null
                 : () async {
-                    final File? result =
-                        await ImageUploadUtils.showImageSourceSelection(
-                            context);
+                    final File? result = await ImageUploadUtils.showImageSourceSelection(context);
                     if (result != null) {
                       controller.updateImage(index, result);
                     }
@@ -209,10 +184,7 @@ class TambahVisibility extends GetView<TambahActivityController> {
               margin: EdgeInsets.only(bottom: 10),
               decoration: BoxDecoration(
                 color: Color(0xFFEDF8FF),
-                border: Border.all(
-                  color: Colors.blue,
-                  width: 1,
-                ),
+                border: Border.all(color: Colors.blue, width: 1),
                 borderRadius: BorderRadius.circular(8),
                 image: image != null
                     ? DecorationImage(
@@ -227,8 +199,7 @@ class TambahVisibility extends GetView<TambahActivityController> {
                       ? Column(
                           mainAxisAlignment: MainAxisAlignment.center,
                           children: [
-                            Icon(Icons.camera_alt,
-                                color: Colors.black),
+                            Icon(Icons.camera_alt, color: Colors.black),
                             Text(
                               "Klik disini untuk ambil foto dengan kamera",
                               style: TextStyle(
@@ -239,8 +210,7 @@ class TambahVisibility extends GetView<TambahActivityController> {
                             ),
                             Text(
                               "Kualitas foto harus jelas dan tidak blur",
-                              style: TextStyle(
-                                  fontSize: 7, color: Colors.blue),
+                              style: TextStyle(fontSize: 7, color: Colors.blue),
                             ),
                           ],
                         )
@@ -251,19 +221,14 @@ class TambahVisibility extends GetView<TambahActivityController> {
                               right: 4,
                               top: 4,
                               child: GestureDetector(
-                                onTap: () =>
-                                    controller.updateImage(index, null),
+                                onTap: () => controller.updateImage(index, null),
                                 child: Container(
                                   padding: EdgeInsets.all(4),
                                   decoration: BoxDecoration(
                                     color: Colors.white.withOpacity(0.8),
                                     shape: BoxShape.circle,
                                   ),
-                                  child: Icon(
-                                    Icons.close,
-                                    size: 16,
-                                    color: Colors.red,
-                                  ),
+                                  child: Icon(Icons.close, size: 16, color: Colors.red),
                                 ),
                               ),
                             ),
@@ -272,7 +237,6 @@ class TambahVisibility extends GetView<TambahActivityController> {
             ),
           );
         }),
-
       ],
     );
   }

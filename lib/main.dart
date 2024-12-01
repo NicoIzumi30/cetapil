@@ -1,4 +1,5 @@
 import 'package:cetapil_mobile/controller/activity/tambah_activity_controller.dart';
+import 'package:cetapil_mobile/controller/activity/tambah_visibility_controller.dart';
 import 'package:cetapil_mobile/controller/outlet/outlet_controller.dart';
 import 'package:cetapil_mobile/controller/routing/routing_controller.dart';
 import 'package:cetapil_mobile/controller/routing/tambah_routing_controller.dart';
@@ -113,6 +114,7 @@ Future<void> initializeControllers(bool isLoggedIn) async {
       Get.lazyPut(() => VideoController());
       Get.lazyPut(() => TambahRoutingController());
       Get.lazyPut(() => TambahAvailabilityController());
+      Get.lazyPut(() => TambahVisibilityController());
       Get.put(SupportDataController());
       Get.lazyPut(() => TambahProdukSellingController());
     } else {
@@ -188,6 +190,7 @@ class InitialBindings extends Bindings {
     Get.lazyPut(() => VideoController());
     Get.lazyPut(() => TambahRoutingController());
     Get.lazyPut(() => TambahAvailabilityController());
+    Get.lazyPut(() => TambahVisibilityController());
     Get.put(SupportDataController());
     Get.lazyPut(() => TambahProdukSellingController());
     // Add other controllers...
