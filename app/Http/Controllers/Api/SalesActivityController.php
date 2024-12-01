@@ -10,6 +10,7 @@ use App\Http\Resources\Product\CategoryCollection;
 use App\Http\Resources\Product\ProductCollection;
 use App\Http\Resources\SalesActivity\SalesActivityCollection;
 use App\Http\Requests\SalesActivity\GetProductListByCategoryIdRequest;
+use App\Http\Requests\SalesActivity\SaveActivityRequest;
 use App\Http\Requests\SalesActivity\SaveAvailabilityRequest;
 use App\Http\Requests\SalesActivity\SaveVisibilityRequest;
 use App\Http\Requests\Visibility\CreateVisibilityRequest;
@@ -28,6 +29,8 @@ use App\Models\Product;
 use Illuminate\Support\Arr;
 use App\Models\SalesActivity;
 use App\Models\SalesAvailability;
+use App\Models\SalesOrder;
+use App\Models\SalesSurvey;
 use App\Models\SalesVisibility;
 use App\Models\Visibility;
 use App\Models\VisualType;
@@ -186,5 +189,85 @@ class SalesActivityController extends Controller
 
         $posm_types = $posm_types->get();
         return new PosmTypeCollection($posm_types);
+    }
+
+    public function storeActivity(SaveActivityRequest $request)
+    {
+        $data = $request->validated();
+        $activity = SalesActivity::findOrFail($data['sales_activity_id']);
+
+        // Store availability data
+        foreach ($data['availability'] as $item) {
+            SalesAvailability::create([
+                'sales_activities_id' => $activity->id,
+                'outlet_id' => $data['outlet_id'],
+                'product_id' => $item['product_id'],
+                'availability_stock' => $item['availability_stock'],
+                'average_stock' => $item['average_stock'],
+                'ideal_stock' => $item['ideal_stock'],
+                'status' => true,
+                'detail' => SalesAvailability::getDetail((int) $item['ideal_stock'] ?? 0)
+            ]);
+        }
+
+        // Store visibility data
+        foreach ($data['visibility'] as $key => $item) {
+            $visibilityRecord = SalesVisibility::create([
+                'sales_activities_id' => $activity->id,
+                'outlet_id' => $data['outlet_id'],
+                'condition' => $item['condition']
+            ]);
+
+            // Handle file1 upload
+            if ($request->hasFile("visibility.$key.file1")) {
+                $file1 = $request->file("visibility.$key.file1");
+                $media1 = saveFile($file1, "sales-visibility/$visibilityRecord->id/file1");
+                $visibilityRecord->file1_filename = $media1['filename'];
+                $visibilityRecord->file1_path = $media1['path'];
+            }
+
+            // Handle file2 upload
+            if ($request->hasFile("visibility.$key.file2")) {
+                $file2 = $request->file("visibility.$key.file2");
+                $media2 = saveFile($file2, "sales-visibility/$visibilityRecord->id/file2");
+                $visibilityRecord->file2_filename = $media2['filename'];
+                $visibilityRecord->file2_path = $media2['path'];
+            }
+
+            $visibilityRecord->save();
+        }
+
+        // Store survey data
+        foreach ($data['survey'] as $item) {
+            SalesSurvey::create([
+                'sales_activities_id' => $activity->id,
+                'survey_question_id' => $item['survey_question_id'],
+                'answer' => $item['answer']
+            ]);
+        }
+
+        // Store order data
+        foreach ($data['order'] as $item) {
+            SalesOrder::create([
+                'sales_activities_id' => $activity->id,
+                'outlet_id' => $data['outlet_id'],
+                'product_id' => $item['product_id'],
+                'total' => $item['total_items'],
+                'subtotal' => $item['subtotal']
+            ]);
+        }
+
+        $activity->update([
+            'checked_out' => $data['current_time'],
+            'views_knowledges' => $data['views_knowledges'],
+            'time_availability' => $data['time_availability'],
+            'time_visibility' => $data['time_visibility'],
+            'time_knowledge' => $data['time_knowledge'],
+            'time_survey' => $data['time_survey'],
+            'time_order' => $data['time_order'],
+            'status' => 'SUBMITTED'  // Add this line to update the status
+        ]);
+
+        return $this->successResponse(SalesActivityConstants::STORE_ACTIVITY, Response::HTTP_OK);
     }
 }
