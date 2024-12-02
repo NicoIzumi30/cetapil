@@ -21,34 +21,6 @@ class ActivityController extends GetxController {
   void onInit() {
     super.onInit();
     initGetActivity();
-    // Initialize with dummy data
-    // activity.addAll([
-    //   Activity(
-    //     name: 'Guardian Setiabudi Building',
-    //     category: 'GT',
-    //     date: 'Senin, 01/11/2024',
-    //   ),
-    //   Activity(
-    //     name: 'CV Jaya Makmur Sentosa',
-    //     category: 'MT',
-    //     date: 'Senin, 01/11/2024',
-    //   ),
-    //   Activity(
-    //     name: 'Alfamart Senen Raya',
-    //     category: 'GT',
-    //     date: 'Senin, 01/11/2024',
-    //   ),
-    //   Activity(
-    //     name: 'Alfamart Thamrin City',
-    //     category: 'GT',
-    //     date: 'Senin, 01/11/2024',
-    //   ),
-    //   Activity(
-    //     name: 'Guardian Setiabudi Building',
-    //     category: 'MT',
-    //     date: 'Senin, 01/11/2024',
-    //   ),
-    // ]);
   }
 
   initGetActivity() async {
@@ -65,8 +37,8 @@ class ActivityController extends GetxController {
             'id': result.id,
             'checked_in': result.checkedIn,
             'checked_out': result.checkedOut,
-            'channel_id': result.channel?.id, // Changed from channel object to channel_id
-            'channel_name': result.channel?.name, // Added channel_name
+            'channel_id': result.channel?.id,
+            'channel_name': result.channel?.name,
             'views_knowledge': result.viewsKnowledge,
             'time_availability': result.timeAvailability,
             'time_visibility': result.timeVisibility,
@@ -88,12 +60,16 @@ class ActivityController extends GetxController {
             });
           }
 
-          if (result.channel != null) {
-            // Add explicit check for channel
-            data.addAll({
-              'channel_id': result.channel!.id,
-              'channel_name': result.channel!.name,
-            });
+          if (result.visibilities != null) {
+            data['visibilities'] = result.visibilities!
+                .map((v) => {
+                      'id': v.id,
+                      'posm_type_id': v.posmTypeId,
+                      'visual_type_id': v.visualTypeId,
+                      'filename': v.filename,
+                      'image': v.image,
+                    })
+                .toList();
           }
 
           await db.insertActivity(data);

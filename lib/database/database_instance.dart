@@ -201,6 +201,20 @@ class DatabaseHelper {
     FOREIGN KEY (outlet_id) REFERENCES outlet_activities (id)
   )
 ''');
+
+    await db.execute('''
+  CREATE TABLE activity_visibilities (
+    id TEXT PRIMARY KEY,
+    activity_id TEXT NOT NULL,
+    posm_type_id TEXT,
+    visual_type_id TEXT,
+    filename TEXT,
+    image TEXT,
+    created_at TEXT NOT NULL,
+    FOREIGN KEY (activity_id) REFERENCES sales_activities (id)
+  )
+''');
+
   }
 
   // Delete entire database
@@ -942,6 +956,7 @@ class DatabaseHelper {
     });
   }
 
+  // Update the insertActivity method in DatabaseHelper
   Future<void> insertActivity(Map<String, dynamic> data) async {
     final db = await database;
 
@@ -963,7 +978,7 @@ class DatabaseHelper {
         conflictAlgorithm: ConflictAlgorithm.replace,
       );
 
-      // Insert sales activity with channel
+      // Insert sales activity
       await txn.insert(
         'sales_activities',
         {
@@ -985,9 +1000,29 @@ class DatabaseHelper {
         },
         conflictAlgorithm: ConflictAlgorithm.replace,
       );
+
+      // Insert visibilities if they exist
+      if (data['visibilities'] != null) {
+        for (var visibility in data['visibilities']) {
+          await txn.insert(
+            'activity_visibilities',
+            {
+              'id': visibility['id'] ?? const Uuid().v4(),
+              'activity_id': data['id'],
+              'posm_type_id': visibility['posm_type_id'],
+              'visual_type_id': visibility['visual_type_id'],
+              'filename': visibility['filename'],
+              'image': visibility['image'],
+              'created_at': DateTime.now().toIso8601String(),
+            },
+            conflictAlgorithm: ConflictAlgorithm.replace,
+          );
+        }
+      }
     });
   }
 
+  // Update the getSalesActivities method in DatabaseHelper
   Future<List<Activity.Data>> getSalesActivities() async {
     final db = await database;
 
@@ -1002,6 +1037,13 @@ class DatabaseHelper {
         whereArgs: [activityMap['outlet_id']],
       );
 
+      // Get visibilities for this activity
+      final visibilityMaps = await db.query(
+        'activity_visibilities',
+        where: 'activity_id = ?',
+        whereArgs: [activityMap['id']],
+      );
+
       final activities = Activity.Data(
         id: activityMap['id'],
         outlet: outletMaps.isNotEmpty ? Activity.Outlet.fromJson(outletMaps.first) : null,
@@ -1011,6 +1053,15 @@ class DatabaseHelper {
                 name: activityMap['channel_name'],
               )
             : null,
+        visibilities: visibilityMaps
+            .map((v) => Activity.Visibilities(
+                  id: v['id']?.toString() ?? '',
+                  posmTypeId: v['posm_type_id']?.toString() ?? '',
+                  visualTypeId: v['visual_type_id']?.toString() ?? '',
+                  filename: v['filename']?.toString() ?? '',
+                  image: v['image']?.toString() ?? '',
+                ))
+            .toList(),
         checkedIn: activityMap['checked_in'],
         checkedOut: activityMap['checked_out'],
         viewsKnowledge: activityMap['views_knowledge'],
