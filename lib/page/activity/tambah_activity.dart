@@ -17,66 +17,76 @@ class TambahActivity extends GetView<TambahActivityController> {
   Widget build(BuildContext context) {
     return SafeArea(
         child: Stack(children: [
-          Image.asset(
-            'assets/background.png',
-            fit: BoxFit.cover,
-            width: double.infinity,
-            height: double.infinity,
-          ),
-          Padding(
-              padding: const EdgeInsets.fromLTRB(15, 30, 15, 10),
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  EnhancedBackButton(
-                    onPressed: () => Alerts.showConfirmDialog(context),
-                    backgroundColor: Colors.white,
-                    iconColor: Colors.blue,
-                  ),
-                  SizedBox(
-                    height: 20,
-                  ),
-                  Obx(() {
-                    return UnderlineTextField.readOnly(
-                      title: "Nama Outlet",
-                      value: controller.detailOutlet.value!.outlet!.name,
-                    );
+      Image.asset(
+        'assets/background.png',
+        fit: BoxFit.cover,
+        width: double.infinity,
+        height: double.infinity,
+      ),
+      Padding(
+          padding: const EdgeInsets.fromLTRB(15, 30, 15, 10),
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              EnhancedBackButton(
+                onPressed: () {
+                  Alerts.showConfirmDialog(
+                    context,
+                    onContinue: ()async {
+                      Get.back(); 
+                      final controller = Get.find<TambahActivityController>();
+                      controller.clearAllDraftItems();
+                      controller.onClose();
+                    },
+                  );
+                },
+                backgroundColor: Colors.white,
+                iconColor: Colors.blue,
+              ),
+              SizedBox(
+                height: 20,
+              ),
+              Obx(() {
+                return UnderlineTextField.readOnly(
+                  title: "Nama Outlet",
+                  value: controller.detailOutlet.value!.outlet!.name,
+                );
+              }),
+              Obx(() {
+                return UnderlineTextField.readOnly(
+                  title: "Kategori Outlet",
+                  value: controller.detailOutlet.value!.outlet!.category,
+                );
+              }),
+              Obx(() {
+                return SecondaryTabbar(
+                    selectedIndex: controller.selectedTab.value,
+                    onTabChanged: controller.changeTab);
+              }),
+              SizedBox(
+                height: 15,
+              ),
+              Expanded(
+                child: SingleChildScrollView(
+                  child: Obx(() {
+                    switch (controller.selectedTab.value) {
+                      case 0:
+                        return AvailabilityPage();
+                      case 1:
+                        return VisibilityPage();
+                      case 2:
+                        return KnowledgePage();
+                      case 3:
+                        return SurveyPage();
+                      default:
+                        return OrderPage();
+                    }
                   }),
-                  Obx(() {
-                    return UnderlineTextField.readOnly(
-                      title: "Kategori Outlet",
-                      value: controller.detailOutlet.value!.outlet!.category,
-                    );
-                  }),
-                  Obx(() {
-                    return SecondaryTabbar(
-                        selectedIndex: controller.selectedTab.value,
-                        onTabChanged: controller.changeTab);
-                  }),
-                  SizedBox(
-                    height: 15,
-                  ),
-                  Expanded(
-                    child: SingleChildScrollView(
-                      child: Obx(() {
-                        switch (controller.selectedTab.value) {
-                          case 0:
-                            return AvailabilityPage();
-                          case 1:
-                            return VisibilityPage();
-                          case 2:
-                            return KnowledgePage();
-                          case 3:
-                            return SurveyPage();
-                          default:
-                            return OrderPage();
-                        }
-                      }),
-                    ),
-                  ),
-                ],
-              ))
-        ]));
+                ),
+              ),
+            ],
+          ))
+    ]));
   }
 }
 
@@ -120,14 +130,12 @@ class SecondaryTabbar extends StatelessWidget {
           onTabChanged(index);
         },
         child: Container(
-          decoration: BoxDecoration(
-              color: selectedIndex == index ? Colors.blue : Colors.white),
+          decoration: BoxDecoration(color: selectedIndex == index ? Colors.blue : Colors.white),
           child: Center(
             child: Text(
               label,
               style: TextStyle(
-                  fontSize: 11,
-                  color: selectedIndex == index ? Colors.white : Colors.blue),
+                  fontSize: 11, color: selectedIndex == index ? Colors.white : Colors.blue),
             ),
           ),
         ),

@@ -85,6 +85,9 @@ class TambahVisibility extends GetView<TambahVisibilityController> {
                             SizedBox(height: 15),
                             CustomDropdown(
                                 hint: "-- Pilih condition --",
+                                value: controller.selectedCondition.value.isEmpty
+                                    ? null
+                                    : controller.selectedCondition.value,
                                 items: ["Good", "Bad"].map((item) {
                                   return DropdownMenuItem<String>(
                                     value: item,

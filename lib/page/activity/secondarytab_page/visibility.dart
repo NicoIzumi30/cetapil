@@ -1,5 +1,6 @@
 import 'dart:convert';
 
+import 'package:cetapil_mobile/controller/activity/tambah_activity_controller.dart';
 import 'package:cetapil_mobile/controller/activity/tambah_visibility_controller.dart';
 import 'package:cetapil_mobile/page/activity/secondarytab_page/tambah_visibility.dart';
 import 'package:cetapil_mobile/controller/activity/activity_controller.dart';
@@ -53,25 +54,18 @@ class VisibilityPage extends GetView<ActivityController> {
                 visualTypeName: visualType?['name'] ?? 'Unknown Visual Type',
                 onTapCard: () {
                   if (!Get.isRegistered<TambahVisibilityController>()) {
-                    // Create and initialize a new controller
                     Get.put(TambahVisibilityController());
                   }
 
-// Get the existing controller instance
                   final controller = Get.find<TambahVisibilityController>();
 
-                  controller.updateWithArgs(
-                    posmType: posmType,
-                    visualType: visualType,
-                    isReadOnly: true,
-                    visibility: visibility,
-                  );
+                  controller.editItem({
+                    'posmType': posmType,
+                    'visualType': visualType,
+                    'visibility': visibility,
+                  });
 
-                  // Navigate to the page
-                  Get.to(
-                    () => TambahVisibility(),
-                    arguments: controller,
-                  );
+                  Get.to(() => TambahVisibility());
                 },
               );
             },
@@ -105,7 +99,33 @@ class VisibilityCard extends StatelessWidget {
     return '$BASE_URL$path';
   }
 
-  Widget _buildImage() {
+ Widget _buildImage() {
+    final tambahActivityController = Get.find<TambahActivityController>();
+    
+    // Check for draft image first
+    final draftItem = tambahActivityController.visibilityDraftItems
+        .firstWhereOrNull((draft) => draft['id'] == visibility.id);
+        
+    if (draftItem != null && draftItem['image1'] != null) {
+      // Show draft image1 if available
+      return ClipRRect(
+        borderRadius: BorderRadius.circular(10),
+        child: Image.file(
+          draftItem['image1'],
+          width: 120,
+          height: 120,
+          fit: BoxFit.cover,
+          errorBuilder: (context, error, stackTrace) => Container(
+            width: 120,
+            height: 120,
+            color: Colors.grey[200],
+            child: Icon(Icons.error),
+          ),
+        ),
+      );
+    }
+
+    // Fall back to original image logic
     if (visibility.image == null) {
       return Container(
         width: 120,
@@ -179,52 +199,82 @@ class VisibilityCard extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return InkWell(
-      onTap: onTapCard,
-      child: Container(
-        margin: const EdgeInsets.only(bottom: 16),
-        padding: const EdgeInsets.all(16),
-        decoration: BoxDecoration(
-          borderRadius: BorderRadius.circular(10),
-          gradient: LinearGradient(
-            begin: Alignment.topCenter,
-            end: Alignment.bottomCenter,
-            colors: [
-              Color(0xFFFFFFFF),
-              Color(0x80FFFFFF),
+    final tambahActivityController = Get.find<TambahActivityController>();
+
+    return Obx(() {
+      // Check if this visibility exists in draft items
+      final hasDraft =
+          tambahActivityController.visibilityDraftItems.any((draft) => draft['id'] == visibility.id);
+
+      return InkWell(
+        onTap: onTapCard,
+        child: Container(
+          margin: const EdgeInsets.only(bottom: 16),
+          padding: const EdgeInsets.all(16),
+          decoration: BoxDecoration(
+            borderRadius: BorderRadius.circular(10),
+            gradient: LinearGradient(
+              begin: Alignment.topCenter,
+              end: Alignment.bottomCenter,
+              colors: [
+                Color(0xFFFFFFFF),
+                Color(0x80FFFFFF),
+              ],
+            ),
+            border: Border.all(
+              color: hasDraft ? Colors.blue : Colors.grey.withOpacity(0.2),
+              width: hasDraft ? 2 : 1,
+            ),
+            boxShadow: [
+              BoxShadow(
+                color: Colors.grey.withOpacity(0.1),
+                spreadRadius: 1,
+                blurRadius: 2,
+                offset: Offset(0, 1),
+              ),
             ],
           ),
-          border: Border.all(
-            color: Colors.grey.withOpacity(0.2),
-          ),
-          boxShadow: [
-            BoxShadow(
-              color: Colors.grey.withOpacity(0.1),
-              spreadRadius: 1,
-              blurRadius: 2,
-              offset: Offset(0, 1),
-            ),
-          ],
-        ),
-        child: Row(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          mainAxisAlignment: MainAxisAlignment.spaceBetween,
-          children: [
-            Expanded(
-              child: Column(
+          child: Stack(
+            children: [
+              Row(
                 crossAxisAlignment: CrossAxisAlignment.start,
+                mainAxisAlignment: MainAxisAlignment.spaceBetween,
                 children: [
-                  _buildInfoRow("POSM Type", posmTypeName),
-                  SizedBox(height: 8),
-                  _buildInfoRow("Visual Type", visualTypeName),
+                  Expanded(
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        _buildInfoRow("POSM Type", posmTypeName),
+                        SizedBox(height: 8),
+                        _buildInfoRow("Visual Type", visualTypeName),
+                      ],
+                    ),
+                  ),
+                  _buildImage(),
                 ],
               ),
-            ),
-            _buildImage(),
-          ],
+              if (hasDraft)
+                Positioned(
+                  top: -8,
+                  right: -8,
+                  child: Container(
+                    padding: EdgeInsets.all(4),
+                    decoration: BoxDecoration(
+                      color: Colors.blue,
+                      shape: BoxShape.circle,
+                    ),
+                    child: Icon(
+                      Icons.check,
+                      color: Colors.white,
+                      size: 16,
+                    ),
+                  ),
+                ),
+            ],
+          ),
         ),
-      ),
-    );
+      );
+    });
   }
 
   Widget _buildInfoRow(String label, String value) {

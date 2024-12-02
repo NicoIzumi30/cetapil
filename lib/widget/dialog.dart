@@ -4,7 +4,11 @@ import 'package:get/get.dart';
 import '../utils/colors.dart';
 
 class Alerts {
-  static showConfirmDialog(BuildContext context, {bool useGetBack = true}) async {
+  static showConfirmDialog(
+    BuildContext context, {
+    bool useGetBack = true,
+    Function? onContinue, // Add callback parameter
+  }) async {
     return showDialog(
       context: context,
       builder: (dialogContext) => Dialog(
@@ -58,6 +62,10 @@ class Alerts {
                           side: BorderSide(color: AppColors.primary, width: 1)),
                     ),
                     onPressed: () {
+                      // Execute callback if provided
+                      onContinue?.call();
+
+                      // Handle navigation
                       if (useGetBack) {
                         Get.back();
                         Get.back();

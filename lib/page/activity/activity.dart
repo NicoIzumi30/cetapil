@@ -59,6 +59,7 @@ class ActivityPage extends GetView<ActivityController> {
                                   ontap: () {
                                     final outlet_id = activity.outlet!.id;
                                     // Set the outlet_id in the TambahActivityController before navigation
+                                    Get.delete<TambahActivityController>();
                                     if (!Get.isRegistered<TambahActivityController>()) {
                                       Get.put(TambahActivityController());
                                     }
@@ -73,6 +74,8 @@ class ActivityPage extends GetView<ActivityController> {
                                     }
                                     final tambahActivityController =
                                         Get.find<TambahActivityController>();
+                                    tambahActivityController.selectedTab.value = 0;
+                                    tambahActivityController.clearAllDraftItems();
                                     tambahActivityController.setDetailOutlet(activity);
                                     tambahActivityController.setOutletId(outlet_id!);
                                     Get.to(() => TambahActivity());

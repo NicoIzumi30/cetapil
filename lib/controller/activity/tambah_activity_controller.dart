@@ -1,3 +1,5 @@
+import 'dart:async';
+
 import 'package:cetapil_mobile/api/api.dart';
 import 'package:cetapil_mobile/model/survey_question_response.dart';
 import 'package:flutter/material.dart';
@@ -59,11 +61,52 @@ class TambahActivityController extends GetxController {
   final visibilityImages = RxList<File?>([null, null]);
   final isImageUploading = RxList<bool>([false, false]);
 
+  // Add timer-related variables
+  final availabilityTime = 0.obs;
+  final visibilityTime = 0.obs;
+  final knowledgeTime = 0.obs;
+  final surveyTime = 0.obs;
+  final orderTime = 0.obs;
+  Timer? _timer;
+
   @override
   void onInit() {
     super.onInit();
-    initGetSurveyQuestion();
-    initListCategory();
+    // initGetSurveyQuestion();
+    // initListCategory();
+
+    // Start the timer when controller is initialized
+    startTabTimer();
+  }
+
+  void startTabTimer() {
+    _timer?.cancel(); // Cancel any existing timer
+    _timer = Timer.periodic(Duration(seconds: 1), (timer) {
+      // Increment the timer based on current selected tab
+      switch (selectedTab.value) {
+        case 0:
+          availabilityTime.value++;
+          break;
+        case 1:
+          visibilityTime.value++;
+          break;
+        case 2:
+          knowledgeTime.value++;
+          break;
+        case 3:
+          surveyTime.value++;
+          break;
+        case 4:
+          orderTime.value++;
+          break;
+      }
+
+      print("Availability: ${getFormattedTime(availabilityTime.value)}");
+      print("Visibility: ${getFormattedTime(visibilityTime.value)}");
+      print("Knowledge: ${getFormattedTime(knowledgeTime.value)}");
+      print("Survey: ${getFormattedTime(surveyTime.value)}");
+      print("Order: ${getFormattedTime(orderTime.value)}");
+    });
   }
 
   // Draft items management methods
@@ -93,8 +136,20 @@ class TambahActivityController extends GetxController {
     orderDraftItems.refresh();
   }
 
+  // In TambahActivityController
   void addVisibilityItem(Map<String, dynamic> item) {
-    visibilityDraftItems.add(item);
+    final existingIndex =
+        visibilityDraftItems.indexWhere((existing) => existing['id'] == item['id']);
+
+    print(existingIndex);
+
+    if (existingIndex != -1) {
+      // Update existing item
+      visibilityDraftItems[existingIndex] = item;
+    } else {
+      // Add new item
+      visibilityDraftItems.add(item);
+    }
     visibilityDraftItems.refresh();
   }
 
@@ -114,23 +169,23 @@ class TambahActivityController extends GetxController {
   }
 
   // Availability methods
-  initListCategory() async {
-    try {
-      setLoadingState(true);
-      setErrorState(false);
-      final response = await Api.getCategoryList();
-      if (response.status == "OK") {
-        itemsCategory.value = response.data!;
-      } else {
-        setErrorState(true, response.message ?? 'Failed to load data');
-      }
-    } catch (e) {
-      setErrorState(true, 'Connection error. Please check your internet connection and try again.');
-      print('Error initializing categories: $e');
-    } finally {
-      setLoadingState(false);
-    }
-  }
+  // initListCategory() async {
+  //   try {
+  //     setLoadingState(true);
+  //     setErrorState(false);
+  //     final response = await Api.getCategoryList();
+  //     if (response.status == "OK") {
+  //       itemsCategory.value = response.data!;
+  //     } else {
+  //       setErrorState(true, response.message ?? 'Failed to load data');
+  //     }
+  //   } catch (e) {
+  //     setErrorState(true, 'Connection error. Please check your internet connection and try again.');
+  //     print('Error initializing categories: $e');
+  //   } finally {
+  //     setLoadingState(false);
+  //   }
+  // }
 
   // Visibility image methods
   void updateVisibilityImage(int index, File? file) {
@@ -167,45 +222,45 @@ class TambahActivityController extends GetxController {
   }
 
   // Survey methods
-  Future<void> initGetSurveyQuestion() async {
-    try {
-      setLoadingState(true);
-      setErrorState(false);
+  // Future<void> initGetSurveyQuestion() async {
+  //   try {
+  //     setLoadingState(true);
+  //     setErrorState(false);
 
-      final response = await Api.getSurveyQuestion();
+  //     final response = await Api.getSurveyQuestion();
 
-      if (response.status == "OK" && response.data != null) {
-        final sortedData = [...response.data!]..sort((a, b) {
-            if (a.name == 'Recommendation') return 1;
-            if (b.name == 'Recommendation') return -1;
-            return 0;
-          });
+  //     if (response.status == "OK" && response.data != null) {
+  //       final sortedData = [...response.data!]..sort((a, b) {
+  //           if (a.name == 'Recommendation') return 1;
+  //           if (b.name == 'Recommendation') return -1;
+  //           return 0;
+  //         });
 
-        surveyQuestions.assignAll(sortedData);
+  //       surveyQuestions.assignAll(sortedData);
 
-        priceControllers.clear();
-        switchStates.clear();
+  //       priceControllers.clear();
+  //       switchStates.clear();
 
-        for (var question in sortedData) {
-          for (var survey in question.surveys ?? []) {
-            final id = survey.id ?? '';
-            if (survey.type == 'text') {
-              priceControllers[id] = TextEditingController();
-            } else if (survey.type == 'bool') {
-              switchStates[id] = false.obs;
-            }
-          }
-        }
-      } else {
-        setErrorState(true, response.message ?? 'Failed to load data');
-      }
-    } catch (e) {
-      setErrorState(true, 'Connection error. Please check your internet connection and try again.');
-      print('Error initializing survey questions: $e');
-    } finally {
-      setLoadingState(false);
-    }
-  }
+  //       for (var question in sortedData) {
+  //         for (var survey in question.surveys ?? []) {
+  //           final id = survey.id ?? '';
+  //           if (survey.type == 'text') {
+  //             priceControllers[id] = TextEditingController();
+  //           } else if (survey.type == 'bool') {
+  //             switchStates[id] = false.obs;
+  //           }
+  //         }
+  //       }
+  //     } else {
+  //       setErrorState(true, response.message ?? 'Failed to load data');
+  //     }
+  //   } catch (e) {
+  //     setErrorState(true, 'Connection error. Please check your internet connection and try again.');
+  //     print('Error initializing survey questions: $e');
+  //   } finally {
+  //     setLoadingState(false);
+  //   }
+  // }
 
   void toggleSwitch(String id, bool value) {
     final switchValue = switchStates[id];
@@ -219,6 +274,7 @@ class TambahActivityController extends GetxController {
   }
 
   // Tab management methods
+  @override
   void changeTab(int index) {
     selectedTab.value = index;
     update();
@@ -286,6 +342,44 @@ class TambahActivityController extends GetxController {
     }
   }
 
+  // Add this method to TambahActivityController
+  void clearAllDraftItems() {
+    // Clear all draft items
+    availabilityDraftItems.clear();
+    orderDraftItems.clear();
+    visibilityDraftItems.clear();
+
+    // Clear visibility related fields
+    visibilityImages.value = [null, null];
+    isImageUploading.value = [false, false];
+
+    // Clear product related fields
+    selectedProducts.value.clear();
+    productInputs.value.clear();
+    products.value.clear();
+
+    // Clear controllers
+    for (var controllerMap in productControllers.values) {
+      for (var controller in controllerMap.values) {
+        controller.clear();
+      }
+    }
+
+    // Clear survey fields
+    for (var controller in priceControllers.values) {
+      controller.clear();
+    }
+    for (var switchState in switchStates.values) {
+      switchState.value = false;
+    }
+
+    // Refresh all observable lists
+    availabilityDraftItems.refresh();
+    orderDraftItems.refresh();
+    visibilityDraftItems.refresh();
+    update();
+  }
+
   @override
   void onClose() {
     for (var controller in priceControllers.values) {
@@ -296,6 +390,13 @@ class TambahActivityController extends GetxController {
         controller.dispose();
       }
     }
+    _timer?.cancel(); // Cancel timer when controller is disposed
     super.onClose();
+  }
+
+  String getFormattedTime(int seconds) {
+    int minutes = seconds ~/ 60;
+    int remainingSeconds = seconds % 60;
+    return '${minutes.toString().padLeft(2, '0')}:${remainingSeconds.toString().padLeft(2, '0')}';
   }
 }
