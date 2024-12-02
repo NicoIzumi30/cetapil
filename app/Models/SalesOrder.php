@@ -7,14 +7,21 @@ use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\SoftDeletes;
 
-class PosmType extends Model
+class SalesOrder extends Model
 {
     use HasFactory, HasUuids, SoftDeletes;
 
     protected $guarded = [];
 
-    public function posmImages()
+    // Relationship with Outlet
+    public function outlet()
     {
-        return $this->hasMany(PosmImage::class, 'posm_type_id', 'id');
+        return $this->belongsTo(Outlet::class);
+    }
+
+    // Relationship with Product
+    public function product()
+    {
+        return $this->belongsTo(Product::class);
     }
 }

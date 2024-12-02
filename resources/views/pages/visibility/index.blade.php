@@ -11,14 +11,14 @@
         </x-slot:cardTitle>
         {{-- Visibility Action --}}
         <x-slot:cardAction>
-            <x-input.search wire:model.live="search" class="border-0" placeholder="Cari data visibility"></x-input.search>
-            <x-select.light :title="'Filter Jenis Visibility'" id="sales-filter" name="sales_id">
-                @foreach ($salesUsers as $sales)
-                    <option value="{{ $sales->id }}" {{ request('sales_id') == $sales->id ? 'selected' : '' }}>
-                        {{ $sales->name }}
+            <x-input.search wire:model.live="search" type="text" class="border-0" name="search" id="search" placeholder="Cari data visibility" value="{{ request('search') }}"></x-input.search>
+            <x-select.light :title="'Filter Jenis Visibility'" id="posm-filter" name="posm_type_id">
+                <option value="">Semua Jenis</option>
+                @foreach($posmTypes as $type)
+                    <option value="{{ $type->id }}" {{ request('posm_type_id') == $type->id ? 'selected' : '' }}>
+                        {{ $type->name }}
                     </option>
                 @endforeach
-
             </x-select.light>
             <x-button.info onclick="openModal('update-photo')">Update Foto</x-button.info>
             <x-button.info href="/visibility/create">Tambah Visibility</x-button.info>
@@ -27,15 +27,24 @@
 
         <x-modal id="update-photo">
             <x:slot:title>Update Foto Visibility Berdasarkan Jenis POSM</x:slot:title>
-            <div class="flex">
-                <x-input.image class="!text-primary" id="backwall" name="backwall" label="Backwall" :max-size="5" />
-                <x-input.image class="!text-primary" id="standee" name="standee" label="Standee" :max-size="5" />
-                <x-input.image class="!text-primary" id="Glolifier" name="Glolifier" label="Glolifier" :max-size="5" />
-                <x-input.image class="!text-primary" id="COC" name="COC" label="COC" :max-size="5" />
-            </div>
-            <x:slot:footer>
-                <x-button.info class="w-full">Konfirmasi</x-button.info>
-            </x:slot:footer>
+            <form id="posmImageForm" enctype="multipart/form-data">
+                @csrf
+                <div class="flex">
+                    <x-input.image class="!text-primary" id="backwall" name="backwall" label="Backwall" :max-size="5" />
+                    <x-input.image class="!text-primary" id="standee" name="standee" label="Standee" :max-size="5" />
+                    <x-input.image class="!text-primary" id="glolifier" name="glolifier" label="Glolifier" :max-size="5" />
+                    <x-input.image class="!text-primary" id="coc" name="coc" label="COC" :max-size="5" />
+                </div>
+                <x:slot:footer>
+                    <!-- Ubah type menjadi "button" dan tambahkan id -->
+                    <x-button.info class="w-full" type="button" id="submitPosmBtn">
+                        <span id="submitBtnText">Konfirmasi</span>
+                        <span id="submitBtnLoading" class="hidden">
+                            <i class="fas fa-spinner fa-spin mr-2"></i>Menyimpan...
+                        </span>
+                    </x-button.info>
+                </x:slot:footer>
+            </form>
         </x-modal>
 
 
@@ -44,43 +53,43 @@
         <table id="visibility-table" class="table">
             <thead>
                 <tr>
-                    <th scope="col" class="text-center">
+                    <th scope="col">
                         <a class="table-head">
                             {{ __('Nama Outlet') }}
                             <x-icons.sort />
                         </a>
                     </th>
-                    <th scope="col" class="text-center">
+                    <th scope="col">
                         <a class="table-head">
                             {{ __('Nama Sales') }}
                             <x-icons.sort />
                         </a>
                     </th>
-                    <th scope="col" class="text-center">
+                    <th scope="col">
                         <a class="table-head">
                             {{ __('SKU') }}
                             <x-icons.sort />
                         </a>
                     </th>
-                    <th scope="col" class="text-center">
+                    <th scope="col">
                         <a class="table-head">
                             {{ __('Visual') }}
                             <x-icons.sort />
                         </a>
                     </th>
-                    <th scope="col" class="text-center">
+                    <th scope="col">
                         <a class="table-head">
                             {{ __('Status') }}
                             <x-icons.sort />
                         </a>
                     </th>
-                    <th scope="col" class="text-center">
+                    <th scope="col">
                         <a class="table-head">
                             {{ __('Jangka Waktu') }}
                             <x-icons.sort />
                         </a>
                     </th>
-                    <th scope="col" class="text-center">
+                    <th scope="col">
                         <a class="table-head">
                             Aksi
                         </a>
@@ -88,17 +97,22 @@
                 </tr>
             </thead>
             <tbody>
-                {{-- @foreach ($visibilities as $visibility)
+                @foreach ($visibilities as $visibility)
             <tr>
                 <td class="table-data">{{ $visibility->outlet->name }}</td>
                 <td class="table-data">{{ $visibility->outlet->user->name }}</td>
                 <td class="table-data">{{ $visibility->product->sku }}</td>
                 <td class="table-data">{{ $visibility->visualType->name }}</td>
-                <td class="table-data {{ $visibility->status === 'ACTIVE' ? '!text-[#70FFE2]' : '!text-red-500' }}">
+                <td class="table-data {{ $visibility->status === 'ACTIVE' ? '!text-[#3eff86]' : '!text-red-500' }}">
                     {{ $visibility->status }}
                 </td>
                 <td class="table-data">
-                    {{ \Carbon\Carbon::parse($visibility->program_date)->format('d F Y') }}
+                    @if($visibility->started_at && $visibility->ended_at)
+                        {{ \Carbon\Carbon::parse($visibility->started_at)->format('d F Y') }} - {{ \Carbon\Carbon::parse($visibility->ended_at)->format('d F Y') }}
+                    @else
+                        -
+                    @endif
+
                 </td>
                 <td class="table-data">
                     <x-action-table-dropdown>
@@ -116,7 +130,7 @@
                     </x-action-table-dropdown>
                 </td>
             </tr>
-        @endforeach --}}
+        @endforeach
             </tbody>
         </table>
         <x-modal id="delete-visibility">
@@ -145,37 +159,37 @@
         <table id="visibility-activity-table" class="table">
             <thead>
                 <tr>
-                    <th scope="col" class="text-center">
+                    <th scope="col">
                         <a class="table-head">
                             {{ __('Nama Outlet') }}
                             <x-icons.sort />
                         </a>
                     </th>
-                    <th scope="col" class="text-center">
+                    <th scope="col">
                         <a class="table-head">
                             {{ __('Nama Sales') }}
                             <x-icons.sort />
                         </a>
                     </th>
-                    <th scope="col" class="text-center">
+                    <th scope="col">
                         <a class="table-head">
                             {{ __('SKU') }}
                             <x-icons.sort />
                         </a>
                     </th>
-                    <th scope="col" class="text-center">
+                    <th scope="col">
                         <a class="table-head">
                             {{ __('Visual') }}
                             <x-icons.sort />
                         </a>
                     </th>
-                    <th scope="col" class="text-center">
+                    <th scope="col">
                         <a class="table-head">
                             {{ __('Condition') }}
                             <x-icons.sort />
                         </a>
                     </th>
-                    <th scope="col" class="text-center">
+                    <th scope="col">
                         <a class="table-head">
                             Aksi
                         </a>
@@ -183,13 +197,14 @@
                 </tr>
             </thead>
             <tbody>
-                {{-- <tr class="table-row">
+        @foreach($visibilities as $visibility)
+                <tr class="table-row">
                     <td class="table-data">{{ $visibility->outlet->name }}</td>
                     <td class="table-data">{{ $visibility->outlet->user->name }}</td>
                     <td class="table-data">{{ $visibility->product->sku }}</td>
                     <td class="table-data">{{ $visibility->visualType->name }}</td>
-                    <td scope="row" class="table-data">
-                        halo
+                    <td scope="row" class="table-data" style="color: #3eff86;">
+                        GOOD
                     </td>
                     <td class="table-data">
                         <x-action-table-dropdown>
@@ -204,7 +219,8 @@
                             </li>
                         </x-action-table-dropdown>
                     </td>
-                </tr> --}}
+                </tr>
+        @endforeach
             </tbody>
         </table>
         <x-modal id="delete-visibility-activity">
@@ -222,100 +238,57 @@
 
 @push('scripts')
     <script>
-        $(document).ready(function() {
-            $("#visibility-activity-daterange").flatpickr({
-                mode: "range"
-            });
+$(document).ready(function() {
 
-            const visibilityTable = $('#visibility-table').DataTable({
-                processing: false,
-                pageLength: 10,
-                lengthMenu: [10, 20, 30, 40, 50],
-                data: {!! $visibilities->toJson() !!}, // Passing data langsung dari controller
-                columns: [{
-                        data: 'outlet.name',
-                        render: function(data, type, row) {
-                            return data || '-';
-                        }
-                    },
-                    {
-                        data: 'outlet.user.name',
-                        render: function(data, type, row) {
-                            return data || '-';
-                        }
-                    },
-                    {
-                        data: 'product.sku',
-                        render: function(data, type, row) {
-                            return data || '-';
-                        }
-                    },
-                    {
-                        data: 'visual_type.name',
-                        render: function(data, type, row) {
-                            return data || '-';
-                        }
-                    },
-                    {
-                        data: 'status',
-                        render: function(data, type, row) {
-                            return `<span class="${data === 'ACTIVE' ? 'text-green-500' : 'text-red-500'}">${data}</span>`;
-                        }
-                    },
-                    {
-                        data: 'program_date',
-                        render: function(data, type, row) {
-                            return moment(data).format('DD MMMM YYYY');
-                        }
-                    },
-                    {
-                        data: null,
-                        orderable: false,
-                        render: function(data, type, row) {
-                            return `
-                        <div class="flex justify-center space-x-2">
-                            <a href="/visibility/${row.id}/edit"
-                               class="btn btn-sm btn-primary">
-                                Lihat Data
-                            </a>
-                            <button onclick="deleteVisibility('${row.id}', '${row.outlet.name}', '${row.outlet.user.name}', '${row.product.sku}')"
-                                    class="btn btn-sm btn-danger">
-                                Hapus
-                            </button>
-                        </div>
-                    `;
-                        }
-                    }
-                ],
-                language: {
-                    emptyTable: "Tidak ada data visibility",
-                    info: "Menampilkan _START_ sampai _END_ dari _TOTAL_ data",
-                    infoEmpty: "Menampilkan 0 sampai 0 dari 0 data",
-                    infoFiltered: "(difilter dari _MAX_ total data)",
-                    lengthMenu: "Menampilkan _MENU_ data",
-                    search: "Cari:",
-                    zeroRecords: "Tidak ditemukan data yang sesuai",
-                    paginate: {
-                        first: "Pertama",
-                        last: "Terakhir",
-                        next: ">",
-                        previous: "<"
-                    }
-                },
-                dom: 'rt<"bottom-container"<"bottom-left"l><"bottom-right"p>>'
-            });
+   
+});
 
-            // Search functionality
-            $('#search').on('keyup', function() {
-                visibilityTable.search(this.value).draw();
-            });
-        });
 
-        // Delete function
-        function deleteVisibility(id, outletName, salesName, sku) {
-            Swal.fire({
-                title: 'Hapus Visibility?',
-                html: `
+$(document).ready(function() {
+    // Handle POSM type filter change
+    $('#posm-filter').on('change', function() {
+        const selectedPosmType = $(this).val();
+        const currentUrl = new URL(window.location.href);
+        
+        if (selectedPosmType) {
+            currentUrl.searchParams.set('posm_type_id', selectedPosmType);
+        } else {
+            currentUrl.searchParams.delete('posm_type_id');
+        }
+        
+        window.location.href = currentUrl.toString();
+    });
+
+    // Set selected value on page load if filter is active
+    const urlParams = new URLSearchParams(window.location.search);
+    const activePosmType = urlParams.get('posm_type_id');
+    if (activePosmType) {
+        $('#posm-filter').val(activePosmType);
+    }
+});
+
+window.toast = function(type, message) {
+    const Toast = Swal.mixin({
+        toast: true,
+        position: 'top-end',
+        showConfirmButton: false,
+        timer: 3000,
+        timerProgressBar: true
+    });
+
+    Toast.fire({
+        icon: type,
+        title: message
+    });
+}
+
+// Definisikan deleteVisibility function di global scope
+window.deleteVisibility = function(id, outletName, salesName, sku) {
+    console.log('Delete function called:', { id, outletName, salesName, sku }); // Untuk debugging
+    
+    Swal.fire({
+        title: 'Hapus Visibility?',
+        html: `
             <div class="text-center">
                 <p class="mb-2"><strong>Detail data yang akan dihapus:</strong></p>
                 <ul class="list-none">
@@ -326,68 +299,174 @@
                 <p class="mt-4 text-red-500">Data yang dihapus tidak dapat dikembalikan!</p>
             </div>
         `,
-                icon: 'warning',
-                showCancelButton: true,
-                confirmButtonColor: '#d33',
-                cancelButtonColor: '#3085d6',
-                confirmButtonText: 'Ya, Hapus!',
-                cancelButtonText: 'Batal'
-            }).then((result) => {
-                if (result.isConfirmed) {
-                    $.ajax({
-                        url: `/visibility/${id}`,
-                        type: 'DELETE',
-                        headers: {
-                            'X-CSRF-TOKEN': $('meta[name="csrf-token"]').attr('content')
-                        },
-                        success: function(response) {
-                            if (response.status === 'success') {
-                                Swal.fire('Berhasil!', 'Data berhasil dihapus', 'success')
-                                    .then(() => {
-                                        visibilityTable.ajax.reload();
-                                    });
-                            }
-                        },
-                        error: function(xhr) {
-                            Swal.fire('Error!', 'Terjadi kesalahan saat menghapus data', 'error');
-                        }
-                    });
+        icon: 'warning',
+        showCancelButton: true,
+        confirmButtonColor: '#d33',
+        cancelButtonColor: '#3085d6',
+        confirmButtonText: 'Ya, Hapus!',
+        cancelButtonText: 'Batal'
+    }).then((result) => {
+        if (result.isConfirmed) {
+            $.ajax({
+                url: `/visibility/${id}`,
+                type: 'DELETE',
+                headers: {
+                    'X-CSRF-TOKEN': $('meta[name="csrf-token"]').attr('content')
+                },
+                success: function(response) {
+                    if (response.status === 'success') {
+                        // Tampilkan toast notification sukses
+                        toast('success', 'Data berhasil dihapus');
+                        
+                        // Reload halaman setelah notifikasi selesai
+                        setTimeout(() => {
+                            window.location.reload();
+                        }, 3000);
+                    }
+                },
+                error: function(xhr) {
+                    // Tampilkan toast notification error
+                    toast('error', 'Terjadi kesalahan saat menghapus data');
                 }
             });
         }
+    });
+}
     </script>
 @endpush
-
-
 @push('scripts')
-    <script>
-        $(document).ready(function() {
-            // Initialize select2
-            $('#sales-filter').select2({
-                placeholder: 'Select Sales',
-                allowClear: true
-            });
+<script>
 
-            // Handle filter change
-            $('#sales-filter').change(function() {
-                const salesId = $(this).val();
-                let url = new URL(window.location.href);
+//DATATABLE
 
-                if (salesId) {
-                    url.searchParams.set('sales_id', salesId);
-                } else {
-                    url.searchParams.delete('sales_id');
+
+$(document).ready(function() {
+    const form = $('#posmImageForm');
+    const submitBtn = $('#submitPosmBtn');
+    const btnText = $('#submitBtnText');
+    const loadingText = $('#submitBtnLoading');
+
+    // Function untuk memuat gambar yang ada
+    function loadExistingImages() {
+        $.ajax({
+            url: "{{ route('posm.get-images') }}",
+            type: 'GET',
+            success: function(response) {
+                if (response.status === 'success' && response.data) {
+                    response.data.forEach(function(item) {
+                        const input = $(`#${item.input_name}`);
+                        const inputContainer = input.closest('.image-input-container');
+                        
+                        // Update preview container
+                        inputContainer.find('.preview-container').html(`
+                            <div class="relative">
+                                <img src="${item.image_url}" class="h-20 w-20 object-cover rounded" />
+                                <button type="button" 
+                                        onclick="removeImage(this)"
+                                        class="absolute -top-2 -right-2 bg-white rounded-full p-1 shadow-md">
+                                    <svg xmlns="http://www.w3.org/2000/svg" 
+                                         class="h-4 w-4 text-red-500" 
+                                         viewBox="0 0 20 20" 
+                                         fill="currentColor">
+                                        <path fill-rule="evenodd" 
+                                              d="M4.293 4.293a1 1 0 011.414 0L10 8.586l4.293-4.293a1 1 0 111.414 1.414L11.414 10l4.293 4.293a1 1 0 01-1.414 1.414L10 11.414l-4.293 4.293a1 1 0 01-1.414-1.414L8.586 10 4.293 5.707a1 1 0 010-1.414z" 
+                                              clip-rule="evenodd" />
+                                    </svg>
+                                </button>
+                            </div>
+                        `);
+                    });
                 }
-
-                window.location.href = url.toString();
-            });
-
-            // Handle reset button
-            $('#reset-filter').click(function() {
-                let url = new URL(window.location.href);
-                url.searchParams.delete('sales_id');
-                window.location.href = url.toString();
-            });
+            }
         });
-    </script>
+    }
+
+    // Load gambar saat modal dibuka
+    $(document).on('click', '[onclick="openModal(\'update-photo\')"]', function() {
+        loadExistingImages();
+    });
+
+    // Handle form submission
+    submitBtn.on('click', function(e) {
+        e.preventDefault();
+        
+        btnText.addClass('hidden');
+        loadingText.removeClass('hidden');
+        submitBtn.prop('disabled', true);
+
+        const formData = new FormData(form[0]);
+
+        $.ajax({
+            url: "{{ route('posm.update-image') }}",
+            type: 'POST',
+            data: formData,
+            processData: false,
+            contentType: false,
+            headers: {
+                'X-CSRF-TOKEN': $('meta[name="csrf-token"]').attr('content')
+            },
+            success: function(response) {
+                if (response.status === 'success') {
+                    toast('success', response.message);
+                    setTimeout(() => {
+                        closeModal('update-photo');
+                        window.location.reload();
+                    }, 1500);
+                }
+            },
+            error: function(xhr) {
+                toast('error', xhr.responseJSON?.message || 'Terjadi kesalahan saat mengupload gambar');
+            },
+            complete: function() {
+                btnText.removeClass('hidden');
+                loadingText.addClass('hidden');
+                submitBtn.prop('disabled', false);
+            }
+        });
+    });
+
+    // Handle file input change for preview
+    $('input[type="file"]').on('change', function() {
+        const file = this.files[0];
+        if (file) {
+            if (file.size > 5 * 1024 * 1024) {
+                toast('error', 'Ukuran file tidak boleh lebih dari 5MB');
+                this.value = '';
+                return;
+            }
+
+            const reader = new FileReader();
+            const inputContainer = $(this).closest('.image-input-container');
+            
+            reader.onload = function(e) {
+                inputContainer.find('.preview-container').html(`
+                    <div class="relative">
+                        <img src="${e.target.result}" class="h-20 w-20 object-cover rounded" />
+                        <button type="button" 
+                                onclick="removeImage(this)"
+                                class="absolute -top-2 -right-2 bg-white rounded-full p-1 shadow-md">
+                            <svg xmlns="http://www.w3.org/2000/svg" 
+                                 class="h-4 w-4 text-red-500" 
+                                 viewBox="0 0 20 20" 
+                                 fill="currentColor">
+                                <path fill-rule="evenodd" 
+                                      d="M4.293 4.293a1 1 0 011.414 0L10 8.586l4.293-4.293a1 1 0 111.414 1.414L11.414 10l4.293 4.293a1 1 0 01-1.414 1.414L10 11.414l-4.293 4.293a1 1 0 01-1.414-1.414L8.586 10 4.293 5.707a1 1 0 010-1.414z" 
+                                      clip-rule="evenodd" />
+                            </svg>
+                        </button>
+                    </div>
+                `);
+            };
+            reader.readAsDataURL(file);
+        }
+    });
+});
+
+// Function to remove image preview
+function removeImage(button) {
+    const container = $(button).closest('.image-input-container');
+    container.find('input[type="file"]').val('');
+    container.find('.preview-container').empty();
+}
+</script>
 @endpush

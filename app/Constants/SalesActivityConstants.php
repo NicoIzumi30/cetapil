@@ -12,4 +12,5 @@ class SalesActivityConstants {
 
     public const SAVE_AVAILABILITY = 'Sales Activity availability saved successfully';
     public const SAVE_VISIBILITY = 'Visibility saved successfully';
+    public const STORE_ACTIVITY = 'Sales Activity submitted successfully';
 }

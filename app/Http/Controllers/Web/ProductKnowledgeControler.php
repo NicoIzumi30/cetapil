@@ -8,6 +8,8 @@ use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
 use App\Http\Controllers\Controller;
 use App\Http\Requests\ProductKnowledge\UpdateProductKnowledgeRequest;
+use Illuminate\Support\Facades\Log;
+
 
 class ProductKnowledgeControler extends Controller
 {
@@ -56,7 +58,7 @@ class ProductKnowledgeControler extends Controller
             
         } catch (\Exception $e) {
             DB::rollBack();
-            \Log::error('Error updating product knowledge: ' . $e->getMessage());
+            Log::error('Error updating product knowledge: ' . $e->getMessage());
             return response()->json([
                 'status' => 'error',
                 'message' => 'Gagal mengupdate Product Knowledge: ' . $e->getMessage()

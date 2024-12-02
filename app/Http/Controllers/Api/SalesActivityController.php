@@ -10,6 +10,7 @@ use App\Http\Resources\Product\CategoryCollection;
 use App\Http\Resources\Product\ProductCollection;
 use App\Http\Resources\SalesActivity\SalesActivityCollection;
 use App\Http\Requests\SalesActivity\GetProductListByCategoryIdRequest;
+use App\Http\Requests\SalesActivity\SaveActivityRequest;
 use App\Http\Requests\SalesActivity\SaveAvailabilityRequest;
 use App\Http\Requests\SalesActivity\SaveVisibilityRequest;
 use App\Http\Requests\Visibility\CreateVisibilityRequest;
@@ -28,7 +29,10 @@ use App\Models\Product;
 use Illuminate\Support\Arr;
 use App\Models\SalesActivity;
 use App\Models\SalesAvailability;
+use App\Models\SalesOrder;
+use App\Models\SalesSurvey;
 use App\Models\SalesVisibility;
+use App\Models\SurveyQuestion;
 use App\Models\Visibility;
 use App\Models\VisualType;
 use App\Traits\HasAuthUser;
@@ -36,6 +40,7 @@ use App\Traits\ProductTrait;
 use Illuminate\Http\Request;
 use Illuminate\Support\Carbon;
 use Illuminate\Http\JsonResponse;
+use Illuminate\Support\Facades\DB;
 use Symfony\Component\HttpFoundation\Response;
 
 class SalesActivityController extends Controller
@@ -43,10 +48,18 @@ class SalesActivityController extends Controller
     use HasAuthUser, ProductTrait;
     public function getSalesAcitivityList()
     {
+        $now = Carbon::now();
+
         $activities = SalesActivity::completeRelation()
+            ->with(['visibilities' => function ($query) use ($now) {
+                $query->where('started_at', '<=', $now)
+                    ->where('ended_at', '>=', $now);
+            }])
             ->where('user_id', $this->getAuthUserId())
             ->whereDate('checked_in', Carbon::now())
             ->get();
+
+            // return response()->json($activities);
         return new SalesActivityCollection($activities);
     }
     public function getAllProducts()
@@ -186,5 +199,158 @@ class SalesActivityController extends Controller
 
         $posm_types = $posm_types->get();
         return new PosmTypeCollection($posm_types);
+    }
+
+    public function storeActivity(SaveActivityRequest $request)
+    {
+        $data = $request->validated();
+        $activity = SalesActivity::findOrFail($data['sales_activity_id']);
+
+        // Check if the authenticated user matches the activity's user
+        if ($activity->user_id !== $this->getAuthUserId()) {
+            return $this->failedResponse(
+                'You are not authorized to modify this activity',
+                Response::HTTP_FORBIDDEN
+            );
+        }
+
+        // Check if the outlet_id matches
+        if ($activity->outlet_id !== $data['outlet_id']) {
+            return $this->failedResponse(
+                'The outlet ID does not match with the current activity',
+                Response::HTTP_BAD_REQUEST
+            );
+        }
+
+
+        // Get all survey questions with their types
+        // $surveyQuestions = SurveyQuestion::get(['id', 'type'])->keyBy('id');
+        // $answeredQuestions = collect($data['survey'])->pluck('survey_question_id')->toArray();
+
+        // // Check if all questions are answered
+        // $missingQuestions = array_diff($surveyQuestions->pluck('id')->toArray(), $answeredQuestions);
+        // if (!empty($missingQuestions)) {
+        //     return $this->failedResponse(
+        //         'Please answer all survey questions',
+        //         Response::HTTP_BAD_REQUEST
+        //     );
+        // }
+
+        // // Validate answer types
+        // foreach ($data['survey'] as $item) {
+        //     $question = $surveyQuestions[$item['survey_question_id']];
+        //     $answer = $item['answer'];
+
+        //     // Validate based on question type
+        //     switch ($question->type) {
+        //         case 'bool':
+        //             if (!in_array($answer, ['true', 'false', '1', '0', true, false])) {
+        //                 return $this->failedResponse(
+        //                     "Question {$question->id} requires a boolean answer",
+        //                     Response::HTTP_BAD_REQUEST
+        //                 );
+        //             }
+        //             break;
+        //         case 'text':
+        //             if (!is_string($answer)) {
+        //                 return $this->failedResponse(
+        //                     "Question {$question->id} requires a text answer",
+        //                     Response::HTTP_BAD_REQUEST
+        //                 );
+        //             }
+        //             break;
+        //             // Add more cases for other types if needed
+        //     }
+        // }
+
+
+        // Start transaction
+        DB::beginTransaction();
+        try {
+            // Clear existing data
+            SalesAvailability::where('sales_activity_id', $activity->id)->delete();
+            SalesVisibility::where('sales_activity_id', $activity->id)->delete();
+            SalesSurvey::where('sales_activity_id', $activity->id)->delete();
+            SalesOrder::where('sales_activity_id', $activity->id)->delete();
+
+            // Store availability data
+            foreach ($data['availability'] as $item) {
+                SalesAvailability::create([
+                    'sales_activity_id' => $activity->id,
+                    'outlet_id' => $data['outlet_id'],
+                    'product_id' => $item['product_id'],
+                    'availability_stock' => $item['availability_stock'],
+                    'average_stock' => $item['average_stock'],
+                    'ideal_stock' => $item['ideal_stock'],
+                    'status' => true,
+                    'detail' => SalesAvailability::getDetail((int) $item['ideal_stock'] ?? 0)
+                ]);
+            }
+
+            // Store visibility data
+            foreach ($data['visibility'] as $key => $item) {
+                $visibilityRecord = SalesVisibility::create([
+                    'sales_activity_id' => $activity->id,
+                    'condition' => $item['condition']
+                ]);
+
+                if ($request->hasFile("visibility.$key.file1")) {
+                    $file1 = $request->file("visibility.$key.file1");
+                    $media1 = saveFile($file1, "sales-visibility/$visibilityRecord->id/file1");
+                    $visibilityRecord->file1_filename = $media1['filename'];
+                    $visibilityRecord->file1_path = $media1['path'];
+                }
+
+                if ($request->hasFile("visibility.$key.file2")) {
+                    $file2 = $request->file("visibility.$key.file2");
+                    $media2 = saveFile($file2, "sales-visibility/$visibilityRecord->id/file2");
+                    $visibilityRecord->file2_filename = $media2['filename'];
+                    $visibilityRecord->file2_path = $media2['path'];
+                }
+
+                $visibilityRecord->save();
+            }
+
+            // Store survey data
+            foreach ($data['survey'] as $item) {
+                SalesSurvey::create([
+                    'sales_activity_id' => $activity->id,
+                    'survey_question_id' => $item['survey_question_id'],
+                    'answer' => $item['answer']
+                ]);
+            }
+
+            // Store order data
+            foreach ($data['order'] as $item) {
+                SalesOrder::create([
+                    'sales_activity_id' => $activity->id,
+                    'outlet_id' => $data['outlet_id'],
+                    'product_id' => $item['product_id'],
+                    'total' => $item['total_items'],
+                    'subtotal' => $item['subtotal']
+                ]);
+            }
+
+            // Update SalesActivity status and times
+            $activity->update([
+                'checked_out' => $data['current_time'],
+                'views_knowledges' => $data['views_knowledges'],
+                'time_availability' => $data['time_availability'],
+                'time_visibility' => $data['time_visibility'],
+                'time_knowledge' => $data['time_knowledge'],
+                'time_survey' => $data['time_survey'],
+                'time_order' => $data['time_order'],
+                'status' => 'SUBMITTED'
+            ]);
+
+            DB::commit();
+            return $this->successResponse(SalesActivityConstants::STORE_ACTIVITY, Response::HTTP_OK);
+        } catch (\Exception $e) {
+            DB::rollBack();
+            return $this->failedResponse(
+                'Failed to store activity: ' . $e->getMessage(),
+                Response::HTTP_INTERNAL_SERVER_ERROR
+            );
+        }
     }
 }

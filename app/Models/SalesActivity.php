@@ -36,4 +36,9 @@ class SalesActivity extends Model
     {
         $query->has('outlet');
     }
+    // Add this relationship method to your SalesActivity class
+    public function visibilities(): HasMany
+    {
+        return $this->hasMany(Visibility::class, 'outlet_id', 'outlet_id');
+    }
 }

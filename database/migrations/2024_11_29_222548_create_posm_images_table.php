@@ -13,7 +13,11 @@ return new class extends Migration
     {
         Schema::create('posm_images', function (Blueprint $table) {
             $table->uuid('id')->primary();
-            $table->foreignUuid('posm_type_id')->references('id')->on('posm_types');
+            $table->uuid('posm_type_id');
+            $table->foreign('posm_type_id')
+                  ->references('id')
+                  ->on('posm_types')
+                  ->onDelete('cascade');
             $table->text('image');
             $table->text('path');
             $table->softDeletes();
