@@ -5,9 +5,9 @@
     <div class="flex items-start flex-col md:flex-row gap-6 justify-between mb-6 md:mb-0 p-6">
         <div class="z-[30]">
             <h2 class="text-4xl text-white text-left font-[400]">Selamat Datang,</h2>
-            <h1 class="text-5xl text-white my-6 text-left font-bold">Andromeda Phytagoras Silalahi</h1>
+            <h1 class="text-5xl text-white my-6 text-left font-bold">{{ auth()->user()->name }}</h1>
             <div class="px-5 py-2 bg-primary rounded-3xl text-center w-fit text-white font-[600] italic text-xl">
-                Superadmin
+                {{ ucwords(auth()->user()->getRoleNames()->first()) }}
             </div>
         </div>
         <div class="flex flex-col items-end z-50">
@@ -15,7 +15,7 @@
                 <img class="w-10 h-auto" src="{{ asset('/assets/icons/material-symbols_date-range.svg') }}" alt="calendar">
                 <div>
                     <p class="text-lightGrey text-sm font-bold">Hari Ini</p>
-                    <p class="text-black text-sms font-bold">Senin, 10 November 2024</p>
+                    <p class="text-black text-sms font-bold">{{formatTanggalIndonesia()}}</p>
                 </div>
             </div>
         </div>

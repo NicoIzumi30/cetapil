@@ -122,11 +122,10 @@
                             </a>
                         </li>
                         <li>
-                            <button 
-    onclick="deleteVisibility('{{ $visibility->id }}', '{{ $visibility->outlet->name }}', '{{ $visibility->outlet->user->name }}', '{{ $visibility->product->sku }}')"
-    class="dropdown-option text-red-400">
-    Hapus Data
-</button>
+                            <button onclick="deleteVisibility('{{ $visibility->id }}', '{{ $visibility->outlet->name }}', '{{ $visibility->outlet->user->name }}', '{{ $visibility->product->sku }}')"
+                                class="dropdown-option text-red-400">
+                                Hapus Data
+                            </button>
                         </li>
                     </x-action-table-dropdown>
                 </td>
@@ -240,123 +239,8 @@
 @push('scripts')
     <script>
 $(document).ready(function() {
-    // $.ajaxSetup({
-    //     headers: {
-    //         'X-CSRF-TOKEN': $('meta[name="csrf-token"]').attr('content')
-    //     }
-    // });
 
-    // let visibilityTable = $('#visibility-table').DataTable({
-    //     processing: true,
-    //     serverSide: true,
-    //     paging: true,
-    //     searching: false,
-    //     info: true,
-    //     pageLength: 10,
-    //     lengthMenu: [10, 20, 30, 40, 50],
-    //     dom: 'rt<"bottom-container"<"bottom-left"l><"bottom-right"p>>',
-    //     language: {
-    //         lengthMenu: "Menampilkan _MENU_ dari _TOTAL_ data",
-    //         processing: "Memuat data...",
-    //         paginate: {
-    //             previous: '<',
-    //             next: '>',
-    //             last: 'Terakhir',
-    //         },
-    //         info: "Menampilkan _START_ sampai _END_ dari _TOTAL_ data",
-    //         infoEmpty: "Menampilkan 0 sampai 0 dari 0 data",
-    //         emptyTable: "Tidak ada data yang tersedia"
-    //     },
-    //     ajax: {
-    //         url: "/visibility/data",
-    //         data: function(d) {
-    //             d.search_term = $('#search').val();
-    //             d.posm_type_id = $('#posm-filter').val();
-    //         }
-    //     },
-    //     columns: [
-    //         { 
-    //             data: 'outlet.name',
-    //             name: 'outlet.name',
-    //             render: function(data, type, row) {
-    //                 return data || '-';
-    //             }
-    //         },
-    //         { 
-    //             data: 'outlet.user.name',
-    //             name: 'outlet.user.name',
-    //             render: function(data, type, row) {
-    //                 return data || '-';
-    //             }
-    //         },
-    //         { 
-    //             data: 'product.sku',
-    //             name: 'product.sku',
-    //             render: function(data, type, row) {
-    //                 return data || '-';
-    //             }
-    //         },
-    //         { 
-    //             data: 'visual_type.name',
-    //             name: 'visual_type.name',
-    //             render: function(data, type, row) {
-    //                 return data || '-';
-    //             }
-    //         },
-    //         { 
-    //             data: 'status',
-    //             name: 'status',
-    //             render: function(data, type, row) {
-    //                 return `<span class="table-data ${data === 'ACTIVE' ? 'text-[#3eff86]' : 'text-red-500'}">${data}</span>`;
-    //             }
-    //         },
-    //         { 
-    //             data: null,
-    //             name: 'date_range',
-    //             render: function(data, type, row) {
-    //                 if (row.started_at && row.ended_at) {
-    //                     return moment(row.started_at).format('D MMMM Y') + ' - ' + moment(row.ended_at).format('D MMMM Y');
-    //                 }
-    //                 return '-';
-    //             }
-    //         },
-    //         { 
-    //             data: null,
-    //             name: 'action',
-    //             orderable: false,
-    //             searchable: false,
-    //             render: function(data, type, row) {
-    //                 return `
-    //                     <x-action-table-dropdown>
-    //                         <li>
-    //                             <a href="/visibility/edit/${row.id}" class="dropdown-option">
-    //                                 Lihat Data
-    //                             </a>
-    //                         </li>
-    //                         <li>
-    //                             <button onclick="deleteVisibility('${row.id}', '${row.outlet.name}', '${row.outlet.user.name}', '${row.product.sku}')" 
-    //                                 class="dropdown-option text-red-500">
-    //                                 Hapus Data
-    //                             </button>
-    //                         </li>
-    //                     </x-action-table-dropdown>
-    //                 `;
-    //             }
-    //         }
-    //     ]
-    // });
-
-    // Handle search with debounce
-    let searchTimer;
-    $('#search').on('input', function() {
-        clearTimeout(searchTimer);
-        searchTimer = setTimeout(() => visibilityTable.ajax.reload(), 500);
-    });
-
-    // Handle POSM type filter
-    $('#posm-filter').on('change', function() {
-        visibilityTable.ajax.reload();
-    });
+   
 });
 
 
@@ -383,8 +267,7 @@ $(document).ready(function() {
     }
 });
 
-
-function toast(type, message) {
+window.toast = function(type, message) {
     const Toast = Swal.mixin({
         toast: true,
         position: 'top-end',
@@ -399,9 +282,10 @@ function toast(type, message) {
     });
 }
 
-// Delete function
-// Taruh di luar document.ready
+// Definisikan deleteVisibility function di global scope
 window.deleteVisibility = function(id, outletName, salesName, sku) {
+    console.log('Delete function called:', { id, outletName, salesName, sku }); // Untuk debugging
+    
     Swal.fire({
         title: 'Hapus Visibility?',
         html: `
@@ -431,13 +315,18 @@ window.deleteVisibility = function(id, outletName, salesName, sku) {
                 },
                 success: function(response) {
                     if (response.status === 'success') {
-                        Swal.fire('Berhasil!', 'Data berhasil dihapus', 'success').then(() => {
-                            $('#visibility-table').DataTable().ajax.reload();
-                        });
+                        // Tampilkan toast notification sukses
+                        toast('success', 'Data berhasil dihapus');
+                        
+                        // Reload halaman setelah notifikasi selesai
+                        setTimeout(() => {
+                            window.location.reload();
+                        }, 3000);
                     }
                 },
                 error: function(xhr) {
-                    Swal.fire('Error!', 'Terjadi kesalahan saat menghapus data', 'error');
+                    // Tampilkan toast notification error
+                    toast('error', 'Terjadi kesalahan saat menghapus data');
                 }
             });
         }
@@ -447,6 +336,10 @@ window.deleteVisibility = function(id, outletName, salesName, sku) {
 @endpush
 @push('scripts')
 <script>
+
+//DATATABLE
+
+
 $(document).ready(function() {
     const form = $('#posmImageForm');
     const submitBtn = $('#submitPosmBtn');
