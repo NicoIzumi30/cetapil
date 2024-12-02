@@ -21,7 +21,7 @@
         </x-select.light>
         <x-button.light id="downloadBtn">Download</x-button.light>
         <x-button.light href="/routing/request" class="!text-white !bg-[#39B5FF] py-2">
-            Need Approval <span class="py-1 px-2 ml-2 rounded-md bg-white text-primary">4</span>
+            Need Approval <span class="py-1 px-2 ml-2 rounded-md bg-white text-primary">{{$countPending}}</span>
         </x-button.light>
         <x-button.info onclick="openModal('upload-product-knowledge')">Upload Product knowledge</x-button.info>
         <x-modal id="upload-product-knowledge">
@@ -288,10 +288,10 @@
                     d.filter_day = $('#filter_day').val();
                 },
                 dataSrc: function (json) {
-                    $('.dataTables_length select').closest('.dataTables_length')
-                        .find('label')
-                        .html(`Menampilkan <select>${$('.dataTables_length select').html()}</select> dari ${json.recordsFiltered} data`);
-                    return json.data;
+                $('#routing-table_wrapper .dt-length select').closest('.dt-length')
+                            .find('label')
+                            .html(`Menampilkan <select  name="routing-table_length" aria-controls="routing-table" class="dt-input" id="dt-length-0">${$('.dt-length select').html()}</select> dari ${json.recordsFiltered} data`);
+                        return json.data;
                 }
             },
             columns: [
@@ -304,6 +304,10 @@
                 }
             ]
         });
+        $(document).on('change', '#dt-length-0', function() {
+    var length = $(this).val();
+    table.page.len(length).draw();
+});
         let searchTimer;
         $('#global-search').on('input', function () {
             clearTimeout(searchTimer);

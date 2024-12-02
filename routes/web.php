@@ -3,6 +3,7 @@
 use App\Http\Controllers\Web\OutletControler;
 use App\Http\Controllers\Web\ProductKnowledgeControler;
 use App\Http\Controllers\Web\RoutingController;
+use App\Http\Controllers\Web\RoutingRequestControler;
 use App\Http\Controllers\Web\VisualController;
 use App\Models\Visibility;
 use Illuminate\Support\Facades\Route;
@@ -55,15 +56,18 @@ Route::middleware('auth')->group(function () {
     //         return view('pages.routing.av3m');
     //     });
     // });
-    Route::get('/routing/request', function () {
-        return view('pages.routing.request');
-        });
-Route::get('/routing/request/detail', function () {
-            return view('pages.routing.detail-request');
-        });
+    Route::get('/routing/request', [RoutingRequestControler::class,'index'])->name('routing.request')->middleware('permission:menu_routing');
+    Route::get('/routing/request/data', [RoutingRequestControler::class,'getData'])->name('routing.request.data')->middleware('permission:menu_routing');
+    Route::get('/routing/request/{id}/edit', [RoutingRequestControler::class,'edit'])->name('routing.request.edit')->middleware('permission:menu_routing');
+    Route::put('/routing/request/{id}/approve', [RoutingRequestControler::class,'approve'])->name('routing.request.approve')->middleware('permission:menu_routing');
+    Route::put('/routing/request/{id}/reject', [RoutingRequestControler::class,'reject'])->name('routing.request.reject')->middleware('permission:menu_routing');
+    Route::delete('/routing/request/delete/', [RoutingRequestControler::class,'destroy'])->name('routing.request.delete')->middleware('permission:menu_routing');
+  
+    Route::post('/routing/bulk', [RoutingController::class,'bulk'])->name('routing.bulk')->middleware('permission:menu_routing');
     Route::get('routing/generate-excel',[RoutingController::class,'downloadExcel'])->name('routing.generae-excel')->middleware('permission:menu_routing');
     Route::get('routing/data',[RoutingController::class,'getData'])->name('routing.data')->middleware('permission:menu_routing');
     Route::resource('routing',RoutingController::class)->middleware('permission:menu_routing');
+  
     Route::put('update-product-knowledge', [ProductKnowledgeControler::class, 'update'])->name('update-product-knowledge')->middleware('permission:menu_routing');
 
     // Visibility Management

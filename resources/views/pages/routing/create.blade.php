@@ -44,249 +44,264 @@
                 <div class="flex gap-4">
                     <x-button.light onclick="closeModal('unggah-produk-bulk')"
                         class="w-full border rounded-md ">Batalkan</x-button.light>
-                    <x-button.light class="w-full !text-white !bg-primary ">Mulai Unggah</x-button.light>
-                    <x-button.light class="w-full !text-white !bg-primary ">Download Template</x-button.light>
+                    <x-button.light class="w-full !text-white !bg-primary " id="importBtn">Mulai Unggah</x-button.light>
+                    <x-button.light id="downloadTemplate" class="w-full !text-white !bg-primary ">Download
+                        Template</x-button.light>
                 </div>
             </x-slot:footer>
         </x-modal>
     </x-slot:cardAction>
-<form action="{{ route('routing.store') }}" method="POST" enctype="multipart/form-data">
-    @csrf
-    <div class="grid grid-cols-2 gap-4">
-        <div>
-            <label for="name" class="form-label">Nama Outlet</label>
-            <input id="name" class="form-control @error('name') is-invalid @enderror" type="text" name="name" placeholder="Masukan nama outlet"
-                aria-describedby="name" />
-            @if ($errors->has('name'))
-                <span id="name-error" class="text-sm text-red-600 mt-1">{{ $errors->first('name') }}</span>
-            @endif
-        </div>
-        <div>
-            <label for="user_id">Nama Sales</label>
-            <select id="user_id" name="user_id" class="w-full">
-                <option value="" selected disabled>
-                    -- Pilih nama sales yang ditugaskan --
-                </option>
-                @foreach ($salesUsers as $sales)
-                    <option value="{{ $sales->id }}">{{ $sales->name }}</option>
-                @endforeach
-            </select>
-            @if ($errors->has('user_id'))
-                <span id="user_id-error" class="text-sm text-red-600 mt-1">{{ $errors->first('name') }}</span>
-            @endif
-        </div>
-        <div>
-            <label for="category">Kategori Outlet</label>
-            <select id="category" name="category" class="w-full">
-                <option value="" selected disabled>
-                    -- Pilih kategori outlet --
-                </option>
-                <option value="MT">
-                    MT
-                </option>
-                <option value="GT">
-                    GT
-                </option>
-            </select>
-            @if ($errors->has('category'))
-                <span id="category-error" class="text-sm text-red-600 mt-1">{{ $errors->first('category') }}</span>
-            @endif
-        </div>
-        <div>
-            <label for="visit_day">Waktu Kunjungan</label>
-            <select id="visit_day" name="visit_day" class=" w-full">
-                <option value="" selected disabled>
-                    -- Pilih waktu kunjungan --
-                </option>
-                @foreach ($waktuKunjungan as $hari)
-                    <option value="{{$hari['value']}}">{{$hari['name']}}</option>
-                @endforeach
-            </select>
-            @if ($errors->has('visit_day'))
-                <span id="visit_day-error" class="text-sm text-red-600 mt-1">{{ $errors->first('visit_day') }}</span>
-            @endif
-        </div>
-        <div>
-            <label for="cycle">Cycle</label>
-            <select id="cycle" name="cycle" class=" w-full">
-                <option value="" selected disabled>
-                    -- Pilih cycle --
-                </option>
-                @foreach ($cycles as $cycle)
-                    <option value="{{$cycle}}">{{$cycle}}</option>
-                @endforeach
-            </select>
-            @if ($errors->has('cycle'))
-                <span id="cycle-error" class="text-sm text-red-600 mt-1">{{ $errors->first('cycle') }}</span>
-            @endif
-        </div>
-        <div id="week-container" class="hidden">
-            <label for="week_type">Week</label>
-            <select id="week_type" name="week_type" class=" w-full">
-                <option value="" selected disabled>
-                    -- Pilih Week --
-                </option>
-                @foreach ($weekType as $week)
-                    <option value="{{$week['value']}}">{{$week['name']}}</option>
-                @endforeach
-            </select>
-            @if ($errors->has('week_type'))
-                <span id="week_type-error" class="text-sm text-red-600 mt-1">{{ $errors->first('week_type') }}</span>
-            @endif
-        </div>
-        <div>
-            <label for="channel">Channel</label>
-            <select id="channel" name="channel" class=" w-full">
-                <option value="" selected disabled>
-                    -- Pilih Channel --
-                </option>
-                @foreach ($channels as $channel)
-                    <option value="{{$channel->id}}">{{$channel->name}}</option>
-                @endforeach
-            </select>
-            @if ($errors->has('channel'))
-                <span id="channel-error" class="text-sm text-red-600 mt-1">{{ $errors->first('channel') }}</span>
-            @endif
-        </div>
-    </div>
-
-    <x-section-card :title="'Produk'">
+    <form action="{{ route('routing.store') }}" method="POST" enctype="multipart/form-data">
+        @csrf
         <div class="grid grid-cols-2 gap-4">
             <div>
-                <label for="product_category">Kategori Produk</label>
-                <select id="product_category" name="product_category[]" class="w-full" multiple="multiple">
-                    @foreach ($categories as $category)
-                        <option value="{{ $category->id }}" data-name="{{ \Str::slug($category->name) }}">
-                            {{ $category->name }}
-                        </option>
-                    @endforeach
-                </select>
-                @if ($errors->has('product_category'))
-                    <span id="product_category-error"
-                        class="text-sm text-red-600 mt-1">{{ $errors->first('product_category') }}</span>
-                @endif
-            </div>
-        </div>
-    </x-section-card>
-
-
-    @foreach ($categories as $category)
-        <div id="{{ \Str::slug($category->name) }}" class="hidden border-b-2 border-dashed py-6">
-            <h3 class="font-bold text-2xl text-white py-2 mb-6">
-                {{ $category->name }}
-            </h3>
-            @foreach ($category->products as $product)
-                <x-pages.routing.product-form :label="$product->sku" />
-            @endforeach
-        </div>
-    @endforeach
-
-    <x-section-card :title="'Area Domisili Outlet'">
-        <div class="grid grid-cols-2 gap-6">
-            <div>
-                <label for="longitude" class="form-label">Longitudes <span class="font-normal">(DD
-                        Coordinates)</span></label>
-                <input id="longitude" class="form-control @error('longtitude') is-invalid @enderror" type="text" name="longitude"
-                    placeholder="Masukkan Koordinat Longitude" aria-describedby="longitude" />
-                @if ($errors->has('longtitude'))
-                    <span id="longtitude-error" class="text-sm text-red-600 mt-1">{{ $errors->first('longtitude') }}</span>
+                <label for="name" class="form-label">Nama Outlet</label>
+                <input id="name" class="form-control @error('name') is-invalid @enderror" value="{{ old('name') }}" type="text" name="name"
+                    placeholder="Masukan nama outlet" aria-describedby="name" />
+                @if ($errors->has('name'))
+                    <span id="name-error" class="text-sm text-red-600 mt-1">{{ $errors->first('name') }}</span>
                 @endif
             </div>
             <div>
-                <label for="latitude" class="form-label">Latitudes <span class="font-normal">(DMS
-                        Coordinates)</span></label>
-                <input id="latitude" class="form-control @error('latitude') is-invalid @enderror" type="text" name="latitude"
-                    placeholder="Masukkan Koordinat Latitude" aria-describedby="latitude" />
-                @if ($errors->has('latitude'))
-                    <span id="latitude-error" class="text-sm text-red-600 mt-1">{{ $errors->first('latitude') }}</span>
+                <label for="code" class="form-label">Kode Outlet</label>
+                <input id="code" class="form-control @error('code') is-invalid @enderror" value="{{ old('code') }}" type="text" name="code"
+                    placeholder="Masukan nama outlet" aria-describedby="name" />
+                @if ($errors->has('code'))
+                    <span id="code-error" class="text-sm text-red-600 mt-1">{{ $errors->first('code') }}</span>
                 @endif
             </div>
             <div>
-                <label for="city">Kabupaten/Kota</label>
-                <select id="city" name="city" class=" w-full">
+                <label for="user_id">Nama Sales</label>
+                <select id="user_id" name="user_id" class="w-full">
                     <option value="" selected disabled>
-                        -- Pilih Kabupaten/Kota--
+                        -- Pilih nama sales yang ditugaskan --
                     </option>
-                    @foreach ($cities as $city)
-                        <option value="{{$city->id}}">{{$city->name}}</option>
+                    @foreach ($salesUsers as $sales)
+                        <option value="{{ $sales->id }}" {{ old('user_id') == $sales->id ? 'selected' : ''}}>{{ $sales->name }}</option>
                     @endforeach
                 </select>
-                @if ($errors->has('city'))
-                    <span id="city-error" class="text-sm text-red-600 mt-1">{{ $errors->first('city') }}</span>
+                @if ($errors->has('user_id'))
+                    <span id="user_id-error" class="text-sm text-red-600 mt-1">{{ $errors->first('name') }}</span>
                 @endif
             </div>
             <div>
-                <label for="adresss" class="form-label">Alamat Lengkap</label>
-                <input id="adresss" class="form-control" type="text" name="adresss"
-                    placeholder="Masukkan Alamat Lengkap" aria-describedby="adresss" />
-                @if ($errors->has('address'))
-                    <span id="address-error" class="text-sm text-red-600 mt-1">{{ $errors->first('address') }}</span>
+                <label for="category">Kategori Outlet</label>
+                <select id="category" name="category" class="w-full">
+                    <option value="" selected disabled>
+                        -- Pilih kategori outlet --
+                    </option>
+                    <option value="MT" {{ old('category') == 'MT' ? 'selected' : ''}}>
+                        MT
+                    </option>
+                    <option value="GT" {{ old('category') == 'GT' ? 'selected' : ''}}>
+                        GT
+                    </option>
+                </select>
+                @if ($errors->has('category'))
+                    <span id="category-error" class="text-sm text-red-600 mt-1">{{ $errors->first('category') }}</span>
+                @endif
+            </div>
+            <div>
+                <label for="visit_day">Waktu Kunjungan</label>
+                <select id="visit_day" name="visit_day" class=" w-full">
+                    <option value="" selected disabled>
+                        -- Pilih waktu kunjungan --
+                    </option>
+                    @foreach ($waktuKunjungan as $hari)
+                        <option value="{{$hari['value']}}" {{ old('visit_day') == $hari['value'] ? 'selected' : ''}}>{{$hari['name']}}</option>
+                    @endforeach
+                </select>
+                @if ($errors->has('visit_day'))
+                    <span id="visit_day-error" class="text-sm text-red-600 mt-1">{{ $errors->first('visit_day') }}</span>
+                @endif
+            </div>
+            <div>
+                <label for="cycle">Cycle</label>
+                <select id="cycle" name="cycle" class=" w-full">
+                    <option value="" selected disabled>
+                        -- Pilih cycle --
+                    </option>
+                    @foreach ($cycles as $cycle)
+                        <option value="{{$cycle}}" {{ old('cycle') == $cycle ? 'selected' : ''}}>{{$cycle}}</option>
+                    @endforeach
+                </select>
+                @if ($errors->has('cycle'))
+                    <span id="cycle-error" class="text-sm text-red-600 mt-1">{{ $errors->first('cycle') }}</span>
+                @endif
+            </div>
+            <div id="week-container" class="hidden">
+                <label for="week_type">Week</label>
+                <select id="week_type" name="week_type" class=" w-full">
+                    <option value="" selected disabled>
+                        -- Pilih Week --
+                    </option>
+                    @foreach ($weekType as $week)
+                        <option value="{{$week['value']}}" {{ old('week_type') == $week['value'] ? 'selected' : ''}}>{{$week['name']}}</option>
+                    @endforeach
+                </select>
+                @if ($errors->has('week_type'))
+                    <span id="week_type-error" class="text-sm text-red-600 mt-1">{{ $errors->first('week_type') }}</span>
+                @endif
+            </div>
+            <div>
+                <label for="channel">Channel</label>
+                <select id="channel" name="channel" class=" w-full">
+                    <option value="" selected disabled>
+                        -- Pilih Channel --
+                    </option>
+                    @foreach ($channels as $channel)
+                        <option value="{{$channel->id}}" {{ old('channel') == $channel->id ? 'selected' : ''}}>{{$channel->name}}</option>
+                    @endforeach
+                </select>
+                @if ($errors->has('channel'))
+                    <span id="channel-error" class="text-sm text-red-600 mt-1">{{ $errors->first('channel') }}</span>
                 @endif
             </div>
         </div>
-        <div class="relative mt-6">
-            <div class="h-[450px] z-10" id="user-map-location"></div>
-            <button id="fullscreen-button"
-                class="absolute top-3 right-3 rounded-sm w-10 h-10 grid place-items-center bg-white z-50 hover:bg-slate-200">
-                <svg width="32" height="32" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
-                    <path
-                        d="M6 14C5.45 14 5 14.45 5 15V18C5 18.55 5.45 19 6 19H9C9.55 19 10 18.55 10 18C10 17.45 9.55 17 9 17H7V15C7 14.45 6.55 14 6 14ZM6 10C6.55 10 7 9.55 7 9V7H9C9.55 7 10 6.55 10 6C10 5.45 9.55 5 9 5H6C5.45 5 5 5.45 5 6V9C5 9.55 5.45 10 6 10ZM17 17H15C14.45 17 14 17.45 14 18C14 18.55 14.45 19 15 19H18C18.55 19 19 18.55 19 18V15C19 14.45 18.55 14 18 14C17.45 14 17 14.45 17 15V17ZM14 6C14 6.55 14.45 7 15 7H17V9C17 9.55 17.45 10 18 10C18.55 10 19 9.55 19 9V6C19 5.45 18.55 5 18 5H15C14.45 5 14 5.45 14 6Z"
-                        fill="#000" />
-                </svg>
-            </button>
-        </div>
-    </x-section-card>
 
-    <x-section-card :title="'Tambahkan Foto Outlet'">
-        <div class="flex">
-            {{-- Foto Tampak Depan Outlet --}}
-            <x-input.image id="front_outlet" name="img_front" label="Foto tampak depan outlet" :max-size="2" />
-            {{-- Foto Tampak Depan Outlet End --}}
+        <x-section-card :title="'Produk'">
+            <div class="grid grid-cols-2 gap-4">
+                <div>
+                    <label for="product_category">Kategori Produk</label>
+                    <select id="product_category" name="product_category[]" class="w-full" multiple="multiple">
+                        @foreach ($categories as $category)
+                            <option value="{{ $category->id }}" {{ old('product_category') == $category->id ? 'selected' : ''}} data-name="{{ \Str::slug($category->name) }}">
+                                {{ $category->name }}
+                            </option>
+                        @endforeach
+                    </select>
+                    @if ($errors->has('product_category'))
+                        <span id="product_category-error"
+                            class="text-sm text-red-600 mt-1">{{ $errors->first('product_category') }}</span>
+                    @endif
+                </div>
+            </div>
+        </x-section-card>
 
-            {{-- Foto Spanduk/Banner/Neon Box --}}
-            <x-input.image id="banner_outlet" name="img_banner" label="Foto spanduk/banner/neon Box" :max-size="2" />
-            {{-- Foto Spanduk/Banner/Neon Box End --}}
 
-            {{-- Foto jalan utama outlet --}}
-            <x-input.image id="street_outlet" name="img_main_road" label="Foto jalan utama outlet" :max-size="2" />
-            {{-- Foto jalan utama outlet End --}}
-        </div>
-
-    </x-section-card>
-
-    <x-section-card :title="'Formulir Survey Outlet'">
-        @foreach ($outletForms as $form)
-            @if($form->type == 'bool')
-                <div class="flex flex-col gap-6">
-                    <div class="flex justify-between items-center w-full">
-                        <p class="text-white font-bold text-sm">{{$form->question}}</p>
-                        <div class="relative inline-flex items-center">
-                            <input type="checkbox" name="survey[{{$form->id}}]" id="gih-checkbox" value="1" class="sr-only" />
-                            <label for="gih-checkbox"
-                                class="flex w-[160px] cursor-pointer items-center rounded-md bg-gray-200 p-1">
-                                <span id="gih-checked"
-                                    class="flex h-10 w-[90px] items-center justify-center rounded-md bg-blue-400 text-sm text-white font-medium transition-all duration-200">
-                                    Sudah
-                                </span>
-                                <span id="gih-unchecked"
-                                    class="flex h-10 w-[90px] items-center justify-center rounded-md text-sm font-medium text-blue-400 transition-all duration-200">
-                                    Belum
-                                </span>
-                            </label>
-                        </div>
-                    </div>
-            @elseif($form->type == 'text')
-                <x-pages.routing.outlet-form>
-                    <x-slot:title>{{$form->question}}</x-slot:title>
-                    <x-slot:name>survey[{{$form->id}}]</x-slot:name>
-                    <x-slot:value>0</x-slot:value>
-                </x-pages.routing.outlet-form>
-            @endif
+        @foreach ($categories as $category)
+            <div id="{{ \Str::slug($category->name) }}" class="hidden border-b-2 border-dashed py-6">
+                <h3 class="font-bold text-2xl text-white py-2 mb-6">
+                    {{ $category->name }}
+                </h3>
+                @foreach ($category->products as $product)
+                    <x-pages.routing.product-form :label="$product->sku" />
+                @endforeach
+            </div>
         @endforeach
-        </div>
-        <x-button.info class="w-full mt-20 !text-xl" type="submit">Konfirmasi</x-button.info>
 
-    </x-section-card>   
+        <x-section-card :title="'Area Domisili Outlet'">
+            <div class="grid grid-cols-2 gap-6">
+                <div>
+                    <label for="longitude" class="form-label">Longitudes <span class="font-normal">(DD
+                            Coordinates)</span></label>
+                    <input id="longitude" class="form-control @error('longtitude') is-invalid @enderror" {{ old('longitude')}} type="text"
+                        name="longitude" placeholder="Masukkan Koordinat Longitude" aria-describedby="longitude" />
+                    @if ($errors->has('longtitude'))
+                        <span id="longtitude-error"
+                            class="text-sm text-red-600 mt-1">{{ $errors->first('longtitude') }}</span>
+                    @endif
+                </div>
+                <div>
+                    <label for="latitude" class="form-label">Latitudes <span class="font-normal">(DMS
+                            Coordinates)</span></label>
+                    <input id="latitude" class="form-control @error('latitude') is-invalid @enderror" value="{{ old('latitude') }}" type="text"
+                        name="latitude" placeholder="Masukkan Koordinat Latitude" aria-describedby="latitude" />
+                    @if ($errors->has('latitude'))
+                        <span id="latitude-error" class="text-sm text-red-600 mt-1">{{ $errors->first('latitude') }}</span>
+                    @endif
+                </div>
+                <div>
+                    <label for="city">Kabupaten/Kota</label>
+                    <select id="city" name="city" class=" w-full">
+                        <option value="" selected disabled>
+                            -- Pilih Kabupaten/Kota--
+                        </option>
+                        @foreach ($cities as $city)
+                            <option value="{{$city->id}}"  {{ old('city') == $city->id ? 'selected' : ''}}>{{$city->name}}</option>
+                        @endforeach
+                    </select>
+                    @if ($errors->has('city'))
+                        <span id="city-error" class="text-sm text-red-600 mt-1">{{ $errors->first('city') }}</span>
+                    @endif
+                </div>
+                <div>
+                    <label for="adresss" class="form-label">Alamat Lengkap</label>
+                    <input id="adresss" class="form-control" value="{{ old('address') }}" type="text" name="adresss"
+                        placeholder="Masukkan Alamat Lengkap" aria-describedby="adresss" />
+                    @if ($errors->has('address'))
+                        <span id="address-error" class="text-sm text-red-600 mt-1">{{ $errors->first('address') }}</span>
+                    @endif
+                </div>
+            </div>
+            <div class="relative mt-6">
+                <div class="h-[450px] z-10" id="user-map-location"></div>
+                <button id="fullscreen-button"
+                    class="absolute top-3 right-3 rounded-sm w-10 h-10 grid place-items-center bg-white z-50 hover:bg-slate-200">
+                    <svg width="32" height="32" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                        <path
+                            d="M6 14C5.45 14 5 14.45 5 15V18C5 18.55 5.45 19 6 19H9C9.55 19 10 18.55 10 18C10 17.45 9.55 17 9 17H7V15C7 14.45 6.55 14 6 14ZM6 10C6.55 10 7 9.55 7 9V7H9C9.55 7 10 6.55 10 6C10 5.45 9.55 5 9 5H6C5.45 5 5 5.45 5 6V9C5 9.55 5.45 10 6 10ZM17 17H15C14.45 17 14 17.45 14 18C14 18.55 14.45 19 15 19H18C18.55 19 19 18.55 19 18V15C19 14.45 18.55 14 18 14C17.45 14 17 14.45 17 15V17ZM14 6C14 6.55 14.45 7 15 7H17V9C17 9.55 17.45 10 18 10C18.55 10 19 9.55 19 9V6C19 5.45 18.55 5 18 5H15C14.45 5 14 5.45 14 6Z"
+                            fill="#000" />
+                    </svg>
+                </button>
+            </div>
+        </x-section-card>
+
+        <x-section-card :title="'Tambahkan Foto Outlet'">
+            <div class="flex">
+                {{-- Foto Tampak Depan Outlet --}}
+                <x-input.image id="front_outlet" name="img_front" label="Foto tampak depan outlet" :max-size="2" />
+                {{-- Foto Tampak Depan Outlet End --}}
+
+                {{-- Foto Spanduk/Banner/Neon Box --}}
+                <x-input.image id="banner_outlet" name="img_banner" label="Foto spanduk/banner/neon Box"
+                    :max-size="2" />
+                {{-- Foto Spanduk/Banner/Neon Box End --}}
+
+                {{-- Foto jalan utama outlet --}}
+                <x-input.image id="street_outlet" name="img_main_road" label="Foto jalan utama outlet" :max-size="2" />
+                {{-- Foto jalan utama outlet End --}}
+            </div>
+
+        </x-section-card>
+
+        <x-section-card :title="'Formulir Survey Outlet'">
+            @foreach ($outletForms as $form)
+                @if($form->type == 'bool')
+                    <div class="flex flex-col gap-6">
+                        <div class="flex justify-between items-center w-full">
+                            <p class="text-white font-bold text-sm">{{$form->question}}</p>
+                            <div class="relative inline-flex items-center">
+                                <input type="checkbox" name="survey[{{$form->id}}]" id="gih-checkbox" checked value="Sudah"
+                                    class="sr-only" />
+                                    <div class="flex w-[160px] cursor-pointer items-center rounded-md bg-gray-200 p-1">
+                                    <span id="gih-checked"
+                                        class="flex h-10 w-[90px] items-center justify-center rounded-md bg-blue-400 text-sm text-white font-medium transition-all duration-200">
+                                        Sudah
+                                    </span>
+                                    <span id="gih-unchecked"
+                                        class="flex h-10 w-[90px] items-center justify-center rounded-md text-sm font-medium text-blue-400 transition-all duration-200">
+                                        Belum
+                                    </span>
+                                    </div>
+                                <!-- <label for="gih-checkbox"
+                                    class="flex w-[160px] cursor-pointer items-center rounded-md bg-gray-200 p-1"> -->
+                                  
+                                <!-- </label> -->
+                            </div>
+                        </div>
+                @elseif($form->type == 'text')
+                    <x-pages.routing.outlet-form>
+                        <x-slot:title>{{$form->question}}</x-slot:title>
+                        <x-slot:name>survey[{{$form->id}}]</x-slot:name>
+                        <x-slot:value>{{old('survey['.$form->id.']') ?? '0'}}</x-slot:value>
+                    </x-pages.routing.outlet-form>
+                @endif
+            @endforeach
+            </div>
+            <x-button.info class="w-full mt-20 !text-xl" type="submit">Konfirmasi</x-button.info>
+
+        </x-section-card>
     </form>
 </x-card>
 @endsection
@@ -309,10 +324,10 @@
                 placeholder: '-- Pilih Kategori Produk --'
             });
             $('#product_category').on('change', function () {
-                var selectedCategories = $(this).find(':selected'); 
+                var selectedCategories = $(this).find(':selected');
                 selectedCategories.each(function () {
-                    var categoryName = $(this).data('name'); 
-                    $('#' + categoryName).show(); 
+                    var categoryName = $(this).data('name');
+                    $('#' + categoryName).show();
                 });
             });
 
@@ -322,6 +337,40 @@
             });
             $('#outlet-categories').select2({
                 minimumResultsForSearch: Infinity
+            });
+            $('#downloadTemplate').on('click', function () {
+                window.location.href = "{{asset('assets/template/template_bulk_routing.xlsx')}}";
+            })
+            function handleSuccess(modalId, message) {
+                toggleLoading(false, 'update');
+                closeModal(modalId);
+                toast('success', message, 150);
+                setTimeout(() => window.location.reload(), 1500);
+            }
+            $('#importBtn').click(function () {
+                const file = $('#file_upload')[0].files[0];
+                if (!file) {
+                    return toast('error', 'Silakan pilih file terlebih dahulu', 200);
+                }
+
+                const formData = new FormData();
+                formData.append('excel_file', file);
+                toggleLoading(true, 'import');
+
+                $.ajax({
+                    url: '/routing/bulk',
+                    type: 'POST',
+                    data: formData,
+                    processData: false,
+                    contentType: false,
+                    success: function (response) {
+                        handleSuccess('unggah-routing-bulk', response.message);
+                    },
+                    error: function (xhr) {
+                        toggleLoading(false, 'import');
+                        toast('error', xhr.responseJSON.message, 200);
+                    }
+                });
             });
         });
     </script>
@@ -416,72 +465,67 @@
             const gihCheckbox = document.querySelector('#gih-checkbox');
             const gihChecked = document.querySelector('#gih-checked');
             const gihUnChecked = document.querySelector('#gih-unchecked');
-
-
-            gihCheckbox.addEventListener('change', function () {
-                if (this.checked) {
-                    gihChecked.classList.add("bg-blue-400", "!text-white");
-                    gihUnChecked.classList.remove("bg-blue-400", "!text-white");
-                } else {
-                    gihUnChecked.classList.add("bg-blue-400", "!text-white");
-                    gihChecked.classList.remove("bg-blue-400", "!text-white");
-                    gihChecked.classList.add("text-blue-400");
-                }
+            gihChecked.addEventListener('click', function () {
+                $('#gih-checkbox').val('Sudah');
+                gihChecked.classList.add("bg-blue-400", "!text-white");
+                gihUnChecked.classList.remove("bg-blue-400", "!text-white");
             });
+            gihUnChecked.addEventListener('click', function () {
+                $('#gih-checkbox').val('Belum');
+                gihUnChecked.classList.add("bg-blue-400", "!text-white");
+                gihChecked.classList.remove("bg-blue-400", "!text-white");
+                gihChecked.classList.add("text-blue-400");
+            });
+
+            // gihCheckbox.addEventListener('change', function () {
+            //     if (this.checked) {
+            //         $('#gih-checkbox').val('Sudah');
+            //         gihChecked.classList.add("bg-blue-400", "!text-white");
+            //         gihUnChecked.classList.remove("bg-blue-400", "!text-white");
+            //     } else {
+            //         $('#gih-checkbox').val('Belum');
+            //         gihUnChecked.classList.add("bg-blue-400", "!text-white");
+            //         gihChecked.classList.remove("bg-blue-400", "!text-white");
+            //         gihChecked.classList.add("text-blue-400");
+            //     }
+            // });
         });
     </script>
 @endpush
 
 @push('scripts')
     <script>
-        document.addEventListener('DOMContentLoaded', function () {
+        const setupFileUpload = () => {
             const uploadArea = document.getElementById('upload-area');
             const fileInput = document.getElementById('file_upload');
             const displayFileName = document.getElementById('filename-display');
             const uploadHelptext = document.getElementById('upload-helptext');
             const maxFileSize = 5 * 1024 * 1024;
 
-            // Click handler for the upload area
-            uploadArea.addEventListener('click', () => {
-                fileInput.click();
+            uploadArea.addEventListener('click', () => fileInput.click());
+
+            ['dragover', 'dragleave', 'drop'].forEach(eventName => {
+                uploadArea.addEventListener(eventName, (e) => {
+                    e.preventDefault();
+                    uploadArea.classList.toggle('drag-over', eventName === 'dragover');
+                    if (eventName === 'drop') handleFiles(e.dataTransfer.files);
+                });
             });
 
-            // Drag and drop handlers
-            uploadArea.addEventListener('dragover', (e) => {
-                e.preventDefault();
-                uploadArea.classList.add('drag-over');
-            });
-
-            uploadArea.addEventListener('dragleave', (e) => {
-                e.preventDefault();
-                uploadArea.classList.remove('drag-over');
-            });
-
-            uploadArea.addEventListener('drop', (e) => {
-                e.preventDefault();
-                uploadArea.classList.remove('drag-over');
-
-                const files = e.dataTransfer.files;
-                handleFiles(files);
-            });
-
-            fileInput.addEventListener('change', (e) => {
-                handleFiles(e.target.files);
-            });
+            fileInput.addEventListener('change', (e) => handleFiles(e.target.files));
 
             function handleFiles(files) {
-                if (files.length === 0) return;
+                if (!files.length) return;
 
                 const file = files[0];
-
                 const validTypes = [
-                    'text/csv',
-                    'application/vnd.ms-excel',
-                    'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet'
+                    'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet',
+                    'application/wps-office.xlsx',
+                    'application/vnd.ms-excel'
                 ];
 
                 if (!validTypes.includes(file.type)) {
-                    alert('Upload file gagal, Tolong Unggah Hanya file berformat .csv/xls');
+                    alert('Upload file gagal, Tolong Unggah Hanya file berformat .xlsx');
                     fileInput.value = '';
                     return;
                 }
@@ -492,20 +536,12 @@
                     return;
                 }
 
-                if (file.size > maxFileSize && file.size > maxFileSize) {
-                    return
-                }
-
-                console.log(file.name);
-
-                const reader = new FileReader();
-                reader.onload = function (e) {
-                    displayFileName.classList.remove('hidden')
-                    uploadHelptext.classList.add('hidden')
-                    displayFileName.innerText = file.name
-                };
-                reader.readAsText(file);
+                displayFileName.classList.remove('hidden');
+                uploadHelptext.classList.add('hidden');
+                displayFileName.innerText = file.name;
             }
-        });
+        };
+
+        setupFileUpload();
     </script>
 @endpush

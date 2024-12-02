@@ -15,6 +15,7 @@ use Illuminate\Support\Arr;
 use Illuminate\Http\Request;
 use App\Exports\OutletExport;
 use App\Models\OutletProduct;
+use App\Imports\RoutingImport;
 use App\Models\OutletFormAnswer;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Log;
@@ -52,7 +53,8 @@ class RoutingController extends Controller
     {
         $channels = Channel::all();
         $waktuKunjungan = $this->waktuKunjungan;
-        return view("pages.routing.index", compact('channels', 'waktuKunjungan'));
+        $countPending = Outlet::where('status', 'PENDING')->count();
+        return view("pages.routing.index", compact('channels', 'waktuKunjungan','countPending'));
     }
     public function getData(Request $request)
     {
@@ -230,6 +232,10 @@ class RoutingController extends Controller
         ]);
     }
 
+    public function request(){
+        $outletRequest = Outlet::with('user')->where('status', 'PENDING')->orWhere('status', 'REJECTED')->orderBy('created_at', 'desc')->get();
+        return view('pages.routing.request', compact('outletRequest'));
+    } 
     /**
      * Update the specified resource in storage.
      */
@@ -319,7 +325,27 @@ class RoutingController extends Controller
             ], 500);
         }
     }
+    public function bulk(Request $request)
+    {
+        $request->validate([
+            'excel_file' => 'required|mimes:xlsx|max:10240'
+        ]);
 
+        try {
+            $file = $request->file('excel_file');
+            $fileName = $file->getClientOriginalName();
+            $import = new RoutingImport($fileName);
+            Excel::import($import, $file);
+
+            if ($import->response['status'] == 'error') {
+                throw new Exception($import->response['message']);
+            }
+
+            return response()->json(['message' => 'Import success'], 200);
+        } catch (\Exception $e) {
+            return response()->json(['message' => $e->getMessage()], 500);
+        }
+    }
     /**
      * Remove the specified resource from storage.
      */

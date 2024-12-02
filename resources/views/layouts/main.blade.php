@@ -96,7 +96,7 @@
             toast('error', '{{ session('error') }}')
         @endif
         @if($errors->any())
-            toast('error', 'Form Validation Error!!')
+            toast('error', '{{ $errors->first() }}',1000)
         @endif
         function previewImage(input, id) {
             const file = input.files[0];

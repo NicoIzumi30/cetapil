@@ -369,7 +369,7 @@ $(document).ready(function() {
             dataSrc: function(json) {
                 $('.dataTables_length select').closest('.dataTables_length')
                     .find('label')
-                    .html(`Menampilkan <select>${$('.dataTables_length select').html()}</select> dari ${json.recordsFiltered} data`);
+                    .html(` <select>${$('.dataTables_length select').html()}</select> dari ${json.recordsFiltered} data`);
                 return json.data;
             }
         },

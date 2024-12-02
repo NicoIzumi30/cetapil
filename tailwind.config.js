@@ -2,6 +2,9 @@ import defaultTheme from 'tailwindcss/defaultTheme';
 
 /** @type {import('tailwindcss').Config} */
 export default {
+	safelist: [
+		'bg-red-500',
+	  ],
     content: [
 		'./storage/framework/views/*.php',
         './resources/**/*.blade.php',
@@ -27,6 +30,7 @@ export default {
 			}
         },
     },
+	
     plugins: [
 	],
 };

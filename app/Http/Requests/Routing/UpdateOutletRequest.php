@@ -2,6 +2,7 @@
 
 namespace App\Http\Requests\Routing;
 
+use Illuminate\Validation\Rule;
 use Illuminate\Foundation\Http\FormRequest;
 
 class UpdateOutletRequest extends FormRequest
@@ -34,6 +35,7 @@ class UpdateOutletRequest extends FormRequest
             'latitude' => 'required|string',
             'city' => 'required|string|exists:cities,id',
             'address' => 'nullable|string',
+            'code' => ['required'],
             // 'status' => 'required|in:APPROVED,PENDING,REJECTED',
             'img_front' => 'nullable|file|mimes:png,jpg,jpeg|max:1024',
             'img_banner' => 'nullable|file|mimes:png,jpg,jpeg|max:1024',
