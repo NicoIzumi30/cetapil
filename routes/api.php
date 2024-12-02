@@ -69,6 +69,7 @@ Route::middleware(['auth_api', 'role:sales'])->group(function () {
         // Route::get('/outlets', 'getOutletList');
         // Route::get('/visual', 'getVisualTypeList');
         // Route::get('/posm', 'getPosmTypeList');
+        Route::post('/submit', [SalesActivityController::class, 'storeActivity']);
 
         Route::controller(SurveyController::class)
             ->prefix('surveys')

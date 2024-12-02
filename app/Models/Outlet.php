@@ -72,4 +72,8 @@ class Outlet extends Model
     {
         return $this->hasMany(ProductKnowledge::class, 'channel_id', 'channel');
     }
+    public function visibilities(): HasMany
+    {
+        return $this->hasMany(Visibility::class);
+    }
 }
