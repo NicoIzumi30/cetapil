@@ -8,6 +8,7 @@ import 'package:cetapil_mobile/model/list_posm_response.dart';
 import 'package:cetapil_mobile/model/list_product_sku_response.dart';
 import 'package:cetapil_mobile/model/list_routing_response.dart';
 import 'package:cetapil_mobile/model/list_selling_response.dart';
+import 'package:cetapil_mobile/model/list_visual_response.dart';
 import 'package:cetapil_mobile/model/outlet.dart';
 import 'package:cetapil_mobile/model/submit_checkin_routing.dart';
 import 'package:cetapil_mobile/model/submit_outlet_response.dart';
@@ -252,7 +253,7 @@ class Api {
     throw "Gagal request data Routing : \n${response.body}";
   }
 
-  static Future<DropdownModel> getItemPOSMList() async {
+  static Future<ListPosmResponse> getItemPOSMList() async {
     var url = "$baseUrl/api/activity/posm";
     var token = await storage.read('token');
     var response = await http.get(
@@ -264,12 +265,12 @@ class Api {
     );
     // print(response.body);
     if (response.statusCode == 200) {
-      return DropdownModel.fromJson(jsonDecode(response.body));
+      return ListPosmResponse.fromJson(jsonDecode(response.body));
     }
     throw "Gagal request data POSM : \n${response.body}";
   }
 
-  static Future<DropdownModel> getItemVisualList() async {
+  static Future<ListVisualResponse> getItemVisualList() async {
     var url = "$baseUrl/api/activity/visual";
     var token = await storage.read('token');
     var response = await http.get(
@@ -281,7 +282,7 @@ class Api {
     );
     // print(response.body);
     if (response.statusCode == 200) {
-      return DropdownModel.fromJson(jsonDecode(response.body));
+      return ListVisualResponse.fromJson(jsonDecode(response.body));
     }
     throw "Gagal request item Visual : \n${response.body}";
   }

@@ -3,6 +3,8 @@ import '../model/list_category_response.dart' as Category;
 import '../model/list_channel_response.dart' as Channel;
 import '../model/list_knowledge_response.dart' as Knowledge;
 import '../model/survey_question_response.dart' as Survey;
+import '../model/list_posm_response.dart' as Posm;
+import '../model/list_visual_response.dart' as Visual;
 import 'package:sqflite/sqflite.dart';
 import 'package:path/path.dart';
 
@@ -115,6 +117,22 @@ class SupportDatabaseHelper {
         survey_question_id TEXT,
         FOREIGN KEY (survey_question_id) REFERENCES survey_questions(id)
       )
+    ''');
+
+    // Add POSM type table
+    await db.execute('''
+    CREATE TABLE posm_types(
+      id TEXT PRIMARY KEY,
+      name TEXT NOT NULL
+    )
+    ''');
+
+    // Add Visual type table
+    await db.execute('''
+    CREATE TABLE visual_types(
+      id TEXT PRIMARY KEY,
+      name TEXT NOT NULL
+    )
     ''');
   }
 
@@ -325,5 +343,36 @@ class SupportDatabaseHelper {
     }
 
     return result;
+  }
+
+  // Add method to insert POSM type
+  Future<void> insertPosmType(Posm.Data posmType) async {
+    final db = await database;
+    await db.insert(
+      'posm_types',
+      posmType.toJson(),
+      conflictAlgorithm: ConflictAlgorithm.replace,
+    );
+  }
+
+  // Add method to get all POSM types
+  Future<List<Map<String, dynamic>>> getAllPosmTypes() async {
+    final db = await database;
+    return await db.query('posm_types');
+  }
+
+  // Visual type methods
+  Future<void> insertVisualType(Visual.Data visualType) async {
+    final db = await database;
+    await db.insert(
+      'visual_types',
+      visualType.toJson(),
+      conflictAlgorithm: ConflictAlgorithm.replace,
+    );
+  }
+
+  Future<List<Map<String, dynamic>>> getAllVisualTypes() async {
+    final db = await database;
+    return await db.query('visual_types');
   }
 }

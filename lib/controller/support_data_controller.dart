@@ -21,6 +21,8 @@ class SupportDataController extends GetxController {
   var categories = <Map<String, dynamic>>[].obs;
   var channels = <Channel.Data>[].obs;
   var knowledge = <Map<String, dynamic>>[].obs;
+  var posmTypes = <Map<String, dynamic>>[].obs;
+  var visualTypes = <Map<String, dynamic>>[].obs;
 
   static const String LAST_FETCH_DATE_KEY = 'last_fetch_date';
 
@@ -40,10 +42,13 @@ class SupportDataController extends GetxController {
 
   Future<void> checkData() async {
     await loadLocalData();
-    print("----cek-----");
 
     // Only force refresh if data is empty
-    if (products.isEmpty || categories.isEmpty || channels.isEmpty || knowledge.isEmpty || survey.isEmpty) {
+    if (products.isEmpty ||
+        categories.isEmpty ||
+        channels.isEmpty ||
+        knowledge.isEmpty ||
+        survey.isEmpty) {
       await initAllData();
     } else {
       // If data exists, check for daily refresh
@@ -69,6 +74,12 @@ class SupportDataController extends GetxController {
 
       // Load Survey Question
       survey.value = await supportDB.getAllSurveyQuestions();
+
+      // Load POSM types
+      posmTypes.value = await supportDB.getAllPosmTypes();
+      
+      // Load Visual types
+      visualTypes.value = await supportDB.getAllVisualTypes();
     } catch (e) {
       print("Error loading local data: $e");
     } finally {
@@ -101,6 +112,8 @@ class SupportDataController extends GetxController {
         initChannelListData(),
         initKnowledgeData(),
         initQuestionSurvey(),
+        initPosmTypeData(),
+        initVisualTypeData(),
       ]);
       // Reload local data after updating SQLite
       await loadLocalData();
@@ -177,16 +190,15 @@ class SupportDataController extends GetxController {
 
       if (responseSurvey.status == "OK" && responseSurvey.data != null) {
         final sortedData = [...responseSurvey.data!]..sort((a, b) {
-          if (a.name == 'Recommendation') return 1;
-          if (b.name == 'Recommendation') return -1;
-          return 0;
-        });
+            if (a.name == 'Recommendation') return 1;
+            if (b.name == 'Recommendation') return -1;
+            return 0;
+          });
         for (final data in sortedData) {
           await supportDB.insertSurveyQuestion(data);
         }
         // supportDB.insertSurveyQuestion(sortedData);
         // surveyQuestions.assignAll(sortedData);
-
       } else {
         print("Survey error = ${responseSurvey.message}");
       }
@@ -195,7 +207,35 @@ class SupportDataController extends GetxController {
     }
   }
 
+  Future<void> initPosmTypeData() async {
+    try {
+      final responsePosmType = await Api.getItemPOSMList();
+      if (responsePosmType.status == "OK") {
+        for (final posmType in responsePosmType.data ?? []) {
+          await supportDB.insertPosmType(posmType);
+        }
+      } else {
+        print("POSM Type error = ${responsePosmType.message}");
+      }
+    } catch (e) {
+      print("POSM Type error = $e");
+    }
+  }
 
+  Future<void> initVisualTypeData() async {
+    try {
+      final responseVisualType = await Api.getItemVisualList();
+      if (responseVisualType.status == "OK") {
+        for (final visualType in responseVisualType.data ?? []) {
+          await supportDB.insertVisualType(visualType);
+        }
+      } else {
+        print("Visual Type error = ${responseVisualType.message}");
+      }
+    } catch (e) {
+      print("Visual Type error = $e");
+    }
+  }
 
   // Helper methods to access data
   List<Map<String, dynamic>> getProducts() => products;
@@ -203,4 +243,6 @@ class SupportDataController extends GetxController {
   List<Channel.Data> getChannels() => channels;
   List<Map<String, dynamic>> getKnowledge() => knowledge;
   List<Map<String, dynamic>> getSurvey() => survey;
+  List<Map<String, dynamic>> getPosmTypes() => posmTypes;
+  List<Map<String, dynamic>> getVisualTypes() => visualTypes;
 }

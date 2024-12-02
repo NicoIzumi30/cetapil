@@ -31,9 +31,10 @@ class TambahAvailability extends GetView<TambahAvailabilityController> {
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
                 EnhancedBackButton(
-                  onPressed: () => Get.back(),
+                  onPressed: () => Alerts.showConfirmDialog(context,useGetBack: false),
                   backgroundColor: Colors.white,
                   iconColor: Colors.blue,
+                  useGetBack: false,
                 ),
                 SizedBox(height: 20),
                 Expanded(

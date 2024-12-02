@@ -1,21 +1,22 @@
+import 'package:cetapil_mobile/controller/activity/tambah_activity_controller.dart';
 import 'package:get/get.dart';
 import 'package:flutter/material.dart';
 import '../../controller/support_data_controller.dart';
 
+// tambah_order_controller.dart (continued)
 class TambahOrderController extends GetxController {
   final supportDataController = Get.find<SupportDataController>();
+  final activityController = Get.find<TambahActivityController>();
 
   // Selected values
   final selectedCategory = Rxn<String>();
   final selectedSku = Rxn<String>();
   final selectedSkuData = Rxn<Map<String, dynamic>>();
-  final draftItems = <Map<String, dynamic>>[].obs;
 
   // Form controllers
   var jumlahController = TextEditingController().obs;
   var hargaController = TextEditingController().obs;
 
-  // Get list of SKUs for selected category
   List<Map<String, dynamic>> get filteredSkus {
     if (selectedCategory.value == null) return [];
     return supportDataController
@@ -82,10 +83,6 @@ class TambahOrderController extends GetxController {
         .getCategories()
         .firstWhere((cat) => cat['id'].toString() == selectedCategory.value);
 
-    final existingItemIndex = draftItems.indexWhere(
-      (item) => item['id'] == selectedSku.value,
-    );
-
     final newItem = {
       'id': selectedSku.value,
       'category': categoryData['name'],
@@ -94,13 +91,8 @@ class TambahOrderController extends GetxController {
       'harga': hargaController.value.text,
     };
 
-    if (existingItemIndex != -1) {
-      draftItems[existingItemIndex] = newItem;
-    } else {
-      draftItems.add(newItem);
-    }
-
-    draftItems.refresh();
+    activityController.addOrderItem(newItem);
+    clearForm();
   }
 
   void _clearControllers() {

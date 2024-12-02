@@ -1,142 +1,81 @@
+// tambah_visibility_controller.dart
 import 'dart:io';
 import 'package:get/get.dart';
 import 'package:flutter/material.dart';
-import '../../model/visibility.dart' as VisibilityModel;
-import '../../model/dropdown_model.dart' as Model;
-import '../../api/api.dart';
+import '../../controller/activity/tambah_activity_controller.dart';
 
 class TambahVisibilityController extends GetxController {
-  final api = Api();
+  final activityController = Get.find<TambahActivityController>();
 
-  // POSM related variables
-  var itemsPOSM = <Model.Data>[].obs;
-  final selectedPOSM = ''.obs;
-  final selectedIdPOSM = ''.obs;
-
-  // Visual related variables
-  var itemsVisual = <Model.Data>[].obs;
-  final selectedVisual = ''.obs;
-  final selectedIdVisual = ''.obs;
-
-  // Other visibility properties
+  // Form fields
+  final posmType = ''.obs;
+  final posmTypeId = ''.obs;
+  final visualType = ''.obs;
+  final visualTypeId = ''.obs;
   final selectedCondition = ''.obs;
-  final RxList<File?> visibilityImages = RxList([null, null]); // [frontView, banner]
-  final RxList<String> imageUrls = RxList(['', '']);
-  final RxList<String> imagePath = RxList(['', '']);
-  final RxList<String> imageFilename = RxList(['', '']);
+  final RxList<File?> visibilityImages = RxList([null, null]);
   final RxList<bool> isImageUploading = RxList([false, false]);
-  var listVisibility = <VisibilityModel.Visibility>[].obs;
-
-  // Loading and error states
-  final isLoading = true.obs;
-  final hasError = false.obs;
-  final errorMessage = ''.obs;
+  dynamic visibility; // Make this dynamic
 
   @override
   void onInit() {
     super.onInit();
-    initListPosm();
-    initListVisual();
-  }
-
-  void setLoadingState(bool loading) {
-    isLoading.value = loading;
-  }
-
-  void setErrorState(bool error, [String? message]) {
-    hasError.value = error;
-    errorMessage.value = message ?? '';
-  }
-
-  Future<void> initListPosm() async {
-    try {
-      setLoadingState(true);
-      setErrorState(false);
-
-      final response = await Api.getItemPOSMList();
-      if (response.status == "OK") {
-        itemsPOSM.value = response.data!;
-      } else {
-        setErrorState(true, 'Failed to load POSM data');
-      }
-    } catch (e) {
-      setErrorState(true, 'Connection error. Please check your internet connection and try again.');
-      print('Error initializing POSM list: $e');
-    } finally {
-      setLoadingState(false);
+    // Get arguments passed from previous page
+    final args = Get.arguments;
+    if (args != null) {
+      posmType.value = args['posmType']?['name'] ?? '';
+      posmTypeId.value = args['posmType']?['id'] ?? '';
+      visualType.value = args['visualType']?['name'] ?? '';
+      visualTypeId.value = args['visualType']?['id'] ?? '';
+      visibility = args['visibility']; // Assign the passed-in visibility data
     }
   }
 
-  Future<void> initListVisual() async {
-    try {
-      setLoadingState(true);
-      setErrorState(false);
-
-      final response = await Api.getItemVisualList();
-      if (response.status == "OK") {
-        itemsVisual.value = response.data!;
-      } else {
-        setErrorState(true, 'Failed to load Visual data');
-      }
-    } catch (e) {
-      setErrorState(true, 'Connection error. Please check your internet connection and try again.');
-      print('Error initializing Visual list: $e');
-    } finally {
-      setLoadingState(false);
+  void updateWithArgs({
+    Map<String, dynamic>? posmType,
+    Map<String, dynamic>? visualType,
+    bool isReadOnly = false,
+    dynamic visibility,
+  }) {
+    if (posmType != null) {
+      this.posmType.value = posmType['name'] ?? '';
+      this.posmTypeId.value = posmType['id'] ?? '';
     }
+
+    if (visualType != null) {
+      this.visualType.value = visualType['name'] ?? '';
+      this.visualTypeId.value = visualType['id'] ?? '';
+    }
+
+    // this.isReadOnly.value = isReadOnly;
+    this.visibility = visibility;
   }
 
   void updateImage(int index, File? file) {
     visibilityImages[index] = file;
+    activityController.updateVisibilityImage(index, file);
     update();
   }
 
-  void insertVisibility() {
-    final data = VisibilityModel.Visibility(
-      typeVisibility:
-          VisibilityModel.TypeVisibility(id: selectedIdPOSM.value, type: selectedPOSM.value),
-      typeVisual:
-          VisibilityModel.TypeVisual(id: selectedIdVisual.value, type: selectedVisual.value),
-      condition: selectedCondition.value,
-      image1: visibilityImages[0],
-      image2: visibilityImages[1],
-    );
+  void saveVisibility() {
+    final data = {
+      'posm_type_id': posmTypeId.value,
+      'posm_type_name': posmType.value,
+      'visual_type_id': visualTypeId.value,
+      'visual_type_name': visualType.value,
+      'condition': selectedCondition.value,
+      'image1': visibilityImages[0],
+      'image2': visibilityImages[1],
+    };
 
-    listVisibility.add(data);
+    activityController.addVisibilityItem(data);
     clearForm();
     Get.back();
   }
 
   void clearForm() {
-    selectedPOSM.value = "";
-    selectedIdPOSM.value = "";
-    selectedVisual.value = "";
-    selectedIdVisual.value = "";
     selectedCondition.value = "";
-    imagePath.value = ['', ''];
     isImageUploading.value = [false, false];
     visibilityImages.value = [null, null];
-  }
-
-  void editVisibilityItem(VisibilityModel.Visibility item) {
-    selectedPOSM.value = item.typeVisibility!.type!;
-    selectedIdPOSM.value = item.typeVisibility!.id!;
-    selectedVisual.value = item.typeVisual!.type!;
-    selectedIdVisual.value = item.typeVisual!.id!;
-    selectedCondition.value = item.condition!;
-    visibilityImages[0] = item.image1;
-    visibilityImages[1] = item.image2;
-    update();
-  }
-
-  void removeVisibilityItem(int index) {
-    listVisibility.removeAt(index);
-    update();
-  }
-
-  @override
-  void onClose() {
-    // Clean up any controllers or resources if needed
-    super.onClose();
   }
 }

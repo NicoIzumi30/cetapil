@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:get/get.dart';
 
 class EnhancedBackButton extends StatefulWidget {
   final VoidCallback? onPressed;
@@ -6,6 +7,7 @@ class EnhancedBackButton extends StatefulWidget {
   final Color iconColor;
   final double size;
   final double iconSize;
+  final bool useGetBack;  // Added parameter
 
   const EnhancedBackButton({
     Key? key,
@@ -14,6 +16,7 @@ class EnhancedBackButton extends StatefulWidget {
     this.iconColor = Colors.blue,
     this.size = 50,
     this.iconSize = 24,
+    this.useGetBack = true,  // Default to using Get.back()
   }) : super(key: key);
 
   @override
@@ -66,6 +69,16 @@ class _EnhancedBackButtonState extends State<EnhancedBackButton>
     _controller.reverse();
   }
 
+  void _handleNavigation(BuildContext context) {
+    if (widget.onPressed != null) {
+      widget.onPressed!();
+    } else if (widget.useGetBack) {
+      Get.back();
+    } else {
+      Navigator.of(context).pop();
+    }
+  }
+
   @override
   Widget build(BuildContext context) {
     return MouseRegion(
@@ -95,7 +108,7 @@ class _EnhancedBackButtonState extends State<EnhancedBackButton>
             child: Material(
               color: Colors.transparent,
               child: InkWell(
-                onTap: widget.onPressed ?? () => Navigator.of(context).pop(),
+                onTap: () => _handleNavigation(context),
                 borderRadius: BorderRadius.circular(16),
                 child: Center(
                   child: AnimatedContainer(

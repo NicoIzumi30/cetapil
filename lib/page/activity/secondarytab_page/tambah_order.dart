@@ -1,4 +1,5 @@
 import 'package:cetapil_mobile/widget/back_button.dart';
+import 'package:cetapil_mobile/widget/dialog.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:get/get.dart';
@@ -25,9 +26,10 @@ class TambahOrder extends GetView<TambahOrderController> {
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
                 EnhancedBackButton(
-                  onPressed: () => Get.back(),
+                  onPressed: () => Alerts.showConfirmDialog(context,useGetBack: false),
                   backgroundColor: Colors.white,
                   iconColor: Colors.blue,
+                        useGetBack: false,
                 ),
                 SizedBox(height: 20),
                 Expanded(

@@ -1,16 +1,13 @@
-
-
 import 'package:cetapil_mobile/controller/dashboard/dashboard_controller.dart';
-import 'package:cetapil_mobile/page/login.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
-
 import '../utils/colors.dart';
-class Alerts{
-  static showConfirmDialog(BuildContext context) async {
+
+class Alerts {
+  static showConfirmDialog(BuildContext context, {bool useGetBack = true}) async {
     return showDialog(
       context: context,
-      builder: (context) => Dialog(
+      builder: (dialogContext) => Dialog(
         shape: RoundedRectangleBorder(
           borderRadius: BorderRadius.circular(20),
         ),
@@ -48,8 +45,8 @@ class Alerts{
                       ),
                     ),
                     onPressed: () {
-                      Get.back();
-                    } ,
+                      useGetBack ? Get.back() : Navigator.pop(dialogContext);
+                    },
                     child: Text('Batalkan', style: TextStyle(color: Colors.white)),
                   ),
                   ElevatedButton(
@@ -58,14 +55,17 @@ class Alerts{
                       padding: EdgeInsets.symmetric(horizontal: 30, vertical: 12),
                       shape: RoundedRectangleBorder(
                           borderRadius: BorderRadius.circular(10),
-                          side: BorderSide(color: AppColors.primary,width: 1)
-                      ),
+                          side: BorderSide(color: AppColors.primary, width: 1)),
                     ),
                     onPressed: () {
-
-                      Get.back();
-                      Get.back();
-                    } ,
+                      if (useGetBack) {
+                        Get.back();
+                        Get.back();
+                      } else {
+                        Navigator.pop(dialogContext);
+                        Navigator.pop(context);
+                      }
+                    },
                     child: Text('Lanjutkan', style: TextStyle(color: AppColors.primary)),
                   ),
                 ],
@@ -77,11 +77,11 @@ class Alerts{
     );
   }
 
-  static showLogOutDialog(BuildContext context) async {
+  static showLogOutDialog(BuildContext context, {bool useGetBack = true}) async {
     DashboardController controller = Get.find<DashboardController>();
     return showDialog(
       context: context,
-      builder: (context) => Dialog(
+      builder: (dialogContext) => Dialog(
         shape: RoundedRectangleBorder(
           borderRadius: BorderRadius.circular(20),
         ),
@@ -115,8 +115,8 @@ class Alerts{
                       ),
                     ),
                     onPressed: () {
-                      Get.back();
-                    } ,
+                      useGetBack ? Get.back() : Navigator.pop(dialogContext);
+                    },
                     child: Text('Batalkan', style: TextStyle(color: Colors.white)),
                   ),
                   ElevatedButton(
@@ -125,8 +125,7 @@ class Alerts{
                       padding: EdgeInsets.symmetric(horizontal: 30, vertical: 12),
                       shape: RoundedRectangleBorder(
                           borderRadius: BorderRadius.circular(10),
-                          side: BorderSide(color: AppColors.primary,width: 1)
-                      ),
+                          side: BorderSide(color: AppColors.primary, width: 1)),
                     ),
                     onPressed: () => controller.logOut(),
                     child: Text('Lanjutkan', style: TextStyle(color: AppColors.primary)),

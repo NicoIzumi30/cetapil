@@ -21,7 +21,8 @@ class AvailabilityPage extends GetView<TambahActivityController> {
         Obx(() {
           final groupedItems = <String, List<Map<String, dynamic>>>{};
 
-          for (var item in availabilityController.draftItems) {
+          // Use availabilityDraftItems from TambahActivityController
+          for (var item in controller.availabilityDraftItems) {
             final category = item['category'];
             if (groupedItems[category] == null) {
               groupedItems[category] = [];
@@ -203,7 +204,8 @@ class SumAmountProduct extends StatelessWidget {
                     SizedBox(width: 8),
                     IconButton(
                       onPressed: () {
-                        activityController.removeItem(itemData); // Pass the full item data
+                        // Use the new removeAvailabilityItem method
+                        activityController.removeAvailabilityItem(itemData['id']);
                       },
                       icon: Icon(Icons.delete_outline, color: Colors.red[400], size: 20),
                       padding: EdgeInsets.zero,

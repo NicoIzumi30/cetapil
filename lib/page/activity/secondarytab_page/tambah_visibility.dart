@@ -1,20 +1,29 @@
+import 'dart:convert';
 import 'dart:io';
-
+import 'package:cached_network_image/cached_network_image.dart';
 import 'package:cetapil_mobile/controller/activity/tambah_visibility_controller.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
-
-import '../../../controller/activity/tambah_activity_controller.dart';
-import '../../../controller/outlet/outlet_controller.dart';
-import '../../../model/dropdown_model.dart' as Model;
-import '../../../model/list_posm_response.dart';
 import '../../../utils/colors.dart';
 import '../../../utils/image_upload.dart';
 import '../../../widget/back_button.dart';
 import '../../../widget/dialog.dart';
 import '../../../widget/dropdown_textfield.dart';
 
+const String BASE_URL = 'https://dev-cetaphil.i-am.host/storage/';
+
 class TambahVisibility extends GetView<TambahVisibilityController> {
+  String? _getImageUrl(String? imagePath) {
+    if (imagePath == null || imagePath.isEmpty) return null;
+
+    if (imagePath.startsWith('data:image') || imagePath.startsWith('/9j/')) {
+      return null;
+    }
+
+    String path = imagePath.startsWith('/') ? imagePath.substring(1) : imagePath;
+    return '$BASE_URL$path';
+  }
+
   @override
   Widget build(BuildContext context) {
     return SafeArea(
@@ -35,62 +44,42 @@ class TambahVisibility extends GetView<TambahVisibilityController> {
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
                       EnhancedBackButton(
-                        onPressed: () => Alerts.showConfirmDialog(context),
+                        onPressed: () => Alerts.showConfirmDialog(context, useGetBack: false),
                         backgroundColor: Colors.white,
                         iconColor: Colors.blue,
+                        useGetBack: false,
                       ),
                       SizedBox(height: 20),
                       Expanded(
                         child: ListView(
                           children: [
-                            Obx(() {
-                              if (controller.isLoading.value) {
-                                return CircularProgressIndicator();
-                              } else {
-                                return DropdownApi(
-                                  label: "Jenis Visibility",
-                                  items: controller.itemsPOSM.map((item) {
-                                    return DropdownMenuItem<Model.Data>(
-                                      value: item,
-                                      child: Text(item.name ?? ''),
-                                    );
-                                  }).toList(),
-                                  onChanged: (value) {
-                                    controller.selectedPOSM.value = value!.name!;
-                                    controller.selectedIdPOSM.value = value.id!;
-                                  },
-                                );
-                              }
-                            }),
-                            Obx(() {
-                              if (controller.isLoading.value) {
-                                return CircularProgressIndicator();
-                              } else {
-                                return DropdownApi(
-                                  label: "Jenis Visual",
-                                  items: controller.itemsVisual.map((item) {
-                                    return DropdownMenuItem<Model.Data>(
-                                      value: item,
-                                      child: Text(item.name ?? ''),
-                                    );
-                                  }).toList(),
-                                  onChanged: (value) {
-                                    controller.selectedVisual.value = value!.name!;
-                                    controller.selectedIdVisual.value = value.id!;
-                                  },
-                                );
-                              }
-                            }),
+                            _buildReadOnlyField(
+                              label: "Jenis Visibility",
+                              value: controller.posmType.value,
+                            ),
+                            _buildReadOnlyField(
+                              label: "Jenis Visual",
+                              value: controller.visualType.value,
+                            ),
                             Text(
                               "Planogram",
                               style: TextStyle(fontSize: 13, fontWeight: FontWeight.w700),
                             ),
                             SizedBox(height: 10),
-                            SizedBox(
+                            Container(
                               width: double.infinity,
+                              height: 200,
                               child: ClipRRect(
                                 borderRadius: BorderRadius.circular(10),
-                                child: Image.asset("assets/carousel1.png"),
+                                child: controller.visibility?.image != null
+                                    ? _buildPlanogramImage(controller.visibility?.image)
+                                    : Container(
+                                        color: Colors.grey[200],
+                                        child: Center(
+                                          child:
+                                              Icon(Icons.image_not_supported, color: Colors.grey),
+                                        ),
+                                      ),
                               ),
                             ),
                             SizedBox(height: 15),
@@ -106,8 +95,8 @@ class TambahVisibility extends GetView<TambahVisibilityController> {
                                   controller.selectedCondition.value = value!;
                                 },
                                 title: "Condition"),
-                            _buildImageUploader(context, "Foto Visibility 1", 0, controller),
-                            _buildImageUploader(context, "Foto Visibility 2", 1, controller),
+                            _buildImageUploader(context, "Foto Visibility 1", 0),
+                            _buildImageUploader(context, "Foto Visibility 2", 1),
                           ],
                         ),
                       )
@@ -132,9 +121,9 @@ class TambahVisibility extends GetView<TambahVisibilityController> {
                           side: BorderSide(color: AppColors.primary),
                         ),
                       ),
-                      onPressed: () => controller.insertVisibility(),
+                      onPressed: () => controller.saveVisibility(),
                       child: Text(
-                        " Tambah Visibility",
+                        "Simpan Visibility",
                         style: TextStyle(
                           color: Colors.white,
                           fontWeight: FontWeight.bold,
@@ -151,12 +140,87 @@ class TambahVisibility extends GetView<TambahVisibilityController> {
     );
   }
 
-  Widget _buildImageUploader(
-    BuildContext context,
-    String title,
-    int index,
-    TambahVisibilityController controller,
-  ) {
+  Widget _buildPlanogramImage(String? image) {
+    final imageUrl = _getImageUrl(image);
+
+    if (imageUrl != null) {
+      return CachedNetworkImage(
+        imageUrl: imageUrl,
+        fit: BoxFit.cover,
+        placeholder: (context, url) => Container(
+          color: Colors.grey[200],
+          child: Center(child: CircularProgressIndicator()),
+        ),
+        errorWidget: (context, url, error) => Container(
+          color: Colors.grey[200],
+          child: Icon(Icons.error),
+        ),
+      );
+    } else if (image!.startsWith('data:image') || image.startsWith('/9j/')) {
+      try {
+        return Image.memory(
+          base64Decode(image.split(',').last),
+          fit: BoxFit.cover,
+          errorBuilder: (context, error, stackTrace) => Container(
+            color: Colors.grey[200],
+            child: Icon(Icons.error),
+          ),
+        );
+      } catch (e) {
+        print('Error loading base64 image: $e');
+        return Container(
+          color: Colors.grey[200],
+          child: Icon(Icons.error),
+        );
+      }
+    }
+
+    return Container(
+      color: Colors.grey[200],
+      child: Icon(Icons.image_not_supported, color: Colors.grey),
+    );
+  }
+
+  Widget _buildReadOnlyField({
+    required String label,
+    required String value,
+  }) {
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        Text(
+          label,
+          style: TextStyle(fontSize: 13, fontWeight: FontWeight.w700),
+        ),
+        SizedBox(height: 10),
+        Container(
+          margin: EdgeInsets.only(bottom: 10),
+          padding: EdgeInsets.symmetric(horizontal: 16, vertical: 12),
+          decoration: BoxDecoration(
+            color: const Color(0xFFE8F3FF),
+            borderRadius: BorderRadius.circular(8),
+            boxShadow: [
+              BoxShadow(
+                color: Colors.grey.withOpacity(0.1),
+                spreadRadius: 1,
+                blurRadius: 3,
+                offset: const Offset(0, 2),
+              ),
+            ],
+          ),
+          child: Text(
+            value,
+            style: TextStyle(
+              fontSize: 14,
+              color: Color(0xFF0077BD),
+            ),
+          ),
+        ),
+      ],
+    );
+  }
+
+  Widget _buildImageUploader(BuildContext context, String title, int index) {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
@@ -237,92 +301,6 @@ class TambahVisibility extends GetView<TambahVisibilityController> {
             ),
           );
         }),
-      ],
-    );
-  }
-}
-
-class DropdownApi extends StatelessWidget {
-  final String label;
-  final List<DropdownMenuItem<Model.Data>> items;
-  final Function(Model.Data?) onChanged;
-
-  const DropdownApi({
-    super.key,
-    required this.label,
-    required this.items,
-    required this.onChanged,
-  });
-
-  @override
-  Widget build(BuildContext context) {
-    return Column(
-      crossAxisAlignment: CrossAxisAlignment.start,
-      children: [
-        Text(
-          label,
-          style: TextStyle(fontSize: 13, fontWeight: FontWeight.w700),
-        ),
-        SizedBox(
-          height: 10,
-        ),
-        Container(
-          margin: EdgeInsets.only(bottom: 10),
-          decoration: BoxDecoration(
-            borderRadius: BorderRadius.circular(8),
-            boxShadow: [
-              BoxShadow(
-                color: Colors.grey.withOpacity(0.1),
-                spreadRadius: 1,
-                blurRadius: 3,
-                offset: const Offset(0, 2),
-              ),
-            ],
-          ),
-          child: DropdownButtonFormField<Model.Data>(
-            style: const TextStyle(
-              fontSize: 14,
-              color: Color(0xFF0077BD),
-            ),
-            decoration: InputDecoration(
-              contentPadding: const EdgeInsets.symmetric(
-                horizontal: 16,
-                vertical: 12,
-              ),
-              border: OutlineInputBorder(
-                borderRadius: BorderRadius.circular(8),
-                borderSide: BorderSide.none,
-              ),
-              filled: true,
-              fillColor: const Color(0xFFE8F3FF),
-            ),
-            hint: Text(
-              "-- Pilih $label --",
-              style: TextStyle(
-                color: Colors.grey[400],
-                fontSize: 14,
-              ),
-            ),
-            icon: const Icon(
-              Icons.keyboard_arrow_down_rounded,
-              color: Colors.blue, // Match your theme color
-            ),
-            items: items,
-            // controller.itemsPOSM.map((item) {
-            //   return DropdownMenuItem<Data>(
-            //     value: item, // Use the ID as the value
-            //     child: Text(item.name ?? ''), // Display the name
-            //   );
-            // }).toList(),
-            onChanged: onChanged,
-            //     (value) {
-            //   if (!controller.selectedItems.contains(value)) {
-            //     controller.selectedItems.add(value!);
-            //   }
-            // },
-            isExpanded: true,
-          ),
-        ),
       ],
     );
   }

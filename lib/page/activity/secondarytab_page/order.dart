@@ -1,3 +1,4 @@
+import 'package:cetapil_mobile/controller/activity/tambah_activity_controller.dart';
 import 'package:cetapil_mobile/page/activity/secondarytab_page/tambah_order.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
@@ -5,7 +6,7 @@ import 'package:get/get.dart';
 import '../../../controller/activity/tambah_order_controller.dart';
 import '../../../utils/colors.dart';
 
-class OrderPage extends GetView<TambahOrderController> {
+class OrderPage extends GetView<TambahActivityController> {
   @override
   Widget build(BuildContext context) {
     final orderController = Get.find<TambahOrderController>();
@@ -16,7 +17,8 @@ class OrderPage extends GetView<TambahOrderController> {
         Obx(() {
           final groupedItems = <String, List<Map<String, dynamic>>>{};
 
-          for (var item in orderController.draftItems) {
+          // Use orderDraftItems from TambahActivityController
+          for (var item in controller.orderDraftItems) {
             final category = item['category'];
             if (groupedItems[category] == null) {
               groupedItems[category] = [];
@@ -112,6 +114,7 @@ class OrderProductCard extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final orderController = Get.find<TambahOrderController>();
+    final activityController = Get.find<TambahActivityController>();
 
     return Container(
       margin: EdgeInsets.only(bottom: 16),
@@ -179,11 +182,8 @@ class OrderProductCard extends StatelessWidget {
                     SizedBox(width: 8),
                     IconButton(
                       onPressed: () {
-                        final index = orderController.draftItems
-                            .indexWhere((item) => item['id'] == itemData['id']);
-                        if (index != -1) {
-                          orderController.draftItems.removeAt(index);
-                        }
+                        // Use the new removeOrderItem method
+                        activityController.removeOrderItem(itemData['id']);
                       },
                       icon: Icon(Icons.delete_outline, color: Colors.red[400], size: 20),
                       padding: EdgeInsets.zero,
@@ -200,12 +200,12 @@ class OrderProductCard extends StatelessWidget {
             child: Row(
               children: [
                 Expanded(
-                  flex: 2, // Smaller width for Jumlah
+                  flex: 2,
                   child: _buildJumlahField(),
                 ),
                 SizedBox(width: 12),
                 Expanded(
-                  flex: 5, // Larger width for Harga
+                  flex: 5,
                   child: _buildHargaField(),
                 ),
               ],
@@ -229,71 +229,16 @@ class OrderProductCard extends StatelessWidget {
           ),
         ),
         SizedBox(height: 4),
-        Container(
-          margin: EdgeInsets.only(bottom: 10, top: 5),
-          decoration: BoxDecoration(
-            borderRadius: BorderRadius.circular(12),
-            boxShadow: [
-              BoxShadow(
-                color: Colors.grey.withOpacity(0.1),
-                spreadRadius: 1,
-                blurRadius: 3,
-                offset: const Offset(0, 2),
-              ),
-            ],
-          ),
-          child: TextFormField(
-            controller: jumlahController,
-            keyboardType: TextInputType.number,
-            readOnly: isReadOnly,
-            style: TextStyle(
-              fontSize: 14,
-              color: isReadOnly ? Colors.grey : Color(0xFF0077BD),
-            ),
-            textAlign: TextAlign.center,
-            inputFormatters: [
-              FilteringTextInputFormatter.digitsOnly,
-            ],
-            decoration: InputDecoration(
-              contentPadding: EdgeInsets.symmetric(
-                horizontal: 3,
-                vertical: 3,
-              ),
-              border: OutlineInputBorder(
-                borderRadius: BorderRadius.circular(8),
-                borderSide: BorderSide(
-                  color: Color(0xFF64B5F6),
-                  width: 2,
-                ),
-              ),
-              filled: true,
-              fillColor: isReadOnly ? Colors.grey[100] : Color(0xFFE8F3FF),
-              enabledBorder: OutlineInputBorder(
-                borderRadius: BorderRadius.circular(8),
-                borderSide: BorderSide(
-                  color: isReadOnly ? Colors.grey[300]! : Color(0xFF64B5F6),
-                  width: 1,
-                ),
-              ),
-            ),
-          ),
+        NumberField(
+          controller: jumlahController,
+          readOnly: isReadOnly,
+          isSmall: true,
         ),
       ],
     );
   }
 
   Widget _buildHargaField() {
-    String _formatCurrency(String value) {
-      if (value.isEmpty) return '';
-      final number = int.parse(value.replaceAll(RegExp(r'[^\d]'), ''));
-      final formatted = number
-          .toString()
-          .replaceAllMapped(RegExp(r'(\d{1,3})(?=(\d{3})+(?!\d))'), (Match m) => '${m[1]}.');
-      return 'Rp $formatted';
-    }
-
-    String displayValue = _formatCurrency(hargaController.text);
-
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
@@ -306,51 +251,9 @@ class OrderProductCard extends StatelessWidget {
           ),
         ),
         SizedBox(height: 4),
-        Container(
-          margin: EdgeInsets.only(bottom: 10, top: 5),
-          decoration: BoxDecoration(
-            borderRadius: BorderRadius.circular(12),
-            boxShadow: [
-              BoxShadow(
-                color: Colors.grey.withOpacity(0.1),
-                spreadRadius: 1,
-                blurRadius: 3,
-                offset: const Offset(0, 2),
-              ),
-            ],
-          ),
-          child: TextFormField(
-            controller: TextEditingController(text: displayValue),
-            readOnly: true,
-            style: TextStyle(
-              fontSize: 16,
-              fontWeight: FontWeight.w500,
-              color: isReadOnly ? Colors.grey : Color(0xFF0077BD),
-            ),
-            textAlign: TextAlign.left,
-            decoration: InputDecoration(
-              contentPadding: EdgeInsets.symmetric(
-                horizontal: 12,
-                vertical: 12,
-              ),
-              border: OutlineInputBorder(
-                borderRadius: BorderRadius.circular(8),
-                borderSide: BorderSide(
-                  color: Color(0xFF64B5F6),
-                  width: 2,
-                ),
-              ),
-              filled: true,
-              fillColor: isReadOnly ? Colors.grey[100] : Color(0xFFE8F3FF),
-              enabledBorder: OutlineInputBorder(
-                borderRadius: BorderRadius.circular(8),
-                borderSide: BorderSide(
-                  color: isReadOnly ? Colors.grey[300]! : Color(0xFF64B5F6),
-                  width: 1,
-                ),
-              ),
-            ),
-          ),
+        PriceField(
+          controller: hargaController,
+          readOnly: isReadOnly,
         ),
       ],
     );

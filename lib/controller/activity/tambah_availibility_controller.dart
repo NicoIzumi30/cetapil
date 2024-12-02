@@ -1,9 +1,8 @@
-import 'package:cetapil_mobile/controller/activity/tambah_activity_controller.dart';
+// tambah_availability_controller.dart
 import 'package:get/get.dart';
 import 'package:flutter/material.dart';
-import '../../model/list_product_sku_response.dart';
-import '../../model/list_category_response.dart' as Category;
 import '../../controller/support_data_controller.dart';
+import '../../controller/activity/tambah_activity_controller.dart';
 
 class TambahAvailabilityController extends GetxController {
   final supportDataController = Get.find<SupportDataController>();
@@ -13,7 +12,6 @@ class TambahAvailabilityController extends GetxController {
   final selectedCategory = Rxn<String>();
   final selectedSku = Rxn<String>();
   final selectedSkuData = Rxn<Map<String, dynamic>>();
-  final draftItems = <Map<String, dynamic>>[].obs;
 
   // Form controllers
   var stockController = TextEditingController().obs;
@@ -23,40 +21,31 @@ class TambahAvailabilityController extends GetxController {
   @override
   void onInit() {
     super.onInit();
-    print(activityController.getSelectedChannel());
   }
 
-  // In TambahAvailabilityController
   void editItem(Map<String, dynamic> item) async {
-    // Clear previous selections first
     clearForm();
 
-    // Find the category from the product data
     final categories = supportDataController.getCategories();
     final categoryData = categories.firstWhere(
       (cat) => cat['name'] == item['category'],
-      orElse: () => <String, dynamic>{}, // Return empty map instead of null
+      orElse: () => <String, dynamic>{},
     );
 
     if (categoryData.isNotEmpty) {
-      // Check if map is not empty instead of null check
-      // Set category and wait for filteredSkus to update
       selectedCategory.value = categoryData['id'].toString();
       await Future.delayed(const Duration(milliseconds: 100));
 
-      // Find and set SKU
       final skus = filteredSkus;
       final skuData = skus.firstWhere(
         (sku) => sku['id'].toString() == item['id'].toString(),
-        orElse: () => <String, dynamic>{}, // Return empty map instead of null
+        orElse: () => <String, dynamic>{},
       );
 
       if (skuData.isNotEmpty) {
-        // Check if map is not empty instead of null check
         selectedSku.value = skuData['id'].toString();
         selectedSkuData.value = skuData;
 
-        // Set the form values
         stockController.value.text = item['stock']?.toString() ?? '';
         av3mController.value.text = item['av3m']?.toString() ?? '';
         recommendController.value.text = item['recommend']?.toString() ?? '';
@@ -64,7 +53,6 @@ class TambahAvailabilityController extends GetxController {
     }
   }
 
-  // Get list of SKUs for selected category
   List<Map<String, dynamic>> get filteredSkus {
     if (selectedCategory.value == null) return [];
     return supportDataController
@@ -92,10 +80,8 @@ class TambahAvailabilityController extends GetxController {
     if (skuId != null) {
       selectedSkuData.value = getSelectedSkuData;
 
-      // Get the outlet's channel from activity controller
       final outletChannel = activityController.getSelectedChannel();
 
-      // Auto-populate AV3M if channel matches
       if (selectedSkuData.value != null &&
           selectedSkuData.value!['channel_av3m'] != null &&
           outletChannel != null) {
@@ -119,12 +105,6 @@ class TambahAvailabilityController extends GetxController {
         .getCategories()
         .firstWhere((cat) => cat['id'].toString() == selectedCategory.value);
 
-    // Check for existing item
-    final existingItemIndex = draftItems.indexWhere(
-      (item) => item['id'] == selectedSku.value,
-    );
-
-    // Create new item data
     final newItem = {
       'id': selectedSku.value,
       'category': categoryData['name'],
@@ -134,20 +114,12 @@ class TambahAvailabilityController extends GetxController {
       'recommend': recommendController.value.text,
     };
 
-    // Update or add item
-    if (existingItemIndex != -1) {
-      draftItems[existingItemIndex] = newItem;
-    } else {
-      draftItems.add(newItem);
-    }
-
-    // Refresh the list
-    draftItems.refresh();
+    activityController.addAvailabilityItem(newItem);
+    clearForm();
   }
 
   void _clearControllers() {
     stockController.value.clear();
-    // Don't clear av3mController since it's auto-populated
     recommendController.value.clear();
   }
 
