@@ -48,10 +48,18 @@ class SalesActivityController extends Controller
     use HasAuthUser, ProductTrait;
     public function getSalesAcitivityList()
     {
+        $now = Carbon::now();
+
         $activities = SalesActivity::completeRelation()
+            ->with(['visibilities' => function ($query) use ($now) {
+                $query->where('started_at', '<=', $now)
+                    ->where('ended_at', '>=', $now);
+            }])
             ->where('user_id', $this->getAuthUserId())
             ->whereDate('checked_in', Carbon::now())
             ->get();
+
+            // return response()->json($activities);
         return new SalesActivityCollection($activities);
     }
     public function getAllProducts()
