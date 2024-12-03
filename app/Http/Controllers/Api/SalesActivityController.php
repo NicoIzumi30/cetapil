@@ -207,6 +207,15 @@ class SalesActivityController extends Controller
         $data = $request->validated();
         $activity = SalesActivity::findOrFail($data['sales_activity_id']);
 
+        // Check if the activity is already submitted
+        if ($activity->status === 'SUBMITTED') {
+            return $this->failedResponse(
+                'This activity has already been submitted and cannot be modified',
+                Response::HTTP_BAD_REQUEST
+            );
+        }
+
+
         // Check if the authenticated user matches the activity's user
         if ($activity->user_id !== $this->getAuthUserId()) {
             return $this->failedResponse(
