@@ -53,11 +53,12 @@ class SalesActivityController extends Controller
 
         $activities = SalesActivity::completeRelation()
             ->with(['visibilities' => function ($query) use ($now) {
-                $query->where('started_at', '<=', $now)
-                    ->where('ended_at', '>=', $now);
+                $query->join('visibilities', 'sales_visibilities.visibility_id', '=', 'visibilities.id')
+                    ->whereDate('visibilities.started_at', '<=', $now->toDateString())
+                    ->whereDate('visibilities.ended_at', '>=', $now->toDateString());
             }])
             ->where('user_id', $this->getAuthUserId())
-            ->whereDate('checked_in', Carbon::now())
+            ->whereDate('checked_in', $now)
             ->get();
 
         // return response()->json($activities);
