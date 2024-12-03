@@ -17,6 +17,7 @@ use App\Http\Requests\Visibility\CreateVisibilityRequest;
 use App\Http\Resources\PosmType\PosmTypeCollection;
 use App\Http\Resources\Channel\ChannelCollection;
 use App\Http\Resources\Product\ProductChannelCollection;
+use App\Http\Resources\SalesActivity\DetailSalesActivityResource;
 use App\Http\Resources\Visibility\VisibilityCollection;
 use App\Http\Resources\Visibility\VisibilityResource;
 use App\Http\Resources\VisualType\VisualTypeCollection;
@@ -59,7 +60,7 @@ class SalesActivityController extends Controller
             ->whereDate('checked_in', Carbon::now())
             ->get();
 
-            // return response()->json($activities);
+        // return response()->json($activities);
         return new SalesActivityCollection($activities);
     }
     public function getAllProducts()
@@ -289,23 +290,25 @@ class SalesActivityController extends Controller
 
             // Store visibility data
             foreach ($data['visibility'] as $key => $item) {
+
                 $visibilityRecord = SalesVisibility::create([
                     'sales_activity_id' => $activity->id,
+                    'visibility_id' => $item['visibility_id'],
                     'condition' => $item['condition']
                 ]);
 
                 if ($request->hasFile("visibility.$key.file1")) {
                     $file1 = $request->file("visibility.$key.file1");
                     $media1 = saveFile($file1, "sales-visibility/$visibilityRecord->id/file1");
-                    $visibilityRecord->file1_filename = $media1['filename'];
-                    $visibilityRecord->file1_path = $media1['path'];
+                    $visibilityRecord->filename1 = $media1['filename'];
+                    $visibilityRecord->path1 = $media1['path'];
                 }
 
                 if ($request->hasFile("visibility.$key.file2")) {
                     $file2 = $request->file("visibility.$key.file2");
                     $media2 = saveFile($file2, "sales-visibility/$visibilityRecord->id/file2");
-                    $visibilityRecord->file2_filename = $media2['filename'];
-                    $visibilityRecord->file2_path = $media2['path'];
+                    $visibilityRecord->filename2 = $media2['filename'];
+                    $visibilityRecord->path2 = $media2['path'];
                 }
 
                 $visibilityRecord->save();
@@ -326,7 +329,7 @@ class SalesActivityController extends Controller
                     'sales_activity_id' => $activity->id,
                     'outlet_id' => $data['outlet_id'],
                     'product_id' => $item['product_id'],
-                    'total' => $item['total_items'],
+                    'total_items' => $item['total_items'],
                     'subtotal' => $item['subtotal']
                 ]);
             }
@@ -334,7 +337,7 @@ class SalesActivityController extends Controller
             // Update SalesActivity status and times
             $activity->update([
                 'checked_out' => $data['current_time'],
-                'views_knowledges' => $data['views_knowledges'],
+                'views_knowledge' => $data['views_knowledge'],
                 'time_availability' => $data['time_availability'],
                 'time_visibility' => $data['time_visibility'],
                 'time_knowledge' => $data['time_knowledge'],
@@ -351,6 +354,29 @@ class SalesActivityController extends Controller
                 'Failed to store activity: ' . $e->getMessage(),
                 Response::HTTP_INTERNAL_SERVER_ERROR
             );
+        }
+    }
+
+    public function getActivityById(string $id)
+    {
+        try {
+            $activity = SalesActivity::with([
+                'outlet',
+                'user',
+                'visibilities',
+                'surveys',
+                'orders',
+                'availabilities'
+            ])
+                ->completeRelation()
+                ->findOrFail($id);
+
+            return new DetailSalesActivityResource($activity);
+        } catch (\Exception $e) {
+            return response()->json([
+                'status' => 'ERROR',
+                'message' => 'Failed to fetch activity: ' . $e->getMessage()
+            ], Response::HTTP_INTERNAL_SERVER_ERROR);
         }
     }
 }
