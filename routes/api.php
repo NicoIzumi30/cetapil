@@ -54,7 +54,7 @@ Route::middleware(['auth_api', 'role:sales'])->group(function () {
     });
     Route::prefix("activity")->group(function () {
         Route::get('/', [SalesActivityController::class, 'getSalesAcitivityList']);
-        Route::get('/{activity_id}', [SalesActivityController::class, 'getActivityById']);
+        Route::get('/{activity_id}/detail', [SalesActivityController::class, 'getActivityById']);
         Route::get('/product-categories', [SalesActivityController::class, 'categoryList']);
         Route::post('/product', [SalesActivityController::class, 'productByCategoryList']);
         Route::get('/{outlet_id}/visibilities', [SalesActivityController::class, 'getVisibilityList']);
