@@ -29,7 +29,7 @@ class SaveActivityRequest extends FormRequest
             // Sales Activity
             'sales_activity_id' => 'required|exists:sales_activities,id',
             'outlet_id' => 'required|exists:outlets,id',
-            'views_knowledges' => 'required:numeric',
+            'views_knowledge' => 'required:numeric',
             'time_availability' => 'required:numeric',
             'time_visibility' => 'required:numeric',
             'time_knowledge' => 'required:numeric',
@@ -47,6 +47,7 @@ class SaveActivityRequest extends FormRequest
 
             // Sales Availability
             'visibility' => 'required|array',
+            'visibility.*.visibility_id' => 'required|exists:visibilities,id',
             'visibility.*.file1' => 'required|image|mimes:jpeg,png,jpg',
             'visibility.*.file2' => 'required|image|mimes:jpeg,png,jpg',
             'visibility.*.condition' => 'required|in:GOOD,BAD',
@@ -57,7 +58,7 @@ class SaveActivityRequest extends FormRequest
             'survey.*.answer' => 'required|string',
 
             // Sales Order
-            'order'=> 'required|array',
+            'order' => 'required|array',
             'order.*.product_id' => 'required|exists:products,id',
             'order.*.total_items' => 'required:numeric',
             'order.*.subtotal' => 'required:numeric',
