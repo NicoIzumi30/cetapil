@@ -1,6 +1,6 @@
 @props(['title'])
 
-<div class="flex justify-between items-center w-full px-4 mb-10">
+<div class="flex justify-between flex-col md:flex-row items-start gap-2 md:items-center w-full px-4 md:mb-10 mb-6">
 	<div class="z-[40] flex items-center gap-6">
 		<h1 class="text-[3rem] font-bold text-white">{{$title}}</h1>
 	</div>

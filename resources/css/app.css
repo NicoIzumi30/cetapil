@@ -4,6 +4,7 @@
 @import "/resources/css/components/table.css";
 @import "/resources/css/components/select.css";
 @import "/resources/css/components/dropdown.css";
+@import "/resources/css/components/chart.css";
 
 @tailwind base;
 @tailwind components;

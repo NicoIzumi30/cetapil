@@ -24,6 +24,7 @@ use App\Http\Requests\Routing\CreateOutletRequest;
 use App\Http\Requests\Routing\UpdateOutletRequest;
 
 
+
 class RoutingController extends Controller
 {
     protected $waktuKunjungan = [

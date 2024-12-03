@@ -58,7 +58,7 @@ Route::middleware('auth')->group(function () {
     Route::get('/routing/request', function () {
         return view('pages.routing.request');
         });
-Route::get('/routing/request/detail', function () {
+    Route::get('/routing/request/detail', function () {
             return view('pages.routing.detail-request');
         });
     Route::get('routing/generate-excel',[RoutingController::class,'downloadExcel'])->name('routing.generae-excel')->middleware('permission:menu_routing');
@@ -69,17 +69,25 @@ Route::get('/routing/request/detail', function () {
     // Visibility Management
     Route::middleware('permission:menu_visibility')->group(function () {
         Route::resource('visibility', VisibilityController::class);
-        
-        // Route::get('visibility/data', [VisibilityController::class, 'getData'])->name('visibility.data');
+            
+        // Route::get('/visibility/data', [VisibilityController::class, 'getData'])->name('visibility.data');
         
         Route::post('/visibility/data', [VisibilityController::class, 'store'])->name('visibility.data');
         Route::get('visibility/{visibility}/edit', [VisibilityController::class, 'edit'])->name('visibility.edit');
+        Route::get('/visibility/data', [VisibilityController::class, 'getData'])->name('visibility.data');
+
+        Route::get('posm/get-images', [PosmController::class, 'getImages'])
+        ->name('posm.get-images');
+
+        Route::post('posm/update-image', [PosmController::class, 'updateImage'])
+            ->name('posm.update-image');
         
         Route::post('visual', [VisualController::class, 'store'])->name('visual.store');
         Route::post('posm-types', [PosmController::class, 'store'])->name('posm.store');
     
         Route::get('/visibility/products/{category}', [VisibilityController::class, 'getProducts'])
             ->name('visibility.products');
+
     });
 
 

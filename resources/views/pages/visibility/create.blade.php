@@ -111,7 +111,7 @@
                         </option>
                         @foreach($outlets as $outlet)
                         <option value="{{ $outlet->id }}" data-sales-id="{{ $outlet->user_id }}" data-sales-name="{{ $outlet->user->name }}">
-                            {{ $outlet->code }} - {{ $outlet->name }}
+                            {{ $outlet->name }}
                         </option>
                     @endforeach
                     </select>
@@ -440,6 +440,17 @@
                     }
                 });
             });
+            $("#program-date").flatpickr({
+				mode : "range",
+				showMonths: 2
+			});
+            $('#states-option').select2();
+            $('#category').select2();
+            $('#outlet-name').select2();
+            $('#sku').select2();
+            $('#visual-campaign').select2();
+            $('#posm').select2();
+
         });
         </script>
     @endpush
