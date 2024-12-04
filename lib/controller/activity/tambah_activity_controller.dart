@@ -14,10 +14,6 @@ import '../../model/list_activity_response.dart' as Activity;
 import '../../widget/custom_alert.dart';
 
 class TambahActivityController extends GetxController {
-  TambahVisibilityController visibilityController =
-  Get.find<TambahVisibilityController>();
-  TambahOrderController orderController =
-  Get.find<TambahOrderController>();
   final TextEditingController controller = TextEditingController();
   final api = Api();
   final selectedTab = 0.obs;
@@ -128,7 +124,7 @@ class TambahActivityController extends GetxController {
 
       // final response = await Api.submitActivity(
       //   data,
-      //   surveyList,
+      //   availabilityDraftItems,
       //   visibilityController.listVisibility,
       //   surveyList,
       //   orderController.draftItems,
@@ -374,6 +370,7 @@ class TambahActivityController extends GetxController {
 
   void setDetailOutlet(Activity.Data data) {
     detailOutlet.value = data;
+    print("----${detailOutlet.value!.outlet!.category}");
   }
 
   // Loading and error management methods

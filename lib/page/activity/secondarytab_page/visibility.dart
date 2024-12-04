@@ -10,6 +10,8 @@ import 'package:cached_network_image/cached_network_image.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 
+import '../../../utils/colors.dart';
+
 const String BASE_URL = 'https://dev-cetaphil.i-am.host/storage/';
 
 class VisibilityPage extends GetView<ActivityController> {
@@ -71,6 +73,27 @@ class VisibilityPage extends GetView<ActivityController> {
             },
           );
         }),
+        const SizedBox(height: 16),
+        SizedBox(
+          width: double.infinity,
+          child: ElevatedButton(
+            style: ElevatedButton.styleFrom(
+              backgroundColor: AppColors.primary,
+              shape: RoundedRectangleBorder(
+                borderRadius: BorderRadius.circular(10),
+                side: BorderSide(color: AppColors.primary),
+              ),
+            ),
+            onPressed: () => Get.to(() => TambahVisibility()),
+            child: Text(
+              "Tambah Visibility",
+              style: TextStyle(
+                color: Colors.white,
+                fontWeight: FontWeight.bold,
+              ),
+            ),
+          ),
+        ),
       ],
     );
   }

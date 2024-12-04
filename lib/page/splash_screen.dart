@@ -1,3 +1,5 @@
+import 'package:cetapil_mobile/controller/activity/tambah_activity_controller.dart';
+import 'package:cetapil_mobile/controller/activity/tambah_visibility_controller.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_svg/svg.dart';
 import 'package:get/get.dart';
@@ -29,6 +31,7 @@ class _SplashScreenState extends State<SplashScreen> {
     Future.delayed(const Duration(seconds: 3), () {
       Get.put(ConnectivityController(), permanent: true);
       Get.put(GPSLocationController(), permanent: true);
+
       // Get.put(SupportDataController(), permanent: true);
       Get.offAll(
             () => isLoggedIn ? MainPage() : LoginPage(),

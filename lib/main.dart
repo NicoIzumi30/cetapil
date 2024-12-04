@@ -21,6 +21,7 @@ import 'package:intl/intl.dart';
 import 'controller/activity/activity_controller.dart';
 import 'controller/activity/knowledge_controller.dart';
 import 'controller/activity/tambah_availibility_controller.dart';
+import 'controller/activity/tambah_order_controller.dart';
 import 'controller/bottom_nav_controller.dart';
 import 'controller/connectivity_controller.dart';
 import 'controller/dashboard/dashboard_controller.dart';
@@ -179,6 +180,10 @@ class InitialBindings extends Bindings {
     // Controllers that should be available throughout the app
     // Get.put(() => GPSLocationController(), permanent: true);
     // Get.put(() => ConnectivityController(),permanent: true);
+    Get.lazyPut(()=>TambahActivityController());
+    Get.lazyPut(()=>TambahAvailabilityController());
+    Get.lazyPut(()=>TambahVisibilityController());
+    Get.lazyPut(()=>TambahOrderController());
     Get.lazyPut(() => SupportDataController());
     Get.lazyPut(() => LoginController());
     Get.lazyPut(() => BottomNavController());
@@ -187,11 +192,8 @@ class InitialBindings extends Bindings {
     Get.lazyPut(() => ActivityController());
     Get.lazyPut(() => RoutingController());
     Get.lazyPut(() => SellingController());
-    Get.lazyPut(() => TambahActivityController());
     Get.lazyPut(() => VideoController());
     Get.lazyPut(() => TambahRoutingController());
-    Get.lazyPut(() => TambahAvailabilityController());
-    Get.lazyPut(() => TambahVisibilityController());
     Get.lazyPut(() => TambahProdukSellingController());
     // Add other controllers...
   }

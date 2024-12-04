@@ -7,16 +7,22 @@ import 'package:cetapil_mobile/page/activity/secondarytab_page/visibility.dart';
 import 'package:cetapil_mobile/utils/colors.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
+import '../../model/list_activity_response.dart' as Activity;
 
 import '../../widget/back_button.dart';
 import '../../widget/dialog.dart';
 import '../outlet/detail_outlet.dart';
 
 class TambahActivity extends GetView<TambahActivityController> {
+  TambahActivity(
+    this.activity, {
+    super.key,
+  });
+  final Activity.Data activity;
   @override
   Widget build(BuildContext context) {
     return WillPopScope(
-      onWillPop: ()async{
+      onWillPop: () async {
         final shouldPop = await Alerts.showConfirmDialog(context);
         return shouldPop ?? false;
       },
@@ -37,8 +43,8 @@ class TambahActivity extends GetView<TambahActivityController> {
                   onPressed: () {
                     Alerts.showConfirmDialog(
                       context,
-                      onContinue: ()async {
-                        Get.back(); 
+                      onContinue: () async {
+                        Get.back();
                         final controller = Get.find<TambahActivityController>();
                         controller.clearAllDraftItems();
                         controller.onClose();
@@ -51,18 +57,14 @@ class TambahActivity extends GetView<TambahActivityController> {
                 SizedBox(
                   height: 20,
                 ),
-                Obx(() {
-                  return UnderlineTextField.readOnly(
+                UnderlineTextField.readOnly(
                     title: "Nama Outlet",
-                    value: controller.detailOutlet.value!.outlet!.name,
-                  );
-                }),
-                Obx(() {
-                  return UnderlineTextField.readOnly(
+                    value: activity.outlet!.name,
+                  ),
+                 UnderlineTextField.readOnly(
                     title: "Kategori Outlet",
-                    value: controller.detailOutlet.value!.outlet!.category,
-                  );
-                }),
+                    value: activity.outlet!.category,
+                  ),
                 Obx(() {
                   return SecondaryTabbar(
                       selectedIndex: controller.selectedTab.value,
@@ -89,26 +91,29 @@ class TambahActivity extends GetView<TambahActivityController> {
                     }),
                   ),
                 ),
-                SizedBox(height: 3,),
+                SizedBox(
+                  height: 3,
+                ),
                 Container(
                   width: double.infinity,
                   decoration: BoxDecoration(
                       color: Colors.white.withOpacity(0.3),
                       borderRadius: BorderRadius.circular(10)),
                   child: Padding(
-                    padding: const EdgeInsets.symmetric(horizontal: 15, vertical: 10),
+                    padding: const EdgeInsets.symmetric(
+                        horizontal: 15, vertical: 10),
                     child: Row(
                       children: [
                         _buildButton(
                           false,
                           "Simpan Draft",
-                              () => null,
+                          () => null,
                         ),
                         SizedBox(width: 10),
                         _buildButton(
                           true,
                           "Kirim",
-                              () => controller.submitApiActivity(),
+                          () => controller.submitApiActivity(),
                           // controller.submitOutlet(),
                         ),
                       ],
@@ -128,7 +133,9 @@ class TambahActivity extends GetView<TambahActivityController> {
           backgroundColor: isSubmit ? AppColors.primary : Colors.white,
           shape: RoundedRectangleBorder(
             borderRadius: BorderRadius.circular(10),
-            side: isSubmit ? BorderSide.none : BorderSide(color: AppColors.primary),
+            side: isSubmit
+                ? BorderSide.none
+                : BorderSide(color: AppColors.primary),
           ),
         ),
         onPressed: onTap,
@@ -166,11 +173,11 @@ class SecondaryTabbar extends StatelessWidget {
         borderRadius: BorderRadius.circular(10),
         child: Row(
           children: [
-            buildTab(0, "Availability",false),
-            buildTab(1, "Visibility",false),
-            buildTab(2, "Knowledge",false),
-            buildTab(3, "Survey",false),
-            buildTab(4, "Order",false),
+            buildTab(0, "Availability", false),
+            buildTab(1, "Visibility", false),
+            buildTab(2, "Knowledge", false),
+            buildTab(3, "Survey", false),
+            buildTab(4, "Order", false),
           ],
         ),
       ),
@@ -181,18 +188,21 @@ class SecondaryTabbar extends StatelessWidget {
     return Expanded(
       child: GestureDetector(
         onTap: () {
-          (isDisable != true)
-              ? onTabChanged(index)
-              : null;
+          (isDisable != true) ? onTabChanged(index) : null;
         },
         child: Container(
           decoration: BoxDecoration(
-              color: (isDisable == true) ? Colors.grey : (selectedIndex == index) ? Colors.blue : Colors.white),
+              color: (isDisable == true)
+                  ? Colors.grey
+                  : (selectedIndex == index)
+                      ? Colors.blue
+                      : Colors.white),
           child: Center(
             child: Text(
               label,
               style: TextStyle(
-                  fontSize: 11, color: selectedIndex == index ? Colors.white : Colors.blue),
+                  fontSize: 11,
+                  color: selectedIndex == index ? Colors.white : Colors.blue),
             ),
           ),
         ),

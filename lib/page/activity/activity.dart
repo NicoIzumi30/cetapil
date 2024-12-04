@@ -16,6 +16,7 @@ import '../../utils/colors.dart';
 import '../outlet/detail_outlet.dart';
 
 class ActivityPage extends GetView<ActivityController> {
+  final TambahActivityController tambahActivityController = TambahActivityController();
   @override
   Widget build(BuildContext context) {
     return SafeArea(
@@ -56,29 +57,27 @@ class ActivityPage extends GetView<ActivityController> {
                                   activity: activity,
                                   statusDraft: 'Drafted',
                                   statusCheckin: true,
-                                  ontap: () {
-                                    final outlet_id = activity.outlet!.id;
+                                  ontap: ()async {
                                     // Set the outlet_id in the TambahActivityController before navigation
-                                    Get.delete<TambahActivityController>();
+                                    // Get.delete<TambahActivityController>();
                                     if (!Get.isRegistered<TambahActivityController>()) {
-                                      Get.put(TambahActivityController());
+                                      Get.lazyPut(()=>TambahActivityController());
                                     }
                                     if (!Get.isRegistered<TambahAvailabilityController>()) {
                                       Get.put(TambahAvailabilityController());
                                     }
                                     if (!Get.isRegistered<TambahVisibilityController>()) {
-                                      Get.put(TambahVisibilityController());
+                                      Get.lazyPut(()=>TambahVisibilityController());
                                     }
                                     if (!Get.isRegistered<TambahOrderController>()) {
                                       Get.put(TambahOrderController());
                                     }
-                                    final tambahActivityController =
-                                        Get.find<TambahActivityController>();
+                                    final outlet_id = activity.outlet!.id;
                                     tambahActivityController.selectedTab.value = 0;
                                     tambahActivityController.clearAllDraftItems();
-                                    tambahActivityController.setDetailOutlet(activity);
+                                    // tambahActivityController.setDetailOutlet(activity);
                                     tambahActivityController.setOutletId(outlet_id!);
-                                    Get.to(() => TambahActivity());
+                                    Get.to(() => TambahActivity(activity));
                                   },
                                 );
                               },
@@ -91,6 +90,8 @@ class ActivityPage extends GetView<ActivityController> {
       ),
     );
   }
+
+
 
   Widget _buildEmptyState() {
     return ListView(
@@ -130,6 +131,7 @@ class ActivityPage extends GetView<ActivityController> {
     );
   }
 }
+
 
 class ActivityCard extends StatelessWidget {
   final Data activity;
