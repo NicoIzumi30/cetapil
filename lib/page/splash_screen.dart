@@ -2,6 +2,8 @@ import 'package:flutter/material.dart';
 import 'package:flutter_svg/svg.dart';
 import 'package:get/get.dart';
 
+import '../controller/connectivity_controller.dart';
+import '../controller/gps_controller.dart';
 import '../controller/login_controller.dart';
 import '../widget/logo_animation.dart';
 import 'index.dart';
@@ -25,7 +27,12 @@ class _SplashScreenState extends State<SplashScreen> {
   Future<void> _navigateToNextScreen() async {
     bool isLoggedIn = await loginController.isLoggedIn();
     Future.delayed(const Duration(seconds: 3), () {
-    Get.offAll(() => isLoggedIn ? MainPage() : LoginPage());
+      Get.put(ConnectivityController(), permanent: true);
+      Get.put(GPSLocationController(), permanent: true);
+      // Get.put(SupportDataController(), permanent: true);
+      Get.offAll(
+            () => isLoggedIn ? MainPage() : LoginPage(),
+      );
     });
   }
 
@@ -59,7 +66,6 @@ class _SplashScreenState extends State<SplashScreen> {
                     child: Column(
                       mainAxisAlignment: MainAxisAlignment.center,
                       children: [
-
                         const EnhancedFadeInImage(
                           imagePath: 'assets/logo2.png',
                           width: 100,

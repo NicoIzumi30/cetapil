@@ -6,11 +6,20 @@ import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:intl/intl.dart';
 import 'package:intl/date_symbol_data_local.dart';
-import 'package:path/path.dart';
-
 import '../../database/database_instance.dart';
 import '../../widget/calendar_dialog.dart';
-import '../../widget/dialog.dart';
+import '../activity/activity_controller.dart';
+import '../activity/tambah_activity_controller.dart';
+import '../activity/tambah_availibility_controller.dart';
+import '../activity/tambah_visibility_controller.dart';
+import '../bottom_nav_controller.dart';
+import '../outlet/outlet_controller.dart';
+import '../routing/routing_controller.dart';
+import '../routing/tambah_routing_controller.dart';
+import '../selling/selling_controller.dart';
+import '../selling/tambah_produk_selling_controller.dart';
+import '../support_data_controller.dart';
+import '../video_controller/video_controller.dart';
 import '../login_controller.dart';
 
 class DashboardController extends GetxController {
@@ -23,6 +32,8 @@ class DashboardController extends GetxController {
   var dashboard = Rxn<Dashboard>();
   var error = Rxn<String>();
   var username = "".obs;
+  var phoneNumber = "".obs;
+  var longLat = "".obs;
   
   final List<String> imageUrls = [
     'assets/carousel1.png',
@@ -42,7 +53,9 @@ class DashboardController extends GetxController {
   }
 
   getUserData()async{
-   username.value = await storage.read('username');
+    username.value = await storage.read('username') ?? "";
+    phoneNumber.value = await storage.read('phone_number');
+    longLat.value = await storage.read('long_lat');
   }
 
   logOut()async{
@@ -50,7 +63,24 @@ class DashboardController extends GetxController {
     // await Get.deleteAll();
     db.deleteDatabase();
     // Get.put(LoginController());
-    Get.offAll(()=>LoginPage());
+    Get.offAll(()=>LoginPage(),binding:  BindingsBuilder(() {
+      // Get.put(ConnectivityController(), permanent: true);
+      // Get.put(GPSLocationController(), permanent: true);
+      Get.lazyPut(()=>SupportDataController());
+      Get.lazyPut(() => DashboardController());
+      Get.lazyPut(() => LoginController());
+      Get.lazyPut(() => BottomNavController());
+      Get.lazyPut(() => OutletController());
+      Get.lazyPut(() => ActivityController());
+      Get.lazyPut(() => RoutingController());
+      Get.lazyPut(() => SellingController());
+      Get.lazyPut(() => TambahActivityController());
+      Get.lazyPut(() => VideoController());
+      Get.lazyPut(() => TambahRoutingController());
+      Get.lazyPut(() => TambahAvailabilityController());
+      Get.lazyPut(() => TambahVisibilityController());
+      Get.lazyPut(() => TambahProdukSellingController());
+    }));
   }
 
   Future<void> initializeDashboard() async {

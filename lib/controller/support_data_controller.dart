@@ -4,6 +4,7 @@ import 'package:cetapil_mobile/database/support_database.dart';
 import 'package:get/get.dart';
 import '../../api/api.dart';
 import 'package:cetapil_mobile/model/list_product_sku_response.dart' as SKU;
+import '../database/database_instance.dart';
 import '../model/list_category_response.dart' as Category;
 import '../model/list_channel_response.dart' as Channel;
 import '../model/list_knowledge_response.dart' as Knowledge;
@@ -11,12 +12,14 @@ import '../model/survey_question_response.dart';
 
 class SupportDataController extends GetxController {
   final supportDB = SupportDatabaseHelper.instance;
+  final outletDB = DatabaseHelper.instance;
   final storage = GetStorage();
   Timer? _timer;
   var isLoading = false.obs;
 
   // Observable variables for storing SQLite data
-  final survey = <Map<String, dynamic>>[].obs;
+  var survey = <Map<String, dynamic>>[].obs;
+  var formOutlet = <Map<String, dynamic>>[].obs;
   var products = <Map<String, dynamic>>[].obs;
   var categories = <Map<String, dynamic>>[].obs;
   var channels = <Channel.Data>[].obs;
@@ -44,11 +47,7 @@ class SupportDataController extends GetxController {
     await loadLocalData();
 
     // Only force refresh if data is empty
-    if (products.isEmpty ||
-        categories.isEmpty ||
-        channels.isEmpty ||
-        knowledge.isEmpty ||
-        survey.isEmpty) {
+    if (products.isEmpty || categories.isEmpty || channels.isEmpty || knowledge.isEmpty || survey.isEmpty || formOutlet.isEmpty || posmTypes.isEmpty || visualTypes.isEmpty) {
       await initAllData();
     } else {
       // If data exists, check for daily refresh
@@ -80,6 +79,9 @@ class SupportDataController extends GetxController {
       
       // Load Visual types
       visualTypes.value = await supportDB.getAllVisualTypes();
+
+      // Load Form Outlet
+      formOutlet.value = await outletDB.getAllForms();
     } catch (e) {
       print("Error loading local data: $e");
     } finally {
@@ -114,6 +116,7 @@ class SupportDataController extends GetxController {
         initQuestionSurvey(),
         initPosmTypeData(),
         initVisualTypeData(),
+        initFormOutlet(),
       ]);
       // Reload local data after updating SQLite
       await loadLocalData();
@@ -237,6 +240,19 @@ class SupportDataController extends GetxController {
     }
   }
 
+  Future<void> initFormOutlet() async {
+    try {
+      final responseFormOutlet = await Api.getFormOutlet();
+      if (responseFormOutlet.isNotEmpty) {
+        await outletDB.insertOutletFormBatch(responseFormOutlet);
+      } else {
+        print("Form Outlet Empty");
+      }
+    } catch (e) {
+      print("Form Outlet = $e");
+    }
+  }
+
   // Helper methods to access data
   List<Map<String, dynamic>> getProducts() => products;
   List<Map<String, dynamic>> getCategories() => categories;
@@ -245,4 +261,5 @@ class SupportDataController extends GetxController {
   List<Map<String, dynamic>> getSurvey() => survey;
   List<Map<String, dynamic>> getPosmTypes() => posmTypes;
   List<Map<String, dynamic>> getVisualTypes() => visualTypes;
+  List<Map<String, dynamic>> getFormOutlet() => formOutlet;
 }

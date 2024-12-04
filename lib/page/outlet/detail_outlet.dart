@@ -11,12 +11,14 @@ import 'package:google_maps_flutter/google_maps_flutter.dart';
 import 'package:path_provider/path_provider.dart';
 
 import '../../controller/routing/routing_controller.dart';
+import '../../controller/support_data_controller.dart';
 import '../../utils/colors.dart';
 import '../../widget/back_button.dart';
 import '../../widget/clipped_maps.dart';
 
 class DetailOutlet extends GetView<OutletController> {
   RoutingController routingController = Get.find<RoutingController>();
+  SupportDataController supportController = Get.find<SupportDataController>();
   DetailOutlet( {super.key,required this.isCheckin, required this.outlet});
   final Outlet outlet;
   final bool isCheckin;
@@ -132,20 +134,20 @@ class DetailOutlet extends GetView<OutletController> {
                                 return const Center(child: CircularProgressIndicator());
                               }
 
-                              if (controller.questions.isEmpty) {
+                              if (supportController.getFormOutlet().isEmpty) {
                                 return const Center(child: Text("No Form"));
                               }
                               return Column(
                                 children: List<Widget>.generate(
-                                  controller.questions.length,
+                                  supportController.getFormOutlet().length,
                                   (index) {
-                                    final localQuestion = controller.questions[index];
+                                    final localQuestion = supportController.getFormOutlet()[index];
                                     String answer = "";
 
                                     // Method 1: Try to match by index first
                                     if (index < (outlet.forms?.length ?? 0)) {
                                       final apiForm = outlet.forms![index];
-                                      if (apiForm.outletForm?.id == localQuestion.id) {
+                                      if (apiForm.outletForm?.id == localQuestion['id']) {
                                         answer = apiForm.answer ?? "";
                                       }
                                     }
@@ -154,13 +156,13 @@ class DetailOutlet extends GetView<OutletController> {
                                     if (answer.isEmpty) {
                                       answer = outlet.forms
                                               ?.firstWhereOrNull(
-                                                  (form) => form.outletForm?.id == localQuestion.id)
+                                              (form) => form.outletForm?.id == localQuestion['id'])
                                               ?.answer ??
                                           "";
                                     }
 
                                     return UnderlineTextField.readOnly(
-                                      title: localQuestion.question,
+                                      title: localQuestion['question'],
                                       value: answer,
                                     );
                                   },

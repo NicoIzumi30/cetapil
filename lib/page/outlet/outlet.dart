@@ -15,6 +15,7 @@ class OutletPage extends GetView<OutletController> {
   Widget build(BuildContext context) {
     return Scaffold(
       backgroundColor: Colors.transparent,
+      resizeToAvoidBottomInset: false,
       body: SafeArea(
         child: Padding(
           padding: EdgeInsets.fromLTRB(15, 15, 15, 0),

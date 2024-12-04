@@ -3,6 +3,7 @@ import 'dart:io';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 
+import '../../controller/outlet/outlet_controller.dart';
 import '../../controller/routing/tambah_routing_controller.dart';
 import '../../model/outlet.dart';
 import '../../widget/back_button.dart';
@@ -10,6 +11,7 @@ import '../outlet/detail_outlet.dart';
 
 class ListTambahRouting extends StatelessWidget {
   final TambahRoutingController controller = Get.find<TambahRoutingController>();
+  final OutletController outletController = Get.find<OutletController>();
   @override
   Widget build(BuildContext context) {
     return SafeArea(
@@ -36,7 +38,7 @@ class ListTambahRouting extends StatelessWidget {
                   height: 40,
                   child: SearchBar(
                     controller: TextEditingController(),
-                    onChanged: controller.updateSearchQuery,
+                    onChanged: outletController.updateSearchQuery,
                     leading: const Icon(Icons.search),
                     hintText: 'Masukkan Kata Kunci',
                     hintStyle:
@@ -53,24 +55,24 @@ class ListTambahRouting extends StatelessWidget {
                         () => RefreshIndicator(
                       onRefresh: () async {
                         // Use refreshOutlets instead of syncOutlets
-                        await controller.refreshOutlets();
+                        await outletController.refreshOutlets();
                       },
                       child: Stack(
                         children: [
                           // Main Content
-                          controller.filteredOutlets.isEmpty
+                          outletController.filteredOutletsApproval.isEmpty
                               ? _buildEmptyState()
                               : ListView.builder(
                             physics: AlwaysScrollableScrollPhysics(),
-                            itemCount: controller.filteredOutlets.length,
+                            itemCount: outletController.filteredOutletsApproval.length,
                             itemBuilder: (context, index) {
-                              final outlet = controller.filteredOutlets[index];
+                              final outlet = outletController.filteredOutletsApproval[index];
                               return OutletCard(outlet: outlet);
                             },
                           ),
 
                           // Loading Overlay
-                          if (controller.isSyncing.value)
+                          if (outletController.isSyncing.value)
                             Container(
                               color: Colors.black12,
                               child: Center(

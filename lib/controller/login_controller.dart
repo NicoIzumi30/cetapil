@@ -46,7 +46,7 @@ class LoginController extends GetxController {
 
       if (response.status == true && response.data != null) {
         await _saveUserData(response.data!);
-        await _initializeControllers(true); // Load all controllers after login
+        // await _initializeControllers(true); // Load all controllers after login
         Get.offAll(() => MainPage(), transition: Transition.fade);
       } else {
         errorMessage.value = response.message ?? 'An error occurred';
@@ -71,29 +71,29 @@ class LoginController extends GetxController {
     }
   }
 
-  Future<void> _initializeControllers(bool isLoggedIn) async {
-    if (isLoggedIn) {
-      // Initialize controllers after login
-      Get.lazyPut(() => ConnectivityController());
-      Get.put(GPSLocationController());
-      Get.lazyPut(() => BottomNavController());
-      Get.lazyPut(() => DashboardController());
-      Get.put(OutletController());
-      Get.lazyPut(() => ActivityController());
-      Get.put(RoutingController());
-      Get.lazyPut(() => SellingController());
-      Get.lazyPut(() => TambahActivityController());
-      Get.lazyPut(() => VideoController());
-      Get.lazyPut(() => TambahRoutingController());
-      Get.lazyPut(() => TambahAvailabilityController());
-      Get.put(SupportDataController());
-      Get.lazyPut(() => TambahProdukSellingController());
-    } else {
-      // Initialize only the login-related controllers
-      Get.put(LoginController());
-      Get.lazyPut(() => ConnectivityController());
-    }
-  }
+  // Future<void> _initializeControllers(bool isLoggedIn) async {
+  //   if (isLoggedIn) {
+  //     // Initialize controllers after login
+  //     Get.lazyPut(() => ConnectivityController());
+  //     Get.put(GPSLocationController());
+  //     Get.lazyPut(() => BottomNavController());
+  //     Get.lazyPut(() => DashboardController());
+  //     Get.put(OutletController());
+  //     Get.lazyPut(() => ActivityController());
+  //     Get.put(RoutingController());
+  //     Get.lazyPut(() => SellingController());
+  //     Get.lazyPut(() => TambahActivityController());
+  //     Get.lazyPut(() => VideoController());
+  //     Get.lazyPut(() => TambahRoutingController());
+  //     Get.lazyPut(() => TambahAvailabilityController());
+  //     Get.put(SupportDataController());
+  //     Get.lazyPut(() => TambahProdukSellingController());
+  //   } else {
+  //     // Initialize only the login-related controllers
+  //     Get.put(LoginController());
+  //     Get.lazyPut(() => ConnectivityController());
+  //   }
+  // }
 
   Future<void> logout() async {
     await _storage.erase();
@@ -104,5 +104,7 @@ class LoginController extends GetxController {
     await _storage.write('user_id', userData.user?.id);
     await _storage.write('token', userData.token);
     await _storage.write('username', userData.user!.name);
+    await _storage.write('phone_number', userData.user!.phoneNumber);
+    await _storage.write('long_lat', "${userData.user!.longitude },${userData.user!.latitude!}");
   }
 }

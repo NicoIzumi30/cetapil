@@ -14,6 +14,7 @@ import '../../widget/password_field.dart';
 import '../../widget/text_field.dart';
 
 class SettingProfile extends GetView<DashboardController> {
+  final DashboardController dashboardController = Get.find<DashboardController>();
   final TextEditingController _controller =
       TextEditingController(text: "Andromeda Phytagoras Silalahi");
 
@@ -50,12 +51,12 @@ class SettingProfile extends GetView<DashboardController> {
               ModernTextField(
                 enable: false,
                 title: "Nama Pengguna",
-                controller: _controller,
+                controller: TextEditingController(text: dashboardController.username.value),
               ),
               ModernTextField(
                 enable: false,
                 title: "Nomor Telepon Pengguna",
-                controller: _controller,
+                controller: TextEditingController(text: dashboardController.phoneNumber.value),
               ),
               ModernTextField(
                 enable: false,
@@ -71,7 +72,7 @@ class SettingProfile extends GetView<DashboardController> {
               ),
               ModernTextField(
                 title: "Longitudes & Latitudes",
-                controller: _controller,
+                controller: TextEditingController(text: dashboardController.longLat.value),
                 enable: false,
               ),
               SizedBox(

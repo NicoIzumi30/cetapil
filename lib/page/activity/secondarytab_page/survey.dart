@@ -10,6 +10,70 @@ import '../../../utils/price_formatter.dart';
 class SurveyPage extends GetView<TambahActivityController> {
   final SupportDataController supportController = Get.find<SupportDataController>();
 
+  _buildSectionTitle(Map<String, dynamic> questionGroup) {
+    if (questionGroup['title'] != null) {
+      return Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Text(
+            questionGroup['title']!,
+            style: const TextStyle(fontSize: 13, fontWeight: FontWeight.w700),
+          ),
+          const SizedBox(height: 10),
+        ],
+      );
+    }
+
+    // Handle special section titles
+    String? sectionTitle;
+    if (questionGroup['name'] == 'Visibility') {
+      sectionTitle = "Survey Visibility";
+    } else if (questionGroup['name'] == 'Recommendation') {
+      sectionTitle = "Survey Recommendation";
+    }
+
+    if (sectionTitle != null) {
+      return Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Text(
+            sectionTitle,
+            style: const TextStyle(
+              fontSize: 20,
+              color: Color(0xff0077BD),
+              fontWeight: FontWeight.w900,
+            ),
+          ),
+          const SizedBox(height: 10),
+        ],
+      );
+    }
+
+    return const SizedBox.shrink();
+  }
+
+  buildSurveyQuestions(Map<String, dynamic> questionGroup) {
+    return (questionGroup['surveys'] ?? []).map((survey) {
+      final id = survey['id'] ?? '';
+      if (survey['type'] == 'bool') {
+        if (!controller.switchStates.containsKey(id)) {
+          controller.switchStates[id] = true.obs; // Initialize with true for 'Ada'
+        }
+        return BooleanQuestion(
+          title: survey['question'] ?? '',
+          surveyId: id,
+          controller: controller,
+        );
+      } else if (survey['type'] == 'text') {
+        return PriceQuestion(
+          title: survey['question'] ?? '',
+          controller: controller.priceControllers[id] ?? TextEditingController(),
+        );
+      }
+      return const SizedBox.shrink();
+    }).toList();
+  }
+
   @override
   Widget build(BuildContext context) {
     return Obx(() {
@@ -79,12 +143,12 @@ class SurveyPage extends GetView<TambahActivityController> {
       // }
 
       // Your existing ListView implementation
+      final questionGroup = supportController.getSurvey();
       return ListView.builder(
         shrinkWrap: true,
         physics: const NeverScrollableScrollPhysics(),
-        itemCount: controller.surveyQuestions.length,
+        itemCount: questionGroup.length,
         itemBuilder: (context, index) {
-          final questionGroup = supportController.getSurvey();
           return Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
@@ -98,70 +162,7 @@ class SurveyPage extends GetView<TambahActivityController> {
     });
   }
 
-   _buildSectionTitle(Map<String, dynamic> questionGroup) {
-    if (questionGroup['title'] != null) {
-      return Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          Text(
-            questionGroup['title']!,
-            style: const TextStyle(fontSize: 13, fontWeight: FontWeight.w700),
-          ),
-          const SizedBox(height: 10),
-        ],
-      );
-    }
 
-    // Handle special section titles
-    String? sectionTitle;
-    if (questionGroup['name'] == 'Visibility') {
-      sectionTitle = "Survey Visibility";
-    } else if (questionGroup['name'] == 'Recommendation') {
-      sectionTitle = "Survey Recommendation";
-    }
-
-    if (sectionTitle != null) {
-      return Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          Text(
-            sectionTitle,
-            style: const TextStyle(
-              fontSize: 20,
-              color: Color(0xff0077BD),
-              fontWeight: FontWeight.w900,
-            ),
-          ),
-          const SizedBox(height: 10),
-        ],
-      );
-    }
-
-    return const SizedBox.shrink();
-  }
-
-   buildSurveyQuestions(Map<String, dynamic> questionGroup) {
-    print(questionGroup['surveys']);
-    return (questionGroup['surveys'] ?? []).map((survey) {
-      final id = survey['id'] ?? '';
-      if (survey['type'] == 'bool') {
-        if (!controller.switchStates.containsKey(id)) {
-          controller.switchStates[id] = true.obs; // Initialize with true for 'Ada'
-        }
-        return BooleanQuestion(
-          title: survey['question'] ?? '',
-          surveyId: id,
-          controller: controller,
-        );
-      } else if (survey['type'] == 'text') {
-        return PriceQuestion(
-          title: survey['question'] ?? '',
-          controller: controller.priceControllers[id] ?? TextEditingController(),
-        );
-      }
-      return const SizedBox.shrink();
-    }).toList();
-  }
 }
 
 class BooleanQuestion extends StatelessWidget {

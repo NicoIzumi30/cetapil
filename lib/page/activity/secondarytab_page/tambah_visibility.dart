@@ -26,119 +26,125 @@ class TambahVisibility extends GetView<TambahVisibilityController> {
 
   @override
   Widget build(BuildContext context) {
-    return SafeArea(
-      child: Stack(
-        children: [
-          Image.asset(
-            'assets/background.png',
-            fit: BoxFit.cover,
-            width: double.infinity,
-            height: double.infinity,
-          ),
-          Column(
-            children: [
-              Expanded(
-                child: Padding(
-                  padding: const EdgeInsets.fromLTRB(15, 30, 15, 10),
-                  child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      EnhancedBackButton(
-                        onPressed: () => Alerts.showConfirmDialog(context, useGetBack: false),
-                        backgroundColor: Colors.white,
-                        iconColor: Colors.blue,
-                        useGetBack: false,
-                      ),
-                      SizedBox(height: 20),
-                      Expanded(
-                        child: ListView(
-                          children: [
-                            _buildReadOnlyField(
-                              label: "Jenis Visibility",
-                              value: controller.posmType.value,
-                            ),
-                            _buildReadOnlyField(
-                              label: "Jenis Visual",
-                              value: controller.visualType.value,
-                            ),
-                            Text(
-                              "Planogram",
-                              style: TextStyle(fontSize: 13, fontWeight: FontWeight.w700),
-                            ),
-                            SizedBox(height: 10),
-                            Container(
-                              width: double.infinity,
-                              height: 200,
-                              child: ClipRRect(
-                                borderRadius: BorderRadius.circular(10),
-                                child: controller.visibility?.image != null
-                                    ? _buildPlanogramImage(controller.visibility?.image)
-                                    : Container(
-                                        color: Colors.grey[200],
-                                        child: Center(
-                                          child:
-                                              Icon(Icons.image_not_supported, color: Colors.grey),
-                                        ),
-                                      ),
-                              ),
-                            ),
-                            SizedBox(height: 15),
-                            CustomDropdown(
-                                hint: "-- Pilih condition --",
-                                value: controller.selectedCondition.value.isEmpty
-                                    ? null
-                                    : controller.selectedCondition.value,
-                                items: ["Good", "Bad"].map((item) {
-                                  return DropdownMenuItem<String>(
-                                    value: item,
-                                    child: Text(item),
-                                  );
-                                }).toList(),
-                                onChanged: (value) {
-                                  controller.selectedCondition.value = value!;
-                                },
-                                title: "Condition"),
-                            _buildImageUploader(context, "Foto Visibility 1", 0),
-                            _buildImageUploader(context, "Foto Visibility 2", 1),
-                          ],
+    return WillPopScope(
+      onWillPop: ()async{
+        final shouldPop = await Alerts.showConfirmDialog(context);
+        return shouldPop ?? false;
+      },
+      child: SafeArea(
+        child: Stack(
+          children: [
+            Image.asset(
+              'assets/background.png',
+              fit: BoxFit.cover,
+              width: double.infinity,
+              height: double.infinity,
+            ),
+            Column(
+              children: [
+                Expanded(
+                  child: Padding(
+                    padding: const EdgeInsets.fromLTRB(15, 30, 15, 10),
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        EnhancedBackButton(
+                          onPressed: () => Alerts.showConfirmDialog(context, useGetBack: false),
+                          backgroundColor: Colors.white,
+                          iconColor: Colors.blue,
+                          useGetBack: false,
                         ),
-                      )
-                    ],
+                        SizedBox(height: 20),
+                        Expanded(
+                          child: ListView(
+                            children: [
+                              _buildReadOnlyField(
+                                label: "Jenis Visibility",
+                                value: controller.posmType.value,
+                              ),
+                              _buildReadOnlyField(
+                                label: "Jenis Visual",
+                                value: controller.visualType.value,
+                              ),
+                              Text(
+                                "Planogram",
+                                style: TextStyle(fontSize: 13, fontWeight: FontWeight.w700),
+                              ),
+                              SizedBox(height: 10),
+                              Container(
+                                width: double.infinity,
+                                height: 200,
+                                child: ClipRRect(
+                                  borderRadius: BorderRadius.circular(10),
+                                  child: controller.visibility?.image != null
+                                      ? _buildPlanogramImage(controller.visibility?.image)
+                                      : Container(
+                                          color: Colors.grey[200],
+                                          child: Center(
+                                            child:
+                                                Icon(Icons.image_not_supported, color: Colors.grey),
+                                          ),
+                                        ),
+                                ),
+                              ),
+                              SizedBox(height: 15),
+                              CustomDropdown(
+                                  hint: "-- Pilih condition --",
+                                  value: controller.selectedCondition.value.isEmpty
+                                      ? null
+                                      : controller.selectedCondition.value,
+                                  items: ["Good", "Bad"].map((item) {
+                                    return DropdownMenuItem<String>(
+                                      value: item,
+                                      child: Text(item),
+                                    );
+                                  }).toList(),
+                                  onChanged: (value) {
+                                    controller.selectedCondition.value = value!;
+                                  },
+                                  title: "Condition"),
+                              _buildImageUploader(context, "Foto Visibility 1", 0),
+                              _buildImageUploader(context, "Foto Visibility 2", 1),
+                            ],
+                          ),
+                        )
+                      ],
+                    ),
                   ),
                 ),
-              ),
-              Padding(
-                padding: const EdgeInsets.fromLTRB(15, 0, 15, 15),
-                child: Container(
-                  width: double.infinity,
-                  decoration: BoxDecoration(
-                      color: Colors.white.withOpacity(0.3),
-                      borderRadius: BorderRadius.circular(10)),
-                  child: Padding(
-                    padding: const EdgeInsets.symmetric(horizontal: 15, vertical: 10),
-                    child: ElevatedButton(
-                      style: ElevatedButton.styleFrom(
-                        backgroundColor: AppColors.primary,
-                        shape: RoundedRectangleBorder(
-                          borderRadius: BorderRadius.circular(10),
-                          side: BorderSide(color: AppColors.primary),
+                Padding(
+                  padding: const EdgeInsets.fromLTRB(15, 0, 15, 15),
+                  child: Container(
+                    width: double.infinity,
+                    decoration: BoxDecoration(
+                        color: Colors.white.withOpacity(0.3),
+                        borderRadius: BorderRadius.circular(10)),
+                    child: Padding(
+                      padding: const EdgeInsets.symmetric(horizontal: 15, vertical: 10),
+                      child: ElevatedButton(
+                        style: ElevatedButton.styleFrom(
+                          backgroundColor: AppColors.primary,
+                          shape: RoundedRectangleBorder(
+                            borderRadius: BorderRadius.circular(10),
+                            side: BorderSide(color: AppColors.primary),
+                          ),
                         ),
-                      ),
-                      onPressed: () => controller.saveVisibility(),
-                      child: Text(
-                        "Simpan Visibility",
-                        style: TextStyle(
-                          color: Colors.white,
-                          fontWeight: FontWeight.bold,
+                        onPressed: () => controller.saveVisibility(),
+                        child: Text(
+                          "Simpan Visibility",
+                          style: TextStyle(
+                            color: Colors.white,
+                            fontWeight: FontWeight.bold,
+                          ),
                         ),
                       ),
                     ),
                   ),
                 ),
-              ),
-            ],
-          ),
-        ],
+              ],
+            ),
+          ],
+        ),
       ),
     );
   }

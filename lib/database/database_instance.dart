@@ -219,6 +219,8 @@ class DatabaseHelper {
 
   // Delete entire database
   Future<void> deleteDatabase() async {
+    _database!.close();
+    _database = null;
     String path = join(await getDatabasesPath(), 'outlet_database.db');
     await databaseFactory.deleteDatabase(path);
   }

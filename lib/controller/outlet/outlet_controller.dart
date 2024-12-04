@@ -19,9 +19,11 @@ import 'package:uuid/uuid.dart';
 import 'package:path/path.dart' as path;
 
 import '../../page/outlet/tambah_outlet.dart';
+import '../support_data_controller.dart';
 
 class OutletController extends GetxController {
   final GPSLocationController gpsController = Get.find<GPSLocationController>();
+  final SupportDataController supportController = Get.find<SupportDataController>();
   final api = Api();
   final db = DatabaseHelper.instance;
   final citiesDb = CitiesDatabaseHelper.instance;
@@ -42,7 +44,7 @@ class OutletController extends GetxController {
   var outletName = TextEditingController().obs;
   var outletAddress = TextEditingController().obs;
   var controllers = <TextEditingController>[].obs;
-  var questions = <FormOutletResponse>[].obs;
+  // var questions = <FormOutletResponse>[].obs;
 
   setListOutletPage(int page) {
     if (listOutletPage.value != page) {
@@ -171,7 +173,7 @@ class OutletController extends GetxController {
   @override
   void onInit() {
     super.onInit();
-    initializeFormData();
+    // initializeFormData();
     loadOutlets(); // Only load from SQLite initially
   }
 
@@ -338,43 +340,43 @@ class OutletController extends GetxController {
     }
   }
 
-  Future<void> initializeFormData() async {
-    try {
-      isLoading.value = true;
-      final isEmpty = await db.isOutletFormsEmpty();
-
-      if (isEmpty) {
-        final response = await Api.getFormOutlet();
-        if (response == null || response.isEmpty) {
-          throw Exception('Failed to load forms: Empty response');
-        }
-        try {
-          await db.insertOutletFormBatch(response);
-        } catch (e) {
-          throw Exception('Failed to insert forms: $e');
-        }
-      }
-
-      final forms = await db.getAllForms();
-      if (forms.isEmpty) {
-        throw Exception('No forms found in database');
-      }
-
-      questions.value = forms
-          .map((form) => FormOutletResponse(
-                id: form['id'] as String,
-                type: form['type'] as String,
-                question: form['question'] as String,
-              ))
-          .toList();
-
-      generateControllers();
-    } catch (e) {
-      print('Error initializing form data: $e');
-    } finally {
-      isLoading.value = false;
-    }
-  }
+  // Future<void> initializeFormData() async {
+  //   try {
+  //     isLoading.value = true;
+  //     final isEmpty = await db.isOutletFormsEmpty();
+  //
+  //     if (isEmpty) {
+  //       final response = await Api.getFormOutlet();
+  //       if (response == null || response.isEmpty) {
+  //         throw Exception('Failed to load forms: Empty response');
+  //       }
+  //       try {
+  //         await db.insertOutletFormBatch(response);
+  //       } catch (e) {
+  //         throw Exception('Failed to insert forms: $e');
+  //       }
+  //     }
+  //
+  //     final forms = await db.getAllForms();
+  //     if (forms.isEmpty) {
+  //       throw Exception('No forms found in database');
+  //     }
+  //
+  //     questions.value = forms
+  //         .map((form) => FormOutletResponse(
+  //               id: form['id'] as String,
+  //               type: form['type'] as String,
+  //               question: form['question'] as String,
+  //             ))
+  //         .toList();
+  //
+  //     generateControllers();
+  //   } catch (e) {
+  //     print('Error initializing form data: $e');
+  //   } finally {
+  //     isLoading.value = false;
+  //   }
+  // }
 
   Future<void> saveDraftOutlet() async {
     try {
@@ -421,8 +423,8 @@ class OutletController extends GetxController {
         'image_path_1': imagePath[0],
         'image_path_2': imagePath[1],
         'image_path_3': imagePath[2],
-        for (int i = 0; i < questions.length; i++)
-          'form_id_${questions[i].id}': controllers[i].value.text,
+        for (int i = 0; i < supportController.getFormOutlet().length; i++)
+          'form_id_${supportController.getFormOutlet()[i]['id']}': controllers[i].value.text,
         'created_at': isEditing ? null : DateTime.now().toIso8601String(),
         'updated_at': DateTime.now().toIso8601String(),
       };
@@ -482,9 +484,16 @@ class OutletController extends GetxController {
         'image_path_1': imagePath[0],
         'image_path_2': imagePath[1],
         'image_path_3': imagePath[2],
-        for (int i = 0; i < questions.length; i++) 'forms[$i][id]': questions[i].id,
-        for (int i = 0; i < questions.length; i++) 'forms[$i][answer]': controllers[i].value.text,
+        for (int i = 0; i < supportController.getFormOutlet().length; i++) 'forms[$i][id]': supportController.getFormOutlet()[i]['id'],
+        for (int i = 0; i < supportController.getFormOutlet().length; i++) 'forms[$i][answer]': controllers[i].value.text,
       };
+      List<FormOutletResponse> questions = supportController.getFormOutlet().map((form) {
+        return FormOutletResponse(
+          id: form['id'] as String,
+          type: form['type'] as String,
+          question: form['question'] as String,
+        );
+      }).toList();
       final response = await Api.submitOutlet(data, questions);
 
       if (response.status != "OK") {
@@ -579,7 +588,7 @@ class OutletController extends GetxController {
     for (var controller in controllers) {
       controller.dispose();
     }
-    controllers.assignAll(List.generate(questions.length, (index) => TextEditingController()));
+    controllers.assignAll(List.generate(supportController.getFormOutlet().length, (index) => TextEditingController()));
   }
 
   // Helper methods for batch operations

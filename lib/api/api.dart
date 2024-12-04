@@ -16,6 +16,8 @@ import 'package:cetapil_mobile/model/submit_selling_response.dart';
 import 'package:cetapil_mobile/model/survey_question_response.dart';
 import 'package:get_storage/get_storage.dart';
 import 'package:http/http.dart' as http;
+import 'package:cetapil_mobile/model/submit_activity_response.dart';
+import 'package:cetapil_mobile/model/visibility.dart' as VisibilityModel;
 
 import '../model/dashboard.dart';
 import '../model/dropdown_model.dart';
@@ -405,6 +407,87 @@ class Api {
       return SubmitSellingResponse.fromJson(jsonDecode(responseJson.body));
     } else {
       throw "Unable to Submit Selling";
+    }
+  }
+
+  static Future<SubmitActivityResponse> submitActivity(
+      Map<String, dynamic> data,
+      List<Map<String, dynamic>> availabilityList,
+      List<VisibilityModel.Visibility> visibilityList,
+      List<Map<String, dynamic>> surveyList,
+      List<Map<String, dynamic>> orderList,
+      ) async {
+    var url = "$baseUrl/api/activity/submit";
+    var token = await storage.read('token');
+    var request = await http.MultipartRequest('post', Uri.parse(url));
+    request.headers["Content-type"] = 'application/json';
+    request.headers["Authorization"] = 'Bearer $token';
+
+    ///General Section
+    request.fields["sales_activity_id"] = data["sales_activity_id"].toString();
+    request.fields["outlet_id"] = data["outlet_id"].toString();
+    request.fields["views_knowledge"] = data["views_knowledge"].toString();
+    request.fields["time_availability"] = data["time_availability"].toString();
+    request.fields["time_visibility"] = data["time_visibility"].toString();
+    request.fields["time_knowledge"] = data["time_knowledge"].toString();
+    request.fields["time_survey"] = data["time_survey"].toString();
+    request.fields["time_order"] = data["time_order"].toString();
+    request.fields["current_time"] = data["current_time"].toString();
+    request.fields["time_survey"] = data["time_survey"].toString();
+
+    /// Availability Section
+    for (var i = 0; i < availabilityList.length; i++) {
+      request.fields["availability[$i][product_id]"] =
+          availabilityList[i]["product_id"].toString();
+      request.fields["availability[$i][availability_stock]"] =
+          availabilityList[i]["availability_stock"].toString();
+      request.fields["availability[$i][average_stock]"] =
+          availabilityList[i]["average_stock"].toString();
+      request.fields["availability[$i][ideal_stock]"] =
+          availabilityList[i]["ideal_stock"].toString();
+    }
+
+    ///Visibility Section (*SUDAH BENAR)
+    for (var i = 0; i < visibilityList.length; i++) {
+      request.fields["visibility[$i][visibility_id]"] =
+          visibilityList[i].typeVisibility!.id.toString();
+      request.fields["visibility[$i][condition]"] =
+          visibilityList[i].condition.toString();
+      request.files.add(await http.MultipartFile.fromPath(
+        'visibility[$i][file1]',
+        visibilityList[i].image1!.path,
+      ));
+      request.files.add(await http.MultipartFile.fromPath(
+        'visibility[$i][file2]',
+        visibilityList[i].image2!.path,
+      ));
+    }
+
+    ///Survey Section (*SUDAH BENAR)
+    for (var i = 0; i < surveyList.length; i++) {
+      request.fields["survey[$i][survey_question_id]"] =
+          surveyList[i]["survey_question_id"].toString();
+      request.fields["survey[$i][answer]"] = surveyList[i]["answer"].toString();
+    }
+
+    ///Order Section (*SUDAH BENAR)
+    for (var i = 0; i < orderList.length; i++) {
+      request.fields["order[$i][product_id]"] =
+          orderList[i]["id"].toString();
+      request.fields["order[$i][total_items]"] =
+          orderList[i]["jumlah"].toString();
+      request.fields["order[$i][subtotal]"] =
+          orderList[i]["harga"].toString();
+    }
+
+    var response = await request.send();
+    var responseJson = await http.Response.fromStream(response);
+
+    print(response.statusCode);
+    if (response.statusCode == 200) {
+      return SubmitActivityResponse.fromJson(jsonDecode(responseJson.body));
+    } else {
+      throw "Unable to Submit Activity";
     }
   }
 }

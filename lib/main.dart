@@ -41,14 +41,14 @@ void main() async {
     ]);
 
     configureApp();
-    bool isLoggedIn = await checkLoginStatus(); // Check login status
-    if (isLoggedIn) {
-      // If logged in, load all controllers
-      await initializeControllers(true); // Load all controllers
-    } else {
-      // If not logged in, load only login related controllers
-      await initializeControllers(false); // Load only login related controllers
-    }
+    // bool isLoggedIn = await checkLoginStatus(); // Check login status
+    // if (isLoggedIn) {
+    //   // If logged in, load all controllers
+    //   await initializeControllers(true); // Load all controllers
+    // } else {
+    //   // If not logged in, load only login related controllers
+    //   await initializeControllers(false); // Load only login related controllers
+    // }
     runApp(const MyApp());
   } catch (e) {
     print('App Initialization Error: $e');
@@ -97,36 +97,36 @@ Future<void> initializeGPS() async {
   }
 }
 
-Future<void> initializeControllers(bool isLoggedIn) async {
-  try {
-    if (isLoggedIn) {
-      // Load all controllers if logged in
-      Get.put(LoginController());
-      Get.lazyPut(() => ConnectivityController());
-      Get.put(GPSLocationController());
-      Get.lazyPut(() => BottomNavController());
-      Get.lazyPut(() => DashboardController());
-      Get.put(OutletController());
-      Get.lazyPut(() => ActivityController());
-      Get.put(RoutingController());
-      Get.lazyPut(() => SellingController());
-      Get.lazyPut(() => TambahActivityController());
-      Get.lazyPut(() => VideoController());
-      Get.lazyPut(() => TambahRoutingController());
-      Get.lazyPut(() => TambahAvailabilityController());
-      Get.lazyPut(() => TambahVisibilityController());
-      Get.put(SupportDataController());
-      Get.lazyPut(() => TambahProdukSellingController());
-    } else {
-      // Load only login related controllers
-      Get.lazyPut(() => LoginController());
-      Get.lazyPut(() => ConnectivityController());
-      Get.lazyPut(() => KnowledgeController());
-    }
-  } catch (e) {
-    print('Controller Initialization Error: $e');
-  }
-}
+// Future<void> initializeControllers(bool isLoggedIn) async {
+//   try {
+//     if (isLoggedIn) {
+//       // Load all controllers if logged in
+//       Get.put(LoginController());
+//       Get.lazyPut(() => ConnectivityController());
+//       Get.put(GPSLocationController());
+//       Get.lazyPut(() => BottomNavController());
+//       Get.lazyPut(() => DashboardController());
+//       Get.put(OutletController());
+//       Get.lazyPut(() => ActivityController());
+//       Get.put(RoutingController());
+//       Get.lazyPut(() => SellingController());
+//       Get.lazyPut(() => TambahActivityController());
+//       Get.lazyPut(() => VideoController());
+//       Get.lazyPut(() => TambahRoutingController());
+//       Get.lazyPut(() => TambahAvailabilityController());
+//       Get.lazyPut(() => TambahVisibilityController());
+//       Get.put(SupportDataController());
+//       Get.lazyPut(() => TambahProdukSellingController());
+//     } else {
+//       // Load only login related controllers
+//       Get.lazyPut(() => LoginController());
+//       Get.lazyPut(() => ConnectivityController());
+//       Get.lazyPut(() => KnowledgeController());
+//     }
+//   } catch (e) {
+//     print('Controller Initialization Error: $e');
+//   }
+// }
 
 void configureApp() {
   // This will prevent the app from closing when the back button is pressed
@@ -145,7 +145,7 @@ class MyApp extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return GetMaterialApp(
-      // initialBinding: InitialBindings(),
+      initialBinding: InitialBindings(),
       debugShowCheckedModeBanner: false,
       title: 'Cetaphil App',
       home: const SplashScreen(),
@@ -177,21 +177,21 @@ class InitialBindings extends Bindings {
   @override
   void dependencies() {
     // Controllers that should be available throughout the app
-    Get.put(LoginController());
-    Get.lazyPut(() => ConnectivityController());
-    Get.put(GPSLocationController());
+    // Get.put(() => GPSLocationController(), permanent: true);
+    // Get.put(() => ConnectivityController(),permanent: true);
+    Get.lazyPut(() => SupportDataController());
+    Get.lazyPut(() => LoginController());
     Get.lazyPut(() => BottomNavController());
     Get.lazyPut(() => DashboardController());
-    Get.put(OutletController());
+    Get.lazyPut(() => OutletController());
     Get.lazyPut(() => ActivityController());
-    Get.put(RoutingController());
+    Get.lazyPut(() => RoutingController());
     Get.lazyPut(() => SellingController());
     Get.lazyPut(() => TambahActivityController());
     Get.lazyPut(() => VideoController());
     Get.lazyPut(() => TambahRoutingController());
     Get.lazyPut(() => TambahAvailabilityController());
     Get.lazyPut(() => TambahVisibilityController());
-    Get.put(SupportDataController());
     Get.lazyPut(() => TambahProdukSellingController());
     // Add other controllers...
   }

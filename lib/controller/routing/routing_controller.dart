@@ -10,9 +10,11 @@ import 'package:uuid/uuid.dart';
 import '../../api/api.dart';
 import '../../database/database_instance.dart';
 import '../../model/outlet_example.dart';
+import '../support_data_controller.dart';
 
 class RoutingController extends GetxController {
   final OutletController outletController = Get.find<OutletController>();
+  final SupportDataController supportController = Get.find<SupportDataController>();
   RxString searchQuery = ''.obs;
   final db = DatabaseHelper.instance;
   RxList<Data> routing = <Data>[].obs;
@@ -84,8 +86,8 @@ class RoutingController extends GetxController {
             final formAnswers = Map.fromEntries(result.forms!
                 .map((form) => MapEntry(form.outletForm?.id ?? "", form.answer ?? "")));
 
-            for (int j = 0; j < outletController.questions.length; j++) {
-              final questionId = outletController.questions[j].id;
+            for (int j = 0; j < supportController.getFormOutlet().length; j++) {
+              final questionId = supportController.getFormOutlet()[j]['id'];
               data['form_id_$questionId'] = formAnswers[questionId] ?? "";
             }
           }

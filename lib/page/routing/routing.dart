@@ -19,6 +19,7 @@ class RoutingPage extends GetView<RoutingController> {
   Widget build(BuildContext context) {
     return Scaffold(
       backgroundColor: Colors.transparent,
+      resizeToAvoidBottomInset: false,
       body: SafeArea(
         child: Padding(
           padding: const EdgeInsets.fromLTRB(15, 15, 15, 0),

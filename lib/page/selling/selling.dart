@@ -12,6 +12,7 @@ class SellingPage extends GetView<SellingController> {
   Widget build(BuildContext context) {
     return Scaffold(
       backgroundColor: Colors.transparent,
+      resizeToAvoidBottomInset: false,
       body: SafeArea(
         child: Padding(
           padding: EdgeInsets.fromLTRB(15, 15, 15, 0),
@@ -223,18 +224,21 @@ class SellingCard extends StatelessWidget {
               mainAxisAlignment: MainAxisAlignment.spaceBetween,
               children: [
                 Container(
-                  padding: EdgeInsets.symmetric(vertical: 7, horizontal: 15),
+                  width: 80,
+                  padding: EdgeInsets.symmetric(vertical: 7),
                   decoration: BoxDecoration(
                     color: selling.isDrafted! ? Colors.white : AppColors.primary,
                     borderRadius: BorderRadius.circular(4),
-                    border: selling.isDrafted! ? Border.all(color: Colors.blue) : null,
+                    border: selling.isDrafted! ? Border.all(color: AppColors.primary) : null,
                   ),
-                  child: Text(
-                    selling.isDrafted! ? 'Draft' : 'Terkirim',
-                    style: TextStyle(
-                      fontSize: 12,
-                      fontWeight: FontWeight.bold,
-                      color: selling.isDrafted! ? Colors.blue : Colors.white,
+                  child: Center(
+                    child: Text(
+                      selling.isDrafted! ? 'Draft' : 'Terkirim',
+                      style: TextStyle(
+                        fontSize: 12,
+                        fontWeight: FontWeight.bold,
+                        color: selling.isDrafted! ? AppColors.primary : Colors.white,
+                      ),
                     ),
                   ),
                 ),
@@ -268,7 +272,9 @@ class SellingCard extends StatelessWidget {
                           );
                         },
                         style: OutlinedButton.styleFrom(
-                          foregroundColor: Colors.red,
+                          foregroundColor: Colors.white,
+                          backgroundColor: Colors.red[400],
+                          minimumSize: const Size(80, 30),
                           shape: RoundedRectangleBorder(
                             borderRadius: BorderRadius.circular(4),
                           ),

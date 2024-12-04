@@ -1,15 +1,23 @@
 import 'dart:async';
 
 import 'package:cetapil_mobile/api/api.dart';
+import 'package:cetapil_mobile/controller/activity/tambah_order_controller.dart';
+import 'package:cetapil_mobile/controller/activity/tambah_visibility_controller.dart';
 import 'package:cetapil_mobile/model/survey_question_response.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_easyloading/flutter_easyloading.dart';
 import 'package:get/get.dart';
 import 'dart:io';
 
 import '../../model/list_category_response.dart' as Category;
 import '../../model/list_activity_response.dart' as Activity;
+import '../../widget/custom_alert.dart';
 
 class TambahActivityController extends GetxController {
+  TambahVisibilityController visibilityController =
+  Get.find<TambahVisibilityController>();
+  TambahOrderController orderController =
+  Get.find<TambahOrderController>();
   final TextEditingController controller = TextEditingController();
   final api = Api();
   final selectedTab = 0.obs;
@@ -77,6 +85,78 @@ class TambahActivityController extends GetxController {
 
     // Start the timer when controller is initialized
     startTabTimer();
+  }
+
+  Future<void> submitApiActivity() async {
+    try {
+      // final String? currentOutletId = Get.arguments?['id'];
+      // final bool isEditing = currentOutletId != null;
+      EasyLoading.show(status: 'Submit Data...');
+
+      Map<String,dynamic> data = {
+        // 'sales_activity_id': detailOutlet.value!.id,
+        // 'outlet_id': detailOutlet.value!.outlet!.id,
+        // 'views_knowledge': cityName.value.isEmpty ? "" : cityName.value,
+        // 'time_availability': DateTime.now().weekday.toString(),
+        // 'time_visibility': gpsController.longController.value.text,
+        // 'time_knowledge': gpsController.latController.value.text,
+        // 'time_survey': outletAddress.value.text,
+        // 'time_order': "1x1",
+        // 'current_time': imagePath[0],
+      };
+
+      ///Availability List
+      List<Map<String, dynamic>> listavailability = [
+        {
+          // 'visibility_id': outletName.value.text,
+          // 'condition': selectedCategory.value,
+          // 'file1': cityName.value.isEmpty ? "" : cityName.value,
+          // 'file2': DateTime.now().weekday.toString(),
+        }
+      ];
+      ///Survey List
+      List<Map<String, dynamic>> surveyList = [
+        ...priceControllers.entries.map((entry) => {
+          'survey_question_id': entry.key,
+          'answer': entry.value.text,
+        }),
+        ...switchStates.entries.map((entry) => {
+          'survey_question_id': entry.key,
+          'answer': entry.value.value.toString(),
+        }),
+      ];
+
+      // final response = await Api.submitActivity(
+      //   data,
+      //   surveyList,
+      //   visibilityController.listVisibility,
+      //   surveyList,
+      //   orderController.draftItems,
+      // );
+
+      // if (response.status != "OK") {
+      //   throw Exception('Failed to get outlets from API');
+      // }
+
+      // isEditing ? await db.deleteOutlet(currentOutletId) : null;
+      // clearForm();
+      EasyLoading.dismiss();
+      Get.back();
+      showSuccessAlert(
+          Get.context!, // Use Get.context instead of the previous context
+          "Data Berhasil Disimpan",
+          "Anda baru menyimpan Data. Silahkan periksa status Outlet pada aplikasi.");
+      // await refreshOutlets();
+    } catch (e) {
+      print('Error submit data: $e');
+      Get.snackbar(
+        'Error',
+        'Failed to submit data: $e',
+        snackPosition: SnackPosition.BOTTOM,
+      );
+    } finally {
+      EasyLoading.dismiss();
+    }
   }
 
   void startTabTimer() {
