@@ -53,9 +53,10 @@ class SalesActivityController extends Controller
 
         $activities = SalesActivity::completeRelation()
             ->with(['visibilities' => function ($query) use ($now) {
-                $query->join('visibilities', 'sales_visibilities.visibility_id', '=', 'visibilities.id')
-                    ->whereDate('visibilities.started_at', '<=', $now->toDateString())
-                    ->whereDate('visibilities.ended_at', '>=', $now->toDateString());
+                $query->where(function ($q) use ($now) {
+                    $q->where('started_at', '<=', $now)
+                        ->where('ended_at', '>=', $now);
+                });
             }])
             ->where('user_id', $this->getAuthUserId())
             ->whereDate('checked_in', $now)
@@ -373,7 +374,7 @@ class SalesActivityController extends Controller
             $activity = SalesActivity::with([
                 'outlet',
                 'user',
-                'visibilities',
+                'salesVisibilities',
                 'surveys',
                 'orders',
                 'availabilities'
