@@ -134,6 +134,14 @@ if (!function_exists('getStatusBadge')) {
             '</div>';
     }
 }
+if (!function_exists('spanColor')) {
+    function spanColor($value,$color)
+    {
+        return '<span class="text-' . $color . '-400">' .
+            e($value) .
+            '</span>';
+    }
+}
 if (!function_exists('csv_to_array')) {
     function csv_to_array($filename, $header)
     {

@@ -54,8 +54,9 @@ class RoutingController extends Controller
     {
         $channels = Channel::all();
         $waktuKunjungan = $this->waktuKunjungan;
+        $cities = City::all();
         $countPending = Outlet::where('status', 'PENDING')->count();
-        return view("pages.routing.index", compact('channels', 'waktuKunjungan','countPending'));
+        return view("pages.routing.index", compact('channels', 'waktuKunjungan','countPending', 'cities'));
     }
     public function getData(Request $request)
     {
@@ -65,6 +66,7 @@ class RoutingController extends Controller
             $searchTerm = $request->search_term;
             $query->where(function ($q) use ($searchTerm) {
                 $q->where('name', 'like', "%{$searchTerm}%")
+                    ->where('status', '!=', 'APPROVED')
                     ->orWhereHas('user', function ($q) use ($searchTerm) {
                         $q->where('name', 'like', "%{$searchTerm}%");
                     });
@@ -356,4 +358,7 @@ class RoutingController extends Controller
         $outlet->delete();
         return to_route('routing.index')->with('success', 'Outlet berhasil dihapus');
     }
+    public function salesActivity($id){
+        return view('pages.routing.sales-activity', compact('id'));
+    } 
 }

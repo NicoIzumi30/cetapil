@@ -63,17 +63,21 @@
             @foreach ($outletForms as $form)
                 <x-pages.routing.outlet-detail>
                     <x-slot:title>{{$form->question}}</x-slot:title>
-                    <x-slot:value>{{$form->answers[0]->answer}}</x-slot:value>
+                    <x-slot:value>{{$form->answers[0]->answer ?? 'Data Tidak Tersedia'}}</x-slot:value>
                 </x-pages.routing.outlet-detail>
             @endforeach
 
         </div>
     </x-section-card>
-
+    @if($outlet->status == 'PENDING')
     <div class="w-full flex gap-6 mt-16">
         <x-button.light class="w-full" id="rejectBtn">Reject</x-button.light>
         <x-button.info class="w-full" id="approveBtn">Approve</x-button.info>
     </div>
+    @elseif($outlet->status == 'REJECTED')
+    <div class="w-full flex gap-6 mt-16"></div>
+        <x-button.light class="w-full" id="rejected" disabled>Rejected</x-button.light>
+    @endif
 </x-card>
 @endsection
 
