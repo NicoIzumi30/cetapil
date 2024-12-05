@@ -413,7 +413,7 @@ class Api {
   static Future<SubmitActivityResponse> submitActivity(
       Map<String, dynamic> data,
       List<Map<String, dynamic>> availabilityList,
-      List<VisibilityModel.Visibility> visibilityList,
+      List<Map<String, dynamic>> visibilityList,
       List<Map<String, dynamic>> surveyList,
       List<Map<String, dynamic>> orderList,
       ) async {
@@ -424,60 +424,60 @@ class Api {
     request.headers["Authorization"] = 'Bearer $token';
 
     ///General Section
-    request.fields["sales_activity_id"] = data["sales_activity_id"].toString();
-    request.fields["outlet_id"] = data["outlet_id"].toString();
-    request.fields["views_knowledge"] = data["views_knowledge"].toString();
-    request.fields["time_availability"] = data["time_availability"].toString();
-    request.fields["time_visibility"] = data["time_visibility"].toString();
-    request.fields["time_knowledge"] = data["time_knowledge"].toString();
-    request.fields["time_survey"] = data["time_survey"].toString();
-    request.fields["time_order"] = data["time_order"].toString();
-    request.fields["current_time"] = data["current_time"].toString();
-    request.fields["time_survey"] = data["time_survey"].toString();
+    request.fields["sales_activity_id"] = data["sales_activity_id"].toString() ?? "";
+    request.fields["outlet_id"] = data["outlet_id"].toString() ?? "";
+    request.fields["views_knowledge"] = data["views_knowledge"].toString() ?? "";
+    request.fields["time_availability"] = data["time_availability"].toString() ?? "";
+    request.fields["time_visibility"] = data["time_visibility"].toString() ?? "";
+    request.fields["time_knowledge"] = data["time_knowledge"].toString() ?? "";
+    request.fields["time_survey"] = data["time_survey"].toString() ?? "";
+    request.fields["time_order"] = data["time_order"].toString() ?? "";
+    request.fields["current_time"] = data["current_time"].toString() ?? "";
+    request.fields["time_survey"] = data["time_survey"].toString() ?? "";
 
     /// Availability Section
     for (var i = 0; i < availabilityList.length; i++) {
       request.fields["availability[$i][product_id]"] =
-          availabilityList[i]["product_id"].toString();
+          availabilityList[i]["id"].toString() ?? "";
       request.fields["availability[$i][availability_stock]"] =
-          availabilityList[i]["availability_stock"].toString();
+          availabilityList[i]["stock"].toString() ?? "";
       request.fields["availability[$i][average_stock]"] =
-          availabilityList[i]["average_stock"].toString();
+          availabilityList[i]["av3m"].toString() ?? "";
       request.fields["availability[$i][ideal_stock]"] =
-          availabilityList[i]["ideal_stock"].toString();
+          availabilityList[i]["recommend"].toString() ?? "";
     }
 
-    ///Visibility Section (*SUDAH BENAR)
+    ///Visibility Section
     for (var i = 0; i < visibilityList.length; i++) {
       request.fields["visibility[$i][visibility_id]"] =
-          visibilityList[i].typeVisibility!.id.toString();
+          visibilityList[i]['id'].id.toString() ?? "";
       request.fields["visibility[$i][condition]"] =
-          visibilityList[i].condition.toString();
+          visibilityList[i]['condition'].toString() ?? "";
       request.files.add(await http.MultipartFile.fromPath(
         'visibility[$i][file1]',
-        visibilityList[i].image1!.path,
+        visibilityList[i]['image1'].path,
       ));
       request.files.add(await http.MultipartFile.fromPath(
         'visibility[$i][file2]',
-        visibilityList[i].image2!.path,
+        visibilityList[i]['image2'].path,
       ));
     }
 
-    ///Survey Section (*SUDAH BENAR)
+    ///Survey Section
     for (var i = 0; i < surveyList.length; i++) {
       request.fields["survey[$i][survey_question_id]"] =
-          surveyList[i]["survey_question_id"].toString();
-      request.fields["survey[$i][answer]"] = surveyList[i]["answer"].toString();
+          surveyList[i]["survey_question_id"].toString() ?? "";
+      request.fields["survey[$i][answer]"] = surveyList[i]["answer"].toString() ?? "";
     }
 
-    ///Order Section (*SUDAH BENAR)
+    ///Order Section
     for (var i = 0; i < orderList.length; i++) {
       request.fields["order[$i][product_id]"] =
-          orderList[i]["id"].toString();
+          orderList[i]["id"].toString() ?? "";
       request.fields["order[$i][total_items]"] =
-          orderList[i]["jumlah"].toString();
+          orderList[i]["jumlah"].toString() ?? "";
       request.fields["order[$i][subtotal]"] =
-          orderList[i]["harga"].toString();
+          orderList[i]["harga"].toString() ?? "";
     }
 
     var response = await request.send();
