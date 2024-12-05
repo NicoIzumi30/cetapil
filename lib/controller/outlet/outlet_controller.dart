@@ -252,7 +252,10 @@ class OutletController extends GetxController {
   Future<void> refreshOutlets() async {
     try {
       isSyncing.value = true;
-      EasyLoading.show(status: 'Syncing data...');
+      CustomAlerts.showLoading(
+          Get.context!, // Use Get.context instead of the previous context
+          "Processing",
+          "Mengambil data outlet...");
 
       final apiResponse = await Api.getOutletList();
       if (apiResponse.status != "OK") {
@@ -309,21 +312,15 @@ class OutletController extends GetxController {
 
       await loadOutlets();
 
-      Get.snackbar(
-        'Sync Complete',
-        'Outlets synchronized successfully',
-        snackPosition: SnackPosition.BOTTOM,
-      );
+      CustomAlerts.dismissLoading();
+      CustomAlerts.showSuccess(Get.context!, "Berhasil", "Data outlet berhasil diperbarui");
     } catch (e) {
       print('Error syncing outlets: $e');
-      Get.snackbar(
-        'Sync Error',
-        'Failed to sync outlets: $e',
-        snackPosition: SnackPosition.BOTTOM,
-      );
+      CustomAlerts.showError(
+          Get.context!, "Gagal", "Gagal mengambil data: Periksa koneksi Anda dan coba lagi");
     } finally {
       isSyncing.value = false;
-      EasyLoading.dismiss();
+      CustomAlerts.dismissLoading();
     }
   }
 
@@ -346,11 +343,8 @@ class OutletController extends GetxController {
       outlets.assignAll(results);
     } catch (e) {
       print('Error loading outlets: $e');
-      Get.snackbar(
-        'Error',
-        'Failed to load outlets',
-        snackPosition: SnackPosition.BOTTOM,
-      );
+      CustomAlerts.showError(
+          Get.context!, "Gagal", "Gagal mengambil data: Periksa koneksi Anda dan coba lagi");
     } finally {
       isLoading.value = false;
     }
@@ -396,13 +390,10 @@ class OutletController extends GetxController {
 
   Future<void> saveDraftOutlet() async {
     try {
-      EasyLoading.show(status: 'Saving draft...');
+      CustomAlerts.showLoading(Get.context!, "Menyimpan", "Menyimpan data ke draft...");
 
       final String? currentOutletId = Get.arguments?['id'];
       final bool isEditing = currentOutletId != null;
-
-      print("Sales Name: ${salesName.value.text}");
-      print("City Name: ${cityName.value}");
 
       for (int i = 0; i < outletImages.length; i++) {
         if (outletImages[i] != null) {
@@ -455,7 +446,7 @@ class OutletController extends GetxController {
       clearForm();
 
       // Navigate back first
-      EasyLoading.dismiss();
+      CustomAlerts.dismissLoading();
       Get.back();
 
       // Then show the success alert
@@ -467,12 +458,9 @@ class OutletController extends GetxController {
               : "Anda baru menyimpan Draft. Silahkan periksa status Draft pada aplikasi.");
     } catch (e) {
       print('Error saving draft: $e');
-      Get.snackbar(
-        'Error',
-        'Failed to save draft: $e',
-        snackPosition: SnackPosition.BOTTOM,
-      );
+      CustomAlerts.showError(Get.context!, "Gagal", "Gagal menyimpan data ke draft.");
     } finally {
+      CustomAlerts.dismissLoading();
       EasyLoading.dismiss();
     }
   }
@@ -481,7 +469,9 @@ class OutletController extends GetxController {
     try {
       final String? currentOutletId = Get.arguments?['id'];
       final bool isEditing = currentOutletId != null;
-      EasyLoading.show(status: 'Submit Data...');
+
+      CustomAlerts.showLoading(Get.context!, "Mengirim", "Mengirim data ke server...");
+
       for (int i = 0; i < outletImages.length; i++) {
         if (outletImages[i] != null) {
           await uploadImage(i);
@@ -521,9 +511,9 @@ class OutletController extends GetxController {
 
       isEditing ? await db.deleteOutlet(currentOutletId) : null;
       clearForm();
-      EasyLoading.dismiss();
+      CustomAlerts.dismissLoading();
       Get.back();
-      
+
       CustomAlerts.showSuccess(
           Get.context!, // Use Get.context instead of the previous context
           "Data Berhasil Disimpan",
@@ -531,13 +521,10 @@ class OutletController extends GetxController {
       await refreshOutlets();
     } catch (e) {
       print('Error submit data: $e');
-      Get.snackbar(
-        'Error',
-        'Failed to submit data: $e',
-        snackPosition: SnackPosition.BOTTOM,
-      );
+      CustomAlerts.showError(Get.context!, "Gagal",
+          "Gagal mengirim data ke server : Periksa koneksi Anda dan coba lagi");
     } finally {
-      EasyLoading.dismiss();
+      CustomAlerts.dismissLoading();
     }
   }
 

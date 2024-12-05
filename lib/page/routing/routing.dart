@@ -46,9 +46,9 @@ class RoutingPage extends GetView<RoutingController> {
               Expanded(
                 child: Obx(() {
                   // Check loading state
-                  if (controller.isLoading.value) {
-                    return const Center(child: CircularProgressIndicator());
-                  }
+                  // if (controller.isLoading.value) {
+                  //   return const Center(child: CircularProgressIndicator());
+                  // }
 
                   // Get the list safely
                   List<Data> outletList = controller.filteredOutlets.toList();

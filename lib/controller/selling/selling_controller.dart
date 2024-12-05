@@ -61,6 +61,8 @@ class SellingController extends GetxController {
       isLoading.value = true;
       errorMessage.value = '';
 
+      CustomAlerts.showLoading(Get.context!, "Processing", "Mengambil data aktivitas...");
+
       // Load data from local database (drafted)
       final localData = await dbHelper.getAllSellingData(isDrafted: true);
 
@@ -78,15 +80,22 @@ class SellingController extends GetxController {
         data.isDrafted = true;
       }
 
+      CustomAlerts.dismissLoading();
+
       // Combine both sources and update the list
       sellingData.value = [
         ...localData,
         ...apiData,
       ];
+
+      CustomAlerts.showSuccess(Get.context!, "Berhasil", "Data selling berhasil diperbarui");
     } catch (e) {
       errorMessage.value = 'Gagal memuat data: $e';
       print('Error loading data: $e');
+      CustomAlerts.showError(
+          Get.context!, "Gagal", "Gagal mengambil data: Periksa koneksi Anda dan coba lagi");
     } finally {
+      CustomAlerts.dismissLoading();
       isLoading.value = false;
     }
   }
@@ -162,6 +171,8 @@ class SellingController extends GetxController {
     try {
       isSaving.value = true;
 
+      CustomAlerts.showLoading(Get.context!, "Menyimpan", "Menyimpan data ke draft...");
+
       // Validate required fields
       if (outletName.value.text.isEmpty) {
         throw 'Nama outlet harus diisi';
@@ -226,30 +237,33 @@ class SellingController extends GetxController {
       currentDraftId?.value = '';
 
       // Navigate back
-      Get.back();
+      CustomAlerts.dismissLoading();
 
       // Show success message
-      Get.snackbar(
-        'Berhasil',
-        'Draft berhasil ${currentDraftId?.value.isNotEmpty == true ? 'diperbarui' : 'disimpan'}',
-        snackPosition: SnackPosition.BOTTOM,
-        backgroundColor: Colors.green,
-        colorText: Colors.white,
-      );
+      CustomAlerts.showSuccess(
+          Get.context!,
+          currentDraftId?.value.isNotEmpty == true
+              ? "Draft Berhasil Diperbarui"
+              : "Draft Berhasil Disimpan",
+          currentDraftId?.value.isNotEmpty == true
+              ? "Anda baru memperbarui Draft. Silahkan periksa status Draft pada aplikasi."
+              : "Anda baru menyimpan Draft. Silahkan periksa status Draft pada aplikasi.");
 
       // Refresh the list
       await loadAllData();
       clearForm();
     } catch (e) {
-      Get.snackbar(
-        'Error',
-        e.toString(),
-        snackPosition: SnackPosition.BOTTOM,
-        backgroundColor: Colors.red,
-        colorText: Colors.white,
-      );
+      // Get.snackbar(
+      //   'Error',
+      //   e.toString(),
+      //   snackPosition: SnackPosition.BOTTOM,
+      //   backgroundColor: Colors.red,
+      //   colorText: Colors.white,
+      // );
+      CustomAlerts.showError(Get.context!, "Gagal", "Gagal menyimpan data ke draft.");
     } finally {
       isSaving.value = false;
+      CustomAlerts.dismissLoading();
     }
   }
 
@@ -259,7 +273,9 @@ class SellingController extends GetxController {
     try {
       final String? currentSellingId = Get.arguments?['id'].toString();
       final bool isEditing = currentSellingId != null;
-      EasyLoading.show(status: 'Submit Data...');
+
+      CustomAlerts.showLoading(Get.context!, "Mengirim", "Mengirim data ke server...");
+
       final data = {
         'outlet_name': outletName.value.text,
         'category_outlet': selectedCategory.value,
@@ -276,7 +292,10 @@ class SellingController extends GetxController {
       print("id draft = $currentDraftId");
       isEditing ? await dbHelper.deleteSellingData(currentDraftId!.value) : null;
       clearForm();
-      EasyLoading.dismiss();
+
+      CustomAlerts.dismissLoading();
+
+
       Get.back();
       CustomAlerts.showSuccess(
           Get.context!, // Use Get.context instead of the previous context
@@ -285,13 +304,10 @@ class SellingController extends GetxController {
       // await refreshOutlets();
     } catch (e) {
       print('Error submit data: $e');
-      Get.snackbar(
-        'Error',
-        'Failed to submit data: $e',
-        snackPosition: SnackPosition.BOTTOM,
-      );
+      CustomAlerts.showError(Get.context!, "Gagal",
+          "Gagal mengirim data ke server : Periksa koneksi Anda dan coba lagi");
     } finally {
-      EasyLoading.dismiss();
+      CustomAlerts.dismissLoading();
     }
   }
 

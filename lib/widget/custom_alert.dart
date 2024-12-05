@@ -44,7 +44,7 @@ class CustomAlerts {
 
     Overlay.of(context).insert(_successEntry!);
 
-    Future.delayed(Duration(seconds: 5), () {
+    Future.delayed(Duration(seconds: 4), () {
       dismissSuccess();
     });
   }
@@ -62,7 +62,7 @@ class CustomAlerts {
 
     Overlay.of(context).insert(_errorEntry!);
 
-    Future.delayed(Duration(seconds: 5), () {
+    Future.delayed(Duration(seconds: 4), () {
       dismissError();
     });
   }

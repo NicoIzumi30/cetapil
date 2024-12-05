@@ -1,3 +1,4 @@
+// image_upload_utils.dart
 import 'dart:convert';
 import 'dart:io';
 import 'package:flutter/material.dart';
@@ -6,16 +7,24 @@ import 'package:path_provider/path_provider.dart';
 import 'package:image_picker/image_picker.dart';
 import 'package:path/path.dart' as path;
 import 'package:get/get.dart';
+import 'package:photo_view/photo_view.dart';
 
 class ImageUploadUtils {
   static final ImagePicker _picker = ImagePicker();
-  
-  // Maximum file size in bytes (200KB)
   static const int maxFileSize = 200 * 1024;
 
-  /// Shows bottom sheet for picking image source and handles the upload process
-  static Future<File?> showImageSourceSelection(BuildContext context) async {
-    final ImageSource? source = await showModalBottomSheet<ImageSource>(
+  static void showImageViewer(BuildContext context, dynamic image) {
+    Navigator.push(
+      context,
+      MaterialPageRoute(
+        builder: (context) => ImageViewerScreen(image: image),
+      ),
+    );
+  }
+
+  static Future<File?> showImageSourceSelection(BuildContext context,
+      {dynamic currentImage}) async {
+    final result = await showModalBottomSheet<dynamic>(
       context: context,
       backgroundColor: Colors.transparent,
       builder: (BuildContext context) {
@@ -53,6 +62,14 @@ class ImageUploadUtils {
               //     Navigator.pop(context, ImageSource.gallery);
               //   },
               // ),
+              if (currentImage != null)
+                ListTile(
+                  leading: Icon(Icons.image, color: Colors.blue),
+                  title: Text('View Image'),
+                  onTap: () {
+                    Navigator.pop(context, 'view');
+                  },
+                ),
               SizedBox(height: 16),
             ],
           ),
@@ -60,10 +77,14 @@ class ImageUploadUtils {
       },
     );
 
-    if (source == null) return null;
+    if (result == null) return null;
+    if (result == 'view') {
+      showImageViewer(context, currentImage!);
+      return currentImage;
+    }
 
     try {
-      return await pickAndCompressImage(source: source);
+      return await pickAndCompressImage(source: result);
     } catch (e) {
       Get.snackbar(
         'Error',
@@ -74,7 +95,6 @@ class ImageUploadUtils {
     }
   }
 
-  /// Picks image from camera or gallery and compresses it
   static Future<File?> pickAndCompressImage({
     required ImageSource source,
     int quality = 85,
@@ -82,7 +102,6 @@ class ImageUploadUtils {
     int minHeight = 1024,
   }) async {
     try {
-      // Pick image
       final XFile? pickedFile = await _picker.pickImage(
         source: source,
         imageQuality: quality,
@@ -90,7 +109,6 @@ class ImageUploadUtils {
 
       if (pickedFile == null) return null;
 
-      // Get temp directory for storing compressed image
       final Directory tempDir = await getTemporaryDirectory();
       final String targetPath = path.join(
         tempDir.path,
@@ -105,11 +123,8 @@ class ImageUploadUtils {
         minHeight: minHeight,
       );
 
-      // Check if file size is within limits
       if (compressedFile != null) {
         int fileSize = await compressedFile.length();
-        
-        // If file is still too large, compress again with lower quality
         while (fileSize > maxFileSize && quality > 5) {
           quality -= 10;
           compressedFile = await compressImage(
@@ -134,7 +149,6 @@ class ImageUploadUtils {
     }
   }
 
-  /// Compresses an image file
   static Future<File?> compressImage(
     File file,
     String targetPath, {
@@ -159,7 +173,6 @@ class ImageUploadUtils {
     }
   }
 
-  /// Converts image file to base64 string
   static Future<String?> convertImageToBase64(File imageFile) async {
     try {
       List<int> imageBytes = await imageFile.readAsBytes();
@@ -170,9 +183,75 @@ class ImageUploadUtils {
     }
   }
 
-  /// Gets file size in KB
   static Future<double> getFileSizeInKB(File file) async {
     final int bytes = await file.length();
     return bytes / 1024;
+  }
+}
+
+class ImageViewerScreen extends StatelessWidget {
+  final dynamic image;
+
+  const ImageViewerScreen({
+    Key? key,
+    required this.image,
+  }) : super(key: key);
+
+  @override
+  Widget build(BuildContext context) {
+    return Scaffold(
+      backgroundColor: Colors.black,
+      appBar: AppBar(
+        backgroundColor: Colors.black,
+        iconTheme: IconThemeData(color: Colors.white),
+        elevation: 0,
+      ),
+      body: PhotoView(
+        imageProvider: image is File ? FileImage(image) : NetworkImage(image) as ImageProvider,
+        minScale: PhotoViewComputedScale.contained,
+        maxScale: PhotoViewComputedScale.covered * 2,
+        initialScale: PhotoViewComputedScale.contained,
+        backgroundDecoration: BoxDecoration(color: Colors.black),
+      ),
+    );
+  }
+}
+
+// Example usage in a widget
+class ImagePickerWidget extends StatefulWidget {
+  @override
+  _ImagePickerWidgetState createState() => _ImagePickerWidgetState();
+}
+
+class _ImagePickerWidgetState extends State<ImagePickerWidget> {
+  File? _imageFile;
+
+  Future<void> _handleImageSelection() async {
+    final File? result = await ImageUploadUtils.showImageSourceSelection(
+      context,
+      currentImage: _imageFile,
+    );
+
+    if (result != null) {
+      setState(() => _imageFile = result);
+    }
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return Column(
+      children: [
+        if (_imageFile != null)
+          Container(
+            height: 200,
+            width: 200,
+            child: Image.file(_imageFile!, fit: BoxFit.cover),
+          ),
+        ElevatedButton(
+          onPressed: _handleImageSelection,
+          child: Text(_imageFile == null ? 'Select Image' : 'Change Image'),
+        ),
+      ],
+    );
   }
 }

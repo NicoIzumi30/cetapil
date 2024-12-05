@@ -67,26 +67,26 @@ class SellingPage extends GetView<SellingController> {
                               ),
 
                         // Loading Overlay
-                        if (controller.isLoading.value)
-                          Container(
-                            color: Colors.black12,
-                            child: Center(
-                              child: Column(
-                                mainAxisSize: MainAxisSize.min,
-                                children: [
-                                  CircularProgressIndicator(),
-                                  SizedBox(height: 16),
-                                  Text(
-                                    'Menyinkronkan data...',
-                                    style: TextStyle(
-                                      fontSize: 14,
-                                      color: Colors.black87,
-                                    ),
-                                  ),
-                                ],
-                              ),
-                            ),
-                          ),
+                        // if (controller.isLoading.value)
+                        //   Container(
+                        //     color: Colors.black12,
+                        //     child: Center(
+                        //       child: Column(
+                        //         mainAxisSize: MainAxisSize.min,
+                        //         children: [
+                        //           CircularProgressIndicator(),
+                        //           SizedBox(height: 16),
+                        //           Text(
+                        //             'Menyinkronkan data...',
+                        //             style: TextStyle(
+                        //               fontSize: 14,
+                        //               color: Colors.black87,
+                        //             ),
+                        //           ),
+                        //         ],
+                        //       ),
+                        //     ),
+                        //   ),
                       ],
                     ),
                   );

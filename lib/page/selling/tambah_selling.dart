@@ -18,7 +18,7 @@ class TambahSelling extends GetView<SellingController> {
   @override
   Widget build(BuildContext context) {
     return WillPopScope(
-      onWillPop: ()async{
+      onWillPop: () async {
         final shouldPop = await Alerts.showConfirmDialog(context);
         return shouldPop ?? false;
       },
@@ -58,7 +58,8 @@ class TambahSelling extends GetView<SellingController> {
                                 CategoryDropdown<SellingController>(
                                   title: "Kategori Outlet",
                                   controller: controller,
-                                  selectedCategoryGetter: (controller) => controller.selectedCategory,
+                                  selectedCategoryGetter: (controller) =>
+                                      controller.selectedCategory,
                                   categoriesGetter: (controller) => controller.categories,
                                 ),
                                 Text(
@@ -119,7 +120,8 @@ class TambahSelling extends GetView<SellingController> {
                                                 itemData: item, // Pass the full item data
                                                 onDelete: () {
                                                   groupedItems.forEach((key, value) {
-                                                    value.removeWhere((element) => element == items);
+                                                    value
+                                                        .removeWhere((element) => element == items);
                                                   });
                                                   groupedItems
                                                       .removeWhere((key, value) => value.isEmpty);
@@ -140,7 +142,8 @@ class TambahSelling extends GetView<SellingController> {
                                             ),
                                           ),
                                           onPressed: () async {
-                                            if (!Get.isRegistered<TambahProdukSellingController>()) {
+                                            if (!Get.isRegistered<
+                                                TambahProdukSellingController>()) {
                                               var con = Get.put(TambahProdukSellingController());
                                               con.clearForm();
                                             } else {
@@ -183,8 +186,8 @@ class TambahSelling extends GetView<SellingController> {
                                       child: Obx(() => TextField(
                                             readOnly: true,
                                             controller: TextEditingController(
-                                                text: controller
-                                                        .gpsController.currentPosition.value?.latitude
+                                                text: controller.gpsController.currentPosition.value
+                                                        ?.latitude
                                                         .toString() ??
                                                     '-'),
                                             decoration: InputDecoration(
@@ -338,14 +341,16 @@ class TambahSelling extends GetView<SellingController> {
             onTap: isUploading
                 ? null
                 : () async {
-                    final File? result = await ImageUploadUtils.showImageSourceSelection(context);
+                    final File? result = await ImageUploadUtils.showImageSourceSelection(context,
+                        currentImage: image);
+
                     if (result != null) {
                       controller.updateImage(result);
                     }
                   },
             child: Container(
               width: double.infinity,
-              height: 250,
+              height: 200,
               margin: EdgeInsets.only(bottom: 10),
               decoration: BoxDecoration(
                 color: Color(0xFFEDF8FF),

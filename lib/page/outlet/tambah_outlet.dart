@@ -224,7 +224,8 @@ class TambahOutlet extends GetView<OutletController> {
               onTap: isUploading
                   ? null
                   : () async {
-                      final File? result = await ImageUploadUtils.showImageSourceSelection(context);
+                      final File? result = await ImageUploadUtils.showImageSourceSelection(context,
+                          currentImage: image);
                       if (result != null) {
                         controller.updateImage(index, result);
                       }

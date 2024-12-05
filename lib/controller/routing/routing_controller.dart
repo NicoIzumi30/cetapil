@@ -1,5 +1,6 @@
 import 'package:cetapil_mobile/controller/outlet/outlet_controller.dart';
 import 'package:cetapil_mobile/model/list_routing_response.dart';
+import 'package:cetapil_mobile/widget/custom_alert.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_easyloading/flutter_easyloading.dart';
 import 'package:get/get.dart';
@@ -41,8 +42,8 @@ class RoutingController extends GetxController {
     try {
       await db.deleteAllRouting();
       routing.clear();
+      CustomAlerts.showLoading(Get.context!, "Processing", "Mengambil data routing...");
 
-      EasyLoading.show(status: 'Saving data...');
       final response = await Api.getRoutingList();
 
       if (response.status == "OK" && response.data!.isNotEmpty) {
@@ -104,43 +105,46 @@ class RoutingController extends GetxController {
           await db.insertRoutingWithAnswers(data: data);
         }
 
+        CustomAlerts.dismissLoading();
+
         final results = await db.getAllRouting();
         routing.addAll(results);
+
+        CustomAlerts.showSuccess(Get.context!, "Berhasil", "Data routing berhasil diperbarui");
       }
     } catch (e) {
       print('Error saving Routing: $e');
-      Get.snackbar(
-        'Error',
-        'Gagal Simpan Data: Periksa Koneksi Anda dan Coba Lagi',
-        snackPosition: SnackPosition.BOTTOM,
-      );
+      CustomAlerts.showError(
+          Get.context!, "Gagal", "Gagal mengambil data: Periksa koneksi Anda dan coba lagi");
     } finally {
-      EasyLoading.dismiss();
+      CustomAlerts.dismissLoading();
     }
   }
 
-  submitCheckin(String outlet_id) async {
+  Future<void> submitCheckin(String outlet_id) async {
     try {
-      EasyLoading.show(status: 'Submit data...');
+      CustomAlerts.showLoading(Get.context!, "Check in", "Check in data routing...");
+
       final data = {
         'outlet_id': outlet_id,
         'checked_in': DateTime.now().toIso8601String(),
       };
       final response = await Api.submitCheckin(data);
 
+      CustomAlerts.dismissLoading();
+
       if (response.status == "OK") {
         Get.back();
-        initGetRouting();
+        await initGetRouting();
+        CustomAlerts.showSuccess(Get.context!, "Check in",
+            "Berhasil Check in di ${routing.firstWhere((r) => r.id == outlet_id).name}");
       }
     } catch (e) {
       print('Error saving Routing: $e');
-      Get.snackbar(
-        'Error',
-        'Gagal Simpan Data: Periksa Koneksi Anda dan Coba Lagi',
-        snackPosition: SnackPosition.BOTTOM,
-      );
+      CustomAlerts.showError(
+          Get.context!, "Check in", e.toString());
     } finally {
-      EasyLoading.dismiss();
+      CustomAlerts.dismissLoading();
     }
   }
 

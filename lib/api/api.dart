@@ -46,8 +46,7 @@ class Api {
         if (response.statusCode >= 500) {
           throw Exception('Server Error');
         }
-        throw Exception(
-            'Failed to login: ${response.statusCode} ${response.reasonPhrase}');
+        throw Exception('Failed to login: ${response.statusCode} ${response.reasonPhrase}');
       }
     } catch (e) {
       throw Exception('Failed to login: $e');
@@ -90,9 +89,7 @@ class Api {
         final jsonResponse = json.decode(response.body);
         final List<dynamic> data = jsonResponse;
         print(data);
-        return data
-            .map((item) => FormOutletResponse.fromJson(item).toJson())
-            .toList();
+        return data.map((item) => FormOutletResponse.fromJson(item).toJson()).toList();
       }
 
       throw Exception('Failed to load forms');
@@ -170,8 +167,7 @@ class Api {
     throw "Gagal request data Survey Question : \n${response.body}";
   }
 
-  static Future<SubmitCheckinRouting> submitCheckin(
-      Map<String, String> data) async {
+  static Future<SubmitCheckinRouting> submitCheckin(Map<String, String> data) async {
     var url = "$baseUrl/api/routing/check_in";
     var token = await storage.read('token');
     var response = await http.post(
@@ -189,7 +185,11 @@ class Api {
     if (response.statusCode == 200) {
       return SubmitCheckinRouting.fromJson(jsonDecode(response.body));
     }
-    throw "Gagal submit checkin : \n${response.body}";
+    if (SubmitCheckinRouting.fromJson(jsonDecode(response.body)).message! ==
+        "You still have an activity that has not checked out yet") {
+      throw "Anda masih memiliki aktivitas yang belum check out";
+    }
+    throw SubmitCheckinRouting.fromJson(jsonDecode(response.body)).message!;
   }
 
   static Future<SubmitOutletResponse> submitOutlet(
@@ -388,7 +388,7 @@ class Api {
     request.fields["longitude"] = data["longitude"].toString();
     request.fields["latitude"] = data["latitude"].toString();
 
-    for(var i = 0; i < productList.length; i++){
+    for (var i = 0; i < productList.length; i++) {
       request.fields["products[$i][id]"] = productList[i]["id"].toString();
       request.fields["products[$i][stock]"] = productList[i]["stock"].toString();
       request.fields["products[$i][selling]"] = productList[i]["selling"].toString();
@@ -412,12 +412,12 @@ class Api {
   }
 
   static Future<SubmitActivityResponse> submitActivity(
-      Map<String, dynamic> data,
-      List<Map<String, dynamic>> availabilityList,
-      List<Map<String, dynamic>> visibilityList,
-      List<Map<String, dynamic>> surveyList,
-      List<Map<String, dynamic>> orderList,
-      ) async {
+    Map<String, dynamic> data,
+    List<Map<String, dynamic>> availabilityList,
+    List<Map<String, dynamic>> visibilityList,
+    List<Map<String, dynamic>> surveyList,
+    List<Map<String, dynamic>> orderList,
+  ) async {
     var url = "$baseUrl/api/activity/submit";
     var token = await storage.read('token');
     var request = await http.MultipartRequest('post', Uri.parse(url));
@@ -438,8 +438,7 @@ class Api {
 
     /// Availability Section
     for (var i = 0; i < availabilityList.length; i++) {
-      request.fields["availability[$i][product_id]"] =
-          availabilityList[i]["id"].toString() ?? "";
+      request.fields["availability[$i][product_id]"] = availabilityList[i]["id"].toString() ?? "";
       request.fields["availability[$i][availability_stock]"] =
           availabilityList[i]["stock"].toString() ?? "";
       request.fields["availability[$i][average_stock]"] =
@@ -450,10 +449,8 @@ class Api {
 
     ///Visibility Section
     for (var i = 0; i < visibilityList.length; i++) {
-      request.fields["visibility[$i][visibility_id]"] =
-          visibilityList[i]['id'].id.toString() ?? "";
-      request.fields["visibility[$i][condition]"] =
-          visibilityList[i]['condition'].toString() ?? "";
+      request.fields["visibility[$i][visibility_id]"] = visibilityList[i]['id'].id.toString() ?? "";
+      request.fields["visibility[$i][condition]"] = visibilityList[i]['condition'].toString() ?? "";
       request.files.add(await http.MultipartFile.fromPath(
         'visibility[$i][file1]',
         visibilityList[i]['image1'].path,
@@ -473,12 +470,9 @@ class Api {
 
     ///Order Section
     for (var i = 0; i < orderList.length; i++) {
-      request.fields["order[$i][product_id]"] =
-          orderList[i]["id"].toString() ?? "";
-      request.fields["order[$i][total_items]"] =
-          orderList[i]["jumlah"].toString() ?? "";
-      request.fields["order[$i][subtotal]"] =
-          orderList[i]["harga"].toString() ?? "";
+      request.fields["order[$i][product_id]"] = orderList[i]["id"].toString() ?? "";
+      request.fields["order[$i][total_items]"] = orderList[i]["jumlah"].toString() ?? "";
+      request.fields["order[$i][subtotal]"] = orderList[i]["harga"].toString() ?? "";
     }
 
     var response = await request.send();
