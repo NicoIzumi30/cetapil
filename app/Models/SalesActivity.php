@@ -43,9 +43,13 @@ class SalesActivity extends Model
         return $this->hasMany(SalesAvailability::class);
     }
 
-    public function visibilities(): HasMany
+    public function salesVisibilities(): HasMany
     {
         return $this->hasMany(SalesVisibility::class);
+    }
+    public function visibilities(): HasMany
+    {
+        return $this->hasMany(Visibility::class, 'outlet_id', 'outlet_id');
     }
 
     public function scopeCompleteRelation(Builder $query)
