@@ -95,6 +95,8 @@ class ActivityController extends GetxController {
       // Show error
       CustomAlerts.showError(
           Get.context!, "Gagal", "Gagal mengambil data: Periksa koneksi Anda dan coba lagi");
+    } finally {
+      CustomAlerts.dismissLoading();
     }
   }
 

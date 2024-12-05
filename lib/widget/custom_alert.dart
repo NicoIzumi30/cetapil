@@ -42,7 +42,9 @@ class CustomAlerts {
       ),
     );
 
-    Overlay.of(context).insert(_successEntry!);
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      Overlay.of(context).insert(_successEntry!);
+    });
 
     Future.delayed(Duration(seconds: 4), () {
       dismissSuccess();
@@ -60,7 +62,9 @@ class CustomAlerts {
       ),
     );
 
-    Overlay.of(context).insert(_errorEntry!);
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      Overlay.of(context).insert(_errorEntry!);
+    });
 
     Future.delayed(Duration(seconds: 4), () {
       dismissError();
@@ -76,7 +80,9 @@ class CustomAlerts {
       ),
     );
 
-    Overlay.of(context).insert(_loadingEntry!);
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      Overlay.of(context).insert(_loadingEntry!);
+    });
   }
 
   static void dismissSuccess() {
