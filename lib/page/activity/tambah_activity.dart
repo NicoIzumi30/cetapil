@@ -107,13 +107,13 @@ class TambahActivity extends GetView<TambahActivityController> {
                         _buildButton(
                           false,
                           "Simpan Draft",
-                          () => controller.saveDraftActivity(),
+                          () => controller.saveDraftActivity(activity.id!,activity.outlet!.id),
                         ),
                         SizedBox(width: 10),
                         _buildButton(
                           true,
                           "Kirim",
-                          () => controller.submitApiActivity(),
+                          () => controller.submitApiActivity(activity.id!,activity.outlet!.id),
                           // controller.submitOutlet(),
                         ),
                       ],

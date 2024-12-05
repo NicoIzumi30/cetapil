@@ -16,7 +16,7 @@ import '../../utils/colors.dart';
 import '../outlet/detail_outlet.dart';
 
 class ActivityPage extends GetView<ActivityController> {
-  final TambahActivityController tambahActivityController = TambahActivityController();
+
   @override
   Widget build(BuildContext context) {
     return SafeArea(
@@ -59,7 +59,7 @@ class ActivityPage extends GetView<ActivityController> {
                                   statusCheckin: true,
                                   ontap: ()async {
                                     // Set the outlet_id in the TambahActivityController before navigation
-                                    // Get.delete<TambahActivityController>();
+                                    Get.delete<TambahActivityController>();
                                     if (!Get.isRegistered<TambahActivityController>()) {
                                       Get.lazyPut(()=>TambahActivityController());
                                     }
@@ -72,11 +72,13 @@ class ActivityPage extends GetView<ActivityController> {
                                     if (!Get.isRegistered<TambahOrderController>()) {
                                       Get.put(TambahOrderController());
                                     }
+                                    print(!Get.isRegistered<TambahActivityController>());
+                                    final TambahActivityController tambahActivityController = TambahActivityController();
                                     final outlet_id = activity.outlet!.id;
                                     tambahActivityController.selectedTab.value = 0;
                                     tambahActivityController.clearAllDraftItems();
-                                    tambahActivityController.setDetailOutlet(activity);
                                     tambahActivityController.setOutletId(outlet_id!);
+                                    tambahActivityController.setDetailOutlet(activity);
                                     Get.to(() => TambahActivity(activity));
                                   },
                                 );

@@ -88,17 +88,15 @@ class TambahActivityController extends GetxController {
     startTabTimer();
   }
 
-  Future<void> submitApiActivity() async {
-
+  Future<void> submitApiActivity(String activityId, outletId) async {
     try {
       // final String? currentOutletId = Get.arguments?['id'];
       // final bool isEditing = currentOutletId != null;
       EasyLoading.show(status: 'Submit Data...');
 
-      // print(detailOutlet?.value?.id ?? "sss");
       Map<String, dynamic> data = {
-        'sales_activity_id': detailOutlet.value!.id,
-        'outlet_id': detailOutlet.value!.outlet!.id,
+        'sales_activity_id': activityId,
+        'outlet_id': outletId,
         'views_knowledge': "111",
         'time_availability': availabilityTime.value.toString(),
         'time_visibility': visibilityTime.value.toString(),
@@ -134,6 +132,7 @@ class TambahActivityController extends GetxController {
 
       // isEditing ? await db.deleteOutlet(currentOutletId) : null;
       // clearForm();
+      _timer?.cancel();
       EasyLoading.dismiss();
       Get.back();
       CustomAlerts.showSuccess(
@@ -142,7 +141,7 @@ class TambahActivityController extends GetxController {
           "Anda baru menyimpan Data. Silahkan periksa status Outlet pada aplikasi.");
       // await refreshOutlets();
     } catch (e) {
-      print('Error submit data: $e');
+      print('Error submit dati: $e');
       Get.snackbar(
         'Error',
         'Failed to submit data: $e',
@@ -153,12 +152,11 @@ class TambahActivityController extends GetxController {
     }
   }
 
-  Future<void> saveDraftActivity() async {
+  Future<void> saveDraftActivity(String activityId, outletId) async {
     try {
       EasyLoading.show(status: 'Saving draft...');
 
-      final String? currentOutletId = Get.arguments?['id'];
-      final bool isEditing = currentOutletId != null;
+      bool isEditing = await db.checkSalesActivityExists(activityId);
 
       List<Map<String, dynamic>> surveyList = [
         ...priceControllers.entries.map((entry) => {
@@ -172,8 +170,8 @@ class TambahActivityController extends GetxController {
       ];
 
       final data = {
-        'sales_activity_id': detailOutlet.value!.id,
-        'outlet_id': detailOutlet.value!.outlet!.id,
+        'sales_activity_id': activityId,
+        'outlet_id': outletId,
         'views_knowledge': "111",
         'time_availability': availabilityTime.toString(),
         'time_visibility': visibilityTime.toString(),
@@ -438,8 +436,9 @@ class TambahActivityController extends GetxController {
     return null;
   }
 
-  void setDetailOutlet(Activity.Data data) {
+   setDetailOutlet(Activity.Data data) {
     detailOutlet.value = data;
+    print(detailOutlet.value!.id);
   }
 
   // Loading and error management methods

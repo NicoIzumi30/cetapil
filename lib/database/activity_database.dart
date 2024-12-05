@@ -74,7 +74,7 @@ class ActivityDatabaseHelper {
     // Survey items table
     await db.execute('''
       CREATE TABLE survey (
-        id INTEGER PRIMARY KEY AUTOINCREMENT,
+        id TEXT PRIMARY KEY,
         survey_id TEXT,
         sales_activity_id TEXT,
         answer TEXT,
@@ -96,8 +96,18 @@ class ActivityDatabaseHelper {
     ''');
   }
 
+  Future<bool> checkSalesActivityExists(String id) async {
+    final db = await database;
+    final result = await db.query(
+      'sales_activity',
+      where: 'id = ?',
+      whereArgs: [id],
+    );
+    return result.isNotEmpty;
+  }
+
   // Insert methods
-  Future<void> insertFullSalesActivity({
+  Future<void>  insertFullSalesActivity({
     required Map<String, dynamic> data,
     List<Map<String, dynamic>>? availabilityItems,
     List<Map<String, dynamic>>? visibilityItems,
@@ -109,15 +119,15 @@ class ActivityDatabaseHelper {
     await db.transaction((txn) async {
       // Insert main sales activity
       await txn.insert('sales_activity', {
-        'id': data['sales_activity_id'],
-        'outlet_id': data['outlet_id'],
-        'view_knowledge': data['views_knowledge'],
-        'time_availability': data['time_availability'],
-        'time_visibility': data['time_visibility'],
-        'time_knowledge': data['time_knowledge'],
-        'time_survey': data['time_survey'],
-        'time_order': data['time_order'],
-        'current_time': data['current_time'],
+        'id': data['sales_activity_id'].toString(),
+        'outlet_id': data['outlet_id'].toString(),
+        'view_knowledge': data['views_knowledge'].toString(),
+        'time_availability': data['time_availability'].toString(),
+        'time_visibility': data['time_visibility'].toString(),
+        'time_knowledge': data['time_knowledge'].toString(),
+        'time_survey': data['time_survey'].toString(),
+        'time_order': data['time_order'].toString(),
+        'current_time': data['current_time'].toString(),
       });
 
       // Insert availability items
@@ -125,10 +135,10 @@ class ActivityDatabaseHelper {
         for (var item in availabilityItems) {
           await txn.insert('availability', {
             'id': uuid.v4(),
-            'product_id': item['id'],
-            'available_stock': item['stock'],
-            'average_stock': item['av3m'],
-            'ideal_stock': item['recommend'],
+            'product_id': item['id'].toString(),
+            'available_stock': item['stock'].toString(),
+            'average_stock': item['av3m'] ?? "1",
+            'ideal_stock': item['recommend'].toString(),
             'sales_activity_id': data['sales_activity_id'],
           });
         }
@@ -139,10 +149,10 @@ class ActivityDatabaseHelper {
         for (var item in visibilityItems) {
           await txn.insert('visibility', {
             'id': uuid.v4(),
-            'visibility_id': item['id'],
-            'condition': item['condition'],
-            'image1': item['image1'],
-            'image2': item['image2'],
+            'visibility_id': item['id'].toString(),
+            'condition': item['condition'].toString().toUpperCase(),
+            'image1': item['image1'].path,
+            'image2': item['image2'].path,
             'sales_activity_id': data['sales_activity_id'],
           });
         }
@@ -153,8 +163,8 @@ class ActivityDatabaseHelper {
         for (var item in surveyItems) {
           await txn.insert('survey', {
             'id': uuid.v4(),
-            'survey_question_id': item['survey_question_id'],
-            'answer': item['answer'],
+            'survey_id': item['survey_question_id'].toString(),
+            'answer': item['answer'].toString(),
             'sales_activity_id': data['sales_activity_id'],
           });
         }
@@ -243,14 +253,14 @@ class ActivityDatabaseHelper {
       await txn.update(
         'sales_activity',
         {
-          'outlet_id': data['outlet_id'],
-          'view_knowledge': data['views_knowledge'],
-          'time_availability': data['time_availability'],
-          'time_visibility': data['time_visibility'],
-          'time_knowledge': data['time_knowledge'],
-          'time_survey': data['time_survey'],
-          'time_order': data['time_order'],
-          'current_time': data['current_time'],
+          'outlet_id': data['outlet_id'].toString(),
+          'view_knowledge': data['views_knowledge'].toString(),
+          'time_availability': data['time_availability'].toString(),
+          'time_visibility': data['time_visibility'].toString(),
+          'time_knowledge': data['time_knowledge'].toString(),
+          'time_survey': data['time_survey'].toString(),
+          'time_order': data['time_order'].toString(),
+          'current_time': data['current_time'].toString(),
         },
         where: 'id = ?',
         whereArgs: [data['sales_activity_id']],
@@ -268,10 +278,10 @@ class ActivityDatabaseHelper {
         for (var item in availabilityItems) {
           await txn.insert('availability', {
             'id': uuid.v4(),
-            'product_id': item['id'],
-            'available_stock': item['stock'],
-            'average_stock': item['av3m'],
-            'ideal_stock': item['recommend'],
+            'product_id': item['id'].toString(),
+            'available_stock': item['stock'].toString(),
+            'average_stock': item['av3m'] ?? "1",
+            'ideal_stock': item['recommend'].toString(),
             'sales_activity_id': data['sales_activity_id'],
           });
         }
@@ -287,10 +297,10 @@ class ActivityDatabaseHelper {
         for (var item in visibilityItems) {
           await txn.insert('visibility', {
             'id': uuid.v4(),
-            'visibility_id': item['id'],
-            'condition': item['condition'],
-            'image1': item['image1'],
-            'image2': item['image2'],
+            'visibility_id': item['id'].toString(),
+            'condition': item['condition'].toString().toUpperCase(),
+            'image1': item['image1'].path,
+            'image2': item['image2'].path,
             'sales_activity_id': data['sales_activity_id'],
           });
         }
@@ -306,8 +316,8 @@ class ActivityDatabaseHelper {
         for (var item in surveyItems) {
           await txn.insert('survey', {
             'id': uuid.v4(),
-            'survey_question_id': item['survey_question_id'],
-            'answer': item['answer'],
+            'survey_id': item['survey_question_id'].toString(),
+            'answer': item['answer'].toString(),
             'sales_activity_id': data['sales_activity_id'],
           });
         }
@@ -323,9 +333,9 @@ class ActivityDatabaseHelper {
         for (var item in orderItems) {
           await txn.insert('orders', {
             'id': uuid.v4(),
-            'product_id': item['id'],
-            'jumlah': item['jumlah'],
-            'harga': item['harga'],
+            'product_id': item['id'].toString(),
+            'jumlah': item['jumlah'].toString(),
+            'harga': item['harga'].toString(),
             'sales_activity_id': data['sales_activity_id'],
           });
         }
