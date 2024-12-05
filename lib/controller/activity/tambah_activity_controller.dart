@@ -9,12 +9,14 @@ import 'package:flutter_easyloading/flutter_easyloading.dart';
 import 'package:get/get.dart';
 import 'dart:io';
 
+import '../../database/activity_database.dart';
 import '../../model/list_category_response.dart' as Category;
 import '../../model/list_activity_response.dart' as Activity;
 import '../../widget/custom_alert.dart';
 
 class TambahActivityController extends GetxController {
   final TextEditingController controller = TextEditingController();
+  final db = ActivityDatabaseHelper.instance;
   final api = Api();
   final selectedTab = 0.obs;
   final surveyQuestions = <SurveyQuestion>[].obs;
@@ -65,6 +67,9 @@ class TambahActivityController extends GetxController {
   final visibilityImages = RxList<File?>([null, null]);
   final isImageUploading = RxList<bool>([false, false]);
 
+  // Order Section
+  List<Map<String, dynamic>> listOrder = [];
+
   // Add timer-related variables
   final availabilityTime = 0.obs;
   final visibilityTime = 0.obs;
@@ -84,55 +89,48 @@ class TambahActivityController extends GetxController {
   }
 
   Future<void> submitApiActivity() async {
+
     try {
       // final String? currentOutletId = Get.arguments?['id'];
       // final bool isEditing = currentOutletId != null;
       EasyLoading.show(status: 'Submit Data...');
 
-      Map<String,dynamic> data = {
-        // 'sales_activity_id': detailOutlet.value!.id,
-        // 'outlet_id': detailOutlet.value!.outlet!.id,
-        // 'views_knowledge': cityName.value.isEmpty ? "" : cityName.value,
-        // 'time_availability': DateTime.now().weekday.toString(),
-        // 'time_visibility': gpsController.longController.value.text,
-        // 'time_knowledge': gpsController.latController.value.text,
-        // 'time_survey': outletAddress.value.text,
-        // 'time_order': "1x1",
-        // 'current_time': imagePath[0],
+      // print(detailOutlet?.value?.id ?? "sss");
+      Map<String, dynamic> data = {
+        'sales_activity_id': detailOutlet.value!.id,
+        'outlet_id': detailOutlet.value!.outlet!.id,
+        'views_knowledge': "111",
+        'time_availability': availabilityTime.value.toString(),
+        'time_visibility': visibilityTime.value.toString(),
+        'time_knowledge': knowledgeTime.value.toString(),
+        'time_survey': surveyTime.value.toString(),
+        'time_order': orderTime.value.toString(),
+        'current_time': DateTime.now().toIso8601String(),
       };
 
-      ///Availability List
-      List<Map<String, dynamic>> listavailability = [
-        {
-          // 'visibility_id': outletName.value.text,
-          // 'condition': selectedCategory.value,
-          // 'file1': cityName.value.isEmpty ? "" : cityName.value,
-          // 'file2': DateTime.now().weekday.toString(),
-        }
-      ];
-      ///Survey List
       List<Map<String, dynamic>> surveyList = [
         ...priceControllers.entries.map((entry) => {
-          'survey_question_id': entry.key,
-          'answer': entry.value.text,
-        }),
+              'survey_question_id': entry.key.toString() ?? "",
+              'answer': entry.value.text ?? "",
+            }),
         ...switchStates.entries.map((entry) => {
-          'survey_question_id': entry.key,
-          'answer': entry.value.value.toString(),
-        }),
+              'survey_question_id': entry.key.toString() ?? "",
+              'answer': entry.value.value.toString() ?? "",
+            }),
       ];
 
-      // final response = await Api.submitActivity(
-      //   data,
-      //   availabilityDraftItems,
-      //   visibilityController.listVisibility,
-      //   surveyList,
-      //   orderController.draftItems,
-      // );
 
-      // if (response.status != "OK") {
-      //   throw Exception('Failed to get outlets from API');
-      // }
+      final response = await Api.submitActivity(
+        data,
+        availabilityDraftItems,
+        visibilityDraftItems,
+        surveyList,
+        orderDraftItems,
+      );
+
+      if (response.status != "OK") {
+        throw Exception('Failed to get outlets from API');
+      }
 
       // isEditing ? await db.deleteOutlet(currentOutletId) : null;
       // clearForm();
@@ -148,6 +146,78 @@ class TambahActivityController extends GetxController {
       Get.snackbar(
         'Error',
         'Failed to submit data: $e',
+        snackPosition: SnackPosition.BOTTOM,
+      );
+    } finally {
+      EasyLoading.dismiss();
+    }
+  }
+
+  Future<void> saveDraftActivity() async {
+    try {
+      EasyLoading.show(status: 'Saving draft...');
+
+      final String? currentOutletId = Get.arguments?['id'];
+      final bool isEditing = currentOutletId != null;
+
+      List<Map<String, dynamic>> surveyList = [
+        ...priceControllers.entries.map((entry) => {
+              'survey_question_id': entry.key,
+              'answer': entry.value.text,
+            }),
+        ...switchStates.entries.map((entry) => {
+              'survey_question_id': entry.key,
+              'answer': entry.value.value.toString(),
+            }),
+      ];
+
+      final data = {
+        'sales_activity_id': detailOutlet.value!.id,
+        'outlet_id': detailOutlet.value!.outlet!.id,
+        'views_knowledge': "111",
+        'time_availability': availabilityTime.toString(),
+        'time_visibility': visibilityTime.toString(),
+        'time_knowledge': knowledgeTime.toString(),
+        'time_survey': surveyTime.toString(),
+        'time_order': orderTime.toString(),
+        'current_time': DateTime.now().toIso8601String(),
+      };
+
+      if (isEditing) {
+        await db.updateSalesActivity(
+            data: data,
+            availabilityItems: availabilityDraftItems,
+            visibilityItems: visibilityDraftItems,
+            surveyItems: surveyList,
+            orderItems: orderDraftItems);
+      } else {
+        await db.insertFullSalesActivity(
+            data: data,
+            availabilityItems: availabilityDraftItems,
+            visibilityItems: visibilityDraftItems,
+            surveyItems: surveyList,
+            orderItems: orderDraftItems);
+      }
+
+      // await loadOutlets();
+      // clearForm();
+
+      // Navigate back first
+      EasyLoading.dismiss();
+      Get.back();
+
+      // Then show the success alert
+      showSuccessAlert(
+          Get.context!, // Use Get.context instead of the previous context
+          isEditing ? "Draft Berhasil Diperbarui" : "Draft Berhasil Disimpan",
+          isEditing
+              ? "Anda baru memperbarui Draft. Silahkan periksa status Draft pada aplikasi."
+              : "Anda baru menyimpan Draft. Silahkan periksa status Draft pada aplikasi.");
+    } catch (e) {
+      print('Error saving draft: $e');
+      Get.snackbar(
+        'Error',
+        'Failed to save draft: $e',
         snackPosition: SnackPosition.BOTTOM,
       );
     } finally {
@@ -214,8 +284,8 @@ class TambahActivityController extends GetxController {
 
   // In TambahActivityController
   void addVisibilityItem(Map<String, dynamic> item) {
-    final existingIndex =
-        visibilityDraftItems.indexWhere((existing) => existing['id'] == item['id']);
+    final existingIndex = visibilityDraftItems
+        .indexWhere((existing) => existing['id'] == item['id']);
 
     print(existingIndex);
 
@@ -370,7 +440,6 @@ class TambahActivityController extends GetxController {
 
   void setDetailOutlet(Activity.Data data) {
     detailOutlet.value = data;
-    print("----${detailOutlet.value!.outlet!.category}");
   }
 
   // Loading and error management methods

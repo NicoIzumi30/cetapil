@@ -75,7 +75,7 @@ class ActivityPage extends GetView<ActivityController> {
                                     final outlet_id = activity.outlet!.id;
                                     tambahActivityController.selectedTab.value = 0;
                                     tambahActivityController.clearAllDraftItems();
-                                    // tambahActivityController.setDetailOutlet(activity);
+                                    tambahActivityController.setDetailOutlet(activity);
                                     tambahActivityController.setOutletId(outlet_id!);
                                     Get.to(() => TambahActivity(activity));
                                   },
