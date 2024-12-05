@@ -28,6 +28,15 @@ class RoutingController extends GetxController {
     initGetRouting();
   }
 
+  bool isRoutingActive(String outletId) {
+    final routingData = routing.firstWhereOrNull((r) => r.id == outletId);
+    if (routingData?.salesActivity != null) {
+      return routingData!.salesActivity!.checkedIn != null ||
+          routingData.salesActivity!.checkedOut != null;
+    }
+    return false;
+  }
+
   Future<void> initGetRouting() async {
     try {
       await db.deleteAllRouting();

@@ -1,5 +1,6 @@
 import 'package:cetapil_mobile/model/activity.dart';
 import 'package:cetapil_mobile/model/list_activity_response.dart';
+import 'package:cetapil_mobile/widget/custom_alert.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_easyloading/flutter_easyloading.dart';
 import 'package:get/get.dart';
@@ -28,7 +29,8 @@ class ActivityController extends GetxController {
       await db.deleteAllActivity();
       activity.clear();
 
-      EasyLoading.show(status: 'Saving data...');
+      CustomAlerts.showLoading(Get.context!, "Processing", "Mengambil data aktivitas...");
+
       final response = await Api.getActivityList();
       if (response.status == "OK" && response.data!.isNotEmpty) {
         for (int i = 0; i < response.data!.length; i++) {
@@ -77,16 +79,22 @@ class ActivityController extends GetxController {
 
         final results = await db.getSalesActivities();
         activity.addAll(results);
+
+        // Dismiss loading first
+        CustomAlerts.dismissLoading();
+
+        // Show success
+        CustomAlerts.showSuccess(Get.context!, "Berhasil", "Data aktivitas berhasil diperbarui");
       }
     } catch (e) {
       print('Error saving Activity: $e');
-      Get.snackbar(
-        'Error',
-        'Gagal Simpan Data: Periksa Koneksi Anda dan Coba Lagi',
-        snackPosition: SnackPosition.BOTTOM,
-      );
-    } finally {
-      EasyLoading.dismiss();
+
+      // Dismiss loading
+      CustomAlerts.dismissLoading();
+
+      // Show error
+      CustomAlerts.showError(
+          Get.context!, "Gagal", "Gagal mengambil data: Periksa koneksi Anda dan coba lagi");
     }
   }
 

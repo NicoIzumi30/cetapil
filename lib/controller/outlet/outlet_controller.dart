@@ -18,6 +18,7 @@ import 'package:path_provider/path_provider.dart';
 import 'package:uuid/uuid.dart';
 import 'package:path/path.dart' as path;
 
+import '../../model/list_channel_response.dart' as channel;
 import '../../page/outlet/tambah_outlet.dart';
 import '../support_data_controller.dart';
 
@@ -43,6 +44,7 @@ class OutletController extends GetxController {
   var salesName = TextEditingController().obs;
   var outletName = TextEditingController().obs;
   var outletAddress = TextEditingController().obs;
+  var selectedChannel = Rxn<channel.Data>();
   var controllers = <TextEditingController>[].obs;
   // var questions = <FormOutletResponse>[].obs;
 
@@ -50,6 +52,11 @@ class OutletController extends GetxController {
     if (listOutletPage.value != page) {
       listOutletPage.value = page;
     }
+  }
+
+  // Add this method in the OutletController class
+  void setChannel(channel.Data channel) {
+    selectedChannel.value = channel;
   }
 
   setDraftValue(Outlet outlet) async {
@@ -71,6 +78,13 @@ class OutletController extends GetxController {
       selectedCity.value = Data(
         id: outlet.city?.id ?? "",
         name: outlet.city?.name ?? "",
+      );
+    }
+
+    if (outlet.channel != null) {
+      selectedChannel.value = channel.Data(
+        id: outlet.channel?.id ?? "",
+        name: outlet.channel?.name ?? "",
       );
     }
 
@@ -108,6 +122,8 @@ class OutletController extends GetxController {
     for (var controller in controllers) {
       controller.text = "";
     }
+
+    generateControllers(); // Generate new controllers
 
     // Safely set form answers
     if (outlet.forms != null && outlet.forms!.isNotEmpty) {
@@ -259,7 +275,7 @@ class OutletController extends GetxController {
       // Handle existing outlets
       for (final localOutlet in localOutlets) {
         final id = localOutlet.id!;
-        
+
         // Skip if it's a draft
         if (localOutlet.dataSource == 'DRAFT') {
           continue;
@@ -403,8 +419,8 @@ class OutletController extends GetxController {
         'outletName': outletName.value.text,
         'category': selectedCategory.value,
         'channel': json.encode({
-          'id': "1",
-          'name': "Minimarket",
+          'id': selectedChannel.value?.id ?? "",
+          'name': selectedChannel.value?.name ?? "",
         }),
         'city_id': cityId.value.isEmpty ? "" : cityId.value,
         'city_name': cityName.value.isEmpty ? "" : cityName.value,
@@ -443,8 +459,8 @@ class OutletController extends GetxController {
       Get.back();
 
       // Then show the success alert
-      showSuccessAlert(
-          Get.context!, // Use Get.context instead of the previous context
+      CustomAlerts.showSuccess(
+          Get.context!,
           isEditing ? "Draft Berhasil Diperbarui" : "Draft Berhasil Disimpan",
           isEditing
               ? "Anda baru memperbarui Draft. Silahkan periksa status Draft pada aplikasi."
@@ -476,6 +492,7 @@ class OutletController extends GetxController {
         'outletName': outletName.value.text,
         'category': selectedCategory.value,
         'city_name': cityName.value.isEmpty ? "" : cityName.value,
+        'channel_id': selectedChannel.value?.id,
         'visit_day': DateTime.now().weekday.toString(),
         'longitude': gpsController.longController.value.text,
         'latitude': gpsController.latController.value.text,
@@ -484,8 +501,10 @@ class OutletController extends GetxController {
         'image_path_1': imagePath[0],
         'image_path_2': imagePath[1],
         'image_path_3': imagePath[2],
-        for (int i = 0; i < supportController.getFormOutlet().length; i++) 'forms[$i][id]': supportController.getFormOutlet()[i]['id'],
-        for (int i = 0; i < supportController.getFormOutlet().length; i++) 'forms[$i][answer]': controllers[i].value.text,
+        for (int i = 0; i < supportController.getFormOutlet().length; i++)
+          'forms[$i][id]': supportController.getFormOutlet()[i]['id'],
+        for (int i = 0; i < supportController.getFormOutlet().length; i++)
+          'forms[$i][answer]': controllers[i].value.text,
       };
       List<FormOutletResponse> questions = supportController.getFormOutlet().map((form) {
         return FormOutletResponse(
@@ -504,7 +523,8 @@ class OutletController extends GetxController {
       clearForm();
       EasyLoading.dismiss();
       Get.back();
-      showSuccessAlert(
+      
+      CustomAlerts.showSuccess(
           Get.context!, // Use Get.context instead of the previous context
           "Data Berhasil Disimpan",
           "Anda baru menyimpan Data. Silahkan periksa status Outlet pada aplikasi.");
@@ -529,6 +549,7 @@ class OutletController extends GetxController {
     cityName.value = '';
     selectedCity.value = null;
     selectedCategory.value = 'MT'; // Reset to default MT
+    selectedChannel.value = null;
     for (var controller in controllers) {
       controller.clear();
     }
@@ -588,7 +609,8 @@ class OutletController extends GetxController {
     for (var controller in controllers) {
       controller.dispose();
     }
-    controllers.assignAll(List.generate(supportController.getFormOutlet().length, (index) => TextEditingController()));
+    controllers.assignAll(List.generate(
+        supportController.getFormOutlet().length, (index) => TextEditingController()));
   }
 
   // Helper methods for batch operations
@@ -685,6 +707,7 @@ class OutletController extends GetxController {
     salesName.value.dispose();
     outletName.value.dispose();
     outletAddress.value.dispose();
+    selectedChannel.value = null;
     for (var controller in controllers) {
       controller.dispose();
     }

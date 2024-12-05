@@ -2,6 +2,7 @@ import 'package:cetapil_mobile/controller/routing/routing_controller.dart';
 import 'package:cetapil_mobile/model/list_routing_response.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
+import 'package:get_storage/get_storage.dart' as getstorage;
 
 import '../../utils/colors.dart';
 import '../../widget/back_button.dart';
@@ -9,11 +10,16 @@ import '../../widget/clipped_maps.dart';
 import '../outlet/detail_outlet.dart';
 
 class DetailRouting extends GetView<RoutingController> {
-  DetailRouting( this.routing, {super.key,});
+  DetailRouting(
+    this.routing, {
+    super.key,
+  });
   final Data routing;
+  final storage = getstorage.GetStorage();
 
   @override
   Widget build(BuildContext context) {
+    final username = storage.read('username') ?? '-';
     return SafeArea(
       child: Stack(children: [
         Image.asset(
@@ -48,6 +54,10 @@ class DetailRouting extends GetView<RoutingController> {
                             Text("Detail Routing", style: AppTextStyle.titlePage),
                             SizedBox(
                               height: 20,
+                            ),
+                            UnderlineTextField.readOnly(
+                              title: "Nama Sales",
+                              value: username,
                             ),
                             UnderlineTextField.readOnly(
                               title: "Nama Outlet",
@@ -129,11 +139,9 @@ class DetailRouting extends GetView<RoutingController> {
                               return Column(
                                 children: List<Widget>.generate(
                                   routing.forms!.length,
-                                      (index) {
+                                  (index) {
                                     final question = routing.forms![index].outletForm!.question;
                                     final answer = routing.forms![index].answer;
-
-
 
                                     return UnderlineTextField.readOnly(
                                       title: question!,
@@ -151,23 +159,23 @@ class DetailRouting extends GetView<RoutingController> {
                 ),
               ),
             ),
-            Container(
-              width: double.infinity,
-              color: Colors.white,
-              child: Padding(
-                padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 15),
-                child: Row(
-                  children: [
-                    _buildButton(
-                      true,
-                      "Check-in",
-                          () => controller.submitCheckin(routing.id!),
-                      // controller.submitOutlet(),
-                    ),
-                  ],
+            if (routing.salesActivity?.checkedIn == null) // Only show if not checked in
+              Container(
+                width: double.infinity,
+                color: Colors.white,
+                child: Padding(
+                  padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 15),
+                  child: Row(
+                    children: [
+                      _buildButton(
+                        true,
+                        "Check-in",
+                        () => controller.submitCheckin(routing.id!),
+                      ),
+                    ],
+                  ),
                 ),
               ),
-            ),
           ],
         ),
       ]),

@@ -1,13 +1,16 @@
 import 'dart:io';
 import 'dart:ui';
+import 'package:cetapil_mobile/page/outlet/detail_outlet.dart';
 import 'package:cetapil_mobile/utils/image_upload.dart';
 import 'package:cetapil_mobile/widget/back_button.dart';
 import 'package:cetapil_mobile/widget/category_dropdown.dart';
+import 'package:cetapil_mobile/widget/channel_dropdown.dart';
 import 'package:cetapil_mobile/widget/cities_dropdown.dart';
 import 'package:cetapil_mobile/widget/clipped_maps.dart';
 import 'package:cetapil_mobile/widget/text_field.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
+import 'package:get_storage/get_storage.dart';
 import '../../controller/support_data_controller.dart';
 import '../../model/form_outlet_response.dart';
 import '../../utils/colors.dart';
@@ -17,10 +20,12 @@ import '../../widget/dropdown_textfield.dart';
 
 class TambahOutlet extends GetView<OutletController> {
   final SupportDataController supportController = Get.find<SupportDataController>();
+  final storage = GetStorage();
   @override
   Widget build(BuildContext context) {
+    final username = storage.read('username') ?? '-';
     return WillPopScope(
-      onWillPop: ()async {
+      onWillPop: () async {
         final shouldPop = await Alerts.showConfirmDialog(context);
         return shouldPop ?? false;
       },
@@ -56,9 +61,13 @@ class TambahOutlet extends GetView<OutletController> {
                                   Text("Tambah Outlet", style: AppTextStyle.titlePage),
                                   SizedBox(height: 20),
                                   // Your existing form fields here
-                                  ModernTextField(
+                                  // ModernTextField(
+                                  //   title: "Nama Sales",
+                                  //   controller: controller.salesName.value,
+                                  // ),
+                                  UnderlineTextField.readOnly(
                                     title: "Nama Sales",
-                                    controller: controller.salesName.value,
+                                    value: username,
                                   ),
                                   ModernTextField(
                                     title: "Nama Outlet",
@@ -66,6 +75,10 @@ class TambahOutlet extends GetView<OutletController> {
                                   ),
                                   CityDropdown(
                                     title: "Kabupaten/Kota",
+                                    controller: controller,
+                                  ),
+                                  ChannelDropdown(
+                                    title: "Channel Outlet",
                                     controller: controller,
                                   ),
                                   CategoryDropdown<OutletController>(
@@ -294,34 +307,30 @@ class TambahOutlet extends GetView<OutletController> {
 
   Widget _buildSurveyForm() {
     return Obx(() {
-      final question = supportController.getFormOutlet()
+      final questions = supportController
+          .getFormOutlet()
           .map((form) => FormOutletResponse(
-        id: form['id'] as String,
-        type: form['type'] as String,
-        question: form['question'] as String,
-      ))
+                id: form['id'] as String,
+                type: form['type'] as String,
+                question: form['question'] as String,
+              ))
           .toList();
-      print(question.length);
-      controller.generateControllers();
 
-      // if (controller.isLoading.value) {
-      //   return Center(child: CircularProgressIndicator());
-      // }
-      //
-      // if (controller.questions.isEmpty) {
-      //   return Center(child: Text("No Form"));
-      // }
+      // Only generate controllers if they haven't been generated yet
+      if (controller.controllers.isEmpty) {
+        controller.generateControllers();
+      }
 
       return Column(
         children: List.generate(
-            question.length,
-          (index) => question[index].type == "bool"
+          questions.length,
+          (index) => questions[index].type == "bool"
               ? CustomDropdown(
-                  title: question[index].question ?? "",
+                  title: questions[index].question ?? "",
                   items: ["Sudah", "Belum"].map((item) {
                     return DropdownMenuItem<String>(
                       value: item,
-                      child: Text(item ?? ''), // Display the name
+                      child: Text(item),
                     );
                   }).toList(),
                   value: controller.controllers[index].text.isNotEmpty
@@ -329,12 +338,14 @@ class TambahOutlet extends GetView<OutletController> {
                       : null,
                   hint: "-- Pilih salah satu pilihan dibawah ini --",
                   onChanged: (value) {
-                    controller.controllers[index].text = value!;
+                    if (value != null) {
+                      controller.controllers[index].text = value;
+                    }
                   },
                 )
               : ModernTextField(
                   keyboardType: TextInputType.number,
-                  title: question[index].question ?? "",
+                  title: questions[index].question ?? "",
                   controller: controller.controllers[index],
                 ),
         ),

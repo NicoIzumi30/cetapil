@@ -6,6 +6,7 @@ import 'package:cetapil_mobile/model/outlet.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_svg/svg.dart';
 import 'package:get/get.dart';
+import 'package:get_storage/get_storage.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:google_maps_flutter/google_maps_flutter.dart';
 import 'package:path_provider/path_provider.dart';
@@ -19,12 +20,14 @@ import '../../widget/clipped_maps.dart';
 class DetailOutlet extends GetView<OutletController> {
   RoutingController routingController = Get.find<RoutingController>();
   SupportDataController supportController = Get.find<SupportDataController>();
-  DetailOutlet( {super.key,required this.isCheckin, required this.outlet});
+  DetailOutlet({super.key, required this.isCheckin, required this.outlet});
+  final storage = GetStorage();
   final Outlet outlet;
   final bool isCheckin;
 
   @override
   Widget build(BuildContext context) {
+    final username = storage.read('username') ?? '-';
     return SafeArea(
       child: Stack(children: [
         Image.asset(
@@ -61,8 +64,16 @@ class DetailOutlet extends GetView<OutletController> {
                               height: 20,
                             ),
                             UnderlineTextField.readOnly(
+                              title: "Nama Sales",
+                              value: username,
+                            ),
+                            UnderlineTextField.readOnly(
                               title: "Nama Outlet",
                               value: outlet.name,
+                            ),
+                            UnderlineTextField.readOnly(
+                              title: "Channel Outlet",
+                              value: outlet.channel?.name ?? '-',
                             ),
                             UnderlineTextField.readOnly(
                               title: "Kategori Outlet",
@@ -155,8 +166,8 @@ class DetailOutlet extends GetView<OutletController> {
                                     // Method 2: If no match by index, search through all forms
                                     if (answer.isEmpty) {
                                       answer = outlet.forms
-                                              ?.firstWhereOrNull(
-                                              (form) => form.outletForm?.id == localQuestion['id'])
+                                              ?.firstWhereOrNull((form) =>
+                                                  form.outletForm?.id == localQuestion['id'])
                                               ?.answer ??
                                           "";
                                     }
@@ -199,31 +210,32 @@ class DetailOutlet extends GetView<OutletController> {
                 ),
               ),
             ),
-            (isCheckin)
-            ? Padding(
-              padding: const EdgeInsets.fromLTRB(15, 0, 15, 15),
-              child: Container(
-                width: double.infinity,
-                decoration: BoxDecoration(
-                    color: Colors.white.withOpacity(0.3),
-                    borderRadius: BorderRadius.circular(10)
-                ),
-                child: Padding(
-                  padding: const EdgeInsets.symmetric(horizontal: 15, vertical: 10),
-                  child: Row(
-                    children: [
-                      _buildButton(
-                        true,
-                        "Check-in",
-                            () => routingController.submitCheckin(outlet.id!),
-                        // controller.submitOutlet(),
+            Obx(() {
+              print(routingController.isRoutingActive(outlet.id!));
+              return (isCheckin && !routingController.isRoutingActive(outlet.id!))
+                  ? Padding(
+                      padding: const EdgeInsets.fromLTRB(15, 0, 15, 15),
+                      child: Container(
+                        width: double.infinity,
+                        decoration: BoxDecoration(
+                            color: Colors.white.withOpacity(0.3),
+                            borderRadius: BorderRadius.circular(10)),
+                        child: Padding(
+                          padding: const EdgeInsets.symmetric(horizontal: 15, vertical: 10),
+                          child: Row(
+                            children: [
+                              _buildButton(
+                                true,
+                                "Check-in",
+                                () => routingController.submitCheckin(outlet.id!),
+                              ),
+                            ],
+                          ),
+                        ),
                       ),
-                    ],
-                  ),
-                ),
-              ),
-            )
-                : SizedBox()
+                    )
+                  : SizedBox();
+            }),
           ],
         ),
       ]),
@@ -260,7 +272,6 @@ class ClipImage extends StatelessWidget {
   final double? size;
   final BoxFit fit;
 
-
   const ClipImage({
     super.key,
     required this.url,
@@ -284,8 +295,6 @@ class ClipImage extends StatelessWidget {
       },
     );
   }
-
-
 
   @override
   Widget build(BuildContext context) {

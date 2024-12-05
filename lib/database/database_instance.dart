@@ -214,7 +214,6 @@ class DatabaseHelper {
     FOREIGN KEY (activity_id) REFERENCES sales_activities (id)
   )
 ''');
-
   }
 
   // Delete entire database
@@ -585,8 +584,7 @@ class DatabaseHelper {
             'user_id': null, // Add this
             'user_name': data['salesName'], // Change this from user_name
             'category': data['category'],
-            'channel_id': data['channel_id'],
-            'channel_name': data['channel_name'],
+            'channel': data['channel'], // Use the JSON string channel data
             'city_id': data['city_id'], // Added
             'city_name': data['city_name'], // Added
             'longitude': data['longitude'],
@@ -680,8 +678,7 @@ class DatabaseHelper {
         SET name = ?, 
             user_name = ?,
             category = ?,
-            channel_id = ?,
-            channel_name = ?,
+            channel = ?,
             city_id = ?,
             city_name = ?,
             longitude = ?,
@@ -694,18 +691,17 @@ class DatabaseHelper {
         WHERE id = ?
       ''', [
           data['outletName'],
-          data['salesName'], // Make sure this matches
+          data['salesName'],
           data['category'],
-          data['channel_id'],
-          data['channel_name'],
+          data['channel'], // Use the JSON string channel data
           data['city_id'],
           data['city_name'],
           data['longitude'],
           data['latitude'],
           data['address'],
           data['status'],
-          'DRAFT', // Added this
-          0, // Added this
+          'DRAFT',
+          0,
           data['updated_at'],
           data['id'],
         ]);

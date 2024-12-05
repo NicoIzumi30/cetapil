@@ -13,8 +13,7 @@ import '../../widget/custom_alert.dart';
 
 class SellingController extends GetxController {
   final GPSLocationController gpsController = Get.find<GPSLocationController>();
-  final SupportDataController supportDataController =
-      Get.find<SupportDataController>();
+  final SupportDataController supportDataController = Get.find<SupportDataController>();
   RxString searchQuery = ''.obs;
   RxList<Data> sellingData = <Data>[].obs;
   final dbHelper = SellingDatabaseHelper.instance;
@@ -156,10 +155,7 @@ class SellingController extends GetxController {
   }
 
   List<Data> get filteredSellingData => sellingData.where((data) {
-        return data.outletName
-                ?.toLowerCase()
-                .contains(searchQuery.value.toLowerCase()) ??
-            false;
+        return data.outletName?.toLowerCase().contains(searchQuery.value.toLowerCase()) ?? false;
       }).toList();
 
   Future<void> saveDraftSelling() async {
@@ -203,9 +199,7 @@ class SellingController extends GetxController {
       // Create selling data
       final data = Data(
         // Use existing ID if editing, create new one if new draft
-        id: currentDraftId?.value.isNotEmpty == true
-            ? currentDraftId?.value
-            : uuid.v4(),
+        id: currentDraftId?.value.isNotEmpty == true ? currentDraftId?.value : uuid.v4(),
         outletName: outletName.value.text,
         categoryOutlet: selectedCategory.value,
         products: products,
@@ -280,13 +274,11 @@ class SellingController extends GetxController {
         throw Exception('Failed to get outlets from API');
       }
       print("id draft = $currentDraftId");
-      isEditing
-          ? await dbHelper.deleteSellingData(currentDraftId!.value)
-          : null;
+      isEditing ? await dbHelper.deleteSellingData(currentDraftId!.value) : null;
       clearForm();
       EasyLoading.dismiss();
       Get.back();
-      showSuccessAlert(
+      CustomAlerts.showSuccess(
           Get.context!, // Use Get.context instead of the previous context
           "Data Berhasil Disimpan",
           "Anda baru menyimpan Data. Silahkan periksa status Outlet pada aplikasi.");

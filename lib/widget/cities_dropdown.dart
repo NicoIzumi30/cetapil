@@ -147,6 +147,12 @@ class _CityDropdownState extends State<CityDropdown> {
             },
             decoratorProps: DropDownDecoratorProps(
                 decoration: InputDecoration(
+              hintText: ' - Search city - ',
+              hintStyle: TextStyle(
+                color: Colors.grey[400],
+                fontSize: 14,
+              ),
+
               filled: true,
               fillColor: const Color(0xFFE8F3FF), // Light blue background
               border: OutlineInputBorder(
@@ -183,6 +189,10 @@ class _CityDropdownState extends State<CityDropdown> {
               searchFieldProps: TextFieldProps(
                 decoration: InputDecoration(
                   hintText: 'Search city...',
+                  hintStyle: TextStyle(
+                    color: Colors.grey[400],
+                    fontSize: 14,
+                  ),
                   prefixIcon: Icon(Icons.search),
                   filled: true,
                   fillColor: const Color(0xFFE8F3FF),
@@ -190,7 +200,7 @@ class _CityDropdownState extends State<CityDropdown> {
                     borderRadius: BorderRadius.circular(8),
                     borderSide: const BorderSide(
                       color: Color(0xFF64B5F6),
-                      width: 2,
+                      width: 1,
                     ),
                   ),
                   focusedBorder: OutlineInputBorder(

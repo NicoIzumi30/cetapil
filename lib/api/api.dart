@@ -200,6 +200,7 @@ class Api {
     request.headers["Content-type"] = 'application/json';
     request.headers["Authorization"] = 'Bearer $token';
 
+    request.fields["channel_id"] = data["channel_id"];
     request.fields["name"] = data["outletName"];
     request.fields["category"] = data["category"];
     request.fields["city"] = data["city_name"];
