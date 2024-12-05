@@ -206,12 +206,33 @@ class ImageViewerScreen extends StatelessWidget {
         iconTheme: IconThemeData(color: Colors.white),
         elevation: 0,
       ),
-      body: PhotoView(
-        imageProvider: image is File ? FileImage(image) : NetworkImage(image) as ImageProvider,
-        minScale: PhotoViewComputedScale.contained,
-        maxScale: PhotoViewComputedScale.covered * 2,
-        initialScale: PhotoViewComputedScale.contained,
-        backgroundDecoration: BoxDecoration(color: Colors.black),
+      body: image != null
+          ? PhotoView(
+              imageProvider: image is File 
+                  ? FileImage(image) 
+                  : NetworkImage(image) as ImageProvider,
+              minScale: PhotoViewComputedScale.contained,
+              maxScale: PhotoViewComputedScale.covered * 2,
+              initialScale: PhotoViewComputedScale.contained,
+              backgroundDecoration: BoxDecoration(color: Colors.black),
+              errorBuilder: (context, error, stackTrace) => _buildErrorWidget(),
+            )
+          : _buildErrorWidget(),
+    );
+  }
+
+  Widget _buildErrorWidget() {
+    return Center(
+      child: Column(
+        mainAxisAlignment: MainAxisAlignment.center,
+        children: [
+          Icon(Icons.image_not_supported, color: Colors.white70, size: 64),
+          SizedBox(height: 16),
+          Text(
+            'Image not available',
+            style: TextStyle(color: Colors.white70, fontSize: 16),
+          ),
+        ],
       ),
     );
   }

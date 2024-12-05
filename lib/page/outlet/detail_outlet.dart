@@ -3,6 +3,7 @@ import 'dart:io';
 import 'package:cetapil_mobile/controller/login_controller.dart';
 import 'package:cetapil_mobile/controller/outlet/outlet_controller.dart';
 import 'package:cetapil_mobile/model/outlet.dart';
+import 'package:cetapil_mobile/utils/image_upload.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_svg/svg.dart';
 import 'package:get/get.dart';
@@ -268,91 +269,77 @@ class DetailOutlet extends GetView<OutletController> {
 }
 
 class ClipImage extends StatelessWidget {
-  final String url;
+  final String? url;
   final double? size;
   final BoxFit fit;
 
   const ClipImage({
     super.key,
-    required this.url,
+    this.url,
     this.size,
     this.fit = BoxFit.cover,
   });
 
   String _sanitizeUrl(String url) {
-    // Convert localhost/127.0.0.1 URLs to your actual development server IP
-    // Replace this with your actual development server IP
     return "https://dev-cetaphil.i-am.host${url}";
-  }
-
-  Future<Widget> imageFile() async {
-    final directory = await getApplicationDocumentsDirectory();
-    final path = '${directory.path}/$url';
-    return Image.file(
-      File(path),
-      errorBuilder: (context, error, stackTrace) {
-        return const Center(child: Text('Error loading image'));
-      },
-    );
   }
 
   @override
   Widget build(BuildContext context) {
     return Expanded(
-      child: AspectRatio(
-        aspectRatio: 1,
-        child: Container(
-          decoration: BoxDecoration(
-            color: Colors.white,
-            border: Border.all(
-              color: Colors.blue,
-              width: 1,
-            ),
-            borderRadius: BorderRadius.circular(5),
-          ),
-          child: ClipRRect(
-            borderRadius: BorderRadius.circular(5),
-            child: Image.network(
-              _sanitizeUrl(url),
-              fit: fit,
-              errorBuilder: (context, error, stackTrace) {
-                print('Image Error: $error');
-                return Container(
-                  color: Colors.grey[200],
-                  child: Column(
-                    mainAxisAlignment: MainAxisAlignment.center,
-                    children: [
-                      const Icon(
-                        Icons.error_outline,
-                        color: Colors.red,
-                        size: 24,
-                      ),
-                      const SizedBox(height: 8),
-                      Text(
-                        'Image Error',
-                        style: TextStyle(
-                          fontSize: 12,
-                          color: Colors.grey[600],
-                        ),
-                      ),
-                      if (error is NetworkImageLoadException)
-                        Padding(
-                          padding: const EdgeInsets.all(4.0),
-                          child: Text(
-                            'Network Error',
-                            style: TextStyle(
-                              fontSize: 10,
-                              color: Colors.grey[500],
-                            ),
-                          ),
-                        ),
-                    ],
+      child: GestureDetector(
+        onTap: url != null
+            ? () {
+                Navigator.push(
+                  context,
+                  MaterialPageRoute(
+                    builder: (context) => ImageViewerScreen(
+                      image: _sanitizeUrl(url!),
+                    ),
                   ),
                 );
-              },
+              }
+            : null,
+        child: AspectRatio(
+          aspectRatio: 1,
+          child: Container(
+            decoration: BoxDecoration(
+              color: Colors.white,
+              border: Border.all(
+                color: Colors.blue,
+                width: 1,
+              ),
+              borderRadius: BorderRadius.circular(5),
+            ),
+            child: ClipRRect(
+              borderRadius: BorderRadius.circular(5),
+              child: url != null
+                  ? Image.network(
+                      _sanitizeUrl(url!),
+                      fit: fit,
+                      errorBuilder: _buildErrorWidget,
+                    )
+                  : _buildErrorWidget(context, null, null),
             ),
           ),
         ),
+      ),
+    );
+  }
+
+  Widget _buildErrorWidget(BuildContext context, Object? error, StackTrace? stackTrace) {
+    return Container(
+      color: Colors.grey[200],
+      child: Column(
+        mainAxisAlignment: MainAxisAlignment.center,
+        children: [
+          Icon(Icons.image_not_supported, color: Colors.grey[400], size: 24),
+          SizedBox(height: 8),
+          Text(
+            'No Image',
+            style: TextStyle(fontSize: 12, color: Colors.grey[600]),
+          ),
+        ],
       ),
     );
   }
