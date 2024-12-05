@@ -136,7 +136,7 @@ class TambahActivityController extends GetxController {
       // clearForm();
       EasyLoading.dismiss();
       Get.back();
-      showSuccessAlert(
+      CustomAlerts.showSuccess(
           Get.context!, // Use Get.context instead of the previous context
           "Data Berhasil Disimpan",
           "Anda baru menyimpan Data. Silahkan periksa status Outlet pada aplikasi.");
@@ -207,7 +207,7 @@ class TambahActivityController extends GetxController {
       Get.back();
 
       // Then show the success alert
-      showSuccessAlert(
+      CustomAlerts.showSuccess(
           Get.context!, // Use Get.context instead of the previous context
           isEditing ? "Draft Berhasil Diperbarui" : "Draft Berhasil Disimpan",
           isEditing

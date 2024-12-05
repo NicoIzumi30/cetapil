@@ -44,7 +44,7 @@ class CustomAlerts {
 
     Overlay.of(context).insert(_successEntry!);
 
-    Future.delayed(Duration(seconds: 3), () {
+    Future.delayed(Duration(seconds: 5), () {
       dismissSuccess();
     });
   }
@@ -62,7 +62,7 @@ class CustomAlerts {
 
     Overlay.of(context).insert(_errorEntry!);
 
-    Future.delayed(Duration(seconds: 3), () {
+    Future.delayed(Duration(seconds: 5), () {
       dismissError();
     });
   }
@@ -113,55 +113,65 @@ class _CustomAlertOverlay extends StatelessWidget {
   Widget build(BuildContext context) {
     return Material(
       color: Colors.black54,
-      child: Center(
-        child: Container(
-          constraints: BoxConstraints(maxWidth: 400),
-          margin: EdgeInsets.symmetric(horizontal: 24),
-          decoration: BoxDecoration(
-            color: color,
-            borderRadius: BorderRadius.circular(8),
-          ),
-          padding: EdgeInsets.all(24),
-          child: Stack(
-            clipBehavior: Clip.none,
-            children: [
-              Positioned(
-                right: -15,
-                top: -25,
-                child: ClipRRect(
-                  child: SizedBox(
-                    width: 90,
-                    height: 90,
-                    child: SvgPicture.string(
-                      pattern,
-                      fit: BoxFit.cover,
+      child: InkWell(
+        onTap: () {
+          // Dismiss the alert when tapped anywhere
+          if (this.color == Color(0xFF0277BD)) {
+            CustomAlerts.dismissSuccess();
+          } else {
+            CustomAlerts.dismissError();
+          }
+        },
+        child: Center(
+          child: Container(
+            constraints: BoxConstraints(maxWidth: 400),
+            margin: EdgeInsets.symmetric(horizontal: 24),
+            decoration: BoxDecoration(
+              color: color,
+              borderRadius: BorderRadius.circular(8),
+            ),
+            padding: EdgeInsets.all(24),
+            child: Stack(
+              clipBehavior: Clip.none,
+              children: [
+                Positioned(
+                  right: -15,
+                  top: -25,
+                  child: ClipRRect(
+                    child: SizedBox(
+                      width: 90,
+                      height: 90,
+                      child: SvgPicture.string(
+                        pattern,
+                        fit: BoxFit.cover,
+                      ),
                     ),
                   ),
                 ),
-              ),
-              Column(
-                mainAxisSize: MainAxisSize.min,
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  Text(
-                    title,
-                    style: TextStyle(
-                      color: Colors.white,
-                      fontSize: 18,
-                      fontWeight: FontWeight.w600,
+                Column(
+                  mainAxisSize: MainAxisSize.min,
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Text(
+                      title,
+                      style: TextStyle(
+                        color: Colors.white,
+                        fontSize: 18,
+                        fontWeight: FontWeight.w600,
+                      ),
                     ),
-                  ),
-                  SizedBox(height: 8),
-                  Text(
-                    subtitle,
-                    style: TextStyle(
-                      color: Colors.white.withOpacity(0.9),
-                      fontSize: 14,
+                    SizedBox(height: 8),
+                    Text(
+                      subtitle,
+                      style: TextStyle(
+                        color: Colors.white.withOpacity(0.9),
+                        fontSize: 14,
+                      ),
                     ),
-                  ),
-                ],
-              ),
-            ],
+                  ],
+                ),
+              ],
+            ),
           ),
         ),
       ),
@@ -288,7 +298,8 @@ class _AnimatedLoadingTextState extends State<AnimatedLoadingText>
     _controller = AnimationController(
       vsync: this,
       duration: Duration(milliseconds: 800),
-    )..addListener(() {
+    )
+      ..addListener(() {
         setState(() {
           if (_controller.value < 0.25) {
             _dotCount = 0;
@@ -300,7 +311,8 @@ class _AnimatedLoadingTextState extends State<AnimatedLoadingText>
             _dotCount = 3;
           }
         });
-      })..repeat();
+      })
+      ..repeat();
   }
 
   @override
