@@ -21,6 +21,7 @@ class DetailSalesActivityResource extends JsonResource
             'checked_in' => $this->checked_in,
             'checked_out' => $this->checked_out,
             'status' => $this->status,
+            'channel' => $this->outlet->channel ? $this->outlet->channel->only('id', 'name') : null,
             'outlet' => $this->outlet->only(
                 'id',
                 'name',
@@ -30,6 +31,7 @@ class DetailSalesActivityResource extends JsonResource
             ),
             // 'user' => $this->user->only('id', 'name'),
             'orders' => SalesOrderResource::collection($this->whenLoaded('orders')),
+
             'visibilities' => SalesVisibilityResource::collection($this->whenLoaded('salesVisibilities')),
             'availabilities' => SalesAvailabilityResource::collection($this->whenLoaded('availabilities')),
             'surveys' => SalesSurveyResource::collection($this->whenLoaded('surveys')),
