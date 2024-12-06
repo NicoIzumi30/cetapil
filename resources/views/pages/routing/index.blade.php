@@ -21,7 +21,7 @@
         </x-select.light>
         <x-button.light id="downloadBtn">Download</x-button.light>
         <x-button.light href="/routing/request" class="!text-white !bg-[#39B5FF] py-2">
-            Need Approval <span class="py-1 px-2 ml-2 rounded-md bg-white text-primary">4</span>
+            Need Approval <span class="py-1 px-2 ml-2 rounded-md bg-white text-primary">{{$countPending}}</span>
         </x-button.light>
         <x-button.info onclick="openModal('upload-product-knowledge')">Upload Product knowledge</x-button.info>
         <x-modal id="upload-product-knowledge">
@@ -132,18 +132,20 @@
     </x-slot:cardTitle>
     {{-- Sales Activity Action --}}
     <x-slot:cardAction>
-        <x-input.search wire:model.live="search" class="border-0" placeholder="Cari data sales"></x-input.search>
-        <x-select.light :title="'Filter Hari'" id="day" name="day">
-            <option value="senin">
-                senin
-            </option>
+        <x-input.search wire:model.live="search" id="global-search-sales" class="border-0" placeholder="Cari data sales"></x-input.search>
+        <x-select.light :title="'Filter Hari'" id="filter_day_sales" name="day">
+        <option value="all">Semua</option>
+            @foreach ($waktuKunjungan as $hari)
+                <option value="{{$hari['value']}}">{{$hari['name']}}</option>
+            @endforeach
         </x-select.light>
-        <x-select.light :title="'Filter Area'" id="area" name="area">
-            <option value="senin">
-                senin
-            </option>
+        <x-select.light :title="'Filter Area'" id="filter_area" name="area">
+        <option value="all">Semua</option>
+        @foreach ($cities as $city)
+            <option value="{{$city->id}}">{{$city->name}}</option>
+        @endforeach
         </x-select.light>
-        <x-input.datepicker id="sales-date-range"></x-input.datepicker>
+        <x-input.datepicker id="sales-date-range" value=""></x-input.datepicker>
         <x-button.info>Download</x-button.info>
     </x-slot:cardAction>
     {{-- Sales Activity Action End --}}
@@ -194,53 +196,7 @@
                 </th>
             </tr>
         </thead>
-        <tbody>
-            <tr class="table-row">
-                <td scope="row" class="table-data">
-                    halo
-                </td>
-                <td scope="row" class="table-data">
-                    halo
-                </td>
-                <td scope="row" class="table-data !text-[#70FFE2]">
-                    halo
-                </td>
-                <td scope="row" class="table-data">
-                    halo
-                </td>
-                <td scope="row" class="table-data">
-                    halo
-                </td>
-                <td scope="row" class="table-data">
-                    halo
-                </td>
-                <td class="table-data">
-                    <x-action-table-dropdown>
-                        <li>
-                            <a href="/routing/sales-activity" class="dropdown-option">Lihat
-                                Data</a>
-                        </li>
-                        <li>
-                            <button onclick="openModal('delete-sales-activity')"
-                                class="dropdown-option text-red-400">Hapus
-                                Data</button>
-                        </li>
-                    </x-action-table-dropdown>
-                </td>
-            </tr>
-        </tbody>
     </table>
-    {{-- Delete Modal --}}
-    <x-modal id="delete-sales-activity">
-        <x-slot:title>Hapus Sales Activity</x-slot:title>
-        <p>Apakah kamu yakin Ingin Menghapus data Sales Activity ini?</p>
-        <x-slot:footer>
-            <x-button.light onclick="closeModal('delete-sales-activity')"
-                class="border-primary border">Batal</x-button.light>
-            <x-button.light class="!bg-red-400 text-white border border-red-400">Hapus Data</x-button.light>
-        </x-slot:footer>
-    </x-modal>
-    {{-- Sales Activity Table End --}}
 </x-card>
 {{-- Sales Activity End --}}
 @endsection
@@ -288,9 +244,9 @@
                     d.filter_day = $('#filter_day').val();
                 },
                 dataSrc: function (json) {
-                    $('.dataTables_length select').closest('.dataTables_length')
+                    $('#routing-table_wrapper .dt-length select').closest('.dt-length')
                         .find('label')
-                        .html(`Menampilkan <select>${$('.dataTables_length select').html()}</select> dari ${json.recordsFiltered} data`);
+                        .html(`Menampilkan <select  name="routing-table_length" aria-controls="routing-table" class="dt-input" id="dt-length-0">${$('.dt-length select').html()}</select> dari ${json.recordsFiltered} data`);
                     return json.data;
                 }
             },
@@ -303,6 +259,10 @@
                     searchable: false
                 }
             ]
+        });
+        $(document).on('change', '#dt-length-0', function () {
+            var length = $(this).val();
+            table.page.len(length).draw();
         });
         let searchTimer;
         $('#global-search').on('input', function () {
@@ -318,7 +278,11 @@
             const name = $(this).data('name');
             deleteData(url, name);
         });
-        $('#sales-table').DataTable({
+
+        console.log($('#sales-date-range').val());
+        let tableSales = $('#sales-table').DataTable({
+            processing: true,
+            serverSide: true,
             paging: true,
             searching: false,
             info: true,
@@ -326,15 +290,91 @@
             lengthMenu: [10, 20, 30, 40, 50],
             dom: 'rt<"bottom-container"<"bottom-left"l><"bottom-right"p>>',
             language: {
-                lengthMenu: "Menampilkan _MENU_ dari 4,768 data",
+                lengthMenu: "Menampilkan _MENU_ dari _TOTAL_ data",
+                processing: "Memuat data...",
                 paginate: {
                     previous: '<',
                     next: '>',
                     last: 'Terakhir',
+                },
+                info: "Menampilkan _START_ sampai _END_ dari _TOTAL_ data",
+                infoEmpty: "Menampilkan 0 sampai 0 dari 0 data",
+                emptyTable: "Tidak ada data yang tersedia"
+            },
+            ajax: {
+                url: "{{ route('routing.sales.activity.data') }}",
+                type: 'GET',
+                data: function (d) {
+                    d.search_term = $('#global-search-sales').val();
+                    d.filter_day = $('#filter_day_sales').val();
+                    d.date = $('#sales-date-range').val() == 'Date Range' ? '' : $('#sales-date-range').val();
+                    d.filter_area = $('#filter_area').val();
                 }
             },
+            columns: [
+                {
+                    data: 'sales',
+                    name: 'user.name',
+                    class: 'table-data'
+                },
+                {
+                    data: 'outlet',
+                    name: 'name',
+                    class: 'table-data'
+                },
+                {
+                    data: 'visit_day',
+                    name: 'visit_day',
+                    class: 'table-data'
+                },
+                {
+                    data: 'checkin',
+                    name: 'checkin',
+                    class: 'table-data'
+                },
+                {
+                    data: 'checkout',
+                    name: 'checkout',
+                    class: 'table-data'
+                },
+                {
+                    data: 'views',
+                    name: 'views',
+                    class: 'table-data'
+                },
+                {
+                    data: 'actions',
+                    name: 'actions',
+                    class: 'table-data',
+                    orderable: false,
+                    searchable: false
+                }
+            ],
+            order: [[0, 'asc']]
+        });
+        // Event Handlers for Sales Table
+        $(document).on('change', '#dt-length-sales', function () {
+            var length = $(this).val();
+            tableSales.page.len(length).draw();
         });
 
+        let searchTimerSales;
+        $('#global-search-sales').on('input', function () {
+            clearTimeout(searchTimerSales);
+            searchTimerSales = setTimeout(() => tableSales.ajax.reload(null, false), 500);
+        });
+
+        $('#filter_day_sales').on('input', function () {
+            tableSales.ajax.reload(null, false);
+        });
+
+        $('#sales-date-range').on('change', function () {
+            tableSales.ajax.reload(null, false);
+        });
+
+        $('#filter_area').on('change', function () {
+            tableSales.ajax.reload(null, false);
+        });
     </script>
 @endpush
 

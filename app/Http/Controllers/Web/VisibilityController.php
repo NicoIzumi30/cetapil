@@ -61,6 +61,56 @@ class VisibilityController extends Controller
         return view("pages.visibility.index", compact('posmTypes', 'visibilities', 'posmImages'));
     }
 
+    public function getData(Request $request)
+    {
+        $query = Visibility::with([ 'user:id,name', 'product:id,sku', 'visualType:id,name', 'posmType:id,name', 'outlet:id,name' ])->orderBy('created_at', 'desc');
+
+        if ($request->filled('search_term')) {
+            $searchTerm = $request->search_term;
+            $query->where(function ($q) use ($searchTerm) {
+                $q->WhereHas('outlet', function ($q) use ($searchTerm) {
+                        $q->where('name', 'like', "%{$searchTerm}%");
+                    })->orWhereHas('product', function ($q) use ($searchTerm) {
+                        $q->where('sku', 'like', "%{$searchTerm}%");
+                    })->orWhereHas('user', function ($q) use ($searchTerm) {
+                        $q->where('name', 'like', "%{$searchTerm}%");
+                    });
+            });
+        }
+        if ($request->filled('filter_visibility')) {
+            $filter_visibility = $request->filter_visibility;
+            if ($filter_visibility != 'all') {
+                $query->where('posm_type_id', $filter_visibility);
+            }
+        }
+        
+        $filteredRecords = (clone $query)->count();
+
+        $result = $query->skip($request->start)
+            ->take($request->length)
+            ->get();
+
+        return response()->json([
+            'draw' => intval($request->draw),
+            'recordsTotal' => $filteredRecords,
+            'recordsFiltered' => $filteredRecords,
+            'data' => $result->map(function ($item) {
+                return [
+                    'id' => $item->id,
+                    'outlet' => $item->outlet->name,
+                    'sales' => $item->user->name,
+                    'product' => $item->product->sku,
+                    'visual' => $item->visualType->name,
+                    'status' => $item->status,
+                    'periode' =>  Carbon::parse($item->started_at)->format('d F Y')  .' - '. Carbon::parse($item->ended_at)->format('d F Y'),
+                    'actions' => view('pages.visibility.action', [
+                        'item' => $item,
+                        'visibilityId' => $item
+                    ])->render()
+                ];
+            })
+        ]);
+    }
     /**
      * Show the form for creating a new resource.
      */

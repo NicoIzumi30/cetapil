@@ -27,6 +27,7 @@ class CreateNOOWithFormsRequest extends FormRequest
     {
         return [
             // Original NOO request rules
+            'channel_id' => 'required|exists:channels,id', 
             'city' => 'required|string',
             'name' => 'required|string',
             'category' => 'required|string',

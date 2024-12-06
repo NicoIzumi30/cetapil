@@ -76,28 +76,29 @@ if (!function_exists('getVisitDayByDay')) {
     function getVisitDayByDay($nameDay)
     {
         $day = [
-            'SENIN'  => '1',
+            'SENIN' => '1',
             'SELASA' => '2',
-            'RABU'   => '3',
-            'KAMIS'  => '4',
-            'JUMAT'  => '5',
-            'SABTU'  => '6',
+            'RABU' => '3',
+            'KAMIS' => '4',
+            'JUMAT' => '5',
+            'SABTU' => '6',
             'MINGGU' => '7',
         ];
 
-        return Arr::get($day, $nameDay) ?? '7';
+        return Arr::get($day, $nameDay) ?? null
+        ;
     }
 }
 if (!function_exists('getVisitDayByNumber')) {
     function getVisitDayByNumber($numberDay)
     {
         $day = [
-            '1'  => 'Senin',
+            '1' => 'Senin',
             '2' => 'Selasa',
-            '3'   => 'Rabu',
-            '4'  => 'Kamis',
-            '5'  => 'Jumat',
-            '6'  => 'Sabtu',
+            '3' => 'Rabu',
+            '4' => 'Kamis',
+            '5' => 'Jumat',
+            '6' => 'Sabtu',
             '7' => 'Minggu',
         ];
 
@@ -117,7 +118,30 @@ if (!function_exists('updatePhotoVisibility')) {
         }
     }
 }
+if (!function_exists('getStatusBadge')) {
+    function getStatusBadge($status)
+    {
+        $colors = [
+            'PENDING' => 'bg-blue-400',
+            'REJECTED' => 'bg-red-500',
+            // tambahkan status lain jika ada
+        ];
 
+        $bgColor = $colors[$status] ?? 'bg-gray-400';
+
+        return '<div class="rounded-full py-2 px-4 font-bold w-fit ' . $bgColor . '">' .
+            e($status) .
+            '</div>';
+    }
+}
+if (!function_exists('spanColor')) {
+    function spanColor($value,$color)
+    {
+        return '<span class="text-' . $color . '-400">' .
+            e($value) .
+            '</span>';
+    }
+}
 if (!function_exists('csv_to_array')) {
     function csv_to_array($filename, $header)
     {

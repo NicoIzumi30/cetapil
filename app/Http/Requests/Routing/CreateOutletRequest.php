@@ -35,6 +35,7 @@ class CreateOutletRequest extends FormRequest
             'latitude' => 'required|string',
             'city' => 'required|string|exists:cities,id',
             'address' => 'nullable|string',
+            'code' => 'required|string|unique:outlets,code',
             // 'status' => 'required|in:APPROVED,PENDING,REJECTED',
             'img_front' => 'nullable|file|mimes:png,jpg,jpeg|max:1024',
             'img_banner' => 'nullable|file|mimes:png,jpg,jpeg|max:1024',

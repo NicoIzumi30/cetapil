@@ -22,6 +22,14 @@
                 @endif
             </div>
             <div>
+                <label for="code" class="form-label">Kode Outlet</label>
+                <input id="code" class="form-control @error('code') is-invalid @enderror" value="{{$outlet->code}}" type="text" name="code"
+                    placeholder="Masukan nama outlet" aria-describedby="name" />
+                @if ($errors->has('code'))
+                    <span id="code-error" class="text-sm text-red-600 mt-1">{{ $errors->first('code') }}</span>
+                @endif
+            </div>
+            <div>
                 <label for="user_id">Nama Sales</label>
                 <select id="user_id" name="user_id" class="w-full">
                     <option value="" selected disabled>
@@ -238,11 +246,12 @@
                 @foreach ($outletForms as $form)
                     @if($form->type == 'bool')
                         <div class="flex justify-between items-center w-full">
+                            <div class="flex justify-between items-center w-full">
                             <p class="text-white font-bold text-sm">{{$form->question}}</p>
                             <div class="relative inline-flex items-center">
-                            <input type="checkbox" name="survey[{{$form->id}}]" id="gih-checkbox" class="sr-only" {{$form->answers->where('outlet_id', $outlet->id)->first()?->answer == 'true' ? 'checked' : '' }} />
-                                <label for="gih-checkbox"
-                                    class="flex w-[160px] cursor-pointer items-center rounded-md bg-gray-200 p-1">
+                                <input type="checkbox" name="survey[{{$form->id}}]" id="gih-checkbox" checked value="{{$form->answers->where('outlet_id', $outlet->id)->first()?->answer ?? 'Sudah'}}"
+                                    class="sr-only" />
+                                    <div class="flex w-[160px] cursor-pointer items-center rounded-md bg-gray-200 p-1">
                                     <span id="gih-checked"
                                         class="flex h-10 w-[90px] items-center justify-center rounded-md bg-blue-400 text-sm text-white font-medium transition-all duration-200">
                                         Sudah
@@ -251,8 +260,9 @@
                                         class="flex h-10 w-[90px] items-center justify-center rounded-md text-sm font-medium text-blue-400 transition-all duration-200">
                                         Belum
                                     </span>
-                                </label>
+                                    </div>
                             </div>
+                        </div>
                         </div>
                     @elseif($form->type == 'text')
                         <x-pages.routing.outlet-form>
@@ -409,101 +419,44 @@
 
             // Inisialisasi awal
             weekHandler($('#cycle').val());
-
             const gihCheckbox = document.querySelector('#gih-checkbox');
             const gihChecked = document.querySelector('#gih-checked');
             const gihUnChecked = document.querySelector('#gih-unchecked');
-
-
-            gihCheckbox.addEventListener('change', function () {
-                if (this.checked) {
-                    gihChecked.classList.add("bg-blue-400", "!text-white");
-                    gihUnChecked.classList.remove("bg-blue-400", "!text-white");
-                } else {
-                    gihUnChecked.classList.add("bg-blue-400", "!text-white");
-                    gihChecked.classList.remove("bg-blue-400", "!text-white");
-                    gihChecked.classList.add("text-blue-400");
-                }
-            });
-        });
-    </script>
-@endpush
-
-
-@push('scripts')
-    <script>
-        document.addEventListener('DOMContentLoaded', function () {
-            const uploadArea = document.getElementById('upload-area');
-            const fileInput = document.getElementById('file_upload');
-            const displayFileName = document.getElementById('filename-display');
-            const uploadHelptext = document.getElementById('upload-helptext');
-            const maxFileSize = 5 * 1024 * 1024;
-
-            // Click handler for the upload area
-            uploadArea.addEventListener('click', () => {
-                fileInput.click();
-            });
-
-            // Drag and drop handlers
-            uploadArea.addEventListener('dragover', (e) => {
-                e.preventDefault();
-                uploadArea.classList.add('drag-over');
-            });
-
-            uploadArea.addEventListener('dragleave', (e) => {
-                e.preventDefault();
-                uploadArea.classList.remove('drag-over');
-            });
-
-            uploadArea.addEventListener('drop', (e) => {
-                e.preventDefault();
-                uploadArea.classList.remove('drag-over');
-
-                const files = e.dataTransfer.files;
-                handleFiles(files);
-            });
-
-            fileInput.addEventListener('change', (e) => {
-                handleFiles(e.target.files);
-            });
-
-            function handleFiles(files) {
-                if (files.length === 0) return;
-
-                const file = files[0];
-
-                const validTypes = [
-                    'text/csv',
-                    'application/vnd.ms-excel',
-                    'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet'
-                ];
-
-                if (!validTypes.includes(file.type)) {
-                    alert('Upload file gagal, Tolong Unggah Hanya file berformat .csv/xls');
-                    fileInput.value = '';
-                    return;
-                }
-
-                if (file.size > maxFileSize) {
-                    alert('Upload file gagal, Ukuran file lebih dari 5 MB');
-                    fileInput.value = '';
-                    return;
-                }
-
-                if (file.size > maxFileSize && file.size > maxFileSize) {
-                    return
-                }
-
-                console.log(file.name);
-
-                const reader = new FileReader();
-                reader.onload = function (e) {
-                    displayFileName.classList.remove('hidden')
-                    uploadHelptext.classList.add('hidden')
-                    displayFileName.innerText = file.name
-                };
-                reader.readAsText(file);
+            
+            if(gihCheckbox.value == 'Sudah') {
+                $('#gih-checkbox').val('Sudah');
+                gihChecked.classList.add("bg-blue-400", "!text-white");
+                gihUnChecked.classList.remove("bg-blue-400", "!text-white");
+            }else{
+                $('#gih-checkbox').val('Belum');
+                gihUnChecked.classList.add("bg-blue-400", "!text-white");
+                gihChecked.classList.remove("bg-blue-400", "!text-white");
+                gihChecked.classList.add("text-blue-400");
             }
+
+            gihChecked.addEventListener('click', function () {
+                $('#gih-checkbox').val('Sudah');
+                gihChecked.classList.add("bg-blue-400", "!text-white");
+                gihUnChecked.classList.remove("bg-blue-400", "!text-white");
+            });
+            gihUnChecked.addEventListener('click', function () {
+                $('#gih-checkbox').val('Belum');
+                gihUnChecked.classList.add("bg-blue-400", "!text-white");
+                gihChecked.classList.remove("bg-blue-400", "!text-white");
+                gihChecked.classList.add("text-blue-400");
+            });
+
+            // gihCheckbox.addEventListener('change', function () {
+            //     if (this.checked) {
+            //         gihChecked.classList.add("bg-blue-400", "!text-white");
+            //         gihUnChecked.classList.remove("bg-blue-400", "!text-white");
+            //     } else {
+            //         gihUnChecked.classList.add("bg-blue-400", "!text-white");
+            //         gihChecked.classList.remove("bg-blue-400", "!text-white");
+            //         gihChecked.classList.add("text-blue-400");
+            //     }
+            // });
         });
     </script>
 @endpush
+

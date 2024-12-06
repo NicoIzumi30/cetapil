@@ -17,6 +17,7 @@ class SalesActivity extends Model
 
     protected $guarded = [];
 
+
     public function outlet(): BelongsTo
     {
         return $this->belongsTo(Outlet::class);
@@ -32,13 +33,27 @@ class SalesActivity extends Model
         return $this->hasMany(SalesSurvey::class);
     }
 
-    public function scopeCompleteRelation(Builder $query)
+    public function orders(): HasMany
     {
-        $query->has('outlet');
+        return $this->hasMany(SalesOrder::class);
     }
-    // Add this relationship method to your SalesActivity class
+
+    public function availabilities(): HasMany
+    {
+        return $this->hasMany(SalesAvailability::class);
+    }
+
+    public function salesVisibilities(): HasMany
+    {
+        return $this->hasMany(SalesVisibility::class);
+    }
     public function visibilities(): HasMany
     {
         return $this->hasMany(Visibility::class, 'outlet_id', 'outlet_id');
+    }
+
+    public function scopeCompleteRelation(Builder $query)
+    {
+        $query->has('outlet');
     }
 }

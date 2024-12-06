@@ -95,11 +95,12 @@ class OutletController extends Controller
 
         DB::beginTransaction();
         try {
-            // Create outlet
+            // Create outlet - include channel_id in the data
             $data = Arr::except($request->validated(), ['city', 'img_front', 'img_banner', 'img_main_road', 'forms']);
             $outlet = new Outlet($data);
             $outlet->user_id = $this->getAuthUserId();
             $outlet->status = 'PENDING';
+            $outlet->cycle = $data['cycle'] ?? '1x1';  // Set default if not provided
 
             // Handle city
             $city = City::whereName($request->city)->first();
@@ -107,6 +108,16 @@ class OutletController extends Controller
                 return $this->failedResponse(OutletConstants::CITY_NOT_FOUND, Response::HTTP_NOT_FOUND);
             }
             $outlet->city_id = $city->id;
+
+            // Handle channel_id
+            if (!$request->channel_id) {
+                return $this->failedResponse(
+                    'Channel ID is required',
+                    Response::HTTP_BAD_REQUEST
+                );
+            }
+            $outlet->channel_id = $request->channel_id;
+
             $outlet->save();
 
             // Handle images
