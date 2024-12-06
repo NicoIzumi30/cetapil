@@ -194,7 +194,7 @@ class DatabaseHelper {
     time_knowledge INTEGER DEFAULT 0,
     time_survey INTEGER DEFAULT 0,
     time_order INTEGER DEFAULT 0,
-    status TEXT CHECK(status IN ('IN_PROGRESS', 'SUBMITTED', 'CANCELLED')) DEFAULT 'IN_PROGRESS',
+    status TEXT CHECK(status IN ('IN_PROGRESS' , 'DRAFTED' , 'SUBMITTED', 'CANCELLED')) DEFAULT 'IN_PROGRESS',
     created_at TEXT NOT NULL,
     updated_at TEXT NOT NULL,
     deleted_at TEXT,
@@ -1167,6 +1167,21 @@ class DatabaseHelper {
     } catch (e) {
       print('Error in getOutletById: $e');
       return null;
+    }
+  }
+
+  Future<void> updateSalesActivityStatus(String id) async {
+    final db = await database;
+    try {
+      await db.update(
+        'sales_activities',
+        {'status': 'DRAFTED'},
+        where: 'id = ?',
+        whereArgs: [id],
+      );
+    } catch (e) {
+      print('Error updating status: $e');
+      throw e;
     }
   }
 }

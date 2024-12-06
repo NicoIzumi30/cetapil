@@ -117,7 +117,6 @@ class TambahActivityController extends GetxController {
             }),
       ];
 
-
       final response = await Api.submitActivity(
         data,
         availabilityDraftItems,
@@ -130,11 +129,10 @@ class TambahActivityController extends GetxController {
         throw Exception('Failed to get outlets from API');
       }
 
-      // isEditing ? await db.deleteOutlet(currentOutletId) : null;
-      // clearForm();
       _timer?.cancel();
       EasyLoading.dismiss();
       Get.back();
+      // REFRESH LIST ACTIVITY
       CustomAlerts.showSuccess(
           Get.context!, // Use Get.context instead of the previous context
           "Data Berhasil Disimpan",
@@ -152,7 +150,8 @@ class TambahActivityController extends GetxController {
     }
   }
 
-  Future<void> saveDraftActivity(String activityId, outletId) async {
+  Future<void> saveDraftActivity(String activityId, outletId, checkedIn,
+      channelId, channelName, outletName, outletCategory) async {
     try {
       EasyLoading.show(status: 'Saving draft...');
 
@@ -172,13 +171,19 @@ class TambahActivityController extends GetxController {
       final data = {
         'sales_activity_id': activityId,
         'outlet_id': outletId,
+        'name': outletName,
+        'category': outletCategory,
+        'channel_id': channelId,
+        'channel_name': channelName,
         'views_knowledge': "111",
         'time_availability': availabilityTime.toString(),
         'time_visibility': visibilityTime.toString(),
         'time_knowledge': knowledgeTime.toString(),
         'time_survey': surveyTime.toString(),
         'time_order': orderTime.toString(),
-        'current_time': DateTime.now().toIso8601String(),
+        'status': "DRAFTED",
+        'checked_in': checkedIn.toString(),
+        'checked_out': DateTime.now().toIso8601String(),
       };
 
       if (isEditing) {
@@ -436,7 +441,7 @@ class TambahActivityController extends GetxController {
     return null;
   }
 
-   setDetailOutlet(Activity.Data data) {
+  setDetailOutlet(Activity.Data data) {
     detailOutlet.value = data;
     print(detailOutlet.value!.id);
   }

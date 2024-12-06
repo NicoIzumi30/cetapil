@@ -55,7 +55,7 @@ class ActivityPage extends GetView<ActivityController> {
                                 final activity = controller.filteredOutlets[index];
                                 return ActivityCard(
                                   activity: activity,
-                                  statusDraft: 'Drafted',
+                                  statusDraft: activity.status!,
                                   statusCheckin: true,
                                   ontap: ()async {
                                     // Set the outlet_id in the TambahActivityController before navigation
@@ -203,7 +203,7 @@ class ActivityCard extends StatelessWidget {
                 Container(
                   padding: EdgeInsets.symmetric(vertical: 7, horizontal: 15),
                   decoration: BoxDecoration(
-                    color: statusDraft == "Drafted" ? Colors.white : AppColors.primary,
+                    color: statusDraft == "DRAFTED" ? Colors.white : AppColors.primary,
                     borderRadius: BorderRadius.circular(4),
                   ),
                   child: Text(
@@ -211,7 +211,7 @@ class ActivityCard extends StatelessWidget {
                     style: TextStyle(
                         fontSize: 12,
                         fontWeight: FontWeight.bold,
-                        color: statusDraft == "Drafted" ? Colors.blue : Colors.white),
+                        color: statusDraft == "DRAFTED" ? Colors.blue : Colors.white),
                   ),
                 ),
                 Row(

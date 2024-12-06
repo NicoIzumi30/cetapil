@@ -33,18 +33,23 @@ class ActivityDatabaseHelper {
       CREATE TABLE sales_activity (
         id TEXT PRIMARY KEY,
         outlet_id TEXT,
+        name TEXT,
+        category TEXT,
+        channel_id TEXT,
+        channel_name TEXT,
         view_knowledge TEXT,
         time_availability TEXT,
         time_visibility TEXT,
         time_knowledge TEXT,
         time_survey TEXT,
         time_order TEXT,
-        current_time TEXT
+        status TEXT,
+        checked_in TEXT,
+        checked_out TEXT
       )
     ''');
 
     // Availability items table
-    /// EDITED (tambah product id)
     await db.execute('''
       CREATE TABLE availability (
         id TEXT PRIMARY KEY,
@@ -58,7 +63,6 @@ class ActivityDatabaseHelper {
     ''');
 
     // Visibility items table
-    /// EDITED (tambah visibility id)
     await db.execute('''
       CREATE TABLE visibility (
         id TEXT PRIMARY KEY,
@@ -83,7 +87,6 @@ class ActivityDatabaseHelper {
     ''');
 
     // Order items table
-    ///
     await db.execute('''
       CREATE TABLE orders (
         id TEXT PRIMARY KEY,
@@ -121,13 +124,19 @@ class ActivityDatabaseHelper {
       await txn.insert('sales_activity', {
         'id': data['sales_activity_id'].toString(),
         'outlet_id': data['outlet_id'].toString(),
+        'name': data['name'].toString(),
+        'category': data['category'].toString(),
+        'channel_id': data['channel_id'].toString(),
+        'channel_name': data['channel_name'].toString(),
         'view_knowledge': data['views_knowledge'].toString(),
         'time_availability': data['time_availability'].toString(),
         'time_visibility': data['time_visibility'].toString(),
         'time_knowledge': data['time_knowledge'].toString(),
         'time_survey': data['time_survey'].toString(),
         'time_order': data['time_order'].toString(),
-        'current_time': data['current_time'].toString(),
+        'status': data['status'].toString(),
+        'checked_in': data['checked_in'].toString(),
+        'checked_out': data['checked_out'].toString(),
       });
 
       // Insert availability items
@@ -238,6 +247,33 @@ class ActivityDatabaseHelper {
     }
   }
 
+  // Only Get List Data SalesActivitu
+  Future<List<Map<String, dynamic>>> getSalesActivities() async {
+    final db = await database;
+    try {
+      return await db.query('sales_activity');
+    } catch (e) {
+      print('Error getting sales activities: $e');
+      return [];
+    }
+  }
+
+  Future<List<String>> getSalesActivityIds() async {
+    final db = await database;
+    try {
+      final List<Map<String, dynamic>> maps = await db.query(
+        'sales_activity',
+        columns: ['id'], // Only select the id column
+      );
+
+      return maps.map((map) => map['id'] as String).toList();
+    } catch (e) {
+      print('Error getting sales activity IDs: $e');
+      return [];
+    }
+  }
+
+
 // Update Function
   Future<void> updateSalesActivity({
     required Map<String, dynamic> data,
@@ -254,13 +290,19 @@ class ActivityDatabaseHelper {
         'sales_activity',
         {
           'outlet_id': data['outlet_id'].toString(),
+          'name': data['name'].toString(),
+          'category': data['category'].toString(),
+          'channel_id': data['channel_id'].toString(),
+          'channel_name': data['channel_name'].toString(),
           'view_knowledge': data['views_knowledge'].toString(),
           'time_availability': data['time_availability'].toString(),
           'time_visibility': data['time_visibility'].toString(),
           'time_knowledge': data['time_knowledge'].toString(),
           'time_survey': data['time_survey'].toString(),
           'time_order': data['time_order'].toString(),
-          'current_time': data['current_time'].toString(),
+          'status': data['status'].toString(),
+          'checked_in': data['checked_in'].toString(),
+          'checked_out': data['checked_out'].toString(),
         },
         where: 'id = ?',
         whereArgs: [data['sales_activity_id']],
