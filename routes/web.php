@@ -4,6 +4,7 @@ use App\Http\Controllers\Web\OutletControler;
 use App\Http\Controllers\Web\ProductKnowledgeControler;
 use App\Http\Controllers\Web\RoutingController;
 use App\Http\Controllers\Web\RoutingRequestControler;
+use App\Http\Controllers\Web\SalesActivityController;
 use App\Http\Controllers\Web\VisualController;
 use App\Models\Visibility;
 use Illuminate\Support\Facades\Route;
@@ -32,62 +33,45 @@ Route::middleware('auth')->group(function () {
         return view('pages.profile');
     })->name('profile');
 
-    // Routing Management
-    // Route::prefix('routing')->name('routing.')->middleware('permission:menu_routing')->group(function () {
-    //     Route::get('/', function () {
-    //         return view('pages.routing.index');
-    //     })->name('index');
-    //     Route::get('/create', function () {
-    //         return view('pages.routing.create');
-    //     })->name('create');
-    //     Route::get('/edit', function () {
-    //         return view('pages.routing.edit');
-    //     })->name('edit');
-    //     Route::get('/request', function () {
-    //         return view('pages.routing.request');
-    //     });
-    //     Route::get('/routingrequest/detail', function () {
-    //         return view('pages.routing.detail-request');
-    //     });
-        Route::get('/routing/sales-activity', function () {
-            return view('pages.routing.sales-activity');
-        });
-    //     Route::get('/av3m', function () {
-    //         return view('pages.routing.av3m');
-    //     });
-    // });
-    Route::get('/routing/request', [RoutingRequestControler::class,'index'])->name('routing.request')->middleware('permission:menu_routing');
-    Route::get('/routing/request/data', [RoutingRequestControler::class,'getData'])->name('routing.request.data')->middleware('permission:menu_routing');
-    Route::get('/routing/request/{id}/edit', [RoutingRequestControler::class,'edit'])->name('routing.request.edit')->middleware('permission:menu_routing');
-    Route::put('/routing/request/{id}/approve', [RoutingRequestControler::class,'approve'])->name('routing.request.approve')->middleware('permission:menu_routing');
-    Route::put('/routing/request/{id}/reject', [RoutingRequestControler::class,'reject'])->name('routing.request.reject')->middleware('permission:menu_routing');
-    Route::delete('/routing/request/delete/', [RoutingRequestControler::class,'destroy'])->name('routing.request.delete')->middleware('permission:menu_routing');
-  
-    Route::post('/routing/bulk', [RoutingController::class,'bulk'])->name('routing.bulk')->middleware('permission:menu_routing');
-    Route::get('routing/generate-excel',[RoutingController::class,'downloadExcel'])->name('routing.generae-excel')->middleware('permission:menu_routing');
-    Route::get('routing/data',[RoutingController::class,'getData'])->name('routing.data')->middleware('permission:menu_routing');
-    Route::resource('routing',RoutingController::class)->middleware('permission:menu_routing');
-  
+    Route::prefix('routing/sales/activity')->name('routing.sales.activity.')->middleware('permission:menu_routing')->group(function () {
+        Route::get('/data', [SalesActivityController::class, 'getData'])->name('data');
+        Route::get('/{id}', [SalesActivityController::class, 'detail'])->name('detail');
+    });
+    Route::prefix('routing/request')->name('routing.request.')->middleware('permission:menu_routing')->group(function () {
+        Route::get('/', [RoutingRequestControler::class, 'index'])->name('index');
+        Route::get('/data', [RoutingRequestControler::class, 'getData'])->name('data');
+        Route::get('/{id}/edit', [RoutingRequestControler::class, 'edit'])->name('edit');
+        Route::put('/{id}/approve', [RoutingRequestControler::class, 'approve'])->name('approve');
+        Route::put('/{id}/reject', [RoutingRequestControler::class, 'reject'])->name('reject');
+        Route::delete('/delete/', [RoutingRequestControler::class, 'destroy'])->name('delete');
+    });
+
+
+    Route::post('/routing/bulk', [RoutingController::class, 'bulk'])->name('routing.bulk')->middleware('permission:menu_routing');
+    Route::get('routing/generate-excel', [RoutingController::class, 'downloadExcel'])->name('routing.generae-excel')->middleware('permission:menu_routing');
+    Route::get('routing/data', [RoutingController::class, 'getData'])->name('routing.data')->middleware('permission:menu_routing');
+    Route::resource('routing', RoutingController::class)->middleware('permission:menu_routing');
+
     Route::put('update-product-knowledge', [ProductKnowledgeControler::class, 'update'])->name('update-product-knowledge')->middleware('permission:menu_routing');
 
     // Visibility Management
     Route::middleware('permission:menu_visibility')->group(function () {
         Route::get('/visibility/data', [VisibilityController::class, 'getData'])->name('visibility.data');
         Route::resource('visibility', VisibilityController::class);
-            
+
         // Route::get('/visibility/data', [VisibilityController::class, 'getData'])->name('visibility.data');
-        
-        Route::get('visibility/{visibility}/edit', [VisibilityController::class, 'edit'])->name('visibility.edit');
+
+        // Route::get('visibility/{visibility}/edit', [VisibilityController::class, 'edit'])->name('visibility.edit');
 
         Route::get('posm/get-images', [PosmController::class, 'getImages'])
-        ->name('posm.get-images');
+            ->name('posm.get-images');
 
         Route::post('posm/update-image', [PosmController::class, 'updateImage'])
             ->name('posm.update-image');
-        
+
         Route::post('visual', [VisualController::class, 'store'])->name('visual.store');
         Route::post('posm-types', [PosmController::class, 'store'])->name('posm.store');
-    
+
         Route::get('/visibility/products/{category}', [VisibilityController::class, 'getProducts'])
             ->name('visibility.products');
 
@@ -112,26 +96,24 @@ Route::middleware('auth')->group(function () {
 
     // Product Management
     Route::prefix('products')->name('products.')->middleware('permission:menu_product')->group(function () {
-        Route::get('/', [ProductController::class, 'index'])->name('index');
-        Route::get('/create', [ProductController::class, 'create'])->name('create');
-        Route::post('/', [ProductController::class, 'store'])->name('store');
-        Route::get('{product}/edit', [ProductController::class, 'edit'])->name('edit');
-        Route::put('/{product}', [ProductController::class, 'update'])->name('update');
-        Route::delete('/{product}', [ProductController::class, 'destroy'])->name('destroy');
+
         Route::post('/bulk', [ProductController::class, 'bulk'])->name('bulk');
-        Route::get('/download-template', [ProductController::class,'downloadTemplate'])->name('downloadTemplate');
+        Route::get('/download-template', [ProductController::class, 'downloadTemplate'])->name('downloadTemplate');
         Route::get('/{product}/av3m', [ProductController::class, 'getAv3m'])->name('products.getAv3m');
         Route::post('/{product}/av3m', [ProductController::class, 'updateAv3m'])->name('products.updateAv3m');
         Route::get('/generate-excel', [ProductController::class, 'downloadExcel'])
-        ->name('generate-excel');
+            ->name('generate-excel');
         Route::get('/data', [ProductController::class, 'getData'])->name('data');
+        Route::get('/data-stock-on-hand', [ProductController::class, 'getDataStockOnHand'])->name('data-stock-on-hand');
     });
+    Route::resource('products', ProductController::class)->middleware('permission:menu_product');
     // Logout
+
     Route::get('/logout', LogoutController::class)->name('logout');
-// Unauthorized Access
-Route::get('/unauthorized', function () {
-    return view('pages.unauthorized');
-})->name('unauthorized');
+    // Unauthorized Access
+    Route::get('/unauthorized', function () {
+        return view('pages.unauthorized');
+    })->name('unauthorized');
 
 });
 

@@ -237,11 +237,17 @@
         <x-slot:cardAction>
             <x-button.light>Download
             </x-button.light>
-            <x-select.light :title="'Filter Produk'">
-                <option value="apalah">apalah</option>
+            <x-select.light :title="'Filter Produk'" id="filter_product">
+                <option value="all">Semua</option>
+                @foreach ($products as $product)
+                    <option value="{{$product->id}}">{{$product->sku}}</option>
+                @endforeach
             </x-select.light>
-            <x-select.light :title="'Filter Area'">
-                <option value="maa">mamah</option>
+            <x-select.light :title="'Filter Area'" id="filter_area">
+                <option value="all">Semua</option>
+                @foreach ($cities as $city)
+                    <option value="{{$city->id}}">{{$city->name}}</option>
+                @endforeach
             </x-select.light>
             <x-input.datepicker id="stock-date-range"></x-input.datepicker>
             {{-- <input type='text' id="basic-date" placeholder="Select Date..."> --}}
@@ -293,35 +299,6 @@
                     </th>
                 </tr>
             </thead>
-            <tbody>
-                @forelse ($items as $item)
-                    <tr class="table-row">
-                        <td scope="row" class="table-data">
-                            {{ $item['name'] }}
-                        </td>
-                        <td class="table-data">
-                            {{ $item['price'] }}
-                        </td>
-                        <td class="table-data">
-                            100
-                        </td>
-                        <td class="table-data {{ $item['status'] == 'Yes' ? 'text-green-400' : 'text-red-400' }}">
-                            {{ $item['status'] }}
-                        </td>
-                        <td class="table-data">
-                            80
-                        </td>
-                        <td class="table-data {{ $item['recommendation'] > 0 ? 'text-green-400' : 'text-red-400' }}">
-                            {{ $item['recommendation'] }}
-                        </td>
-                        <td class="table-data {{ $item['ket'] == 'Ideal' ? 'text-green-400' : 'text-red-400' }}">
-                            {{ $item['ket'] }}
-                        </td>
-                    </tr>
-                @empty
-                    <p>data not found</p>
-                @endforelse
-            </tbody>
         </table>
         {{-- Tabel Stock-on-Hand End --}}
 
@@ -333,345 +310,415 @@
 
 
 @push('scripts')
-<script>
-$(document).ready(function() {
-    // Inisialisasi komponen
-    $('.categories, .edit-category').select2();
-    $("#stock-date-range").flatpickr({ mode: "range" });
+    <script>
+        $(document).ready(function () {
+            // Inisialisasi komponen
+            $('.categories, .edit-category').select2();
+            $("#stock-date-range").flatpickr({ mode: "range" });
 
-    // Konfigurasi DataTable utama
-    let table = $('#product-table').DataTable({
-        processing: true,
-        serverSide: true,
-        paging: true,
-        searching: false,
-        info: true,
-        pageLength: 10,
-        lengthMenu: [10, 20, 30, 40, 50],
-        dom: 'rt<"bottom-container"<"bottom-left"l><"bottom-right"p>>',
-        language: {
-            lengthMenu: "Menampilkan _MENU_ dari _TOTAL_ data",
-            processing: "Memuat data...",
-            paginate: {
-                previous: '<',
-                next: '>',
-                last: 'Terakhir',
-            },
-            info: "Menampilkan _START_ sampai _END_ dari _TOTAL_ data",
-            infoEmpty: "Menampilkan 0 sampai 0 dari 0 data",
-            emptyTable: "Tidak ada data yang tersedia"
-        },
-        ajax: {
-            url: "{{ route('products.data') }}",
-            data: function(d) {
-                d.search_term = $('#global-search').val();
-            },
-            dataSrc: function(json) {
-                $('.dataTables_length select').closest('.dataTables_length')
-                    .find('label')
-                    .html(` <select>${$('.dataTables_length select').html()}</select> dari ${json.recordsFiltered} data`);
-                return json.data;
-            }
-        },
-        columns: [
-            { data: 'category', name: 'category.name',className: 'table-data', },
-                
-                { data: 'sku', name: 'sku',className: 'table-data', },
-            { 
-                data: 'md_price',
-                name: 'md_price',
-                className: 'table-data',
-                render: data => 'Rp ' + data
-            },
-            { 
-                data: 'sales_price',
-                name: 'sales_price',
-                className: 'table-data',
-                render: data => 'Rp ' + data
-            },
-            { 
-                data: 'actions',
-                name: 'actions',
-                orderable: false,
-                searchable: false
-            }
-        ]
-    });
+            // Konfigurasi DataTable utama
+            let table = $('#product-table').DataTable({
+                processing: true,
+                serverSide: true,
+                paging: true,
+                searching: false,
+                info: true,
+                pageLength: 10,
+                lengthMenu: [10, 20, 30, 40, 50],
+                dom: 'rt<"bottom-container"<"bottom-left"l><"bottom-right"p>>',
+                language: {
+                    lengthMenu: "Menampilkan _MENU_ dari _TOTAL_ data",
+                    processing: "Memuat data...",
+                    paginate: {
+                        previous: '<',
+                        next: '>',
+                        last: 'Terakhir',
+                    },
+                    info: "Menampilkan _START_ sampai _END_ dari _TOTAL_ data",
+                    infoEmpty: "Menampilkan 0 sampai 0 dari 0 data",
+                    emptyTable: "Tidak ada data yang tersedia"
+                },
+                ajax: {
+                    url: "{{ route('products.data') }}",
+                    data: function (d) {
+                        d.search_term = $('#global-search').val();
+                    },
+                    dataSrc: function (json) {
+                        $('.dataTables_length select').closest('.dataTables_length')
+                            .find('label')
+                            .html(` <select>${$('.dataTables_length select').html()}</select> dari ${json.recordsFiltered} data`);
+                        return json.data;
+                    }
+                },
+                columns: [
+                    { data: 'category', name: 'category.name', className: 'table-data', },
 
-    // Search dengan debounce
-    let searchTimer;
-    $('#global-search').on('input', function() {
-        clearTimeout(searchTimer);
-        searchTimer = setTimeout(() => table.ajax.reload(null, false), 500);
-    });
-
-    // Stock on hand table
-    $('#stock-on-hand-table').DataTable({
-        paging: true,
-        searching: false,
-        info: true,
-        pageLength: 10,
-        lengthMenu: [10, 20, 30, 40, 50],
-        dom: 'rt<"bottom-container"<"bottom-left"l><"bottom-right"p>>',
-        language: {
-            lengthMenu: "Menampilkan _MENU_ dari 4,768 data",
-            paginate: {
-                previous: '<',
-                next: '>',
-                last: 'Terakhir',
-            }
-        },
-    });
-    $(document).on('click', '#product-table .delete-btn', function(e) {
-        e.preventDefault();
-        const url = $(this).attr('href');
-        const name = $(this).data('name');
-        deleteData(url, name);
-    });
-    // Create Product
-    $('#saveBtn').click(function() {
-        resetFormErrors();
-        toggleLoading(true, 'save');
-        
-        $.ajax({
-            type: 'POST',
-            url: '{{ route('products.store') }}',
-            data: $('#createProductForm').serialize(),
-            success: function(response) {
-                handleSuccess('tambah-produk', response.message);
-            },
-            error: handleFormErrors
-        });
-    });
-
-    // Edit product handler
-    $(document).on('click', '#view-product', function(e) {
-        e.preventDefault();
-        const productId = $(this).data('id');
-        resetFormErrors();
-        
-        $.ajax({
-            url: `/products/${productId}/edit`,
-            type: 'GET',
-            success: function(response) {
-                $('#edit-category').val(response.category_id).trigger('change');
-                $('#edit-sku').val(response.sku);
-                $('#edit-md-price').val(response.md_price);
-                $('#edit-sales-price').val(response.sales_price);
-                $('#editProductForm').data('id', response.id);
-                openModal('edit-produk');
-            },
-            error: function() {
-                toast('error', 'Terjadi kesalahan saat mengambil data produk', 200);
-            }
-        });
-    });
-
-    // Update product handler
-    $('#updateBtn').click(function(e) {
-        e.preventDefault();
-        const productId = $('#editProductForm').data('id');
-        const formData = {
-            category_id: $('#edit-category').val(),
-            sku: $('#edit-sku').val(),
-            md_price: $('#edit-md-price').val().replace(/[^\d]/g, ''),
-            sales_price: $('#edit-sales-price').val().replace(/[^\d]/g, '')
-        };
-
-        resetFormErrors();
-        toggleLoading(true, 'update');
-
-        $.ajax({
-            url: `/products/${productId}`,
-            type: 'PUT',
-            data: formData,
-            success: function(response) {
-                handleSuccess('edit-produk', response.message);
-            },
-            error: handleFormErrors
-        });
-    });
-
-    // AV3M update handler
-    $(document).on('click', '#view-av3m', function(e) {
-        e.preventDefault();
-        const productId = $(this).data('id');
-        resetFormErrors();
-        openModal('update-av3m');
-        
-        $.ajax({
-            url: `/products/${productId}/av3m`,
-            type: 'GET',
-            success: function(response) {
-                @foreach ($channels as $channel)
-                    $('#channel-{{$channel->id}}').val(response.channel_{{$loop->iteration}});
-                @endforeach
-                $('#av3mForm').data('id', response.id);
-            }
-        });
-    });
-
-    // Save AV3M handler
-    $('#saveAv3mBtn').click(function(e) {
-        e.preventDefault();
-        const productId = $('#av3mForm').data('id');
-
-        $.ajax({
-            url: `/products/${productId}/av3m`,
-            type: 'POST',
-            data: $('#av3mForm').serialize(),
-            success: function(response) {
-                handleSuccess('update-av3m', response.message);
-            },
-            error: function(xhr) {
-                if (xhr.status === 422) {
-                    toast('error', xhr.responseJSON.message, 200);
-                    handleFieldErrors(xhr.responseJSON.errors, true);
-                }
-            }
-        });
-    });
-
-    // Import/Upload handlers
-    $('#downloadTemplate').click(function() {
-        window.location.href = "{{ asset('assets/template/template_bulk_product.xlsx') }}";
-    });
-
-    $('#importBtn').click(function() {
-        const file = $('#file_upload')[0].files[0];
-        if (!file) {
-            return toast('error', 'Silakan pilih file terlebih dahulu', 200);
-        }
-
-        const formData = new FormData();
-        formData.append('excel_file', file);
-        toggleLoading(true, 'import');
-
-        $.ajax({
-            url: '/products/bulk',
-            type: 'POST',
-            data: formData,
-            processData: false,
-            contentType: false,
-            success: function(response) {
-                handleSuccess('unggah-produk-bulk', response.message);
-            },
-            error: function(xhr) {
-                toggleLoading(false, 'import');
-                toast('error', xhr.responseJSON.message, 200);
-            }
-        });
-    });
-
-    // Download Excel handler
-    $('#downloadBtn').click(function(e) {
-        e.preventDefault();
-        toggleLoading(true);
-
-        const form = document.createElement('form');
-        form.method = 'GET';
-        form.action = '/products/generate-excel';
-        document.body.appendChild(form);
-
-        fetch('/products/generate-excel')
-            .then(response => {
-                if (response.ok) {
-                    form.submit();
-                    toast('success', 'File berhasil diunduh', 150);
-                } else {
-                    return response.json().then(data => {
-                        throw new Error(data.message || 'Gagal mengunduh file');
-                    });
-                }
-            })
-            .catch(error => {
-                console.error('Download error:', error);
-                toast('error', error.message || 'Gagal mengunduh file', 200);
-            })
-            .finally(() => {
-                toggleLoading(false);
-                document.body.removeChild(form);
+                    { data: 'sku', name: 'sku', className: 'table-data', },
+                    {
+                        data: 'md_price',
+                        name: 'md_price',
+                        className: 'table-data',
+                        render: data => 'Rp ' + data
+                    },
+                    {
+                        data: 'sales_price',
+                        name: 'sales_price',
+                        className: 'table-data',
+                        render: data => 'Rp ' + data
+                    },
+                    {
+                        data: 'actions',
+                        name: 'actions',
+                        orderable: false,
+                        searchable: false
+                    }
+                ]
             });
-    });
 
-    // File Upload Area
-    const setupFileUpload = () => {
-        const uploadArea = document.getElementById('upload-area');
-        const fileInput = document.getElementById('file_upload');
-        const displayFileName = document.getElementById('filename-display');
-        const uploadHelptext = document.getElementById('upload-helptext');
-        const maxFileSize = 5 * 1024 * 1024;
+            // Search dengan debounce
+            let searchTimer;
+            $('#global-search').on('input', function () {
+                clearTimeout(searchTimer);
+                searchTimer = setTimeout(() => table.ajax.reload(null, false), 500);
+            });
 
-        uploadArea.addEventListener('click', () => fileInput.click());
+            // Stock on hand table
+            let tableSOD = $('#stock-on-hand-table').DataTable({
+                processing: true,
+                serverSide: true,
+                paging: true,
+                searching: false,
+                info: true,
+                pageLength: 10,
+                lengthMenu: [10, 20, 30, 40, 50],
+                dom: 'rt<"bottom-container"<"bottom-left"l><"bottom-right"p>>',
+                language: {
+                    lengthMenu: "Menampilkan _MENU_ dari _TOTAL_ data",
+                    processing: "Memuat data...",
+                    paginate: {
+                        previous: '<',
+                        next: '>',
+                        last: 'Terakhir',
+                    },
+                    info: "Menampilkan _START_ sampai _END_ dari _TOTAL_ data",
+                    infoEmpty: "Menampilkan 0 sampai 0 dari 0 data",
+                    emptyTable: "Tidak ada data yang tersedia"
+                },
+                ajax: {
+                    url: "{{ route('products.data-stock-on-hand') }}",
+                    type: 'GET',
+                    data: function (d) {
+                        d.date = $('#stock-date-range').val() == 'Date Range' ? '' : $('#stock-date-range').val();
+                        d.filter_area = $('#filter_area').val();
+                        d.filter_product = $('#filter_product').val();
+                    }
+                },
+                columns: [
+                    {
+                        data: 'outlet',
+                        name: 'outlet',
+                        class: 'table-data'
+                    },
+                    {
+                        data: 'sku',
+                        name: 'sku',
+                        class: 'table-data'
+                    },
+                    {
+                        data: 'sod',
+                        name: 'sod',
+                        class: 'table-data'
+                    },
+                    {
+                        data: 'status',
+                        name: 'status',
+                        class: 'table-data'
+                    },
+                    {
+                        data: 'av3m',
+                        name: 'av3m',
+                        class: 'table-data'
+                    },
+                    {
+                        data: 'ideal',
+                        name: 'ideal',
+                        class: 'table-data'
+                    },
 
-        ['dragover', 'dragleave', 'drop'].forEach(eventName => {
-            uploadArea.addEventListener(eventName, (e) => {
+                    {
+                        data: 'keterangan',
+                        name: 'keterangan',
+                        class: 'table-data'
+                    }
+                ],
+                order: [[0, 'asc']]
+            });
+            // Event Handlers for Sales Table
+            $(document).on('change', '#dt-length-stock-on-hand', function () {
+                var length = $(this).val();
+                tableSOD.page.len(length).draw();
+            });
+
+            $('#stock-date-range').on('change', function () {
+                tableSOD.ajax.reload(null, false);
+            });
+
+            $('#filter_area').on('change', function () {
+                tableSOD.ajax.reload(null, false);
+            });
+            $('#filter_product').on('change', function () {
+                tableSOD.ajax.reload(null, false);
+            });
+            $(document).on('click', '#product-table .delete-btn', function (e) {
                 e.preventDefault();
-                uploadArea.classList.toggle('drag-over', eventName === 'dragover');
-                if (eventName === 'drop') handleFiles(e.dataTransfer.files);
+                const url = $(this).attr('href');
+                const name = $(this).data('name');
+                deleteData(url, name);
             });
-        });
+            // Create Product
+            $('#saveBtn').click(function () {
+                resetFormErrors();
+                toggleLoading(true, 'save');
 
-        fileInput.addEventListener('change', (e) => handleFiles(e.target.files));
+                $.ajax({
+                    type: 'POST',
+                    url: '{{ route('products.store') }}',
+                    data: $('#createProductForm').serialize(),
+                    success: function (response) {
+                        handleSuccess('tambah-produk', response.message);
+                    },
+                    error: handleFormErrors
+                });
+            });
 
-        function handleFiles(files) {
-            if (!files.length) return;
+            // Edit product handler
+            $(document).on('click', '#view-product', function (e) {
+                e.preventDefault();
+                const productId = $(this).data('id');
+                resetFormErrors();
 
-            const file = files[0];
-            const validTypes = [
-                'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet',
-                'application/wps-office.xlsx',
-                'application/vnd.ms-excel'
-            ];
+                $.ajax({
+                    url: `/products/${productId}/edit`,
+                    type: 'GET',
+                    success: function (response) {
+                        $('#edit-category').val(response.category_id).trigger('change');
+                        $('#edit-sku').val(response.sku);
+                        $('#edit-md-price').val(response.md_price);
+                        $('#edit-sales-price').val(response.sales_price);
+                        $('#editProductForm').data('id', response.id);
+                        openModal('edit-produk');
+                    },
+                    error: function () {
+                        toast('error', 'Terjadi kesalahan saat mengambil data produk', 200);
+                    }
+                });
+            });
 
-            if (!validTypes.includes(file.type)) {
-                alert('Upload file gagal, Tolong Unggah Hanya file berformat .xlsx');
-                fileInput.value = '';
-                return;
+            // Update product handler
+            $('#updateBtn').click(function (e) {
+                e.preventDefault();
+                const productId = $('#editProductForm').data('id');
+                const formData = {
+                    category_id: $('#edit-category').val(),
+                    sku: $('#edit-sku').val(),
+                    md_price: $('#edit-md-price').val().replace(/[^\d]/g, ''),
+                    sales_price: $('#edit-sales-price').val().replace(/[^\d]/g, '')
+                };
+
+                resetFormErrors();
+                toggleLoading(true, 'update');
+
+                $.ajax({
+                    url: `/products/${productId}`,
+                    type: 'PUT',
+                    data: formData,
+                    success: function (response) {
+                        handleSuccess('edit-produk', response.message);
+                    },
+                    error: handleFormErrors
+                });
+            });
+
+            // AV3M update handler
+            $(document).on('click', '#view-av3m', function (e) {
+                e.preventDefault();
+                const productId = $(this).data('id');
+                resetFormErrors();
+                openModal('update-av3m');
+
+                $.ajax({
+                    url: `/products/${productId}/av3m`,
+                    type: 'GET',
+                    success: function (response) {
+                        @foreach ($channels as $channel)
+                            $('#channel-{{$channel->id}}').val(response.channel_{{$loop->iteration}});
+                        @endforeach
+                        $('#av3mForm').data('id', response.id);
+                    }
+                });
+            });
+
+            // Save AV3M handler
+            $('#saveAv3mBtn').click(function (e) {
+                e.preventDefault();
+                const productId = $('#av3mForm').data('id');
+
+                $.ajax({
+                    url: `/products/${productId}/av3m`,
+                    type: 'POST',
+                    data: $('#av3mForm').serialize(),
+                    success: function (response) {
+                        handleSuccess('update-av3m', response.message);
+                    },
+                    error: function (xhr) {
+                        if (xhr.status === 422) {
+                            toast('error', xhr.responseJSON.message, 200);
+                            handleFieldErrors(xhr.responseJSON.errors, true);
+                        }
+                    }
+                });
+            });
+
+            // Import/Upload handlers
+            $('#downloadTemplate').click(function () {
+                window.location.href = "{{ asset('assets/template/template_bulk_product.xlsx') }}";
+            });
+
+            $('#importBtn').click(function () {
+                const file = $('#file_upload')[0].files[0];
+                if (!file) {
+                    return toast('error', 'Silakan pilih file terlebih dahulu', 200);
+                }
+
+                const formData = new FormData();
+                formData.append('excel_file', file);
+                toggleLoading(true, 'import');
+
+                $.ajax({
+                    url: '/products/bulk',
+                    type: 'POST',
+                    data: formData,
+                    processData: false,
+                    contentType: false,
+                    success: function (response) {
+                        handleSuccess('unggah-produk-bulk', response.message);
+                    },
+                    error: function (xhr) {
+                        toggleLoading(false, 'import');
+                        toast('error', xhr.responseJSON.message, 200);
+                    }
+                });
+            });
+
+            // Download Excel handler
+            $('#downloadBtn').click(function (e) {
+                e.preventDefault();
+                toggleLoading(true);
+
+                const form = document.createElement('form');
+                form.method = 'GET';
+                form.action = '/products/generate-excel';
+                document.body.appendChild(form);
+
+                fetch('/products/generate-excel')
+                    .then(response => {
+                        if (response.ok) {
+                            form.submit();
+                            toast('success', 'File berhasil diunduh', 150);
+                        } else {
+                            return response.json().then(data => {
+                                throw new Error(data.message || 'Gagal mengunduh file');
+                            });
+                        }
+                    })
+                    .catch(error => {
+                        console.error('Download error:', error);
+                        toast('error', error.message || 'Gagal mengunduh file', 200);
+                    })
+                    .finally(() => {
+                        toggleLoading(false);
+                        document.body.removeChild(form);
+                    });
+            });
+
+            // File Upload Area
+            const setupFileUpload = () => {
+                const uploadArea = document.getElementById('upload-area');
+                const fileInput = document.getElementById('file_upload');
+                const displayFileName = document.getElementById('filename-display');
+                const uploadHelptext = document.getElementById('upload-helptext');
+                const maxFileSize = 5 * 1024 * 1024;
+
+                uploadArea.addEventListener('click', () => fileInput.click());
+
+                ['dragover', 'dragleave', 'drop'].forEach(eventName => {
+                    uploadArea.addEventListener(eventName, (e) => {
+                        e.preventDefault();
+                        uploadArea.classList.toggle('drag-over', eventName === 'dragover');
+                        if (eventName === 'drop') handleFiles(e.dataTransfer.files);
+                    });
+                });
+
+                fileInput.addEventListener('change', (e) => handleFiles(e.target.files));
+
+                function handleFiles(files) {
+                    if (!files.length) return;
+
+                    const file = files[0];
+                    const validTypes = [
+                        'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet',
+                        'application/wps-office.xlsx',
+                        'application/vnd.ms-excel'
+                    ];
+
+                    if (!validTypes.includes(file.type)) {
+                        alert('Upload file gagal, Tolong Unggah Hanya file berformat .xlsx');
+                        fileInput.value = '';
+                        return;
+                    }
+
+                    if (file.size > maxFileSize) {
+                        alert('Upload file gagal, Ukuran file lebih dari 5 MB');
+                        fileInput.value = '';
+                        return;
+                    }
+
+                    displayFileName.classList.remove('hidden');
+                    uploadHelptext.classList.add('hidden');
+                    displayFileName.innerText = file.name;
+                }
+            };
+
+            setupFileUpload();
+
+            // Helper functions
+            function resetFormErrors() {
+                $('.text-red-500').addClass('hidden');
+                $('input, select').removeClass('border-red-500');
             }
 
-            if (file.size > maxFileSize) {
-                alert('Upload file gagal, Ukuran file lebih dari 5 MB');
-                fileInput.value = '';
-                return;
+            function handleSuccess(modalId, message) {
+                toggleLoading(false, 'update');
+                closeModal(modalId);
+                toast('success', message, 150);
+                setTimeout(() => window.location.reload(), 1500);
             }
 
-            displayFileName.classList.remove('hidden');
-            uploadHelptext.classList.add('hidden');
-            displayFileName.innerText = file.name;
-        }
-    };
+            function handleFormErrors(xhr) {
+                toggleLoading(false, 'update');
+                if (xhr.status === 422) {
+                    handleFieldErrors(xhr.responseJSON.errors);
+                }
+            }
 
-    setupFileUpload();
-
-    // Helper functions
-    function resetFormErrors() {
-        $('.text-red-500').addClass('hidden');
-        $('input, select').removeClass('border-red-500');
-    }
-
-    function handleSuccess(modalId, message) {
-        toggleLoading(false, 'update');
-        closeModal(modalId);
-        toast('success', message, 150);
-        setTimeout(() => window.location.reload(), 1500);
-    }
-
-    function handleFormErrors(xhr) {
-        toggleLoading(false, 'update');
-        if (xhr.status === 422) {
-            handleFieldErrors(xhr.responseJSON.errors);
-        }
-    }
-
-    function handleFieldErrors(errors, isAv3m = false) {
-        $.each(errors, function(key, value) {
-            const prefix = isAv3m ? '.' : '#edit-';
-            const suffix = isAv3m ? '' : '-error';
-            $(`${prefix}${key}${suffix}`).text(value[0]).removeClass('hidden');
-            $(`[name="${key}"]`).addClass('border-red-500');
+            function handleFieldErrors(errors, isAv3m = false) {
+                $.each(errors, function (key, value) {
+                    const prefix = isAv3m ? '.' : '#edit-';
+                    const suffix = isAv3m ? '' : '-error';
+                    $(`${prefix}${key}${suffix}`).text(value[0]).removeClass('hidden');
+                    $(`[name="${key}"]`).addClass('border-red-500');
+                });
+            }
         });
-    }
-});
-</script>
+    </script>
 @endpush

@@ -2,39 +2,40 @@
 
 namespace App\Http\Controllers\Web;
 
-use App\Http\Requests\Product\UpdateAv3mRequest;
-use App\Http\Requests\Product\UpdateProductRequest;
 use Exception;
+use Carbon\Carbon;
 use App\Models\Av3m;
+use App\Models\City;
 use App\Models\Channel;
 use App\Models\Product;
 use App\Models\Category;
 use Illuminate\Http\Request;
-use App\Imports\ProductImport;
-use Illuminate\Support\Facades\DB;
-use Maatwebsite\Excel\Facades\Excel;
-use Illuminate\Validation\ValidationException;
-use App\Http\Requests\Product\CreateProductRequest;
-use App\Http\Controllers\Controller;
 use App\Exports\ProductExport;
+use App\Imports\ProductImport;
+use App\Models\SalesAvailability;
+use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Log;
+use App\Http\Controllers\Controller;
+use Maatwebsite\Excel\Facades\Excel;
 use Illuminate\Support\Facades\Storage;
+use Illuminate\Validation\ValidationException;
+use App\Http\Requests\Product\UpdateAv3mRequest;
+use App\Http\Requests\Product\CreateProductRequest;
+use App\Http\Requests\Product\UpdateProductRequest;
 
 class ProductController extends Controller
 {
     public function index(Request $request)
     {
-        // Validate and get per_page parameter
-        $perPage = $request->input('per_page', 10);
-        $validPerPage = in_array($perPage, [10, 20, 30, 40, 50]) ? $perPage : 10;
-
-        $items = Product::with('category')->latest()->get();
+      
         $categories = Category::all();
         $channels = Channel::all();
+        $cities = City::select('id','name')->get();
+        $products = Product::select('id','sku')->get();
         return view('pages.product.index', [
-            'items' => $items,
             'categories' => $categories,
-            'product' => null,
+            'cities' => $cities,
+            'products' => $products,
             'channels' => $channels
         ]);
     }
@@ -73,6 +74,63 @@ class ProductController extends Controller
                         'item' => $item,
                         'productId' => $item->id // Pass product id ke view actions
                     ])->render()
+                ];
+            })
+        ]);
+    }
+    public function getDataStockOnHand(Request $request)
+    {
+        $query = SalesAvailability::with(['product:id,sku','outlet:id,name']);
+        if ($request->filled('date')) {
+            $dateParam = $request->date;
+            
+            if (str_contains($dateParam, ' to ')) {
+                [$startDate, $endDate] = explode(' to ', $dateParam);
+                $query->whereBetween('created_at', [
+                    Carbon::parse($startDate)->startOfDay(),
+                    Carbon::parse($endDate)->endOfDay()
+                ]);
+            } else {
+                $query->whereDate('created_at', Carbon::parse($dateParam));
+            }
+        }
+    
+        if ($request->filled('filter_product')) {
+            $filter_product = $request->filter_product;
+            if ($filter_product != 'all') {
+                $query->where('product_id', $filter_product);
+            }
+        }
+    
+        if ($request->filled('filter_area')) {
+            $filter_area = $request->filter_area;
+            if ($filter_area != 'all') {
+                $query->where(function ($q) use ($filter_area): void {
+                    $q->WhereHas('outlet', function ($q) use ($filter_area) {
+                        $q->where('city_id', $filter_area);
+                    });
+                });
+            }
+        }
+        $filteredRecords = (clone $query)->count();
+        
+        $result = $query->skip($request->start)
+                       ->take($request->length)
+                       ->get();
+        return response()->json([
+            'draw' => intval($request->draw),
+            'recordsTotal' => $filteredRecords,
+            'recordsFiltered' => $filteredRecords,
+            'data' => $result->map(function($item) {
+                return [
+                    'id' => $item->id, // Tambahkan id product
+                    'outlet' => $item->outlet->name,
+                    'sku' => $item->product->sku,
+                    'sod' => $item->availability_stock,
+                    'status' => spanColor($item->status == '1' ? 'YES' : 'NO', $item->status == '1' ? 'green' : 'red'),
+                    'av3m' => $item->average_stock,
+                    'ideal' => spanColor($item->ideal_stock, $item->ideal_stock > 0 ? 'green' : 'red'),
+                    'keterangan' => spanColor($item->detail, $item->detail == 'Ideal' ? 'green' : 'red'),
                 ];
             })
         ]);

@@ -58,6 +58,8 @@ class AuthController extends Controller
             }
 
             $user = User::where('email', $request->email)->firstOrFail();
+            $role = $user->roles()->first()->name;
+            $user->role = $role;
             $token = $user->createToken('auth_token')->plainTextToken;
 
             return response()->json([
@@ -65,7 +67,7 @@ class AuthController extends Controller
                 'message' => 'Login successful',
                 'data' => [
                     'user' => $user,
-                    'token' => $token
+                    'token' => $token,
                 ]
             ], 200);
         } catch (\Exception $e) {
