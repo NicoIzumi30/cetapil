@@ -13,7 +13,7 @@ use App\Http\Controllers\Web\ProductController;
 use App\Http\Controllers\Web\DashboardController;
 use App\Http\Controllers\Web\VisibilityController;
 use App\Http\Controllers\Web\PosmController;
-
+use App\Http\Controllers\Web\ProfileController;
 
 // Guest Routes
 Route::middleware('guest')->group(function () {
@@ -25,11 +25,11 @@ Route::middleware('guest')->group(function () {
 Route::middleware('auth')->group(function () {
     // Dashboard
     Route::get('/', [DashboardController::class, 'index'])->name('dashboard');
+    
+    //profile
+    Route::get('/profile', [ProfileController::class, 'index'])->name('profile');
 
-    // Profile
-    Route::get('/profile', function () {
-        return view('pages.profile');
-    })->name('profile');
+    Route::post('/profile/update-password', [ProfileController::class, 'updatePassword'])->name('profile.update-password');
 
     // Routing Management
     // Route::prefix('routing')->name('routing.')->middleware('permission:menu_routing')->group(function () {
@@ -87,7 +87,6 @@ Route::middleware('auth')->group(function () {
     
         Route::get('/visibility/products/{category}', [VisibilityController::class, 'getProducts'])
             ->name('visibility.products');
-
     });
 
 

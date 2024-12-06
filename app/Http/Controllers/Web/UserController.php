@@ -47,6 +47,8 @@ class UserController extends Controller
     ];
     public function index(Request $request)
     {
+
+        $user = Auth::user();
         $query = User::with('roles')
             ->where('id', '!=', Auth::id())
             ->orderBy('created_at', 'desc')->get();
@@ -73,8 +75,7 @@ class UserController extends Controller
 
     }
 
-
-    /**
+    /** 
      * Show the form for creating a new resource.
      */
     public function create()
