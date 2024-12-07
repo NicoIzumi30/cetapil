@@ -40,17 +40,17 @@
 @endphp
 
 <aside id="sidebar"
-    class="z-[45] bg-sidebar h-[100%] fixed top-0 p-4 w-20 hover:w-80 group transition-all duration-200 ease-in-out">
-    <div class="flex items-center gap-4 ">
-        <img class="w-[50px]" src="{{ asset('/assets/images/logo.webp') }}" alt="logo">
+    class="z-[99999] bg-sidebar h-[100%] fixed top-0 p-6 w-20 hover:w-80 group transition-all duration-100 ease-in-out ">
+    <div class="flex items-center gap-4 w-[40px] h-[40px]">
+        <img src="{{ asset('/assets/images/logo.webp') }}" alt="logo">
         <h1 class="text-2xl font-bold text-white group-hover:block  hidden">Dashboard</h1>
     </div>
     <hr class="sidebar-border my-6" />
-    <ul class="p-2 w-[70px] group-hover:w-[264px] h-full rounded-md flex flex-col gap-4">
+    <ul class="w-20 group-hover:w-[17rem] h-full rounded-md flex flex-col gap-4">
         @foreach ($menus as $menu)
             <li>
                 <a href="{{ $menu->path }}"
-                    class="flex items-center gap-6 text-lightBlue rounded-md hover:bg-primary hover:bg-opacity-15">
+                    class="flex items-center h-[40px] gap-6 text-lightBlue rounded-md hover:bg-primary hover:bg-opacity-15">
                     <div class="icon-menu-container">
                         <img class="icon-menu" src="{{ asset("assets/icons/{$menu->icon}") }}"
                             alt="{{ $menu->title }}">
@@ -59,9 +59,9 @@
                 </a>
             </li>
         @endforeach
-        <div class="absolute bottom-6 left-6 right-6">
+        <div class="absolute bottom-6 left-6 right-6 w-[70px] group-hover:w-[264px]">
             <div
-                class="bg-white relative overflow-hidden rounded-md p-4 mb-4 scale-x-0 opacity-0 group-hover:opacity-100 group-hover:scale-x-100 w-[270px] origin-left transition-all ">
+                class="bg-white relative overflow-hidden rounded-md p-4 mb-4 scale-x-0 opacity-0 group-hover:opacity-100 group-hover:scale-x-100 w-[17rem] origin-left transition-all duration-100">
                 <div class="z-50 w-full flex flex-col">
                     <i><svg width="36" height="35" viewBox="0 0 36 35" fill="none"
                             xmlns="http://www.w3.org/2000/svg">
@@ -78,10 +78,9 @@
                 <img class="absolute z-0 bottom-0 opacity-65 right-0" src="{{ asset('assets/images/water.webp') }}"
                     alt="water-accent-bg">
             </div>
-            <a href="/logout"
-                class="flex items-center gap-6 text-lightBlue rounded-md hover:bg-primary hover:bg-opacity-15">
+            <a href="/logout" class="flex items-center h-[50px] gap-6 text-lightBlue rounded-md hover:bg-primary hover:bg-opacity-15\">
                 <div class="icon-menu-container">
-                    <img class="icon-menu" src="{{ asset('assets/icons/majesticons_door_exit.svg') }}" alt="logout">
+                    <img class="!max-w-[30px] h-[30px]" src="{{ asset('assets/icons/majesticons_door_exit.svg') }}" alt="logout">
                 </div>
                 <p class="group-hover:block hidden">Log Out</p>
             </a>
