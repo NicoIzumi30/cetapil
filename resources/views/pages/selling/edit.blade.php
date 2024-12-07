@@ -7,7 +7,7 @@
 @section('dashboard-content')
     <x-card>
         <x-slot:cardTitle>
-            Tambah Daftar Selling
+            Edit Daftar Selling
         </x-slot:cardTitle>
 
 	

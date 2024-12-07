@@ -12,7 +12,7 @@
         </x-slot:cardTitle>
         {{-- Selling Action --}}
         <x-slot:cardAction>
-            <x-input.search wire:model.live="search" class="border-0" placeholder="Cari data penjualan"></x-input.search>
+            <x-input.search wire:model.live="search" class="border-0" id="global-search" placeholder="Cari data penjualan"></x-input.search>
             <x-button.info href="/selling/create">Tambah Penjualan</x-button.info>
             <x-button.info>Download</x-button.info>
         </x-slot:cardAction>
@@ -47,41 +47,7 @@
                     </th>
                 </tr>
             </thead>
-            <tbody>
-                <tr class="table-row">
-                    <td scope="row" class="table-data">
-                        halo
-                    </td>
-                    <td scope="row" class="table-data">
-                        halo
-                    </td>
-                    <td scope="row" class="table-data">
-                        halo
-                    </td>
-                    <td class="table-data">
-                        <x-action-table-dropdown>
-                            <li>
-                                <a class="dropdown-option" href="/selling/edit">
-                                    Lihat Data
-                                </a>
-                            </li>
-                            <li>
-                                <button onclick="openModal('delete-selling')" class="dropdown-option text-red-400">Hapus
-                                    Data</button>
-                            </li>
-                        </x-action-table-dropdown>
-                    </td>
-                </tr>
-            </tbody>
         </table>
-        <x-modal id="delete-selling">
-			<x-slot:title>Hapus Selling</x-slot:title>
-			<p>Apakah kamu yakin Ingin Menghapus Data Selling ini?</p>
-			<x-slot:footer>
-				<x-button.light onclick="closeModal('delete-selling')" class="border-primary border">Batal</x-button.light>
-				<x-button.light class="!bg-red-400 text-white border border-red-400">Hapus Data</x-button.light>
-			</x-slot:footer>
-		</x-modal>
         {{-- Selling Table End --}}
     </x-card>
     {{-- Selling End --}}
@@ -90,10 +56,9 @@
 @push('scripts')
     <script>
         $(document).ready(function() {
-            $("#sales-date-range").flatpickr({
-                mode: "range"
-            });
-            $('#selling-table').DataTable({
+            let table = $('#selling-table').DataTable({
+                processing: true,
+                serverSide: true,
                 paging: true,
                 searching: false,
                 info: true,
@@ -101,13 +66,47 @@
                 lengthMenu: [10, 20, 30, 40, 50],
                 dom: 'rt<"bottom-container"<"bottom-left"l><"bottom-right"p>>',
                 language: {
-                    lengthMenu: "Menampilkan _MENU_ dari 4,768 data",
+                    lengthMenu: "Menampilkan _MENU_ dari _TOTAL_ data",
+                    processing: "Memuat data...",
                     paginate: {
                         previous: '<',
                         next: '>',
                         last: 'Terakhir',
+                    },
+                    info: "Menampilkan _START_ sampai _END_ dari _TOTAL_ data",
+                    infoEmpty: "Menampilkan 0 sampai 0 dari 0 data",
+                    emptyTable: "Tidak ada data yang tersedia"
+                },
+                ajax: {
+                    url: "{{ route('selling.data') }}",
+                    data: function (d) {
+                        d.search_term = $('#global-search').val();
+                    },
+                    dataSrc: function (json) {
+                        $('.dataTables_length select').closest('.dataTables_length')
+                            .find('label')
+                            .html(` <select>${$('.dataTables_length select').html()}</select> dari ${json.recordsFiltered} data`);
+                        return json.data;
                     }
                 },
+                columns: [
+                    { data: 'waktu', name: 'waktu', className: 'table-data', },
+                    { data: 'sales', name: 'sales', className: 'table-data', },
+                    { data: 'outlet', name: 'outlet', className: 'table-data', },
+                    {
+                        data: 'actions',
+                        name: 'actions',
+                        orderable: false,
+                        searchable: false
+                    }
+                ]
+            });
+
+            // Search dengan debounce
+            let searchTimer;
+            $('#global-search').on('input', function () {
+                clearTimeout(searchTimer);
+                searchTimer = setTimeout(() => table.ajax.reload(null, false), 500);
             });
         });
     </script>

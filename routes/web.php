@@ -1,20 +1,21 @@
 <?php
 
-use App\Http\Controllers\Web\OutletControler;
-use App\Http\Controllers\Web\ProductKnowledgeControler;
-use App\Http\Controllers\Web\RoutingController;
-use App\Http\Controllers\Web\RoutingRequestControler;
-use App\Http\Controllers\Web\SalesActivityController;
-use App\Http\Controllers\Web\VisualController;
 use App\Models\Visibility;
 use Illuminate\Support\Facades\Route;
+use App\Http\Controllers\Web\PosmController;
 use App\Http\Controllers\Web\UserController;
+use App\Http\Controllers\Web\OutletControler;
 use App\Http\Controllers\Auth\LoginController;
+use App\Http\Controllers\Web\VisualController;
 use App\Http\Controllers\Auth\LogoutController;
 use App\Http\Controllers\Web\ProductController;
+use App\Http\Controllers\Web\RoutingController;
+use App\Http\Controllers\Web\SellingController;
 use App\Http\Controllers\Web\DashboardController;
 use App\Http\Controllers\Web\VisibilityController;
-use App\Http\Controllers\Web\PosmController;
+use App\Http\Controllers\Web\RoutingRequestControler;
+use App\Http\Controllers\Web\SalesActivityController;
+use App\Http\Controllers\Web\ProductKnowledgeControler;
 
 
 // Guest Routes
@@ -76,15 +77,14 @@ Route::middleware('auth')->group(function () {
 
     // Selling Management
     Route::prefix('selling')->name('selling.')->middleware('permission:menu_selling')->group(function () {
-        Route::get('/', function () {
-            return view('pages.selling.index');
-        })->name('index');
+        Route::get('/', [SellingController::class, 'index'])->name('index');
         Route::get('/create', function () {
             return view('pages.selling.create');
         });
-        Route::get('/edit', function () {
+        Route::get('/{id}/edit', function () {
             return view('pages.selling.edit');
-        });
+        })->name('edit');
+        Route::get('/data', [SellingController::class, 'getData'])->name('data');
     });
 
     // User Management
