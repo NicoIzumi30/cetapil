@@ -1,15 +1,4 @@
-import 'package:cetapil_mobile/controller/activity/activity_controller.dart';
-import 'package:cetapil_mobile/controller/activity/tambah_activity_controller.dart';
-import 'package:cetapil_mobile/controller/activity/tambah_availibility_controller.dart';
-import 'package:cetapil_mobile/controller/bottom_nav_controller.dart';
-import 'package:cetapil_mobile/controller/dashboard/dashboard_controller.dart';
-import 'package:cetapil_mobile/controller/gps_controller.dart';
-import 'package:cetapil_mobile/controller/outlet/outlet_controller.dart';
-import 'package:cetapil_mobile/controller/routing/routing_controller.dart';
-import 'package:cetapil_mobile/controller/routing/tambah_routing_controller.dart';
-import 'package:cetapil_mobile/controller/selling/selling_controller.dart';
-import 'package:cetapil_mobile/controller/selling/tambah_produk_selling_controller.dart';
-import 'package:cetapil_mobile/controller/support_data_controller.dart';
+
 import 'package:cetapil_mobile/controller/video_controller/video_controller.dart';
 import 'package:cetapil_mobile/page/login.dart';
 import 'package:flutter_easyloading/flutter_easyloading.dart';
@@ -71,29 +60,6 @@ class LoginController extends GetxController {
     }
   }
 
-  // Future<void> _initializeControllers(bool isLoggedIn) async {
-  //   if (isLoggedIn) {
-  //     // Initialize controllers after login
-  //     Get.lazyPut(() => ConnectivityController());
-  //     Get.put(GPSLocationController());
-  //     Get.lazyPut(() => BottomNavController());
-  //     Get.lazyPut(() => DashboardController());
-  //     Get.put(OutletController());
-  //     Get.lazyPut(() => ActivityController());
-  //     Get.put(RoutingController());
-  //     Get.lazyPut(() => SellingController());
-  //     Get.lazyPut(() => TambahActivityController());
-  //     Get.lazyPut(() => VideoController());
-  //     Get.lazyPut(() => TambahRoutingController());
-  //     Get.lazyPut(() => TambahAvailabilityController());
-  //     Get.put(SupportDataController());
-  //     Get.lazyPut(() => TambahProdukSellingController());
-  //   } else {
-  //     // Initialize only the login-related controllers
-  //     Get.put(LoginController());
-  //     Get.lazyPut(() => ConnectivityController());
-  //   }
-  // }
 
   Future<void> logout() async {
     await _storage.erase();
@@ -104,6 +70,7 @@ class LoginController extends GetxController {
     await _storage.write('user_id', userData.user?.id);
     await _storage.write('token', userData.token);
     await _storage.write('username', userData.user!.name);
+    await _storage.write('role', userData.user!.role);
     await _storage.write('phone_number', userData.user!.phoneNumber);
     await _storage.write('long_lat', "${userData.user!.longitude },${userData.user!.latitude!}");
   }

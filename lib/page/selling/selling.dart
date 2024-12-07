@@ -2,6 +2,7 @@ import 'package:cetapil_mobile/page/selling/detail_selling.dart';
 import 'package:cetapil_mobile/page/selling/tambah_selling.dart';
 import 'package:cetapil_mobile/utils/colors.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_svg/svg.dart';
 import 'package:get/get.dart';
 import 'package:intl/intl.dart';
 import '../../controller/selling/selling_controller.dart';
@@ -116,11 +117,8 @@ class SellingPage extends GetView<SellingController> {
           child: Column(
             mainAxisAlignment: MainAxisAlignment.center,
             children: [
-              Icon(
-                Icons.shopping_cart_outlined,
-                size: 64,
-                color: Colors.grey,
-              ),
+              SvgPicture.asset("assets/icon/Vector (4).svg",height: 64,
+                color: Colors.grey,),
               SizedBox(height: 16),
               Text(
                 'Tidak ada data penjualan',

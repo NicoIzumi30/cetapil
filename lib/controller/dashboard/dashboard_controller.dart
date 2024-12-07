@@ -33,6 +33,7 @@ class DashboardController extends GetxController {
   var error = Rxn<String>();
   var username = "".obs;
   var phoneNumber = "".obs;
+  var role = "".obs;
   var longLat = "".obs;
   
   final List<String> imageUrls = [
@@ -55,6 +56,7 @@ class DashboardController extends GetxController {
   getUserData()async{
     username.value = await storage.read('username') ?? "";
     phoneNumber.value = await storage.read('phone_number');
+    role.value = await storage.read('role');
     longLat.value = await storage.read('long_lat');
   }
 

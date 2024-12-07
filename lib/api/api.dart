@@ -1,5 +1,6 @@
 import 'dart:convert';
 
+import 'package:cetapil_mobile/model/detail_activity_response.dart';
 import 'package:cetapil_mobile/model/list_activity_response.dart';
 import 'package:cetapil_mobile/model/list_category_response.dart';
 import 'package:cetapil_mobile/model/list_channel_response.dart';
@@ -126,10 +127,11 @@ class Api {
         'Authorization': 'Bearer $token',
       },
     );
-    print(response.body);
+    // print(response.body);
     if (response.statusCode == 200) {
       return OutletResponse.fromJson(jsonDecode(response.body));
     }
+    print(response.statusCode);
     throw "Gagal request data Outlet : \n${response.body}";
   }
 
@@ -485,5 +487,22 @@ class Api {
       print(responseJson.body);
       throw "Unable to Submit Activity";
     }
+  }
+
+  static Future<DetailActivityResponse> getDetailActivity(String activityId) async {
+    var url = "$baseUrl/api/activity/$activityId/detail";
+    var token = await storage.read('token');
+    var response = await http.get(
+      Uri.parse(url),
+      headers: {
+        'Content-type': 'application/json',
+        'Authorization': 'Bearer $token',
+      },
+    );
+    if (response.statusCode == 200) {
+      return DetailActivityResponse.fromJson(jsonDecode(response.body));
+    }
+    print(response.statusCode);
+    throw "Gagal request data Outlet : \n${response.body}";
   }
 }

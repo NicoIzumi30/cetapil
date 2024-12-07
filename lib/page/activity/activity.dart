@@ -2,8 +2,10 @@ import 'package:cetapil_mobile/controller/activity/tambah_activity_controller.da
 import 'package:cetapil_mobile/controller/activity/tambah_availibility_controller.dart';
 import 'package:cetapil_mobile/controller/activity/tambah_order_controller.dart';
 import 'package:cetapil_mobile/controller/activity/tambah_visibility_controller.dart';
+import 'package:cetapil_mobile/page/activity/detail_activity.dart';
 import 'package:cetapil_mobile/page/activity/tambah_activity.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_svg/flutter_svg.dart';
 import 'package:get/get.dart';
 import 'package:get/get_core/src/get_main.dart';
 import 'package:get/get_state_manager/src/rx_flutter/rx_obx_widget.dart';
@@ -58,6 +60,9 @@ class ActivityPage extends GetView<ActivityController> {
                                   statusDraft: activity.status!,
                                   statusCheckin: true,
                                   ontap: ()async {
+                                    if (activity.status! == "APPROVAL") {
+                                      Get.to(() => DetailActivity(activity.id!));
+                                    }
                                     // Set the outlet_id in the TambahActivityController before navigation
                                     Get.delete<TambahActivityController>();
                                     if (!Get.isRegistered<TambahActivityController>()) {
@@ -104,11 +109,8 @@ class ActivityPage extends GetView<ActivityController> {
           child: Column(
             mainAxisAlignment: MainAxisAlignment.center,
             children: [
-              Icon(
-                Icons.assignment,
-                size: 64,
-                color: Colors.grey,
-              ),
+              SvgPicture.asset("assets/icon/Vector (3).svg",height: 64,
+                color: Colors.grey,),
               SizedBox(height: 16),
               Text(
                 'Tidak ada Activity',

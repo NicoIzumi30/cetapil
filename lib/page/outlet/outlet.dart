@@ -8,6 +8,7 @@ import 'package:cetapil_mobile/page/outlet/detail_outlet.dart';
 import 'package:cetapil_mobile/page/outlet/tambah_outlet.dart';
 import 'package:cetapil_mobile/widget/button_primary.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_svg/svg.dart';
 import 'package:get/get.dart';
 
 class OutletPage extends GetView<OutletController> {
@@ -188,11 +189,8 @@ class OutletPage extends GetView<OutletController> {
           child: Column(
             mainAxisAlignment: MainAxisAlignment.center,
             children: [
-              Icon(
-                Icons.store_outlined,
-                size: 64,
-                color: Colors.grey,
-              ),
+              SvgPicture.asset("assets/icon/Vector (2).svg",height: 64,
+                color: Colors.grey,),
               SizedBox(height: 16),
               Text(
                 'Tidak ada outlet',

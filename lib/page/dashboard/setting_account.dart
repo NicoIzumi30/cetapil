@@ -61,7 +61,7 @@ class SettingProfile extends GetView<DashboardController> {
               ModernTextField(
                 enable: false,
                 title: "Jabatan Pengguna",
-                controller: _controller,
+                controller: TextEditingController(text: dashboardController.role.value),
               ),
               SizedBox(
                 height: 15,

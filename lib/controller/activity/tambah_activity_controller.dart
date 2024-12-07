@@ -423,7 +423,6 @@ class TambahActivityController extends GetxController {
   }
 
   // Tab management methods
-  @override
   void changeTab(int index) {
     selectedTab.value = index;
     update();

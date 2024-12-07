@@ -26,6 +26,11 @@ class ActivityController extends GetxController {
     initGetActivity();
   }
 
+  void changeTab(int index) {
+    selectedTab.value = index;
+    update();
+  }
+
   initGetActivity() async {
     try {
       await db.deleteAllActivity();
@@ -182,6 +187,7 @@ class ActivityController extends GetxController {
     //   CustomAlerts.dismissLoading();
     // }
   }
+
 
   List<Data> get filteredOutlets => activity.where((outlet) {
         return outlet.outlet!.name!
