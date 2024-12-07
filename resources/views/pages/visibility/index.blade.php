@@ -204,7 +204,7 @@
                     <td class="table-data">
                         <x-action-table-dropdown>
                             <li>
-                                <a href="/visibility/edit" class="dropdown-option">Lihat
+                                <a href="/visibility/activity" class="dropdown-option">Lihat
                                     Data</a>
                             </li>
                             <li>
