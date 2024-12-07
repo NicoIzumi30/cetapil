@@ -57,15 +57,11 @@ Route::middleware('auth')->group(function () {
     // Visibility Management
     Route::middleware('permission:menu_visibility')->group(function () {
         Route::get('/visibility/data', [VisibilityController::class, 'getData'])->name('visibility.data');
+        Route::get('visibility/dataActivity',[VisibilityController::class,'getDataActivity'])->name('visibility.dataActivity');
         Route::resource('visibility', VisibilityController::class);
-
-        // Route::get('/visibility/data', [VisibilityController::class, 'getData'])->name('visibility.data');
-
-        // Route::get('visibility/{visibility}/edit', [VisibilityController::class, 'edit'])->name('visibility.edit');
-
         Route::get('posm/get-images', [PosmController::class, 'getImages'])
             ->name('posm.get-images');
-
+        
         Route::post('posm/update-image', [PosmController::class, 'updateImage'])
             ->name('posm.update-image');
 
