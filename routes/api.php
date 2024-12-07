@@ -33,6 +33,7 @@ Route::middleware(['auth_api', 'role:sales'])->group(function () {
         ->group(function () {
             Route::get('/', 'index');
             Route::get('/performance', 'performanceIndex');
+            Route::get('/power-sku', 'getPowerSkus');
         });
 
     Route::prefix("outlet")->group(function () {

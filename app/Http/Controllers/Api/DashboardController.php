@@ -37,6 +37,7 @@ class DashboardController extends Controller
         $currentDayNumber = $now->dayOfWeek;
         if ($currentDayNumber == 0) $currentDayNumber = 7;
         if ($now->weekOfYear % 2 == 0) $week_type = "EVEN";
+
         $total_call_plan = (int) DB::table(DB::raw("({$outlet_query->toSql()}) as query"))
             ->mergeBindings($outlet_query->getQuery())
             ->where('visit_day', $currentDayNumber)
@@ -49,6 +50,62 @@ class DashboardController extends Controller
             })
             ->count();
 
+        $current_outlet = $this->getCurrentOutlet($user, $now, $currentDayNumber, $week_type);
+
+        $power_skus = DB::table('power_skus as ps')
+            ->join('products as p', 'ps.product_id', '=', 'p.id')
+            ->select('p.sku', 'ps.product_id')
+            ->get()
+            ->map(function ($powerSku) use ($user) {
+                $total_outlets = DB::table('outlets')
+                    ->where('user_id', $user->id)
+                    ->count();
+
+                $available_count = DB::table('outlets as o')
+                    ->join('sales_activities as sa', 'sa.outlet_id', '=', 'o.id')
+                    ->join('sales_surveys as ss', 'ss.sales_activity_id', '=', 'sa.id')
+                    ->join('survey_questions as sq', function ($join) use ($powerSku) {
+                        $join->on('ss.survey_question_id', '=', 'sq.id')
+                            ->where('sq.type', '=', 'bool')
+                            ->where('sq.product_id', '=', $powerSku->product_id);
+                    })
+                    ->where('o.user_id', $user->id)
+                    ->where('ss.answer', '=', 'true')
+                    ->distinct('o.id')
+                    ->count('o.id');
+
+                return [
+                    'sku' => $powerSku->sku,
+                    'total_outlets' => $total_outlets,
+                    'available_count' => $available_count,
+                    'availability_percentage' => $total_outlets ?
+                        round(($available_count / $total_outlets) * 100, 2) : 0
+                ];
+            })
+            ->sortByDesc('availability_percentage')
+            ->values()
+            ->all();
+
+        return $this->successResponse(
+            DashboardConstants::GET_MOBILE_DASH,
+            HTTPCode::HTTP_OK,
+            [
+                'city' => $user->city,
+                'region' => $user->region,
+                'role' => 'Sales',
+                'total_outlet' => $total_outlet,
+                'total_actual_plan' => $total_actual_plan,
+                'total_call_plan' => $total_call_plan,
+                'plan_percentage' => $total_actual_plan && $total_call_plan ?
+                    round($total_actual_plan / $total_call_plan * 100) : 0,
+                'current_outlet' => $current_outlet,
+                'power_skus' => $power_skus
+            ]
+        );
+    }
+
+    private function getCurrentOutlet($user, $now, $currentDayNumber, $week_type)
+    {
         $current_outlet = SalesActivity::completeRelation()
             ->where('user_id', $user->id)
             ->whereDate('checked_in', $now)
@@ -83,46 +140,28 @@ class DashboardController extends Controller
                 })
                 ->first();
 
-            // There's a routing today
-            // CASE ready to check in
-            $checked_in_outlet = $current_outlet ? [
+            return $current_outlet ? [
                 'outlet_id' => $current_outlet->id,
                 'sales_activity_id' => null,
                 'name' => $current_outlet->name,
                 'checked_in' => null,
                 'checked_out' => null,
             ] : [
-                // There's no routing today
                 'outlet_id' => null,
                 'sales_activity_id' => null,
                 'name' => '-',
                 'checked_in' => null,
                 'checked_out' => null,
             ];
-        } else {
-            // There's a checked in data
-            // CASE ready to check out
-            $checked_in_outlet = [
-                'outlet_id' => $current_outlet->outlet->id,
-                'sales_activity_id' => $current_outlet->id,
-                'name' => $current_outlet->outlet->name,
-                'checked_in' => $current_outlet->checked_in,
-                'checked_out' => null,
-            ];
         }
 
-        $data = [
-            'city' => $user->city,
-            'region' => $user->region,
-            'role' => 'Sales',
-            'total_outlet' => $total_outlet,
-            'total_actual_plan' => $total_actual_plan,
-            'total_call_plan' => $total_call_plan,
-            'plan_percentage' => $total_actual_plan && $total_call_plan ? round($total_actual_plan / $total_call_plan * 100) : 0,
-            'current_outlet' => $checked_in_outlet
+        return [
+            'outlet_id' => $current_outlet->outlet->id,
+            'sales_activity_id' => $current_outlet->id,
+            'name' => $current_outlet->outlet->name,
+            'checked_in' => $current_outlet->checked_in,
+            'checked_out' => null,
         ];
-
-        return $this->successResponse(DashboardConstants::GET_MOBILE_DASH, HTTPCode::HTTP_OK, $data);
     }
 
     public function performanceIndex()
@@ -160,5 +199,51 @@ class DashboardController extends Controller
             'plan_percentage',
             'last_updated'
         ));
+    }
+
+    public function getPowerSkus()
+    {
+        $user = $this->getAuthUser();
+
+        $powerSkus = DB::table('power_skus as ps')
+            ->join('products as p', 'ps.product_id', '=', 'p.id')
+            ->select('p.sku', 'ps.product_id')
+            ->get();
+
+        $stats = $powerSkus->map(function ($powerSku) use ($user) {
+            $total_outlets = DB::table('outlets')
+                ->where('user_id', $user->id)
+                ->count();
+
+            $available_count = DB::table('outlets as o')
+                ->join('sales_activities as sa', 'sa.outlet_id', '=', 'o.id')
+                ->join('sales_surveys as ss', 'ss.sales_activity_id', '=', 'sa.id')
+                ->join('survey_questions as sq', function ($join) use ($powerSku) {
+                    $join->on('ss.survey_question_id', '=', 'sq.id')
+                        ->where('sq.type', '=', 'bool')
+                        ->where('sq.product_id', '=', $powerSku->product_id);
+                })
+                ->where('o.user_id', $user->id)
+                ->where('ss.answer', '=', 'true')
+                ->distinct('o.id')
+                ->count('o.id');
+
+            return [
+                'sku' => $powerSku->sku,
+                'total_outlets' => $total_outlets,
+                'available_count' => $available_count,
+                'availability_percentage' => $total_outlets ?
+                    round(($available_count / $total_outlets) * 100, 2) : 0
+            ];
+        })
+            ->sortByDesc('availability_percentage')
+            ->values()
+            ->all();
+
+        return $this->successResponse(
+            'Power SKU statistics retrieved successfully',
+            HTTPCode::HTTP_OK,
+            $stats
+        );
     }
 }
