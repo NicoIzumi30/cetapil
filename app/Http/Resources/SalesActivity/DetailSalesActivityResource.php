@@ -31,7 +31,6 @@ class DetailSalesActivityResource extends JsonResource
             ),
             // 'user' => $this->user->only('id', 'name'),
             'orders' => SalesOrderResource::collection($this->whenLoaded('orders')),
-
             'visibilities' => SalesVisibilityResource::collection($this->whenLoaded('salesVisibilities')),
             'availabilities' => SalesAvailabilityResource::collection($this->whenLoaded('availabilities')),
             'surveys' => SalesSurveyResource::collection($this->whenLoaded('surveys')),

@@ -16,7 +16,7 @@ class OutletFormResource extends JsonResource
     {
         return [
             'id' => $this->id,
-            'outletForm' => $this->outletForm->only('id', 'type', 'question'),
+            'outletForm' => $this->outletForm?->only('id', 'type', 'question'),  // Added null safe operator
             'answer' => $this->answer
         ];
     }
