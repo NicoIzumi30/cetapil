@@ -25,9 +25,9 @@
     <main class="w-full p-6">
         <div class="flex flex-col md:flex-row w-full gap-5 ">
             <x-pages.dashboard.total-card :title="'Total Report'" :total="7.432" :trendValue="56" :date="'03 November 2024'" />
-            <x-pages.dashboard.total-card :title="'Total Report'" :total="7.432" :trendValue="32" :date="'03 November 2024'" />
-            <x-pages.dashboard.total-card :title="'Total Report'" :total="7.432" :trendValue="-12" :date="'03 November 2024'" />
-            <x-pages.dashboard.total-card :title="'Total Report'" :total="7.432" :trendValue="-2" :date="'03 November 2024'" />
+            <x-pages.dashboard.total-card :title="'Total Sales'" :total="7.432" :trendValue="32" :date="'03 November 2024'" />
+            <x-pages.dashboard.total-card :title="'Total Routing'" :total="7.432" :trendValue="-12" :date="'03 November 2024'" />
+            <x-pages.dashboard.total-card :title="'Total Visibility'" :total="7.432" :trendValue="-2" :date="'03 November 2024'" />
         </div>
         <div class="flex flex-wrap xl:flex-nowrap gap-6 w-full mt-6">
             <x-pages.dashboard.chart-routing />

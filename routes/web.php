@@ -52,6 +52,9 @@ Route::get('/visibility/edit', function () {
 Route::get('/visibility/create', function () {
     return view('pages.visibility.create');
 });
+Route::get('/visibility/activity', function () {
+    return view('pages.visibility.visibility-activity');
+});
 
 Route::get('/selling', function () {
     return view('pages.selling.index');
