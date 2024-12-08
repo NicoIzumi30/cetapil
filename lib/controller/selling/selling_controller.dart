@@ -61,7 +61,7 @@ class SellingController extends GetxController {
       isLoading.value = true;
       errorMessage.value = '';
 
-      CustomAlerts.showLoading(Get.context!, "Processing", "Mengambil data aktivitas...");
+      CustomAlerts.showLoading(Get.context!, "Processing", "Mengambil data selling...");
 
       // Load data from local database (drafted)
       final localData = await dbHelper.getAllSellingData(isDrafted: true);
@@ -94,6 +94,7 @@ class SellingController extends GetxController {
       print('Error loading data: $e');
       CustomAlerts.showError(
           Get.context!, "Gagal", "Gagal mengambil data: Periksa koneksi Anda dan coba lagi");
+      CustomAlerts.dismissLoading();
     } finally {
       CustomAlerts.dismissLoading();
       isLoading.value = false;
@@ -261,6 +262,7 @@ class SellingController extends GetxController {
       //   colorText: Colors.white,
       // );
       CustomAlerts.showError(Get.context!, "Gagal", "Gagal menyimpan data ke draft.");
+      CustomAlerts.dismissLoading();
     } finally {
       isSaving.value = false;
       CustomAlerts.dismissLoading();
@@ -295,7 +297,6 @@ class SellingController extends GetxController {
 
       CustomAlerts.dismissLoading();
 
-
       Get.back();
       CustomAlerts.showSuccess(
           Get.context!, // Use Get.context instead of the previous context
@@ -306,6 +307,7 @@ class SellingController extends GetxController {
       print('Error submit data: $e');
       CustomAlerts.showError(Get.context!, "Gagal",
           "Gagal mengirim data ke server : Periksa koneksi Anda dan coba lagi");
+      CustomAlerts.dismissLoading();
     } finally {
       CustomAlerts.dismissLoading();
     }

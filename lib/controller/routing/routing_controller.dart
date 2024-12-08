@@ -116,6 +116,7 @@ class RoutingController extends GetxController {
       print('Error saving Routing: $e');
       CustomAlerts.showError(
           Get.context!, "Gagal", "Gagal mengambil data: Periksa koneksi Anda dan coba lagi");
+      CustomAlerts.dismissLoading();
     } finally {
       CustomAlerts.dismissLoading();
     }
@@ -141,8 +142,8 @@ class RoutingController extends GetxController {
       }
     } catch (e) {
       print('Error saving Routing: $e');
-      CustomAlerts.showError(
-          Get.context!, "Check in", e.toString());
+      CustomAlerts.showError(Get.context!, "Check in", e.toString());
+      CustomAlerts.dismissLoading(); 
     } finally {
       CustomAlerts.dismissLoading();
     }
