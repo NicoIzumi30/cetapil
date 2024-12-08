@@ -35,7 +35,7 @@ class Product extends Model
         if (!$this->path) {
             return null;
         }
-        return env('APP_URL') . "/storage$this->path";
+        return "/storage$this->path";
     }
 
     public function av3ms()
