@@ -2,6 +2,7 @@ import 'package:cetapil_mobile/api/api.dart';
 import 'package:cetapil_mobile/database/dashboard.dart';
 import 'package:cetapil_mobile/model/dashboard.dart';
 import 'package:cetapil_mobile/page/login.dart';
+import 'package:cetapil_mobile/widget/custom_alert.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:intl/intl.dart';
@@ -24,18 +25,22 @@ import '../login_controller.dart';
 
 class DashboardController extends GetxController {
   final DashboardDatabaseHelper _dbHelper = DashboardDatabaseHelper.instance;
-  final db = DatabaseHelper.instance;
-  
-  var currentIndex = 0.obs;
-  var currentDate = DateTime.now().obs;
-  var isLoading = false.obs;
-  var dashboard = Rxn<Dashboard>();
-  var error = Rxn<String>();
-  var username = "".obs;
-  var phoneNumber = "".obs;
-  var role = "".obs;
-  var longLat = "".obs;
-  
+  final DatabaseHelper _db = DatabaseHelper.instance;
+  final LoginController _loginController = Get.find<LoginController>();
+
+  // Observable states
+  final RxInt currentIndex = 0.obs;
+  final Rx<DateTime> currentDate = DateTime.now().obs;
+  final RxBool isLoading = false.obs;
+  final Rxn<Dashboard> dashboard = Rxn<Dashboard>();
+  final Rxn<String> error = Rxn<String>();
+
+  // User data observables
+  final RxString username = "".obs;
+  final RxString phoneNumber = "".obs;
+  final RxString role = "".obs;
+  final RxString longLat = "".obs;
+
   final List<String> imageUrls = [
     'assets/carousel1.png',
     'assets/carousel1.png',
@@ -46,43 +51,92 @@ class DashboardController extends GetxController {
   @override
   void onInit() {
     super.onInit();
+    _initialize();
+  }
+
+  void _initialize() async {
     initializeDateFormatting('id_ID');
     ever(currentDate, (_) {});
     updateDate();
-    initializeDashboard();
-    getUserData();
+    await initializeDashboard();
+    await getUserData();
   }
 
-  getUserData()async{
+  Future<void> getUserData() async {
+    try {
+      final user = _loginController.currentUser.value;
+      if (user != null) {
+        username.value = user.name ?? "";
+        phoneNumber.value = user.phoneNumber ?? "";
+        final roles = _loginController.userRoles;
+        role.value = roles.isNotEmpty ? roles.first : "";
+        longLat.value = "${user.longitude ?? ""},${user.latitude ?? ""}";
+      } else {
+        await _loadUserDataFromStorage();
+      }
+    } catch (e) {
+      print('Error getting user data: $e');
+      await _loadUserDataFromStorage();
+    }
+  }
+
+  Future<void> _loadUserDataFromStorage() async {
     username.value = await storage.read('username') ?? "";
-    phoneNumber.value = await storage.read('phone_number');
-    role.value = await storage.read('role');
-    longLat.value = await storage.read('long_lat');
+    phoneNumber.value = await storage.read('phone_number') ?? "";
+    role.value = await storage.read('role') ?? "";
+    longLat.value = await storage.read('long_lat') ?? "";
   }
 
-  logOut()async{
-    await storage.erase();
-    // await Get.deleteAll();
-    db.deleteDatabase();
-    // Get.put(LoginController());
-    Get.offAll(()=>LoginPage(),binding:  BindingsBuilder(() {
-      // Get.put(ConnectivityController(), permanent: true);
-      // Get.put(GPSLocationController(), permanent: true);
-      Get.lazyPut(()=>SupportDataController());
-      Get.lazyPut(() => DashboardController());
-      Get.lazyPut(() => LoginController());
-      Get.lazyPut(() => BottomNavController());
-      Get.lazyPut(() => OutletController());
-      Get.lazyPut(() => ActivityController());
-      Get.lazyPut(() => RoutingController());
-      Get.lazyPut(() => SellingController());
-      Get.lazyPut(() => TambahActivityController());
-      Get.lazyPut(() => VideoController());
-      Get.lazyPut(() => TambahRoutingController());
-      Get.lazyPut(() => TambahAvailabilityController());
-      Get.lazyPut(() => TambahVisibilityController());
-      Get.lazyPut(() => TambahProdukSellingController());
-    }));
+  Future<void> logOut() async {
+    try {
+      // Show loading indicator
+      isLoading.value = true;
+
+      // Clear databases
+      await _db.deleteDatabase();
+      // await _dbHelper.clearDatabase();
+
+      // Clear all controllers and state
+      Get.delete<SupportDataController>(force: true);
+      Get.delete<DashboardController>(force: true);
+      Get.delete<BottomNavController>(force: true);
+      Get.delete<OutletController>(force: true);
+      Get.delete<ActivityController>(force: true);
+      Get.delete<RoutingController>(force: true);
+      Get.delete<SellingController>(force: true);
+      Get.delete<TambahActivityController>(force: true);
+      Get.delete<VideoController>(force: true);
+      Get.delete<TambahRoutingController>(force: true);
+      Get.delete<TambahAvailabilityController>(force: true);
+      Get.delete<TambahVisibilityController>(force: true);
+      Get.delete<TambahProdukSellingController>(force: true);
+
+      // Log out using LoginController
+      await _loginController.logout();
+
+      // Navigate to login page with new bindings
+      Get.offAll(() => LoginPage(), binding: BindingsBuilder(() {
+        Get.lazyPut(() => SupportDataController());
+        Get.lazyPut(() => DashboardController());
+        Get.lazyPut(() => LoginController());
+        Get.lazyPut(() => BottomNavController());
+        Get.lazyPut(() => OutletController());
+        Get.lazyPut(() => ActivityController());
+        Get.lazyPut(() => RoutingController());
+        Get.lazyPut(() => SellingController());
+        Get.lazyPut(() => TambahActivityController());
+        Get.lazyPut(() => VideoController());
+        Get.lazyPut(() => TambahRoutingController());
+        Get.lazyPut(() => TambahAvailabilityController());
+        Get.lazyPut(() => TambahVisibilityController());
+        Get.lazyPut(() => TambahProdukSellingController());
+      }));
+    } catch (e) {
+      print('Logout error: $e');
+      CustomAlerts.showError(Get.context!, "Error", "Gagal logout: ${e.toString()}");
+    } finally {
+      isLoading.value = false;
+    }
   }
 
   Future<void> initializeDashboard() async {
@@ -92,7 +146,7 @@ class DashboardController extends GetxController {
       if (localData != null) {
         dashboard.value = localData;
       }
-      
+
       // Then fetch fresh data from API
       await fetchDashboardData();
     } catch (e) {
@@ -106,23 +160,31 @@ class DashboardController extends GetxController {
       isLoading.value = true;
       error.value = null;
 
-      // Fetch data from API
       final response = await Api.getDashboard();
-      
-      // Save to database
+
+      // Check the response type and structure
+      if (response.status == false &&
+          response.message?.contains('Sesi anda telah berakhir') == true) {
+        await _loginController.handleSessionExpired();
+        return;
+      }
+
       await _dbHelper.saveDashboard(response);
-      
-      // Update state
       dashboard.value = response;
     } catch (e) {
       error.value = 'Failed to fetch dashboard data: $e';
       print('Error fetching dashboard data: $e');
+
+      if (e.toString().contains('Sesi anda telah berakhir')) {
+        await _loginController.handleSessionExpired();
+      }
     } finally {
       isLoading.value = false;
     }
   }
 
-  // Refresh data when pull-to-refresh is triggered
+  // ... (keep existing utility methods)
+
   Future<void> onRefresh() async {
     try {
       await fetchDashboardData();
@@ -133,7 +195,6 @@ class DashboardController extends GetxController {
   }
 
   void updateDate() {
-    // Update date every second
     Future.delayed(const Duration(seconds: 1), () {
       currentDate.value = DateTime.now();
       updateDate();

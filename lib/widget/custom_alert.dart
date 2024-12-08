@@ -72,17 +72,29 @@ class CustomAlerts {
   }
 
   static void showLoading(BuildContext context, String title, String subtitle) {
-    _loadingEntry?.remove();
-    _loadingEntry = OverlayEntry(
-      builder: (context) => _CustomLoadingOverlay(
-        title: title,
-        subtitle: subtitle,
-      ),
-    );
+    try {
+      _loadingEntry?.remove();
+      _loadingEntry = OverlayEntry(
+        builder: (context) => _CustomLoadingOverlay(
+          title: title,
+          subtitle: subtitle,
+        ),
+      );
 
-    WidgetsBinding.instance.addPostFrameCallback((_) {
-      Overlay.of(context).insert(_loadingEntry!);
-    });
+      if (!context.mounted) return;
+
+      // Ensure we're not in a build phase
+      WidgetsBinding.instance.addPostFrameCallback((_) {
+        try {
+          if (!context.mounted) return;
+          Navigator.of(context, rootNavigator: true).overlay?.insert(_loadingEntry!);
+        } catch (e) {
+          print('Error inserting loading overlay: $e');
+        }
+      });
+    } catch (e) {
+      print('Error creating loading overlay: $e');
+    }
   }
 
   static void dismissSuccess() {
@@ -96,8 +108,24 @@ class CustomAlerts {
   }
 
   static void dismissLoading() {
-    _loadingEntry?.remove();
-    _loadingEntry = null;
+    try {
+      if (_loadingEntry != null) {
+        // Ensure we're not in a build phase
+        WidgetsBinding.instance.addPostFrameCallback((_) {
+          try {
+            if (_loadingEntry?.mounted == true) {
+              _loadingEntry?.remove();
+            }
+          } catch (e) {
+            print('Error removing loading overlay: $e');
+          } finally {
+            _loadingEntry = null;
+          }
+        });
+      }
+    } catch (e) {
+      print('Error dismissing loading overlay: $e');
+    }
   }
 }
 

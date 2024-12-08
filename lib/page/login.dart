@@ -53,21 +53,18 @@ class LoginPage extends GetView<LoginController> {
                               text: TextSpan(
                                 style: TextStyle(
                                   color: Colors.black, // Default text color
-                                  fontSize:
-                                      13, // Set font size as per your design
+                                  fontSize: 13, // Set font size as per your design
                                 ),
                                 children: <TextSpan>[
                                   TextSpan(text: 'Silahkan Masukkan '),
                                   TextSpan(
                                     text: 'Email ',
-                                    style:
-                                        TextStyle(fontWeight: FontWeight.bold),
+                                    style: TextStyle(fontWeight: FontWeight.bold),
                                   ),
                                   TextSpan(text: 'dan '),
                                   TextSpan(
                                     text: 'Kata Sandi ',
-                                    style:
-                                        TextStyle(fontWeight: FontWeight.bold),
+                                    style: TextStyle(fontWeight: FontWeight.bold),
                                   ),
                                   TextSpan(text: 'untuk melanjutkan'),
                                 ],
@@ -89,31 +86,29 @@ class LoginPage extends GetView<LoginController> {
                             const SizedBox(height: 16),
                             Obx(() {
                               return GlassmorphicTextField(
-                                controller: passwordController,
-                                hintText: 'Masukan Kata Sandi Anda',
-                                obscureText: _isPasswordVisible.value,
-                                prefixIcon: Icon(
-                                  Icons.lock_outline,
-                                  color: Colors.blue,
-                                  // size: 22,
-                                ),
-                                suffixIcon: IconButton(
-                                  icon: Icon(
-                                    _isPasswordVisible.value ? Icons.visibility : Icons.visibility_off,
-                                    color: AppColors.primary,
+                                  controller: passwordController,
+                                  hintText: 'Masukan Kata Sandi Anda',
+                                  obscureText: !_isPasswordVisible.value, // Changed this line
+                                  prefixIcon: Icon(
+                                    Icons.lock_outline,
+                                    color: Colors.blue,
                                   ),
-                                  onPressed: () => _isPasswordVisible.toggle(),
-                                )
-                              );
+                                  suffixIcon: IconButton(
+                                    icon: Icon(
+                                      _isPasswordVisible.value
+                                          ? Icons.visibility
+                                          : Icons.visibility_off,
+                                      color: AppColors.primary,
+                                    ),
+                                    onPressed: () => _isPasswordVisible.toggle(),
+                                  ));
                             }),
                             const SizedBox(height: 10),
                             Obx(() => controller.errorMessage.isNotEmpty
                                 ? Text(
                                     controller.errorMessage.value,
                                     style: TextStyle(
-                                        color:
-                                            Theme.of(context).colorScheme.error,
-                                        fontSize: 11),
+                                        color: Theme.of(context).colorScheme.error, fontSize: 11),
                                     textAlign: TextAlign.center,
                                   )
                                 : SizedBox.shrink()),
@@ -136,24 +131,20 @@ class LoginPage extends GetView<LoginController> {
                                     backgroundColor: Colors.white,
                                     // Button color
                                     shape: RoundedRectangleBorder(
-                                      borderRadius: BorderRadius.circular(
-                                          13), // Rounded corners
+                                      borderRadius: BorderRadius.circular(13), // Rounded corners
                                     ),
                                     elevation: 5,
                                     // Shadow depth
                                     shadowColor: Colors.black, // Shadow color
                                   ),
                                   child: controller.isLoading.value
-                                      ? CircularProgressIndicator(
-                                          color: Colors.white)
+                                      ? CircularProgressIndicator(color: Colors.white)
                                       : Text(
                                           'Masuk',
                                           style: TextStyle(
-                                            color:
-                                                Colors.blue[900], // Text color
+                                            color: Colors.blue[900], // Text color
                                             fontSize: 18,
-                                            fontWeight:
-                                                FontWeight.bold, // Bold text
+                                            fontWeight: FontWeight.bold, // Bold text
                                           ),
                                         ),
                                 ),

@@ -42,8 +42,11 @@ class Data {
   int? totalCallPlan;
   int? planPercentage;
   CurrentOutlet? currentOutlet;
+  List<PowerSkus>? powerSkus;
+  String? lastPerformanceUpdate;
+  String? lastPowerSkuUpdate;
 
-  Data({this.city, this.region, this.role, this.totalOutlet, this.totalActualPlan, this.totalCallPlan, this.planPercentage, this.currentOutlet});
+  Data({this.city, this.region, this.role, this.totalOutlet, this.totalActualPlan, this.totalCallPlan, this.planPercentage, this.currentOutlet, this.powerSkus, this.lastPerformanceUpdate, this.lastPowerSkuUpdate});
 
   Data.fromJson(Map<String, dynamic> json) {
     city = json["city"];
@@ -66,6 +69,15 @@ class Data {
     if(json["current_outlet"] is Map) {
       currentOutlet = json["current_outlet"] == null ? null : CurrentOutlet.fromJson(json["current_outlet"]);
     }
+    if(json["power_skus"] is List) {
+      powerSkus = json["power_skus"] == null ? null : (json["power_skus"] as List).map((e) => PowerSkus.fromJson(e)).toList();
+    }
+    if(json["last_performance_update"] is String) {
+      lastPerformanceUpdate = json["last_performance_update"];
+    }
+    if(json["last_power_sku_update"] is String) {
+      lastPowerSkuUpdate = json["last_power_sku_update"];
+    }
   }
 
   static List<Data> fromList(List<Map<String, dynamic>> list) {
@@ -84,6 +96,48 @@ class Data {
     if(currentOutlet != null) {
       _data["current_outlet"] = currentOutlet?.toJson();
     }
+    if(powerSkus != null) {
+      _data["power_skus"] = powerSkus?.map((e) => e.toJson()).toList();
+    }
+    _data["last_performance_update"] = lastPerformanceUpdate;
+    _data["last_power_sku_update"] = lastPowerSkuUpdate;
+    return _data;
+  }
+}
+
+class PowerSkus {
+  String? sku;
+  int? totalOutlets;
+  int? availableCount;
+  int? availabilityPercentage;
+
+  PowerSkus({this.sku, this.totalOutlets, this.availableCount, this.availabilityPercentage});
+
+  PowerSkus.fromJson(Map<String, dynamic> json) {
+    if(json["sku"] is String) {
+      sku = json["sku"];
+    }
+    if(json["total_outlets"] is int) {
+      totalOutlets = json["total_outlets"];
+    }
+    if(json["available_count"] is int) {
+      availableCount = json["available_count"];
+    }
+    if(json["availability_percentage"] is int) {
+      availabilityPercentage = json["availability_percentage"];
+    }
+  }
+
+  static List<PowerSkus> fromList(List<Map<String, dynamic>> list) {
+    return list.map(PowerSkus.fromJson).toList();
+  }
+
+  Map<String, dynamic> toJson() {
+    final Map<String, dynamic> _data = <String, dynamic>{};
+    _data["sku"] = sku;
+    _data["total_outlets"] = totalOutlets;
+    _data["available_count"] = availableCount;
+    _data["availability_percentage"] = availabilityPercentage;
     return _data;
   }
 }

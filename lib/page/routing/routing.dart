@@ -61,7 +61,7 @@ class RoutingPage extends GetView<RoutingController> {
 
                   return RefreshIndicator(
                     onRefresh: () async {
-                      await controller.initGetRouting();
+                      await controller.refreshRoutingData();
                     },
                     child: ListView.builder(
                       physics: const AlwaysScrollableScrollPhysics(),
@@ -116,7 +116,7 @@ class RoutingPage extends GetView<RoutingController> {
   Widget _buildEmptyState() {
     return RefreshIndicator(
       onRefresh: () async {
-        await controller.initGetRouting();
+        await controller.refreshRoutingData();
       },
       child: ListView(
         physics: const AlwaysScrollableScrollPhysics(),

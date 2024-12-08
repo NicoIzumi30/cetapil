@@ -100,7 +100,6 @@ class SellingDatabaseHelper {
     sellingMap.remove('products');
     print("-----${sellingMap['category_outlet']}");// Remove nested products array
     await db.insert('selling_data', sellingMap, conflictAlgorithm: ConflictAlgorithm.replace);
-print("aaa");
 
     // Insert associated products
     if (sellingData.products != null) {

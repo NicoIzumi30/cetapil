@@ -39,7 +39,7 @@ class SellingPage extends GetView<SellingController> {
                 child: Obx(() {
                   return RefreshIndicator(
                     onRefresh: () async {
-                      await controller.loadAllData();
+                      await controller.refreshData();
                     },
                     child: Stack(
                       children: [

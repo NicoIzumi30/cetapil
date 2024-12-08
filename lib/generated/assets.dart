@@ -19,10 +19,10 @@ class Assets {
   static const String fontsPlusJakartaSansSemiBold = 'assets/fonts/PlusJakartaSans-SemiBold.ttf';
   static const String iconSettingAccount = 'assets/icon/setting_account.png';
   static const String iconVector = 'assets/icon/Vector.svg';
-  static const String iconVector (1) = 'assets/icon/Vector (1).svg';
-  static const String iconVector (2) = 'assets/icon/Vector (2).svg';
-  static const String iconVector (3) = 'assets/icon/Vector (3).svg';
-  static const String iconVector (4) = 'assets/icon/Vector (4).svg';
-  static const String iconVector (5) = 'assets/icon/Vector (5).svg';
+  // static const String iconVector (1) = 'assets/icon/Vector (1).svg';
+  // static const String iconVector (2) = 'assets/icon/Vector (2).svg';
+  // static const String iconVector (3) = 'assets/icon/Vector (3).svg';
+  // static const String iconVector (4) = 'assets/icon/Vector (4).svg';
+  // static const String iconVector (5) = 'assets/icon/Vector (5).svg';
 
 }
