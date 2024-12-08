@@ -81,7 +81,7 @@ class ActivityPage extends GetView<ActivityController> {
                                       final dbActivity = ActivityDatabaseHelper.instance;
                                       final tambahActivityController = Get.find<TambahActivityController>();
                                       var fetchedData = await dbActivity.getDetailSalesActivity(activity.id!);
-                                      print("/// ${fetchedData!["surveyItems"]}");
+                                      print("/// ${fetchedData!["orderItems"]}");
                                       tambahActivityController.detailDraft.assignAll(fetchedData!);
                                       tambahActivityController.setDetailOutlet(activity);
                                       Get.to(() => TambahActivity());

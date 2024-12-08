@@ -146,11 +146,27 @@ class SurveyPage extends GetView<TambahActivityController> {
 
       // Your existing ListView implementation
 
-      final List<Map<String, dynamic>> questionGroup;
+       var questionGroup = <Map<String, dynamic>>[];
       if (controller.detailDraft.isNotEmpty) {
-        // questionGroup = availibilityController.getSurveyByDataDraft();
-      }
+        final data = controller.detailDraft['surveyItems'];
+
+        questionGroup = supportController.getSurvey().map((entry) {
+          var surveys = entry['surveys'] as List;
+          var filteredSurveys = surveys.where((survey) {
+            return data.any((d) => d['survey_id'] == survey['id']);
+          }).toList();
+
+          return {
+            'id': entry['id'],
+            'title': entry['title'],
+            'name': entry['name'],
+            'surveys': filteredSurveys
+          };
+        }).toList();
+
+      }else{
        questionGroup = supportController.getSurvey();
+      }
       return ListView.builder(
         shrinkWrap: true,
         physics: const NeverScrollableScrollPhysics(),

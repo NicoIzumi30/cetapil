@@ -3,19 +3,37 @@ import 'package:cetapil_mobile/page/activity/secondarytab_page/tambah_order.dart
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:get/get.dart';
+import '../../../controller/activity/tambah_availibility_controller.dart';
 import '../../../controller/activity/tambah_order_controller.dart';
 import '../../../utils/colors.dart';
 
 class OrderPage extends GetView<TambahActivityController> {
+  final tambahAvailabilityController = Get.find<TambahAvailabilityController>();
+  final tambahOrderController = Get.find<TambahOrderController>();
   @override
   Widget build(BuildContext context) {
-    final orderController = Get.find<TambahOrderController>();
 
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
         Obx(() {
           final groupedItems = <String, List<Map<String, dynamic>>>{};
+
+          if (controller.detailDraft.isNotEmpty) {
+            for (var data in controller.detailDraft["orderItems"]) {
+
+              final item = tambahAvailabilityController.getSkuByDataApi(data['product_id']);
+              final newItem = {
+                'id': data['product_id'],
+                'category': item!['category']['name'],
+                'sku': item['sku'],
+                'jumlah': data['jumlah'],
+                'harga': data['harga'],
+              };
+              controller.addOrderItem(newItem);
+              tambahOrderController.clearForm();
+            }
+          }
 
           // Use orderDraftItems from TambahActivityController
           for (var item in controller.orderDraftItems) {

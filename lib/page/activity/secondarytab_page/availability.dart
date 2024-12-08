@@ -22,22 +22,22 @@ class AvailabilityPage extends GetView<TambahActivityController> {
       children: [
         Obx(() {
           final groupedItems = <String, List<Map<String, dynamic>>>{};
-          // if (controller.detailDraft.isNotEmpty) {
-          //   for (var data in controller.detailDraft["availabilityItems"]) {
-          //
-          //     final item = tambahAvailabilityController.getSkuByDataApi(data['product_id']);
-          //     final newItem = {
-          //       'id': data['product_id'],
-          //       'sku': item!['sku'],
-          //       'category': item['category']['name'],
-          //       'stock': data['available_stock'],
-          //       'av3m': data['average_stock'],
-          //       'recommend': data['ideal_stock'],
-          //     };
-          //     controller.addAvailabilityItem(newItem);
-          //     tambahAvailabilityController.clearForm();
-          //   }
-          // }
+          if (controller.detailDraft.isNotEmpty) {
+            for (var data in controller.detailDraft["availabilityItems"]) {
+
+              final item = tambahAvailabilityController.getSkuByDataApi(data['product_id']);
+              final newItem = {
+                'id': data['product_id'],
+                'sku': item!['sku'],
+                'category': item['category']['name'],
+                'stock': data['available_stock'],
+                'av3m': data['average_stock'],
+                'recommend': data['ideal_stock'],
+              };
+              controller.addAvailabilityItem(newItem);
+              tambahAvailabilityController.clearForm();
+            }
+          }
           // Use availabilityDraftItems from TambahActivityController
           for (var item in controller.availabilityDraftItems) {
             final category = item['category'];

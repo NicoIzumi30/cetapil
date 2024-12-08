@@ -1,6 +1,7 @@
 import 'dart:async';
 
 import 'package:cetapil_mobile/api/api.dart';
+import 'package:cetapil_mobile/controller/activity/activity_controller.dart';
 import 'package:cetapil_mobile/controller/activity/tambah_order_controller.dart';
 import 'package:cetapil_mobile/controller/activity/tambah_visibility_controller.dart';
 import 'package:cetapil_mobile/model/survey_question_response.dart';
@@ -15,6 +16,7 @@ import '../../model/list_activity_response.dart' as Activity;
 import '../../widget/custom_alert.dart';
 
 class TambahActivityController extends GetxController {
+  final activityController = Get.find<ActivityController>();
   final TextEditingController controller = TextEditingController();
   final db = ActivityDatabaseHelper.instance;
   final api = Api();
@@ -204,12 +206,8 @@ class TambahActivityController extends GetxController {
             surveyItems: surveyList,
             orderItems: orderDraftItems);
       }
-
-      // await loadOutlets();
-      // clearForm();
-
-      // Navigate back first
       _timer?.cancel();
+      activityController.initGetActivity();
       EasyLoading.dismiss();
       Get.back();
 

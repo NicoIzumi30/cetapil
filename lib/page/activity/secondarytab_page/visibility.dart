@@ -31,16 +31,21 @@ class VisibilityPage extends GetView<ActivityController> {
               tambahActivityController.detailOutlet.value!.visibilities ?? [];
           final visibilityDraft = tambahActivityController.detailDraft["visibilityItems"];
 
-          if (allVisibilities.isNotEmpty && visibilityDraft.isNotEmpty ) {
+          if (allVisibilities.isNotEmpty && visibilityDraft != null ) {
             for(var dataApi in allVisibilities){
               for (var dataDraft in visibilityDraft ) {
-
+                final posmType = supportController
+                    .getPosmTypes()
+                    .firstWhereOrNull((posm) => posm['id'] == dataApi.posmTypeId);
+                final visualType = supportController
+                    .getVisualTypes()
+                    .firstWhereOrNull((visual) => visual['id'] == dataApi.visualTypeId);
                 final newItem = {
                   'id': dataApi.id,
                   'posm_type_id': dataApi.posmTypeId,
-                  'posm_type_name': "HHHHH",
+                  'posm_type_name': posmType!['name'],
                   'visual_type_id': dataApi.visualTypeId,
-                  'visual_type_name': "HHHHHH",
+                  'visual_type_name': visualType!['name'],
                   'condition': dataDraft['condition'],
                   /// ERROR KARNA dataDraft['image1'] ADALAH STRING
                   'image1': File(dataDraft['image1']),
