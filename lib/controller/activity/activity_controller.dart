@@ -23,12 +23,29 @@ class ActivityController extends GetxController {
   @override
   void onInit() {
     super.onInit();
-    initGetActivity();
+    // initGetActivity();
+    loadLocalData(); // Changed from initGetActivity()
   }
 
   void changeTab(int index) {
     selectedTab.value = index;
     update();
+  }
+
+  Future<void> loadLocalData() async {
+    try {
+      // isInitialLoading.value = true;
+      final results = await db.getSalesActivities();
+      activity.clear();
+      activity.addAll(results);
+
+      if (activity.isEmpty) {
+        // If no local data exists, fetch from API
+        await initGetActivity();
+      }
+    } catch (e) {
+      print('Error loading local data: $e');
+    }
   }
 
   initGetActivity() async {
@@ -72,12 +89,12 @@ class ActivityController extends GetxController {
           if (result.visibilities != null) {
             data['visibilities'] = result.visibilities!
                 .map((v) => {
-              'id': v.id,
-              'posm_type_id': v.posmTypeId,
-              'visual_type_id': v.visualTypeId,
-              'filename': v.filename,
-              'image': v.image,
-            })
+                      'id': v.id,
+                      'posm_type_id': v.posmTypeId,
+                      'visual_type_id': v.visualTypeId,
+                      'filename': v.filename,
+                      'image': v.image,
+                    })
                 .toList();
           }
 
@@ -188,11 +205,8 @@ class ActivityController extends GetxController {
     // }
   }
 
-
   List<Data> get filteredOutlets => activity.where((outlet) {
-        return outlet.outlet!.name!
-            .toLowerCase()
-            .contains(searchQuery.value.toLowerCase());
+        return outlet.outlet!.name!.toLowerCase().contains(searchQuery.value.toLowerCase());
       }).toList();
 
   void updateSearchQuery(String query) {

@@ -341,6 +341,10 @@ class OutletController extends GetxController {
       });
 
       outlets.assignAll(results);
+
+      if (results.isEmpty) {
+        await refreshOutlets();
+      }
     } catch (e) {
       print('Error loading outlets: $e');
       CustomAlerts.showError(
@@ -610,52 +614,38 @@ class OutletController extends GetxController {
     }
   }
 
+  // Modified _batchUpsert to handle updates more efficiently
   Future<void> _batchUpsert(List<Outlet> outlets) async {
     const batchSize = 100;
     for (var i = 0; i < outlets.length; i += batchSize) {
       final end = (i + batchSize < outlets.length) ? i + batchSize : outlets.length;
       final batch = outlets.sublist(i, end);
 
-      // Get existing outlets to check draft status
+      // Get existing outlets to check draft status and changes
       final existingOutlets =
           await Future.wait(batch.map((outlet) => db.getOutletById(outlet.id!)));
 
       // Create a list of futures for upsert operations
-      final futures = batch.asMap().entries.map((entry) {
+      final futures = batch.asMap().entries.map((entry) async {
         final index = entry.key;
         final outlet = entry.value;
+        final existingOutlet = existingOutlets[index];
 
-        // If the existing outlet is a draft, preserve its draft status
-        if (existingOutlets[index]?.dataSource == 'DRAFT') {
-          final modifiedOutlet = Outlet(
-              id: outlet.id,
-              name: outlet.name,
-              address: outlet.address,
-              latitude: outlet.latitude,
-              longitude: outlet.longitude,
-              category: outlet.category,
-              channel: Channel(
-                id: outlet.channel?.id,
-                name: outlet.channel?.name,
-              ),
-              city: outlet.city, // Use the city object directly
-              images: outlet.images,
-              forms: outlet.forms,
-              user: outlet.user,
-              dataSource: 'DRAFT', // Preserve draft status
-              status: outlet.status,
-              visitDay: outlet.visitDay,
-              weekType: outlet.weekType,
-              cycle: outlet.cycle,
-              salesActivity: outlet.salesActivity,
-              isSynced: false);
-          return db.upsertOutletFromApi(modifiedOutlet);
+        if (existingOutlet == null) {
+          // New outlet, insert it
+          return db.upsertOutletFromApi(outlet);
+        } else if (existingOutlet.dataSource == 'DRAFT') {
+          // Don't update drafts
+          return null;
+        } else if (_hasChanges(existingOutlet, outlet)) {
+          // Update only if there are actual changes
+          return db.upsertOutletFromApi(outlet);
         }
-
-        return db.upsertOutletFromApi(outlet);
+        // No changes needed
+        return null;
       });
 
-      await Future.wait(futures);
+      await Future.wait(futures.where((f) => f != null));
     }
   }
 
@@ -671,22 +661,66 @@ class OutletController extends GetxController {
         })));
   }
 
-// Also update the _hasChanges method
+// Improved _hasChanges method to check all relevant fields
   bool _hasChanges(Outlet local, Outlet api) {
     // Always skip sync for drafts
     if (local.dataSource == 'DRAFT') {
       return false;
     }
 
-    return local.name != api.name ||
+    // Check basic fields
+    if (local.name != api.name ||
         local.address != api.address ||
         local.latitude != api.latitude ||
         local.longitude != api.longitude ||
-        local.city?.id != api.city?.id ||
-        local.city?.name != api.city?.name ||
         local.category != api.category ||
-        local.channel?.id != api.channel?.id || // Add channel comparison
-        local.channel?.name != api.channel?.name;
+        local.visitDay != api.visitDay ||
+        local.status != api.status) {
+      return true;
+    }
+
+    // Check city data
+    if ((local.city?.id != api.city?.id) || (local.city?.name != api.city?.name)) {
+      return true;
+    }
+
+    // Check channel data
+    if ((local.channel?.id != api.channel?.id) || (local.channel?.name != api.channel?.name)) {
+      return true;
+    }
+
+    // Check user data
+    if ((local.user?.id != api.user?.id) || (local.user?.name != api.user?.name)) {
+      return true;
+    }
+
+    // Check images
+    if (local.images?.length != api.images?.length) {
+      return true;
+    }
+    if (local.images != null && api.images != null) {
+      for (int i = 0; i < local.images!.length; i++) {
+        if (local.images![i].image != api.images![i].image ||
+            local.images![i].filename != api.images![i].filename) {
+          return true;
+        }
+      }
+    }
+
+    // Check forms
+    if (local.forms?.length != api.forms?.length) {
+      return true;
+    }
+    if (local.forms != null && api.forms != null) {
+      for (int i = 0; i < local.forms!.length; i++) {
+        if (local.forms![i].answer != api.forms![i].answer ||
+            local.forms![i].outletForm?.id != api.forms![i].outletForm?.id) {
+          return true;
+        }
+      }
+    }
+
+    return false;
   }
 
   @override

@@ -42,7 +42,7 @@ class SellingController extends GetxController {
   @override
   void onInit() {
     super.onInit();
-    loadAllData();
+    loadInitialData(); // New method for initial load
     checkAndRequestGPS();
   }
 
@@ -54,6 +54,45 @@ class SellingController extends GetxController {
     if (!gpsController.isGPSEnabled.value) {
       await gpsController.requestGPSActivation();
     }
+  }
+
+  // New method for initial data load
+  Future<void> loadInitialData() async {
+    try {
+      errorMessage.value = '';
+
+      // Load data from local database (drafted)
+      final localData = await dbHelper.getAllSellingData(isDrafted: true);
+
+      // Also load data from API
+      try {
+        ListSellingResponse apiResponse = await Api.getListSelling();
+        List<Data> apiData = apiResponse.data ?? [];
+
+        // Mark API data as not drafted
+        for (var data in apiData) {
+          data.isDrafted = false;
+        }
+
+        // Mark local data as drafted
+        for (var data in localData) {
+          data.isDrafted = true;
+        }
+
+        // Combine both sources and update the list
+        sellingData.value = [
+          ...localData,
+          ...apiData,
+        ];
+      } catch (apiError) {
+        print('Error loading API data: $apiError');
+        // If API fails, at least show local data
+        sellingData.value = localData;
+      }
+    } catch (e) {
+      print('Error loading initial data: $e');
+      errorMessage.value = 'Gagal memuat data: $e';
+    } 
   }
 
   Future<void> loadAllData() async {

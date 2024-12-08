@@ -26,7 +26,7 @@ class RoutingController extends GetxController {
   @override
   void onInit() {
     super.onInit();
-    initGetRouting();
+    loadLocalData(); // Load from SQLite first
   }
 
   bool isRoutingActive(String outletId) {
@@ -36,6 +36,20 @@ class RoutingController extends GetxController {
           routingData.salesActivity!.checkedOut != null;
     }
     return false;
+  }
+
+Future<void> loadLocalData() async {
+    try {
+      final results = await db.getAllRouting();
+      routing.clear();
+      routing.addAll(results);
+      
+      if (routing.isEmpty) {
+        await initGetRouting();
+      }
+    } catch (e) {
+      print('Error loading local data: $e');
+    } 
   }
 
   Future<void> initGetRouting() async {
@@ -143,7 +157,7 @@ class RoutingController extends GetxController {
     } catch (e) {
       print('Error saving Routing: $e');
       CustomAlerts.showError(Get.context!, "Check in", e.toString());
-      CustomAlerts.dismissLoading(); 
+      CustomAlerts.dismissLoading();
     } finally {
       CustomAlerts.dismissLoading();
     }

@@ -96,8 +96,19 @@ class CustomAlerts {
   }
 
   static void dismissLoading() {
-    _loadingEntry?.remove();
-    _loadingEntry = null;
+    try {
+      if (_loadingEntry != null) {
+        // Check if the overlay entry is still mounted
+        WidgetsBinding.instance.addPostFrameCallback((_) {
+          if (_loadingEntry?.mounted == true) {
+            _loadingEntry?.remove();
+          }
+          _loadingEntry = null;
+        });
+      }
+    } catch (e) {
+      print('Error dismissing loading overlay: $e');
+    }
   }
 }
 

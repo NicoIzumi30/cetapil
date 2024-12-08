@@ -1,6 +1,6 @@
 import 'package:sqflite/sqflite.dart';
 import 'package:path/path.dart';
-import '../model/dashboard.dart'; // Adjust import path as needed
+import '../model/dashboard.dart';
 
 class DashboardDatabaseHelper {
   static final DashboardDatabaseHelper instance = DashboardDatabaseHelper._init();
@@ -21,8 +21,9 @@ class DashboardDatabaseHelper {
 
       return await openDatabase(
         path,
-        version: 1,
+        version: 3, // Increased version for new fields
         onCreate: _createDB,
+        onUpgrade: _onUpgrade,
       );
     } catch (e) {
       print('Error initializing dashboard database: $e');
@@ -30,8 +31,36 @@ class DashboardDatabaseHelper {
     }
   }
 
+  Future _onUpgrade(Database db, int oldVersion, int newVersion) async {
+    if (oldVersion < 2) {
+      await db.execute('''
+        CREATE TABLE power_skus (
+          id INTEGER PRIMARY KEY AUTOINCREMENT,
+          dashboard_id INTEGER,
+          sku TEXT,
+          total_outlets INTEGER,
+          available_count INTEGER,
+          availability_percentage INTEGER,
+          FOREIGN KEY (dashboard_id) REFERENCES dashboard_data (id)
+        )
+      ''');
+    }
+    
+    if (oldVersion < 3) {
+      // Add new columns for last update timestamps
+      await db.execute('''
+        ALTER TABLE dashboard_data 
+        ADD COLUMN last_performance_update TEXT
+      ''');
+      
+      await db.execute('''
+        ALTER TABLE dashboard_data 
+        ADD COLUMN last_power_sku_update TEXT
+      ''');
+    }
+  }
+
   Future _createDB(Database db, int version) async {
-    // Create current_outlets table
     await db.execute('''
       CREATE TABLE current_outlets (
         id INTEGER PRIMARY KEY AUTOINCREMENT,
@@ -43,7 +72,6 @@ class DashboardDatabaseHelper {
       )
     ''');
 
-    // Create dashboard_data table
     await db.execute('''
       CREATE TABLE dashboard_data (
         id INTEGER PRIMARY KEY AUTOINCREMENT,
@@ -56,14 +84,27 @@ class DashboardDatabaseHelper {
         total_actual_plan INTEGER,
         total_call_plan INTEGER,
         plan_percentage INTEGER,
+        last_performance_update TEXT,
+        last_power_sku_update TEXT,
         current_outlet_id INTEGER,
         created_at DATETIME DEFAULT CURRENT_TIMESTAMP,
         FOREIGN KEY (current_outlet_id) REFERENCES current_outlets (id)
       )
     ''');
+
+    await db.execute('''
+      CREATE TABLE power_skus (
+        id INTEGER PRIMARY KEY AUTOINCREMENT,
+        dashboard_id INTEGER,
+        sku TEXT,
+        total_outlets INTEGER,
+        available_count INTEGER,
+        availability_percentage INTEGER,
+        FOREIGN KEY (dashboard_id) REFERENCES dashboard_data (id)
+      )
+    ''');
   }
 
-  // Save Dashboard Data
   Future<void> saveDashboard(Dashboard dashboard) async {
     final db = await database;
     
@@ -86,7 +127,7 @@ class DashboardDatabaseHelper {
         }
 
         // Insert dashboard data
-        await txn.insert(
+        final dashboardId = await txn.insert(
           'dashboard_data',
           {
             'status': dashboard.status,
@@ -98,10 +139,29 @@ class DashboardDatabaseHelper {
             'total_actual_plan': dashboard.data?.totalActualPlan,
             'total_call_plan': dashboard.data?.totalCallPlan,
             'plan_percentage': dashboard.data?.planPercentage,
+            'last_performance_update': dashboard.data?.lastPerformanceUpdate,
+            'last_power_sku_update': dashboard.data?.lastPowerSkuUpdate,
             'current_outlet_id': currentOutletId,
           },
           conflictAlgorithm: ConflictAlgorithm.replace,
         );
+
+        // Insert power SKUs if they exist
+        if (dashboard.data?.powerSkus != null) {
+          for (var sku in dashboard.data!.powerSkus!) {
+            await txn.insert(
+              'power_skus',
+              {
+                'dashboard_id': dashboardId,
+                'sku': sku.sku,
+                'total_outlets': sku.totalOutlets,
+                'available_count': sku.availableCount,
+                'availability_percentage': sku.availabilityPercentage,
+              },
+              conflictAlgorithm: ConflictAlgorithm.replace,
+            );
+          }
+        }
       } catch (e) {
         print('Error saving dashboard data: $e');
         rethrow;
@@ -109,7 +169,6 @@ class DashboardDatabaseHelper {
     });
   }
 
-  // Get Latest Dashboard Data
   Future<Dashboard?> getLatestDashboard() async {
     final db = await database;
     
@@ -132,14 +191,28 @@ class DashboardDatabaseHelper {
 
       final row = results.first;
       
+      // Get power SKUs for this dashboard
+      final powerSkusResults = await db.query(
+        'power_skus',
+        where: 'dashboard_id = ?',
+        whereArgs: [row['id']],
+      );
+
+      final powerSkus = powerSkusResults.map((skuRow) => PowerSkus(
+        sku: skuRow['sku'] as String?,
+        totalOutlets: skuRow['total_outlets'] as int?,
+        availableCount: skuRow['available_count'] as int?,
+        availabilityPercentage: skuRow['availability_percentage'] as int?,
+      )).toList();
+
       // Construct CurrentOutlet
-      final currentOutlet = CurrentOutlet(
+      final currentOutlet = row['outlet_id'] != null ? CurrentOutlet(
         outletId: row['outlet_id'],
         salesActivityId: row['sales_activity_id'],
         name: row['outlet_name'] as String?,
         checkedIn: row['checked_in'],
         checkedOut: row['checked_out'],
-      );
+      ) : null;
 
       // Construct Data
       final data = Data(
@@ -150,7 +223,10 @@ class DashboardDatabaseHelper {
         totalActualPlan: row['total_actual_plan'] as int?,
         totalCallPlan: row['total_call_plan'] as int?,
         planPercentage: row['plan_percentage'] as int?,
+        lastPerformanceUpdate: row['last_performance_update'] as String?,
+        lastPowerSkuUpdate: row['last_power_sku_update'] as String?,
         currentOutlet: currentOutlet,
+        powerSkus: powerSkus,
       );
 
       // Construct Dashboard
@@ -165,107 +241,12 @@ class DashboardDatabaseHelper {
     }
   }
 
-  // Update Dashboard Data
-  Future<void> updateDashboard(Dashboard dashboard) async {
-    final db = await database;
-    
-    await db.transaction((txn) async {
-      try {
-        // Update or insert current outlet
-        if (dashboard.data?.currentOutlet != null) {
-          await txn.insert(
-            'current_outlets',
-            {
-              'outlet_id': dashboard.data!.currentOutlet!.outletId,
-              'sales_activity_id': dashboard.data!.currentOutlet!.salesActivityId,
-              'name': dashboard.data!.currentOutlet!.name,
-              'checked_in': dashboard.data!.currentOutlet!.checkedIn,
-              'checked_out': dashboard.data!.currentOutlet!.checkedOut,
-            },
-            conflictAlgorithm: ConflictAlgorithm.replace,
-          );
-        }
-
-        // Update dashboard data
-        await txn.insert(
-          'dashboard_data',
-          {
-            'status': dashboard.status,
-            'message': dashboard.message,
-            'city': dashboard.data?.city,
-            'region': dashboard.data?.region,
-            'role': dashboard.data?.role,
-            'total_outlet': dashboard.data?.totalOutlet,
-            'total_actual_plan': dashboard.data?.totalActualPlan,
-            'total_call_plan': dashboard.data?.totalCallPlan,
-            'plan_percentage': dashboard.data?.planPercentage,
-          },
-          conflictAlgorithm: ConflictAlgorithm.replace,
-        );
-      } catch (e) {
-        print('Error updating dashboard data: $e');
-        rethrow;
-      }
-    });
-  }
-
-  // Clear All Dashboard Data
   Future<void> clearDashboard() async {
     final db = await database;
     await db.transaction((txn) async {
+      await txn.delete('power_skus');
       await txn.delete('current_outlets');
       await txn.delete('dashboard_data');
     });
-  }
-
-  // Get Dashboard History (Optional)
-  Future<List<Dashboard>> getDashboardHistory({int limit = 10}) async {
-    final db = await database;
-    
-    try {
-      final results = await db.rawQuery('''
-        SELECT 
-          d.*,
-          c.outlet_id,
-          c.sales_activity_id,
-          c.name as outlet_name,
-          c.checked_in,
-          c.checked_out
-        FROM dashboard_data d
-        LEFT JOIN current_outlets c ON d.current_outlet_id = c.id
-        ORDER BY d.created_at DESC
-        LIMIT ?
-      ''', [limit]);
-
-      return results.map((row) {
-        final currentOutlet = CurrentOutlet(
-          outletId: row['outlet_id'],
-          salesActivityId: row['sales_activity_id'],
-          name: row['outlet_name'] as String?,
-          checkedIn: row['checked_in'],
-          checkedOut: row['checked_out'],
-        );
-
-        final data = Data(
-          city: row['city'],
-          region: row['region'],
-          role: row['role'] as String?,
-          totalOutlet: row['total_outlet'] as int?,
-          totalActualPlan: row['total_actual_plan'] as int?,
-          totalCallPlan: row['total_call_plan'] as int?,
-          planPercentage: row['plan_percentage'] as int?,
-          currentOutlet: currentOutlet,
-        );
-
-        return Dashboard(
-          status: row['status'] as String?,
-          message: row['message'] as String?,
-          data: data,
-        );
-      }).toList();
-    } catch (e) {
-      print('Error getting dashboard history: $e');
-      rethrow;
-    }
   }
 }
