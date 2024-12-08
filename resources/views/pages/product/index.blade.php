@@ -18,7 +18,7 @@
             <x-input.search class="border-0" placeholder="Cari data produk" id="global-search"></x-input.search>
             <x-button.light id="downloadBtn">
                 <span id="downloadBtnText">Download</span>
-                <span id="downloadBtnLoading" class="hidden">Memproses...</span>
+                <span id="downloadBtnLoadingProduct" class="hidden">Downloading...</span>
             </x-button.light>
             <x-button.info onclick="openModal('tambah-produk')">
                 Tambah Daftar Produk
@@ -235,7 +235,9 @@
 
         {{-- Stock-on-Hand Action --}}
         <x-slot:cardAction>
-            <x-button.light>Download
+            <x-button.light id="downloadBtnStockOnHand">
+                <span id="downloadBtnText">Download</span>
+                <span id="downloadBtnLoading" class="hidden">Downloading...</span>
             </x-button.light>
             <x-select.light :title="'Filter Produk'" id="filter_product">
                 <option value="all">Semua</option>
@@ -613,7 +615,15 @@
             // Download Excel handler
             $('#downloadBtn').click(function (e) {
                 e.preventDefault();
-                toggleLoading(true);
+                
+                // Show loading state
+                const $btn = $(this);
+                const $btnText = $btn.find('#downloadBtnText');
+                const $btnLoading = $btn.find('#downloadBtnLoadingProduct');
+                
+                $btnText.addClass('hidden');
+                $btnLoading.removeClass('hidden');
+                $btn.prop('disabled', true);
 
                 const form = document.createElement('form');
                 form.method = 'GET';
@@ -624,7 +634,7 @@
                     .then(response => {
                         if (response.ok) {
                             form.submit();
-                            toast('success', 'File berhasil diunduh', 150);
+                            toast('success', 'File berhasil diunduh', 300);
                         } else {
                             return response.json().then(data => {
                                 throw new Error(data.message || 'Gagal mengunduh file');
@@ -636,8 +646,12 @@
                         toast('error', error.message || 'Gagal mengunduh file', 200);
                     })
                     .finally(() => {
-                        toggleLoading(false);
-                        document.body.removeChild(form);
+                        setTimeout(() => {
+                            $btnText.removeClass('hidden');
+                            $btnLoading.addClass('hidden');
+                            $btn.prop('disabled', false);
+                            document.body.removeChild(form);
+                        }, 1000);
                     });
             });
 
@@ -700,7 +714,7 @@
             function handleSuccess(modalId, message) {
                 toggleLoading(false, 'update');
                 closeModal(modalId);
-                toast('success', message, 150);
+                toast('success', message, 300);
                 setTimeout(() => window.location.reload(), 1500);
             }
 
@@ -720,5 +734,43 @@
                 });
             }
         });
+
+        $('#downloadBtnStockOnHand').click(function(e) {
+    e.preventDefault();
+    
+    // Get current filter values
+    const filters = {
+        date: $('#stock-date-range').val() === 'Date Range' ? '' : $('#stock-date-range').val(),
+        product: $('#filter_product').val(),
+        area: $('#filter_area').val()
+    };
+
+    // Show loading state
+    const $btn = $(this);
+    const $btnText = $btn.find('#downloadBtnText');
+    const $btnLoading = $btn.find('#downloadBtnLoading');
+    
+    $btnText.addClass('hidden');
+    $btnLoading.removeClass('hidden');
+    $btn.prop('disabled', true);
+
+    // Create form for download
+    const form = document.createElement('form');
+    form.method = 'GET';
+    form.action = '/products/download-stock-on-hand?' + new URLSearchParams(filters).toString();
+    document.body.appendChild(form);
+    
+    form.submit();
+    
+    // Reset button state after a short delay
+    setTimeout(() => {
+        $btnText.removeClass('hidden');
+        $btnLoading.addClass('hidden');
+        $btn.prop('disabled', false);
+        document.body.removeChild(form);
+        toast('success', 'File sedang diunduh', 300);
+    }, 1000);
+});
+
     </script>
 @endpush

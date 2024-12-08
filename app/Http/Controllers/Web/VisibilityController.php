@@ -18,6 +18,7 @@ use App\Models\Outlet;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Log;
 use Illuminate\Http\Request;
+use Carbon\Carbon;
 
 
 
@@ -142,44 +143,45 @@ class VisibilityController extends Controller
      * Store a newly created resource in storage.
      */
     public function store(CreateVisibilityRequest $request)
-    {
-        DB::beginTransaction();
-        try {
-            // Get validated data
-            $data = $request->validated();
+{
+    DB::beginTransaction();
+    try {
+        // Get validated data
+        $data = $request->validated();
 
-            // Get user_id from outlet
-            $outlet = Outlet::findOrFail($data['outlet_id']);
-            $data['user_id'] = $outlet->user_id;
+        // Get user_id from outlet
+        $outlet = Outlet::findOrFail($data['outlet_id']);
+        $data['user_id'] = $outlet->user_id;
 
-            // Create visibility
-            $visibility = Visibility::create($data);
-
-            // Handle file upload if exists
-            if ($request->hasFile('filename')) {
-                $file = $request->file('filename');
-                $media = saveFile($file,"visibility/$visibility->id");
-
-                $data['filename'] = $media['filename'];
-                $data['path'] = $media['path'];
-            }
-            DB::commit();
-
-            return response()->json([
-                'status' => 'success',
-                'message' => 'Data visibility berhasil ditambahkan',
-                'data' => $visibility->load(['city', 'outlet', 'product'])
-            ]);
-        } catch (\Exception $e) {
-            DB::rollBack();
-
-            return response()->json([
-                'status' => 'error',
-                'message' => 'Terjadi kesalahan saat menyimpan data',
-                'error' => $e->getMessage()
-            ], 500);
+        // Handle file upload first
+        if ($request->hasFile('filename')) {
+            $file = $request->file('filename');
+            $media = saveFile($file, "visibility"); // Remove the ID since record isn't created yet
+            
+            // Add file data to visibility data
+            $data['filename'] = $media['filename'];
+            $data['path'] = $media['path'];
         }
+
+        // Create visibility with all data including file info
+        $visibility = Visibility::create($data);
+
+        DB::commit();
+
+        return response()->json([
+            'status' => 'success',
+            'message' => 'Data visibility berhasil ditambahkan',
+            'data' => $visibility->load(['city', 'outlet', 'product'])
+        ]);
+    } catch (\Exception $e) {
+        DB::rollBack();
+        return response()->json([
+            'status' => 'error', 
+            'message' => 'Terjadi kesalahan saat menyimpan data',
+            'error' => $e->getMessage()
+        ], 500);
     }
+}
 
     public function getProducts($categoryId)
     {

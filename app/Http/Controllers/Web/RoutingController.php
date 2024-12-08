@@ -14,7 +14,10 @@ use App\Models\OutletImage;
 use Illuminate\Support\Arr;
 use Illuminate\Http\Request;
 use App\Exports\OutletExport;
+use App\Exports\OutletFilteredExport;
+use App\Exports\SalesActivityExport;
 use App\Models\OutletProduct;
+use App\Models\SalesActivity;
 use App\Imports\RoutingImport;
 use App\Models\OutletFormAnswer;
 use Illuminate\Support\Facades\DB;
@@ -23,6 +26,7 @@ use App\Http\Controllers\Controller;
 use Maatwebsite\Excel\Facades\Excel;
 use App\Http\Requests\Routing\CreateOutletRequest;
 use App\Http\Requests\Routing\UpdateOutletRequest;
+use Carbon\Carbon;
 
 
 
@@ -361,4 +365,112 @@ class RoutingController extends Controller
     public function salesActivity($id){
         return view('pages.routing.sales-activity', compact('id'));
     } 
+
+
+    public function downloadFilteredExcel(Request $request)
+    {
+        try {
+            $query = Outlet::with('user');
+    
+            // Apply search filter
+            if ($request->filled('search_term')) {
+                $searchTerm = $request->search_term;
+                $query->where(function ($q) use ($searchTerm) {
+                    $q->where('name', 'like', "%{$searchTerm}%")
+                        ->orWhereHas('user', function ($q) use ($searchTerm) {
+                            $q->where('name', 'like', "%{$searchTerm}%");
+                        });
+                });
+            }
+    
+            // Apply day filter
+            if ($request->filled('filter_day') && $request->filter_day != 'all') {
+                $query->where('visit_day', $request->filter_day);
+            }
+    
+            $data = $query->get();
+            
+            // Pastikan return type Excel yang benar
+            return Excel::download(
+                new OutletFilteredExport($data), 
+                'routing_data_' . now()->format('Y-m-d_His') . '.xlsx'
+            );
+    
+        } catch (\Exception $e) {
+            Log::error('Routing Excel Download Error', [
+                'message' => $e->getMessage(),
+                'file' => $e->getFile(),
+                'line' => $e->getLine()
+            ]);
+    
+            return response()->json([
+                'status' => 'error',
+                'message' => 'Gagal membuat file Excel: ' . $e->getMessage()
+            ], 500);
+        }
+    }
+    
+    public function downloadSalesActivityExcel(Request $request)
+    {
+        try {
+            // Ubah query untuk mengambil dari tabel sales_activities
+            $query = SalesActivity::with(['outlet', 'user'])
+                ->join('outlets', 'sales_activities.outlet_id', '=', 'outlets.id');
+    
+            // Apply search filter
+            if ($request->filled('search_term')) {
+                $searchTerm = $request->search_term;
+                $query->where(function ($q) use ($searchTerm) {
+                    $q->whereHas('user', function ($q) use ($searchTerm) {
+                        $q->where('name', 'like', "%{$searchTerm}%");
+                    })->orWhereHas('outlet', function ($q) use ($searchTerm) {
+                        $q->where('name', 'like', "%{$searchTerm}%");
+                    });
+                });
+            }
+    
+            // Apply day filter
+            if ($request->filled('filter_day') && $request->filter_day != 'all') {
+                $query->where('outlets.visit_day', $request->filter_day);
+            }
+    
+            // Apply area filter 
+            if ($request->filled('filter_area') && $request->filter_area != 'all') {
+                $query->where('outlets.city_id', $request->filter_area);
+            }
+    
+            // Apply date filter
+            if ($request->filled('date') && $request->date !== 'Date Range') {
+                $dateParam = $request->date;
+                if (str_contains($dateParam, ' to ')) {
+                    [$startDate, $endDate] = explode(' to ', $dateParam);
+                    $query->whereBetween('checked_in', [
+                        Carbon::parse($startDate)->startOfDay(),
+                        Carbon::parse($endDate)->endOfDay()
+                    ]);
+                } else {
+                    $query->whereDate('checked_in', Carbon::parse($dateParam));
+                }
+            }
+    
+            $data = $query->get();
+            
+            return Excel::download(
+                new SalesActivityExport($data), 
+                'sales_activity_' . now()->format('Y-m-d_His') . '.xlsx'
+            );
+    
+        } catch (\Exception $e) {
+            Log::error('Sales Activity Excel Download Error', [
+                'message' => $e->getMessage(),
+                'file' => $e->getFile(),
+                'line' => $e->getLine()
+            ]);
+    
+            return response()->json([
+                'status' => 'error',
+                'message' => 'Gagal membuat file Excel: ' . $e->getMessage()
+            ], 500);
+        }
+    }
 }

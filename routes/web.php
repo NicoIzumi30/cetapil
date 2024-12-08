@@ -44,8 +44,16 @@ Route::middleware('auth')->group(function () {
         Route::put('/{id}/approve', [RoutingRequestControler::class, 'approve'])->name('approve');
         Route::put('/{id}/reject', [RoutingRequestControler::class, 'reject'])->name('reject');
         Route::delete('/delete/', [RoutingRequestControler::class, 'destroy'])->name('delete');
+
     });
 
+    Route::get('/routing/download-filtered', [RoutingController::class, 'downloadFilteredExcel'])
+    ->name('routing.download-filtered')
+    ->middleware('permission:menu_routing');
+
+Route::get('/routing/download-sales-activity', [RoutingController::class, 'downloadSalesActivityExcel'])
+    ->name('routing.download-sales-activity')
+    ->middleware('permission:menu_routing');
 
     Route::post('/routing/bulk', [RoutingController::class, 'bulk'])->name('routing.bulk')->middleware('permission:menu_routing');
     Route::get('routing/generate-excel', [RoutingController::class, 'downloadExcel'])->name('routing.generae-excel')->middleware('permission:menu_routing');
@@ -104,6 +112,8 @@ Route::middleware('auth')->group(function () {
             ->name('generate-excel');
         Route::get('/data', [ProductController::class, 'getData'])->name('data');
         Route::get('/data-stock-on-hand', [ProductController::class, 'getDataStockOnHand'])->name('data-stock-on-hand');
+        Route::get('/download-stock-on-hand', [ProductController::class, 'downloadStockOnHand'])
+        ->name('download-stock-on-hand');
     });
     Route::resource('products', ProductController::class)->middleware('permission:menu_product');
     // Logout

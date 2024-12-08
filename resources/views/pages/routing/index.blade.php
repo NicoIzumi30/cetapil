@@ -19,7 +19,10 @@
                 <option value="{{$hari['value']}}">{{$hari['name']}}</option>
             @endforeach
         </x-select.light>
-        <x-button.light id="downloadBtn">Download</x-button.light>
+        <x-button.light id="downloadBtnRouting">
+            <span id="downloadBtnTextRouting">Download</span>
+            <span id="downloadBtnLoadingRouting" class="hidden">Downloading...</span>
+        </x-button.light>
         <x-button.light href="/routing/request" class="!text-white !bg-[#39B5FF] py-2">
             Need Approval <span class="py-1 px-2 ml-2 rounded-md bg-white text-primary">{{$countPending}}</span>
         </x-button.light>
@@ -146,7 +149,10 @@
         @endforeach
         </x-select.light>
         <x-input.datepicker id="sales-date-range" value=""></x-input.datepicker>
-        <x-button.info>Download</x-button.info>
+        <x-button.light id="downloadBtnSalesActivity">
+            <span id="downloadBtnTextSales">Download</span>
+            <span id="downloadBtnLoadingSales" class="hidden">Downloading...</span>
+        </x-button.light>
     </x-slot:cardAction>
     {{-- Sales Activity Action End --}}
 
@@ -486,5 +492,66 @@
             const fileName = e.target.files[0] ? e.target.files[0].name : 'No file selected';
             document.getElementById('videofileNameDisplay').value = fileName;
         });
+
+
+        // Add these handlers to your existing JavaScript
+        $('#downloadBtnRouting').click(function(e) {
+    e.preventDefault();
+    
+    // Get current filter values
+    const filters = {
+        search_term: $('#global-search').val(),
+        filter_day: $('#filter_day').val()
+    };
+
+    // Show loading state
+    const $btn = $(this);
+    const $btnText = $btn.find('#downloadBtnTextRouting');
+    const $btnLoading = $btn.find('#downloadBtnLoadingRouting');
+    
+    $btnText.addClass('hidden');
+    $btnLoading.removeClass('hidden');
+    $btn.prop('disabled', true);
+
+    // Redirect to download - Gunakan route() helper
+    window.location.href = "{{ route('routing.download-filtered') }}?" + new URLSearchParams(filters).toString();
+    
+    // Reset button state after a delay
+    setTimeout(() => {
+        $btnText.removeClass('hidden');
+        $btnLoading.addClass('hidden');
+        $btn.prop('disabled', false);
+        toast('success', 'File sedang diunduh', 300);
+    }, 1000);
+});
+
+$('#downloadBtnSalesActivity').click(function(e) {
+    e.preventDefault();
+    
+    const filters = {
+        search_term: $('#global-search-sales').val(),
+        filter_day: $('#filter_day_sales').val(),
+        date: $('#sales-date-range').val() === 'Date Range' ? '' : $('#sales-date-range').val(),
+        filter_area: $('#filter_area').val()
+    };
+
+    const $btn = $(this);
+    const $btnText = $btn.find('#downloadBtnTextSales');
+    const $btnLoading = $btn.find('#downloadBtnLoadingSales');
+    
+    $btnText.addClass('hidden');
+    $btnLoading.removeClass('hidden');
+    $btn.prop('disabled', true);
+
+    // Redirect to download
+    window.location.href = "{{ route('routing.download-sales-activity') }}?" + new URLSearchParams(filters).toString();
+    
+    setTimeout(() => {
+        $btnText.removeClass('hidden');
+        $btnLoading.addClass('hidden');
+        $btn.prop('disabled', false);
+        toast('success', 'File sedang diunduh', 300);
+    }, 1000);
+});
     </script>
 @endpush

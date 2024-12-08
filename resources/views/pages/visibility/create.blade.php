@@ -187,7 +187,7 @@
                 </div>
             </div>
             <x-section-card>
-                <x-slot:title>Unggah Banner Program</x-slot:title>
+                <x-slot:title>Unggah Planogram</x-slot:title>
                 <div class="flex flex-col items-center w-full">
                     <div class="relative w-full mx-3 border-red">
                         <div class="flex justify-center items-center flex-col py-2 h-[260px]">
@@ -203,7 +203,7 @@
                                             d="M0 39.375H8V55.125H56V39.375H64V55.125C64 59.4742 60.4183 63 56 63H8C3.58172 63 0 59.4742 0 55.125V39.375Z"
                                             fill="#fff" />
                                     </svg>
-                                    <h5 class="text-white font-bold text-xl mt-2">Tarik atau klik disini untuk mulai mengunggah gambar banner program</h5>
+                                    <h5 class="text-white font-bold text-xl mt-2">Tarik atau klik disini untuk mulai mengunggah gambar Planogram</h5>
                                     <p class="text-white font-light text-sm">
                                         Ukuran maksimal foto <strong class="font-bold"> 5 MB</strong>
                                         dengan dimensi <strong class="font-bold">728 x 90 </strong> Pixel

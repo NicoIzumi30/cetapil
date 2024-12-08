@@ -11,6 +11,7 @@ use App\Models\Product;
 use App\Models\Category;
 use Illuminate\Http\Request;
 use App\Exports\ProductExport;
+use App\Exports\StockOnHandExport;
 use App\Imports\ProductImport;
 use App\Models\SalesAvailability;
 use Illuminate\Support\Facades\DB;
@@ -326,6 +327,63 @@ class ProductController extends Controller
             return response()->json([
                 'status' => 'error',
                 'message' => 'Gagal mengunduh file: ' . $e->getMessage()
+            ], 500);
+        }
+    }
+
+    // Add this new method in ProductController.php
+
+    public function downloadStockOnHand(Request $request)
+    {
+        try {
+            $query = SalesAvailability::with(['product:id,sku', 'outlet:id,name']);
+    
+            // Apply date filter
+            if ($request->filled('date')) {
+                $dateParam = $request->date;
+                
+                if (str_contains($dateParam, ' to ')) {
+                    [$startDate, $endDate] = explode(' to ', $dateParam);
+                    $query->whereBetween('created_at', [
+                        Carbon::parse($startDate)->startOfDay(),
+                        Carbon::parse($endDate)->endOfDay()
+                    ]);
+                } else {
+                    $query->whereDate('created_at', Carbon::parse($dateParam));
+                }
+            }
+    
+            // Apply product filter
+            if ($request->filled('product') && $request->product !== 'all') {
+                $query->where('product_id', $request->product);
+            }
+    
+            // Apply area filter
+            if ($request->filled('area') && $request->area !== 'all') {
+                $query->whereHas('outlet', function ($q) use ($request) {
+                    $q->where('city_id', $request->area);
+                });
+            }
+    
+            // Get filtered data
+            $data = $query->get();
+    
+            // Create and return Excel file
+            return Excel::download(
+                new StockOnHandExport($data), 
+                'stock_on_hand_' . now()->format('Y-m-d_His') . '.xlsx'
+            );
+    
+        } catch (\Exception $e) {
+            Log::error('Stock On Hand Download Error', [
+                'message' => $e->getMessage(),
+                'file' => $e->getFile(),
+                'line' => $e->getLine()
+            ]);
+    
+            return response()->json([
+                'status' => 'error',
+                'message' => 'Gagal membuat file Excel: ' . $e->getMessage()
             ], 500);
         }
     }
