@@ -8,13 +8,21 @@ class Assets {
   static const String assetsLogo = 'assets/logo.svg';
   static const String assetsLogo2 = 'assets/logo2.png';
   static const String assetsVector = 'assets/vector.png';
-  static const String assetsVector1 = 'assets/vector1.svg';
-  static const String assetsVector2 = 'assets/vector2.svg';
-  static const String assetsVector3 = 'assets/vector3.svg';
   static const String assetsVectorCalendar = 'assets/vector_calendar.png';
-  static const String cetapilMobileAssetsCarousel1 = 'assets/carousel1.svg';
-  static const String cetapilMobileAssetsLogo = 'assets/logo.svg';
-  static const String cetapilMobileAssetsVectorCalendar = 'assets/vector_calendar.svg';
+  static const String cetaphilMobileAssetsBackground = 'assets/background.svg';
+  static const String cetaphilMobileAssetsCarousel1 = 'assets/carousel1.svg';
+  static const String cetaphilMobileAssetsLogo = 'assets/logo.svg';
+  static const String cetaphilMobileAssetsVectorCalendar = 'assets/vector_calendar.svg';
+  static const String fontsPlusJakartaSansBold = 'assets/fonts/PlusJakartaSans-Bold.ttf';
+  static const String fontsPlusJakartaSansMedium = 'assets/fonts/PlusJakartaSans-Medium.ttf';
+  static const String fontsPlusJakartaSansRegular = 'assets/fonts/PlusJakartaSans-Regular.ttf';
+  static const String fontsPlusJakartaSansSemiBold = 'assets/fonts/PlusJakartaSans-SemiBold.ttf';
   static const String iconSettingAccount = 'assets/icon/setting_account.png';
+  static const String iconVector = 'assets/icon/Vector.svg';
+  static const String iconVector (1) = 'assets/icon/Vector (1).svg';
+  static const String iconVector (2) = 'assets/icon/Vector (2).svg';
+  static const String iconVector (3) = 'assets/icon/Vector (3).svg';
+  static const String iconVector (4) = 'assets/icon/Vector (4).svg';
+  static const String iconVector (5) = 'assets/icon/Vector (5).svg';
 
 }

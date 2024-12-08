@@ -3,6 +3,7 @@ import 'package:cetapil_mobile/model/list_routing_response.dart';
 import 'package:cetapil_mobile/page/routing/detail_routing.dart';
 import 'package:cetapil_mobile/page/routing/list_tambah_routing.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_svg/svg.dart';
 import 'package:get/get.dart';
 import 'package:intl/intl.dart';
 
@@ -125,11 +126,8 @@ class RoutingPage extends GetView<RoutingController> {
             child: Column(
               mainAxisAlignment: MainAxisAlignment.center,
               children: [
-                const Icon(
-                  Icons.route_outlined,
-                  size: 64,
-                  color: Colors.grey,
-                ),
+                 SvgPicture.asset("assets/icon/Vector (1).svg",height: 64,
+                  color: Colors.grey,),
                 const SizedBox(height: 16),
                 Text(
                   'Tidak ada Routing',

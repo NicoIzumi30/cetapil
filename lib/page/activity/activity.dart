@@ -2,8 +2,10 @@ import 'package:cetapil_mobile/controller/activity/tambah_activity_controller.da
 import 'package:cetapil_mobile/controller/activity/tambah_availibility_controller.dart';
 import 'package:cetapil_mobile/controller/activity/tambah_order_controller.dart';
 import 'package:cetapil_mobile/controller/activity/tambah_visibility_controller.dart';
+import 'package:cetapil_mobile/page/activity/detail_activity.dart';
 import 'package:cetapil_mobile/page/activity/tambah_activity.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_svg/flutter_svg.dart';
 import 'package:get/get.dart';
 import 'package:get/get_core/src/get_main.dart';
 import 'package:get/get_state_manager/src/rx_flutter/rx_obx_widget.dart';
@@ -16,7 +18,7 @@ import '../../utils/colors.dart';
 import '../outlet/detail_outlet.dart';
 
 class ActivityPage extends GetView<ActivityController> {
-  final TambahActivityController tambahActivityController = TambahActivityController();
+
   @override
   Widget build(BuildContext context) {
     return SafeArea(
@@ -55,11 +57,14 @@ class ActivityPage extends GetView<ActivityController> {
                                 final activity = controller.filteredOutlets[index];
                                 return ActivityCard(
                                   activity: activity,
-                                  statusDraft: 'Drafted',
+                                  statusDraft: activity.status!,
                                   statusCheckin: true,
                                   ontap: ()async {
+                                    if (activity.status! == "APPROVAL") {
+                                      Get.to(() => DetailActivity(activity.id!));
+                                    }
                                     // Set the outlet_id in the TambahActivityController before navigation
-                                    // Get.delete<TambahActivityController>();
+                                    Get.delete<TambahActivityController>();
                                     if (!Get.isRegistered<TambahActivityController>()) {
                                       Get.lazyPut(()=>TambahActivityController());
                                     }
@@ -72,11 +77,13 @@ class ActivityPage extends GetView<ActivityController> {
                                     if (!Get.isRegistered<TambahOrderController>()) {
                                       Get.put(TambahOrderController());
                                     }
+                                    print(!Get.isRegistered<TambahActivityController>());
+                                    final TambahActivityController tambahActivityController = TambahActivityController();
                                     final outlet_id = activity.outlet!.id;
                                     tambahActivityController.selectedTab.value = 0;
                                     tambahActivityController.clearAllDraftItems();
-                                    tambahActivityController.setDetailOutlet(activity);
                                     tambahActivityController.setOutletId(outlet_id!);
+                                    tambahActivityController.setDetailOutlet(activity);
                                     Get.to(() => TambahActivity(activity));
                                   },
                                 );
@@ -102,11 +109,8 @@ class ActivityPage extends GetView<ActivityController> {
           child: Column(
             mainAxisAlignment: MainAxisAlignment.center,
             children: [
-              Icon(
-                Icons.assignment,
-                size: 64,
-                color: Colors.grey,
-              ),
+              SvgPicture.asset("assets/icon/Vector (3).svg",height: 64,
+                color: Colors.grey,),
               SizedBox(height: 16),
               Text(
                 'Tidak ada Activity',
@@ -201,7 +205,7 @@ class ActivityCard extends StatelessWidget {
                 Container(
                   padding: EdgeInsets.symmetric(vertical: 7, horizontal: 15),
                   decoration: BoxDecoration(
-                    color: statusDraft == "Drafted" ? Colors.white : AppColors.primary,
+                    color: statusDraft == "DRAFTED" ? Colors.white : AppColors.primary,
                     borderRadius: BorderRadius.circular(4),
                   ),
                   child: Text(
@@ -209,7 +213,7 @@ class ActivityCard extends StatelessWidget {
                     style: TextStyle(
                         fontSize: 12,
                         fontWeight: FontWeight.bold,
-                        color: statusDraft == "Drafted" ? Colors.blue : Colors.white),
+                        color: statusDraft == "DRAFTED" ? Colors.blue : Colors.white),
                   ),
                 ),
                 Row(

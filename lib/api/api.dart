@@ -1,5 +1,6 @@
 import 'dart:convert';
 
+import 'package:cetapil_mobile/model/detail_activity_response.dart';
 import 'package:cetapil_mobile/model/list_activity_response.dart';
 import 'package:cetapil_mobile/model/list_category_response.dart';
 import 'package:cetapil_mobile/model/list_channel_response.dart';
@@ -126,10 +127,11 @@ class Api {
         'Authorization': 'Bearer $token',
       },
     );
-    print(response.body);
+    // print(response.body);
     if (response.statusCode == 200) {
       return OutletResponse.fromJson(jsonDecode(response.body));
     }
+    print(response.statusCode);
     throw "Gagal request data Outlet : \n${response.body}";
   }
 
@@ -418,6 +420,7 @@ class Api {
     List<Map<String, dynamic>> surveyList,
     List<Map<String, dynamic>> orderList,
   ) async {
+
     var url = "$baseUrl/api/activity/submit";
     var token = await storage.read('token');
     var request = await http.MultipartRequest('post', Uri.parse(url));
@@ -425,32 +428,32 @@ class Api {
     request.headers["Authorization"] = 'Bearer $token';
 
     ///General Section
-    request.fields["sales_activity_id"] = data["sales_activity_id"].toString() ?? "";
-    request.fields["outlet_id"] = data["outlet_id"].toString() ?? "";
-    request.fields["views_knowledge"] = data["views_knowledge"].toString() ?? "";
-    request.fields["time_availability"] = data["time_availability"].toString() ?? "";
-    request.fields["time_visibility"] = data["time_visibility"].toString() ?? "";
-    request.fields["time_knowledge"] = data["time_knowledge"].toString() ?? "";
-    request.fields["time_survey"] = data["time_survey"].toString() ?? "";
-    request.fields["time_order"] = data["time_order"].toString() ?? "";
-    request.fields["current_time"] = data["current_time"].toString() ?? "";
-    request.fields["time_survey"] = data["time_survey"].toString() ?? "";
+    request.fields["sales_activity_id"] = data["sales_activity_id"].toString();
+    request.fields["outlet_id"] = data["outlet_id"].toString();
+    request.fields["views_knowledge"] = data["views_knowledge"].toString();
+    request.fields["time_availability"] = data["time_availability"].toString();
+    request.fields["time_visibility"] = data["time_visibility"].toString();
+    request.fields["time_knowledge"] = data["time_knowledge"].toString();
+    request.fields["time_survey"] = data["time_survey"].toString();
+    request.fields["time_order"] = data["time_order"].toString();
+    request.fields["current_time"] = data["current_time"].toString();
+    request.fields["time_survey"] = data["time_survey"].toString();
 
     /// Availability Section
     for (var i = 0; i < availabilityList.length; i++) {
-      request.fields["availability[$i][product_id]"] = availabilityList[i]["id"].toString() ?? "";
-      request.fields["availability[$i][availability_stock]"] =
-          availabilityList[i]["stock"].toString() ?? "";
-      request.fields["availability[$i][average_stock]"] =
-          availabilityList[i]["av3m"].toString() ?? "";
+      request.fields["availability[$i][product_id]"] = availabilityList[i]["id"].toString();
+      request.fields["availability[$i][availability_stock]"] = availabilityList[i]["stock"].toString();
+      request.fields["availability[$i][average_stock]"] = "1"; /// Hardcode karna av3m null
+      // request.fields["availability[$i][average_stock]"] =
+      //     availabilityList[i]["av3m"].toString() ?? "";
       request.fields["availability[$i][ideal_stock]"] =
-          availabilityList[i]["recommend"].toString() ?? "";
+          availabilityList[i]["recommend"].toString();
     }
 
     ///Visibility Section
     for (var i = 0; i < visibilityList.length; i++) {
-      request.fields["visibility[$i][visibility_id]"] = visibilityList[i]['id'].id.toString() ?? "";
-      request.fields["visibility[$i][condition]"] = visibilityList[i]['condition'].toString() ?? "";
+      request.fields["visibility[$i][visibility_id]"] = visibilityList[i]['id'].toString();
+      request.fields["visibility[$i][condition]"] = visibilityList[i]['condition'].toString().toUpperCase();
       request.files.add(await http.MultipartFile.fromPath(
         'visibility[$i][file1]',
         visibilityList[i]['image1'].path,
@@ -460,29 +463,46 @@ class Api {
         visibilityList[i]['image2'].path,
       ));
     }
-
+// print(orderList[0]);
     ///Survey Section
     for (var i = 0; i < surveyList.length; i++) {
-      request.fields["survey[$i][survey_question_id]"] =
-          surveyList[i]["survey_question_id"].toString() ?? "";
-      request.fields["survey[$i][answer]"] = surveyList[i]["answer"].toString() ?? "";
+      request.fields["survey[$i][survey_question_id]"] = surveyList[i]["survey_question_id"].toString();
+      request.fields["survey[$i][answer]"] = surveyList[i]["answer"].toString();
     }
 
     ///Order Section
     for (var i = 0; i < orderList.length; i++) {
-      request.fields["order[$i][product_id]"] = orderList[i]["id"].toString() ?? "";
-      request.fields["order[$i][total_items]"] = orderList[i]["jumlah"].toString() ?? "";
-      request.fields["order[$i][subtotal]"] = orderList[i]["harga"].toString() ?? "";
+      request.fields["order[$i][product_id]"] = orderList[i]["id"].toString();
+      request.fields["order[$i][total_items]"] = orderList[i]["jumlah"].toString();
+      request.fields["order[$i][subtotal]"] = orderList[i]["harga"].toString();
     }
 
     var response = await request.send();
     var responseJson = await http.Response.fromStream(response);
 
-    print(response.statusCode);
+    print("statuscode ${response.statusCode}");
     if (response.statusCode == 200) {
       return SubmitActivityResponse.fromJson(jsonDecode(responseJson.body));
     } else {
+      print(responseJson.body);
       throw "Unable to Submit Activity";
     }
+  }
+
+  static Future<DetailActivityResponse> getDetailActivity(String activityId) async {
+    var url = "$baseUrl/api/activity/$activityId/detail";
+    var token = await storage.read('token');
+    var response = await http.get(
+      Uri.parse(url),
+      headers: {
+        'Content-type': 'application/json',
+        'Authorization': 'Bearer $token',
+      },
+    );
+    if (response.statusCode == 200) {
+      return DetailActivityResponse.fromJson(jsonDecode(response.body));
+    }
+    print(response.statusCode);
+    throw "Gagal request data Outlet : \n${response.body}";
   }
 }

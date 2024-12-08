@@ -58,13 +58,13 @@ class TambahActivity extends GetView<TambahActivityController> {
                   height: 20,
                 ),
                 UnderlineTextField.readOnly(
-                    title: "Nama Outlet",
-                    value: activity.outlet!.name,
-                  ),
-                 UnderlineTextField.readOnly(
-                    title: "Kategori Outlet",
-                    value: activity.outlet!.category,
-                  ),
+                  title: "Nama Outlet",
+                  value: activity.outlet!.name,
+                ),
+                UnderlineTextField.readOnly(
+                  title: "Kategori Outlet",
+                  value: activity.outlet!.category,
+                ),
                 Obx(() {
                   return SecondaryTabbar(
                       selectedIndex: controller.selectedTab.value,
@@ -107,13 +107,22 @@ class TambahActivity extends GetView<TambahActivityController> {
                         _buildButton(
                           false,
                           "Simpan Draft",
-                          () => controller.saveDraftActivity(),
+                          () => controller.saveDraftActivity(
+                              activity.id!,
+                              activity.outlet!.id,
+                              activity.checkedIn,
+                              activity.channel!.id,
+                              activity.channel!.name,
+                          activity.outlet!.name,
+                            activity.outlet!.category
+                          ),
                         ),
                         SizedBox(width: 10),
                         _buildButton(
                           true,
                           "Kirim",
-                          () => controller.submitApiActivity(),
+                          () => controller.submitApiActivity(
+                              activity.id!, activity.outlet!.id),
                           // controller.submitOutlet(),
                         ),
                       ],

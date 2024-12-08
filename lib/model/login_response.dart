@@ -1,6 +1,6 @@
 /// status : true
 /// message : "Login successful"
-/// data : {"user":{"id":"9d7cc873-c03f-4ebf-af4f-5b7c0d76a314","name":"Sales 1","email":"sales1@gmail.com","phone_number":"+628123456789","longitude":"-79.928219","latitude":"-27.478799","city":null,"region":null,"address":null,"active":true,"email_verified_at":null,"created_at":"2024-11-14T13:57:25.000000Z","updated_at":"2024-11-14T13:57:25.000000Z","deleted_at":null},"token":"7|d6qjC15ZyN93luhCbNrMVkjgy5AhWdpouS2DaLup885ebb4c"}
+/// data : {"user":{"id":"9da8fe31-5e66-4973-bb02-b737520147dd","name":"Sales 1","email":"sales1@gmail.com","phone_number":"+628123456789","longitude":"-38.948349","latitude":"67.669357","city":null,"region":null,"address":null,"active":true,"email_verified_at":null,"created_at":"2024-12-06T13:24:07.000000Z","updated_at":"2024-12-06T13:24:07.000000Z","deleted_at":null,"role":"sales"},"token":"135|ZKXVkk04elY6xF272TX3N1wgZjNZ7BAz6BtG9oNx06856b85"}
 
 class LoginResponse {
   LoginResponse({
@@ -43,8 +43,8 @@ LoginResponse copyWith({  bool? status,
 
 }
 
-/// user : {"id":"9d7cc873-c03f-4ebf-af4f-5b7c0d76a314","name":"Sales 1","email":"sales1@gmail.com","phone_number":"+628123456789","longitude":"-79.928219","latitude":"-27.478799","city":null,"region":null,"address":null,"active":true,"email_verified_at":null,"created_at":"2024-11-14T13:57:25.000000Z","updated_at":"2024-11-14T13:57:25.000000Z","deleted_at":null}
-/// token : "7|d6qjC15ZyN93luhCbNrMVkjgy5AhWdpouS2DaLup885ebb4c"
+/// user : {"id":"9da8fe31-5e66-4973-bb02-b737520147dd","name":"Sales 1","email":"sales1@gmail.com","phone_number":"+628123456789","longitude":"-38.948349","latitude":"67.669357","city":null,"region":null,"address":null,"active":true,"email_verified_at":null,"created_at":"2024-12-06T13:24:07.000000Z","updated_at":"2024-12-06T13:24:07.000000Z","deleted_at":null,"role":"sales"}
+/// token : "135|ZKXVkk04elY6xF272TX3N1wgZjNZ7BAz6BtG9oNx06856b85"
 
 class Data {
   Data({
@@ -79,20 +79,21 @@ Data copyWith({  User? user,
 
 }
 
-/// id : "9d7cc873-c03f-4ebf-af4f-5b7c0d76a314"
+/// id : "9da8fe31-5e66-4973-bb02-b737520147dd"
 /// name : "Sales 1"
 /// email : "sales1@gmail.com"
 /// phone_number : "+628123456789"
-/// longitude : "-79.928219"
-/// latitude : "-27.478799"
+/// longitude : "-38.948349"
+/// latitude : "67.669357"
 /// city : null
 /// region : null
 /// address : null
 /// active : true
 /// email_verified_at : null
-/// created_at : "2024-11-14T13:57:25.000000Z"
-/// updated_at : "2024-11-14T13:57:25.000000Z"
+/// created_at : "2024-12-06T13:24:07.000000Z"
+/// updated_at : "2024-12-06T13:24:07.000000Z"
 /// deleted_at : null
+/// role : "sales"
 
 class User {
   User({
@@ -109,7 +110,8 @@ class User {
       dynamic emailVerifiedAt, 
       String? createdAt, 
       String? updatedAt, 
-      dynamic deletedAt,}){
+      dynamic deletedAt, 
+      String? role,}){
     _id = id;
     _name = name;
     _email = email;
@@ -124,6 +126,7 @@ class User {
     _createdAt = createdAt;
     _updatedAt = updatedAt;
     _deletedAt = deletedAt;
+    _role = role;
 }
 
   User.fromJson(dynamic json) {
@@ -141,6 +144,7 @@ class User {
     _createdAt = json['created_at'];
     _updatedAt = json['updated_at'];
     _deletedAt = json['deleted_at'];
+    _role = json['role'];
   }
   String? _id;
   String? _name;
@@ -156,6 +160,7 @@ class User {
   String? _createdAt;
   String? _updatedAt;
   dynamic _deletedAt;
+  String? _role;
 User copyWith({  String? id,
   String? name,
   String? email,
@@ -170,6 +175,7 @@ User copyWith({  String? id,
   String? createdAt,
   String? updatedAt,
   dynamic deletedAt,
+  String? role,
 }) => User(  id: id ?? _id,
   name: name ?? _name,
   email: email ?? _email,
@@ -184,6 +190,7 @@ User copyWith({  String? id,
   createdAt: createdAt ?? _createdAt,
   updatedAt: updatedAt ?? _updatedAt,
   deletedAt: deletedAt ?? _deletedAt,
+  role: role ?? _role,
 );
   String? get id => _id;
   String? get name => _name;
@@ -199,6 +206,7 @@ User copyWith({  String? id,
   String? get createdAt => _createdAt;
   String? get updatedAt => _updatedAt;
   dynamic get deletedAt => _deletedAt;
+  String? get role => _role;
 
   Map<String, dynamic> toJson() {
     final map = <String, dynamic>{};
@@ -216,6 +224,7 @@ User copyWith({  String? id,
     map['created_at'] = _createdAt;
     map['updated_at'] = _updatedAt;
     map['deleted_at'] = _deletedAt;
+    map['role'] = _role;
     return map;
   }
 
