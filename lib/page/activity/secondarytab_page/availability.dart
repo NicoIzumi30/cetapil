@@ -6,11 +6,13 @@ import 'package:get/get.dart';
 
 import '../../../controller/activity/tambah_activity_controller.dart';
 import '../../../controller/activity/tambah_availibility_controller.dart';
+import '../../../controller/support_data_controller.dart';
 import '../../../model/list_category_response.dart';
 import '../../../utils/colors.dart';
 import '../../../widget/searchable_grouped_dropdown.dart';
 
 class AvailabilityPage extends GetView<TambahActivityController> {
+  final tambahAvailabilityController = Get.find<TambahAvailabilityController>();
   @override
   Widget build(BuildContext context) {
     final availabilityController = Get.find<TambahAvailabilityController>();
@@ -20,7 +22,22 @@ class AvailabilityPage extends GetView<TambahActivityController> {
       children: [
         Obx(() {
           final groupedItems = <String, List<Map<String, dynamic>>>{};
-
+          // if (controller.detailDraft.isNotEmpty) {
+          //   for (var data in controller.detailDraft["availabilityItems"]) {
+          //
+          //     final item = tambahAvailabilityController.getSkuByDataApi(data['product_id']);
+          //     final newItem = {
+          //       'id': data['product_id'],
+          //       'sku': item!['sku'],
+          //       'category': item['category']['name'],
+          //       'stock': data['available_stock'],
+          //       'av3m': data['average_stock'],
+          //       'recommend': data['ideal_stock'],
+          //     };
+          //     controller.addAvailabilityItem(newItem);
+          //     tambahAvailabilityController.clearForm();
+          //   }
+          // }
           // Use availabilityDraftItems from TambahActivityController
           for (var item in controller.availabilityDraftItems) {
             final category = item['category'];
@@ -91,6 +108,7 @@ class AvailabilityPage extends GetView<TambahActivityController> {
               if (!Get.isRegistered<TambahAvailabilityController>()) {
                 Get.put(TambahAvailabilityController());
               }
+              tambahAvailabilityController.clearForm();
               Get.to(() => TambahAvailability());
             },
             child: Text(

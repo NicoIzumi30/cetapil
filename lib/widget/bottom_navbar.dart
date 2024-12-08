@@ -29,10 +29,10 @@ class CustomBottomNavigationBar extends GetView<BottomNavController> {
           mainAxisAlignment: MainAxisAlignment.spaceAround,
           children: [
             _buildNavItem(0, Icons.home, 'Home',Color(0xFF39B5FF),"assets/icon/Vector.svg"),
-            _buildNavItem(1, Icons.route, 'Routing',Color(0xFF39B5FF),"assets/icon/Vector (1).svg"),
-            _buildNavItem(2, Icons.store, 'Outlet',Color(0xFF39B5FF),"assets/icon/Vector (2).svg"),
-            _buildNavItem(3, Icons.assignment, 'Activity',Color(0xFF39B5FF),"assets/icon/Vector (3).svg"),
-            _buildNavItem(4, Icons.shopping_bag, 'Selling',Color(0xFF39B5FF),"assets/icon/Vector (4).svg"),
+            _buildNavItem(1, Icons.route, 'Routing',Color(0xFF39B5FF),"assets/icon/Vector1.svg"),
+            _buildNavItem(2, Icons.store, 'Outlet',Color(0xFF39B5FF),"assets/icon/Vector2.svg"),
+            _buildNavItem(3, Icons.assignment, 'Activity',Color(0xFF39B5FF),"assets/icon/Vector3.svg"),
+            _buildNavItem(4, Icons.shopping_bag, 'Selling',Color(0xFF39B5FF),"assets/icon/Vector4.svg"),
           ],
         ),
       );

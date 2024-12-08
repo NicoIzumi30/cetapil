@@ -53,6 +53,7 @@ class TambahAvailabilityController extends GetxController {
     }
   }
 
+  ///GET SKU by id Category
   List<Map<String, dynamic>> get filteredSkus {
     if (selectedCategory.value == null) return [];
     return supportDataController
@@ -68,6 +69,29 @@ class TambahAvailabilityController extends GetxController {
       orElse: () => {},
     );
   }
+
+  List<Map<String, dynamic>>filteredSkusByDataApi(String categoryId) {
+    return supportDataController
+        .getProducts()
+        .where((product) =>
+    product['category']['id'].toString() == categoryId)
+        .toList();
+  }
+
+
+  Map<String, dynamic>? getSkuByDataApi(String skuId) {
+    return supportDataController.getProducts().firstWhere(
+          (item) => item['id'] == skuId,
+          orElse: () => {},
+        );
+  }
+
+  // List<Map<String, dynamic>?> getSurveyByDataDraft(String surveyId) {
+  //   return supportDataController.getSurvey().firstWhere(
+  //         (item) => item['id'] == surveyId,
+  //     orElse: () => {},
+  //   );
+  // }
 
   void onCategorySelected(String? categoryId) {
     selectedCategory.value = categoryId;
@@ -85,7 +109,8 @@ class TambahAvailabilityController extends GetxController {
       if (selectedSkuData.value != null &&
           selectedSkuData.value!['channel_av3m'] != null &&
           outletChannel != null) {
-        final channelAv3m = selectedSkuData.value!['channel_av3m'] as Map<String, dynamic>;
+        final channelAv3m =
+            selectedSkuData.value!['channel_av3m'] as Map<String, dynamic>;
         final channelValue = channelAv3m[outletChannel];
 
         if (channelValue != null) {
@@ -115,6 +140,7 @@ class TambahAvailabilityController extends GetxController {
     };
 
     activityController.addAvailabilityItem(newItem);
+    print(activityController.availabilityDraftItems);
     clearForm();
   }
 

@@ -23,6 +23,8 @@ class TambahActivityController extends GetxController {
   var outletId = ''.obs;
   var selectedChannel = Rxn<String>();
   Rx<Activity.Data?> detailOutlet = Rx<Activity.Data?>(null);
+  RxMap<String, dynamic> detailDraft = <String, dynamic>{}.obs;
+
 
   // Loading and error states
   final isLoadingAvailability = true.obs;
@@ -88,15 +90,15 @@ class TambahActivityController extends GetxController {
     startTabTimer();
   }
 
-  Future<void> submitApiActivity(String activityId, outletId) async {
+  Future<void> submitApiActivity() async {
     try {
       // final String? currentOutletId = Get.arguments?['id'];
       // final bool isEditing = currentOutletId != null;
       EasyLoading.show(status: 'Submit Data...');
 
       Map<String, dynamic> data = {
-        'sales_activity_id': activityId,
-        'outlet_id': outletId,
+        'sales_activity_id': detailOutlet.value!.id,
+        'outlet_id': detailOutlet.value!.outlet!.id,
         'views_knowledge': "111",
         'time_availability': availabilityTime.value.toString(),
         'time_visibility': visibilityTime.value.toString(),
@@ -150,12 +152,11 @@ class TambahActivityController extends GetxController {
     }
   }
 
-  Future<void> saveDraftActivity(String activityId, outletId, checkedIn,
-      channelId, channelName, outletName, outletCategory) async {
+  Future<void> saveDraftActivity() async {
     try {
       EasyLoading.show(status: 'Saving draft...');
 
-      bool isEditing = await db.checkSalesActivityExists(activityId);
+      bool isEditing = await db.checkSalesActivityExists(detailOutlet.value!.id!);
 
       List<Map<String, dynamic>> surveyList = [
         ...priceControllers.entries.map((entry) => {
@@ -168,13 +169,15 @@ class TambahActivityController extends GetxController {
             }),
       ];
 
+      /// *if draft is not null assign draft
+
       final data = {
-        'sales_activity_id': activityId,
-        'outlet_id': outletId,
-        'name': outletName,
-        'category': outletCategory,
-        'channel_id': channelId,
-        'channel_name': channelName,
+        'sales_activity_id': detailOutlet.value!.id!,
+        'outlet_id': detailOutlet.value!.outlet!.id!,
+        'name': detailOutlet.value!.outlet!.name!,
+        'category': detailOutlet.value!.outlet!.category!,
+        'channel_id': detailOutlet.value!.channel!.id!,
+        'channel_name': detailOutlet.value!.outlet!.name!,
         'views_knowledge': "111",
         'time_availability': availabilityTime.toString(),
         'time_visibility': visibilityTime.toString(),
@@ -182,7 +185,7 @@ class TambahActivityController extends GetxController {
         'time_survey': surveyTime.toString(),
         'time_order': orderTime.toString(),
         'status': "DRAFTED",
-        'checked_in': checkedIn.toString(),
+        'checked_in': detailOutlet.value!.checkedIn!,
         'checked_out': DateTime.now().toIso8601String(),
       };
 
@@ -206,6 +209,7 @@ class TambahActivityController extends GetxController {
       // clearForm();
 
       // Navigate back first
+      _timer?.cancel();
       EasyLoading.dismiss();
       Get.back();
 
@@ -497,6 +501,9 @@ class TambahActivityController extends GetxController {
     availabilityDraftItems.clear();
     orderDraftItems.clear();
     visibilityDraftItems.clear();
+
+    // Clear Data Detail Draft
+
 
     // Clear visibility related fields
     visibilityImages.value = [null, null];

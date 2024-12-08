@@ -1,4 +1,5 @@
 import 'package:cetapil_mobile/controller/activity/tambah_activity_controller.dart';
+import 'package:cetapil_mobile/controller/activity/tambah_availibility_controller.dart';
 import 'package:cetapil_mobile/model/survey_question_response.dart';
 import 'package:cetapil_mobile/widget/custom_switch.dart';
 import 'package:flutter/material.dart';
@@ -9,6 +10,7 @@ import '../../../utils/price_formatter.dart';
 
 class SurveyPage extends GetView<TambahActivityController> {
   final SupportDataController supportController = Get.find<SupportDataController>();
+  final TambahAvailabilityController availibilityController = Get.find<TambahAvailabilityController>();
 
   _buildSectionTitle(Map<String, dynamic> questionGroup) {
     if (questionGroup['title'] != null) {
@@ -143,7 +145,12 @@ class SurveyPage extends GetView<TambahActivityController> {
       // }
 
       // Your existing ListView implementation
-      final questionGroup = supportController.getSurvey();
+
+      final List<Map<String, dynamic>> questionGroup;
+      if (controller.detailDraft.isNotEmpty) {
+        // questionGroup = availibilityController.getSurveyByDataDraft();
+      }
+       questionGroup = supportController.getSurvey();
       return ListView.builder(
         shrinkWrap: true,
         physics: const NeverScrollableScrollPhysics(),

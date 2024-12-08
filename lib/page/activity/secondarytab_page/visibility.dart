@@ -1,4 +1,5 @@
 import 'dart:convert';
+import 'dart:io';
 
 import 'package:cetapil_mobile/controller/activity/tambah_activity_controller.dart';
 import 'package:cetapil_mobile/controller/activity/tambah_visibility_controller.dart';
@@ -17,14 +18,40 @@ const String BASE_URL = 'https://dev-cetaphil.i-am.host/storage/';
 class VisibilityPage extends GetView<ActivityController> {
   final supportController = Get.find<SupportDataController>();
   final tambahActivityController = Get.find<TambahActivityController>();
+  final tambahVisibilityController = Get.find<TambahVisibilityController>();
 
   @override
   Widget build(BuildContext context) {
     return Column(
       children: [
         Obx(() {
+          // final allVisibilities =
+          //     controller.activity.expand((activity) => activity.visibilities ?? []).toList();
           final allVisibilities =
-              controller.activity.expand((activity) => activity.visibilities ?? []).toList();
+              tambahActivityController.detailOutlet.value!.visibilities ?? [];
+          final visibilityDraft = tambahActivityController.detailDraft["visibilityItems"];
+
+          if (allVisibilities.isNotEmpty && visibilityDraft.isNotEmpty ) {
+            for(var dataApi in allVisibilities){
+              for (var dataDraft in visibilityDraft ) {
+
+                final newItem = {
+                  'id': dataApi.id,
+                  'posm_type_id': dataApi.posmTypeId,
+                  'posm_type_name': "HHHHH",
+                  'visual_type_id': dataApi.visualTypeId,
+                  'visual_type_name': "HHHHHH",
+                  'condition': dataDraft['condition'],
+                  /// ERROR KARNA dataDraft['image1'] ADALAH STRING
+                  'image1': File(dataDraft['image1']),
+                  'image2': File(dataDraft['image2']),
+                };
+                tambahActivityController.addVisibilityItem(newItem);
+                tambahVisibilityController.clearForm();
+              }
+            }
+
+          }
 
           if (allVisibilities.isEmpty) {
             return Center(
@@ -50,7 +77,7 @@ class VisibilityPage extends GetView<ActivityController> {
               final visualType = supportController
                   .getVisualTypes()
                   .firstWhereOrNull((visual) => visual['id'] == visibility.visualTypeId);
-
+print(visibility.image);
               return VisibilityCard(
                 visibility: visibility,
                 posmTypeName: posmType?['name'] ?? 'Unknown POSM Type',

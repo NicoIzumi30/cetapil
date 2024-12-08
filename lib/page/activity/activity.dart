@@ -12,6 +12,7 @@ import 'package:get/get_state_manager/src/rx_flutter/rx_obx_widget.dart';
 import 'package:get/get_state_manager/src/simple/get_view.dart';
 
 import '../../controller/activity/activity_controller.dart';
+import '../../database/activity_database.dart';
 import '../../model/activity.dart';
 import '../../model/list_activity_response.dart';
 import '../../utils/colors.dart';
@@ -60,10 +61,6 @@ class ActivityPage extends GetView<ActivityController> {
                                   statusDraft: activity.status!,
                                   statusCheckin: true,
                                   ontap: ()async {
-                                    if (activity.status! == "APPROVAL") {
-                                      Get.to(() => DetailActivity(activity.id!));
-                                    }
-                                    // Set the outlet_id in the TambahActivityController before navigation
                                     Get.delete<TambahActivityController>();
                                     if (!Get.isRegistered<TambahActivityController>()) {
                                       Get.lazyPut(()=>TambahActivityController());
@@ -77,14 +74,29 @@ class ActivityPage extends GetView<ActivityController> {
                                     if (!Get.isRegistered<TambahOrderController>()) {
                                       Get.put(TambahOrderController());
                                     }
-                                    print(!Get.isRegistered<TambahActivityController>());
-                                    final TambahActivityController tambahActivityController = TambahActivityController();
-                                    final outlet_id = activity.outlet!.id;
-                                    tambahActivityController.selectedTab.value = 0;
-                                    tambahActivityController.clearAllDraftItems();
-                                    tambahActivityController.setOutletId(outlet_id!);
-                                    tambahActivityController.setDetailOutlet(activity);
-                                    Get.to(() => TambahActivity(activity));
+                                    if (activity.status! == "APPROVAL") {
+                                      Get.to(() => DetailActivity(activity.id!));
+                                    }
+                                    if(activity.status! == "DRAFTED"){
+                                      final dbActivity = ActivityDatabaseHelper.instance;
+                                      final tambahActivityController = Get.find<TambahActivityController>();
+                                      var fetchedData = await dbActivity.getDetailSalesActivity(activity.id!);
+                                      print("/// ${fetchedData!["surveyItems"]}");
+                                      tambahActivityController.detailDraft.assignAll(fetchedData!);
+                                      tambahActivityController.setDetailOutlet(activity);
+                                      Get.to(() => TambahActivity());
+                                    }
+                                    else{
+                                      print("tambah");
+                                      final tambahActivityController = Get.find<TambahActivityController>();
+                                      final outlet_id = activity.outlet!.id;
+                                      tambahActivityController.selectedTab.value = 0;
+                                      tambahActivityController.clearAllDraftItems();
+                                      tambahActivityController.setOutletId(outlet_id!);
+                                      tambahActivityController.setDetailOutlet(activity);
+                                      Get.to(() => TambahActivity());
+                                    }
+
                                   },
                                 );
                               },
