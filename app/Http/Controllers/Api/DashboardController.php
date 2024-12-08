@@ -85,6 +85,32 @@ class DashboardController extends Controller
             ->sortByDesc('availability_percentage')
             ->values()
             ->all();
+        // Get latest activity date for Performance Index
+        $latest_performance_update = SalesActivity::where('user_id', $user->id)
+            ->whereNotNull('checked_out')
+            ->latest('checked_out')
+            ->first()
+            ->checked_out ?? null;
+
+        // Get latest survey date for Power SKUs
+        $latest_power_sku_update = DB::table('sales_surveys as ss')
+            ->join('sales_activities as sa', 'sa.id', '=', 'ss.sales_activity_id')
+            ->join('survey_questions as sq', 'ss.survey_question_id', '=', 'sq.id')
+            ->join('power_skus as ps', 'ps.product_id', '=', 'sq.product_id')
+            ->where('sa.user_id', $user->id)
+            ->whereNotNull('sa.checked_out')
+            ->latest('sa.checked_out')
+            ->first()
+            ->checked_out ?? null;
+
+        // Format dates to Indonesian format
+        $performance_update = $latest_performance_update ?
+            Carbon::parse($latest_performance_update)->format('d F Y') :
+            $now->format('d F Y');
+
+        $power_sku_update = $latest_power_sku_update ?
+            Carbon::parse($latest_power_sku_update)->format('d F Y') :
+            $now->format('d F Y');
 
         return $this->successResponse(
             DashboardConstants::GET_MOBILE_DASH,
@@ -99,7 +125,9 @@ class DashboardController extends Controller
                 'plan_percentage' => $total_actual_plan && $total_call_plan ?
                     round($total_actual_plan / $total_call_plan * 100) : 0,
                 'current_outlet' => $current_outlet,
-                'power_skus' => $power_skus
+                'power_skus' => $power_skus,
+                'last_performance_update' => $performance_update,
+                'last_power_sku_update' => $power_sku_update
             ]
         );
     }
