@@ -1,5 +1,6 @@
 import 'dart:convert';
 
+import 'package:cetapil_mobile/model/auth_check_response.dart';
 import 'package:cetapil_mobile/model/detail_activity_response.dart';
 import 'package:cetapil_mobile/model/list_activity_response.dart';
 import 'package:cetapil_mobile/model/list_category_response.dart';
@@ -420,7 +421,6 @@ class Api {
     List<Map<String, dynamic>> surveyList,
     List<Map<String, dynamic>> orderList,
   ) async {
-
     var url = "$baseUrl/api/activity/submit";
     var token = await storage.read('token');
     var request = await http.MultipartRequest('post', Uri.parse(url));
@@ -442,18 +442,21 @@ class Api {
     /// Availability Section
     for (var i = 0; i < availabilityList.length; i++) {
       request.fields["availability[$i][product_id]"] = availabilityList[i]["id"].toString();
-      request.fields["availability[$i][availability_stock]"] = availabilityList[i]["stock"].toString();
-      request.fields["availability[$i][average_stock]"] = "1"; /// Hardcode karna av3m null
+      request.fields["availability[$i][availability_stock]"] =
+          availabilityList[i]["stock"].toString();
+      request.fields["availability[$i][average_stock]"] = "1";
+
+      /// Hardcode karna av3m null
       // request.fields["availability[$i][average_stock]"] =
       //     availabilityList[i]["av3m"].toString() ?? "";
-      request.fields["availability[$i][ideal_stock]"] =
-          availabilityList[i]["recommend"].toString();
+      request.fields["availability[$i][ideal_stock]"] = availabilityList[i]["recommend"].toString();
     }
 
     ///Visibility Section
     for (var i = 0; i < visibilityList.length; i++) {
       request.fields["visibility[$i][visibility_id]"] = visibilityList[i]['id'].toString();
-      request.fields["visibility[$i][condition]"] = visibilityList[i]['condition'].toString().toUpperCase();
+      request.fields["visibility[$i][condition]"] =
+          visibilityList[i]['condition'].toString().toUpperCase();
       request.files.add(await http.MultipartFile.fromPath(
         'visibility[$i][file1]',
         visibilityList[i]['image1'].path,
@@ -466,7 +469,8 @@ class Api {
 // print(orderList[0]);
     ///Survey Section
     for (var i = 0; i < surveyList.length; i++) {
-      request.fields["survey[$i][survey_question_id]"] = surveyList[i]["survey_question_id"].toString();
+      request.fields["survey[$i][survey_question_id]"] =
+          surveyList[i]["survey_question_id"].toString();
       request.fields["survey[$i][answer]"] = surveyList[i]["answer"].toString();
     }
 
@@ -504,5 +508,37 @@ class Api {
     }
     print(response.statusCode);
     throw "Gagal request data Outlet : \n${response.body}";
+  }
+
+  Future<AuthCheckResponse> checkAuth() async {
+    try {
+      var token = await storage.read('token');
+      if (token == null) throw Exception('No token found');
+
+      var response = await http.get(
+        Uri.parse('$baseUrl/api/user'),
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': 'Bearer $token',
+        },
+      );
+
+      final responseData = json.decode(response.body);
+
+      // Check for session expiration
+      if (responseData['success'] == false &&
+          responseData['message']?.contains('Sesi anda telah berakhir') == true) {
+        throw 'Sesi anda telah berakhir. Silakan login kembali';
+      }
+
+      if (response.statusCode == 200) {
+        return AuthCheckResponse.fromJson(responseData);
+      }
+
+      throw Exception('Failed to check auth: ${response.statusCode} ${response.reasonPhrase}');
+    } catch (e) {
+      print('Auth check error: $e');
+      throw e.toString();
+    }
   }
 }

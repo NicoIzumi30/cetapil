@@ -85,20 +85,22 @@ class DashboardPage extends GetView<DashboardController> {
                                   style: TextStyle(fontSize: 11),
                                 )),
                           ),
-                          SizedBox(
-                            height: 25,
-                            child: ElevatedButton(
-                                style: ElevatedButton.styleFrom(
-                                    foregroundColor: Colors.white,
-                                    backgroundColor: Colors.blue,
-                                    shape: RoundedRectangleBorder(
-                                        borderRadius: BorderRadius.circular(20))),
-                                onPressed: () {},
-                                child: Text(
-                                  "Checked-In",
-                                  style: TextStyle(fontSize: 11),
-                                )),
-                          )
+                          controller.dashboard.value?.data?.currentOutlet?.checkedIn != null
+                              ? SizedBox(
+                                  height: 25,
+                                  child: ElevatedButton(
+                                      style: ElevatedButton.styleFrom(
+                                          foregroundColor: Colors.white,
+                                          backgroundColor: Colors.blue,
+                                          shape: RoundedRectangleBorder(
+                                              borderRadius: BorderRadius.circular(20))),
+                                      onPressed: () {},
+                                      child: Text(
+                                        "${controller.dashboard.value?.data?.currentOutlet!.checkedIn}",
+                                        style: TextStyle(fontSize: 11),
+                                      )),
+                                )
+                              : SizedBox(),
                         ],
                       ),
                       SizedBox(

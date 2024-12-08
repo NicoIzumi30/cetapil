@@ -99,6 +99,7 @@ class VisibilityCard extends StatelessWidget {
       return null;
     }
     String path = imagePath.startsWith('/') ? imagePath.substring(1) : imagePath;
+    print('$BASE_URL$path');
     return '$BASE_URL$path';
   }
 

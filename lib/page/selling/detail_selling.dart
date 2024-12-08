@@ -19,19 +19,20 @@ import '../outlet/detail_outlet.dart';
 import '../../model/list_selling_response.dart';
 
 class DetailSelling extends GetView<SellingController> {
-  DetailSelling( this.selling, {super.key,});
+  DetailSelling(
+    this.selling, {
+    super.key,
+  });
   final Data selling;
 
   @override
   Widget build(BuildContext context) {
-    final groupedByCategory = selling.products!.fold<Map<String, List<Products>>>(
-        {},
-            (map, product) {
-          final categoryName = product.category?.name ?? '';
-          map.putIfAbsent(categoryName, () => []).add(product);
-          return map;
-        }
-    );
+    final groupedByCategory =
+        selling.products!.fold<Map<String, List<Products>>>({}, (map, product) {
+      final categoryName = product.category?.name ?? '';
+      map.putIfAbsent(categoryName, () => []).add(product);
+      return map;
+    });
     return SafeArea(
         child: Stack(children: [
       Image.asset(
@@ -112,13 +113,19 @@ class DetailSelling extends GetView<SellingController> {
                                     ),
                                   ),
                                 ),
-                                ...products.map((product) => SumAmountProduct(
-                            productName: product.productName!,
-                            stockController: TextEditingController(text: product.stock!.toString()),
-                            sellingController: TextEditingController(text: product.selling!.toString()),
-                            balanceController: TextEditingController(text: product.balance!.toString()),
-                            priceController: TextEditingController(text: product.price!.toString()),
-                            ),)
+                                ...products.map(
+                                  (product) => SumAmountProduct(
+                                    productName: product.productName!,
+                                    stockController:
+                                        TextEditingController(text: product.stock!.toString()),
+                                    sellingController:
+                                        TextEditingController(text: product.selling!.toString()),
+                                    balanceController:
+                                        TextEditingController(text: product.balance!.toString()),
+                                    priceController:
+                                        TextEditingController(text: product.price!.toString()),
+                                  ),
+                                )
                               ],
                             );
                           }).toList(),
@@ -180,6 +187,7 @@ class ClipImage extends StatelessWidget {
   });
 
   String _sanitizeUrl(String url) {
+    print("https://dev-cetaphil.i-am.host${url}");
     return "https://dev-cetaphil.i-am.host${url}";
   }
 
@@ -194,16 +202,18 @@ class ClipImage extends StatelessWidget {
         ),
         SizedBox(height: 10),
         GestureDetector(
-          onTap: url != null ? () {
-            Navigator.push(
-              context,
-              MaterialPageRoute(
-                builder: (context) => ImageViewerScreen(
-                  image: _sanitizeUrl(url!),
-                ),
-              ),
-            );
-          } : null,
+          onTap: url != null
+              ? () {
+                  Navigator.push(
+                    context,
+                    MaterialPageRoute(
+                      builder: (context) => ImageViewerScreen(
+                        image: _sanitizeUrl(url!),
+                      ),
+                    ),
+                  );
+                }
+              : null,
           child: SizedBox(
             height: 150,
             width: double.infinity,
@@ -218,13 +228,13 @@ class ClipImage extends StatelessWidget {
               ),
               child: ClipRRect(
                 borderRadius: BorderRadius.circular(5),
-                child: url != null 
-                  ? Image.network(
-                      _sanitizeUrl(url!),
-                      fit: fit,
-                      errorBuilder: _buildErrorWidget,
-                    )
-                  : _buildErrorWidget(context, null, null),
+                child: url != null
+                    ? Image.network(
+                        _sanitizeUrl(url!),
+                        fit: fit,
+                        errorBuilder: _buildErrorWidget,
+                      )
+                    : _buildErrorWidget(context, null, null),
               ),
             ),
           ),
@@ -263,7 +273,8 @@ class SumAmountProduct extends StatelessWidget {
     required this.productName,
     required this.stockController,
     required this.sellingController,
-    required this.balanceController, required this.priceController,
+    required this.balanceController,
+    required this.priceController,
   });
 
   @override
@@ -281,7 +292,10 @@ class SumAmountProduct extends StatelessWidget {
       Expanded(
         child: Column(
           children: [
-            Text("Stock",style: TextStyle(fontSize: 12),),
+            Text(
+              "Stock",
+              style: TextStyle(fontSize: 12),
+            ),
             NumberField(
               controller: stockController,
             ),
@@ -294,7 +308,10 @@ class SumAmountProduct extends StatelessWidget {
       Expanded(
         child: Column(
           children: [
-            Text("Selling",style: TextStyle(fontSize: 12),),
+            Text(
+              "Selling",
+              style: TextStyle(fontSize: 12),
+            ),
             NumberField(
               controller: sellingController,
             ),
@@ -307,7 +324,10 @@ class SumAmountProduct extends StatelessWidget {
       Expanded(
         child: Column(
           children: [
-            Text("Balance",style: TextStyle(fontSize: 12),),
+            Text(
+              "Balance",
+              style: TextStyle(fontSize: 12),
+            ),
             NumberField(
               controller: balanceController,
             ),
@@ -318,7 +338,10 @@ class SumAmountProduct extends StatelessWidget {
       Expanded(
         child: Column(
           children: [
-            Text("Price",style: TextStyle(fontSize: 12),),
+            Text(
+              "Price",
+              style: TextStyle(fontSize: 12),
+            ),
             NumberField(
               controller: priceController,
             ),
