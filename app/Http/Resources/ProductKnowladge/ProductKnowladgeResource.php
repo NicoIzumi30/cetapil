@@ -16,7 +16,7 @@ class ProductKnowladgeResource extends JsonResource
     {
         return [
             'id' => $this->id,
-            'channel' => $this->channel->only('id', 'name'),
+            'channel' => $this->channel ? $this->channel->only('id', 'name') : null,
             'path_pdf' => $this->path_pdf,
             'path_video' => $this->path_video,
         ];
