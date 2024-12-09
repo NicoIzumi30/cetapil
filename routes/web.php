@@ -81,9 +81,7 @@ Route::middleware('auth')->group(function () {
         Route::get('/create', function () {
             return view('pages.selling.create');
         });
-        Route::get('/{id}/edit', function () {
-            return view('pages.selling.edit');
-        })->name('edit');
+        Route::get('/{id}/detail', [SellingController::class, 'detail'])->name('detail');
         Route::get('/data', [SellingController::class, 'getData'])->name('data');
     });
 
