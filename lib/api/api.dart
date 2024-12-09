@@ -178,6 +178,8 @@ class Api {
       body: json.encode({
         'outlet_id': data['outlet_id'],
         'checked_in': data['checked_in'],
+        'latitude': data['latitude'],
+        'longitude': data['longitude'],
       }),
       headers: {
         'Content-type': 'application/json',

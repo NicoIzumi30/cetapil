@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_svg/flutter_svg.dart';
+import 'package:get/get.dart';
 
 const String checkPattern = '''
 <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100">
@@ -71,9 +72,10 @@ class CustomAlerts {
     });
   }
 
-  static void showLoading(BuildContext context, String title, String subtitle) {
+  static void showLoading(BuildContext? context, String title, String subtitle) {
     try {
-      _loadingEntry?.remove();
+      dismissLoading();
+
       _loadingEntry = OverlayEntry(
         builder: (context) => _CustomLoadingOverlay(
           title: title,
@@ -81,13 +83,13 @@ class CustomAlerts {
         ),
       );
 
-      if (!context.mounted) return;
-
-      // Ensure we're not in a build phase
-      WidgetsBinding.instance.addPostFrameCallback((_) {
+      // Use delayed callback to ensure we're not in build phase
+      Future.microtask(() {
         try {
-          if (!context.mounted) return;
-          Navigator.of(context, rootNavigator: true).overlay?.insert(_loadingEntry!);
+          final overlay = Navigator.of(Get.context!, rootNavigator: true).overlay;
+          if (overlay != null) {
+            overlay.insert(_loadingEntry!);
+          }
         } catch (e) {
           print('Error inserting loading overlay: $e');
         }
@@ -110,12 +112,9 @@ class CustomAlerts {
   static void dismissLoading() {
     try {
       if (_loadingEntry != null) {
-        // Ensure we're not in a build phase
-        WidgetsBinding.instance.addPostFrameCallback((_) {
+        Future.microtask(() {
           try {
-            if (_loadingEntry?.mounted == true) {
-              _loadingEntry?.remove();
-            }
+            _loadingEntry?.remove();
           } catch (e) {
             print('Error removing loading overlay: $e');
           } finally {

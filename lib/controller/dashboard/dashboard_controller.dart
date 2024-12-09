@@ -41,6 +41,12 @@ class DashboardController extends GetxController {
   final RxString role = "".obs;
   final RxString longLat = "".obs;
 
+  // New observables for location data
+  final RxString currentOutletName = "".obs;
+  final RxString checkInTime = "".obs;
+  final RxString outletDistance = "".obs;
+
+  // Carousel data
   final List<String> imageUrls = [
     'assets/carousel1.png',
     'assets/carousel1.png',
@@ -89,47 +95,36 @@ class DashboardController extends GetxController {
 
   Future<void> logOut() async {
     try {
-      // Show loading indicator
       isLoading.value = true;
-
-      // Clear databases
       await _db.deleteDatabase();
-      // await _dbHelper.clearDatabase();
 
-      // Clear all controllers and state
-      Get.delete<SupportDataController>(force: true);
-      Get.delete<DashboardController>(force: true);
-      Get.delete<BottomNavController>(force: true);
-      Get.delete<OutletController>(force: true);
-      Get.delete<ActivityController>(force: true);
-      Get.delete<RoutingController>(force: true);
-      Get.delete<SellingController>(force: true);
-      Get.delete<TambahActivityController>(force: true);
-      Get.delete<VideoController>(force: true);
-      Get.delete<TambahRoutingController>(force: true);
-      Get.delete<TambahAvailabilityController>(force: true);
-      Get.delete<TambahVisibilityController>(force: true);
-      Get.delete<TambahProdukSellingController>(force: true);
+      // Clear all controllers
+      final controllersToDelete = [
+        SupportDataController,
+        DashboardController,
+        BottomNavController,
+        OutletController,
+        ActivityController,
+        RoutingController,
+        SellingController,
+        TambahActivityController,
+        VideoController,
+        TambahRoutingController,
+        TambahAvailabilityController,
+        TambahVisibilityController,
+        TambahProdukSellingController,
+      ];
 
-      // Log out using LoginController
+      for (final controller in controllersToDelete) {
+        Get.delete<dynamic>(force: true, tag: controller.toString());
+      }
+
       await _loginController.logout();
 
-      // Navigate to login page with new bindings
       Get.offAll(() => LoginPage(), binding: BindingsBuilder(() {
-        Get.lazyPut(() => SupportDataController());
-        Get.lazyPut(() => DashboardController());
-        Get.lazyPut(() => LoginController());
-        Get.lazyPut(() => BottomNavController());
-        Get.lazyPut(() => OutletController());
-        Get.lazyPut(() => ActivityController());
-        Get.lazyPut(() => RoutingController());
-        Get.lazyPut(() => SellingController());
-        Get.lazyPut(() => TambahActivityController());
-        Get.lazyPut(() => VideoController());
-        Get.lazyPut(() => TambahRoutingController());
-        Get.lazyPut(() => TambahAvailabilityController());
-        Get.lazyPut(() => TambahVisibilityController());
-        Get.lazyPut(() => TambahProdukSellingController());
+        for (final controller in controllersToDelete) {
+          Get.lazyPut(() => controller);
+        }
       }));
     } catch (e) {
       print('Logout error: $e');
@@ -141,17 +136,40 @@ class DashboardController extends GetxController {
 
   Future<void> initializeDashboard() async {
     try {
-      // First try to load from local database
       final localData = await _dbHelper.getLatestDashboard();
       if (localData != null) {
         dashboard.value = localData;
+        _updateCurrentOutletInfo(localData);
       }
 
-      // Then fetch fresh data from API
       await fetchDashboardData();
     } catch (e) {
       error.value = 'Failed to initialize dashboard: $e';
       print('Error initializing dashboard: $e');
+    }
+  }
+
+  void _updateCurrentOutletInfo(Dashboard dashboardData) {
+    final currentOutlet = dashboardData.data?.currentOutlet;
+    if (currentOutlet != null) {
+      currentOutletName.value = currentOutlet.name ?? "";
+      checkInTime.value = currentOutlet.checkedIn ?? "";
+
+      // Format distance for display
+      if (currentOutlet.distanceToOutlet != null) {
+        final distance = currentOutlet.distanceToOutlet!;
+        if (distance >= 1000) {
+          outletDistance.value = "${(distance / 1000).toStringAsFixed(2)} km";
+        } else {
+          outletDistance.value = "${distance.toStringAsFixed(2)} m";
+        }
+      } else {
+        outletDistance.value = "";
+      }
+    } else {
+      currentOutletName.value = "";
+      checkInTime.value = "";
+      outletDistance.value = "";
     }
   }
 
@@ -162,7 +180,6 @@ class DashboardController extends GetxController {
 
       final response = await Api.getDashboard();
 
-      // Check the response type and structure
       if (response.status == false &&
           response.message?.contains('Sesi anda telah berakhir') == true) {
         await _loginController.handleSessionExpired();
@@ -171,6 +188,7 @@ class DashboardController extends GetxController {
 
       await _dbHelper.saveDashboard(response);
       dashboard.value = response;
+      _updateCurrentOutletInfo(response);
     } catch (e) {
       error.value = 'Failed to fetch dashboard data: $e';
       print('Error fetching dashboard data: $e');
@@ -183,7 +201,16 @@ class DashboardController extends GetxController {
     }
   }
 
-  // ... (keep existing utility methods)
+  String formatDateTime(String? dateTimeString) {
+    if (dateTimeString == null) return '';
+    try {
+      final dateTime = DateTime.parse(dateTimeString);
+      return DateFormat('dd MMM yyyy HH:mm', 'id_ID').format(dateTime);
+    } catch (e) {
+      print('Error formatting date: $e');
+      return dateTimeString;
+    }
+  }
 
   Future<void> onRefresh() async {
     try {
@@ -211,6 +238,10 @@ class DashboardController extends GetxController {
     return month[0].toUpperCase() + month.substring(1);
   }
 
+  String getFormattedDate() {
+    return DateFormat('dd MMMM yyyy', 'id_ID').format(currentDate.value);
+  }
+
   void showCustomCalendarDialog(BuildContext context) {
     showDialog(
       context: context,
@@ -222,5 +253,24 @@ class DashboardController extends GetxController {
         },
       ),
     );
+  }
+
+  // Power SKU helpers
+  List<PowerSkus> getPowerSkus() {
+    return dashboard.value?.data?.powerSkus ?? [];
+  }
+
+  bool hasPowerSkus() {
+    return getPowerSkus().isNotEmpty;
+  }
+
+  String getLastUpdateInfo() {
+    final performanceUpdate = dashboard.value?.data?.lastPerformanceUpdate;
+    final skuUpdate = dashboard.value?.data?.lastPowerSkuUpdate;
+
+    if (performanceUpdate != null && skuUpdate != null) {
+      return 'Last updated: $performanceUpdate';
+    }
+    return '';
   }
 }

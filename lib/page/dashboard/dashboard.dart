@@ -96,7 +96,7 @@ class DashboardPage extends GetView<DashboardController> {
                                               borderRadius: BorderRadius.circular(20))),
                                       onPressed: () {},
                                       child: Text(
-                                        "${controller.dashboard.value?.data?.currentOutlet!.checkedIn}",
+                                        "Check-in",
                                         style: TextStyle(fontSize: 11),
                                       )),
                                 )
@@ -138,10 +138,10 @@ class DashboardPage extends GetView<DashboardController> {
                               children: [
                                 Text("Outlet Radius",
                                     style: TextStyle(fontSize: 10, color: Colors.blue)),
-                                Text(
-                                  "20m",
-                                  style: TextStyle(fontSize: 10, fontWeight: FontWeight.bold),
-                                ),
+                                Obx(() => Text(
+                                      controller.outletDistance.value,
+                                      style: TextStyle(fontSize: 10, fontWeight: FontWeight.bold),
+                                    )),
                               ],
                             ),
                           ],

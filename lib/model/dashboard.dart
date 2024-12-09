@@ -148,17 +148,47 @@ class CurrentOutlet {
   String? name;
   dynamic checkedIn;
   dynamic checkedOut;
+  String? outletLatitude;
+  String? outletLongitude;
+  String? checkInLatitude;
+  String? checkInLongitude;
+  String? radius;
+  double? distanceToOutlet;
 
-  CurrentOutlet({this.outletId, this.salesActivityId, this.name, this.checkedIn, this.checkedOut});
+  CurrentOutlet({this.outletId, this.salesActivityId, this.name, this.checkedIn, this.checkedOut, this.outletLatitude, this.outletLongitude, this.checkInLatitude, this.checkInLongitude, this.radius, this.distanceToOutlet});
 
   CurrentOutlet.fromJson(Map<String, dynamic> json) {
-    outletId = json["outlet_id"];
-    salesActivityId = json["sales_activity_id"];
+    if(json["outlet_id"] is String) {
+      outletId = json["outlet_id"];
+    }
+    if(json["sales_activity_id"] is String) {
+      salesActivityId = json["sales_activity_id"];
+    }
     if(json["name"] is String) {
       name = json["name"];
     }
-    checkedIn = json["checked_in"];
+    if(json["checked_in"] is String) {
+      checkedIn = json["checked_in"];
+    }
     checkedOut = json["checked_out"];
+    if(json["outlet_latitude"] is String) {
+      outletLatitude = json["outlet_latitude"];
+    }
+    if(json["outlet_longitude"] is String) {
+      outletLongitude = json["outlet_longitude"];
+    }
+    if(json["check_in_latitude"] is String) {
+      checkInLatitude = json["check_in_latitude"];
+    }
+    if(json["check_in_longitude"] is String) {
+      checkInLongitude = json["check_in_longitude"];
+    }
+    if(json["radius"] is String) {
+      radius = json["radius"];
+    }
+    if(json["distance_to_outlet"] is double) {
+      distanceToOutlet = json["distance_to_outlet"];
+    }
   }
 
   static List<CurrentOutlet> fromList(List<Map<String, dynamic>> list) {
@@ -172,6 +202,12 @@ class CurrentOutlet {
     _data["name"] = name;
     _data["checked_in"] = checkedIn;
     _data["checked_out"] = checkedOut;
+    _data["outlet_latitude"] = outletLatitude;
+    _data["outlet_longitude"] = outletLongitude;
+    _data["check_in_latitude"] = checkInLatitude;
+    _data["check_in_longitude"] = checkInLongitude;
+    _data["radius"] = radius;
+    _data["distance_to_outlet"] = distanceToOutlet;
     return _data;
   }
 }

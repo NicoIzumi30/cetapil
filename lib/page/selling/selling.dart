@@ -117,7 +117,7 @@ class SellingPage extends GetView<SellingController> {
           child: Column(
             mainAxisAlignment: MainAxisAlignment.center,
             children: [
-              SvgPicture.asset("assets/icon/Vector (4).svg",height: 64,
+              SvgPicture.asset("assets/icon/Vector4.svg",height: 64,
                 color: Colors.grey,),
               SizedBox(height: 16),
               Text(

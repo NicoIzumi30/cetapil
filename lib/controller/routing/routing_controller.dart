@@ -1,7 +1,9 @@
+import 'package:cetapil_mobile/controller/gps_controller.dart';
 import 'package:cetapil_mobile/controller/outlet/outlet_controller.dart';
 import 'package:cetapil_mobile/model/list_routing_response.dart';
 import 'package:cetapil_mobile/widget/custom_alert.dart';
 import 'package:flutter/material.dart';
+import 'package:geolocator/geolocator.dart';
 import 'package:get/get.dart';
 import 'package:intl/intl.dart';
 import 'package:uuid/uuid.dart';
@@ -14,6 +16,7 @@ class RoutingController extends GetxController {
   // SECTION: Dependencies
   final OutletController _outletController = Get.find<OutletController>();
   final SupportDataController _supportController = Get.find<SupportDataController>();
+  final GPSLocationController _gpsController = Get.find<GPSLocationController>();
   final DatabaseHelper _db = DatabaseHelper.instance;
   final Uuid _uuid = Uuid();
 
@@ -168,27 +171,80 @@ class RoutingController extends GetxController {
   // SECTION: Check-in Operations
   Future<void> submitCheckin(String outletId) async {
     try {
-      CustomAlerts.showLoading(Get.context!, "Check in", "Check in data routing...");
-
-      final data = {
-        'outlet_id': outletId,
-        'checked_in': DateTime.now().toIso8601String(),
-      };
-
-      final response = await Api.submitCheckin(data);
-
-      CustomAlerts.dismissLoading();
-
-      if (response.status != "OK") {
-        throw 'Gagal melakukan check in';
+      // Check if GPS is enabled
+      if (!_gpsController.isGPSEnabled.value) {
+        bool gpsActivated = await _gpsController.requestGPSActivation();
+        if (!gpsActivated) {
+          throw 'Please enable GPS to check in';
+        }
       }
 
-      Get.back();
-      await refreshRoutingData();
+      // Get current position
+      Position? position = _gpsController.currentPosition.value;
+      if (position == null) {
+        throw 'Unable to get current location. Please try again';
+      }
 
-      final outletName = routing.firstWhere((r) => r.id == outletId).name;
-      CustomAlerts.showSuccess(Get.context!, "Check in", "Berhasil Check in di $outletName");
+      // Ensure we have a valid context before showing loading
+      final context = Get.context;
+      if (context == null) {
+        throw 'Invalid context state';
+      }
+
+      // Show loading with null check and mounted check
+      if (context.mounted) {
+        CustomAlerts.showLoading(context, "Check in", "Check in data routing...");
+      }
+
+      try {
+        final data = {
+          'outlet_id': outletId,
+          'checked_in': DateTime.now().toIso8601String(),
+          'latitude': position.latitude.toString(),
+          'longitude': position.longitude.toString(),
+        };
+
+        final response = await Api.submitCheckin(data);
+
+        // Ensure context is still valid before dismissing
+        if (Get.context != null && Get.context!.mounted) {
+          CustomAlerts.dismissLoading();
+        }
+
+        if (response.status != "OK") {
+          throw 'Gagal melakukan check in';
+        }
+
+        // Get location name for success message
+        String locationName = await _gpsController.getLocationName(
+          position.latitude,
+          position.longitude,
+        );
+
+        Get.back();
+
+        await _clearExistingData();
+        final responses = await _fetchRoutingData();
+        await _processRoutingData(responses);
+
+        final outletName = routing.firstWhere((r) => r.id == outletId).name;
+
+        // Final check before showing success message
+        if (Get.context != null && Get.context!.mounted) {
+          CustomAlerts.showSuccess(
+              Get.context!, "Check in", "Berhasil Check in di $outletName\nLokasi: $locationName");
+        }
+      } finally {
+        // Ensure loading is dismissed even if an error occurs
+        if (Get.context != null && Get.context!.mounted) {
+          CustomAlerts.dismissLoading();
+        }
+      }
     } catch (e) {
+      // Ensure loading is dismissed before showing error
+      if (Get.context != null && Get.context!.mounted) {
+        CustomAlerts.dismissLoading();
+      }
       _handleError('Gagal melakukan check in: $e');
     }
   }
