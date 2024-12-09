@@ -12,44 +12,26 @@ import '../../../utils/colors.dart';
 import '../../../widget/searchable_grouped_dropdown.dart';
 
 class AvailabilityPage extends GetView<TambahActivityController> {
-  final tambahAvailabilityController = Get.find<TambahAvailabilityController>();
   @override
   Widget build(BuildContext context) {
-    final availabilityController = Get.find<TambahAvailabilityController>();
 
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
         Obx(() {
-          final groupedItems = <String, List<Map<String, dynamic>>>{};
-          if (controller.detailDraft.isNotEmpty) {
-            for (var data in controller.detailDraft["availabilityItems"]) {
+          final groupedItemsAvailability = <String, List<Map<String, dynamic>>>{};
 
-              final item = tambahAvailabilityController.getSkuByDataApi(data['product_id']);
-              final newItem = {
-                'id': data['product_id'],
-                'sku': item!['sku'],
-                'category': item['category']['name'],
-                'stock': data['available_stock'],
-                'av3m': data['average_stock'],
-                'recommend': data['ideal_stock'],
-              };
-              controller.addAvailabilityItem(newItem);
-              tambahAvailabilityController.clearForm();
-            }
-          }
-          // Use availabilityDraftItems from TambahActivityController
           for (var item in controller.availabilityDraftItems) {
             final category = item['category'];
-            if (groupedItems[category] == null) {
-              groupedItems[category] = [];
+            if (groupedItemsAvailability[category] == null) {
+              groupedItemsAvailability[category] = [];
             }
-            groupedItems[category]!.add(item);
+            groupedItemsAvailability[category]!.add(item);
           }
 
           return Column(
             children: [
-              ...groupedItems.entries.map((entry) {
+              ...groupedItemsAvailability.entries.map((entry) {
                 final category = entry.key;
                 final items = entry.value;
 
@@ -108,7 +90,7 @@ class AvailabilityPage extends GetView<TambahActivityController> {
               if (!Get.isRegistered<TambahAvailabilityController>()) {
                 Get.put(TambahAvailabilityController());
               }
-              tambahAvailabilityController.clearForm();
+              // tambahAvailabilityController.clearForm();
               Get.to(() => TambahAvailability());
             },
             child: Text(

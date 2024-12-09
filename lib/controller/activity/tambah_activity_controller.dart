@@ -2,6 +2,7 @@ import 'dart:async';
 
 import 'package:cetapil_mobile/api/api.dart';
 import 'package:cetapil_mobile/controller/activity/activity_controller.dart';
+import 'package:cetapil_mobile/controller/activity/tambah_availibility_controller.dart';
 import 'package:cetapil_mobile/controller/activity/tambah_order_controller.dart';
 import 'package:cetapil_mobile/controller/activity/tambah_visibility_controller.dart';
 import 'package:cetapil_mobile/model/survey_question_response.dart';
@@ -16,7 +17,12 @@ import '../../model/list_activity_response.dart' as Activity;
 import '../../widget/custom_alert.dart';
 
 class TambahActivityController extends GetxController {
-  final activityController = Get.find<ActivityController>();
+  late ActivityController activityController;
+  late TambahAvailabilityController tambahAvailabilityController;
+  late TambahOrderController tambahOrderController;
+  // final activityController = Get.find<ActivityController>();
+  // final tambahAvailabilityController = Get.find<TambahAvailabilityController>();
+  // final tambahOrderController = Get.find<TambahOrderController>();
   final TextEditingController controller = TextEditingController();
   final db = ActivityDatabaseHelper.instance;
   final api = Api();
@@ -82,9 +88,52 @@ class TambahActivityController extends GetxController {
   final orderTime = 0.obs;
   Timer? _timer;
 
+  // final groupedItemsAvailability = <String, List<Map<String, dynamic>>>{};
+  //
+  initDetailDraftAvailability(){
+    if (detailDraft.isNotEmpty) {
+      for (var data in detailDraft["availabilityItems"]) {
+
+        final item = tambahAvailabilityController.getSkuByDataApi(data['product_id']);
+        final newItem = {
+          'id': data['product_id'],
+          'sku': item!['sku'],
+          'category': item['category']['name'],
+          'stock': data['available_stock'],
+          'av3m': data['average_stock'],
+          'recommend': data['ideal_stock'],
+        };
+        addAvailabilityItem(newItem);
+        tambahAvailabilityController.clearForm();
+      }
+    }
+  }
+
+  initDetailDraftOrder(){
+    if (detailDraft.isNotEmpty) {
+      for (var data in detailDraft["orderItems"]) {
+
+        final item = tambahAvailabilityController.getSkuByDataApi(data['product_id']);
+        final newItem = {
+          'id': data['product_id'],
+          'category': item!['category']['name'],
+          'sku': item['sku'],
+          'jumlah': data['jumlah'],
+          'harga': data['harga'],
+        };
+        addOrderItem(newItem);
+        tambahOrderController.clearForm();
+      }
+    }
+  }
+
   @override
   void onInit() {
     super.onInit();
+    activityController = Get.find<ActivityController>();
+    tambahAvailabilityController = Get.find<TambahAvailabilityController>();
+    tambahOrderController = Get.find<TambahOrderController>();
+    initDetailDraftAvailability();
     // initGetSurveyQuestion();
     // initListCategory();
 

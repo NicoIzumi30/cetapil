@@ -8,8 +8,6 @@ import '../../../controller/activity/tambah_order_controller.dart';
 import '../../../utils/colors.dart';
 
 class OrderPage extends GetView<TambahActivityController> {
-  final tambahAvailabilityController = Get.find<TambahAvailabilityController>();
-  final tambahOrderController = Get.find<TambahOrderController>();
   @override
   Widget build(BuildContext context) {
 
@@ -19,21 +17,21 @@ class OrderPage extends GetView<TambahActivityController> {
         Obx(() {
           final groupedItems = <String, List<Map<String, dynamic>>>{};
 
-          if (controller.detailDraft.isNotEmpty) {
-            for (var data in controller.detailDraft["orderItems"]) {
-
-              final item = tambahAvailabilityController.getSkuByDataApi(data['product_id']);
-              final newItem = {
-                'id': data['product_id'],
-                'category': item!['category']['name'],
-                'sku': item['sku'],
-                'jumlah': data['jumlah'],
-                'harga': data['harga'],
-              };
-              controller.addOrderItem(newItem);
-              tambahOrderController.clearForm();
-            }
-          }
+          // if (controller.detailDraft.isNotEmpty) {
+          //   for (var data in controller.detailDraft["orderItems"]) {
+          //
+          //     final item = tambahAvailabilityController.getSkuByDataApi(data['product_id']);
+          //     final newItem = {
+          //       'id': data['product_id'],
+          //       'category': item!['category']['name'],
+          //       'sku': item['sku'],
+          //       'jumlah': data['jumlah'],
+          //       'harga': data['harga'],
+          //     };
+          //     controller.addOrderItem(newItem);
+          //     tambahOrderController.clearForm();
+          //   }
+          // }
 
           // Use orderDraftItems from TambahActivityController
           for (var item in controller.orderDraftItems) {

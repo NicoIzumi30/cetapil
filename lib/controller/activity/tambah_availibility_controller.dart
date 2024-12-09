@@ -5,8 +5,8 @@ import '../../controller/support_data_controller.dart';
 import '../../controller/activity/tambah_activity_controller.dart';
 
 class TambahAvailabilityController extends GetxController {
-  final supportDataController = Get.find<SupportDataController>();
-  final activityController = Get.find<TambahActivityController>();
+  late SupportDataController supportDataController = Get.find<SupportDataController>();
+  late TambahActivityController tambahActivityController = Get.find<TambahActivityController>();
 
   // Selected values
   final selectedCategory = Rxn<String>();
@@ -104,7 +104,7 @@ class TambahAvailabilityController extends GetxController {
     if (skuId != null) {
       selectedSkuData.value = getSelectedSkuData;
 
-      final outletChannel = activityController.getSelectedChannel();
+      final outletChannel = tambahActivityController.getSelectedChannel();
 
       if (selectedSkuData.value != null &&
           selectedSkuData.value!['channel_av3m'] != null &&
@@ -139,8 +139,7 @@ class TambahAvailabilityController extends GetxController {
       'recommend': recommendController.value.text,
     };
 
-    activityController.addAvailabilityItem(newItem);
-    print(activityController.availabilityDraftItems);
+    tambahActivityController.addAvailabilityItem(newItem);
     clearForm();
   }
 

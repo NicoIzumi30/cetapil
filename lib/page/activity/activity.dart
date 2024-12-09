@@ -61,18 +61,18 @@ class ActivityPage extends GetView<ActivityController> {
                                   statusDraft: activity.status!,
                                   statusCheckin: true,
                                   ontap: ()async {
-                                    Get.delete<TambahActivityController>();
+                                    // Get.delete<TambahActivityController>();
                                     if (!Get.isRegistered<TambahActivityController>()) {
                                       Get.lazyPut(()=>TambahActivityController());
                                     }
                                     if (!Get.isRegistered<TambahAvailabilityController>()) {
-                                      Get.put(TambahAvailabilityController());
+                                      Get.lazyPut(()=>TambahAvailabilityController());
                                     }
-                                    if (!Get.isRegistered<TambahVisibilityController>()) {
-                                      Get.lazyPut(()=>TambahVisibilityController());
-                                    }
+                                    // if (!Get.isRegistered<TambahVisibilityController>()) {
+                                    //   Get.lazyPut(()=>TambahVisibilityController());
+                                    // }
                                     if (!Get.isRegistered<TambahOrderController>()) {
-                                      Get.put(TambahOrderController());
+                                      Get.lazyPut(()=>TambahOrderController());
                                     }
                                     if (activity.status! == "APPROVAL") {
                                       Get.to(() => DetailActivity(activity.id!));
