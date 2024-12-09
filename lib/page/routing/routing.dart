@@ -126,7 +126,7 @@ class RoutingPage extends GetView<RoutingController> {
             child: Column(
               mainAxisAlignment: MainAxisAlignment.center,
               children: [
-                 SvgPicture.asset("assets/icon/Vector (1).svg",height: 64,
+                 SvgPicture.asset("assets/icon/Vector1.svg",height: 64,
                   color: Colors.grey,),
                 const SizedBox(height: 16),
                 Text(

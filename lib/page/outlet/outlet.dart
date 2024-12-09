@@ -189,7 +189,7 @@ class OutletPage extends GetView<OutletController> {
           child: Column(
             mainAxisAlignment: MainAxisAlignment.center,
             children: [
-              SvgPicture.asset("assets/icon/Vector (2).svg",height: 64,
+              SvgPicture.asset("assets/icon/Vector2.svg",height: 64,
                 color: Colors.grey,),
               SizedBox(height: 16),
               Text(

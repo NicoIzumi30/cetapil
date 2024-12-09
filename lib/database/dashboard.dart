@@ -21,7 +21,7 @@ class DashboardDatabaseHelper {
 
       return await openDatabase(
         path,
-        version: 3, // Increased version for new fields
+        version: 4, // Increased version for location fields
         onCreate: _createDB,
         onUpgrade: _onUpgrade,
       );
@@ -47,7 +47,6 @@ class DashboardDatabaseHelper {
     }
     
     if (oldVersion < 3) {
-      // Add new columns for last update timestamps
       await db.execute('''
         ALTER TABLE dashboard_data 
         ADD COLUMN last_performance_update TEXT
@@ -56,6 +55,34 @@ class DashboardDatabaseHelper {
       await db.execute('''
         ALTER TABLE dashboard_data 
         ADD COLUMN last_power_sku_update TEXT
+      ''');
+    }
+
+    if (oldVersion < 4) {
+      // Add location fields to current_outlets table
+      await db.execute('''
+        ALTER TABLE current_outlets 
+        ADD COLUMN outlet_latitude TEXT
+      ''');
+      await db.execute('''
+        ALTER TABLE current_outlets 
+        ADD COLUMN outlet_longitude TEXT
+      ''');
+      await db.execute('''
+        ALTER TABLE current_outlets 
+        ADD COLUMN check_in_latitude TEXT
+      ''');
+      await db.execute('''
+        ALTER TABLE current_outlets 
+        ADD COLUMN check_in_longitude TEXT
+      ''');
+      await db.execute('''
+        ALTER TABLE current_outlets 
+        ADD COLUMN radius TEXT
+      ''');
+      await db.execute('''
+        ALTER TABLE current_outlets 
+        ADD COLUMN distance_to_outlet REAL
       ''');
     }
   }
@@ -68,7 +95,13 @@ class DashboardDatabaseHelper {
         sales_activity_id TEXT,
         name TEXT,
         checked_in TEXT,
-        checked_out TEXT
+        checked_out TEXT,
+        outlet_latitude TEXT,
+        outlet_longitude TEXT,
+        check_in_latitude TEXT,
+        check_in_longitude TEXT,
+        radius TEXT,
+        distance_to_outlet REAL
       )
     ''');
 
@@ -121,6 +154,12 @@ class DashboardDatabaseHelper {
               'name': dashboard.data!.currentOutlet!.name,
               'checked_in': dashboard.data!.currentOutlet!.checkedIn,
               'checked_out': dashboard.data!.currentOutlet!.checkedOut,
+              'outlet_latitude': dashboard.data!.currentOutlet!.outletLatitude,
+              'outlet_longitude': dashboard.data!.currentOutlet!.outletLongitude,
+              'check_in_latitude': dashboard.data!.currentOutlet!.checkInLatitude,
+              'check_in_longitude': dashboard.data!.currentOutlet!.checkInLongitude,
+              'radius': dashboard.data!.currentOutlet!.radius,
+              'distance_to_outlet': dashboard.data!.currentOutlet!.distanceToOutlet,
             },
             conflictAlgorithm: ConflictAlgorithm.replace,
           );
@@ -180,7 +219,13 @@ class DashboardDatabaseHelper {
           c.sales_activity_id,
           c.name as outlet_name,
           c.checked_in,
-          c.checked_out
+          c.checked_out,
+          c.outlet_latitude,
+          c.outlet_longitude,
+          c.check_in_latitude,
+          c.check_in_longitude,
+          c.radius,
+          c.distance_to_outlet
         FROM dashboard_data d
         LEFT JOIN current_outlets c ON d.current_outlet_id = c.id
         ORDER BY d.created_at DESC
@@ -205,13 +250,19 @@ class DashboardDatabaseHelper {
         availabilityPercentage: skuRow['availability_percentage'] as int?,
       )).toList();
 
-      // Construct CurrentOutlet
+      // Construct CurrentOutlet with location data
       final currentOutlet = row['outlet_id'] != null ? CurrentOutlet(
         outletId: row['outlet_id'],
         salesActivityId: row['sales_activity_id'],
         name: row['outlet_name'] as String?,
         checkedIn: row['checked_in'],
         checkedOut: row['checked_out'],
+        outletLatitude: row['outlet_latitude'] as String?,
+        outletLongitude: row['outlet_longitude'] as String?,
+        checkInLatitude: row['check_in_latitude'] as String?,
+        checkInLongitude: row['check_in_longitude'] as String?,
+        radius: row['radius'] as String?,
+        distanceToOutlet: row['distance_to_outlet'] as double?,
       ) : null;
 
       // Construct Data
