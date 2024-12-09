@@ -98,15 +98,6 @@
             </tr>
         </thead>
     </table>
-    <x-modal id="delete-visibility">
-        <x-slot:title>Hapus Visibility</x-slot:title>
-        <p>Apakah kamu yakin Ingin Menghapus Data Pengguna ini?</p>
-        <x-slot:footer>
-            <x-button.light onclick="closeModal('delete-visibility')"
-                class="border-primary border">Batal</x-button.light>
-            <x-button.light class="!bg-red-400 text-white border border-red-400">Hapus Data</x-button.light>
-        </x-slot:footer>
-    </x-modal>
     {{-- Visibility Table End --}}
 </x-card>
 
@@ -119,7 +110,6 @@
             placeholder="Cari data visibility activity"></x-input.search>
         <x-button.info>Download</x-button.info>
         <x-input.datepicker id="activity-date-range" value=""></x-input.datepicker>
-
     </x-slot:cardAction>
 
     <table id="activity-table" class="table">
@@ -259,7 +249,7 @@
                     emptyTable: "Tidak ada data yang tersedia"
                 },
                 ajax: {
-                    url: "{{ route('visibility.dataActivity') }}",
+                    url: "{{ route('visibility.activity.data') }}",
                     type: 'GET',
                     data: function (d) {
                         d.search_term = $('#global-search-activity').val();

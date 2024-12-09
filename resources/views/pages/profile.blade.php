@@ -17,22 +17,22 @@
                         <div class="mb-4">
                             <label for="name" class="form-label">Nama Pengguna</label>
                             <input id="name" class="form-control" type="text" name="name"
-                                placeholder="Masukan nama pengguna" readonly aria-describedby="name" />
+                                placeholder="Masukan nama pengguna" value="{{ auth()->user()->name }}" readonly aria-describedby="name" />
                         </div>
                         <div class="mb-4">
                             <label for="email" class="form-label">Email Pengguna</label>
                             <input id="email" class="form-control" type="text" name="email"
-                                placeholder="Masukan email pengguna" readonly aria-describedby="email" />
+                                placeholder="Masukan email pengguna" value="{{ auth()->user()->email }}" readonly aria-describedby="email" />
                         </div>
                         <div class="mb-4">
                             <label for="phone" class="form-label">Nomor Telepon Pengguna</label>
                             <input id="phone" class="form-control" type="text" name="phone"
-                                placeholder="Masukan nomor telepon pengguna" readonly aria-describedby="phone" />
+                                placeholder="Masukan nomor telepon pengguna" value="{{ auth()->user()->phone_number }}" readonly aria-describedby="phone" />
                         </div>
                         <div>
                             <label for="role" class="form-label">Jabatan Pengguna</label>
 							<input id="role" class="form-control" type="text" name="role"
-							placeholder="Masukkkan Jabatan Pengguna" value="Superadmin" readonly aria-describedby="role" />
+							placeholder="Masukkkan Jabatan Pengguna" value="{{ auth()->user()->roles[0]->name }}" readonly aria-describedby="role" />
                         </div>
                     </div>
                     {{-- Profil Pengguna End --}}
@@ -44,13 +44,13 @@
                                 <label for="longitude" class="form-label">Longitudes <span class="font-normal">(DD
                                         Coordinates)</span></label>
                                 <input id="longitude" class="form-control" type="text" name="longitude"
-                                    placeholder="Masukkan Koordinat Longitude" readonly aria-describedby="longitude" />
+                                    placeholder="Masukkan Koordinat Longitude" value="{{ auth()->user()->longitude }}" readonly aria-describedby="longitude" />
                             </div>
                             <div class="mb-4">
                                 <label for="latitude" class="form-label">Latitudes <span class="font-normal">(DMS
                                         Coordinates)</span></label>
                                 <input id="latitude" class="form-control" type="text" name="latitude"
-                                    placeholder="Masukkan Koordinat Latitude" readonly aria-describedby="latitude" />
+                                    placeholder="Masukkan Koordinat Latitude" value="{{ auth()->user()->latitude }}" readonly aria-describedby="latitude" />
                             </div>
                         </div>
                     </x-section-card>

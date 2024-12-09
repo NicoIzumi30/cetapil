@@ -17,7 +17,6 @@ use App\Http\Controllers\Web\RoutingRequestControler;
 use App\Http\Controllers\Web\SalesActivityController;
 use App\Http\Controllers\Web\ProductKnowledgeControler;
 
-
 // Guest Routes
 Route::middleware('guest')->group(function () {
     Route::get('/login', [LoginController::class, 'index'])->name('login');
@@ -58,17 +57,15 @@ Route::middleware('auth')->group(function () {
     // Visibility Management
     Route::middleware('permission:menu_visibility')->group(function () {
         Route::get('/visibility/data', [VisibilityController::class, 'getData'])->name('visibility.data');
-        Route::get('visibility/dataActivity',[VisibilityController::class,'getDataActivity'])->name('visibility.dataActivity');
+        Route::get('visibility/activity/data',[VisibilityController::class,'getDataActivity'])->name('visibility.activity.data');
+        Route::get('visibility/activity/{id}/detail',[VisibilityController::class,'detail_activity'])->name('visibility.activity.detail');
         Route::resource('visibility', VisibilityController::class);
         Route::get('posm/get-images', [PosmController::class, 'getImages'])
             ->name('posm.get-images');
-        
         Route::post('posm/update-image', [PosmController::class, 'updateImage'])
             ->name('posm.update-image');
-
         Route::post('visual', [VisualController::class, 'store'])->name('visual.store');
         Route::post('posm-types', [PosmController::class, 'store'])->name('posm.store');
-
         Route::get('/visibility/products/{category}', [VisibilityController::class, 'getProducts'])
             ->name('visibility.products');
 
@@ -86,6 +83,7 @@ Route::middleware('auth')->group(function () {
     });
 
     // User Management
+    Route::get('users/data', [UserController::class, 'getData'])->name('users.data');
     Route::resource('users', UserController::class)->middleware('permission:menu_user');
 
     // Product Management

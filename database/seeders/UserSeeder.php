@@ -35,6 +35,7 @@ class UserSeeder extends Seeder
             'name' => 'admin'
         ]);
         $sales = Role::create(['name' => 'sales']);
+        $merchandiser = Role::create(['name' => 'merchandiser']);
         $permissions = [
             'menu_report',
             'menu_product',
@@ -84,6 +85,15 @@ class UserSeeder extends Seeder
                 'password' => Hash::make('12345678'),
                 'phone_number' => '+628123456789',
                 'role' => $sales,
+                'permission' => ['menu_outlet', 'menu_routing', 'menu_activity', 'menu_selling']
+            ],
+
+            [
+                'name' => 'Merchandiser',
+                'email' => 'merchandiser@gmail.com',
+                'password' => Hash::make('12345678'),
+                'phone_number' => '+62859126462972',
+                'role' => $merchandiser,
                 'permission' => ['menu_outlet', 'menu_routing', 'menu_activity', 'menu_selling']
             ],
         ];

@@ -148,15 +148,7 @@
                                 @endif
                             </div>
                         </div>
-<<<<<<< HEAD
-<<<<<<< HEAD
-                        <div class="relative mt-5">
-=======
                         <div class="relative mt-12">
->>>>>>> 7a905caae28221ad3bf22e6a47510d7260b56476
-=======
-                        <div class="relative mt-12">
->>>>>>> dd005a59ad6321be875510ecb291446444e27754
                             <div class="h-[350px] z-10" id="user-map-location"></div>
                             <button id="fullscreen-button"
                                 class="absolute top-3 right-3 rounded-sm w-10 h-10 grid place-items-center bg-white z-50 hover:bg-slate-200">
@@ -170,16 +162,12 @@
                         </div>
                     </x-section-card>
                     {{-- Area Domisili End --}}
-<<<<<<< HEAD
-<<<<<<< HEAD
-=======
->>>>>>> dd005a59ad6321be875510ecb291446444e27754
                     <x-section-card :title="'Manajemen Akun'">
                         @if ($errors->has('permissions'))
                             <span id="name-error"
                                 class="text-sm text-red-600 mt-1">{{ $errors->first('permissions') }}</span>
                         @endif
-                        @foreach(['admin', 'sales', 'superadmin'] as $role)
+                        @foreach(['admin', 'sales', 'superadmin', 'merchandiser'] as $role)
                         <div id="{{ $role }}-access" class="grid-cols-3 gap-12 hidden">
                             @foreach($rolePermissions[$role] as $menu)
                                 <x-input.switch name="permissions[]" value="{{ $menu['value'] }}">
@@ -189,29 +177,7 @@
                         </div>
                         @endforeach
                     </x-section-card>
-<<<<<<< HEAD
-=======
-
-                    {{-- Manajemen Akun --}}
-                    <div id="account-management" class="hidden">
-                        <x-section-card :title="'Manajemen Akun'">
-                            <div>
-                                <div class="grid grid-cols-3 gap-12 ">
-                                    {{-- @foreach ($form['permissions'] as $permission) --}}
-                                    <x-input.switch>Main Reports</x-input.switch>
-                                    <x-input.switch>Menu Produk</x-input.switch>
-                                    <x-input.switch>Menu Routing</x-input.switch>
-                                    <x-input.switch>Menu Selling</x-input.switch>
-                                    <x-input.switch>Menu Pengguna</x-input.switch>
-                                    {{-- @endforeach --}}
-                                </div>
-                            </div>
-                        </x-section-card>
-                    </div>
->>>>>>> 7a905caae28221ad3bf22e6a47510d7260b56476
                     {{-- Manajemen Akun End --}}
-=======
->>>>>>> dd005a59ad6321be875510ecb291446444e27754
 
                     <x-button.info class="w-full mt-20 !text-xl" type="submit">Konfirmasi</x-button.info>
                 </form>
@@ -309,15 +275,19 @@
         const roleConfig = {
             "admin": {
                 showElement: 'admin-access',
-                hideElements: ['sales-access', 'superadmin-access']
+                hideElements: ['sales-access', 'superadmin-access', 'merchandiser-access']
             },
             "sales": {
                 showElement: 'sales-access',
-                hideElements: ['admin-access', 'superadmin-access']
+                hideElements: ['admin-access', 'superadmin-access', 'merchandiser-access']
+            },
+            "merchandiser": {
+                showElement: 'merchandiser-access',
+                hideElements: ['admin-access', 'superadmin-access','sales-access']
             },
             "superadmin": {
                 showElement: 'superadmin-access',
-                hideElements: ['admin-access', 'sales-access']
+                hideElements: ['admin-access', 'sales-access', 'merchandiser-access']
             }
         };
 
