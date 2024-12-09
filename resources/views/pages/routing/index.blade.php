@@ -285,7 +285,6 @@
             deleteData(url, name);
         });
 
-        console.log($('#sales-date-range').val());
         let tableSales = $('#sales-table').DataTable({
             processing: true,
             serverSide: true,

@@ -738,11 +738,11 @@
         $('#downloadBtnStockOnHand').click(function(e) {
     e.preventDefault();
     
-    // Get current filter values
+    // Get current filter values exactly as they are used in the DataTable
     const filters = {
-        date: $('#stock-date-range').val() === 'Date Range' ? '' : $('#stock-date-range').val(),
-        product: $('#filter_product').val(),
-        area: $('#filter_area').val()
+        filter_date: $('#stock-date-range').val() === 'Date Range' ? '' : $('#stock-date-range').val(),
+        filter_product: $('#filter_product').val(),
+        filter_area: $('#filter_area').val()
     };
 
     // Show loading state
@@ -754,23 +754,35 @@
     $btnLoading.removeClass('hidden');
     $btn.prop('disabled', true);
 
-    // Create form for download
-    const form = document.createElement('form');
-    form.method = 'GET';
-    form.action = '/products/download-stock-on-hand?' + new URLSearchParams(filters).toString();
-    document.body.appendChild(form);
-    
-    form.submit();
-    
-    // Reset button state after a short delay
-    setTimeout(() => {
-        $btnText.removeClass('hidden');
-        $btnLoading.addClass('hidden');
-        $btn.prop('disabled', false);
-        document.body.removeChild(form);
-        toast('success', 'File sedang diunduh', 300);
-    }, 1000);
+    // Use the exact same parameters as your DataTable
+    $.ajax({
+        url: '/products/download-stock-on-hand',
+        method: 'GET',
+        data: filters,
+        xhrFields: {
+            responseType: 'blob'
+        },
+        success: function(response) {
+            const url = window.URL.createObjectURL(new Blob([response]));
+            const link = document.createElement('a');
+            link.href = url;
+            link.setAttribute('download', 'stock_on_hand_' + new Date().toISOString().slice(0,19).replace(/[:]/g, '-') + '.xlsx');
+            document.body.appendChild(link);
+            link.click();
+            link.remove();
+            window.URL.revokeObjectURL(url);
+            toast('success', 'File berhasil diunduh', 300);
+        },
+        error: function(xhr) {
+            console.error('Download error:', xhr);
+            toast('error', 'Gagal mengunduh file', 200);
+        },
+        complete: function() {
+            $btnText.removeClass('hidden');
+            $btnLoading.addClass('hidden');
+            $btn.prop('disabled', false);
+        }
+    });
 });
-
     </script>
 @endpush

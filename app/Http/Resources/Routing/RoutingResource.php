@@ -18,10 +18,10 @@ class RoutingResource extends JsonResource
     {
         return [
             'id' => $this->id,
-            'user' => $this->user->only('id', 'name'),
+            'user' => $this->user?->only('id', 'name'),  // Added null safe operator
             'name' => $this->name,
             'category' => $this->category,
-            'channel' => $this->channel ? $this->channel->only('id', 'name') : null,
+            'channel' => $this->channel?->only('id', 'name'),  // Already had null check
             'visit_day' => $this->visit_day,
             'longitude' => $this->longitude,
             'latitude' => $this->latitude,

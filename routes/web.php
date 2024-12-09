@@ -1,21 +1,23 @@
 <?php
 
-use App\Http\Controllers\Web\OutletControler;
-use App\Http\Controllers\Web\ProductKnowledgeControler;
-use App\Http\Controllers\Web\RoutingController;
-use App\Http\Controllers\Web\RoutingRequestControler;
-use App\Http\Controllers\Web\SalesActivityController;
-use App\Http\Controllers\Web\VisualController;
 use App\Models\Visibility;
 use Illuminate\Support\Facades\Route;
+use App\Http\Controllers\Web\PosmController;
 use App\Http\Controllers\Web\UserController;
+use App\Http\Controllers\Web\OutletControler;
 use App\Http\Controllers\Auth\LoginController;
+use App\Http\Controllers\Web\VisualController;
 use App\Http\Controllers\Auth\LogoutController;
 use App\Http\Controllers\Web\ProductController;
+use App\Http\Controllers\Web\RoutingController;
+use App\Http\Controllers\Web\SellingController;
 use App\Http\Controllers\Web\DashboardController;
 use App\Http\Controllers\Web\VisibilityController;
-use App\Http\Controllers\Web\PosmController;
 use App\Http\Controllers\Web\ProfileController;
+use App\Http\Controllers\Web\RoutingRequestControler;
+use App\Http\Controllers\Web\SalesActivityController;
+use App\Http\Controllers\Web\ProductKnowledgeControler;
+
 
 // Guest Routes
 Route::middleware('guest')->group(function () {
@@ -65,15 +67,11 @@ Route::get('/routing/download-sales-activity', [RoutingController::class, 'downl
     // Visibility Management
     Route::middleware('permission:menu_visibility')->group(function () {
         Route::get('/visibility/data', [VisibilityController::class, 'getData'])->name('visibility.data');
+        Route::get('visibility/dataActivity',[VisibilityController::class,'getDataActivity'])->name('visibility.dataActivity');
         Route::resource('visibility', VisibilityController::class);
-
-        // Route::get('/visibility/data', [VisibilityController::class, 'getData'])->name('visibility.data');
-
-        // Route::get('visibility/{visibility}/edit', [VisibilityController::class, 'edit'])->name('visibility.edit');
-
         Route::get('posm/get-images', [PosmController::class, 'getImages'])
             ->name('posm.get-images');
-
+        
         Route::post('posm/update-image', [PosmController::class, 'updateImage'])
             ->name('posm.update-image');
 
@@ -87,15 +85,14 @@ Route::get('/routing/download-sales-activity', [RoutingController::class, 'downl
 
     // Selling Management
     Route::prefix('selling')->name('selling.')->middleware('permission:menu_selling')->group(function () {
-        Route::get('/', function () {
-            return view('pages.selling.index');
-        })->name('index');
+        Route::get('/', [SellingController::class, 'index'])->name('index');
         Route::get('/create', function () {
             return view('pages.selling.create');
         });
-        Route::get('/edit', function () {
+        Route::get('/{id}/edit', function () {
             return view('pages.selling.edit');
-        });
+        })->name('edit');
+        Route::get('/data', [SellingController::class, 'getData'])->name('data');
     });
 
     // User Management
@@ -112,8 +109,8 @@ Route::get('/routing/download-sales-activity', [RoutingController::class, 'downl
             ->name('generate-excel');
         Route::get('/data', [ProductController::class, 'getData'])->name('data');
         Route::get('/data-stock-on-hand', [ProductController::class, 'getDataStockOnHand'])->name('data-stock-on-hand');
-        Route::get('/download-stock-on-hand', [ProductController::class, 'downloadStockOnHand'])
-        ->name('download-stock-on-hand');
+        Route::get('/products/download-stock-on-hand', [ProductController::class, 'downloadStockOnHand'])
+    ->name('products.download-stock-on-hand');
     });
     Route::resource('products', ProductController::class)->middleware('permission:menu_product');
     // Logout

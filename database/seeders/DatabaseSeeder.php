@@ -13,16 +13,17 @@ class DatabaseSeeder extends Seeder
      */
     public function run(): void
     {
-        $this->call([
-            ProvinceSeeder::class,
-            CitySeeder::class,
-            UserSeeder::class,
-            ProductSeeder::class,
-            ProductAccountTypeSeeder::class,
-            OutletFormSeeder::class,
-            VisibilitySeeder::class,
-            SurveySeeder::class,
-            ChannelSeeder::class
-        ]);
+        // $this->call([
+        //     ProvinceSeeder::class,
+        //     CitySeeder::class,
+        //     UserSeeder::class,
+        //     ProductSeeder::class,
+        //     ProductAccountTypeSeeder::class,
+        //     OutletFormSeeder::class,
+        //     VisibilitySeeder::class,
+        //     SurveySeeder::class,
+        //     ChannelSeeder::class,
+        //     PowerSkuSeeder::class
+        // ]);
     }
 }

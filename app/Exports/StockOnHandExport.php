@@ -6,8 +6,8 @@ use Maatwebsite\Excel\Concerns\FromCollection;
 use Maatwebsite\Excel\Concerns\WithHeadings;
 use Maatwebsite\Excel\Concerns\WithMapping;
 use Maatwebsite\Excel\Concerns\WithStyles;
-use Maatwebsite\Excel\Concerns\ShouldAutoSize;
 use PhpOffice\PhpSpreadsheet\Worksheet\Worksheet;
+use Maatwebsite\Excel\Concerns\ShouldAutoSize;
 use PhpOffice\PhpSpreadsheet\Style\Alignment;
 use PhpOffice\PhpSpreadsheet\Style\Border;
 use PhpOffice\PhpSpreadsheet\Style\Fill;
@@ -32,7 +32,7 @@ class StockOnHandExport implements FromCollection, WithHeadings, WithMapping, Wi
         return [
             'Outlet',
             'SKU',
-            'Stock-on-Hand (pcs)',
+            'Stock-on-Hand(pcs)',
             'Status',
             'AV3M',
             'Rekomendasi',
@@ -63,11 +63,10 @@ class StockOnHandExport implements FromCollection, WithHeadings, WithMapping, Wi
 
     public function styles(Worksheet $sheet)
     {
-        $lastColumn = 'G'; // We have 7 columns (A to G)
         $lastRow = $sheet->getHighestRow();
 
         // Header styles
-        $sheet->getStyle("A1:{$lastColumn}1")->applyFromArray([
+        $sheet->getStyle("A1:G1")->applyFromArray([
             'font' => [
                 'bold' => true,
                 'color' => ['rgb' => 'FFFFFF'],
@@ -83,7 +82,7 @@ class StockOnHandExport implements FromCollection, WithHeadings, WithMapping, Wi
         ]);
 
         // Data styles
-        $sheet->getStyle("A2:{$lastColumn}{$lastRow}")->applyFromArray([
+        $sheet->getStyle("A2:G{$lastRow}")->applyFromArray([
             'alignment' => [
                 'vertical' => Alignment::VERTICAL_CENTER,
             ],
@@ -95,42 +94,21 @@ class StockOnHandExport implements FromCollection, WithHeadings, WithMapping, Wi
             ],
         ]);
 
-        // Align Outlet name left
-        $sheet->getStyle("A2:A{$lastRow}")->getAlignment()->setHorizontal(Alignment::HORIZONTAL_LEFT);
-
-        // Align SKU center
-        $sheet->getStyle("B2:B{$lastRow}")->getAlignment()->setHorizontal(Alignment::HORIZONTAL_CENTER);
-
-        // Align numeric values center
-        $sheet->getStyle("C2:F{$lastRow}")->getAlignment()->setHorizontal(Alignment::HORIZONTAL_CENTER);
-
-        // Status column styling with conditional formatting
-        foreach ($sheet->getColumnIterator('D') as $column) {
-            foreach ($column->getCellIterator(2) as $cell) {
-                if ($cell->getValue() == 'YES') {
-                    $cell->getStyle()->getFill()->setFillType(Fill::FILL_SOLID)->getStartColor()->setRGB('C6EFCE');
-                } else {
-                    $cell->getStyle()->getFill()->setFillType(Fill::FILL_SOLID)->getStartColor()->setRGB('FFC7CE');
-                }
-            }
-        }
-
-        // Keterangan column styling
-        foreach ($sheet->getColumnIterator('G') as $column) {
-            foreach ($column->getCellIterator(2) as $cell) {
-                if ($cell->getValue() == 'Ideal') {
-                    $cell->getStyle()->getFill()->setFillType(Fill::FILL_SOLID)->getStartColor()->setRGB('C6EFCE');
-                } else {
-                    $cell->getStyle()->getFill()->setFillType(Fill::FILL_SOLID)->getStartColor()->setRGB('FFC7CE');
-                }
-            }
-        }
+        // Align specific columns
+        $sheet->getStyle("A2:A{$lastRow}")->getAlignment()->setHorizontal(Alignment::HORIZONTAL_LEFT); // Outlet left aligned
+        $sheet->getStyle("B2:B{$lastRow}")->getAlignment()->setHorizontal(Alignment::HORIZONTAL_LEFT); // SKU left aligned
+        $sheet->getStyle("C2:G{$lastRow}")->getAlignment()->setHorizontal(Alignment::HORIZONTAL_CENTER); // Other columns centered
 
         // Set row height
         $sheet->getDefaultRowDimension()->setRowHeight(25);
 
         // Freeze panes
         $sheet->freezePane('A2');
+
+        // Auto-size columns
+        foreach(range('A','G') as $column) {
+            $sheet->getColumnDimension($column)->setAutoSize(true);
+        }
 
         return [
             1 => ['font' => ['bold' => true]],

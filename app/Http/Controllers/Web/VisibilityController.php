@@ -10,6 +10,8 @@ use App\Http\Requests\Visibility\UpdateVisibilityRequest;
 use App\Models\City;
 use App\Models\Category;
 use App\Models\Product;
+use App\Models\SalesActivity;
+use App\Models\SalesVisibility;
 use App\Models\VisualType;
 use App\Models\PosmType;
 use App\Models\PosmImage;
@@ -107,6 +109,59 @@ class VisibilityController extends Controller
                     'actions' => view('pages.visibility.action', [
                         'item' => $item,
                         'visibilityId' => $item
+                    ])->render()
+                ];
+            })
+        ]);
+    }
+    public function getDataActivity(Request $request)
+    {
+        $query = SalesVisibility::with([ 'visibility.outlet','visibility.product','visibility.user','visibility.visualType'])->orderBy('created_at', 'desc');
+
+        if ($request->filled('search_term')) {
+            $searchTerm = $request->search_term;
+            $query->whereHas('visibility', function($q) use ($searchTerm) {
+                $q->whereHas('outlet', function($q) use ($searchTerm) {
+                    $q->where('name', 'like', "%{$searchTerm}%");
+                })->orWhereHas('product', function($q) use ($searchTerm) {
+                    $q->where('sku', 'like', "%{$searchTerm}%");
+                })->orWhereHas('user', function($q) use ($searchTerm) {
+                    $q->where('name', 'like', "%{$searchTerm}%");
+                });
+            });
+        }
+        if ($request->filled('date')) {
+            $dateParam = $request->date;
+            
+            if (str_contains($dateParam, ' to ')) {
+                [$startDate, $endDate] = explode(' to ', $dateParam);
+                $query->whereBetween('created_at', [
+                    Carbon::parse($startDate)->startOfDay(),
+                    Carbon::parse($endDate)->endOfDay()
+                ]);
+            } else {
+                $query->whereDate('created_at', Carbon::parse($dateParam));
+            }
+        }
+        $filteredRecords = (clone $query)->count();
+
+        $result = $query->skip($request->start)
+            ->take($request->length)
+            ->get();
+        return response()->json([
+            'draw' => intval($request->draw),
+            'recordsTotal' => $filteredRecords,
+            'recordsFiltered' => $filteredRecords,
+            'data' => $result->map(function ($item) {
+                return [
+                    'id' => $item->id,
+                    'outlet' => $item->visibility->outlet->name,
+                    'sales' => $item->visibility->user->name,
+                    'product' => $item->visibility->product->sku,
+                    'visual' => $item->visibility->visualType->name,
+                    'condition' => $item->condition,
+                    'actions' => view('pages.visibility.action_activity', [
+                        'activityId' => $item->id
                     ])->render()
                 ];
             })

@@ -5,19 +5,17 @@ namespace App\Models;
 use Illuminate\Database\Eloquent\Concerns\HasUuids;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
+use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\SoftDeletes;
 
-class OutletImage extends Model
+class PowerSku extends Model
 {
     use HasFactory, HasUuids, SoftDeletes;
 
     protected $guarded = [];
 
-    public function getImageAttribute()
+    public function product(): BelongsTo
     {
-        if (!$this->path) {
-            return null;
-        }
-        return "/storage$this->path";
+        return $this->belongsTo(Product::class);
     }
 }
