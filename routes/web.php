@@ -13,6 +13,7 @@ use App\Http\Controllers\Web\RoutingController;
 use App\Http\Controllers\Web\SellingController;
 use App\Http\Controllers\Web\DashboardController;
 use App\Http\Controllers\Web\VisibilityController;
+use App\Http\Controllers\Web\ProfileController;
 use App\Http\Controllers\Web\RoutingRequestControler;
 use App\Http\Controllers\Web\SalesActivityController;
 use App\Http\Controllers\Web\ProductKnowledgeControler;
@@ -27,11 +28,11 @@ Route::middleware('guest')->group(function () {
 Route::middleware('auth')->group(function () {
     // Dashboard
     Route::get('/', [DashboardController::class, 'index'])->name('dashboard');
+    
+    //profile
+    Route::get('/profile', [ProfileController::class, 'index'])->name('profile');
 
-    // Profile
-    Route::get('/profile', function () {
-        return view('pages.profile');
-    })->name('profile');
+    Route::post('/profile/update-password', [ProfileController::class, 'updatePassword'])->name('profile.update-password');
 
     Route::prefix('routing/sales/activity')->name('routing.sales.activity.')->middleware('permission:menu_routing')->group(function () {
         Route::get('/data', [SalesActivityController::class, 'getData'])->name('data');
@@ -44,8 +45,16 @@ Route::middleware('auth')->group(function () {
         Route::put('/{id}/approve', [RoutingRequestControler::class, 'approve'])->name('approve');
         Route::put('/{id}/reject', [RoutingRequestControler::class, 'reject'])->name('reject');
         Route::delete('/delete/', [RoutingRequestControler::class, 'destroy'])->name('delete');
+
     });
 
+    Route::get('/routing/download-filtered', [RoutingController::class, 'downloadFilteredExcel'])
+    ->name('routing.download-filtered')
+    ->middleware('permission:menu_routing');
+
+Route::get('/routing/download-sales-activity', [RoutingController::class, 'downloadSalesActivityExcel'])
+    ->name('routing.download-sales-activity')
+    ->middleware('permission:menu_routing');
 
     Route::post('/routing/bulk', [RoutingController::class, 'bulk'])->name('routing.bulk')->middleware('permission:menu_routing');
     Route::get('routing/generate-excel', [RoutingController::class, 'downloadExcel'])->name('routing.generae-excel')->middleware('permission:menu_routing');
@@ -68,7 +77,6 @@ Route::middleware('auth')->group(function () {
         Route::post('posm-types', [PosmController::class, 'store'])->name('posm.store');
         Route::get('/visibility/products/{category}', [VisibilityController::class, 'getProducts'])
             ->name('visibility.products');
-
     });
 
 
@@ -97,6 +105,8 @@ Route::middleware('auth')->group(function () {
             ->name('generate-excel');
         Route::get('/data', [ProductController::class, 'getData'])->name('data');
         Route::get('/data-stock-on-hand', [ProductController::class, 'getDataStockOnHand'])->name('data-stock-on-hand');
+        Route::get('/products/download-stock-on-hand', [ProductController::class, 'downloadStockOnHand'])
+    ->name('products.download-stock-on-hand');
     });
     Route::resource('products', ProductController::class)->middleware('permission:menu_product');
     // Logout

@@ -18,7 +18,7 @@
             <x-input.search class="border-0" placeholder="Cari data produk" id="global-search"></x-input.search>
             <x-button.light id="downloadBtn">
                 <span id="downloadBtnText">Download</span>
-                <span id="downloadBtnLoading" class="hidden">Memproses...</span>
+                <span id="downloadBtnLoadingProduct" class="hidden">Downloading...</span>
             </x-button.light>
             <x-button.info onclick="openModal('tambah-produk')">
                 Tambah Daftar Produk
@@ -235,7 +235,9 @@
 
         {{-- Stock-on-Hand Action --}}
         <x-slot:cardAction>
-            <x-button.light>Download
+            <x-button.light id="downloadBtnStockOnHand">
+                <span id="downloadBtnText">Download</span>
+                <span id="downloadBtnLoading" class="hidden">Downloading...</span>
             </x-button.light>
             <x-select.light :title="'Filter Produk'" id="filter_product">
                 <option value="all">Semua</option>
@@ -611,7 +613,15 @@
             // Download Excel handler
             $('#downloadBtn').click(function (e) {
                 e.preventDefault();
-                toggleLoading(true);
+                
+                // Show loading state
+                const $btn = $(this);
+                const $btnText = $btn.find('#downloadBtnText');
+                const $btnLoading = $btn.find('#downloadBtnLoadingProduct');
+                
+                $btnText.addClass('hidden');
+                $btnLoading.removeClass('hidden');
+                $btn.prop('disabled', true);
 
                 const form = document.createElement('form');
                 form.method = 'GET';
@@ -622,7 +632,7 @@
                     .then(response => {
                         if (response.ok) {
                             form.submit();
-                            toast('success', 'File berhasil diunduh', 150);
+                            toast('success', 'File berhasil diunduh', 300);
                         } else {
                             return response.json().then(data => {
                                 throw new Error(data.message || 'Gagal mengunduh file');
@@ -634,8 +644,12 @@
                         toast('error', error.message || 'Gagal mengunduh file', 200);
                     })
                     .finally(() => {
-                        toggleLoading(false);
-                        document.body.removeChild(form);
+                        setTimeout(() => {
+                            $btnText.removeClass('hidden');
+                            $btnLoading.addClass('hidden');
+                            $btn.prop('disabled', false);
+                            document.body.removeChild(form);
+                        }, 1000);
                     });
             });
 
@@ -698,7 +712,7 @@
             function handleSuccess(modalId, message) {
                 toggleLoading(false, 'update');
                 closeModal(modalId);
-                toast('success', message, 150);
+                toast('success', message, 300);
                 setTimeout(() => window.location.reload(), 1500);
             }
 
@@ -718,5 +732,55 @@
                 });
             }
         });
+
+        $('#downloadBtnStockOnHand').click(function(e) {
+    e.preventDefault();
+    
+    // Get current filter values exactly as they are used in the DataTable
+    const filters = {
+        filter_date: $('#stock-date-range').val() === 'Date Range' ? '' : $('#stock-date-range').val(),
+        filter_product: $('#filter_product').val(),
+        filter_area: $('#filter_area').val()
+    };
+
+    // Show loading state
+    const $btn = $(this);
+    const $btnText = $btn.find('#downloadBtnText');
+    const $btnLoading = $btn.find('#downloadBtnLoading');
+    
+    $btnText.addClass('hidden');
+    $btnLoading.removeClass('hidden');
+    $btn.prop('disabled', true);
+
+    // Use the exact same parameters as your DataTable
+    $.ajax({
+        url: '/products/download-stock-on-hand',
+        method: 'GET',
+        data: filters,
+        xhrFields: {
+            responseType: 'blob'
+        },
+        success: function(response) {
+            const url = window.URL.createObjectURL(new Blob([response]));
+            const link = document.createElement('a');
+            link.href = url;
+            link.setAttribute('download', 'stock_on_hand_' + new Date().toISOString().slice(0,19).replace(/[:]/g, '-') + '.xlsx');
+            document.body.appendChild(link);
+            link.click();
+            link.remove();
+            window.URL.revokeObjectURL(url);
+            toast('success', 'File berhasil diunduh', 300);
+        },
+        error: function(xhr) {
+            console.error('Download error:', xhr);
+            toast('error', 'Gagal mengunduh file', 200);
+        },
+        complete: function() {
+            $btnText.removeClass('hidden');
+            $btnLoading.addClass('hidden');
+            $btn.prop('disabled', false);
+        }
+    });
+});
     </script>
 @endpush

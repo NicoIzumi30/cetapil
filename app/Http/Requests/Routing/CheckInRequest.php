@@ -27,7 +27,9 @@ class CheckInRequest extends FormRequest
     {
         return [
             'outlet_id' => 'required|exists:outlets,id',
-            'checked_in' => 'required|date'
+            'checked_in' => 'required|date',
+            'latitude' => 'required|numeric|between:-90,90',
+            'longitude' => 'required|numeric|between:-180,180'
         ];
     }
 

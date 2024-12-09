@@ -11,6 +11,7 @@ use App\Models\Product;
 use App\Models\Category;
 use Illuminate\Http\Request;
 use App\Exports\ProductExport;
+use App\Exports\StockOnHandExport;
 use App\Imports\ProductImport;
 use App\Models\SalesAvailability;
 use Illuminate\Support\Facades\DB;
@@ -22,6 +23,7 @@ use Illuminate\Validation\ValidationException;
 use App\Http\Requests\Product\UpdateAv3mRequest;
 use App\Http\Requests\Product\CreateProductRequest;
 use App\Http\Requests\Product\UpdateProductRequest;
+
 
 class ProductController extends Controller
 {
@@ -326,6 +328,80 @@ class ProductController extends Controller
             return response()->json([
                 'status' => 'error',
                 'message' => 'Gagal mengunduh file: ' . $e->getMessage()
+            ], 500);
+        }
+    }
+
+    // Add this new method in ProductController.php
+
+    public function downloadStockOnHand(Request $request)
+    {
+        try {
+            $query = SalesAvailability::with(['product:id,sku', 'outlet:id,name']);
+    
+            // Apply filters exactly as in getDataStockOnHand method
+            if ($request->filled('filter_date')) {
+                $dateParam = $request->filter_date;
+                if (str_contains($dateParam, ' to ')) {
+                    [$startDate, $endDate] = explode(' to ', $dateParam);
+                    $query->whereBetween('created_at', [
+                        Carbon::parse($startDate)->startOfDay(),
+                        Carbon::parse($endDate)->endOfDay()
+                    ]);
+                } else {
+                    $query->whereDate('created_at', Carbon::parse($dateParam));
+                }
+            }
+    
+            // Apply product filter exactly as in DataTable
+            if ($request->filled('filter_product') && $request->filter_product != 'all') {
+                $query->where('product_id', $request->filter_product);
+            }
+    
+            // Apply area filter exactly as in DataTable
+            if ($request->filled('filter_area') && $request->filter_area != 'all') {
+                $query->where(function ($q) use ($request) {
+                    $q->whereHas('outlet', function ($q) use ($request) {
+                        $q->where('city_id', $request->filter_area);
+                    });
+                });
+            }
+    
+            // Get filtered data
+            $data = $query->get();
+    
+            // Log for debugging
+            Log::info('Download Stock On Hand Query', [
+                'filters' => $request->all(),
+                'sql' => $query->toSql(),
+                'bindings' => $query->getBindings(),
+                'count' => $data->count()
+            ]);
+    
+            if ($data->isEmpty()) {
+                return response()->json([
+                    'status' => 'error',
+                    'message' => 'Tidak ada data yang sesuai dengan filter'
+                ], 404);
+            }
+    
+            return Excel::download(
+                new StockOnHandExport($data),
+                'stock_on_hand_' . now()->format('Y-m-d_His') . '.xlsx',
+                \Maatwebsite\Excel\Excel::XLSX
+            );
+    
+        } catch (\Exception $e) {
+            Log::error('Stock On Hand Download Error', [
+                'message' => $e->getMessage(),
+                'file' => $e->getFile(),
+                'line' => $e->getLine(),
+                'filters' => $request->all()
+            ]);
+    
+            return response()->json([
+                'status' => 'error',
+                'message' => 'Gagal membuat file Excel: ' . $e->getMessage()
             ], 500);
         }
     }

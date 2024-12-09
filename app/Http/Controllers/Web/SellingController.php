@@ -3,6 +3,7 @@
 namespace App\Http\Controllers\Web;
 
 use App\Http\Controllers\Controller;
+
 use App\Models\Selling;
 use Carbon\Carbon;
 use Illuminate\Http\Request;
@@ -10,6 +11,7 @@ use function GuzzleHttp\json_encode;
 
 class SellingController extends Controller
 {
+
     public function index(){
         return view('pages.selling.index');
     } 

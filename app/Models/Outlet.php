@@ -24,10 +24,14 @@ class Outlet extends Model
     {
         return $this->belongsTo(City::class);
     }
-
     /**
      * Get the user that owns the outlet.
      */
+    public function outlet()
+    {
+        return $this->belongsTo(Outlet::class);
+    }
+
     public function user()
     {
         return $this->belongsTo(User::class)->withTrashed();

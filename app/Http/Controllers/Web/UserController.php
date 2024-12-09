@@ -53,30 +53,7 @@ class UserController extends Controller
     ];
     public function index(Request $request)
     {
-        $query = User::with('roles')
-            ->where('id', '!=', Auth::id())
-            ->orderBy('created_at', 'desc')->get();
-        
-		$perPage = $request->input('per_page', 10);
-        // Validate the per_page parameter to ensure it's one of the allowed values
-        $validPerPage = in_array($perPage, [10, 20, 30, 40, 50]) ? $perPage : 10;
-        $currentPage = request()->get('page', 1); // Get current page from URL, default to 1
-        $offset = ($currentPage - 1) * $validPerPage; // Calculate offset
-
-        // Create paginator instance with dynamic per_page value
-        $users = new LengthAwarePaginator(
-            $query->slice($offset, $validPerPage)->values(),
-            $query->count(),
-            $validPerPage,
-            $currentPage,
-            ['path' => request()->url()]
-        );
-
-        // Append the per_page parameter to pagination links
-        $users->appends(['per_page' => $validPerPage]);
-
-        return view('pages.users.index', compact('users'));
-
+        return view('pages.users.index');
     }
 
     public function getData(Request $request)
@@ -118,9 +95,6 @@ class UserController extends Controller
             })
         ]);
     }
-    /**
-     * Show the form for creating a new resource.
-     */
     public function create()
     {
         $cities = City::all();
