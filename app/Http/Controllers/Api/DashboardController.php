@@ -52,6 +52,16 @@ class DashboardController extends Controller
 
         $current_outlet = $this->getCurrentOutlet($user, $now, $currentDayNumber, $week_type);
 
+        // Add distance calculation for current outlet if check-in coordinates exist
+        if ($current_outlet && isset($current_outlet['check_in_latitude']) && isset($current_outlet['check_in_longitude'])) {
+            $current_outlet['distance_to_outlet'] = $this->calculateDistance(
+                $current_outlet['check_in_latitude'],
+                $current_outlet['check_in_longitude'],
+                $current_outlet['outlet_latitude'],
+                $current_outlet['outlet_longitude']
+            );
+        }
+
         $power_skus = DB::table('power_skus as ps')
             ->join('products as p', 'ps.product_id', '=', 'p.id')
             ->select('p.sku', 'ps.product_id')
@@ -85,14 +95,13 @@ class DashboardController extends Controller
             ->sortByDesc('availability_percentage')
             ->values()
             ->all();
-        // Get latest activity date for Performance Index
+
         $latest_performance_update = SalesActivity::where('user_id', $user->id)
             ->whereNotNull('checked_out')
             ->latest('checked_out')
             ->first()
             ->checked_out ?? null;
 
-        // Get latest survey date for Power SKUs
         $latest_power_sku_update = DB::table('sales_surveys as ss')
             ->join('sales_activities as sa', 'sa.id', '=', 'ss.sales_activity_id')
             ->join('survey_questions as sq', 'ss.survey_question_id', '=', 'sq.id')
@@ -103,7 +112,6 @@ class DashboardController extends Controller
             ->first()
             ->checked_out ?? null;
 
-        // Format dates to Indonesian format
         $performance_update = $latest_performance_update ?
             Carbon::parse($latest_performance_update)->format('d F Y') :
             $now->format('d F Y');
@@ -130,6 +138,39 @@ class DashboardController extends Controller
                 'last_power_sku_update' => $power_sku_update
             ]
         );
+    }
+
+    private function calculateDistance($lat1, $lon1, $lat2, $lon2)
+    {
+        // Convert decimal degrees to radians
+        $lat1 = deg2rad($lat1);
+        $lon1 = deg2rad($lon1);
+        $lat2 = deg2rad($lat2);
+        $lon2 = deg2rad($lon2);
+
+        // Haversine formula
+        $dlat = $lat2 - $lat1;
+        $dlon = $lon2 - $lon1;
+        $a = sin($dlat / 2) * sin($dlat / 2) + cos($lat1) * cos($lat2) * sin($dlon / 2) * sin($dlon / 2);
+        $c = 2 * atan2(sqrt($a), sqrt(1 - $a));
+
+        // Earth's radius in meters
+        $r = 6371000;
+
+        // Calculate distance
+        return $r * $c;
+    }
+
+    private function formatDistance($meters)
+    {
+        if ($meters >= 1000) {
+            return round($meters / 1000, 2) . ' km';
+        } elseif ($meters >= 1) {
+            return round($meters, 1) . ' m';
+        } else {
+            // For distances less than 1 meter, convert to centimeters
+            return round($meters * 100, 1) . ' cm';
+        }
     }
 
     private function getCurrentOutlet($user, $now, $currentDayNumber, $week_type)
@@ -174,13 +215,32 @@ class DashboardController extends Controller
                 'name' => $current_outlet->name,
                 'checked_in' => null,
                 'checked_out' => null,
+                'outlet_latitude' => $current_outlet->latitude,
+                'outlet_longitude' => $current_outlet->longitude,
+                'radius' => null
             ] : [
                 'outlet_id' => null,
                 'sales_activity_id' => null,
                 'name' => '-',
                 'checked_in' => null,
                 'checked_out' => null,
+                'radius' => null
             ];
+        }
+
+        $radius = null;
+        if (
+            $current_outlet->latitude && $current_outlet->longitude &&
+            $current_outlet->outlet->latitude && $current_outlet->outlet->longitude
+        ) {
+            $meters = $this->calculateDistance(
+                $current_outlet->latitude,
+                $current_outlet->longitude,
+                $current_outlet->outlet->latitude,
+                $current_outlet->outlet->longitude
+            );
+
+            $radius = $this->formatDistance($meters);
         }
 
         return [
@@ -189,6 +249,11 @@ class DashboardController extends Controller
             'name' => $current_outlet->outlet->name,
             'checked_in' => $current_outlet->checked_in,
             'checked_out' => null,
+            'outlet_latitude' => $current_outlet->outlet->latitude,
+            'outlet_longitude' => $current_outlet->outlet->longitude,
+            'check_in_latitude' => $current_outlet->latitude,
+            'check_in_longitude' => $current_outlet->longitude,
+            'radius' => $radius
         ];
     }
 

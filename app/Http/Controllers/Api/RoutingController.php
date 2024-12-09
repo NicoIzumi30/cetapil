@@ -82,16 +82,35 @@ class RoutingController extends Controller
             return $this->failedResponse(RoutingConstants::FAILED_CHECK_IN, Response::HTTP_BAD_REQUEST);
         }
 
+        // Get outlet for location calculation
+        $outlet = Outlet::findOrFail($data['outlet_id']);
+
+        // Calculate radius using Haversine formula
+        $radius = $this->calculateDistance(
+            $data['latitude'],
+            $data['longitude'],
+            $outlet->latitude,
+            $outlet->longitude
+        );
+
+        // Determine radius status
+        $radius_status = $this->determineRadiusStatus($radius);
+
         $activity = SalesActivity::whereDate('checked_in', $now)
             ->where([
                 ['outlet_id', $data['outlet_id']],
                 ['user_id', $user->id]
             ])->first();
+
         if (!$activity) {
             $activity = SalesActivity::create([
                 'checked_in' => $data['checked_in'],
                 'outlet_id' => $data['outlet_id'],
-                'user_id' => $user->id
+                'user_id' => $user->id,
+                'latitude' => $data['latitude'],
+                'longitude' => $data['longitude'],
+                'radius' => $radius,
+                'radius_status' => $radius_status
             ]);
         }
 
@@ -110,5 +129,38 @@ class RoutingController extends Controller
         $activity->save();
 
         return $this->successResponse(RoutingConstants::CHECK_OUT, Response::HTTP_OK, new SalesActivityResource($activity));
+    }
+
+    private function calculateDistance($lat1, $lon1, $lat2, $lon2)
+    {
+        // Convert decimal degrees to radians
+        $lat1 = deg2rad($lat1);
+        $lon1 = deg2rad($lon1);
+        $lat2 = deg2rad($lat2);
+        $lon2 = deg2rad($lon2);
+
+        // Haversine formula
+        $dlat = $lat2 - $lat1;
+        $dlon = $lon2 - $lon1;
+        $a = sin($dlat / 2) * sin($dlat / 2) + cos($lat1) * cos($lat2) * sin($dlon / 2) * sin($dlon / 2);
+        $c = 2 * atan2(sqrt($a), sqrt(1 - $a));
+
+        // Earth's radius in meters
+        $r = 6371000;
+
+        // Calculate distance
+        return round($r * $c, 2);
+    }
+
+    /**
+     * Determine radius status based on distance
+     */
+    private function determineRadiusStatus($radius)
+    {
+        if ($radius <= 100) {
+            return 'ONSITE';
+        } else {
+            return 'OFFSITE';
+        }
     }
 }
