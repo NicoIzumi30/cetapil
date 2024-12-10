@@ -6,13 +6,14 @@ use Maatwebsite\Excel\Concerns\FromCollection;
 use Maatwebsite\Excel\Concerns\WithHeadings;
 use Maatwebsite\Excel\Concerns\WithMapping;
 use Maatwebsite\Excel\Concerns\WithStyles;
-use PhpOffice\PhpSpreadsheet\Worksheet\Worksheet;
 use Maatwebsite\Excel\Concerns\ShouldAutoSize;
+use PhpOffice\PhpSpreadsheet\Worksheet\Worksheet;
 use PhpOffice\PhpSpreadsheet\Style\Alignment;
 use PhpOffice\PhpSpreadsheet\Style\Border;
 use PhpOffice\PhpSpreadsheet\Style\Fill;
+use Carbon\Carbon;
 
-class OutletFilteredExport implements FromCollection, WithHeadings, WithMapping, WithStyles, ShouldAutoSize
+class VisibilityActivityExport implements FromCollection, WithHeadings, WithMapping, WithStyles, ShouldAutoSize
 {
     protected $data;
 
@@ -23,53 +24,40 @@ class OutletFilteredExport implements FromCollection, WithHeadings, WithMapping,
 
     public function collection()
     {
-        return $this->data;
+        return collect($this->data);
     }
 
     public function headings(): array
     {
         return [
-            'Name',
-            'Category (Account)',
-            'City',
-            'Sales',
-            'Visit Day',
-            'Cycle',
-            'Status',
-            'Longitude',
-            'Latitude',
-            'Address',
-            'Channel',
-            'Created At',
-            'Updated At'
+            'Nama Outlet',
+            'Nama Sales',
+            'SKU',
+            'Visual Type',
+            'Kondisi',
+            'Status', 
+            'Tanggal'
         ];
     }
 
-    public function map($outlet): array
+    public function map($row): array
     {
         return [
-            $outlet->name,
-            $outlet->category,
-            $outlet->city->name ?? 'KABUPATEN BANDUNG',
-            $outlet->user->name ?? '',
-            getVisitDayByNumber($outlet->visit_day),
-            $outlet->cycle,
-            $outlet->status,
-            $outlet->longitude,
-            $outlet->latitude,
-            $outlet->address,
-            $outlet->channel->name ?? '',
-            $outlet->created_at->format('Y-m-d H:i:s'),
-            $outlet->updated_at->format('Y-m-d H:i:s')
+            @$row->visibility->outlet->name ?: '-',
+            @$row->visibility->user->name ?: '-',
+            @$row->visibility->product->sku ?: '-',
+            @$row->visibility->visualType->name ?: '-',
+            $row->condition ?: '-',
+            $row->status ?: '-',
+            Carbon::parse($row->created_at)->format('d F Y') ?: '-'
         ];
     }
 
     public function styles(Worksheet $sheet)
     {
-        $lastColumn = 'M';  // Setelah menghapus kolom, sekarang hanya ada 13 kolom (A hingga M)
         $lastRow = $sheet->getHighestRow();
+        $lastColumn = 'G';
 
-        // Header styles
         $sheet->getStyle("A1:{$lastColumn}1")->applyFromArray([
             'font' => [
                 'bold' => true,
@@ -81,28 +69,21 @@ class OutletFilteredExport implements FromCollection, WithHeadings, WithMapping,
             ],
             'alignment' => [
                 'horizontal' => Alignment::HORIZONTAL_CENTER,
-                'vertical' => Alignment::VERTICAL_CENTER,
             ],
         ]);
 
-        // Data styles
         $sheet->getStyle("A2:{$lastColumn}{$lastRow}")->applyFromArray([
-            'alignment' => [
-                'vertical' => Alignment::VERTICAL_CENTER,
-            ],
             'borders' => [
                 'allBorders' => [
                     'borderStyle' => Border::BORDER_THIN,
-                    'color' => ['rgb' => '000000'],
                 ],
+            ],
+            'alignment' => [
+                'vertical' => Alignment::VERTICAL_CENTER,
             ],
         ]);
 
-        // Set row height
         $sheet->getDefaultRowDimension()->setRowHeight(25);
-
-        // Freeze panes
-        $sheet->freezePane('A2');
 
         return [
             1 => ['font' => ['bold' => true]],

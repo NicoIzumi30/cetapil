@@ -371,7 +371,7 @@ class RoutingController extends Controller
     public function downloadFilteredExcel(Request $request)
     {
         try {
-            $query = Outlet::with('user');
+            $query = Outlet::with(['user', 'city', 'channel']);
     
             // Apply search filter
             if ($request->filled('search_term')) {
@@ -391,7 +391,6 @@ class RoutingController extends Controller
     
             $data = $query->get();
             
-            // Pastikan return type Excel yang benar
             return Excel::download(
                 new OutletFilteredExport($data), 
                 'routing_data_' . now()->format('Y-m-d_His') . '.xlsx'
@@ -410,67 +409,97 @@ class RoutingController extends Controller
             ], 500);
         }
     }
-    
     public function downloadSalesActivityExcel(Request $request)
     {
         try {
-            // Ubah query untuk mengambil dari tabel sales_activities
-            $query = SalesActivity::with(['outlet', 'user'])
-                ->join('outlets', 'sales_activities.outlet_id', '=', 'outlets.id');
+            DB::enableQueryLog();
+            
+            // Start query with proper eager loading
+            $query = SalesActivity::with([
+                'outlet' => function($q) {
+                    $q->select('id', 'name', 'visit_day', 'city_id');
+                },
+                'user' => function($q) {
+                    $q->select('id', 'name');
+                }
+            ])
+            ->whereNull('deleted_at'); // Make sure to only get non-deleted records
     
-            // Apply search filter
+            // Apply day filter
+            if ($request->filled('filter_day_sales') && $request->filter_day_sales != 'all') {
+                $query->whereHas('outlet', function($q) use ($request) {
+                    $q->where('visit_day', $request->filter_day_sales);
+                });
+            }
+    
+            // Apply area filter
+            if ($request->filled('filter_area') && $request->filter_area != 'all') {
+                $query->whereHas('outlet', function($q) use ($request) {
+                    $q->where('city_id', $request->filter_area);
+                });
+            }
+    
+            // Apply date filter
+            if ($request->filled('date') && $request->date !== 'Date Range') {
+                $dateRange = explode(' to ', $request->date);
+                if (count($dateRange) == 2) {
+                    $query->whereBetween('checked_in', [
+                        Carbon::parse($dateRange[0])->startOfDay(),
+                        Carbon::parse($dateRange[1])->endOfDay()
+                    ]);
+                } else {
+                    $query->whereDate('checked_in', Carbon::parse($request->date));
+                }
+            }
+    
+            // Apply search term
             if ($request->filled('search_term')) {
                 $searchTerm = $request->search_term;
-                $query->where(function ($q) use ($searchTerm) {
-                    $q->whereHas('user', function ($q) use ($searchTerm) {
+                $query->where(function($q) use ($searchTerm) {
+                    $q->whereHas('user', function($q) use ($searchTerm) {
                         $q->where('name', 'like', "%{$searchTerm}%");
-                    })->orWhereHas('outlet', function ($q) use ($searchTerm) {
+                    })
+                    ->orWhereHas('outlet', function($q) use ($searchTerm) {
                         $q->where('name', 'like', "%{$searchTerm}%");
                     });
                 });
             }
     
-            // Apply day filter
-            if ($request->filled('filter_day') && $request->filter_day != 'all') {
-                $query->where('outlets.visit_day', $request->filter_day);
-            }
+            // Log query information
+            Log::info('Download Query Parameters:', [
+                'filters' => $request->all(),
+                'sql' => $query->toSql(),
+                'bindings' => $query->getBindings()
+            ]);
     
-            // Apply area filter 
-            if ($request->filled('filter_area') && $request->filter_area != 'all') {
-                $query->where('outlets.city_id', $request->filter_area);
-            }
-    
-            // Apply date filter
-            if ($request->filled('date') && $request->date !== 'Date Range') {
-                $dateParam = $request->date;
-                if (str_contains($dateParam, ' to ')) {
-                    [$startDate, $endDate] = explode(' to ', $dateParam);
-                    $query->whereBetween('checked_in', [
-                        Carbon::parse($startDate)->startOfDay(),
-                        Carbon::parse($endDate)->endOfDay()
-                    ]);
-                } else {
-                    $query->whereDate('checked_in', Carbon::parse($dateParam));
-                }
-            }
-    
+            // Get data
             $data = $query->get();
-            
+    
+            // Log retrieved data
+            Log::info('Downloaded Data:', [
+                'count' => $data->count(),
+                'first_record' => $data->first()
+            ]);
+    
+            // Generate filename with timestamp
+            $filename = 'sales_activity_' . now()->format('Y-m-d_His') . '.xlsx';
+    
+            // Return Excel download
             return Excel::download(
-                new SalesActivityExport($data), 
-                'sales_activity_' . now()->format('Y-m-d_His') . '.xlsx'
+                new SalesActivityExport($data),
+                $filename,
+                \Maatwebsite\Excel\Excel::XLSX
             );
     
         } catch (\Exception $e) {
-            Log::error('Sales Activity Excel Download Error', [
+            Log::error('Download Error:', [
                 'message' => $e->getMessage(),
-                'file' => $e->getFile(),
-                'line' => $e->getLine()
+                'trace' => $e->getTraceAsString()
             ]);
-    
+            
             return response()->json([
                 'status' => 'error',
-                'message' => 'Gagal membuat file Excel: ' . $e->getMessage()
+                'message' => 'Gagal mengunduh file: ' . $e->getMessage()
             ], 500);
         }
     }

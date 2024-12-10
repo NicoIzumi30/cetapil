@@ -736,11 +736,11 @@
         $('#downloadBtnStockOnHand').click(function(e) {
     e.preventDefault();
     
-    // Get current filter values exactly as they are used in the DataTable
+    // Get current filter values
     const filters = {
         filter_date: $('#stock-date-range').val() === 'Date Range' ? '' : $('#stock-date-range').val(),
-        filter_product: $('#filter_product').val(),
-        filter_area: $('#filter_area').val()
+        filter_product: $('#filter_product').val() || 'all',
+        filter_area: $('#filter_area').val() || 'all'
     };
 
     // Show loading state
@@ -752,34 +752,35 @@
     $btnLoading.removeClass('hidden');
     $btn.prop('disabled', true);
 
-    // Use the exact same parameters as your DataTable
-    $.ajax({
-        url: '/products/download-stock-on-hand',
+    // Gunakan fetch untuk download
+    fetch('/products/download-stock-on-hand?' + new URLSearchParams(filters), {
         method: 'GET',
-        data: filters,
-        xhrFields: {
-            responseType: 'blob'
-        },
-        success: function(response) {
-            const url = window.URL.createObjectURL(new Blob([response]));
-            const link = document.createElement('a');
-            link.href = url;
-            link.setAttribute('download', 'stock_on_hand_' + new Date().toISOString().slice(0,19).replace(/[:]/g, '-') + '.xlsx');
-            document.body.appendChild(link);
-            link.click();
-            link.remove();
-            window.URL.revokeObjectURL(url);
-            toast('success', 'File berhasil diunduh', 300);
-        },
-        error: function(xhr) {
-            console.error('Download error:', xhr);
-            toast('error', 'Gagal mengunduh file', 200);
-        },
-        complete: function() {
-            $btnText.removeClass('hidden');
-            $btnLoading.addClass('hidden');
-            $btn.prop('disabled', false);
-        }
+    })
+    .then(response => {
+        if (!response.ok) throw new Error('Network response was not ok');
+        return response.blob();
+    })
+    .then(blob => {
+        // Create download link
+        const url = window.URL.createObjectURL(blob);
+        const a = document.createElement('a');
+        a.href = url;
+        a.download = 'stock_on_hand_' + new Date().toISOString().slice(0,19).replace(/[:]/g, '-') + '.xlsx';
+        document.body.appendChild(a);
+        a.click();
+        window.URL.revokeObjectURL(url);
+        a.remove();
+        
+        toast('success', 'File berhasil diunduh', 300);
+    })
+    .catch(error => {
+        console.error('Download error:', error);
+        toast('error', 'Gagal mengunduh file', 200);
+    })
+    .finally(() => {
+        $btnText.removeClass('hidden');
+        $btnLoading.addClass('hidden');
+        $btn.prop('disabled', false);
     });
 });
     </script>

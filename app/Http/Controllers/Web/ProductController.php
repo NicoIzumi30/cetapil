@@ -332,58 +332,53 @@ class ProductController extends Controller
         }
     }
 
-    // Add this new method in ProductController.php
 
     public function downloadStockOnHand(Request $request)
-    {
-        try {
-            $query = SalesAvailability::with(['product:id,sku', 'outlet:id,name']);
-    
-            // Apply filters exactly as in getDataStockOnHand method
-            if ($request->filled('filter_date')) {
-                $dateParam = $request->filter_date;
-                if (str_contains($dateParam, ' to ')) {
-                    [$startDate, $endDate] = explode(' to ', $dateParam);
-                    $query->whereBetween('created_at', [
-                        Carbon::parse($startDate)->startOfDay(),
-                        Carbon::parse($endDate)->endOfDay()
-                    ]);
-                } else {
-                    $query->whereDate('created_at', Carbon::parse($dateParam));
-                }
+{
+    try {
+        DB::enableQueryLog();
+        
+        // Ganti query yang lama dengan yang baru
+        $query = SalesAvailability::with([
+            'product:id,sku',
+            'outlet:id,name,city_id,channel_id,user_id',
+            'outlet.user:id,name',
+            'outlet.city:id,name', 
+            'outlet.channel:id,name'
+        ]);
+
+        // Sisanya tetap sama
+        if ($request->filled('filter_date') && $request->filter_date !== 'Date Range') {
+            $dateParam = $request->filter_date;
+            if (str_contains($dateParam, ' to ')) {
+                [$startDate, $endDate] = explode(' to ', $dateParam);
+                $query->whereBetween('created_at', [
+                    Carbon::parse($startDate)->startOfDay(),
+                    Carbon::parse($endDate)->endOfDay()
+                ]);
+            } else {
+                $query->whereDate('created_at', Carbon::parse($dateParam));
             }
+        }
+
+        if ($request->filled('filter_product') && $request->filter_product !== 'all') {
+            $query->where('product_id', $request->filter_product);
+        }
+
+        if ($request->filled('filter_area') && $request->filter_area !== 'all') {
+            $query->whereHas('outlet', function ($q) use ($request) {
+                $q->where('city_id', $request->filter_area);
+            });
+        }
     
-            // Apply product filter exactly as in DataTable
-            if ($request->filled('filter_product') && $request->filter_product != 'all') {
-                $query->where('product_id', $request->filter_product);
-            }
-    
-            // Apply area filter exactly as in DataTable
-            if ($request->filled('filter_area') && $request->filter_area != 'all') {
-                $query->where(function ($q) use ($request) {
-                    $q->whereHas('outlet', function ($q) use ($request) {
-                        $q->where('city_id', $request->filter_area);
-                    });
-                });
-            }
-    
-            // Get filtered data
             $data = $query->get();
     
-            // Log for debugging
-            Log::info('Download Stock On Hand Query', [
+            // Log untuk debugging
+            Log::info('Stock On Hand Export Data', [
                 'filters' => $request->all(),
-                'sql' => $query->toSql(),
-                'bindings' => $query->getBindings(),
-                'count' => $data->count()
+                'query' => DB::getQueryLog(),
+                'record_count' => $data->count()
             ]);
-    
-            if ($data->isEmpty()) {
-                return response()->json([
-                    'status' => 'error',
-                    'message' => 'Tidak ada data yang sesuai dengan filter'
-                ], 404);
-            }
     
             return Excel::download(
                 new StockOnHandExport($data),
@@ -392,16 +387,15 @@ class ProductController extends Controller
             );
     
         } catch (\Exception $e) {
-            Log::error('Stock On Hand Download Error', [
+            Log::error('Stock On Hand Export Error', [
                 'message' => $e->getMessage(),
-                'file' => $e->getFile(),
-                'line' => $e->getLine(),
+                'trace' => $e->getTraceAsString(),
                 'filters' => $request->all()
             ]);
     
             return response()->json([
-                'status' => 'error',
-                'message' => 'Gagal membuat file Excel: ' . $e->getMessage()
+                'error' => true,
+                'message' => 'Gagal mengunduh file: ' . $e->getMessage()
             ], 500);
         }
     }

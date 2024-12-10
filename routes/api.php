@@ -34,6 +34,7 @@ Route::middleware(['auth_api', 'role:sales'])->group(function () {
             Route::get('/', 'index');
             Route::get('/performance', 'performanceIndex');
             Route::get('/power-sku', 'getPowerSkus');
+            Route::get('/calendar', 'getCalendarActivities');
         });
 
     Route::prefix("outlet")->group(function () {

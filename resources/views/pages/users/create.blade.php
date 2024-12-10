@@ -148,6 +148,8 @@
                                 @endif
                             </div>
                         </div>
+                        <div class="relative mt-5">
+
                         <div class="relative mt-12">
                             <div class="h-[350px] z-10" id="user-map-location"></div>
                             <button id="fullscreen-button"
@@ -178,7 +180,6 @@
                         @endforeach
                     </x-section-card>
                     {{-- Manajemen Akun End --}}
-
                     <x-button.info class="w-full mt-20 !text-xl" type="submit">Konfirmasi</x-button.info>
                 </form>
         </div>

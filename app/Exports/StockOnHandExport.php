@@ -30,13 +30,18 @@ class StockOnHandExport implements FromCollection, WithHeadings, WithMapping, Wi
     public function headings(): array
     {
         return [
+            'Nama Sales',
             'Outlet',
+            'Kota/Area',
+            'Channel',
             'SKU',
-            'Stock-on-Hand(pcs)',
+            'Stock On-Hand',
             'Status',
             'AV3M',
             'Rekomendasi',
-            'Keterangan'
+            'Keterangan',
+            'Created At',
+            'Updated At'
         ];
     }
 
@@ -44,74 +49,85 @@ class StockOnHandExport implements FromCollection, WithHeadings, WithMapping, Wi
     {
         try {
             return [
-                $row->outlet->name,
-                $row->product->sku,
-                $row->availability_stock,
-                $row->status == '1' ? 'YES' : 'NO',
-                $row->average_stock,
-                $row->ideal_stock,
-                $row->detail
+                $row->outlet->user->name ?? 'N/A', // Nama Sales
+                $row->outlet->name ?? 'N/A', // Outlet
+                $row->outlet->city->name ?? 'N/A', // Kota/Area
+                $row->outlet->channel->name ?? 'N/A', // Channel
+                $row->product->sku ?? 'N/A', // SKU
+                $row->availability_stock ?? '0', // Stock On-Hand
+                $row->status == '1' ? 'YES' : 'NO', // Status
+                $row->average_stock ?? '0', // AV3M
+                $row->ideal_stock ?? '0', // Rekomendasi
+                $row->detail ?? 'N/A', // Keterangan
+                $row->created_at ? $row->created_at->format('Y-m-d H:i:s') : 'N/A', // Created At
+                $row->updated_at ? $row->updated_at->format('Y-m-d H:i:s') : 'N/A'  // Updated At
             ];
         } catch (\Exception $e) {
             Log::error('Error in StockOnHandExport mapping', [
-                'message' => $e->getMessage(),
-                'row_id' => $row->id ?? 'unknown'
+                'error' => $e->getMessage(),
+                'row' => $row->id ?? 'unknown'
             ]);
-            throw $e;
+            
+            return array_fill(0, 12, 'Error');
         }
     }
 
     public function styles(Worksheet $sheet)
     {
-        $lastRow = $sheet->getHighestRow();
+        try {
+            $lastRow = $sheet->getHighestRow();
+            $lastCol = 'L'; // 12 columns A to L
 
-        // Header styles
-        $sheet->getStyle("A1:G1")->applyFromArray([
-            'font' => [
-                'bold' => true,
-                'color' => ['rgb' => 'FFFFFF'],
-            ],
-            'fill' => [
-                'fillType' => Fill::FILL_SOLID,
-                'startColor' => ['rgb' => '4A90E2'],
-            ],
-            'alignment' => [
-                'horizontal' => Alignment::HORIZONTAL_CENTER,
-                'vertical' => Alignment::VERTICAL_CENTER,
-            ],
-        ]);
-
-        // Data styles
-        $sheet->getStyle("A2:G{$lastRow}")->applyFromArray([
-            'alignment' => [
-                'vertical' => Alignment::VERTICAL_CENTER,
-            ],
-            'borders' => [
-                'allBorders' => [
-                    'borderStyle' => Border::BORDER_THIN,
-                    'color' => ['rgb' => '000000'],
+            // Header styling
+            $sheet->getStyle("A1:{$lastCol}1")->applyFromArray([
+                'font' => [
+                    'bold' => true,
+                    'color' => ['rgb' => 'FFFFFF'],
                 ],
-            ],
-        ]);
+                'fill' => [
+                    'fillType' => Fill::FILL_SOLID,
+                    'startColor' => ['rgb' => '4A90E2'],
+                ],
+                'alignment' => [
+                    'horizontal' => Alignment::HORIZONTAL_CENTER,
+                    'vertical' => Alignment::VERTICAL_CENTER,
+                ],
+            ]);
 
-        // Align specific columns
-        $sheet->getStyle("A2:A{$lastRow}")->getAlignment()->setHorizontal(Alignment::HORIZONTAL_LEFT); // Outlet left aligned
-        $sheet->getStyle("B2:B{$lastRow}")->getAlignment()->setHorizontal(Alignment::HORIZONTAL_LEFT); // SKU left aligned
-        $sheet->getStyle("C2:G{$lastRow}")->getAlignment()->setHorizontal(Alignment::HORIZONTAL_CENTER); // Other columns centered
+            // Data styling
+            $sheet->getStyle("A2:{$lastCol}{$lastRow}")->applyFromArray([
+                'borders' => [
+                    'allBorders' => [
+                        'borderStyle' => Border::BORDER_THIN,
+                        'color' => ['rgb' => '000000'],
+                    ],
+                ],
+                'alignment' => [
+                    'vertical' => Alignment::VERTICAL_CENTER,
+                ],
+            ]);
 
-        // Set row height
-        $sheet->getDefaultRowDimension()->setRowHeight(25);
+            // Left align text columns
+            $sheet->getStyle("A2:D{$lastRow}")->getAlignment()->setHorizontal(Alignment::HORIZONTAL_LEFT);
+            $sheet->getStyle("E2:E{$lastRow}")->getAlignment()->setHorizontal(Alignment::HORIZONTAL_LEFT); // SKU
+            
+            // Center align numeric/status columns
+            $sheet->getStyle("F2:L{$lastRow}")->getAlignment()->setHorizontal(Alignment::HORIZONTAL_CENTER);
 
-        // Freeze panes
-        $sheet->freezePane('A2');
+            // Set row height
+            $sheet->getDefaultRowDimension()->setRowHeight(25);
 
-        // Auto-size columns
-        foreach(range('A','G') as $column) {
-            $sheet->getColumnDimension($column)->setAutoSize(true);
+            // Freeze panes
+            $sheet->freezePane('A2');
+
+            return [
+                1 => ['font' => ['bold' => true]],
+            ];
+        } catch (\Exception $e) {
+            Log::error('Error in StockOnHandExport styles', [
+                'error' => $e->getMessage()
+            ]);
+            throw $e;
         }
-
-        return [
-            1 => ['font' => ['bold' => true]],
-        ];
     }
 }

@@ -18,14 +18,16 @@ class SalesActivity extends Model
     protected $guarded = [];
 
 
-    public function outlet(): BelongsTo
-    {
-        return $this->belongsTo(Outlet::class);
-    }
+    // app/Models/SalesActivity.php
 
-    public function user(): BelongsTo
+    public function user()
     {
         return $this->belongsTo(User::class);
+    }
+
+    public function outlet()
+    {
+        return $this->belongsTo(Outlet::class);
     }
 
     public function surveys(): HasMany

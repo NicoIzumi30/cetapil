@@ -108,7 +108,10 @@
     <x-slot:cardAction>
         <x-input.search wire:model.live="search" id="global-search-activity" class="border-0"
             placeholder="Cari data visibility activity"></x-input.search>
-        <x-button.info>Download</x-button.info>
+            <x-button.info id="downloadActivityBtn">
+                <span id="downloadBtnText">Download</span>
+                <span id="downloadBtnLoading" class="hidden">Downloading...</span>
+            </x-button.info>
         <x-input.datepicker id="activity-date-range" value=""></x-input.datepicker>
     </x-slot:cardAction>
 
@@ -440,5 +443,57 @@
             container.find('input[type="file"]').val('');
             container.find('.preview-container').empty();
         }
+
+        $('#downloadActivityBtn').click(function(e) {
+    e.preventDefault();
+    
+    // Get the current date filter
+    const dateFilter = $('#activity-date-range').val();
+    
+    // Show loading state
+    const $btn = $(this);
+    const $btnText = $btn.find('#downloadBtnText');
+    const $btnLoading = $btn.find('#downloadBtnLoading');
+    
+    $btnText.addClass('hidden');
+    $btnLoading.removeClass('hidden');
+    $btn.prop('disabled', true);
+
+    // Create URL with date filter
+    const url = "{{ route('visibility.download-activity') }}?" + new URLSearchParams({
+        date: dateFilter === 'Date Range' ? '' : dateFilter
+    }).toString();
+
+    // Start download
+    fetch(url)
+        .then(response => {
+            if (!response.ok) {
+                return response.json().then(data => {
+                    throw new Error(data.message || 'Gagal mengunduh file');
+                });
+            }
+            return response.blob();
+        })
+        .then(blob => {
+            const url = window.URL.createObjectURL(blob);
+            const a = document.createElement('a');
+            a.href = url;
+            a.download = 'visibility_activity_' + new Date().toISOString().slice(0,19).replace(/[:]/g, '-') + '.xlsx';
+            document.body.appendChild(a);
+            a.click();
+            window.URL.revokeObjectURL(url);
+            document.body.removeChild(a);
+            toast('success', 'File berhasil diunduh', 500);
+        })
+        .catch(error => {
+            console.error('Download error:', error);
+            toast('error', error.message || 'Gagal mengunduh file', 300);
+        })
+        .finally(() => {
+            $btnText.removeClass('hidden');
+            $btnLoading.addClass('hidden');
+            $btn.prop('disabled', false);
+        });
+});
     </script>
 @endpush
