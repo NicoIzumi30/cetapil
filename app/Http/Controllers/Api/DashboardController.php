@@ -6,8 +6,10 @@ use App\Constants\DashboardConstants;
 use App\Http\Controllers\Controller;
 use App\Models\Outlet;
 use App\Models\SalesActivity;
+use App\Models\Selling;
 use App\Traits\HasAuthUser;
 use Carbon\Carbon;
+use Carbon\CarbonPeriod;
 use Illuminate\Database\Query\Builder;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
@@ -337,6 +339,91 @@ class DashboardController extends Controller
             'Power SKU statistics retrieved successfully',
             HTTPCode::HTTP_OK,
             $stats
+        );
+    }
+
+    public function getCalendarActivities(Request $request)
+    {
+        $user = $this->getAuthUser();
+
+        // Get month and year from request, default to current month/year
+        $month = $request->month ?? now()->month;
+        $year = $request->year ?? now()->year;
+
+        // Create date range for the specified month
+        $startDate = Carbon::createFromDate($year, $month, 1)->startOfMonth();
+        $endDate = Carbon::createFromDate($year, $month, 1)->endOfMonth();
+
+        // Get sales activities
+        $salesActivities = SalesActivity::where('user_id', $user->id)
+            ->whereNotNull('checked_out')
+            ->whereYear('checked_in', $year)
+            ->whereMonth('checked_in', $month)
+            ->get()
+            ->groupBy(function ($activity) {
+                return Carbon::parse($activity->checked_in)->format('Y-m-d');
+            });
+
+        // Get outlets created
+        $outlets = Outlet::where('user_id', $user->id)
+            ->whereYear('created_at', $year)
+            ->whereMonth('created_at', $month)
+            ->get()
+            ->groupBy(function ($outlet) {
+                return Carbon::parse($outlet->created_at)->format('Y-m-d');
+            });
+
+        // Get selling activities
+        $sellingActivities = Selling::where('user_id', $user->id)
+            ->whereYear('created_at', $year)
+            ->whereMonth('created_at', $month)
+            ->get()
+            ->groupBy(function ($selling) {
+                return Carbon::parse($selling->created_at)->format('Y-m-d');
+            });
+
+        // Create date range array for the month
+        $period = CarbonPeriod::create($startDate, $endDate);
+
+        $calendarData = [];
+        foreach ($period as $date) {
+            $dateString = $date->format('Y-m-d');
+            $calendarData[] = [
+                'date' => $dateString,
+                'day' => $date->day,
+                'activities' => [
+                    'sales' => [
+                        'has_activity' => isset($salesActivities[$dateString]),
+                        'total' => isset($salesActivities[$dateString]) ? count($salesActivities[$dateString]) : 0
+                    ],
+                    'outlets' => [
+                        'has_activity' => isset($outlets[$dateString]),
+                        'total' => isset($outlets[$dateString]) ? count($outlets[$dateString]) : 0
+                    ],
+                    'selling' => [
+                        'has_activity' => isset($sellingActivities[$dateString]),
+                        'total' => isset($sellingActivities[$dateString]) ? count($sellingActivities[$dateString]) : 0
+                    ]
+                ],
+                'has_any_activity' => (
+                    isset($salesActivities[$dateString]) ||
+                    isset($outlets[$dateString]) ||
+                    isset($sellingActivities[$dateString])
+                )
+            ];
+        }
+
+        $response = [
+            'month' => $month,
+            'year' => $year,
+            'total_days' => count($calendarData),
+            'calendar_data' => $calendarData
+        ];
+
+        return $this->successResponse(
+            'Calendar data retrieved successfully',
+            HTTPCode::HTTP_OK,
+            $response
         );
     }
 }
