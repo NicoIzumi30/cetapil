@@ -24,7 +24,7 @@ class DashboardController extends Controller
     {
         $user = $this->getAuthUser();
         $now = Carbon::now();
-        $outlet_query = Outlet::where('user_id', $user->id);
+        $outlet_query = Outlet::where('user_id', $user->id)->approved();
 
         $total_outlet = (int) DB::table(DB::raw("({$outlet_query->toSql()}) as query"))
             ->mergeBindings($outlet_query->getQuery())
