@@ -223,9 +223,9 @@ class TambahActivityController extends GetxController {
       }
 
       _timer?.cancel();
+      activityController.initGetActivity();
       EasyLoading.dismiss();
       Get.back();
-      // REFRESH LIST ACTIVITY
       CustomAlerts.showSuccess(
           Get.context!, // Use Get.context instead of the previous context
           "Data Berhasil Disimpan",

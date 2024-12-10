@@ -1,3 +1,4 @@
+import 'package:cetapil_mobile/controller/activity/detail_activity_controller.dart';
 import 'package:cetapil_mobile/controller/activity/tambah_activity_controller.dart';
 import 'package:cetapil_mobile/controller/activity/tambah_availibility_controller.dart';
 import 'package:cetapil_mobile/controller/activity/tambah_order_controller.dart';
@@ -62,9 +63,12 @@ class ActivityPage extends GetView<ActivityController> {
                                   statusCheckin: true,
                                   ontap: ()async {
                                     // Get.delete<TambahActivityController>();
-                                    if (!Get.isRegistered<TambahActivityController>()) {
-                                      Get.lazyPut(()=>TambahActivityController());
-                                    }
+                                    // if (!Get.isRegistered<TambahActivityController>()) {
+                                    //   Get.lazyPut(()=>TambahActivityController());
+                                    // }
+                                    // if (!Get.isRegistered<DetailActivityController>()) {
+                                    //   Get.lazyPut(()=>DetailActivityController());
+                                    // }
                                     if (!Get.isRegistered<TambahAvailabilityController>()) {
                                       Get.lazyPut(()=>TambahAvailabilityController());
                                     }
@@ -74,18 +78,24 @@ class ActivityPage extends GetView<ActivityController> {
                                     if (!Get.isRegistered<TambahOrderController>()) {
                                       Get.lazyPut(()=>TambahOrderController());
                                     }
-                                    if (activity.status! == "SUBMITTED") {
-                                      Get.to(() => DetailActivity(activity.id!));
-                                    }
-                                    if(activity.status! == "DRAFTED"){
 
+                                    if (activity.status! == "SUBMITTED") {
+                                      if (!Get.isRegistered<DetailActivityController>()) {
+                                        Get.lazyPut(()=>DetailActivityController());
+                                      }
+                                      final detailActivityController = Get.find<DetailActivityController>();
+                                      detailActivityController.selectedTab.value = 0;
+                                      detailActivityController.setDetailOutlet(activity);
+                                      Get.to(() => DetailActivity(activity.id!));
+                                    } else if (activity.status! == "DRAFTED"){
+                                      if (!Get.isRegistered<TambahActivityController>()) {
+                                        Get.lazyPut(()=>TambahActivityController());
+                                      }
                                       final dbActivity = ActivityDatabaseHelper.instance;
 
                                       final tambahActivityController = Get.find<TambahActivityController>();
                                       var fetchedData = await dbActivity.getDetailSalesActivity(activity.id!);
-                                      print(fetchedData!['visibilityItems']);
-                                      print("--------------------");
-                                      print(activity.visibilities);
+                                      tambahActivityController.selectedTab.value = 0;
                                       tambahActivityController.detailDraft.assignAll(fetchedData!);
                                       tambahActivityController.setDetailOutlet(activity);
                                       tambahActivityController.initDetailDraftAvailability();
@@ -94,7 +104,9 @@ class ActivityPage extends GetView<ActivityController> {
                                       Get.to(() => TambahActivity());
                                     }
                                     else{
-                                      print("tambah");
+                                      if (!Get.isRegistered<TambahActivityController>()) {
+                                        Get.lazyPut(()=>TambahActivityController());
+                                      }
                                       final tambahActivityController = Get.find<TambahActivityController>();
                                       final outlet_id = activity.outlet!.id;
                                       tambahActivityController.selectedTab.value = 0;

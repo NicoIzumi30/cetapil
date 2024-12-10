@@ -265,7 +265,7 @@ class OutletController extends GetxController {
   Future<void> refreshOutlets() async {
     try {
       isSyncing.value = true;
-      CustomAlerts.showLoading(Get.context!, "Processing", "Mengambil data outlet...");
+      // CustomAlerts.showLoading(Get.context!, "Processing", "Mengambil data outlet...");
 
       final apiResponse = await Api.getOutletList();
       if (apiResponse.status != "OK") {
