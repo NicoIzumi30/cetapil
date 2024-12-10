@@ -149,6 +149,7 @@
                             </div>
                         </div>
                         <div class="relative mt-5">
+
                         <div class="relative mt-12">
                             <div class="h-[350px] z-10" id="user-map-location"></div>
                             <button id="fullscreen-button"
@@ -168,7 +169,7 @@
                             <span id="name-error"
                                 class="text-sm text-red-600 mt-1">{{ $errors->first('permissions') }}</span>
                         @endif
-                        @foreach(['admin', 'sales', 'superadmin'] as $role)
+                        @foreach(['admin', 'sales', 'superadmin', 'merchandiser'] as $role)
                         <div id="{{ $role }}-access" class="grid-cols-3 gap-12 hidden">
                             @foreach($rolePermissions[$role] as $menu)
                                 <x-input.switch name="permissions[]" value="{{ $menu['value'] }}">
@@ -275,15 +276,19 @@
         const roleConfig = {
             "admin": {
                 showElement: 'admin-access',
-                hideElements: ['sales-access', 'superadmin-access']
+                hideElements: ['sales-access', 'superadmin-access', 'merchandiser-access']
             },
             "sales": {
                 showElement: 'sales-access',
-                hideElements: ['admin-access', 'superadmin-access']
+                hideElements: ['admin-access', 'superadmin-access', 'merchandiser-access']
+            },
+            "merchandiser": {
+                showElement: 'merchandiser-access',
+                hideElements: ['admin-access', 'superadmin-access','sales-access']
             },
             "superadmin": {
                 showElement: 'superadmin-access',
-                hideElements: ['admin-access', 'sales-access']
+                hideElements: ['admin-access', 'sales-access', 'merchandiser-access']
             }
         };
 

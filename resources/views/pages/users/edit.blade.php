@@ -19,7 +19,6 @@
                     <div class="grid grid-cols-2 gap-4">
                         <div>
                             <label for="name" class="form-label">Nama Pengguna</label>
-
                             <input id="name" class="form-control @if($errors->has('name')) is-invalid @endif"
                                 value="{{ $user->name }}" type="text" value="{{ $user->name }}" name="name"
                                 placeholder="Masukan nama pengguna" aria-describedby="name" />
@@ -35,9 +34,6 @@
                             @if ($errors->has('email'))
                                 <span id="name-error" class="text-sm text-red-600 mt-1">{{ $errors->first('email') }}</span>
                             @endif
-
-                        </div>
-                        <div>
 
                         </div>
                         <div>
@@ -174,17 +170,17 @@
                             <span id="name-error"
                                 class="text-sm text-red-600 mt-1">{{ $errors->first('permissions') }}</span>
                         @endif
-                        @foreach(['admin', 'sales', 'superadmin'] as $role)
-                                            <div id="{{ $role }}-access" class="grid-cols-3 gap-12 hidden">
-                                                @foreach($rolePermissions[$role] as $menu)
-                                                                        @php
-                                                                            $isChecked = in_array($menu['value'], $permissions) && $user->roles[0]->name === $role;
-                                                                        @endphp
-                                                                        <x-input.switch name="permissions[]" value="{{ $menu['value'] }}" :checked="$isChecked">
-                                                                            {{ $menu['label'] }}
-                                                                        </x-input.switch>
-                                                @endforeach
-                                            </div>
+                        @foreach(['admin', 'sales', 'superadmin', 'merchandiser'] as $role)
+                            <div id="{{ $role }}-access" class="grid-cols-3 gap-12 hidden">
+                                @foreach($rolePermissions[$role] as $menu)
+                                    @php
+                                        $isChecked = in_array($menu['value'], $permissions) && $user->roles[0]->name === $role;
+                                    @endphp
+                                    <x-input.switch name="permissions[]" value="{{ $menu['value'] }}" :checked="$isChecked">
+                                        {{ $menu['label'] }}
+                                    </x-input.switch>
+                                @endforeach
+                            </div>
                         @endforeach
                     </x-section-card>
                     {{-- Manajemen Akun End --}}
@@ -192,72 +188,6 @@
                     <x-button.info class="w-full mt-20 !text-xl" type="submit">Konfirmasi</x-button.info>
                 </form>
                 {{-- Manajemen Akun End --}}
-
-<<<<<<< HEAD
-
-=======
-                                <input id="latitude" class="form-control" type="text" name="latitude"
-                                    placeholder="Masukkan Koordinat Latitude" aria-describedby="latitude" />
-                            </div>
-                            <div>
-                                <label for="states-option">Kabupaten/Kota</label>
-                                <select id="states-option" name="states-option" class=" w-full">
-                                    <option value="" selected disabled>
-                                        -- Pilih Kabupaten/Kota--
-                                    </option>
-                                    <option value="sumatra">
-                                        Sumatra
-                                    </option>
-                                </select>
-                            </div>
-                            <div>
-                                <label for="address" class="form-label">Alamat Lengkap</label>
-                                <input id="address" class="form-control" type="text" name="address"
-                                    placeholder="Masukkan Alamat Lengkap" aria-describedby="address" />
-                            </div>
-                        </div>
-
-            </div>
-            <div class="relative mt-10">
-                <div class="h-[350px] z-10" id="user-map-location"></div>
-                <button id="fullscreen-button"
-                    class="absolute top-3 right-3 rounded-sm w-10 h-10 grid place-items-center bg-white z-50 hover:bg-slate-200">
-                    <svg width="32" height="32" viewBox="0 0 24 24" fill="none"
-                        xmlns="http://www.w3.org/2000/svg">
-                        <path
-                            d="M6 14C5.45 14 5 14.45 5 15V18C5 18.55 5.45 19 6 19H9C9.55 19 10 18.55 10 18C10 17.45 9.55 17 9 17H7V15C7 14.45 6.55 14 6 14ZM6 10C6.55 10 7 9.55 7 9V7H9C9.55 7 10 6.55 10 6C10 5.45 9.55 5 9 5H6C5.45 5 5 5.45 5 6V9C5 9.55 5.45 10 6 10ZM17 17H15C14.45 17 14 17.45 14 18C14 18.55 14.45 19 15 19H18C18.55 19 19 18.55 19 18V15C19 14.45 18.55 14 18 14C17.45 14 17 14.45 17 15V17ZM14 6C14 6.55 14.45 7 15 7H17V9C17 9.55 17.45 10 18 10C18.55 10 19 9.55 19 9V6C19 5.45 18.55 5 18 5H15C14.45 5 14 5.45 14 6Z"
-                            fill="#000" />
-                    </svg>
-                </button>
-            </div>
-            </x-section-card>
-            {{-- Area Domisili End --}}
-
-            {{-- Manajemen Akun --}}
-            <div id="account-management" class="hidden">
-                <x-section-card :title="'Manajemen Akun'">
-                    <div>
-                        <div class="grid grid-cols-3 gap-12 ">
-                            {{-- @foreach ($form['permissions'] as $permission) --}}
-                            <x-input.switch>Main Reports</x-input.switch>
-                            <x-input.switch>Menu Produk</x-input.switch>
-                            <x-input.switch>Menu Routing</x-input.switch>
-                            <x-input.switch>Menu Selling</x-input.switch>
-                            <x-input.switch>Menu Pengguna</x-input.switch>
-                            {{-- @endforeach --}}
-                        </div>
-                    </div>
-                </x-section-card>
-            </div>
-            {{-- Manajemen Akun End --}}
-
-            <x-button.info class="w-full mt-20 !text-xl">Konfirmasi</x-button.info>
-
-        </div>
-        </x-card>
->>>>>>> 7a905caae28221ad3bf22e6a47510d7260b56476
-=======
->>>>>>> dd005a59ad6321be875510ecb291446444e27754
         </div>
         </x-card>
     </div>
@@ -341,15 +271,19 @@
         const roleConfig = {
             "admin": {
                 showElement: 'admin-access',
-                hideElements: ['sales-access', 'superadmin-access']
+                hideElements: ['sales-access', 'superadmin-access', 'merchandiser-access']
             },
             "sales": {
                 showElement: 'sales-access',
-                hideElements: ['admin-access', 'superadmin-access']
+                hideElements: ['admin-access', 'superadmin-access', 'merchandiser-access']
+            },
+            "merchandiser": {
+                showElement: 'merchandiser-access',
+                hideElements: ['admin-access', 'superadmin-access','sales-access']
             },
             "superadmin": {
                 showElement: 'superadmin-access',
-                hideElements: ['admin-access', 'sales-access']
+                hideElements: ['admin-access', 'sales-access', 'merchandiser-access']
             }
         };
 

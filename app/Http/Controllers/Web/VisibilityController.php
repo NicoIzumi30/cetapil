@@ -1,9 +1,5 @@
 <?php
-
 namespace App\Http\Controllers\Web;
-
-namespace App\Http\Controllers\Web;
-
 use App\Http\Controllers\Controller;
 use App\Http\Requests\Visibility\CreateVisibilityRequest;
 use App\Http\Requests\Visibility\UpdateVisibilityRequest;
@@ -75,6 +71,8 @@ class VisibilityController extends Controller
                     })->orWhereHas('product', function ($q) use ($searchTerm) {
                         $q->where('sku', 'like', "%{$searchTerm}%");
                     })->orWhereHas('user', function ($q) use ($searchTerm) {
+                        $q->where('name', 'like', "%{$searchTerm}%");
+                    })->orWhereHas('visualType', function ($q) use ($searchTerm) {
                         $q->where('name', 'like', "%{$searchTerm}%");
                     });
             });
@@ -323,7 +321,21 @@ class VisibilityController extends Controller
             ], 500);
         }
     }
-
+    public function detail_activity($id){
+        $activity = SalesVisibility::with(['visibility', 'visibility.user:id,name', 'visibility.outlet:id,name','visibility.product:id,sku','visibility.visualType:id,name'])->where('id', $id)->first();
+        $data = [
+            'id' => $activity->id,
+            'outlet' => $activity->visibility->outlet->name,
+            'sku' => $activity->visibility->product->sku,
+            'sales' => $activity->visibility->user->name,
+            'visual' => $activity->visibility->visualType->name,
+            'periode' => Carbon::parse($activity->visibility->started_at)->format('d-m-Y') .' Sampai '.Carbon::parse($activity->visibility->ended_at)->format('d-m-Y'),
+            'condition' => $activity->condition,
+            'path1' => $activity->path1,
+            'path2' => $activity->path2
+        ];
+        return view('pages.visibility.visibility-activity', compact('data'));
+    } 
 
     /**
      * Remove the specified resource from storage.

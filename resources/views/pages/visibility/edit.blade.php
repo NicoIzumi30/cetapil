@@ -72,7 +72,7 @@
                         name="program_date"
                         value="{{ $visibility->program_date }}"
                         class="form-control w-full appearance-none" />
-                <i class="absolute top-10 right-6 pointer-events-none">
+                <i class="absolute top-[45px] right-6 pointer-events-none">
                     <svg width="19" height="25" viewBox="0 0 19 25" fill="none"
                         xmlns="http://www.w3.org/2000/svg">
                         <path
@@ -117,7 +117,7 @@
             </div>
         </div>
         <x-section-card>
-            <x-slot:title>Unggah Banner Program</x-slot:title>
+            <x-slot:title>Unggah Planogram</x-slot:title>
 			<div class="flex flex-col items-center w-full">
 				<div class="relative w-full mx-3 border-red">
 					<div class="flex justify-center items-center flex-col py-2 h-[260px]">

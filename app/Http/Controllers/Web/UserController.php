@@ -34,6 +34,12 @@ class UserController extends Controller
             ['value' => 'menu_outlet', 'label' => 'Menu Outlet'],
             ['value' => 'menu_activity', 'label' => 'Menu Activity'],
         ],
+        'merchandiser' => [
+            ['value' => 'menu_routing', 'label' => 'Menu Routing'],
+            ['value' => 'menu_selling', 'label' => 'Menu Selling'],
+            ['value' => 'menu_outlet', 'label' => 'Menu Outlet'],
+            ['value' => 'menu_activity', 'label' => 'Menu Activity'],
+        ],
         'superadmin' => [
             ['value' => 'menu_report', 'label' => 'Menu Reports'],
             ['value' => 'menu_product', 'label' => 'Menu Produk'],
@@ -47,37 +53,48 @@ class UserController extends Controller
     ];
     public function index(Request $request)
     {
-
-        $user = Auth::user();
-        $query = User::with('roles')
-            ->where('id', '!=', Auth::id())
-            ->orderBy('created_at', 'desc')->get();
-        
-		$perPage = $request->input('per_page', 10);
-        // Validate the per_page parameter to ensure it's one of the allowed values
-        $validPerPage = in_array($perPage, [10, 20, 30, 40, 50]) ? $perPage : 10;
-        $currentPage = request()->get('page', 1); // Get current page from URL, default to 1
-        $offset = ($currentPage - 1) * $validPerPage; // Calculate offset
-
-        // Create paginator instance with dynamic per_page value
-        $users = new LengthAwarePaginator(
-            $query->slice($offset, $validPerPage)->values(),
-            $query->count(),
-            $validPerPage,
-            $currentPage,
-            ['path' => request()->url()]
-        );
-
-        // Append the per_page parameter to pagination links
-        $users->appends(['per_page' => $validPerPage]);
-
-        return view('pages.users.index', compact('users'));
-
+        return view('pages.users.index');
     }
 
-    /** 
-     * Show the form for creating a new resource.
-     */
+    public function getData(Request $request)
+    {
+        $query = User::with('roles')
+        ->where('id', '!=', Auth::id())
+        ->orderBy('created_at', 'desc');
+        
+        if ($request->filled('search_term')) {
+            $searchTerm = $request->search_term;
+            $query->where(function($q) use ($searchTerm) {
+                $q->where('name', 'like', "%{$searchTerm}%")
+                ->orWhere('email', 'like', "%{$searchTerm}%");
+            });
+        }
+        $filteredRecords = (clone $query)->count();
+        
+        $result = $query->skip($request->start)
+                       ->take($request->length)
+                       ->get();
+        
+        return response()->json([
+            'draw' => intval($request->draw),
+            'recordsTotal' => $filteredRecords,
+            'recordsFiltered' => $filteredRecords,
+            'data' => $result->map(function($item) {
+                return [
+                    'id' => $item->id, // Tambahkan id product
+                    'name' => $item->name,
+                    'email' => $item->email,
+                    'role' => ucwords($item->roles[0]->name),
+                    'outlet_area' => $item->longitude . ', ' . $item->latitude,
+                    'status' => $item->active == 1 ? 'Aktif' : 'Tidak Aktif',
+                    'actions' => view('pages.users.action', [
+                        'item' => $item,
+                        'userId' => $item->id // Pass product id ke view actions
+                    ])->render()
+                ];
+            })
+        ]);
+    }
     public function create()
     {
         $cities = City::all();

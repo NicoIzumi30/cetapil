@@ -12,7 +12,10 @@
     </x-slot:cardTitle>
     {{-- Users Action --}}
     <x-slot:cardAction>
+        <x-input.search wire:model.live="search" id="global-search" class="border-0"
+            placeholder="Cari data pengguna"></x-input.search>
         <x-button.info href="/users/create">Tambah Pengguna</x-button.info>
+
     </x-slot:cardAction>
     {{-- Users Action End --}}
 
@@ -56,63 +59,16 @@
                 </th>
             </tr>
         </thead>
-        <tbody>
-            @forelse($users as $user)
-                {{-- Users Table --}}
-                <tr class="table-row">
-                    <td scope="row" class="table-data">
-                        {{ $user->name }}
-                    </td>
-                    <td scope="row" class="table-data">
-                        {{ $user->email }}
-                    </td>
-                    <td scope="row" class="table-data !text-[#70FFE2]">
-                        {{ ucwords($user->roles[0]->name) }}
-                    </td>
-                    <td scope="row" class="table-data !text-[#70FFE2]">
-                        {{ $user->longitude . ', ' . $user->latitude }}
-                    </td>
-                    <td scope="row" class="table-data">
-                        {{ ($user->active == 1 ? 'Aktif' : 'Tidak Aktif') }}
-                    </td>
-                    <td class="table-data">
-                        <x-action-table-dropdown>
-                            <li>
-                                <a href="{{ route('users.edit', $user->id) }}" class="dropdown-option">
-                                    Lihat Data
-                                </a>
-                            </li>
-                            <li>
-                                <a href="{{ route('users.destroy', $user->id) }}"
-                                    class="delete-btn dropdown-option text-red-400 delete-user" data-id="{{ $user->id }}" data-name="{{$user->name}}">
-                                    Hapus Data
-                                </a>
-                            </li>
-                        </x-action-table-dropdown>
-                    </td>
-                </tr>
-            @empty
-                <tr>
-                    <td colspan="6" class="text-center py-4">
-                        Tidak ada data yang ditemukan
-                    </td>
-                </tr>
-            @endforelse
-        </tbody>
     </table>
-
-    {{ $users->links() }}
-    {{-- Users Table End --}}
 </x-card>
-{{-- Users End --}}
-{{-- Users End --}}
 
 @endsection
 
 @push('scripts')
     <script>
-        $(document).ready(function () {
-            $('#users-table').DataTable({
+           let table = $('#table_user').DataTable({
+                processing: true,
+                serverSide: true,
                 paging: true,
                 searching: false,
                 info: true,
@@ -120,15 +76,48 @@
                 lengthMenu: [10, 20, 30, 40, 50],
                 dom: 'rt<"bottom-container"<"bottom-left"l><"bottom-right"p>>',
                 language: {
-                    lengthMenu: "Menampilkan _MENU_ dari 4,768 data",
+                    lengthMenu: "Menampilkan _MENU_ dari _TOTAL_ data",
                     paginate: {
                         previous: '<',
                         next: '>',
                         last: 'Terakhir',
+                    },
+                    info: "Menampilkan _START_ sampai _END_ dari _TOTAL_ data",
+                    infoEmpty: "Menampilkan 0 sampai 0 dari 0 data",
+                    emptyTable: "Tidak ada data yang tersedia"
+                },
+                ajax: {
+                    url: "{{ route('users.data') }}",
+                    data: function (d) {
+                        d.search_term = $('#global-search').val();
+                    },
+                    dataSrc: function (json) {
+                        $('.dataTables_length select').closest('.dataTables_length')
+                            .find('label')
+                            .html(` <select>${$('.dataTables_length select').html()}</select> dari ${json.recordsFiltered} data`);
+                        return json.data;
                     }
                 },
+                columns: [
+                    { data: 'name', name: 'name', className: 'table-data', },
+
+                    { data: 'email', name: 'email', className: 'table-data', },
+                    { data: 'role', name: 'role', className: 'table-data', },
+                    { data: 'outlet_area', name: 'outlet_area', className: 'table-data', },
+                    { data: 'status', name: 'status', className: 'table-data', },
+                    {
+                        data: 'actions',
+                        name: 'actions',
+                        orderable: false,
+                        searchable: false
+                    }
+                ]
             });
-        });
+            let searchTimer;
+            $('#global-search').on('input', function () {
+                clearTimeout(searchTimer);
+                searchTimer = setTimeout(() => table.ajax.reload(null, false), 500);
+            });
         $(document).ready(function () {
             $("#sales-date-range").flatpickr({
                 mode: "range"

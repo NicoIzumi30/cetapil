@@ -1,6 +1,6 @@
 @props(['title'])
 <div>
-    <select class="bg-white select-custom text-sm font-bold outline-none text-primary text-center border-r-8 border-transparent rounded-md blue px-6 py-2 hover:bg-lightBlue" {{$attributes}}>
+    <select class="bg-white select-custom text-sm font-bold outline-none text-primary text-center border-r-8 border-transparent rounded-md blue px-6 py-2 hover:bg-lightBlue max-w-[220px]" {{$attributes}}>
 		<option value="" selected disabled>{{$title}}</option>
 			{{$slot}}
     </select>
