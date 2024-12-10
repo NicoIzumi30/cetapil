@@ -1,16 +1,7 @@
 import 'dart:convert';
 import 'dart:io';
+import 'dart:typed_data';
 
-import 'package:cetapil_mobile/api/api.dart';
-import 'package:cetapil_mobile/controller/gps_controller.dart';
-import 'package:cetapil_mobile/database/database_instance.dart';
-import 'package:cetapil_mobile/database/cities.dart';
-import 'package:cetapil_mobile/model/form_outlet_response.dart';
-import 'package:cetapil_mobile/model/outlet.dart';
-import 'package:cetapil_mobile/model/get_city_response.dart';
-import 'package:cetapil_mobile/utils/image_upload.dart';
-import 'package:cetapil_mobile/widget/custom_alert.dart';
-import 'package:flutter/services.dart';
 import 'package:get/get.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_easyloading/flutter_easyloading.dart';
@@ -18,9 +9,18 @@ import 'package:path_provider/path_provider.dart';
 import 'package:uuid/uuid.dart';
 import 'package:path/path.dart' as path;
 
+import '../../api/api.dart';
+import '../../controller/gps_controller.dart';
+import '../../database/database_instance.dart';
+import '../../database/cities.dart';
+import '../../model/form_outlet_response.dart';
+import '../../model/outlet.dart';
+import '../../model/get_city_response.dart';
+import '../../utils/image_upload.dart';
+import '../../widget/custom_alert.dart';
 import '../../model/list_channel_response.dart' as channel;
 import '../../page/outlet/tambah_outlet.dart';
-import '../support_data_controller.dart';
+import '../../controller/support_data_controller.dart';
 
 class OutletController extends GetxController {
   // SECTION: Dependencies
@@ -64,7 +64,6 @@ class OutletController extends GetxController {
   // Constants
   List<String> get categories => ['GT', 'MT'];
 
-  // SECTION: Initialization
   @override
   void onInit() {
     super.onInit();
@@ -147,93 +146,6 @@ class OutletController extends GetxController {
     return true;
   }
 
-  // SECTION: Draft Management
-  Future<void> setDraftValue(Outlet outlet) async {
-    try {
-      // Basic info
-      salesName.value.text = outlet.user?.name ?? "";
-      outletName.value.text = outlet.name ?? "";
-      selectedCategory.value = outlet.category ?? "MT";
-      outletAddress.value.text = outlet.address ?? "";
-
-      // City data
-      if (outlet.city != null) {
-        cityId.value = outlet.city?.id ?? "";
-        cityName.value = outlet.city?.name ?? "";
-        selectedCity.value = Data(
-          id: outlet.city?.id ?? "",
-          name: outlet.city?.name ?? "",
-        );
-      }
-
-      // Channel data
-      if (outlet.channel != null) {
-        selectedChannel.value = channel.Data(
-          id: outlet.channel?.id ?? "",
-          name: outlet.channel?.name ?? "",
-        );
-      }
-
-      // GPS coordinates
-      gpsController.longController.value.text = outlet.longitude ?? "";
-      gpsController.latController.value.text = outlet.latitude ?? "";
-
-      // Reset and set images
-      _resetImages();
-      await _loadDraftImages(outlet);
-
-      // Handle form controllers
-      _resetFormControllers();
-      _loadDraftForms(outlet);
-
-      update();
-      Get.to(() => TambahOutlet(), arguments: {'id': outlet.id});
-    } catch (e) {
-      CustomAlerts.showError(Get.context!, "Gagal", "Gagal memuat draft: $e");
-    }
-  }
-
-  void _resetImages() {
-    outletImages.assignAll([null, null, null]);
-    imagePath.assignAll(["", "", ""]);
-    imageFilename.assignAll(["", "", ""]);
-  }
-
-  Future<void> _loadDraftImages(Outlet outlet) async {
-    if (outlet.images != null && outlet.images!.isNotEmpty) {
-      for (int i = 0; i < outlet.images!.length; i++) {
-        if (i < 3 && outlet.images![i].image != null && outlet.images![i].image!.isNotEmpty) {
-          try {
-            outletImages[i] = File(outlet.images![i].image!);
-            imagePath[i] = outlet.images![i].image!;
-            imageFilename[i] = path.basename(outlet.images![i].image!);
-          } catch (e) {
-            print('Error loading image $i: $e');
-          }
-        }
-      }
-    }
-  }
-
-  void _resetFormControllers() {
-    for (var controller in controllers) {
-      controller.clear();
-    }
-    generateControllers();
-  }
-
-  void _loadDraftForms(Outlet outlet) {
-    if (outlet.forms != null && outlet.forms!.isNotEmpty) {
-      for (int i = 0; i < outlet.forms!.length; i++) {
-        if (i < controllers.length) {
-          controllers[i].text = outlet.forms![i].answer ?? '';
-        }
-      }
-    }
-  }
-
-  // Continue in Part 2...
-
   // SECTION: Data Loading and Sync
   Future<void> loadOutlets() async {
     try {
@@ -275,7 +187,6 @@ class OutletController extends GetxController {
       await _syncOutlets(apiResponse.data ?? []);
       await loadOutlets();
 
-      CustomAlerts.dismissLoading();
       CustomAlerts.showSuccess(Get.context!, "Berhasil", "Data outlet berhasil diperbarui");
     } catch (e) {
       CustomAlerts.showError(
@@ -287,40 +198,43 @@ class OutletController extends GetxController {
   }
 
   Future<void> _syncOutlets(List<Outlet> apiOutlets) async {
-    final localOutlets = await _db.getAllOutlets();
+    try {
+      final localOutlets = await _db.getAllOutlets();
 
-    final Map<String, Outlet> apiOutletMap = {for (var outlet in apiOutlets) outlet.id!: outlet};
-    final Map<String, Outlet> localOutletMap = {
-      for (var outlet in localOutlets) outlet.id!: outlet
-    };
+      final Map<String, Outlet> apiOutletMap = {for (var outlet in apiOutlets) outlet.id!: outlet};
+      final Map<String, Outlet> localOutletMap = {
+        for (var outlet in localOutlets) outlet.id!: outlet
+      };
 
-    final List<String> toDelete = [];
-    final List<Outlet> toUpsert = [];
+      final List<String> toDelete = [];
+      final List<Outlet> toUpsert = [];
 
-    // Handle existing outlets
-    for (final localOutlet in localOutlets) {
-      if (localOutlet.dataSource == 'DRAFT') continue;
+      for (final localOutlet in localOutlets) {
+        if (localOutlet.dataSource == 'DRAFT') continue;
 
-      final id = localOutlet.id!;
-      if (apiOutletMap.containsKey(id)) {
-        final apiOutlet = apiOutletMap[id]!;
-        if (_hasChanges(localOutlet, apiOutlet)) {
+        final id = localOutlet.id!;
+        if (apiOutletMap.containsKey(id)) {
+          final apiOutlet = apiOutletMap[id]!;
+          if (_hasChanges(localOutlet, apiOutlet)) {
+            toUpsert.add(apiOutlet);
+          }
+        } else if (localOutlet.dataSource == 'API') {
+          toDelete.add(id);
+        }
+      }
+
+      for (final apiOutlet in apiOutlets) {
+        if (!localOutletMap.containsKey(apiOutlet.id)) {
           toUpsert.add(apiOutlet);
         }
-      } else if (localOutlet.dataSource == 'API') {
-        toDelete.add(id);
       }
-    }
 
-    // Add new outlets
-    for (final apiOutlet in apiOutlets) {
-      if (!localOutletMap.containsKey(apiOutlet.id)) {
-        toUpsert.add(apiOutlet);
-      }
+      if (toDelete.isNotEmpty) await _batchDelete(toDelete);
+      if (toUpsert.isNotEmpty) await _batchUpsert(toUpsert);
+    } catch (e) {
+      print('Error syncing outlets: $e');
+      throw 'Failed to sync outlets: $e';
     }
-
-    if (toDelete.isNotEmpty) await _batchDelete(toDelete);
-    if (toUpsert.isNotEmpty) await _batchUpsert(toUpsert);
   }
 
   // SECTION: Submit Operations
@@ -339,8 +253,6 @@ class OutletController extends GetxController {
 
       final response = await Api.submitOutlet(data, questions);
 
-      CustomAlerts.dismissLoading();
-
       if (response.status != "OK") {
         throw response.message ?? 'Gagal mengirim data ke server';
       }
@@ -352,6 +264,8 @@ class OutletController extends GetxController {
       _handleSubmissionSuccess();
     } catch (e) {
       _handleSubmissionError(e);
+    } finally {
+      CustomAlerts.dismissLoading();
     }
   }
 
@@ -403,8 +317,6 @@ class OutletController extends GetxController {
     };
   }
 
-// Continuing from previous part...
-
   List<FormOutletResponse> _prepareQuestions() {
     return supportController.getFormOutlet().map((form) {
       return FormOutletResponse(
@@ -426,7 +338,6 @@ class OutletController extends GetxController {
   }
 
   void _handleSubmissionError(dynamic error) {
-    CustomAlerts.dismissLoading();
     CustomAlerts.showError(
         Get.context!,
         "Gagal",
@@ -452,6 +363,8 @@ class OutletController extends GetxController {
       await _handleDraftSaveSuccess(isEditing);
     } catch (e) {
       _handleDraftSaveError(e);
+    } finally {
+      CustomAlerts.dismissLoading();
     }
   }
 
@@ -527,7 +440,6 @@ class OutletController extends GetxController {
   }
 
   Future<void> _handleDraftSaveSuccess(bool isEditing) async {
-    CustomAlerts.dismissLoading();
     clearForm();
     Get.back();
 
@@ -540,9 +452,94 @@ class OutletController extends GetxController {
   }
 
   void _handleDraftSaveError(dynamic error) {
-    CustomAlerts.dismissLoading();
     CustomAlerts.showError(Get.context!, "Gagal", error.toString());
     print('Error saving draft: $error');
+  }
+
+  // SECTION: Draft Management
+  Future<void> setDraftValue(Outlet outlet) async {
+    try {
+      // Basic info
+      salesName.value.text = outlet.user?.name ?? "";
+      outletName.value.text = outlet.name ?? "";
+      selectedCategory.value = outlet.category ?? "MT";
+      outletAddress.value.text = outlet.address ?? "";
+
+      // City data
+      if (outlet.city != null) {
+        cityId.value = outlet.city?.id ?? "";
+        cityName.value = outlet.city?.name ?? "";
+        selectedCity.value = Data(
+          id: outlet.city?.id ?? "",
+          name: outlet.city?.name ?? "",
+        );
+      }
+
+      // Channel data
+      if (outlet.channel != null) {
+        selectedChannel.value = channel.Data(
+          id: outlet.channel?.id ?? "",
+          name: outlet.channel?.name ?? "",
+        );
+      }
+
+      // GPS coordinates
+      gpsController.longController.value.text = outlet.longitude ?? "";
+      gpsController.latController.value.text = outlet.latitude ?? "";
+
+      // Reset and set images
+      _resetImages();
+      await _loadDraftImages(outlet);
+
+      // Handle form controllers
+      _resetFormControllers();
+      _loadDraftForms(outlet);
+
+      update();
+      Get.to(() => TambahOutlet(), arguments: {'id': outlet.id});
+    } catch (e) {
+      CustomAlerts.showError(Get.context!, "Gagal", "Gagal memuat draft: $e");
+    }
+  }
+
+  void _resetImages() {
+    outletImages.assignAll([null, null, null]);
+    imagePath.assignAll(["", "", ""]);
+    imageFilename.assignAll(["", "", ""]);
+  }
+
+  Future<void> _loadDraftImages(Outlet outlet) async {
+    if (outlet.images != null && outlet.images!.isNotEmpty) {
+      for (int i = 0; i < outlet.images!.length; i++) {
+        if (i < 3 && outlet.images![i].image != null && outlet.images![i].image!.isNotEmpty) {
+          try {
+            outletImages[i] = File(outlet.images![i].image!);
+            imagePath[i] = outlet.images![i].image!;
+            imageFilename[i] = path.basename(outlet.images![i].image!);
+          } catch (e) {
+            print('Error loading image $i: $e');
+          }
+        }
+      }
+    }
+  }
+
+  void _resetFormControllers() {
+    for (var controller in controllers) {
+      controller.dispose();
+    }
+    controllers.clear();
+    generateControllers();
+  }
+
+  void _loadDraftForms(Outlet outlet) {
+    if (outlet.forms != null && outlet.forms!.isNotEmpty) {
+      for (int i = 0; i < outlet.forms!.length; i++) {
+        if (i < controllers.length) {
+          controllers[i].text = outlet.forms![i].answer ?? '';
+        }
+      }
+    }
   }
 
   // SECTION: Utility Methods
@@ -567,31 +564,18 @@ class OutletController extends GetxController {
   }
 
   void setListOutletPage(int page) {
-    if (listOutletPage.value != page) {
-      listOutletPage.value = page;
-    }
+    listOutletPage.value = page;
   }
 
   List<Outlet> get filteredOutlets {
     if (searchQuery.value.isEmpty) {
-      return outlets
-          .where((outlet) => outlet.dataSource == 'DRAFT' || outlet.dataSource == 'API')
-          .toList();
+      return outlets;
     }
 
-    final filtered = outlets
+    return outlets
         .where((outlet) =>
-            (outlet.dataSource == 'DRAFT' || outlet.dataSource == 'API') &&
-            (outlet.name?.toLowerCase().contains(searchQuery.value.toLowerCase()) ?? false))
+            outlet.name?.toLowerCase().contains(searchQuery.value.toLowerCase()) ?? false)
         .toList();
-
-    filtered.sort((a, b) {
-      if (a.dataSource == 'DRAFT' && b.dataSource != 'DRAFT') return -1;
-      if (a.dataSource != 'DRAFT' && b.dataSource == 'DRAFT') return 1;
-      return 0;
-    });
-
-    return filtered;
   }
 
   List<Outlet> get filteredOutletsApproval {
@@ -610,9 +594,6 @@ class OutletController extends GetxController {
   }
 
   void generateControllers() {
-    for (var controller in controllers) {
-      controller.dispose();
-    }
     controllers.assignAll(List.generate(
         supportController.getFormOutlet().length, (index) => TextEditingController()));
   }
