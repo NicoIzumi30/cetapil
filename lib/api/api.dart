@@ -1,6 +1,7 @@
 import 'dart:convert';
 
 import 'package:cetapil_mobile/model/auth_check_response.dart';
+import 'package:cetapil_mobile/model/calendar_response.dart';
 import 'package:cetapil_mobile/model/detail_activity_response.dart';
 import 'package:cetapil_mobile/model/list_activity_response.dart';
 import 'package:cetapil_mobile/model/list_category_response.dart';
@@ -542,5 +543,22 @@ class Api {
       print('Auth check error: $e');
       throw e.toString();
     }
+  }
+
+  static Future<CalendarResponse> getCalendarDashboard(int month,int year) async {
+    var url = "$baseUrl/api/dashboard/calendar?month=$month&year=$year";
+    var token = await storage.read('token');
+    var response = await http.get(
+      Uri.parse(url),
+      headers: {
+        'Content-type': 'application/json',
+        'Authorization': 'Bearer $token',
+      },
+    );
+    if (response.statusCode == 200) {
+      return CalendarResponse.fromJson(jsonDecode(response.body));
+    }
+    print(response.statusCode);
+    throw "Gagal request data Calendar : \n${response.body}";
   }
 }

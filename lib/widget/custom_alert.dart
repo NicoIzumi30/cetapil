@@ -31,6 +31,7 @@ class CustomAlerts {
   static OverlayEntry? _loadingEntry;
   static OverlayEntry? _successEntry;
   static OverlayEntry? _errorEntry;
+  static bool _isLoading = false;
 
   static void showSuccess(BuildContext context, String title, String subtitle) {
     _successEntry?.remove();
@@ -38,7 +39,7 @@ class CustomAlerts {
       builder: (context) => _CustomAlertOverlay(
         title: title,
         subtitle: subtitle,
-        color: Color(0xFF0277BD),
+        color: Colors.green,
         pattern: checkPattern,
       ),
     );
@@ -58,7 +59,7 @@ class CustomAlerts {
       builder: (context) => _CustomAlertOverlay(
         title: title,
         subtitle: subtitle,
-        color: Color(0xFFD32F2F),
+        color: Colors.red,
         pattern: errorPattern,
       ),
     );
@@ -74,7 +75,8 @@ class CustomAlerts {
 
   static void showLoading(BuildContext? context, String title, String subtitle) {
     try {
-      dismissLoading();
+      dismissLoading(); // Clear any existing loading first
+      _isLoading = true;
 
       _loadingEntry = OverlayEntry(
         builder: (context) => _CustomLoadingOverlay(
@@ -83,19 +85,22 @@ class CustomAlerts {
         ),
       );
 
-      // Use delayed callback to ensure we're not in build phase
       Future.microtask(() {
         try {
+          if (!_isLoading) return; // Check if loading was cancelled during microtask
+
           final overlay = Navigator.of(Get.context!, rootNavigator: true).overlay;
-          if (overlay != null) {
+          if (overlay != null && _loadingEntry != null) {
             overlay.insert(_loadingEntry!);
           }
         } catch (e) {
           print('Error inserting loading overlay: $e');
+          _isLoading = false;
         }
       });
     } catch (e) {
       print('Error creating loading overlay: $e');
+      _isLoading = false;
     }
   }
 
@@ -111,19 +116,43 @@ class CustomAlerts {
 
   static void dismissLoading() {
     try {
+      _isLoading = false;
+
       if (_loadingEntry != null) {
+        final entry = _loadingEntry;
+        _loadingEntry = null;
+
         Future.microtask(() {
           try {
-            _loadingEntry?.remove();
+            entry?.remove();
           } catch (e) {
             print('Error removing loading overlay: $e');
-          } finally {
-            _loadingEntry = null;
           }
         });
       }
+
+      // Force cleanup of any stuck overlays
+      // Future.delayed(Duration(milliseconds: 100), () {
+      //   try {
+      //     final overlay = Navigator.of(Get.context!, rootNavigator: true).overlay;
+      //     if (overlay != null && overlay.mounted) {
+      //       // Instead of trying to find entries, remove the entry we're tracking
+      //       if (_loadingEntry != null) {
+      //         try {
+      //           _loadingEntry?.remove();
+      //         } catch (e) {
+      //           print('Error removing stray loading overlay: $e');
+      //         } finally {
+      //           _loadingEntry = null;
+      //         }
+      //       }
+      //     }
+      //   } catch (e) {
+      //     print('Error in force cleanup: $e');
+      //   }
+      // });
     } catch (e) {
-      print('Error dismissing loading overlay: $e');
+      print('Error in dismissLoading: $e');
     }
   }
 }
@@ -149,7 +178,7 @@ class _CustomAlertOverlay extends StatelessWidget {
       child: InkWell(
         onTap: () {
           // Dismiss the alert when tapped anywhere
-          if (this.color == Color(0xFF0277BD)) {
+          if (color == Colors.green) {
             CustomAlerts.dismissSuccess();
           } else {
             CustomAlerts.dismissError();
@@ -231,7 +260,7 @@ class _CustomLoadingOverlay extends StatelessWidget {
           constraints: BoxConstraints(maxWidth: 400),
           margin: EdgeInsets.symmetric(horizontal: 24),
           decoration: BoxDecoration(
-            color: Color(0xFF673AB7),
+            color: Color(0xFF0277BD),
             borderRadius: BorderRadius.circular(8),
           ),
           padding: EdgeInsets.all(24),
