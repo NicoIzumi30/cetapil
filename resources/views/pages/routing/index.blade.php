@@ -527,12 +527,15 @@
 $('#downloadBtnSalesActivity').click(function(e) {
     e.preventDefault();
     
+    // Ambil nilai filter yang sama persis dengan yang digunakan DataTable
     const filters = {
         search_term: $('#global-search-sales').val(),
-        filter_day: $('#filter_day_sales').val(),
+        filter_day_sales: $('#filter_day_sales').val(),
         date: $('#sales-date-range').val() === 'Date Range' ? '' : $('#sales-date-range').val(),
         filter_area: $('#filter_area').val()
     };
+
+    console.log('Download filters:', filters); // Untuk debugging
 
     const $btn = $(this);
     const $btnText = $btn.find('#downloadBtnTextSales');
@@ -542,8 +545,9 @@ $('#downloadBtnSalesActivity').click(function(e) {
     $btnLoading.removeClass('hidden');
     $btn.prop('disabled', true);
 
-    // Redirect to download
-    window.location.href = "{{ route('routing.download-sales-activity') }}?" + new URLSearchParams(filters).toString();
+    // Gunakan URLSearchParams untuk memastikan parameter terkirim dengan benar
+    const queryString = new URLSearchParams(filters).toString();
+    window.location.href = "{{ route('routing.download-sales-activity') }}?" + queryString;
     
     setTimeout(() => {
         $btnText.removeClass('hidden');

@@ -21,8 +21,8 @@
             <tr>
                 <th scope="col" class="text-center">
                     <a href="#" class="table-head sort-link" data-column="name">
-                        <{{ __('Nama') }}
-                            <x-icons.sort />
+                        {{ __('Nama') }}
+                        <x-icons.sort />
                     </a>
                 </th>
                 <th scope="col" class="text-center">

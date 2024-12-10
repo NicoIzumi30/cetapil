@@ -12,90 +12,93 @@ use PhpOffice\PhpSpreadsheet\Style\Alignment;
 use PhpOffice\PhpSpreadsheet\Style\Border;
 use PhpOffice\PhpSpreadsheet\Style\Fill;
 use Carbon\Carbon;
-
+use Illuminate\Support\Facades\Log;
 
 class SalesActivityExport implements FromCollection, WithHeadings, WithMapping, WithStyles, ShouldAutoSize
 {
     protected $data;
-    protected $filterDay;
-    protected $filterArea;
-    protected $filterDate;
 
-    public function __construct($data, $filterDay = null, $filterArea = null, $filterDate = null)
+    public function __construct($data)
     {
         $this->data = $data;
-        $this->filterDay = $filterDay;
-        $this->filterArea = $filterArea;
-        $this->filterDate = $filterDate;
+        
+        // Log data received in constructor
+        Log::info('SalesActivityExport constructed with data:', [
+            'count' => $data->count(),
+            'first_record' => $data->first()
+        ]);
     }
 
     public function collection()
     {
-        $filteredData = $this->data;
-        
-        // Filter by day
-        if ($this->filterDay && $this->filterDay !== 'all') {
-            $filteredData = $filteredData->filter(function($item) {
-                return $item->visit_day == $this->filterDay;
-            });
-        }
+        Log::info('Collection method called with data count:', [
+            'count' => $this->data->count()
+        ]);
 
-        // Filter by area
-        if ($this->filterArea && $this->filterArea !== 'all') {
-            $filteredData = $filteredData->filter(function($item) {
-                return $item->city_id == $this->filterArea;
-            });
-        }
-
-        // Filter by date range
-        if ($this->filterDate && $this->filterDate !== 'Date Range' && $this->filterDate !== '') {
-            if (str_contains($this->filterDate, ' to ')) {
-                [$startDate, $endDate] = explode(' to ', $this->filterDate);
-                $filteredData = $filteredData->filter(function($item) use ($startDate, $endDate) {
-                    $itemDate = Carbon::parse($item->created_at)->startOfDay();
-                    return $itemDate->between(
-                        Carbon::parse($startDate)->startOfDay(),
-                        Carbon::parse($endDate)->endOfDay()
-                    );
-                });
-            } else {
-                $filterDate = Carbon::parse($this->filterDate)->startOfDay();
-                $filteredData = $filteredData->filter(function($item) use ($filterDate) {
-                    return Carbon::parse($item->created_at)->startOfDay()->eq($filterDate);
-                });
-            }
-        }
-
-        return $filteredData;
+        return $this->data;
     }
-
 
     public function headings(): array
     {
         return [
             'Nama Sales',
-            'Nama Outlet',
+            'Nama Outlet', 
             'Hari Kunjungan',
             'Check-In',
             'Check-Out',
-            'Views'
+            'Views',
+            'Status',
+            'Radius Status',
+            'Time Availability',
+            'Time Visibility',
+            'Time Knowledge',
+            'Time Survey',
+            'Time Order'
         ];
     }
 
     public function map($row): array
     {
-        return [
-            $row->user->name,
-            $row->outlet->name,
-            getVisitDayByNumber($row->outlet->visit_day),
-            $row->checked_in ? Carbon::parse($row->checked_in)->format('Y-m-d H:i:s') : '-',
-            $row->checked_out ? Carbon::parse($row->checked_out)->format('Y-m-d H:i:s') : '-',
-            $row->views_knowledge ?? '0'
-        ];
+        try {
+            Log::info('Mapping row:', [
+                'id' => $row->id,
+                'user' => $row->user,
+                'outlet' => $row->outlet
+            ]);
+
+            return [
+                $row->user ? $row->user->name : 'N/A',
+                $row->outlet ? $row->outlet->name : 'N/A',
+                $row->outlet ? getVisitDayByNumber($row->outlet->visit_day ?? 0) : 'N/A',
+                $row->checked_in ? Carbon::parse($row->checked_in)->format('Y-m-d H:i:s') : 'N/A',
+                $row->checked_out ? Carbon::parse($row->checked_out)->format('Y-m-d H:i:s') : 'N/A',
+                $row->views_knowledge ?? '0',
+                $row->status ?? 'N/A',
+                $row->radius_status ?? 'N/A',
+                (string)$row->time_availability ?? '0',
+                (string)$row->time_visibility ?? '0',
+                (string)$row->time_knowledge ?? '0',
+                (string)$row->time_survey ?? '0',
+                (string)$row->time_order ?? '0'
+            ];
+        } catch (\Exception $e) {
+            Log::error('Error mapping row:', [
+                'error' => $e->getMessage(),
+                'trace' => $e->getTraceAsString(),
+                'row' => $row
+            ]);
+
+            // Return default values if mapping fails
+            return [
+                'N/A', 'N/A', 'N/A', 'N/A', 'N/A', '0', 
+                'N/A', 'N/A', '0', '0', '0', '0', '0'
+            ];
+        }
     }
+
     public function styles(Worksheet $sheet)
     {
-        $lastColumn = 'F';  // We have 6 columns (A to F)
+        $lastColumn = 'M';  // 13 columns (A to M)
         $lastRow = $sheet->getHighestRow();
 
         // Header styles
@@ -127,13 +130,15 @@ class SalesActivityExport implements FromCollection, WithHeadings, WithMapping, 
             ],
         ]);
 
-        // Set specific column alignments
-        $sheet->getStyle("A2:B{$lastRow}")->getAlignment()->setHorizontal(Alignment::HORIZONTAL_LEFT);
-        $sheet->getStyle("C2:F{$lastRow}")->getAlignment()->setHorizontal(Alignment::HORIZONTAL_CENTER);
+        // Text alignment for specific columns
+        $sheet->getStyle("A2:B{$lastRow}")->getAlignment()
+              ->setHorizontal(Alignment::HORIZONTAL_LEFT);
+        $sheet->getStyle("C2:{$lastColumn}{$lastRow}")->getAlignment()
+              ->setHorizontal(Alignment::HORIZONTAL_CENTER);
 
-        // Set row height
+        // Row height
         $sheet->getDefaultRowDimension()->setRowHeight(25);
-
+        
         // Freeze panes
         $sheet->freezePane('A2');
 

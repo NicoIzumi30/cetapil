@@ -21,9 +21,8 @@ use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Log;
 use Illuminate\Http\Request;
 use Carbon\Carbon;
-
-
-
+use App\Exports\VisibilityActivityExport;
+use Maatwebsite\Excel\Facades\Excel;
 
 class VisibilityController extends Controller
 {
@@ -120,14 +119,16 @@ class VisibilityController extends Controller
 
         if ($request->filled('search_term')) {
             $searchTerm = $request->search_term;
-            $query->whereHas('visibility', function($q) use ($searchTerm) {
-                $q->whereHas('outlet', function($q) use ($searchTerm) {
-                    $q->where('name', 'like', "%{$searchTerm}%");
-                })->orWhereHas('product', function($q) use ($searchTerm) {
-                    $q->where('sku', 'like', "%{$searchTerm}%");
-                })->orWhereHas('user', function($q) use ($searchTerm) {
+            $query->where(function ( $q) use ($searchTerm) {
+                $q->wherehas('outlet', function ($q) use ($searchTerm) {
                     $q->where('name', 'like', "%{$searchTerm}%");
                 });
+            })->orWhereHas('product', function ($q) use ($searchTerm) {
+                $q->where('sku', 'like', "%{$searchTerm}%");
+            })->orWhereHas('user', function ($q) use ($searchTerm) {
+                $q->where('name', 'like', "%{$searchTerm}%");
+            })->orWhereHas('visualType', function ($q) use ($searchTerm) {
+                $q->where('name', 'like', "%{$searchTerm}%");
             });
         }
         if ($request->filled('date')) {
@@ -351,4 +352,61 @@ class VisibilityController extends Controller
             ], 500);
         }
     }
+
+    public function downloadActivityData(Request $request)
+{
+    try {
+        $query = SalesVisibility::with(['visibility.outlet', 'visibility.product', 'visibility.user', 'visibility.visualType']);
+
+        // Apply date filter
+        if ($request->filled('date') && $request->date !== 'Date Range') {
+            $dateParam = $request->date;
+            if (str_contains($dateParam, ' to ')) {
+                [$startDate, $endDate] = explode(' to ', $dateParam);
+                $query->whereBetween('created_at', [
+                    Carbon::parse($startDate)->startOfDay(),
+                    Carbon::parse($endDate)->endOfDay()
+                ]);
+            } else {
+                $query->whereDate('created_at', Carbon::parse($dateParam));
+            }
+        }
+
+        // Get the filtered data
+        $data = $query->orderBy('created_at', 'desc')->get();
+
+        // Log for debugging
+        Log::info('Visibility Activity Export', [
+            'filters' => $request->all(),
+            'sql' => $query->toSql(),
+            'bindings' => $query->getBindings(),
+            'count' => $data->count()
+        ]);
+
+        if ($data->isEmpty()) {
+            return response()->json([
+                'status' => 'error',
+                'message' => 'Tidak ada data yang sesuai dengan filter'
+            ], 404);
+        }
+
+        return Excel::download(
+            new VisibilityActivityExport($data),
+            'visibility_activity_' . now()->format('Y-m-d_His') . '.xlsx'
+        );
+
+    } catch (\Exception $e) {
+        Log::error('Visibility Activity Download Error', [
+            'message' => $e->getMessage(),
+            'file' => $e->getFile(),
+            'line' => $e->getLine(),
+            'filters' => $request->all()
+        ]);
+
+        return response()->json([
+            'status' => 'error',
+            'message' => 'Gagal membuat file Excel: ' . $e->getMessage()
+        ], 500);
+    }
+}
 }

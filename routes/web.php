@@ -34,6 +34,7 @@ Route::middleware('auth')->group(function () {
     Route::get('/profile', [ProfileController::class, 'index'])->name('profile');
 
     Route::post('/profile/update-password', [ProfileController::class, 'updatePassword'])->name('profile.update-password');
+    Route::post('/profile/update', [ProfileController::class, 'updateProfile'])->name('profile.update');
 
     Route::prefix('routing/sales/activity')->name('routing.sales.activity.')->middleware('permission:menu_routing')->group(function () {
         Route::get('/data', [SalesActivityController::class, 'getData'])->name('data');
@@ -80,6 +81,8 @@ Route::get('/routing/download-sales-activity', [RoutingController::class, 'downl
 
         Route::get('/visibility/products/{category}', [VisibilityController::class, 'getProducts'])
             ->name('visibility.products');
+            Route::get('/visibility/download-activity', [VisibilityController::class, 'downloadActivityData'])
+        ->name('visibility.download-activity');
     });
 
 
@@ -109,8 +112,8 @@ Route::get('/routing/download-sales-activity', [RoutingController::class, 'downl
             ->name('generate-excel');
         Route::get('/data', [ProductController::class, 'getData'])->name('data');
         Route::get('/data-stock-on-hand', [ProductController::class, 'getDataStockOnHand'])->name('data-stock-on-hand');
-        Route::get('/products/download-stock-on-hand', [ProductController::class, 'downloadStockOnHand'])
-    ->name('products.download-stock-on-hand');
+        Route::get('/download-stock-on-hand', [ProductController::class, 'downloadStockOnHand'])
+        ->name('download-stock-on-hand');
     });
     Route::resource('products', ProductController::class)->middleware('permission:menu_product');
     // Logout

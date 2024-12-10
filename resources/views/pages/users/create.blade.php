@@ -148,15 +148,8 @@
                                 @endif
                             </div>
                         </div>
-<<<<<<< HEAD
-<<<<<<< HEAD
                         <div class="relative mt-5">
-=======
                         <div class="relative mt-12">
->>>>>>> 7a905caae28221ad3bf22e6a47510d7260b56476
-=======
-                        <div class="relative mt-12">
->>>>>>> dd005a59ad6321be875510ecb291446444e27754
                             <div class="h-[350px] z-10" id="user-map-location"></div>
                             <button id="fullscreen-button"
                                 class="absolute top-3 right-3 rounded-sm w-10 h-10 grid place-items-center bg-white z-50 hover:bg-slate-200">
@@ -170,10 +163,6 @@
                         </div>
                     </x-section-card>
                     {{-- Area Domisili End --}}
-<<<<<<< HEAD
-<<<<<<< HEAD
-=======
->>>>>>> dd005a59ad6321be875510ecb291446444e27754
                     <x-section-card :title="'Manajemen Akun'">
                         @if ($errors->has('permissions'))
                             <span id="name-error"
@@ -189,30 +178,7 @@
                         </div>
                         @endforeach
                     </x-section-card>
-<<<<<<< HEAD
-=======
-
-                    {{-- Manajemen Akun --}}
-                    <div id="account-management" class="hidden">
-                        <x-section-card :title="'Manajemen Akun'">
-                            <div>
-                                <div class="grid grid-cols-3 gap-12 ">
-                                    {{-- @foreach ($form['permissions'] as $permission) --}}
-                                    <x-input.switch>Main Reports</x-input.switch>
-                                    <x-input.switch>Menu Produk</x-input.switch>
-                                    <x-input.switch>Menu Routing</x-input.switch>
-                                    <x-input.switch>Menu Selling</x-input.switch>
-                                    <x-input.switch>Menu Pengguna</x-input.switch>
-                                    {{-- @endforeach --}}
-                                </div>
-                            </div>
-                        </x-section-card>
-                    </div>
->>>>>>> 7a905caae28221ad3bf22e6a47510d7260b56476
                     {{-- Manajemen Akun End --}}
-=======
->>>>>>> dd005a59ad6321be875510ecb291446444e27754
-
                     <x-button.info class="w-full mt-20 !text-xl" type="submit">Konfirmasi</x-button.info>
                 </form>
         </div>

@@ -14,6 +14,7 @@
                     </x-slot:cardTitle>
                     {{-- Profil Pengguna --}}
                     <div class="grid grid-cols-2 gap-4">
+                        
                         <div class="mb-4">
                             <label for="name" class="form-label">Nama Pengguna</label>
                             <input id="name" class="form-control" type="text" name="name"
