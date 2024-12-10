@@ -2,8 +2,10 @@ import 'dart:async';
 
 import 'package:cetapil_mobile/api/api.dart';
 import 'package:cetapil_mobile/controller/activity/activity_controller.dart';
+import 'package:cetapil_mobile/controller/activity/tambah_availibility_controller.dart';
 import 'package:cetapil_mobile/controller/activity/tambah_order_controller.dart';
 import 'package:cetapil_mobile/controller/activity/tambah_visibility_controller.dart';
+import 'package:cetapil_mobile/controller/support_data_controller.dart';
 import 'package:cetapil_mobile/model/survey_question_response.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_easyloading/flutter_easyloading.dart';
@@ -16,7 +18,14 @@ import '../../model/list_activity_response.dart' as Activity;
 import '../../widget/custom_alert.dart';
 
 class TambahActivityController extends GetxController {
-  final activityController = Get.find<ActivityController>();
+  late ActivityController activityController = Get.find<ActivityController>();
+  late TambahAvailabilityController tambahAvailabilityController = Get.find<TambahAvailabilityController>();
+  late TambahVisibilityController tambahVisibilityController = Get.find<TambahVisibilityController>();
+  late TambahOrderController tambahOrderController = Get.find<TambahOrderController>();
+  late SupportDataController supportController = Get.find<SupportDataController>();
+  // final activityController = Get.find<ActivityController>();
+  // final tambahAvailabilityController = Get.find<TambahAvailabilityController>();
+  // final tambahOrderController = Get.find<TambahOrderController>();
   final TextEditingController controller = TextEditingController();
   final db = ActivityDatabaseHelper.instance;
   final api = Api();
@@ -82,9 +91,89 @@ class TambahActivityController extends GetxController {
   final orderTime = 0.obs;
   Timer? _timer;
 
+  // final groupedItemsAvailability = <String, List<Map<String, dynamic>>>{};
+  //
+  initDetailDraftAvailability(){
+    print(detailDraft.isNotEmpty);
+    if (detailDraft.isNotEmpty) {
+      for (var data in detailDraft["availabilityItems"]) {
+
+        final item = tambahAvailabilityController.getSkuByDataApi(data['product_id']);
+        final newItem = {
+          'id': data['product_id'],
+          'sku': item!['sku'],
+          'category': item['category']['name'],
+          'stock': data['available_stock'],
+          'av3m': data['average_stock'],
+          'recommend': data['ideal_stock'],
+        };
+        addAvailabilityItem(newItem);
+        tambahAvailabilityController.clearForm();
+      }
+    }
+  }
+
+  initDetailDraftOrder(){
+    print(detailDraft.isNotEmpty);
+    if (detailDraft.isNotEmpty) {
+      for (var data in detailDraft["orderItems"]) {
+
+        final item = tambahAvailabilityController.getSkuByDataApi(data['product_id']);
+        final newItem = {
+          'id': data['product_id'],
+          'category': item!['category']['name'],
+          'sku': item['sku'],
+          'jumlah': data['jumlah'],
+          'harga': data['harga'],
+        };
+        addOrderItem(newItem);
+        tambahOrderController.clearForm();
+      }
+    }
+  }
+
+
+  initDetailDraftVisibility(){
+    final allVisibilities = detailOutlet.value!.visibilities ?? [];
+    final visibilityDraft = detailDraft["visibilityItems"];
+
+    if (allVisibilities.isNotEmpty && visibilityDraft != null ) {
+      for(var dataApi in allVisibilities){
+        for (var dataDraft in visibilityDraft) {
+          final posmType = supportController
+              .getPosmTypes()
+              .firstWhereOrNull((posm) => posm['id'] == dataApi.posmTypeId);
+          final visualType = supportController
+              .getVisualTypes()
+              .firstWhereOrNull((visual) => visual['id'] == dataApi.visualTypeId);
+          final newItem = {
+            'id': dataApi.id,
+            'posm_type_id': dataApi.posmTypeId,
+            'posm_type_name': posmType!['name'],
+            'visual_type_id': dataApi.visualTypeId,
+            'visual_type_name': visualType!['name'],
+            'condition': dataDraft['condition'],
+            /// ERROR KARNA dataDraft['image1'] ADALAH STRING
+            'image1': File(dataDraft['image1']),
+            'image2': File(dataDraft['image2']),
+          };
+          addVisibilityItem(newItem);
+          tambahVisibilityController.clearForm();
+        }
+      }
+    }
+  }
+
   @override
   void onInit() {
     super.onInit();
+    // activityController = Get.find<ActivityController>();
+    // tambahAvailabilityController = Get.find<TambahAvailabilityController>();
+    // tambahOrderController = Get.find<TambahOrderController>();
+    // supportController = Get.find<SupportDataController>();
+    // tambahVisibilityController = Get.find<TambahVisibilityController>();
+    // initDetailDraftAvailability();
+    // initDetailDraftOrder();
     // initGetSurveyQuestion();
     // initListCategory();
 

@@ -181,10 +181,10 @@ class InitialBindings extends Bindings {
     // Get.put(() => GPSLocationController(), permanent: true);
     // Get.put(() => ConnectivityController(),permanent: true);
     // Get.lazyPut(()=>TambahActivityController() , permanent: true);
-    Get.put(()=>TambahActivityController() , permanent: true);
-    Get.lazyPut(()=>TambahAvailabilityController());
-    Get.lazyPut(()=>TambahVisibilityController());
-    Get.lazyPut(()=>TambahOrderController());
+    // Get.put(()=>TambahActivityController() , permanent: true);
+    // Get.put(()=>TambahAvailabilityController(), permanent: true);
+    // Get.lazyPut(()=>TambahVisibilityController());
+    // Get.lazyPut(()=>TambahOrderController());
     Get.lazyPut(() => SupportDataController());
     Get.lazyPut(() => LoginController());
     Get.lazyPut(() => BottomNavController());

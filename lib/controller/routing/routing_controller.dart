@@ -1,3 +1,5 @@
+import 'dart:async';
+
 import 'package:cetapil_mobile/controller/gps_controller.dart';
 import 'package:cetapil_mobile/controller/outlet/outlet_controller.dart';
 import 'package:cetapil_mobile/model/list_routing_response.dart';
@@ -64,17 +66,23 @@ class RoutingController extends GetxController {
   Future<void> refreshRoutingData() async {
     try {
       isSyncing.value = true;
-      CustomAlerts.showLoading(Get.context!, "Processing", "Mengambil data routing...");
+      // CustomAlerts.showLoading(Get.context!, "Processing", "Mengambil data routing...");
 
       await _clearExistingData();
-      final response = await _fetchRoutingData();
+      final response = await _fetchRoutingData().timeout(
+        Duration(seconds: 5),
+        onTimeout: () => throw TimeoutException('API timeout'),
+      );
       await _processRoutingData(response);
 
       CustomAlerts.dismissLoading();
       CustomAlerts.showSuccess(Get.context!, "Berhasil", "Data routing berhasil diperbarui");
-    } catch (e) {
-      _handleError('Gagal mengambil data: Periksa koneksi Anda dan coba lagi');
-    } finally {
+    } on TimeoutException catch (e) {
+      print("error $e");
+      CustomAlerts.dismissLoading();
+        _handleError('Gagal mengambil data: Periksa koneksi Anda dan coba lagi');
+    }
+    finally {
       isSyncing.value = false;
       CustomAlerts.dismissLoading();
     }

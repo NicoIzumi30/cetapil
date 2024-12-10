@@ -18,7 +18,7 @@ const String BASE_URL = 'https://dev-cetaphil.i-am.host/storage/';
 class VisibilityPage extends GetView<ActivityController> {
   final supportController = Get.find<SupportDataController>();
   final tambahActivityController = Get.find<TambahActivityController>();
-  final tambahVisibilityController = Get.find<TambahVisibilityController>();
+  // final tambahVisibilityController = Get.find<TambahVisibilityController>();
 
   @override
   Widget build(BuildContext context) {
@@ -27,36 +27,7 @@ class VisibilityPage extends GetView<ActivityController> {
         Obx(() {
           // final allVisibilities =
           //     controller.activity.expand((activity) => activity.visibilities ?? []).toList();
-          final allVisibilities =
-              tambahActivityController.detailOutlet.value!.visibilities ?? [];
-          final visibilityDraft = tambahActivityController.detailDraft["visibilityItems"];
-
-          if (allVisibilities.isNotEmpty && visibilityDraft != null ) {
-            for(var dataApi in allVisibilities){
-              for (var dataDraft in visibilityDraft ) {
-                final posmType = supportController
-                    .getPosmTypes()
-                    .firstWhereOrNull((posm) => posm['id'] == dataApi.posmTypeId);
-                final visualType = supportController
-                    .getVisualTypes()
-                    .firstWhereOrNull((visual) => visual['id'] == dataApi.visualTypeId);
-                final newItem = {
-                  'id': dataApi.id,
-                  'posm_type_id': dataApi.posmTypeId,
-                  'posm_type_name': posmType!['name'],
-                  'visual_type_id': dataApi.visualTypeId,
-                  'visual_type_name': visualType!['name'],
-                  'condition': dataDraft['condition'],
-                  /// ERROR KARNA dataDraft['image1'] ADALAH STRING
-                  'image1': File(dataDraft['image1']),
-                  'image2': File(dataDraft['image2']),
-                };
-                tambahActivityController.addVisibilityItem(newItem);
-                tambahVisibilityController.clearForm();
-              }
-            }
-
-          }
+          final allVisibilities = tambahActivityController.detailOutlet.value!.visibilities ?? [];
 
           if (allVisibilities.isEmpty) {
             return Center(
@@ -82,7 +53,6 @@ class VisibilityPage extends GetView<ActivityController> {
               final visualType = supportController
                   .getVisualTypes()
                   .firstWhereOrNull((visual) => visual['id'] == visibility.visualTypeId);
-print(visibility.image);
               return VisibilityCard(
                 visibility: visibility,
                 posmTypeName: posmType?['name'] ?? 'Unknown POSM Type',
@@ -98,6 +68,7 @@ print(visibility.image);
                     'posmType': posmType,
                     'visualType': visualType,
                     'visibility': visibility,
+                    'condition': "Good",
                   });
 
                   Get.to(() => TambahVisibility());

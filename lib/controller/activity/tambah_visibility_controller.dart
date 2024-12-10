@@ -6,7 +6,7 @@ import '../../controller/support_data_controller.dart';
 
 class TambahVisibilityController extends GetxController {
   final activityController = Get.find<TambahActivityController>();
-  final supportDataController = Get.find<SupportDataController>();
+  // final supportDataController = Get.find<SupportDataController>();
 
   final posmType = ''.obs;
   final posmTypeId = ''.obs;

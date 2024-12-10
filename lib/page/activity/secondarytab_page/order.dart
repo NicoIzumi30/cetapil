@@ -3,37 +3,60 @@ import 'package:cetapil_mobile/page/activity/secondarytab_page/tambah_order.dart
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:get/get.dart';
-import '../../../controller/activity/tambah_availibility_controller.dart';
 import '../../../controller/activity/tambah_order_controller.dart';
 import '../../../utils/colors.dart';
 
 class OrderPage extends GetView<TambahActivityController> {
-  final tambahAvailabilityController = Get.find<TambahAvailabilityController>();
-  final tambahOrderController = Get.find<TambahOrderController>();
   @override
   Widget build(BuildContext context) {
 
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
+        SizedBox(
+          width: double.infinity,
+          child: ElevatedButton(
+            style: ElevatedButton.styleFrom(
+              backgroundColor: AppColors.primary,
+              shape: RoundedRectangleBorder(
+                borderRadius: BorderRadius.circular(10),
+                side: BorderSide(color: AppColors.primary),
+              ),
+            ),
+            onPressed: () {
+              if (!Get.isRegistered<TambahOrderController>()) {
+                Get.put(TambahOrderController());
+              }
+              Get.to(() => TambahOrder());
+            },
+            child: Text(
+              "Tambah Order",
+              style: TextStyle(
+                color: Colors.white,
+                fontWeight: FontWeight.bold,
+              ),
+            ),
+          ),
+        ),
+        SizedBox(height: 20),
         Obx(() {
           final groupedItems = <String, List<Map<String, dynamic>>>{};
 
-          if (controller.detailDraft.isNotEmpty) {
-            for (var data in controller.detailDraft["orderItems"]) {
-
-              final item = tambahAvailabilityController.getSkuByDataApi(data['product_id']);
-              final newItem = {
-                'id': data['product_id'],
-                'category': item!['category']['name'],
-                'sku': item['sku'],
-                'jumlah': data['jumlah'],
-                'harga': data['harga'],
-              };
-              controller.addOrderItem(newItem);
-              tambahOrderController.clearForm();
-            }
-          }
+          // if (controller.detailDraft.isNotEmpty) {
+          //   for (var data in controller.detailDraft["orderItems"]) {
+          //
+          //     final item = tambahAvailabilityController.getSkuByDataApi(data['product_id']);
+          //     final newItem = {
+          //       'id': data['product_id'],
+          //       'category': item!['category']['name'],
+          //       'sku': item['sku'],
+          //       'jumlah': data['jumlah'],
+          //       'harga': data['harga'],
+          //     };
+          //     controller.addOrderItem(newItem);
+          //     tambahOrderController.clearForm();
+          //   }
+          // }
 
           // Use orderDraftItems from TambahActivityController
           for (var item in controller.orderDraftItems) {
@@ -82,32 +105,7 @@ class OrderPage extends GetView<TambahActivityController> {
             ],
           );
         }),
-        SizedBox(height: 20),
-        SizedBox(
-          width: double.infinity,
-          child: ElevatedButton(
-            style: ElevatedButton.styleFrom(
-              backgroundColor: AppColors.primary,
-              shape: RoundedRectangleBorder(
-                borderRadius: BorderRadius.circular(10),
-                side: BorderSide(color: AppColors.primary),
-              ),
-            ),
-            onPressed: () {
-              if (!Get.isRegistered<TambahOrderController>()) {
-                Get.put(TambahOrderController());
-              }
-              Get.to(() => TambahOrder());
-            },
-            child: Text(
-              "Tambah Order",
-              style: TextStyle(
-                color: Colors.white,
-                fontWeight: FontWeight.bold,
-              ),
-            ),
-          ),
-        ),
+
       ],
     );
   }
