@@ -5,8 +5,8 @@ import '../../controller/support_data_controller.dart';
 
 // tambah_order_controller.dart (continued)
 class TambahOrderController extends GetxController {
-  final supportDataController = Get.find<SupportDataController>();
-  final activityController = Get.find<TambahActivityController>();
+  late SupportDataController supportDataController = Get.find<SupportDataController>();
+  late TambahActivityController activityController = Get.find<TambahActivityController>();
 
   // Selected values
   final selectedCategory = Rxn<String>();

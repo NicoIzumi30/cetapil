@@ -18,6 +18,33 @@ class AvailabilityPage extends GetView<TambahActivityController> {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
+        SizedBox(
+          width: double.infinity,
+          child: ElevatedButton(
+            style: ElevatedButton.styleFrom(
+              backgroundColor: AppColors.primary,
+              shape: RoundedRectangleBorder(
+                borderRadius: BorderRadius.circular(10),
+                side: BorderSide(color: AppColors.primary),
+              ),
+            ),
+            onPressed: () {
+              if (!Get.isRegistered<TambahAvailabilityController>()) {
+                Get.put(TambahAvailabilityController());
+              }
+              // tambahAvailabilityController.clearForm();
+              Get.to(() => TambahAvailability());
+            },
+            child: Text(
+              "Tambah Availability",
+              style: TextStyle(
+                color: Colors.white,
+                fontWeight: FontWeight.bold,
+              ),
+            ),
+          ),
+        ),
+        SizedBox(height: 20),
         Obx(() {
           final groupedItemsAvailability = <String, List<Map<String, dynamic>>>{};
 
@@ -75,33 +102,6 @@ class AvailabilityPage extends GetView<TambahActivityController> {
             ],
           );
         }),
-        SizedBox(height: 20),
-        SizedBox(
-          width: double.infinity,
-          child: ElevatedButton(
-            style: ElevatedButton.styleFrom(
-              backgroundColor: AppColors.primary,
-              shape: RoundedRectangleBorder(
-                borderRadius: BorderRadius.circular(10),
-                side: BorderSide(color: AppColors.primary),
-              ),
-            ),
-            onPressed: () {
-              if (!Get.isRegistered<TambahAvailabilityController>()) {
-                Get.put(TambahAvailabilityController());
-              }
-              // tambahAvailabilityController.clearForm();
-              Get.to(() => TambahAvailability());
-            },
-            child: Text(
-              "Tambah Availability",
-              style: TextStyle(
-                color: Colors.white,
-                fontWeight: FontWeight.bold,
-              ),
-            ),
-          ),
-        ),
       ],
     );
   }

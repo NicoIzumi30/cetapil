@@ -14,9 +14,6 @@ import '../../widget/dialog.dart';
 import '../outlet/detail_outlet.dart';
 
 class TambahActivity extends GetView<TambahActivityController> {
-  TambahActivity( {
-    super.key,
-  });
 
   @override
   Widget build(BuildContext context) {

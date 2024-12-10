@@ -68,22 +68,29 @@ class ActivityPage extends GetView<ActivityController> {
                                     if (!Get.isRegistered<TambahAvailabilityController>()) {
                                       Get.lazyPut(()=>TambahAvailabilityController());
                                     }
-                                    // if (!Get.isRegistered<TambahVisibilityController>()) {
-                                    //   Get.lazyPut(()=>TambahVisibilityController());
-                                    // }
+                                    if (!Get.isRegistered<TambahVisibilityController>()) {
+                                      Get.lazyPut(()=>TambahVisibilityController());
+                                    }
                                     if (!Get.isRegistered<TambahOrderController>()) {
                                       Get.lazyPut(()=>TambahOrderController());
                                     }
-                                    if (activity.status! == "APPROVAL") {
+                                    if (activity.status! == "SUBMITTED") {
                                       Get.to(() => DetailActivity(activity.id!));
                                     }
                                     if(activity.status! == "DRAFTED"){
+
                                       final dbActivity = ActivityDatabaseHelper.instance;
+
                                       final tambahActivityController = Get.find<TambahActivityController>();
                                       var fetchedData = await dbActivity.getDetailSalesActivity(activity.id!);
-                                      print("/// ${fetchedData!["orderItems"]}");
+                                      print(fetchedData!['visibilityItems']);
+                                      print("--------------------");
+                                      print(activity.visibilities);
                                       tambahActivityController.detailDraft.assignAll(fetchedData!);
                                       tambahActivityController.setDetailOutlet(activity);
+                                      tambahActivityController.initDetailDraftAvailability();
+                                      tambahActivityController.initDetailDraftOrder();
+                                      tambahActivityController.initDetailDraftVisibility();
                                       Get.to(() => TambahActivity());
                                     }
                                     else{
