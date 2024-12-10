@@ -16,7 +16,7 @@ class DetailAvailabilityPage extends GetView<DetailActivityController> {
         Obx(() {
           final groupedItemsAvailability = <String, List<Map<String, dynamic>>>{};
 
-          for (var item in controller.availabilityDraftItems) {
+          for (var item in controller.availabilitItems) {
             final category = item['category'];
             if (groupedItemsAvailability[category] == null) {
               groupedItemsAvailability[category] = [];

@@ -14,11 +14,10 @@ import 'package:get/get.dart';
 
 import 'detail_item_visibility.dart';
 
-const String BASE_URL = 'https://dev-cetaphil.i-am.host/storage/';
+const String BASE_URL = 'https://dev-cetaphil.i-am.host/storage';
 
-class DetailVisibilityPage extends GetView<ActivityController> {
+class DetailVisibilityPage extends GetView<DetailActivityController> {
   final supportController = Get.find<SupportDataController>();
-  final detailActivityController = Get.find<DetailActivityController>();
 
   @override
   Widget build(BuildContext context) {
@@ -26,7 +25,7 @@ class DetailVisibilityPage extends GetView<ActivityController> {
       children: [
         Obx(() {
           // final allVisibilities = detailActivityController.detailOutlet.value!.visibilities ?? [];
-          final allVisibilities = detailActivityController.visibilityDraftItems;
+          final allVisibilities = controller.visibilityItems;
 
           if (allVisibilities.isEmpty) {
             return Center(
@@ -57,23 +56,16 @@ class DetailVisibilityPage extends GetView<ActivityController> {
                 posmTypeName: posmType?['name'] ?? 'Unknown POSM Type',
                 visualTypeName: visualType?['name'] ?? 'Unknown Visual Type',
                 onTapCard: () {
-                  // if (!Get.isRegistered<DetailActivityController>()) {
-                  //   Get.put(DetailActivityController());
-                  // }
-                  if (!Get.isRegistered<TambahVisibilityController>()) {
-                    Get.put(TambahVisibilityController());
-                  }
+                  final itemData = {
+                    'posm_type_name': posmType!['name'],
+                    'visual_type_name': visualType!['name'],
+                    'condition': visibility['condition'],
+                    'planogram': visibility['planogram'],
+                    'image1': visibility['image1'],
+                    'image2': visibility['image2'],
+                  };
 
-                  // final controller = Get.find<TambahVisibilityController>();
-
-                  // controller.editItem({
-                  //   'posmType': posmType,
-                  //   'visualType': visualType,
-                  //   'visibility': visibility,
-                  //   'condition': "Good",
-                  // });
-
-                  Get.to(() => DetailItemVisibility());
+                  Get.to(() => DetailItemVisibility(itemData));
                 },
               );
             },
@@ -104,23 +96,23 @@ class VisibilityCard extends StatelessWidget {
       return null;
     }
     String path = imagePath.startsWith('/') ? imagePath.substring(1) : imagePath;
-    print('---$BASE_URL$path--');
-    return '$BASE_URL$path';
+    return '$BASE_URL/$path';
   }
 
   Widget _buildImage() {
     final detailActivityController = Get.find<DetailActivityController>();
 
     // Check for draft image first
-    final draftItem = detailActivityController.visibilityDraftItems
+    final draftItem = detailActivityController.visibilityItems
         .firstWhereOrNull((draft) => draft['id'] == visibility['id']);
 
+    print("$BASE_URL${draftItem!['image1']}");
     if (draftItem != null && draftItem['image1'] != null) {
       // Show draft image1 if available
       return ClipRRect(
         borderRadius: BorderRadius.circular(10),
         child: Image.network(
-          draftItem['image1'],
+          "$BASE_URL${draftItem!['image1']}",
           width: 120,
           height: 120,
           fit: BoxFit.cover,
@@ -214,7 +206,7 @@ class VisibilityCard extends StatelessWidget {
     return Obx(() {
       // Check if this visibility exists in draft items
       final hasDraft =
-      detailActivityController.visibilityDraftItems.any((draft) => draft['id'] == visibility['id']);
+      detailActivityController.visibilityItems.any((draft) => draft['id'] == visibility['id']);
 
       return InkWell(
         onTap: onTapCard,

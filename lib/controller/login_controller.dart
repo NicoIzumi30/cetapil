@@ -6,6 +6,7 @@ import 'package:cetapil_mobile/controller/activity/tambah_visibility_controller.
 import 'package:cetapil_mobile/controller/bottom_nav_controller.dart';
 import 'package:cetapil_mobile/controller/dashboard/dashboard_controller.dart';
 import 'package:cetapil_mobile/controller/outlet/outlet_controller.dart';
+import 'package:cetapil_mobile/controller/pdf_controller.dart';
 import 'package:cetapil_mobile/controller/routing/routing_controller.dart';
 import 'package:cetapil_mobile/controller/routing/tambah_routing_controller.dart';
 import 'package:cetapil_mobile/controller/selling/selling_controller.dart';
@@ -236,6 +237,7 @@ class LoginController extends GetxController {
     Get.lazyPut(() => RoutingController(), fenix: true);
     Get.lazyPut(() => SellingController(), fenix: true);
     Get.lazyPut(() => VideoController(), fenix: true);
+    Get.lazyPut(() => PdfController(), fenix: true);
     Get.lazyPut(() => SupportDataController(), fenix: true);
 
     // Activity related controllers
@@ -258,6 +260,7 @@ class LoginController extends GetxController {
     Get.delete<RoutingController>(force: true);
     Get.delete<SellingController>(force: true);
     Get.delete<VideoController>(force: true);
+    Get.delete<PdfController>(force: true);
     Get.delete<SupportDataController>(force: true);
 
     // Activity related controllers

@@ -1,4 +1,5 @@
 import 'package:cetapil_mobile/api/api.dart';
+import 'package:cetapil_mobile/controller/pdf_controller.dart';
 import 'package:cetapil_mobile/database/dashboard.dart';
 import 'package:cetapil_mobile/model/dashboard.dart';
 import 'package:cetapil_mobile/page/login.dart';
@@ -109,6 +110,7 @@ class DashboardController extends GetxController {
         SellingController,
         TambahActivityController,
         VideoController,
+        PdfController,
         TambahRoutingController,
         TambahAvailabilityController,
         TambahVisibilityController,

@@ -7,7 +7,7 @@ import '../../../widget/dialog.dart';
 import '../../../widget/text_field.dart';
 import '../secondarytab_page/tambah_availability.dart';
 
-class DetailItemAvailability extends GetView<TambahAvailabilityController> {
+class DetailItemAvailability extends StatelessWidget {
   const DetailItemAvailability(this.detailItem, {super.key});
 
   final Map<String, dynamic> detailItem;

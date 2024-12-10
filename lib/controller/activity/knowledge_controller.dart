@@ -7,11 +7,13 @@ class KnowledgeController extends GetxController {
   final supportDataController = Get.find<SupportDataController>();
   final activityController = Get.find<TambahActivityController>();
   final videoPath = Rxn<String>();
+  final urlVideo = Rxn<String>();
 
   @override
   void onInit() {
     super.onInit();
     initVideoPath();
+    initPdfPath();
   }
 
   initVideoPath() {
@@ -25,5 +27,9 @@ class KnowledgeController extends GetxController {
     } else {
       videoPath.value = null;
     }
+  }
+
+  initPdfPath(){
+    urlVideo.value = supportDataController.getKnowledge().first['path_pdf'];
   }
 }

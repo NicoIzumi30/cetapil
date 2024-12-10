@@ -27,6 +27,7 @@ import 'controller/connectivity_controller.dart';
 import 'controller/dashboard/dashboard_controller.dart';
 import 'controller/gps_controller.dart';
 import 'controller/login_controller.dart';
+import 'controller/pdf_controller.dart';
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
@@ -194,6 +195,7 @@ class InitialBindings extends Bindings {
     Get.lazyPut(() => RoutingController());
     Get.lazyPut(() => SellingController());
     Get.lazyPut(() => VideoController());
+    Get.lazyPut(() => PdfController());
     Get.lazyPut(() => TambahRoutingController());
     Get.lazyPut(() => TambahProdukSellingController());
     // Add other controllers...

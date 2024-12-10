@@ -132,7 +132,6 @@ class TambahActivityController extends GetxController {
     }
   }
 
-
   initDetailDraftVisibility(){
     final allVisibilities = detailOutlet.value!.visibilities ?? [];
     final visibilityDraft = detailDraft["visibilityItems"];
@@ -163,6 +162,7 @@ class TambahActivityController extends GetxController {
       }
     }
   }
+
 
   @override
   void onInit() {

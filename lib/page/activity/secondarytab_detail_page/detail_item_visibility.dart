@@ -9,10 +9,13 @@ import '../../../utils/image_upload.dart';
 import '../../../widget/back_button.dart';
 import '../../../widget/dialog.dart';
 import '../../../widget/dropdown_textfield.dart';
+import '../../../widget/text_field.dart';
 
 const String BASE_URL = 'https://dev-cetaphil.i-am.host/storage/';
 
-class DetailItemVisibility extends GetView<TambahVisibilityController> {
+class DetailItemVisibility extends StatelessWidget {
+  const DetailItemVisibility(this.detailItem, {super.key});
+  final Map<String, dynamic> detailItem;
   String? _getImageUrl(String? imagePath) {
     if (imagePath == null || imagePath.isEmpty) return null;
 
@@ -60,11 +63,11 @@ class DetailItemVisibility extends GetView<TambahVisibilityController> {
                             children: [
                               _buildReadOnlyField(
                                 label: "Jenis Visibility",
-                                value: controller.posmType.value,
+                                value: detailItem["posm_type_name"],
                               ),
                               _buildReadOnlyField(
                                 label: "Jenis Visual",
-                                value: controller.visualType.value,
+                                value: detailItem['visual_type_name'],
                               ),
                               Text(
                                 "Planogram",
@@ -76,8 +79,8 @@ class DetailItemVisibility extends GetView<TambahVisibilityController> {
                                 height: 200,
                                 child: ClipRRect(
                                   borderRadius: BorderRadius.circular(10),
-                                  child: controller.visibility?.image != null
-                                      ? _buildPlanogramImage(controller.visibility?.image)
+                                  child: detailItem['planogram'] != null
+                                      ? _buildPlanogramImage(detailItem['planogram'])
                                       : Container(
                                     color: Colors.grey[200],
                                     child: Center(
@@ -88,56 +91,18 @@ class DetailItemVisibility extends GetView<TambahVisibilityController> {
                                 ),
                               ),
                               SizedBox(height: 15),
-                              CustomDropdown(
-                                  hint: "-- Pilih condition --",
-                                  value: controller.selectedCondition.value.isEmpty
-                                      ? null
-                                      : controller.selectedCondition.value,
-                                  items: ["Good", "Bad"].map((item) {
-                                    return DropdownMenuItem<String>(
-                                      value: item,
-                                      child: Text(item),
-                                    );
-                                  }).toList(),
-                                  onChanged: (value) {
-                                    controller.selectedCondition.value = value!;
-                                  },
-                                  title: "Condition"),
-                              _buildImageUploader(context, "Foto Visibility 1", 0),
-                              _buildImageUploader(context, "Foto Visibility 2", 1),
+                              ModernTextField(
+                                enable: false,
+                                title: "Condition",
+                                controller:
+                                TextEditingController(text: detailItem['condition']),
+                              ),
+                              _buildImageUploader( "Foto Visibility 1", detailItem['image1'] ?? ""),
+                              _buildImageUploader( "Foto Visibility 2", detailItem['image2'] ?? ""),
                             ],
                           ),
                         )
                       ],
-                    ),
-                  ),
-                ),
-                Padding(
-                  padding: const EdgeInsets.fromLTRB(15, 0, 15, 15),
-                  child: Container(
-                    width: double.infinity,
-                    decoration: BoxDecoration(
-                        color: Colors.white.withOpacity(0.3),
-                        borderRadius: BorderRadius.circular(10)),
-                    child: Padding(
-                      padding: const EdgeInsets.symmetric(horizontal: 15, vertical: 10),
-                      child: ElevatedButton(
-                        style: ElevatedButton.styleFrom(
-                          backgroundColor: AppColors.primary,
-                          shape: RoundedRectangleBorder(
-                            borderRadius: BorderRadius.circular(10),
-                            side: BorderSide(color: AppColors.primary),
-                          ),
-                        ),
-                        onPressed: () => controller.saveVisibility(),
-                        child: Text(
-                          "Simpan Visibility",
-                          style: TextStyle(
-                            color: Colors.white,
-                            fontWeight: FontWeight.bold,
-                          ),
-                        ),
-                      ),
                     ),
                   ),
                 ),
@@ -229,7 +194,7 @@ class DetailItemVisibility extends GetView<TambahVisibilityController> {
     );
   }
 
-  Widget _buildImageUploader(BuildContext context, String title, int index) {
+  Widget _buildImageUploader(String title,String url) {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
@@ -238,78 +203,43 @@ class DetailItemVisibility extends GetView<TambahVisibilityController> {
           style: TextStyle(fontSize: 13, fontWeight: FontWeight.w700),
         ),
         SizedBox(height: 10),
-        Obx(() {
-          final image = controller.visibilityImages[index];
-          final isUploading = controller.isImageUploading[index];
-
-          return GestureDetector(
-            onTap: isUploading
-                ? null
-                : () async {
-              final File? result = await ImageUploadUtils.showImageSourceSelection(context, currentImage: image);
-              if (result != null) {
-                controller.updateImage(index, result);
-              }
+        Container(
+          width: double.infinity,
+          height: 150,
+          margin: const EdgeInsets.only(bottom: 10),
+          decoration: BoxDecoration(
+            color: const Color(0xFFEDF8FF),
+            border: Border.all(color: Colors.blue, width: 1),
+            borderRadius: BorderRadius.circular(8),
+          ),
+          child: url.isNotEmpty
+              ? Image.network(
+            "$BASE_URL$url",
+            fit: BoxFit.cover,
+            loadingBuilder: (context, child, loadingProgress) {
+              if (loadingProgress == null) return child;
+              return const Center(
+                child: CircularProgressIndicator(),
+              );
             },
-            child: Container(
-              width: double.infinity,
-              height: 150,
-              margin: EdgeInsets.only(bottom: 10),
-              decoration: BoxDecoration(
-                color: Color(0xFFEDF8FF),
-                border: Border.all(color: Colors.blue, width: 1),
-                borderRadius: BorderRadius.circular(8),
-                image: image != null
-                    ? DecorationImage(
-                  image: FileImage(image),
-                  fit: BoxFit.cover,
-                )
-                    : null,
-              ),
-              child: isUploading
-                  ? Center(child: CircularProgressIndicator())
-                  : image == null
-                  ? Column(
-                mainAxisAlignment: MainAxisAlignment.center,
-                children: [
-                  Icon(Icons.camera_alt, color: Colors.black),
-                  Text(
-                    "Klik disini untuk ambil foto dengan kamera",
-                    style: TextStyle(
-                      fontSize: 8,
-                      fontWeight: FontWeight.bold,
-                      color: Colors.blue,
-                    ),
-                  ),
-                  Text(
-                    "Kualitas foto harus jelas dan tidak blur",
-                    style: TextStyle(fontSize: 7, color: Colors.blue),
-                  ),
-                ],
-              )
-                  : Stack(
-                alignment: Alignment.topRight,
-                children: [
-                  Positioned(
-                    right: 4,
-                    top: 4,
-                    child: GestureDetector(
-                      onTap: () => controller.updateImage(index, null),
-                      child: Container(
-                        padding: EdgeInsets.all(4),
-                        decoration: BoxDecoration(
-                          color: Colors.white.withOpacity(0.8),
-                          shape: BoxShape.circle,
-                        ),
-                        child: Icon(Icons.close, size: 16, color: Colors.red),
-                      ),
-                    ),
-                  ),
-                ],
-              ),
+            errorBuilder: (context, error, stackTrace) {
+              return const Center(
+                child: Icon(
+                  Icons.error_outline,
+                  color: Colors.red,
+                  size: 40,
+                ),
+              );
+            },
+          )
+              : const Center(
+            child: Icon(
+              Icons.image,
+              color: Colors.grey,
+              size: 40,
             ),
-          );
-        }),
+          ),
+        )
       ],
     );
   }

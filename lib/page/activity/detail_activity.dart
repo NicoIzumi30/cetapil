@@ -1,6 +1,9 @@
 import 'package:cetapil_mobile/controller/activity/tambah_activity_controller.dart';
 import 'package:cetapil_mobile/controller/activity/tambah_availibility_controller.dart';
+import 'package:cetapil_mobile/controller/activity/tambah_order_controller.dart';
 import 'package:cetapil_mobile/page/activity/secondarytab_detail_page/availability.dart';
+import 'package:cetapil_mobile/page/activity/secondarytab_detail_page/order.dart';
+import 'package:cetapil_mobile/page/activity/secondarytab_detail_page/survey.dart';
 import 'package:cetapil_mobile/page/activity/secondarytab_detail_page/visibility.dart';
 import 'package:cetapil_mobile/page/activity/secondarytab_page/availability.dart';
 import 'package:cetapil_mobile/page/activity/secondarytab_page/knowledge.dart';
@@ -84,10 +87,12 @@ class DetailActivity extends GetView<DetailActivityController> {
   Column buildDetailPage(DetailActivityResponse snapshot) {
     final detailActivityController = Get.find<DetailActivityController>();
     final tambahAvailabilityController = Get.find<TambahAvailabilityController>();
+    final tambahOrderController = Get.find<TambahOrderController>();
     late SupportDataController supportController = Get.find<SupportDataController>();
     final allVisibilities = controller.detailOutlet.value!.visibilities ?? [];
 
-    detailActivityController.availabilityDraftItems.value = snapshot.data?.availabilities?.map((item) => {
+    /// AVAILABILITY SECTION
+    detailActivityController.availabilitItems.value = snapshot.data?.availabilities?.map((item) => {
       'id': item.id,
       'sku': tambahAvailabilityController.getSkuByDataApi(item.productId!)!['sku'],
       'category': tambahAvailabilityController.getSkuByDataApi(item.productId!)!['category']['name'],
@@ -95,8 +100,10 @@ class DetailActivity extends GetView<DetailActivityController> {
       'av3m': item.averageStock,
       'recommend': item.idealStock,
     }).toList() ?? [];
-    tambahAvailabilityController.clearForm();
+    // tambahAvailabilityController.clearForm();
 
+
+    ///VISIBILITY SECTION
     if (snapshot.data!.visibilities!.isNotEmpty) {
       for(var dataApi in allVisibilities) {
         for (var item in snapshot.data!.visibilities!) {
@@ -118,21 +125,20 @@ class DetailActivity extends GetView<DetailActivityController> {
             'image1': item.path1,
             'image2': item.path2,
           };
-          detailActivityController.visibilityDraftItems.add(newItem);
+          detailActivityController.visibilityItems.add(newItem);
         }
       }
     }
-    // detailActivityController.visibilityDraftItems.value = snapshot.data?.visibilities?.map((item) => {
-    //   'id': item.id,
-    //   'posm_type_id': dataApi.posmTypeId,
-    //   'posm_type_name': posmType!['name'],
-    //   'visual_type_id': dataApi.visualTypeId,
-    //   'visual_type_name': visualType!['name'],
-    //   'condition': item.condition,
-    //   'image1': item.path1,
-    //   'image2': item.path2,
-    // }).toList() ?? [];
 
+    ///ORDER SECTION
+    detailActivityController.orderItems.value = snapshot.data?.orders?.map((item) => {
+      'id': item.id,
+      'sku': tambahAvailabilityController.getSkuByDataApi(item.productId!)!['sku'],
+      'category': tambahAvailabilityController.getSkuByDataApi(item.productId!)!['category']['name'],
+      'jumlah': item.totalItems,
+      'harga': item.subtotal,
+    }).toList() ?? [];
+    // tambahAvailabilityController.clearForm();
 
 
 
@@ -165,9 +171,9 @@ class DetailActivity extends GetView<DetailActivityController> {
                 case 2:
                   return KnowledgePage();
                 case 3:
-                  return SurveyPage();
+                  return DetailSurveyPage();
                 default:
-                  return OrderPage();
+                  return DetailOrderPage();
               }
             }),
           ),

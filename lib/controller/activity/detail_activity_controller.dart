@@ -1,4 +1,6 @@
 
+import 'package:flutter/material.dart';
+
 import '../../model/list_activity_response.dart' as Activity;
 import 'package:get/get.dart';
 
@@ -16,7 +18,22 @@ class DetailActivityController extends GetxController {
     detailOutlet.value = data;
   }
 
-  final availabilityDraftItems = <Map<String, dynamic>>[].obs;
-  final orderDraftItems = <Map<String, dynamic>>[].obs;
-  final visibilityDraftItems = <Map<String, dynamic>>[].obs;
+  final Map<String, TextEditingController> priceControllers = {};
+  final Map<String, RxBool> switchStates = {};
+
+  bool getSwitchValue(String id) {
+    return switchStates[id]?.value ?? true;
+  }
+
+  void toggleSwitch(String id, bool value) {
+    final switchValue = switchStates[id];
+    if (switchValue != null) {
+      switchValue.value = value;
+    }
+  }
+
+  final availabilitItems = <Map<String, dynamic>>[].obs;
+  final orderItems = <Map<String, dynamic>>[].obs;
+  final visibilityItems = <Map<String, dynamic>>[].obs;
+  final surveyItems = <Map<String, dynamic>>[].obs;
 }

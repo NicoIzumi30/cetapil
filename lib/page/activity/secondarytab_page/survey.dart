@@ -10,7 +10,6 @@ import '../../../utils/price_formatter.dart';
 
 class SurveyPage extends GetView<TambahActivityController> {
   final SupportDataController supportController = Get.find<SupportDataController>();
-  // final TambahAvailabilityController availibilityController = Get.find<TambahAvailabilityController>();
 
   _buildSectionTitle(Map<String, dynamic> questionGroup) {
     if (questionGroup['title'] != null) {
