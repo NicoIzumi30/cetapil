@@ -121,7 +121,7 @@ class DashboardPage extends GetView<DashboardController> {
                                   style: TextStyle(fontSize: 10, color: Colors.blue),
                                 ),
                                 Text(
-                                  "${controller.dashboard.value?.data?.region ?? ""}",
+                                  "${controller.dashboard.value?.data?.region ?? "-"}",
                                   style: TextStyle(fontSize: 10, fontWeight: FontWeight.bold),
                                 ),
                               ],
@@ -130,7 +130,7 @@ class DashboardPage extends GetView<DashboardController> {
                               children: [
                                 Text("Outlet", style: TextStyle(fontSize: 10, color: Colors.blue)),
                                 Text(
-                                    "${controller.dashboard.value?.data?.currentOutlet?.name ?? ""}",
+                                    "${controller.dashboard.value?.data?.currentOutlet?.name ?? "-"}",
                                     style: TextStyle(fontSize: 10, fontWeight: FontWeight.bold))
                               ],
                             ),

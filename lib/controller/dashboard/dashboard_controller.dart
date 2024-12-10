@@ -44,7 +44,7 @@ class DashboardController extends GetxController {
   // New observables for location data
   final RxString currentOutletName = "".obs;
   final RxString checkInTime = "".obs;
-  final RxString outletDistance = "".obs;
+  final RxString outletDistance = "-".obs;
 
   // Carousel data
   final List<String> imageUrls = [
@@ -164,12 +164,12 @@ class DashboardController extends GetxController {
           outletDistance.value = "${distance.toStringAsFixed(2)} m";
         }
       } else {
-        outletDistance.value = "";
+        outletDistance.value = "-";
       }
     } else {
       currentOutletName.value = "";
       checkInTime.value = "";
-      outletDistance.value = "";
+      outletDistance.value = "-";
     }
   }
 
