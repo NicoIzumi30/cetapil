@@ -46,7 +46,7 @@
                 <div class="flex gap-4 w-full">
                     <div class="w-full">
                         <label for="pamflet_file" class="!text-black">
-                            Unggah Pamflet
+                            Unggah Flyer
                             <div id="pamfletFileUpload" class="flex mt-2">
                                 <input type="text" id="pamfletFileNameDisplay" readonly disabled
                                     class="form-control mt-0 border-r-none"

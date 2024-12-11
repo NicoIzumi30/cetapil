@@ -2,6 +2,12 @@
 	--primary : #0077BD;
 }
 
+input[type=number]::-webkit-inner-spin-button, 
+input[type=number]::-webkit-outer-spin-button {
+  -webkit-appearance: none;
+  margin: 0;
+}
+
 .form-control {
     border-radius: 8px !important;
     border: 1px solid #0077BD;

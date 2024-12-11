@@ -31,7 +31,7 @@
 		</div>
 		<div>
 			<label for="edit-md-price" class="!text-black">Harga MD</label>
-			<input id="edit-md-price" class="form-control" wire:model="edit-md-price"
+			<input id="edit-md-price" type="number" class="form-control" wire:model="edit-md-price"
 				name="edit-md-price" placeholder="Masukan Harga MD"
 				aria-describedby="edit-md-price" value="">
 			@error('edit-md-price')
@@ -44,7 +44,7 @@
 			<label for="edit-sales-price" class="!text-black">Harga Sales</label>
 			<input id="edit-sales-price"
 				class="form-control @error('edit-sales-price') is-invalid @enderror"
-				type="text" wire:model="edit-sales-price" name="edit-sales-price"
+				type="number" wire:model="edit-sales-price" name="edit-sales-price"
 				placeholder="Masukan Harga Sales" aria-describedby="edit-sales-price"
 				value="">
 			@error('edit-sales-price')
