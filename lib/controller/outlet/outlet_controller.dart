@@ -201,7 +201,9 @@ class OutletController extends GetxController {
     try {
       final localOutlets = await _db.getAllOutlets();
 
-      final Map<String, Outlet> apiOutletMap = {for (var outlet in apiOutlets) outlet.id!: outlet};
+      final Map<String, Outlet> apiOutletMap = {
+        for (var outlet in apiOutlets) outlet.id!: outlet
+      };
       final Map<String, Outlet> localOutletMap = {
         for (var outlet in localOutlets) outlet.id!: outlet
       };

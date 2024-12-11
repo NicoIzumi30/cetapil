@@ -127,7 +127,6 @@ class SumAmountProduct extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final availabilityController = Get.find<TambahAvailabilityController>();
     final activityController = Get.find<TambahActivityController>();
 
     return Container(

@@ -223,6 +223,11 @@ class TambahActivityController extends GetxController {
       }
 
       _timer?.cancel();
+      /// check apabila data ada di sqlite, maka hapus data
+      bool isExists = await db.checkSalesActivityExists(detailOutlet.value!.id!);
+      if (isExists) {
+        await db.deleteSalesActivity(detailOutlet.value!.id!);
+      }
       activityController.initGetActivity();
       EasyLoading.dismiss();
       Get.back();

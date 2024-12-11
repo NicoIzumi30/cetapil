@@ -63,13 +63,14 @@ class DetailSurveyPage extends GetView<DetailActivityController> {
         }
         return BooleanQuestion(
           title: survey['question'] ?? '',
+          answer: survey['answer'],
           surveyId: id,
           controller: controller,
         );
       } else if (survey['type'] == 'text') {
         return PriceQuestion(
           title: survey['question'] ?? '',
-          controller: controller.priceControllers[id] ?? TextEditingController(),
+          controller:  TextEditingController(text: survey['answer']),
         );
       }
       return const SizedBox.shrink();
@@ -80,13 +81,49 @@ class DetailSurveyPage extends GetView<DetailActivityController> {
   Widget build(BuildContext context) {
     return Obx(() {
       var questionGroup = <Map<String, dynamic>>[];
-      questionGroup = supportController.getSurvey();
+
+
+      questionGroup = supportController.getSurvey().map((entry) {
+        var surveys = entry['surveys'] as List;
+        // var filteredSurveys = surveys.where((survey) {
+        //   return controller.surveyItems.any((d) => d['survey_question_id'] == survey['id']);
+        // }).toList();
+
+        var filteredSurveys = surveys
+            .where((survey) {
+          return controller.surveyItems.any((d) => d['survey_question_id'] == survey['id']);
+        })
+            .map((survey) {
+          var matchingItem = controller.surveyItems.firstWhere(
+                  (d) => d['survey_question_id'] == survey['id']
+          );
+          return {
+            ...survey,
+            'answer': matchingItem['answer']
+          };
+        })
+            .toList();
+
+        // print(filteredSurveys);
+
+        return {
+          'id': entry['id'],
+          'title': entry['title'],
+          'name': entry['name'],
+          'surveys': filteredSurveys
+        };
+      }).toList();
+
+      // questionGroup = supportController.getSurvey();
+
+
 
       return ListView.builder(
       shrinkWrap: true,
       physics: const NeverScrollableScrollPhysics(),
       itemCount: questionGroup.length,
       itemBuilder: (context, index) {
+        // print(questionGroup[5]);
         return Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
@@ -105,6 +142,7 @@ class DetailSurveyPage extends GetView<DetailActivityController> {
 
 class BooleanQuestion extends StatelessWidget {
   final String title;
+  final String answer;
   final String surveyId;
   final DetailActivityController controller;
 
@@ -112,7 +150,7 @@ class BooleanQuestion extends StatelessWidget {
     super.key,
     required this.title,
     required this.surveyId,
-    required this.controller,
+    required this.controller, required this.answer,
   });
 
   @override
@@ -128,14 +166,14 @@ class BooleanQuestion extends StatelessWidget {
               ),
             ),
             const SizedBox(width: 10),
-            Obx(() => CustomSegmentedSwitch(
-              value: controller.getSwitchValue(surveyId),
+           CustomSegmentedSwitch(
+              value: answer.toLowerCase() == 'true',
               onChanged: (value) {
-                controller.toggleSwitch(surveyId, value);
+                // controller.toggleSwitch(surveyId, value);
               },
               activeColor: Colors.blue,
               inactiveColor: Colors.white,
-            )),
+            )
           ],
         ),
         const SizedBox(height: 10),
@@ -172,6 +210,7 @@ class PriceQuestion extends StatelessWidget {
               width: 140,
               child: TextFormField(
                 controller: controller,
+                readOnly: true,
                 style: const TextStyle(
                   fontSize: 14,
                   color: Color(0xFF0077BD),

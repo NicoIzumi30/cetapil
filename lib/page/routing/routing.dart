@@ -79,10 +79,10 @@ class RoutingPage extends GetView<RoutingController> {
                         bool? checkInStatus;
 
                         if (salesActivity != null) {
-                          if (salesActivity.checkedIn != null) {
-                            checkInStatus = true;
-                          } else if (salesActivity.checkedOut != null) {
+                          if (salesActivity.checkedOut != null) {
                             checkInStatus = false;
+                          } else if (salesActivity.checkedIn != null) {
+                            checkInStatus = true;
                           }
                         }
 

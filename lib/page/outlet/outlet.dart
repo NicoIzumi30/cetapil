@@ -227,6 +227,7 @@ class OutletCard extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    print(outlet.images!.first.image);
     return Container(
       margin: const EdgeInsets.only(bottom: 16),
       decoration: BoxDecoration(
@@ -397,7 +398,8 @@ class OutletCard extends StatelessWidget {
                             );
                           },
                           style: OutlinedButton.styleFrom(
-                            foregroundColor: Colors.red,
+                            foregroundColor: Colors.white,
+                            backgroundColor: Colors.red[400],
                             minimumSize: const Size(80, 36),
                             shape: RoundedRectangleBorder(
                               borderRadius: BorderRadius.circular(8),
@@ -416,23 +418,24 @@ class OutletCard extends StatelessWidget {
               children: [
                 ClipRRect(
                   borderRadius: BorderRadius.circular(8),
-                  child: outlet.images != null && outlet.images!.isNotEmpty
-                      ? Image.file(
-                          File(outlet.images!.first.image ?? ''),
+                  ///check if image is not null and image is not from draft
+                  child: outlet.images != null && outlet.images!.isNotEmpty && !outlet.images!.first.image!.contains("/data".toLowerCase())
+                      ? Image.network(
+                          "https://dev-cetaphil.i-am.host${outlet.images!.first.image}",
                           width: 100,
                           height: 100,
                           fit: BoxFit.cover,
                           errorBuilder: (context, error, stackTrace) {
-                            return Image.asset(
-                              "assets/carousel1.png",
-                              width: 100,
+                            return Container(
                               height: 100,
-                              fit: BoxFit.cover,
+                              width: 100,
+                              color: Colors.black12,
+                              child: Icon(Icons.error),
                             );
                           },
                         )
-                      : Image.asset(
-                          "assets/carousel1.png",
+                      : Image.file(
+                          File(outlet.images!.first.image!),
                           width: 100,
                           height: 100,
                           fit: BoxFit.cover,

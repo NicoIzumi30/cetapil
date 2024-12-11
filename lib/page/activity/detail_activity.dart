@@ -140,6 +140,12 @@ class DetailActivity extends GetView<DetailActivityController> {
     }).toList() ?? [];
     // tambahAvailabilityController.clearForm();
 
+    detailActivityController.surveyItems.value = snapshot.data?.surveys?.map((item) => {
+      "id" : item.id,
+      "sales_activity_id": item.salesActivityId,
+      "survey_question_id": item.surveyQuestionId,
+      "answer": item.answer,
+    } ).toList() ?? [];
 
 
     return Column(
