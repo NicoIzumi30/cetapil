@@ -41,6 +41,12 @@
                     </th>
                     <th scope="col" class="text-center">
                         <a class="table-head">
+                            {{ __('Total Penjualan') }}
+                            <x-icons.sort />
+                        </a>
+                    </th>
+                    <th scope="col" class="text-center">
+                        <a class="table-head">
                             Aksi
                         </a>
                     </th>
@@ -92,6 +98,7 @@
                     { data: 'waktu', name: 'waktu', className: 'table-data', },
                     { data: 'sales', name: 'sales', className: 'table-data', },
                     { data: 'outlet', name: 'outlet', className: 'table-data', },
+                    { data: 'total', name: 'total', className: 'table-data', },
                     {
                         data: 'actions',
                         name: 'actions',

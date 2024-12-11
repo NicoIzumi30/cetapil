@@ -54,7 +54,7 @@ class RoutingExcelDataJob implements ShouldQueue
                                 'code' => $row['kode_store'],
                                 'name' => $row['nama_outlet'],
                                 'category' => $row['kategori_outlet'],
-                                'channel'=> $channel->id,
+                                'channel_id'=> $channel->id,
                                 'visit_day' => $visitDay,
                                 'longitude' => $row['longtitude'],
                                 'latitude' => $row['latitude'],

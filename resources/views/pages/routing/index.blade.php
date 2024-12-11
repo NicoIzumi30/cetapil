@@ -135,18 +135,19 @@
     </x-slot:cardTitle>
     {{-- Sales Activity Action --}}
     <x-slot:cardAction>
-        <x-input.search wire:model.live="search" id="global-search-sales" class="border-0" placeholder="Cari data sales"></x-input.search>
+        <x-input.search wire:model.live="search" id="global-search-sales" class="border-0"
+            placeholder="Cari data sales"></x-input.search>
         <x-select.light :title="'Filter Hari'" id="filter_day_sales" name="day">
-        <option value="all">Semua</option>
+            <option value="all">Semua</option>
             @foreach ($waktuKunjungan as $hari)
                 <option value="{{$hari['value']}}">{{$hari['name']}}</option>
             @endforeach
         </x-select.light>
         <x-select.light :title="'Filter Area'" id="filter_area" name="area">
-        <option value="all">Semua</option>
-        @foreach ($cities as $city)
-            <option value="{{$city->id}}">{{$city->name}}</option>
-        @endforeach
+            <option value="all">Semua</option>
+            @foreach ($cities as $city)
+                <option value="{{$city->id}}">{{$city->name}}</option>
+            @endforeach
         </x-select.light>
         <x-input.datepicker id="sales-date-range" value=""></x-input.datepicker>
         <x-button.light id="downloadBtnSalesActivity">
@@ -388,73 +389,133 @@
         $('#channel').select2();
         $('#updateBtn').click(function (e) {
             e.preventDefault();
-            const maxSize = 10 * 1024 * 1024;
+
+            // Konstanta untuk validasi
+            const MAX_VIDEO_SIZE = 5 * 1024 * 1024; // 5MB
+            const MAX_PDF_SIZE = 5 * 1024 * 1024;   // 5MB
+            const MAX_VIDEO_DURATION = 180; // 3 menit dalam detik
+            const MAX_VIDEO_HEIGHT = 360;   // 360p resolution
+
             const formData = new FormData();
             const pdfFile = $('#pamflet_file')[0].files[0];
             const videoFile = $('#video_file')[0].files[0];
+
+            // Fungsi untuk menampilkan toast
+            function showToast(type, message) {
+                toast(type, message, 200);
+            }
+
+            // Validasi PDF
             if (pdfFile) {
-                if (pdfFile.size > maxSize) {
-                    toast('error', 'Ukuran file PDF tidak boleh lebih dari 10MB', 200);
+                if (pdfFile.size > MAX_PDF_SIZE) {
+                    showToast('error', 'Ukuran file PDF tidak boleh lebih dari 5MB');
                     return;
                 }
                 if (!pdfFile.type.includes('pdf')) {
-                    toast('error', 'File harus berformat PDF', 200);
+                    showToast('error', 'File harus berformat PDF');
                     return;
                 }
                 formData.append('file_pdf', pdfFile);
             }
 
-            // Validasi ukuran file Video
+            // Validasi Video
             if (videoFile) {
-                if (videoFile.size > maxSize) {
-                    toast('error', 'Ukuran file Video tidak boleh lebih dari 10MB', 200);
+                // Validasi ukuran dan tipe dasar
+                if (videoFile.size > MAX_VIDEO_SIZE) {
+                    showToast('error', 'Ukuran file Video tidak boleh lebih dari 5MB');
                     return;
                 }
                 if (!videoFile.type.includes('video/')) {
-                    toast('error', 'File harus berformat video', 200);
+                    showToast('error', 'File harus berformat video');
                     return;
                 }
-                formData.append('file_video', videoFile);
-            }
-            const channelId = $('#channel').val();
-            if (!channelId) {
-                alert('Channel ID wajib diisi');
-                return;
-            }
-            formData.append('channel_id', channelId);
-            formData.append('_method', 'PUT');
 
-            $.ajax({
-                url: '{{route('update-product-knowledge')}}',
-                type: 'POST',
-                data: formData,
-                contentType: false,
-                processData: false,
-                cache: false,
-                beforeSend: function () {
-                    $('#updateBtn').prop('disabled', true);
-                    $('#updateBtn').html('Uploading...');
-                },
-                success: function (response) {
-                    if (response.status === 'success') {
-                        closeModal('upload-product-knowledge');
-                        toast('success', response.message, 200);
-                        setTimeout(() => {
-                            window.location.reload();
-                        }, 2000);
-                    }
-                },
-                error: function (xhr) {
-                    // Handle error
-                    toast('error', 'Terjadi kesalahan saat upload', 200);
-                    console.error(xhr.responseText);
-                },
-                complete: function () {
-                    // Reset button state
-                    $('#updateBtn').prop('disabled', false);
-                    $('#updateBtn').html('Update');
+                // Membuat promise untuk validasi video
+                const validateVideo = new Promise((resolve, reject) => {
+                    const video = document.createElement('video');
+                    const videoUrl = URL.createObjectURL(videoFile);
+
+                    video.addEventListener('loadedmetadata', function () {
+                        URL.revokeObjectURL(videoUrl);
+
+                        // Validasi durasi
+                        if (video.duration > MAX_VIDEO_DURATION) {
+                            reject('Durasi video tidak boleh lebih dari 3 menit');
+                            return;
+                        }
+
+                        // Validasi resolusi
+                        if (video.videoHeight > MAX_VIDEO_HEIGHT) {
+                            reject('Resolusi video tidak boleh lebih dari 360p');
+                            return;
+                        }
+
+                        resolve();
+                    });
+
+                    video.addEventListener('error', function () {
+                        URL.revokeObjectURL(videoUrl);
+                        reject('Gagal memvalidasi video');
+                    });
+
+                    video.src = videoUrl;
+                });
+
+                // Menjalankan validasi video dan melanjutkan dengan upload
+                validateVideo
+                    .then(() => {
+                        formData.append('file_video', videoFile);
+                        proceedWithUpload();
+                    })
+                    .catch((error) => {
+                        showToast('error', error);
+                    });
+
+                return; // Menghentikan eksekusi di sini karena validasi video berjalan async
+            }
+
+            // Jika tidak ada video, langsung proceed dengan upload
+            proceedWithUpload();
+
+            function proceedWithUpload() {
+                const channelId = $('#channel').val();
+                if (!channelId) {
+                    alert('Channel ID wajib diisi');
+                    return;
                 }
-            });
+                formData.append('channel_id', channelId);
+                formData.append('_method', 'PUT');
+
+                $.ajax({
+                    url: '{{route('update-product-knowledge')}}',
+                    type: 'POST',
+                    data: formData,
+                    contentType: false,
+                    processData: false,
+                    cache: false,
+                    beforeSend: function () {
+                        $('#updateBtn').prop('disabled', true);
+                        $('#updateBtn').html('Uploading...');
+                    },
+                    success: function (response) {
+                        if (response.status === 'success') {
+                            closeModal('upload-product-knowledge');
+                            showToast('success', response.message);
+                            setTimeout(() => {
+                                window.location.reload();
+                            }, 2000);
+                        }
+                    },
+                    error: function (xhr) {
+                        showToast('error', 'Terjadi kesalahan saat upload');
+                        console.error(xhr.responseText);
+                    },
+                    complete: function () {
+                        $('#updateBtn').prop('disabled', false);
+                        $('#updateBtn').html('Update');
+                    }
+                });
+            }
         });
         $('#downloadBtn').click(function (e) {
             e.preventDefault();
@@ -494,67 +555,67 @@
 
 
         // Add these handlers to your existing JavaScript
-        $('#downloadBtnRouting').click(function(e) {
-    e.preventDefault();
-    
-    // Get current filter values
-    const filters = {
-        search_term: $('#global-search').val(),
-        filter_day: $('#filter_day').val()
-    };
+        $('#downloadBtnRouting').click(function (e) {
+            e.preventDefault();
 
-    // Show loading state
-    const $btn = $(this);
-    const $btnText = $btn.find('#downloadBtnTextRouting');
-    const $btnLoading = $btn.find('#downloadBtnLoadingRouting');
-    
-    $btnText.addClass('hidden');
-    $btnLoading.removeClass('hidden');
-    $btn.prop('disabled', true);
+            // Get current filter values
+            const filters = {
+                search_term: $('#global-search').val(),
+                filter_day: $('#filter_day').val()
+            };
 
-    // Redirect to download - Gunakan route() helper
-    window.location.href = "{{ route('routing.download-filtered') }}?" + new URLSearchParams(filters).toString();
-    
-    // Reset button state after a delay
-    setTimeout(() => {
-        $btnText.removeClass('hidden');
-        $btnLoading.addClass('hidden');
-        $btn.prop('disabled', false);
-        toast('success', 'File sedang diunduh', 300);
-    }, 1000);
-});
+            // Show loading state
+            const $btn = $(this);
+            const $btnText = $btn.find('#downloadBtnTextRouting');
+            const $btnLoading = $btn.find('#downloadBtnLoadingRouting');
 
-$('#downloadBtnSalesActivity').click(function(e) {
-    e.preventDefault();
-    
-    // Ambil nilai filter yang sama persis dengan yang digunakan DataTable
-    const filters = {
-        search_term: $('#global-search-sales').val(),
-        filter_day_sales: $('#filter_day_sales').val(),
-        date: $('#sales-date-range').val() === 'Date Range' ? '' : $('#sales-date-range').val(),
-        filter_area: $('#filter_area').val()
-    };
+            $btnText.addClass('hidden');
+            $btnLoading.removeClass('hidden');
+            $btn.prop('disabled', true);
 
-    console.log('Download filters:', filters); // Untuk debugging
+            // Redirect to download - Gunakan route() helper
+            window.location.href = "{{ route('routing.download-filtered') }}?" + new URLSearchParams(filters).toString();
 
-    const $btn = $(this);
-    const $btnText = $btn.find('#downloadBtnTextSales');
-    const $btnLoading = $btn.find('#downloadBtnLoadingSales');
-    
-    $btnText.addClass('hidden');
-    $btnLoading.removeClass('hidden');
-    $btn.prop('disabled', true);
+            // Reset button state after a delay
+            setTimeout(() => {
+                $btnText.removeClass('hidden');
+                $btnLoading.addClass('hidden');
+                $btn.prop('disabled', false);
+                toast('success', 'File sedang diunduh', 300);
+            }, 1000);
+        });
 
-    // Gunakan URLSearchParams untuk memastikan parameter terkirim dengan benar
-    const queryString = new URLSearchParams(filters).toString();
-    window.location.href = "{{ route('routing.download-sales-activity') }}?" + queryString;
-    
-    setTimeout(() => {
-        $btnText.removeClass('hidden');
-        $btnLoading.addClass('hidden');
-        $btn.prop('disabled', false);
-        toast('success', 'File sedang diunduh', 300);
-    }, 1000);
-});
+        $('#downloadBtnSalesActivity').click(function (e) {
+            e.preventDefault();
+
+            // Ambil nilai filter yang sama persis dengan yang digunakan DataTable
+            const filters = {
+                search_term: $('#global-search-sales').val(),
+                filter_day_sales: $('#filter_day_sales').val(),
+                date: $('#sales-date-range').val() === 'Date Range' ? '' : $('#sales-date-range').val(),
+                filter_area: $('#filter_area').val()
+            };
+
+            console.log('Download filters:', filters); // Untuk debugging
+
+            const $btn = $(this);
+            const $btnText = $btn.find('#downloadBtnTextSales');
+            const $btnLoading = $btn.find('#downloadBtnLoadingSales');
+
+            $btnText.addClass('hidden');
+            $btnLoading.removeClass('hidden');
+            $btn.prop('disabled', true);
+
+            // Gunakan URLSearchParams untuk memastikan parameter terkirim dengan benar
+            const queryString = new URLSearchParams(filters).toString();
+            window.location.href = "{{ route('routing.download-sales-activity') }}?" + queryString;
+
+            setTimeout(() => {
+                $btnText.removeClass('hidden');
+                $btnLoading.addClass('hidden');
+                $btn.prop('disabled', false);
+                toast('success', 'File sedang diunduh', 300);
+            }, 1000);
+        });
     </script>
 @endpush

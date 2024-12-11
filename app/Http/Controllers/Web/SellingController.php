@@ -40,11 +40,13 @@ class SellingController extends Controller
             'recordsTotal' => $filteredRecords,
             'recordsFiltered' => $filteredRecords,
             'data' => $result->map(function($item) {
+                $totalSelling = $item->products->sum('selling');
                 return [
                     'id' => $item->id, // Tambahkan id product
                     'waktu' => Carbon::parse($item->created_at)->format('d-m-Y H:i:s'),
                     'sales' => $item->user->name,
                     'outlet' => $item->outlet_name,
+                    'total' => $totalSelling,
                     'actions' => view('pages.selling.action', [
                         'sellingId' => $item->id
                     ])->render()

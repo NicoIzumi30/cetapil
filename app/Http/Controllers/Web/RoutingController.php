@@ -251,10 +251,11 @@ class RoutingController extends Controller
     {
         try {
             DB::beginTransaction();
-            $data = Arr::except($request->validated(), ['city', 'img_front', 'img_banner', 'img_main_road', 'product_category']);
+            $data = Arr::except($request->validated(), ['city', 'img_front', 'img_banner', 'img_main_road', 'product_category', 'channel']);
             $outlet = Outlet::findOrFail($id);
             $outlet->fill($data);
             $outlet->city_id = $request->city;
+            $outlet->channel_id = $request->channel;
             $outlet->save();
             $images = ['img_front', 'img_banner', 'img_main_road'];
             foreach ($images as $key => $image) {
