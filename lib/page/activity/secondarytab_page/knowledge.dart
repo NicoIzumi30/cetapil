@@ -11,9 +11,55 @@ class KnowledgePage extends GetView<KnowledgeController> {
   @override
   Widget build(BuildContext context) {
     return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        CachedVideoPlayerWidget(),
-        CachedPDFViewerWidget(),
+        // Training Video Section
+        Padding(
+          padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
+          child: Text(
+            'Video',
+            style: TextStyle(
+              fontSize: 18,
+              fontWeight: FontWeight.bold,
+              color: Colors.blue,
+            ),
+          ),
+        ),
+        Card(
+          margin: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+          elevation: 4,
+          shape: RoundedRectangleBorder(
+            borderRadius: BorderRadius.circular(12),
+          ),
+          child: ClipRRect(
+            borderRadius: BorderRadius.circular(12),
+            child: CachedVideoPlayerWidget(),
+          ),
+        ),
+
+        // Training Material Section
+        Padding(
+          padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
+          child: Text(
+            'PDF',
+            style: TextStyle(
+              fontSize: 18,
+              fontWeight: FontWeight.bold,
+              color: Colors.blue,
+            ),
+          ),
+        ),
+        Card(
+          margin: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+          elevation: 4,
+          shape: RoundedRectangleBorder(
+            borderRadius: BorderRadius.circular(12),
+          ),
+          child: ClipRRect(
+            borderRadius: BorderRadius.circular(12),
+            child: CachedPDFViewerWidget(),
+          ),
+        ),
       ],
     );
   }
@@ -23,17 +69,20 @@ class CachedVideoPlayerWidget extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return GetBuilder<CachedVideoController>(
-      init: CachedVideoController(),
+      init: KnowledgeController.cachedVideoController,
       builder: (controller) {
         if (!controller.isInitialized.value) {
-          return const Center(
-            child: Column(
-              mainAxisAlignment: MainAxisAlignment.center,
-              children: [
-                CircularProgressIndicator(),
-                SizedBox(height: 16),
-                Text('Loading video...'),
-              ],
+          return Container(
+            height: 240,
+            child: const Center(
+              child: Column(
+                mainAxisAlignment: MainAxisAlignment.center,
+                children: [
+                  CircularProgressIndicator(),
+                  SizedBox(height: 16),
+                  Text('Loading video...'),
+                ],
+              ),
             ),
           );
         }
@@ -48,23 +97,30 @@ class CachedVideoPlayerWidget extends StatelessWidget {
                 children: [
                   VideoPlayer(controller.videoController),
                   // Play/Pause button overlay
-                  Obx(() => GestureDetector(
-                        onTap: controller.playPause,
-                        child: Container(
-                          color: Colors.black26,
-                          child: Icon(
-                            controller.isPlaying.value ? Icons.pause : Icons.play_arrow,
-                            size: 60,
-                            color: Colors.white,
+                  Obx(() => AnimatedOpacity(
+                        opacity: controller.isPlaying.value ? 0.0 : 1.0,
+                        duration: Duration(milliseconds: 300),
+                        child: GestureDetector(
+                          onTap: controller.playPause,
+                          child: Container(
+                            color: Colors.black26,
+                            child: Icon(
+                              controller.isPlaying.value
+                                  ? Icons.pause_circle_outline
+                                  : Icons.play_circle_outline,
+                              size: 60,
+                              color: Colors.white,
+                            ),
                           ),
                         ),
                       )),
                 ],
               ),
             ),
-            // Video controls
+            // Enhanced video controls
             Container(
-              padding: const EdgeInsets.all(8),
+              padding: const EdgeInsets.all(12),
+              color: Colors.black87,
               child: Column(
                 children: [
                   // Progress bar
@@ -77,6 +133,9 @@ class CachedVideoPlayerWidget extends StatelessWidget {
                             overlayRadius: 12,
                           ),
                           trackHeight: 4,
+                          activeTrackColor: Colors.blue,
+                          inactiveTrackColor: Colors.grey[700],
+                          thumbColor: Colors.blue,
                         ),
                         child: Slider(
                           value: controller.position.value.inMilliseconds.toDouble(),
@@ -89,22 +148,49 @@ class CachedVideoPlayerWidget extends StatelessWidget {
                           },
                         ),
                       )),
-                  // Time display
-                  Padding(
-                    padding: const EdgeInsets.symmetric(horizontal: 16),
-                    child: Row(
-                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                      children: [
-                        Obx(() => Text(
-                              _formatDuration(controller.position.value),
-                              style: const TextStyle(color: Colors.grey),
-                            )),
-                        Obx(() => Text(
-                              _formatDuration(controller.duration.value),
-                              style: const TextStyle(color: Colors.grey),
-                            )),
-                      ],
-                    ),
+                  // Control buttons and time
+                  Row(
+                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                    children: [
+                      Row(
+                        children: [
+                          IconButton(
+                            icon: Obx(() => Icon(
+                                  controller.isPlaying.value ? Icons.pause : Icons.play_arrow,
+                                  color: Colors.white,
+                                )),
+                            onPressed: controller.playPause,
+                          ),
+                          IconButton(
+                            icon: const Icon(Icons.replay_10, color: Colors.white),
+                            onPressed: () => controller.seekTo(
+                                Duration(seconds: controller.position.value.inSeconds - 10)),
+                          ),
+                          IconButton(
+                            icon: const Icon(Icons.forward_10, color: Colors.white),
+                            onPressed: () => controller.seekTo(
+                                Duration(seconds: controller.position.value.inSeconds + 10)),
+                          ),
+                        ],
+                      ),
+                      Padding(
+                        padding: const EdgeInsets.only(right: 16),
+                        child: Row(
+                          mainAxisSize: MainAxisSize.min,
+                          children: [
+                            Obx(() => Text(
+                                  _formatDuration(controller.position.value),
+                                  style: const TextStyle(color: Colors.white),
+                                )),
+                            const Text(' / ', style: TextStyle(color: Colors.white)),
+                            Obx(() => Text(
+                                  _formatDuration(controller.duration.value),
+                                  style: const TextStyle(color: Colors.white),
+                                )),
+                          ],
+                        ),
+                      ),
+                    ],
                   ),
                 ],
               ),
@@ -117,10 +203,9 @@ class CachedVideoPlayerWidget extends StatelessWidget {
 
   String _formatDuration(Duration duration) {
     String twoDigits(int n) => n.toString().padLeft(2, '0');
-    final hours = twoDigits(duration.inHours);
     final minutes = twoDigits(duration.inMinutes.remainder(60));
     final seconds = twoDigits(duration.inSeconds.remainder(60));
-    return duration.inHours > 0 ? '$hours:$minutes:$seconds' : '$minutes:$seconds';
+    return '$minutes:$seconds';
   }
 }
 
@@ -128,75 +213,92 @@ class CachedPDFViewerWidget extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return GetBuilder<CachedPdfController>(
-      init: CachedPdfController(),
+      init: KnowledgeController.cachedPdfController,
       builder: (controller) {
         return Obx(() {
           if (controller.isLoading.value) {
-            return const Center(
-              child: CircularProgressIndicator(),
+            return Container(
+              height: 400,
+              child: const Center(
+                child: CircularProgressIndicator(),
+              ),
             );
           }
 
           if (controller.localPath.value.isEmpty) {
-            return const Center(
-              child: Text('No PDF available'),
+            return Container(
+              height: 400,
+              child: const Center(
+                child: Text('No training material available'),
+              ),
             );
           }
 
           return GestureDetector(
             onTap: () => _showFullScreenPDF(context, controller.localPath.value),
-            child: Stack(
+            child: Column(
               children: [
-                SizedBox(
+                Container(
                   height: 400,
-                  child: PDFView(
-                    filePath: controller.localPath.value,
-                    enableSwipe: true,
-                    swipeHorizontal: true,
-                    autoSpacing: true,
-                    pageFling: true,
-                    pageSnap: true,
-                    onRender: (pages) {
-                      controller.totalPages.value = pages ?? 0;
-                    },
-                    onPageChanged: (page, _) {
-                      controller.currentPage.value = page ?? 0;
-                    },
-                    onError: (error) {
-                      ScaffoldMessenger.of(context).showSnackBar(
-                        SnackBar(content: Text(error.toString())),
-                      );
-                    },
-                  ),
-                ),
-                Positioned(
-                  right: 16,
-                  bottom: 16,
-                  child: Container(
-                    padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
-                    decoration: BoxDecoration(
-                      color: Colors.black54,
-                      borderRadius: BorderRadius.circular(12),
-                    ),
-                    child: Obx(() => Text(
-                          'Page ${controller.currentPage.value + 1}/${controller.totalPages.value}',
-                          style: const TextStyle(color: Colors.white),
-                        )),
-                  ),
-                ),
-                Positioned(
-                  right: 16,
-                  top: 16,
-                  child: Container(
-                    padding: const EdgeInsets.all(8),
-                    decoration: BoxDecoration(
-                      color: Colors.black54,
-                      borderRadius: BorderRadius.circular(20),
-                    ),
-                    child: const Icon(
-                      Icons.fullscreen,
-                      color: Colors.white,
-                    ),
+                  child: Stack(
+                    children: [
+                      PDFView(
+                        filePath: controller.localPath.value,
+                        enableSwipe: true,
+                        swipeHorizontal: true,
+                        autoSpacing: true,
+                        pageFling: true,
+                        pageSnap: true,
+                        onRender: (pages) {
+                          controller.totalPages.value = pages ?? 0;
+                        },
+                        onPageChanged: (page, _) {
+                          controller.currentPage.value = page ?? 0;
+                        },
+                        onError: (error) {
+                          ScaffoldMessenger.of(context).showSnackBar(
+                            SnackBar(content: Text(error.toString())),
+                          );
+                        },
+                      ),
+                      // Overlay controls
+                      Positioned(
+                        bottom: 0,
+                        left: 0,
+                        right: 0,
+                        child: Container(
+                          padding: const EdgeInsets.symmetric(vertical: 8, horizontal: 16),
+                          decoration: BoxDecoration(
+                            gradient: LinearGradient(
+                              begin: Alignment.bottomCenter,
+                              end: Alignment.topCenter,
+                              colors: [
+                                Colors.black87,
+                                Colors.transparent,
+                              ],
+                            ),
+                          ),
+                          child: Row(
+                            mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                            children: [
+                              Obx(() => Text(
+                                    'Page ${controller.currentPage.value + 1} of ${controller.totalPages.value}',
+                                    style: const TextStyle(color: Colors.white),
+                                  )),
+                              Row(
+                                children: [
+                                  IconButton(
+                                    icon: const Icon(Icons.fullscreen, color: Colors.white),
+                                    onPressed: () =>
+                                        _showFullScreenPDF(context, controller.localPath.value),
+                                  ),
+                                ],
+                              ),
+                            ],
+                          ),
+                        ),
+                      ),
+                    ],
                   ),
                 ),
               ],

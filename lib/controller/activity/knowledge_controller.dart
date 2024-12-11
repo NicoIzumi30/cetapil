@@ -4,14 +4,16 @@ import 'package:get/get.dart';
 
 import '../support_data_controller.dart';
 
-
-
 // Updated KnowledgeController
 class KnowledgeController extends GetxController {
   final supportDataController = Get.find<SupportDataController>();
   final activityController = Get.find<TambahActivityController>();
   final videoPath = Rxn<String>();
   final pdfPath = Rxn<String>();
+  
+  // Create static instances of controllers to persist them
+  static final cachedVideoController = Get.put(CachedVideoController(), permanent: true);
+  static final cachedPdfController = Get.put(CachedPdfController(), permanent: true);
 
   @override
   void onInit() {
@@ -39,8 +41,7 @@ class KnowledgeController extends GetxController {
 
   @override
   void onClose() {
-    Get.delete<CachedVideoController>();
-    Get.delete<CachedPdfController>();
+    // Don't delete controllers here since we want to persist them
     super.onClose();
   }
 }
