@@ -20,6 +20,7 @@ import '../../utils/colors.dart';
 import '../outlet/detail_outlet.dart';
 
 class ActivityPage extends GetView<ActivityController> {
+
   @override
   Widget build(BuildContext context) {
     return SafeArea(
@@ -34,10 +35,9 @@ class ActivityPage extends GetView<ActivityController> {
                 onChanged: controller.updateSearchQuery,
                 leading: const Icon(Icons.search),
                 hintText: 'Masukkan Kata Kunci',
-                hintStyle: WidgetStatePropertyAll(
-                    TextStyle(color: Colors.grey[500], fontSize: 14)),
-                shape: WidgetStatePropertyAll(RoundedRectangleBorder(
-                    borderRadius: BorderRadius.circular(10))),
+                hintStyle: WidgetStatePropertyAll(TextStyle(color: Colors.grey[500], fontSize: 14)),
+                shape: WidgetStatePropertyAll(
+                    RoundedRectangleBorder(borderRadius: BorderRadius.circular(10))),
               ),
             ),
             SizedBox(
@@ -70,83 +70,61 @@ class ActivityPage extends GetView<ActivityController> {
                                     // if (!Get.isRegistered<DetailActivityController>()) {
                                     //   Get.lazyPut(()=>DetailActivityController());
                                     // }
-                                    if (!Get.isRegistered<
-                                        TambahAvailabilityController>()) {
-                                      Get.lazyPut(
-                                          () => TambahAvailabilityController());
+                                    if (!Get.isRegistered<TambahAvailabilityController>()) {
+                                      Get.lazyPut(() => TambahAvailabilityController());
                                     }
-                                    if (!Get.isRegistered<
-                                        TambahVisibilityController>()) {
-                                      Get.lazyPut(
-                                          () => TambahVisibilityController());
+                                    if (!Get.isRegistered<TambahVisibilityController>()) {
+                                      Get.lazyPut(() => TambahVisibilityController());
                                     }
-                                    if (!Get.isRegistered<
-                                        TambahOrderController>()) {
-                                      Get.lazyPut(
-                                          () => TambahOrderController());
+                                    if (!Get.isRegistered<TambahOrderController>()) {
+                                      Get.lazyPut(() => TambahOrderController());
                                     }
-                                    print(activity.status);
+                                    if (!Get.isRegistered<KnowledgeController>()) {
+                                      Get.lazyPut(() => KnowledgeController());
+                                    }
+
                                     if (activity.status! == "SUBMITTED") {
-                                      if (!Get.isRegistered<
-                                          DetailActivityController>()) {
-                                        Get.lazyPut(
-                                            () => DetailActivityController());
+                                      if (!Get.isRegistered<DetailActivityController>()) {
+                                        Get.lazyPut(() => DetailActivityController());
                                       }
                                       final detailActivityController =
                                           Get.find<DetailActivityController>();
-                                      detailActivityController
-                                          .selectedTab.value = 0;
-                                      detailActivityController.visibilityItems
-                                          .clear();
-                                      detailActivityController
-                                          .setDetailOutlet(activity);
-                                      Get.to(
-                                          () => DetailActivity(activity.id!));
+                                      detailActivityController.selectedTab.value = 0;
+                                      detailActivityController.visibilityItems.clear();
+                                      detailActivityController.setDetailOutlet(activity);
+                                      Get.to(() => DetailActivity(activity.id!));
                                     } else if (activity.status! == "DRAFTED") {
-                                      if (!Get.isRegistered<
-                                          TambahActivityController>()) {
-                                        Get.lazyPut(
-                                            () => TambahActivityController());
+                                      if (!Get.isRegistered<TambahActivityController>()) {
+                                        Get.lazyPut(() => TambahActivityController());
                                       }
-                                      final dbActivity =
-                                          ActivityDatabaseHelper.instance;
+                                      final dbActivity = ActivityDatabaseHelper.instance;
 
-                                      final tambahActivityController =
-                                          Get.find<TambahActivityController>();
-                                      var fetchedData = await dbActivity
-                                          .getDetailSalesActivity(activity.id!);
-                                      tambahActivityController
-                                          .selectedTab.value = 0;
-                                      tambahActivityController.detailDraft
-                                          .assignAll(fetchedData!);
-                                      tambahActivityController
-                                          .setDetailOutlet(activity);
-                                      tambahActivityController
-                                          .initDetailDraftAvailability();
-                                      tambahActivityController
-                                          .initDetailDraftOrder();
-                                      tambahActivityController
-                                          .initDetailDraftVisibility();
+                                      final tambahActivityController = Get.find<TambahActivityController>();
+                                      var fetchedData = await dbActivity.getDetailSalesActivity(activity.id!);
+                                      tambahActivityController.selectedTab.value = 0;
+                                      tambahActivityController.detailDraft.assignAll(fetchedData!);
+                                      tambahActivityController.startTabTimer();
+                                      tambahActivityController.setDetailOutlet(activity);
+                                      tambahActivityController.initDetailDraftAvailability();
+                                      tambahActivityController.initDetailDraftOrder();
+                                      tambahActivityController.initDetailDraftVisibility();
                                       Get.to(() => TambahActivity());
-                                    } else {
-                                      if (!Get.isRegistered<
-                                          TambahActivityController>()) {
-                                        Get.lazyPut(
-                                            () => TambahActivityController());
+                                    }
+                                    else{
+                                      if (!Get.isRegistered<TambahActivityController>()) {
+                                        Get.lazyPut(()=>TambahActivityController());
                                       }
                                       final tambahActivityController =
                                           Get.find<TambahActivityController>();
                                       final outlet_id = activity.outlet!.id;
-                                      tambahActivityController
-                                          .selectedTab.value = 0;
-                                      tambahActivityController
-                                          .clearAllDraftItems();
-                                      tambahActivityController
-                                          .setOutletId(outlet_id!);
-                                      tambahActivityController
-                                          .setDetailOutlet(activity);
+                                      tambahActivityController.selectedTab.value = 0;
+                                      tambahActivityController.startTabTimer();
+                                      tambahActivityController.clearAllDraftItems();
+                                      tambahActivityController.setOutletId(outlet_id!);
+                                      tambahActivityController.setDetailOutlet(activity);
                                       Get.to(() => TambahActivity());
                                     }
+
                                   },
                                 );
                               },
@@ -159,6 +137,8 @@ class ActivityPage extends GetView<ActivityController> {
       ),
     );
   }
+
+
 
   Widget _buildEmptyState() {
     return ListView(
