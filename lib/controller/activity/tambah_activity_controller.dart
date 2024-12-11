@@ -19,8 +19,10 @@ import '../../widget/custom_alert.dart';
 
 class TambahActivityController extends GetxController {
   late ActivityController activityController = Get.find<ActivityController>();
-  late TambahAvailabilityController tambahAvailabilityController = Get.find<TambahAvailabilityController>();
-  late TambahVisibilityController tambahVisibilityController = Get.find<TambahVisibilityController>();
+  late TambahAvailabilityController tambahAvailabilityController =
+      Get.find<TambahAvailabilityController>();
+  late TambahVisibilityController tambahVisibilityController =
+      Get.find<TambahVisibilityController>();
   late TambahOrderController tambahOrderController = Get.find<TambahOrderController>();
   late SupportDataController supportController = Get.find<SupportDataController>();
   // final activityController = Get.find<ActivityController>();
@@ -35,7 +37,6 @@ class TambahActivityController extends GetxController {
   var selectedChannel = Rxn<String>();
   Rx<Activity.Data?> detailOutlet = Rx<Activity.Data?>(null);
   RxMap<String, dynamic> detailDraft = <String, dynamic>{}.obs;
-
 
   // Loading and error states
   final isLoadingAvailability = true.obs;
@@ -93,11 +94,10 @@ class TambahActivityController extends GetxController {
 
   // final groupedItemsAvailability = <String, List<Map<String, dynamic>>>{};
   //
-  initDetailDraftAvailability(){
+  initDetailDraftAvailability() {
     print(detailDraft.isNotEmpty);
     if (detailDraft.isNotEmpty) {
       for (var data in detailDraft["availabilityItems"]) {
-
         final item = tambahAvailabilityController.getSkuByDataApi(data['product_id']);
         final newItem = {
           'id': data['product_id'],
@@ -113,11 +113,10 @@ class TambahActivityController extends GetxController {
     }
   }
 
-  initDetailDraftOrder(){
+  initDetailDraftOrder() {
     print(detailDraft.isNotEmpty);
     if (detailDraft.isNotEmpty) {
       for (var data in detailDraft["orderItems"]) {
-
         final item = tambahAvailabilityController.getSkuByDataApi(data['product_id']);
         final newItem = {
           'id': data['product_id'],
@@ -132,12 +131,12 @@ class TambahActivityController extends GetxController {
     }
   }
 
-  initDetailDraftVisibility(){
+  initDetailDraftVisibility() {
     final allVisibilities = detailOutlet.value!.visibilities ?? [];
     final visibilityDraft = detailDraft["visibilityItems"];
 
-    if (allVisibilities.isNotEmpty && visibilityDraft != null ) {
-      for(var dataApi in allVisibilities){
+    if (allVisibilities.isNotEmpty && visibilityDraft != null) {
+      for (var dataApi in allVisibilities) {
         for (var dataDraft in visibilityDraft) {
           final posmType = supportController
               .getPosmTypes()
@@ -152,6 +151,7 @@ class TambahActivityController extends GetxController {
             'visual_type_id': dataApi.visualTypeId,
             'visual_type_name': visualType!['name'],
             'condition': dataDraft['condition'],
+
             /// ERROR KARNA dataDraft['image1'] ADALAH STRING
             'image1': File(dataDraft['image1']),
             'image2': File(dataDraft['image2']),
@@ -162,7 +162,6 @@ class TambahActivityController extends GetxController {
       }
     }
   }
-
 
   @override
   void onInit() {
@@ -176,21 +175,22 @@ class TambahActivityController extends GetxController {
     // initDetailDraftOrder();
     // initGetSurveyQuestion();
     // initListCategory();
-
-    // Start the timer when controller is initialized
+    
+    // Initialize timers from draft data if available
+    initDraftTimers();
+    // Start the timer
     startTabTimer();
   }
 
+  // Also update submitApiActivity to use the same logic
   Future<void> submitApiActivity() async {
     try {
-      // final String? currentOutletId = Get.arguments?['id'];
-      // final bool isEditing = currentOutletId != null;
       EasyLoading.show(status: 'Submit Data...');
 
       Map<String, dynamic> data = {
         'sales_activity_id': detailOutlet.value!.id,
         'outlet_id': detailOutlet.value!.outlet!.id,
-        'views_knowledge': "111",
+        'views_knowledge': knowledgeTime.toString(),
         'time_availability': availabilityTime.value.toString(),
         'time_visibility': visibilityTime.value.toString(),
         'time_knowledge': knowledgeTime.value.toString(),
@@ -199,16 +199,29 @@ class TambahActivityController extends GetxController {
         'current_time': DateTime.now().toIso8601String(),
       };
 
-      List<Map<String, dynamic>> surveyList = [
-        ...priceControllers.entries.map((entry) => {
-              'survey_question_id': entry.key.toString() ?? "",
-              'answer': entry.value.text ?? "",
-            }),
-        ...switchStates.entries.map((entry) => {
-              'survey_question_id': entry.key.toString() ?? "",
-              'answer': entry.value.value.toString() ?? "",
-            }),
-      ];
+      // Use the same logic as saveDraftActivity to ensure all fields are included
+      final allSurveys = supportController.getSurvey();
+      List<Map<String, dynamic>> surveyList = [];
+
+      for (var group in allSurveys) {
+        for (var survey in group['surveys']) {
+          final id = survey['id'].toString();
+
+          if (survey['type'] == 'text') {
+            final controller = priceControllers[id];
+            surveyList.add({
+              'survey_question_id': id,
+              'answer': (controller?.text.isEmpty ?? true) ? "0" : controller!.text,
+            });
+          } else if (survey['type'] == 'bool') {
+            final switchState = switchStates[id];
+            surveyList.add({
+              'survey_question_id': id,
+              'answer': (switchState?.value ?? false).toString(),
+            });
+          }
+        }
+      }
 
       final response = await Api.submitActivity(
         data,
@@ -226,13 +239,10 @@ class TambahActivityController extends GetxController {
       activityController.initGetActivity();
       EasyLoading.dismiss();
       Get.back();
-      CustomAlerts.showSuccess(
-          Get.context!, // Use Get.context instead of the previous context
-          "Data Berhasil Disimpan",
+      CustomAlerts.showSuccess(Get.context!, "Data Berhasil Disimpan",
           "Anda baru menyimpan Data. Silahkan periksa status Outlet pada aplikasi.");
-      // await refreshOutlets();
     } catch (e) {
-      print('Error submit dati: $e');
+      print('Error submit data: $e');
       Get.snackbar(
         'Error',
         'Failed to submit data: $e',
@@ -243,24 +253,39 @@ class TambahActivityController extends GetxController {
     }
   }
 
+  // Modified saveDraftActivity method to ensure all fields are saved
   Future<void> saveDraftActivity() async {
     try {
       EasyLoading.show(status: 'Saving draft...');
 
       bool isEditing = await db.checkSalesActivityExists(detailOutlet.value!.id!);
 
-      List<Map<String, dynamic>> surveyList = [
-        ...priceControllers.entries.map((entry) => {
-              'survey_question_id': entry.key,
-              'answer': entry.value.text,
-            }),
-        ...switchStates.entries.map((entry) => {
-              'survey_question_id': entry.key,
-              'answer': entry.value.value.toString(),
-            }),
-      ];
+      // Get all survey questions from support controller to ensure we have all fields
+      final allSurveys = supportController.getSurvey();
+      List<Map<String, dynamic>> surveyList = [];
 
-      /// *if draft is not null assign draft
+      // Process each survey group
+      for (var group in allSurveys) {
+        for (var survey in group['surveys']) {
+          final id = survey['id'].toString();
+
+          if (survey['type'] == 'text') {
+            // For price inputs - ensure we save all fields with default "0"
+            final controller = priceControllers[id];
+            surveyList.add({
+              'survey_question_id': id,
+              'answer': (controller?.text.isEmpty ?? true) ? "0" : controller!.text,
+            });
+          } else if (survey['type'] == 'bool') {
+            // For switches - ensure we save all with default false
+            final switchState = switchStates[id];
+            surveyList.add({
+              'survey_question_id': id,
+              'answer': (switchState?.value ?? false).toString(),
+            });
+          }
+        }
+      }
 
       final data = {
         'sales_activity_id': detailOutlet.value!.id!,
@@ -269,7 +294,7 @@ class TambahActivityController extends GetxController {
         'category': detailOutlet.value!.outlet!.category!,
         'channel_id': detailOutlet.value!.channel!.id!,
         'channel_name': detailOutlet.value!.outlet!.name!,
-        'views_knowledge': "111",
+        'views_knowledge': knowledgeTime.toString(),
         'time_availability': availabilityTime.toString(),
         'time_visibility': visibilityTime.toString(),
         'time_knowledge': knowledgeTime.toString(),
@@ -282,27 +307,29 @@ class TambahActivityController extends GetxController {
 
       if (isEditing) {
         await db.updateSalesActivity(
-            data: data,
-            availabilityItems: availabilityDraftItems,
-            visibilityItems: visibilityDraftItems,
-            surveyItems: surveyList,
-            orderItems: orderDraftItems);
+          data: data,
+          availabilityItems: availabilityDraftItems,
+          visibilityItems: visibilityDraftItems,
+          surveyItems: surveyList,
+          orderItems: orderDraftItems,
+        );
       } else {
         await db.insertFullSalesActivity(
-            data: data,
-            availabilityItems: availabilityDraftItems,
-            visibilityItems: visibilityDraftItems,
-            surveyItems: surveyList,
-            orderItems: orderDraftItems);
+          data: data,
+          availabilityItems: availabilityDraftItems,
+          visibilityItems: visibilityDraftItems,
+          surveyItems: surveyList,
+          orderItems: orderDraftItems,
+        );
       }
+
       _timer?.cancel();
       activityController.initGetActivity();
       EasyLoading.dismiss();
       Get.back();
 
-      // Then show the success alert
       CustomAlerts.showSuccess(
-          Get.context!, // Use Get.context instead of the previous context
+          Get.context!,
           isEditing ? "Draft Berhasil Diperbarui" : "Draft Berhasil Disimpan",
           isEditing
               ? "Anda baru memperbarui Draft. Silahkan periksa status Draft pada aplikasi."
@@ -319,8 +346,28 @@ class TambahActivityController extends GetxController {
     }
   }
 
+  void initDraftTimers() {
+    if (detailDraft.isNotEmpty) {
+      // Initialize timers from draft data
+      availabilityTime.value = int.tryParse(detailDraft['time_availability'] ?? '0') ?? 0;
+      visibilityTime.value = int.tryParse(detailDraft['time_visibility'] ?? '0') ?? 0;
+      knowledgeTime.value = int.tryParse(detailDraft['time_knowledge'] ?? '0') ?? 0;
+      surveyTime.value = int.tryParse(detailDraft['time_survey'] ?? '0') ?? 0;
+      orderTime.value = int.tryParse(detailDraft['time_order'] ?? '0') ?? 0;
+    } else {
+      // Reset timers to 0 if no draft data
+      availabilityTime.value = 0;
+      visibilityTime.value = 0;
+      knowledgeTime.value = 0;
+      surveyTime.value = 0;
+      orderTime.value = 0;
+    }
+  }
+
   void startTabTimer() {
     _timer?.cancel(); // Cancel any existing timer
+    // Initialize timers from draft if available
+    initDraftTimers();
     _timer = Timer.periodic(Duration(seconds: 1), (timer) {
       // Increment the timer based on current selected tab
       switch (selectedTab.value) {
@@ -341,11 +388,11 @@ class TambahActivityController extends GetxController {
           break;
       }
 
-      print("Availability: ${getFormattedTime(availabilityTime.value)}");
-      print("Visibility: ${getFormattedTime(visibilityTime.value)}");
-      print("Knowledge: ${getFormattedTime(knowledgeTime.value)}");
-      print("Survey: ${getFormattedTime(surveyTime.value)}");
-      print("Order: ${getFormattedTime(orderTime.value)}");
+      // print("Availability: ${getFormattedTime(availabilityTime.value)}");
+      // print("Visibility: ${getFormattedTime(visibilityTime.value)}");
+      // print("Knowledge: ${getFormattedTime(knowledgeTime.value)}");
+      // print("Survey: ${getFormattedTime(surveyTime.value)}");
+      // print("Order: ${getFormattedTime(orderTime.value)}");
     });
   }
 
@@ -378,8 +425,8 @@ class TambahActivityController extends GetxController {
 
   // In TambahActivityController
   void addVisibilityItem(Map<String, dynamic> item) {
-    final existingIndex = visibilityDraftItems
-        .indexWhere((existing) => existing['id'] == item['id']);
+    final existingIndex =
+        visibilityDraftItems.indexWhere((existing) => existing['id'] == item['id']);
 
     print(existingIndex);
 
@@ -503,14 +550,17 @@ class TambahActivityController extends GetxController {
   // }
 
   void toggleSwitch(String id, bool value) {
-    final switchValue = switchStates[id];
-    if (switchValue != null) {
-      switchValue.value = value;
+    if (!switchStates.containsKey(id)) {
+      switchStates[id] = false.obs; // Default to false when initializing
     }
+    switchStates[id]?.value = value;
   }
 
   bool getSwitchValue(String id) {
-    return switchStates[id]?.value ?? true;
+    if (!switchStates.containsKey(id)) {
+      switchStates[id] = false.obs; // Default to false if doesn't exist
+    }
+    return switchStates[id]?.value ?? false; // Return false as fallback
   }
 
   // Tab management methods
@@ -591,7 +641,6 @@ class TambahActivityController extends GetxController {
 
     // Clear Data Detail Draft
 
-
     // Clear visibility related fields
     visibilityImages.value = [null, null];
     isImageUploading.value = [false, false];
@@ -615,6 +664,13 @@ class TambahActivityController extends GetxController {
     for (var switchState in switchStates.values) {
       switchState.value = false;
     }
+
+    // Reset all timers to 0
+    availabilityTime.value = 0;
+    visibilityTime.value = 0;
+    knowledgeTime.value = 0;
+    surveyTime.value = 0;
+    orderTime.value = 0;
 
     // Refresh all observable lists
     availabilityDraftItems.refresh();

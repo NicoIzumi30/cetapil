@@ -1,4 +1,5 @@
 import 'package:cetapil_mobile/controller/activity/detail_activity_controller.dart';
+import 'package:cetapil_mobile/controller/activity/knowledge_controller.dart';
 import 'package:cetapil_mobile/controller/activity/tambah_activity_controller.dart';
 import 'package:cetapil_mobile/controller/activity/tambah_availibility_controller.dart';
 import 'package:cetapil_mobile/controller/activity/tambah_order_controller.dart';
@@ -20,7 +21,6 @@ import '../../utils/colors.dart';
 import '../outlet/detail_outlet.dart';
 
 class ActivityPage extends GetView<ActivityController> {
-
   @override
   Widget build(BuildContext context) {
     return SafeArea(
@@ -61,7 +61,7 @@ class ActivityPage extends GetView<ActivityController> {
                                   activity: activity,
                                   statusDraft: activity.status!,
                                   statusCheckin: true,
-                                  ontap: ()async {
+                                  ontap: () async {
                                     // Get.delete<TambahActivityController>();
                                     // if (!Get.isRegistered<TambahActivityController>()) {
                                     //   Get.lazyPut(()=>TambahActivityController());
@@ -70,53 +70,60 @@ class ActivityPage extends GetView<ActivityController> {
                                     //   Get.lazyPut(()=>DetailActivityController());
                                     // }
                                     if (!Get.isRegistered<TambahAvailabilityController>()) {
-                                      Get.lazyPut(()=>TambahAvailabilityController());
+                                      Get.lazyPut(() => TambahAvailabilityController());
                                     }
                                     if (!Get.isRegistered<TambahVisibilityController>()) {
-                                      Get.lazyPut(()=>TambahVisibilityController());
+                                      Get.lazyPut(() => TambahVisibilityController());
                                     }
                                     if (!Get.isRegistered<TambahOrderController>()) {
-                                      Get.lazyPut(()=>TambahOrderController());
+                                      Get.lazyPut(() => TambahOrderController());
+                                    }
+                                    if (!Get.isRegistered<KnowledgeController>()) {
+                                      Get.lazyPut(() => KnowledgeController());
                                     }
 
                                     if (activity.status! == "SUBMITTED") {
                                       if (!Get.isRegistered<DetailActivityController>()) {
-                                        Get.lazyPut(()=>DetailActivityController());
+                                        Get.lazyPut(() => DetailActivityController());
                                       }
-                                      final detailActivityController = Get.find<DetailActivityController>();
+                                      final detailActivityController =
+                                          Get.find<DetailActivityController>();
                                       detailActivityController.selectedTab.value = 0;
                                       detailActivityController.visibilityItems.clear();
                                       detailActivityController.setDetailOutlet(activity);
                                       Get.to(() => DetailActivity(activity.id!));
-                                    } else if (activity.status! == "DRAFTED"){
+                                    } else if (activity.status! == "DRAFTED") {
                                       if (!Get.isRegistered<TambahActivityController>()) {
-                                        Get.lazyPut(()=>TambahActivityController());
+                                        Get.lazyPut(() => TambahActivityController());
                                       }
                                       final dbActivity = ActivityDatabaseHelper.instance;
 
-                                      final tambahActivityController = Get.find<TambahActivityController>();
-                                      var fetchedData = await dbActivity.getDetailSalesActivity(activity.id!);
+                                      final tambahActivityController =
+                                          Get.find<TambahActivityController>();
+                                      var fetchedData =
+                                          await dbActivity.getDetailSalesActivity(activity.id!);
                                       tambahActivityController.selectedTab.value = 0;
                                       tambahActivityController.detailDraft.assignAll(fetchedData!);
+                                      tambahActivityController.startTabTimer();
                                       tambahActivityController.setDetailOutlet(activity);
                                       tambahActivityController.initDetailDraftAvailability();
                                       tambahActivityController.initDetailDraftOrder();
                                       tambahActivityController.initDetailDraftVisibility();
                                       Get.to(() => TambahActivity());
-                                    }
-                                    else{
+                                    } else {
                                       if (!Get.isRegistered<TambahActivityController>()) {
-                                        Get.lazyPut(()=>TambahActivityController());
+                                        Get.lazyPut(() => TambahActivityController());
                                       }
-                                      final tambahActivityController = Get.find<TambahActivityController>();
+                                      final tambahActivityController =
+                                          Get.find<TambahActivityController>();
                                       final outlet_id = activity.outlet!.id;
                                       tambahActivityController.selectedTab.value = 0;
+                                      tambahActivityController.startTabTimer();
                                       tambahActivityController.clearAllDraftItems();
                                       tambahActivityController.setOutletId(outlet_id!);
                                       tambahActivityController.setDetailOutlet(activity);
                                       Get.to(() => TambahActivity());
                                     }
-
                                   },
                                 );
                               },
@@ -130,8 +137,6 @@ class ActivityPage extends GetView<ActivityController> {
     );
   }
 
-
-
   Widget _buildEmptyState() {
     return ListView(
       physics: AlwaysScrollableScrollPhysics(),
@@ -141,8 +146,11 @@ class ActivityPage extends GetView<ActivityController> {
           child: Column(
             mainAxisAlignment: MainAxisAlignment.center,
             children: [
-              SvgPicture.asset("assets/icon/Vector3.svg",height: 64,
-                color: Colors.grey,),
+              SvgPicture.asset(
+                "assets/icon/Vector3.svg",
+                height: 64,
+                color: Colors.grey,
+              ),
               SizedBox(height: 16),
               Text(
                 'Tidak ada Activity',
@@ -167,7 +175,6 @@ class ActivityPage extends GetView<ActivityController> {
     );
   }
 }
-
 
 class ActivityCard extends StatelessWidget {
   final Data activity;
