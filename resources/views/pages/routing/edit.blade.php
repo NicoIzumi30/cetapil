@@ -273,7 +273,7 @@
                     @endif
                 @endforeach
             </div>
-            <x-button.info class="w-full mt-20 !text-xl" type="submit">Konfirmasi</x-button.info>
+            <x-button.info class="w-full mt-20 !text-xl" type="submit">Simpan perubahan</x-button.info>
 
         </x-section-card>
     </form>

@@ -49,7 +49,7 @@ $menus[] =  (object) [
 @endphp
 
 <aside id="sidebar"
-    class="z-[99999] bg-sidebar h-[100%] fixed top-0 p-6 w-20 hover:w-80 group transition-all duration-100 ease-in-out ">
+    class="z-[45] bg-sidebar h-[100%] fixed top-0 p-6 w-20 hover:w-80 group transition-all duration-100 ease-in-out ">
     <div class="flex items-center gap-4 w-[40px] h-[40px]">
         <img src="{{ asset('/assets/images/logo.webp') }}" alt="logo">
         <h1 class="text-2xl font-bold text-white group-hover:block  hidden">Dashboard</h1>

@@ -53,13 +53,13 @@
                     </div>
                     <div>
                         <label for="md_price" class="!text-black">Harga MD</label>
-                        <input id="md_price" class="form-control" type="text" name="md_price"
+                        <input id="md_price" class="form-control" type="number" name="md_price"
                             placeholder="Masukan Harga MD">
                         <span id="md_price-error" class="text-red-500 text-xs hidden"></span>
                     </div>
                     <div>
                         <label for="sales_price" class="!text-black">Harga Sales</label>
-                        <input id="sales_price" class="form-control" type="text" name="sales_price"
+                        <input id="sales_price" class="form-control" type="number" name="sales_price"
                             placeholder="Masukan Harga Sales">
                         <span id="sales_price-error" class="text-red-500 text-xs hidden"></span>
                     </div>
@@ -102,13 +102,13 @@
                     </div>
                     <div>
                         <label for="edit-md-price" class="!text-black">Harga MD</label>
-                        <input id="edit-md-price" class="form-control" type="text" name="md_price"
+                        <input id="edit-md-price" class="form-control" type="number" name="md_price"
                             placeholder="Masukan Harga MD">
                         <span id="edit-md_price-error" class="text-red-500 text-xs hidden"></span>
                     </div>
                     <div>
                         <label for="edit-sales-price" class="!text-black">Harga Sales</label>
-                        <input id="edit-sales-price" class="form-control" type="text" name="sales_price"
+                        <input id="edit-sales-price" class="form-control" type="number" name="sales_price"
                             placeholder="Masukan Harga Sales">
                         <span id="edit-sales_price-error" class="text-red-500 text-xs hidden"></span>
                     </div>
