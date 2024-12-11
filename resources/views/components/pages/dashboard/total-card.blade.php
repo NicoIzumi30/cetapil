@@ -14,7 +14,6 @@
     <div class="p-2 w-full">
         <div class="flex w-full items-center justify-center gap-2 mb-4">
             <p class="text-5xl font-bold my-4 text-center">{{ $total }}</p>
-                <p class="text-[12px]">VS last 30 day</p>
         </div>
         <p class="text-sm text-center">Update terakhir pada : <span class="italic">{{ $date }}</span></p>
     </div>
