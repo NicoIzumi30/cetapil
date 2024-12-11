@@ -1,246 +1,289 @@
+import 'package:cetapil_mobile/controller/activity/knowledge_controller.dart';
+import 'package:cetapil_mobile/controller/activity/tambah_activity_controller.dart';
+import 'package:cetapil_mobile/controller/cache_controller.dart';
+import 'package:cetapil_mobile/controller/support_data_controller.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:flutter_pdfview/flutter_pdfview.dart';
 import 'package:video_player/video_player.dart';
-import 'package:cetapil_mobile/controller/activity/knowledge_controller.dart';
 
-class KnowledgePage extends StatelessWidget {
-  KnowledgePage({Key? key}) : super(key: key);
-
-  final KnowledgeController controller = Get.find<KnowledgeController>();
-
+class KnowledgePage extends GetView<KnowledgeController> {
   @override
   Widget build(BuildContext context) {
-    return SingleChildScrollView(
-      child: Padding(
-        padding: const EdgeInsets.all(16.0),
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: const [
-            Text(
-              "Training Video",
-              style: TextStyle(
-                fontSize: 18,
-                fontWeight: FontWeight.w700,
-              ),
-            ),
-            SizedBox(height: 16),
-            CustomVideoPlayer(),
-            
-            SizedBox(height: 24),
-            
-            Text(
-              "Training Material",
-              style: TextStyle(
-                fontSize: 18,
-                fontWeight: FontWeight.w700,
-              ),
-            ),
-            SizedBox(height: 16),
-            CustomPDFViewer(),
-          ],
-        ),
-      ),
+    return Column(
+      children: [
+        CachedVideoPlayerWidget(),
+        CachedPDFViewerWidget(),
+      ],
     );
   }
 }
 
-class CustomVideoPlayer extends StatelessWidget {
-  const CustomVideoPlayer({Key? key}) : super(key: key);
-
+class CachedVideoPlayerWidget extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
-    return GetX<KnowledgeController>(
+    return GetBuilder<CachedVideoController>(
+      init: CachedVideoController(),
       builder: (controller) {
-        if (controller.isLoadingVideo.value) {
-          return const SizedBox(
-            height: 200,
-            child: Center(child: CircularProgressIndicator()),
-          );
-        }
-
-        if (controller.videoPath.value == null || 
-            !controller.isVideoInitialized.value ||
-            controller.videoPlayerController.value == null) {
-          return Container(
-            height: 200,
-            decoration: BoxDecoration(
-              color: Colors.grey[200],
-              borderRadius: BorderRadius.circular(8),
-            ),
-            child: const Center(
-              child: Text(
-                'No video available',
-                style: TextStyle(color: Colors.grey),
-              ),
-            ),
-          );
-        }
-
-        return AspectRatio(
-          aspectRatio: 16 / 9,
-          child: Container(
-            decoration: BoxDecoration(
-              color: Colors.black,
-              borderRadius: BorderRadius.circular(8),
-            ),
-            child: Stack(
-              alignment: Alignment.center,
+        if (!controller.isInitialized.value) {
+          return const Center(
+            child: Column(
+              mainAxisAlignment: MainAxisAlignment.center,
               children: [
-                VideoPlayer(controller.videoPlayerController.value!),
-                GestureDetector(
-                  onTap: () {
-                    if (controller.videoPlayerController.value!.value.isPlaying) {
-                      controller.videoPlayerController.value!.pause();
-                    } else {
-                      controller.videoPlayerController.value!.play();
-                    }
-                    controller.update();
-                  },
-                  child: Container(
-                    color: Colors.transparent,
-                    child: Center(
-                      child: Icon(
-                        controller.videoPlayerController.value!.value.isPlaying
-                            ? Icons.pause
-                            : Icons.play_arrow,
-                        color: Colors.white,
-                        size: 50,
-                      ),
-                    ),
-                  ),
-                ),
+                CircularProgressIndicator(),
+                SizedBox(height: 16),
+                Text('Loading video...'),
               ],
             ),
-          ),
+          );
+        }
+
+        return Column(
+          children: [
+            // Video display
+            AspectRatio(
+              aspectRatio: controller.videoController.value.aspectRatio,
+              child: Stack(
+                alignment: Alignment.center,
+                children: [
+                  VideoPlayer(controller.videoController),
+                  // Play/Pause button overlay
+                  Obx(() => GestureDetector(
+                        onTap: controller.playPause,
+                        child: Container(
+                          color: Colors.black26,
+                          child: Icon(
+                            controller.isPlaying.value ? Icons.pause : Icons.play_arrow,
+                            size: 60,
+                            color: Colors.white,
+                          ),
+                        ),
+                      )),
+                ],
+              ),
+            ),
+            // Video controls
+            Container(
+              padding: const EdgeInsets.all(8),
+              child: Column(
+                children: [
+                  // Progress bar
+                  Obx(() => SliderTheme(
+                        data: SliderThemeData(
+                          thumbShape: const RoundSliderThumbShape(
+                            enabledThumbRadius: 6,
+                          ),
+                          overlayShape: const RoundSliderOverlayShape(
+                            overlayRadius: 12,
+                          ),
+                          trackHeight: 4,
+                        ),
+                        child: Slider(
+                          value: controller.position.value.inMilliseconds.toDouble(),
+                          min: 0,
+                          max: controller.duration.value.inMilliseconds.toDouble(),
+                          onChanged: (value) {
+                            controller.seekTo(Duration(
+                              milliseconds: value.toInt(),
+                            ));
+                          },
+                        ),
+                      )),
+                  // Time display
+                  Padding(
+                    padding: const EdgeInsets.symmetric(horizontal: 16),
+                    child: Row(
+                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                      children: [
+                        Obx(() => Text(
+                              _formatDuration(controller.position.value),
+                              style: const TextStyle(color: Colors.grey),
+                            )),
+                        Obx(() => Text(
+                              _formatDuration(controller.duration.value),
+                              style: const TextStyle(color: Colors.grey),
+                            )),
+                      ],
+                    ),
+                  ),
+                ],
+              ),
+            ),
+          ],
         );
       },
     );
   }
+
+  String _formatDuration(Duration duration) {
+    String twoDigits(int n) => n.toString().padLeft(2, '0');
+    final hours = twoDigits(duration.inHours);
+    final minutes = twoDigits(duration.inMinutes.remainder(60));
+    final seconds = twoDigits(duration.inSeconds.remainder(60));
+    return duration.inHours > 0 ? '$hours:$minutes:$seconds' : '$minutes:$seconds';
+  }
 }
 
-class CustomPDFViewer extends StatelessWidget {
-  const CustomPDFViewer({Key? key}) : super(key: key);
-
+class CachedPDFViewerWidget extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
-    return GetX<KnowledgeController>(
+    return GetBuilder<CachedPdfController>(
+      init: CachedPdfController(),
       builder: (controller) {
-        if (controller.isLoadingPdf.value) {
-          return const SizedBox(
-            height: 200,
-            child: Center(child: CircularProgressIndicator()),
-          );
-        }
+        return Obx(() {
+          if (controller.isLoading.value) {
+            return const Center(
+              child: CircularProgressIndicator(),
+            );
+          }
 
-        if (controller.pdfPath.value == null) {
-          return Container(
-            height: 200,
-            decoration: BoxDecoration(
-              color: Colors.grey[200],
-              borderRadius: BorderRadius.circular(8),
-            ),
-            child: const Center(
-              child: Text(
-                'No PDF available',
-                style: TextStyle(color: Colors.grey),
-              ),
-            ),
-          );
-        }
+          if (controller.localPath.value.isEmpty) {
+            return const Center(
+              child: Text('No PDF available'),
+            );
+          }
 
-        return GestureDetector(
-          onTap: () => Get.to(() => FullPDFViewer(filePath: controller.pdfPath.value!)),
-          child: Container(
-            height: 200,
-            decoration: BoxDecoration(
-              color: Colors.white,
-              borderRadius: BorderRadius.circular(8),
-              boxShadow: [
-                BoxShadow(
-                  color: Colors.grey.withOpacity(0.2),
-                  spreadRadius: 1,
-                  blurRadius: 5,
-                  offset: const Offset(0, 2),
-                ),
-              ],
-            ),
+          return GestureDetector(
+            onTap: () => _showFullScreenPDF(context, controller.localPath.value),
             child: Stack(
               children: [
-                ClipRRect(
-                  borderRadius: BorderRadius.circular(8),
-                  child: controller.pdfPath.value != null ? PDFView(
-                    filePath: controller.pdfPath.value!,
-                    enableSwipe: false,
+                SizedBox(
+                  height: 400,
+                  child: PDFView(
+                    filePath: controller.localPath.value,
+                    enableSwipe: true,
                     swipeHorizontal: true,
                     autoSpacing: true,
-                    pageFling: false,
-                    pageSnap: false,
-                    defaultPage: 0,
-                    fitPolicy: FitPolicy.HEIGHT,
-                    onError: (error) {
-                      print('PDF Error: $error');
+                    pageFling: true,
+                    pageSnap: true,
+                    onRender: (pages) {
+                      controller.totalPages.value = pages ?? 0;
                     },
-                  ) : const SizedBox(),
+                    onPageChanged: (page, _) {
+                      controller.currentPage.value = page ?? 0;
+                    },
+                    onError: (error) {
+                      ScaffoldMessenger.of(context).showSnackBar(
+                        SnackBar(content: Text(error.toString())),
+                      );
+                    },
+                  ),
                 ),
                 Positioned(
                   right: 16,
                   bottom: 16,
                   child: Container(
-                    padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
+                    padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
                     decoration: BoxDecoration(
-                      color: Colors.blue.withOpacity(0.9),
+                      color: Colors.black54,
+                      borderRadius: BorderRadius.circular(12),
+                    ),
+                    child: Obx(() => Text(
+                          'Page ${controller.currentPage.value + 1}/${controller.totalPages.value}',
+                          style: const TextStyle(color: Colors.white),
+                        )),
+                  ),
+                ),
+                Positioned(
+                  right: 16,
+                  top: 16,
+                  child: Container(
+                    padding: const EdgeInsets.all(8),
+                    decoration: BoxDecoration(
+                      color: Colors.black54,
                       borderRadius: BorderRadius.circular(20),
                     ),
-                    child: const Row(
-                      mainAxisSize: MainAxisSize.min,
-                      children: [
-                        Icon(Icons.fullscreen, color: Colors.white, size: 16),
-                        SizedBox(width: 4),
-                        Text(
-                          'View Full',
-                          style: TextStyle(color: Colors.white, fontSize: 12),
-                        ),
-                      ],
+                    child: const Icon(
+                      Icons.fullscreen,
+                      color: Colors.white,
                     ),
                   ),
                 ),
               ],
             ),
-          ),
-        );
+          );
+        });
       },
+    );
+  }
+
+  void _showFullScreenPDF(BuildContext context, String filePath) {
+    Navigator.push(
+      context,
+      MaterialPageRoute(
+        builder: (context) => FullScreenPDFViewer(filePath: filePath),
+      ),
     );
   }
 }
 
-class FullPDFViewer extends StatelessWidget {
+class FullScreenPDFViewer extends StatefulWidget {
   final String filePath;
 
-  const FullPDFViewer({Key? key, required this.filePath}) : super(key: key);
+  const FullScreenPDFViewer({Key? key, required this.filePath}) : super(key: key);
+
+  @override
+  _FullScreenPDFViewerState createState() => _FullScreenPDFViewerState();
+}
+
+class _FullScreenPDFViewerState extends State<FullScreenPDFViewer> {
+  int currentPage = 0;
+  int totalPages = 0;
+  bool isLoading = true;
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
+      backgroundColor: Colors.black,
       appBar: AppBar(
-        title: const Text('Training Material'),
-        leading: IconButton(
-          icon: const Icon(Icons.arrow_back),
-          onPressed: () => Get.back(),
+        backgroundColor: Colors.black,
+        iconTheme: const IconThemeData(color: Colors.white),
+        title: Text(
+          'Page ${currentPage + 1} of $totalPages',
+          style: const TextStyle(color: Colors.white),
         ),
+        actions: [
+          IconButton(
+            icon: const Icon(Icons.zoom_in),
+            onPressed: () {
+              // Implement zoom functionality if needed
+            },
+          ),
+        ],
       ),
-      body: PDFView(
-        filePath: filePath,
-        enableSwipe: true,
-        swipeHorizontal: true,
-        autoSpacing: true,
-        pageFling: true,
-        pageSnap: true,
-        fitPolicy: FitPolicy.WIDTH,
-        onError: (error) {
-          print('PDF Error: $error');
-          Get.snackbar('Error', 'Failed to load PDF');
-        },
+      body: Stack(
+        children: [
+          PDFView(
+            filePath: widget.filePath,
+            enableSwipe: true,
+            swipeHorizontal: true,
+            autoSpacing: true,
+            pageFling: true,
+            pageSnap: true,
+            onRender: (pages) {
+              setState(() {
+                totalPages = pages ?? 0;
+                isLoading = false;
+              });
+            },
+            onPageChanged: (page, _) {
+              setState(() {
+                currentPage = page ?? 0;
+              });
+            },
+            onError: (error) {
+              ScaffoldMessenger.of(context).showSnackBar(
+                SnackBar(content: Text(error.toString())),
+              );
+            },
+          ),
+          if (isLoading)
+            const Center(
+              child: CircularProgressIndicator(
+                color: Colors.white,
+              ),
+            ),
+        ],
       ),
     );
   }
