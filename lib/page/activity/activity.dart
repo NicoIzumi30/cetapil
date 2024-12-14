@@ -1,4 +1,5 @@
 import 'package:cetapil_mobile/controller/activity/detail_activity_controller.dart';
+import 'package:cetapil_mobile/controller/activity/knowledge_controller.dart';
 import 'package:cetapil_mobile/controller/activity/tambah_activity_controller.dart';
 import 'package:cetapil_mobile/controller/activity/tambah_availibility_controller.dart';
 import 'package:cetapil_mobile/controller/activity/tambah_order_controller.dart';

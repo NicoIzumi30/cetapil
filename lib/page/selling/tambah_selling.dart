@@ -69,98 +69,107 @@ class TambahSelling extends GetView<SellingController> {
                                       fontWeight: FontWeight.bold,
                                       color: Color(0xFF023B5E)),
                                 ),
+                                SizedBox(
+                                  width: double.infinity,
+                                  child: ElevatedButton(
+                                    style: ElevatedButton.styleFrom(
+                                      backgroundColor: AppColors.primary,
+                                      shape: RoundedRectangleBorder(
+                                        borderRadius: BorderRadius.circular(10),
+                                        side: BorderSide(color: AppColors.primary),
+                                      ),
+                                    ),
+                                    onPressed: () async {
+                                      if (!Get.isRegistered<TambahProdukSellingController>()) {
+                                        Get.put(TambahProdukSellingController());
+                                      }
+                                      await Get.to(() => TambahProductSelling());
+                                    },
+                                    child: Text(
+                                      "Tambah Product Selling",
+                                      style: TextStyle(
+                                        color: Colors.white,
+                                        fontWeight: FontWeight.bold,
+                                      ),
+                                    ),
+                                  ),
+                                ),
+                                SizedBox(height: 20),
                                 Obx(() {
-                                  final groupedItems = <String, List<Map<String, dynamic>>>{};
+                                  if (controller.draftItems.isEmpty) {
+                                    return Padding(
+                                      padding: const EdgeInsets.symmetric(vertical: 20.0),
+                                      child: Center(
+                                        child: Text(
+                                          "Belum ada produk yang ditambahkan",
+                                          style: TextStyle(
+                                            color: Colors.grey[600],
+                                            fontSize: 14,
+                                          ),
+                                        ),
+                                      ),
+                                    );
+                                  }
 
+                                  final groupedItems = <String, List<Map<String, dynamic>>>{};
                                   for (var item in controller.draftItems) {
-                                    // Add items to the corresponding category group
                                     final category = item['category'];
                                     if (groupedItems[category] == null) {
                                       groupedItems[category] = [];
                                     }
                                     groupedItems[category]!.add(item);
-                                    controller.listProduct.clear();
-                                    controller.listProduct.add(item);
                                   }
+
                                   return Column(
                                     children: [
-                                      // Iterate over each category and its items
                                       ...groupedItems.entries.map((entry) {
                                         final category = entry.key;
                                         final items = entry.value;
 
-                                        return Column(
-                                          crossAxisAlignment: CrossAxisAlignment.start,
-                                          children: [
-                                            // Display the category header
-                                            Padding(
-                                              padding: const EdgeInsets.symmetric(vertical: 8.0),
-                                              child: Text(
-                                                category, // Display the category name
-                                                style: TextStyle(
-                                                  fontSize: 14,
-                                                  fontWeight: FontWeight.bold,
-                                                  color: Color(0xFF023B5E),
-                                                ),
-                                              ),
-                                            ),
-                                            // Display all the products in this category
-                                            ...items.map((item) {
-                                              return SumAmountProduct(
-                                                productName: item['sku'] ?? '',
-                                                stockController: TextEditingController(
-                                                    text: item['stock'].toString()),
-                                                sellingController: TextEditingController(
-                                                    text: item['selling'].toString()),
-                                                balanceController: TextEditingController(
-                                                    text: item['balance'].toString()),
-                                                priceController: TextEditingController(
-                                                    text: item['price'].toString()),
-                                                isReadOnly: true,
-                                                itemData: item, // Pass the full item data
-                                                onDelete: () {
-                                                  groupedItems.forEach((key, value) {
-                                                    value
-                                                        .removeWhere((element) => element == items);
-                                                  });
-                                                  groupedItems
-                                                      .removeWhere((key, value) => value.isEmpty);
-                                                },
-                                              );
-                                            }).toList(),
-                                          ],
+                                        return Padding(
+                                          padding: const EdgeInsets.only(bottom: 8.0),
+                                          child: CollapsibleCategoryGroup(
+                                            category: category,
+                                            items: items,
+                                            onEdit: () async {
+                                              // Get the controller
+                                              if (!Get.isRegistered<
+                                                  TambahProdukSellingController>()) {
+                                                Get.put(TambahProdukSellingController());
+                                              }
+                                              final prodController =
+                                                  Get.find<TambahProdukSellingController>();
+
+                                              // Find the category ID from the name
+                                              final categoryId =
+                                                  prodController.supportDataController
+                                                      .getCategories()
+                                                      .firstWhere(
+                                                        (cat) => cat['name'] == category,
+                                                        orElse: () => {'id': null},
+                                                      )['id']
+                                                      ?.toString();
+
+                                              // Set the category and pre-fill the data
+                                              prodController.selectedCategory.value = categoryId;
+
+                                              // Pre-populate the values for all products in this category
+                                              for (var item in items) {
+                                                final skuId = item['id'].toString();
+                                                prodController.productValues[skuId] = {
+                                                  'stock': item['stock'].toString(),
+                                                  'selling': item['selling'].toString(),
+                                                  'balance': item['balance'].toString(),
+                                                  'price': item['price'].toString(),
+                                                };
+                                              }
+
+                                              // Navigate to edit screen
+                                              await Get.to(() => TambahProductSelling());
+                                            },
+                                          ),
                                         );
                                       }).toList(),
-                                      SizedBox(
-                                        width: double.infinity,
-                                        child: ElevatedButton(
-                                          style: ElevatedButton.styleFrom(
-                                            backgroundColor: AppColors.primary,
-                                            shape: RoundedRectangleBorder(
-                                              borderRadius: BorderRadius.circular(10),
-                                              side: BorderSide(color: AppColors.primary),
-                                            ),
-                                          ),
-                                          onPressed: () async {
-                                            if (!Get.isRegistered<
-                                                TambahProdukSellingController>()) {
-                                              var con = Get.put(TambahProdukSellingController());
-                                              con.clearForm();
-                                            } else {
-                                              var con = Get.find<TambahProdukSellingController>();
-                                              con.clearForm();
-                                            }
-                                            await Get.to(() => TambahProductSelling());
-                                          },
-                                          child: Text(
-                                            "Tambah Product Selling",
-                                            style: TextStyle(
-                                              color: Colors.white,
-                                              fontWeight: FontWeight.bold,
-                                            ),
-                                          ),
-                                        ),
-                                      ),
                                     ],
                                   );
                                 }),
@@ -407,6 +416,120 @@ class TambahSelling extends GetView<SellingController> {
   }
 }
 
+class CollapsibleCategoryGroup extends StatefulWidget {
+  final String category;
+  final List<Map<String, dynamic>> items;
+  final VoidCallback onEdit;
+
+  const CollapsibleCategoryGroup({
+    Key? key,
+    required this.category,
+    required this.items,
+    required this.onEdit,
+  }) : super(key: key);
+
+  @override
+  State<CollapsibleCategoryGroup> createState() => _CollapsibleCategoryGroupState();
+}
+
+class _CollapsibleCategoryGroupState extends State<CollapsibleCategoryGroup> {
+  bool isExpanded = false;
+
+  @override
+  Widget build(BuildContext context) {
+    return Column(
+      children: [
+        Container(
+          margin: EdgeInsets.only(bottom: isExpanded ? 8 : 0),
+          decoration: BoxDecoration(
+            color: Color(0xFFEDF8FF),
+            borderRadius: BorderRadius.circular(8),
+          ),
+          child: Material(
+            color: Colors.transparent,
+            child: InkWell(
+              borderRadius: BorderRadius.circular(8),
+              onTap: () {
+                setState(() {
+                  isExpanded = !isExpanded;
+                });
+              },
+              child: Padding(
+                padding: const EdgeInsets.symmetric(horizontal: 12.0, vertical: 8.0),
+                child: Row(
+                  children: [
+                    Icon(
+                      isExpanded ? Icons.keyboard_arrow_down : Icons.keyboard_arrow_right,
+                      color: Color(0xFF023B5E),
+                    ),
+                    SizedBox(width: 8),
+                    Expanded(
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          Text(
+                            widget.category,
+                            style: TextStyle(
+                              fontSize: 14,
+                              fontWeight: FontWeight.bold,
+                              color: Color(0xFF023B5E),
+                            ),
+                          ),
+                          Text(
+                            '${widget.items.length} products',
+                            style: TextStyle(
+                              fontSize: 12,
+                              color: Color(0xFF666666),
+                            ),
+                          ),
+                        ],
+                      ),
+                    ),
+                    IconButton(
+                      onPressed: widget.onEdit,
+                      icon: Icon(Icons.edit_outlined, color: Colors.blue, size: 20),
+                      padding: EdgeInsets.zero,
+                      constraints: BoxConstraints(),
+                      tooltip: 'Edit Category Products',
+                    ),
+                  ],
+                ),
+              ),
+            ),
+          ),
+        ),
+        if (isExpanded)
+          AnimatedContainer(
+            duration: Duration(milliseconds: 200),
+            curve: Curves.easeInOut,
+            child: Column(
+              children: widget.items.map((item) {
+                return SumAmountProduct(
+                  productName: item['sku'] ?? '',
+                  stockController: TextEditingController(
+                    text: item['stock'].toString(),
+                  ),
+                  sellingController: TextEditingController(
+                    text: item['selling'].toString(),
+                  ),
+                  balanceController: TextEditingController(
+                    text: item['balance'].toString(),
+                  ),
+                  priceController: TextEditingController(
+                    text: item['price'].toString(),
+                  ),
+                  isReadOnly: true,
+                  itemData: item,
+                  onDelete: () {},
+                );
+              }).toList(),
+            ),
+          ),
+      ],
+    );
+  }
+}
+
 class SumAmountProduct extends StatelessWidget {
   final String productName;
   final TextEditingController stockController;
@@ -415,7 +538,7 @@ class SumAmountProduct extends StatelessWidget {
   final TextEditingController priceController;
   final bool isReadOnly;
   final VoidCallback onDelete;
-  final Map<String, dynamic> itemData; // Add this parameter to pass the full item data
+  final Map<String, dynamic> itemData;
 
   const SumAmountProduct({
     super.key,
@@ -425,125 +548,68 @@ class SumAmountProduct extends StatelessWidget {
     required this.balanceController,
     required this.priceController,
     required this.onDelete,
-    required this.itemData, // Add this required parameter
+    required this.itemData,
     this.isReadOnly = false,
   });
 
   @override
   Widget build(BuildContext context) {
-    return Stack(
-      clipBehavior: Clip.none,
-      children: [
-        Container(
-          margin: EdgeInsets.only(bottom: 16, top: 8, right: 8),
-          decoration: BoxDecoration(
-            color: Colors.white,
-            borderRadius: BorderRadius.circular(12),
-            boxShadow: [
-              BoxShadow(
-                color: Colors.black.withOpacity(0.05),
-                blurRadius: 8,
-                offset: Offset(0, 2),
-              ),
-            ],
+    return Container(
+      margin: EdgeInsets.only(bottom: 16, top: 8, right: 8),
+      decoration: BoxDecoration(
+        color: Colors.white,
+        borderRadius: BorderRadius.circular(12),
+        boxShadow: [
+          BoxShadow(
+            color: Colors.black.withOpacity(0.05),
+            blurRadius: 8,
+            offset: Offset(0, 2),
           ),
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              Container(
-                padding: EdgeInsets.symmetric(horizontal: 16, vertical: 12),
-                decoration: BoxDecoration(
-                  color: Color(0xFFEDF8FF),
-                  borderRadius: BorderRadius.only(
-                    topLeft: Radius.circular(12),
-                    topRight: Radius.circular(12),
-                  ),
-                ),
-                child: Row(
-                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                  children: [
-                    Expanded(
-                      child: Text(
-                        productName,
-                        style: TextStyle(
-                          fontSize: 14,
-                          fontWeight: FontWeight.bold,
-                          color: Color(0xFF023B5E),
-                        ),
-                      ),
-                    ),
-                    Row(
-                      children: [
-                        IconButton(
-                          onPressed: () async {
-                            // Get the controller
-                            if (!Get.isRegistered<TambahProdukSellingController>()) {
-                              Get.put(TambahProdukSellingController());
-                            }
-                            final controller = Get.find<TambahProdukSellingController>();
-
-                            // Find the category ID from the name
-                            final categoryId = controller.supportDataController
-                                .getCategories()
-                                .firstWhere(
-                                  (cat) => cat['name'] == itemData['category'],
-                                  orElse: () => {'id': null},
-                                )['id']
-                                ?.toString();
-
-                            // Pre-fill the data
-                            controller.selectedCategory.value = categoryId;
-                            // Wait a bit for the filtered SKUs to update
-                            await Future.delayed(Duration(milliseconds: 100));
-                            controller.selectedSku.value = itemData['id']?.toString();
-                            controller.stockController.value.text =
-                                itemData['stock']?.toString() ?? '';
-                            controller.sellingController.value.text =
-                                itemData['selling']?.toString() ?? '';
-                            controller.balanceController.value.text =
-                                itemData['balance']?.toString() ?? '';
-                            controller.priceController.value.text =
-                                itemData['price']?.toString() ?? '';
-
-                            // Navigate to edit screen
-                            await Get.to(() => TambahProductSelling());
-                          },
-                          icon: Icon(Icons.edit_outlined, color: Colors.blue, size: 20),
-                          padding: EdgeInsets.zero,
-                          constraints: BoxConstraints(),
-                          tooltip: 'Edit Product',
-                        ),
-                        SizedBox(width: 8),
-                        IconButton(
-                          onPressed: onDelete,
-                          icon: Icon(Icons.delete_outline, color: Colors.red[400], size: 20),
-                          padding: EdgeInsets.zero,
-                          constraints: BoxConstraints(),
-                          tooltip: 'Remove Product',
-                        ),
-                      ],
-                    ),
-                  ],
+        ],
+      ),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Container(
+            padding: EdgeInsets.symmetric(horizontal: 16, vertical: 12),
+            decoration: BoxDecoration(
+              color: Colors.white,
+              borderRadius: BorderRadius.only(
+                topLeft: Radius.circular(12),
+                topRight: Radius.circular(12),
+              ),
+              border: Border(
+                bottom: BorderSide(
+                  color: Color(0xFFEEEEEE),
+                  width: 1,
                 ),
               ),
-              Padding(
-                padding: EdgeInsets.all(16),
-                child: Row(
-                  children: [
-                    _buildDetailField("Stock", stockController),
-                    SizedBox(width: 12),
-                    _buildDetailField("Selling", sellingController),
-                    SizedBox(width: 12),
-                    _buildDetailField("Balance", balanceController),
-                    SizedBox(width: 12),
-                    _buildDetailField("Price", priceController),
-                  ],
-                ),
+            ),
+            child: Text(
+              productName,
+              style: TextStyle(
+                fontSize: 14,
+                fontWeight: FontWeight.bold,
+                color: Color(0xFF023B5E),
               ),
-            ],
+            ),
           ),
-        ),
-      ],
+          Padding(
+            padding: EdgeInsets.all(16),
+            child: Row(
+              children: [
+                _buildDetailField("Stock", stockController),
+                SizedBox(width: 12),
+                _buildDetailField("Selling", sellingController),
+                SizedBox(width: 12),
+                _buildDetailField("Balance", balanceController),
+                SizedBox(width: 12),
+                _buildDetailField("Price", priceController),
+              ],
+            ),
+          ),
+        ],
+      ),
     );
   }
 
@@ -569,87 +635,6 @@ class SumAmountProduct extends StatelessWidget {
       ),
     );
   }
-
-//   @override
-// Widget build(BuildContext context) {
-//   return Row(
-//     crossAxisAlignment: CrossAxisAlignment.start,
-//     children: [
-//       Expanded(
-//         child: Row(
-//           children: [
-//             Expanded(
-//               flex: 2,
-//               child: Column(
-//                 crossAxisAlignment: CrossAxisAlignment.start,
-//                 children: [
-//                   Text(
-//                     productName,
-//                     style: TextStyle(fontSize: 10),
-//                   ),
-//                 ],
-//               ),
-//             ),
-//             SizedBox(width: 10),
-//             Expanded(
-//               child: Column(
-//                 children: [
-//                   Text("Stock",style: TextStyle(fontSize: 12),),
-//                   NumberField(
-//                     controller: stockController,
-//                     readOnly: isReadOnly,
-//                   ),
-//                 ],
-//               ),
-//             ),
-//             SizedBox(width: 10),
-//             Expanded(
-//               child: Column(
-//                 children: [
-//                   Text("Selling",style: TextStyle(fontSize: 12),),
-//                   NumberField(
-//                     controller: sellingController,
-//                     readOnly: isReadOnly,
-//                   ),
-//                 ],
-//               ),
-//             ),
-//             SizedBox(width: 10),
-//             Expanded(
-//               child: Column(
-//                 children: [
-//                   Text("Balance",style: TextStyle(fontSize: 12),),
-//                   NumberField(
-//                     controller: balanceController,
-//                     readOnly: isReadOnly,
-//                   ),
-//                 ],
-//               ),
-//             ),
-//             SizedBox(width: 10),
-//             Expanded(
-//               child: Column(
-//                 children: [
-//                   Text("Price",style: TextStyle(fontSize: 12),),
-//                   NumberField(
-//                     controller: priceController,
-//                     readOnly: isReadOnly,
-//                   ),
-//                 ],
-//               ),
-//             ),
-//           ],
-//         ),
-//       ),
-//       IconButton(
-//         onPressed: onDelete,
-//         icon: Icon(Icons.close, size: 14),
-//         padding: EdgeInsets.zero,
-//         constraints: BoxConstraints(),
-//       ),
-//     ],
-//   );
-// }
 }
 
 class NumberField extends StatelessWidget {
