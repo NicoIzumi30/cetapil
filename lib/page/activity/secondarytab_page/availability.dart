@@ -32,6 +32,9 @@ class AvailabilityPage extends GetView<TambahActivityController> {
               if (!Get.isRegistered<TambahAvailabilityController>()) {
                 Get.put(TambahAvailabilityController());
               }
+              final prodController =
+              Get.find<TambahAvailabilityController>();
+              print(prodController.selectedCategory.value);
               // tambahAvailabilityController.clearForm();
               Get.to(() => TambahAvailability());
             },
@@ -46,62 +49,281 @@ class AvailabilityPage extends GetView<TambahActivityController> {
         ),
         SizedBox(height: 20),
         Obx(() {
-          final groupedItemsAvailability = <String, List<Map<String, dynamic>>>{};
+          if (controller.availabilityDraftItems.isEmpty) {
+            return Padding(
+              padding: const EdgeInsets.symmetric(vertical: 20.0),
+              child: Center(
+                child: Text(
+                  "Belum ada produk yang ditambahkan",
+                  style: TextStyle(
+                    color: Colors.grey[600],
+                    fontSize: 14,
+                  ),
+                ),
+              ),
+            );
+          }
 
+          final groupedItems = <String, List<Map<String, dynamic>>>{};
           for (var item in controller.availabilityDraftItems) {
             final category = item['category'];
-            if (groupedItemsAvailability[category] == null) {
-              groupedItemsAvailability[category] = [];
+            if (groupedItems[category] == null) {
+              groupedItems[category] = [];
             }
-            groupedItemsAvailability[category]!.add(item);
+            groupedItems[category]!.add(item);
           }
 
           return Column(
             children: [
-              ...groupedItemsAvailability.entries.map((entry) {
+              ...groupedItems.entries.map((entry) {
                 final category = entry.key;
                 final items = entry.value;
 
-                return Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    Padding(
-                      padding: const EdgeInsets.symmetric(vertical: 8.0),
-                      child: Text(
-                        category,
-                        style: TextStyle(
-                          fontSize: 14,
-                          fontWeight: FontWeight.bold,
-                          color: Color(0xFF023B5E),
-                        ),
-                      ),
-                    ),
-                    ...items.map((item) {
-                      return SumAmountProduct(
-                        productName: item['sku'] ?? '',
-                        stockController:
-                            TextEditingController(text: item['stock']?.toString() ?? ''),
-                        AV3MController: TextEditingController(text: item['av3m']?.toString() ?? ''),
-                        recommendController:
-                            TextEditingController(text: item['recommend']?.toString() ?? ''),
-                        isReadOnly: true,
-                        itemData: {
-                          'id': item['id'],
-                          'sku': item['sku'],
-                          'category': item['category'],
-                          'stock': item['stock'],
-                          'av3m': item['av3m'],
-                          'recommend': item['recommend']
-                        },
-                      );
-                    }).toList(),
-                    SizedBox(height: 10),
-                  ],
+                return Padding(
+                  padding: const EdgeInsets.only(bottom: 8.0),
+                  child: CollapsibleCategoryGroup(
+                    category: category,
+                    items: items,
+                    onEdit: () async {
+                      // Get the controller
+                      if (!Get.isRegistered<
+                          TambahAvailabilityController>()) {
+                        Get.put(TambahAvailabilityController());
+                      }
+                      final prodController =
+                      Get.find<TambahAvailabilityController>();
+
+                      // Find the category ID from the name
+                      final categoryId =
+                      prodController.supportDataController
+                          .getCategories()
+                          .firstWhere(
+                            (cat) => cat['name'] == category,
+                        orElse: () => {'id': null},
+                      )['id']
+                          ?.toString();
+
+                      // Set the category and pre-fill the data
+                      prodController.selectedCategory.value = categoryId;
+
+                      // Pre-populate the values for all products in this category
+                      for (var item in items) {
+                        final skuId = item['id'].toString();
+                        prodController.productValues[skuId] = {
+                          'stock': item['stock'].toString(),
+                          'av3m': item['av3m'].toString(),
+                          'recommend': item['recommend'].toString(),
+                          // 'price': item['price'].toString(),
+                        };
+                      }
+
+                      // Navigate to edit screen
+                      await Get.to(() => const TambahAvailability());
+                    },
+                    onDelete: () async{
+                      if (!Get.isRegistered<
+                          TambahAvailabilityController>()) {
+                        Get.put(TambahAvailabilityController());
+                      }
+                      final prodController =
+                      Get.find<TambahAvailabilityController>();
+
+                      // Find the category ID from the name
+                      final categoryId =
+                      prodController.supportDataController
+                          .getCategories()
+                          .firstWhere(
+                            (cat) => cat['name'] == category,
+                        orElse: () => {'id': null},
+                      )['id']
+                          ?.toString();
+                    },
+                  ),
                 );
               }).toList(),
             ],
           );
         }),
+        SizedBox(height: 20),
+        // Obx(() {
+        //   final groupedItemsAvailability = <String, List<Map<String, dynamic>>>{};
+        //
+        //   for (var item in controller.availabilityDraftItems) {
+        //     final category = item['category'];
+        //     if (groupedItemsAvailability[category] == null) {
+        //       groupedItemsAvailability[category] = [];
+        //     }
+        //     groupedItemsAvailability[category]!.add(item);
+        //   }
+        //
+        //   return Column(
+        //     children: [
+        //       ...groupedItemsAvailability.entries.map((entry) {
+        //         final category = entry.key;
+        //         final items = entry.value;
+        //
+        //         return Column(
+        //           crossAxisAlignment: CrossAxisAlignment.start,
+        //           children: [
+        //             Padding(
+        //               padding: const EdgeInsets.symmetric(vertical: 8.0),
+        //               child: Text(
+        //                 category,
+        //                 style: TextStyle(
+        //                   fontSize: 14,
+        //                   fontWeight: FontWeight.bold,
+        //                   color: Color(0xFF023B5E),
+        //                 ),
+        //               ),
+        //             ),
+        //             ...items.map((item) {
+        //               return SumAmountProduct(
+        //                 productName: item['sku'] ?? '',
+        //                 stockController:
+        //                     TextEditingController(text: item['stock']?.toString() ?? ''),
+        //                 AV3MController: TextEditingController(text: item['av3m']?.toString() ?? ''),
+        //                 recommendController:
+        //                     TextEditingController(text: item['recommend']?.toString() ?? ''),
+        //                 isReadOnly: true,
+        //                 itemData: {
+        //                   'id': item['id'],
+        //                   'sku': item['sku'],
+        //                   'category': item['category'],
+        //                   'stock': item['stock'],
+        //                   'av3m': item['av3m'],
+        //                   'recommend': item['recommend']
+        //                 },
+        //               );
+        //             }).toList(),
+        //             SizedBox(height: 10),
+        //           ],
+        //         );
+        //       }).toList(),
+        //     ],
+        //   );
+        // }),
+      ],
+    );
+  }
+}
+
+class CollapsibleCategoryGroup extends StatefulWidget {
+  final String category;
+  final List<Map<String, dynamic>> items;
+  final VoidCallback onEdit;
+  final VoidCallback onDelete;
+
+  const CollapsibleCategoryGroup({
+    Key? key,
+    required this.category,
+    required this.items,
+    required this.onEdit, required this.onDelete,
+  }) : super(key: key);
+
+  @override
+  State<CollapsibleCategoryGroup> createState() => _CollapsibleCategoryGroupState();
+}
+
+class _CollapsibleCategoryGroupState extends State<CollapsibleCategoryGroup> {
+  bool isExpanded = false;
+
+  @override
+  Widget build(BuildContext context) {
+    return Column(
+      children: [
+        Container(
+          margin: EdgeInsets.only(bottom: isExpanded ? 8 : 0),
+          decoration: BoxDecoration(
+            color: Color(0xFFEDF8FF),
+            borderRadius: BorderRadius.circular(8),
+          ),
+          child: Material(
+            color: Colors.transparent,
+            child: InkWell(
+              borderRadius: BorderRadius.circular(8),
+              onTap: () {
+                setState(() {
+                  isExpanded = !isExpanded;
+                });
+              },
+              child: Padding(
+                padding: const EdgeInsets.symmetric(horizontal: 12.0, vertical: 8.0),
+                child: Row(
+                  children: [
+                    Icon(
+                      isExpanded ? Icons.keyboard_arrow_down : Icons.keyboard_arrow_right,
+                      color: Color(0xFF023B5E),
+                    ),
+                    SizedBox(width: 8),
+                    Expanded(
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          Text(
+                            widget.category,
+                            style: TextStyle(
+                              fontSize: 14,
+                              fontWeight: FontWeight.bold,
+                              color: Color(0xFF023B5E),
+                            ),
+                          ),
+                          Text(
+                            '${widget.items.length} products',
+                            style: TextStyle(
+                              fontSize: 12,
+                              color: Color(0xFF666666),
+                            ),
+                          ),
+                        ],
+                      ),
+                    ),
+                    IconButton(
+                      onPressed: widget.onEdit,
+                      icon: Icon(Icons.edit_outlined, color: Colors.blue, size: 20),
+                      padding: EdgeInsets.zero,
+                      constraints: BoxConstraints(),
+                      tooltip: 'Edit Category Products',
+                    ),
+                    IconButton(
+                      onPressed: widget.onDelete,
+                      icon: Icon(Icons.delete, color: Colors.red, size: 20),
+                      padding: EdgeInsets.zero,
+                      constraints: BoxConstraints(),
+                      tooltip: 'Delete Category Products',
+                    ),
+                  ],
+                ),
+              ),
+            ),
+          ),
+        ),
+        if (isExpanded)
+          AnimatedContainer(
+            duration: Duration(milliseconds: 200),
+            curve: Curves.easeInOut,
+            child: Column(
+              children: widget.items.map((item) {
+                return SumAmountProduct(
+                  productName: item['sku'] ?? '',
+                  stockController: TextEditingController(
+                    text: item['stock'].toString(),
+                  ),
+                  av3mController: TextEditingController(
+                    text: item['av3m'].toString(),
+                  ),
+                  recommendController: TextEditingController(
+                    text: item['recommend'].toString(),
+                  ),
+                  // priceController: TextEditingController(
+                  //   text: item['price'].toString(),
+                  // ),
+                  isReadOnly: true,
+                  itemData: item,
+                  onDelete: () {},
+                );
+              }).toList(),
+            ),
+          ),
       ],
     );
   }
@@ -110,27 +332,28 @@ class AvailabilityPage extends GetView<TambahActivityController> {
 class SumAmountProduct extends StatelessWidget {
   final String productName;
   final TextEditingController stockController;
-  final TextEditingController AV3MController;
+  final TextEditingController av3mController;
   final TextEditingController recommendController;
+  // final TextEditingController priceController;
   final bool isReadOnly;
+  final VoidCallback onDelete;
   final Map<String, dynamic> itemData;
 
   const SumAmountProduct({
     super.key,
     required this.productName,
     required this.stockController,
-    required this.AV3MController,
+    required this.av3mController,
     required this.recommendController,
+    required this.onDelete,
     required this.itemData,
     this.isReadOnly = false,
   });
 
   @override
   Widget build(BuildContext context) {
-    final activityController = Get.find<TambahActivityController>();
-
     return Container(
-      margin: EdgeInsets.only(bottom: 16),
+      margin: EdgeInsets.only(bottom: 16, top: 8, right: 8),
       decoration: BoxDecoration(
         color: Colors.white,
         borderRadius: BorderRadius.circular(12),
@@ -148,72 +371,25 @@ class SumAmountProduct extends StatelessWidget {
           Container(
             padding: EdgeInsets.symmetric(horizontal: 16, vertical: 12),
             decoration: BoxDecoration(
-              color: Color(0xFFEDF8FF),
+              color: Colors.white,
               borderRadius: BorderRadius.only(
                 topLeft: Radius.circular(12),
                 topRight: Radius.circular(12),
               ),
+              border: Border(
+                bottom: BorderSide(
+                  color: Color(0xFFEEEEEE),
+                  width: 1,
+                ),
+              ),
             ),
-            child: Row(
-              mainAxisAlignment: MainAxisAlignment.spaceBetween,
-              children: [
-                Expanded(
-                  child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      Text(
-                        "Stock On Hand",
-                        style: TextStyle(
-                          fontSize: 14,
-                          fontWeight: FontWeight.bold,
-                          color: Color(0xFF023B5E),
-                        ),
-                      ),
-                      SizedBox(height: 4),
-                      Text(
-                        productName,
-                        style: TextStyle(
-                          fontSize: 12,
-                          color: Color(0xFF666666),
-                        ),
-                      ),
-                    ],
-                  ),
-                ),
-                Row(
-                  children: [
-                    IconButton(
-                      onPressed: () async {
-                        if (!Get.isRegistered<TambahAvailabilityController>()) {
-                          Get.put(TambahAvailabilityController());
-                        }
-                        final controller = Get.find<TambahAvailabilityController>();
-
-                        // Pre-fill the form data
-                        controller.editItem(itemData);
-
-                        // Navigate to edit screen
-                        await Get.to(() => TambahAvailability());
-                      },
-                      icon: Icon(Icons.edit_outlined, color: Colors.blue, size: 20),
-                      padding: EdgeInsets.zero,
-                      constraints: BoxConstraints(),
-                      tooltip: 'Edit Product',
-                    ),
-                    SizedBox(width: 8),
-                    IconButton(
-                      onPressed: () {
-                        // Use the new removeAvailabilityItem method
-                        activityController.removeAvailabilityItem(itemData['id']);
-                      },
-                      icon: Icon(Icons.delete_outline, color: Colors.red[400], size: 20),
-                      padding: EdgeInsets.zero,
-                      constraints: BoxConstraints(),
-                      tooltip: 'Remove Product',
-                    ),
-                  ],
-                ),
-              ],
+            child: Text(
+              productName,
+              style: TextStyle(
+                fontSize: 14,
+                fontWeight: FontWeight.bold,
+                color: Color(0xFF023B5E),
+              ),
             ),
           ),
           Padding(
@@ -222,9 +398,11 @@ class SumAmountProduct extends StatelessWidget {
               children: [
                 _buildDetailField("Stock", stockController),
                 SizedBox(width: 12),
-                _buildDetailField("AV3M(Pcs)", AV3MController),
+                _buildDetailField("Av3m", av3mController),
                 SizedBox(width: 12),
                 _buildDetailField("Recommend", recommendController),
+              //   SizedBox(width: 12),
+              //   _buildDetailField("Price", priceController),
               ],
             ),
           ),

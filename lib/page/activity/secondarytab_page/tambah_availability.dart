@@ -10,6 +10,8 @@ import '../../../model/list_product_sku_response.dart';
 import '../../../model/list_category_response.dart' as Category;
 import '../../../utils/colors.dart';
 import '../../../widget/back_button.dart';
+import '../../../widget/text_field.dart';
+import '../../selling/tambah_product_selling.dart';
 
 class TambahAvailability extends GetView<TambahAvailabilityController> {
   const TambahAvailability({super.key});
@@ -30,43 +32,148 @@ class TambahAvailability extends GetView<TambahAvailabilityController> {
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                EnhancedBackButton(
-                  onPressed: () => Alerts.showConfirmDialog(context,useGetBack: false),
-                  backgroundColor: Colors.white,
-                  iconColor: Colors.blue,
-                  useGetBack: false,
+                Row(
+                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                  children: [
+                    EnhancedBackButton(
+                      onPressed: () {
+                        // Clear the form
+                        controller.clearForm();
+                        Get.back();
+                      },
+                      backgroundColor: Colors.white,
+                      iconColor: Colors.blue,
+                      useGetBack: false,
+                    ),
+                    ElevatedButton(
+                      style: ElevatedButton.styleFrom(
+                        backgroundColor: AppColors.primary,
+                        shape: RoundedRectangleBorder(
+                          borderRadius: BorderRadius.circular(8),
+                        ),
+                        padding: EdgeInsets.symmetric(horizontal: 16, vertical: 12),
+                      ),
+                      onPressed: () {
+                        controller.saveAllProducts();
+                        Get.back();
+                      },
+                      child: Text(
+                        'Save All',
+                        style: TextStyle(
+                          color: Colors.white,
+                          fontWeight: FontWeight.bold,
+                        ),
+                      ),
+                    ),
+                  ],
                 ),
                 SizedBox(height: 20),
-                Expanded(
-                  child: SingleChildScrollView(
-                    child: Column(
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      children: [
-                        Text(
-                          "Kategori",
-                          style: TextStyle(fontSize: 13, fontWeight: FontWeight.w700),
-                        ),
-                        SizedBox(height: 10),
-                        _buildCategoryDropdown(),
-                        SizedBox(height: 20),
-                        Text(
-                          "SKU",
-                          style: TextStyle(fontSize: 13, fontWeight: FontWeight.w700),
-                        ),
-                        SizedBox(height: 10),
-                        _buildSkuDropdown(),
-                        SizedBox(height: 20),
-                        Text(
-                          "Selected SKU",
-                          style: TextStyle(fontSize: 13, fontWeight: FontWeight.w700),
-                        ),
-                        SizedBox(height: 10),
-                        _buildSelectedSkuDetails(),
-                      ],
-                    ),
+                controller.selectedCategory.value != null
+                ? ModernTextField(
+                  enable: false,
+                  title: "Kategori",
+                  controller:
+                  TextEditingController(text: controller.filteredCategory),
+                )
+                :
+                Container(
+                  margin: EdgeInsets.only(bottom: 10),
+                  decoration: BoxDecoration(
+                    borderRadius: BorderRadius.circular(8),
+                    boxShadow: [
+                      BoxShadow(
+                        color: Colors.grey.withOpacity(0.1),
+                        spreadRadius: 1,
+                        blurRadius: 3,
+                        offset: const Offset(0, 2),
+                      ),
+                    ],
                   ),
+                  child: Obx(() {
+                    final categories = controller.supportDataController.getCategories();
+                    return DropdownButtonFormField<String>(
+                      style: const TextStyle(
+                        fontSize: 14,
+                        color: Color(0xFF0077BD),
+                      ),
+                      decoration: InputDecoration(
+                        contentPadding: const EdgeInsets.symmetric(
+                          horizontal: 16,
+                          vertical: 12,
+                        ),
+                        border: OutlineInputBorder(
+                          borderRadius: BorderRadius.circular(8),
+                          borderSide: BorderSide.none,
+                        ),
+                        filled: true,
+                        fillColor: const Color(0xFFE8F3FF),
+                      ),
+                      hint: Text(
+                        "-- Pilih Kategori --",
+                        style: TextStyle(
+                          color: Colors.grey[400],
+                          fontSize: 14,
+                        ),
+                      ),
+                      value: controller.selectedCategory.value,
+                      items: categories.map((category) {
+                        return DropdownMenuItem<String>(
+                          value: category['id'].toString(),
+                          child: Text(category['name'] ?? ''),
+                        );
+                      }).toList(),
+                      onChanged: controller.onCategorySelected,
+                      isExpanded: true,
+                    );
+                  }),
                 ),
-                _buildBottomButtons(),
+                Expanded(
+                  child: Obx(() {
+                    final skus = controller.filteredSkus; // Get the filtered SKUs
+                    return ListView.builder(
+                      padding: EdgeInsets.symmetric(vertical: 8),
+                      itemCount: skus.length,
+                      itemBuilder: (context, index) {
+                        final sku = skus[index];
+                        return CompactProductCard(
+                          sku: sku,
+                          onChanged: (values) =>
+                              controller.updateProductValues(sku['id'].toString(), values),
+                        );
+                      },
+                    );
+                  }),
+                ),
+                // Expanded(
+                //   child: SingleChildScrollView(
+                //     child: Column(
+                //       crossAxisAlignment: CrossAxisAlignment.start,
+                //       children: [
+                //         Text(
+                //           "Kategori",
+                //           style: TextStyle(fontSize: 13, fontWeight: FontWeight.w700),
+                //         ),
+                //         SizedBox(height: 10),
+                //         _buildCategoryDropdown(),
+                //         SizedBox(height: 20),
+                //         Text(
+                //           "SKU",
+                //           style: TextStyle(fontSize: 13, fontWeight: FontWeight.w700),
+                //         ),
+                //         SizedBox(height: 10),
+                //         _buildSkuDropdown(),
+                //         SizedBox(height: 20),
+                //         Text(
+                //           "Selected SKU",
+                //           style: TextStyle(fontSize: 13, fontWeight: FontWeight.w700),
+                //         ),
+                //         SizedBox(height: 10),
+                //         _buildSelectedSkuDetails(),
+                //       ],
+                //     ),
+                //   ),
+                // ),
+                // _buildBottomButtons(),
               ],
             ),
           ),
@@ -264,6 +371,195 @@ class TambahAvailability extends GetView<TambahAvailabilityController> {
           ),
         ],
       ),
+    );
+  }
+}
+
+class CompactProductCard extends StatefulWidget {
+  final Map<String, dynamic> sku;
+  final Function(Map<String, String>) onChanged;
+
+  const CompactProductCard({
+    required this.sku,
+    required this.onChanged,
+    Key? key,
+  }) : super(key: key);
+
+  @override
+  State<CompactProductCard> createState() => _CompactProductCardState();
+}
+
+class _CompactProductCardState extends State<CompactProductCard> {
+  // late TextEditingController stockController;
+  // late TextEditingController sellingController;
+  // late TextEditingController balanceController;
+  // late TextEditingController priceController;
+
+  late TextEditingController stockController;
+  late TextEditingController av3mController;
+  late TextEditingController recommendController;
+
+  @override
+  void initState() {
+    super.initState();
+    initializeControllers();
+  }
+
+  @override
+  void didUpdateWidget(CompactProductCard oldWidget) {
+    super.didUpdateWidget(oldWidget);
+    if (oldWidget.sku['id'] != widget.sku['id']) {
+      initializeControllers();
+    }
+  }
+
+  void initializeControllers() {
+    final controller = Get.find<TambahAvailabilityController>();
+    final skuId = widget.sku['id'].toString();
+    final existingValues = controller.productValues[skuId] ??
+        {
+          'stock': '0',
+          'av3m': '0',
+          'recommend': '0',
+        };
+
+    stockController = TextEditingController(text: existingValues['stock']);
+    av3mController = TextEditingController(text: existingValues['av3m']);
+    recommendController = TextEditingController(text: existingValues['recommend']);
+    // priceController = TextEditingController(text: existingValues['price']);
+
+    _setupListeners();
+  }
+
+  void _setupListeners() {
+    void updateValues() {
+      widget.onChanged({
+        'stock': stockController.text.isEmpty ? '0' : stockController.text,
+        'av3m': av3mController.text.isEmpty ? '0' : av3mController.text,
+        'recommend': recommendController.text.isEmpty ? '0' : recommendController.text,
+        // 'price': priceController.text.isEmpty ? '0' : priceController.text,
+      });
+    }
+
+    stockController.addListener(updateValues);
+    av3mController.addListener(updateValues);
+    recommendController.addListener(updateValues);
+    // priceController.addListener(updateValues);
+  }
+
+  @override
+  void dispose() {
+    stockController.dispose();
+    av3mController.dispose();
+    recommendController.dispose();
+    // priceController.dispose();
+    super.dispose();
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return Container(
+      margin: EdgeInsets.symmetric(vertical: 6),
+      decoration: BoxDecoration(
+        color: Colors.white,
+        borderRadius: BorderRadius.circular(12),
+        boxShadow: [
+          BoxShadow(
+            color: Colors.black.withOpacity(0.05),
+            blurRadius: 8,
+            offset: Offset(0, 2),
+          ),
+        ],
+      ),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Container(
+            padding: EdgeInsets.symmetric(horizontal: 16, vertical: 12),
+            decoration: BoxDecoration(
+              color: Color(0xFFEDF8FF),
+              borderRadius: BorderRadius.only(
+                topLeft: Radius.circular(12),
+                topRight: Radius.circular(12),
+              ),
+            ),
+            child: Row(
+              children: [
+                Container(
+                  width: 40,
+                  height: 40,
+                  decoration: BoxDecoration(
+                    color: Colors.white,
+                    borderRadius: BorderRadius.circular(8),
+                  ),
+                  child: Icon(
+                    Icons.inventory_2_outlined,
+                    size: 24,
+                    color: Color(0xFF0077BD),
+                  ),
+                ),
+                SizedBox(width: 12),
+                Expanded(
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Text(
+                        widget.sku['sku'] ?? '',
+                        style: TextStyle(
+                          fontSize: 14,
+                          fontWeight: FontWeight.bold,
+                          color: Color(0xFF023B5E),
+                        ),
+                      ),
+                      Text(
+                        widget.sku['category']['name'] ?? '',
+                        style: TextStyle(
+                          fontSize: 12,
+                          color: Colors.grey[600],
+                        ),
+                      ),
+                    ],
+                  ),
+                ),
+              ],
+            ),
+          ),
+          Padding(
+            padding: EdgeInsets.all(16),
+            child: Row(
+              children: [
+                Expanded(child: _buildInputField('Stock', stockController)),
+                SizedBox(width: 8),
+                Expanded(child: _buildInputField('AV3M', av3mController)),
+                SizedBox(width: 8),
+                Expanded(child: _buildInputField('Recommend', recommendController)),
+                // SizedBox(width: 8),
+                // Expanded(child: _buildInputField('Price', priceController)),
+              ],
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+
+  Widget _buildInputField(String label, TextEditingController controller) {
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        Text(
+          label,
+          style: TextStyle(
+            fontSize: 12,
+            fontWeight: FontWeight.w500,
+            color: Color(0xFF666666),
+          ),
+        ),
+        SizedBox(height: 4),
+        NumberField(
+          controller: controller,
+        ),
+      ],
     );
   }
 }
