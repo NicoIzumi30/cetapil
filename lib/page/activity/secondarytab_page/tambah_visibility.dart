@@ -2,6 +2,7 @@ import 'dart:convert';
 import 'dart:io';
 import 'package:cached_network_image/cached_network_image.dart';
 import 'package:cetapil_mobile/controller/activity/tambah_visibility_controller.dart';
+import 'package:cetapil_mobile/controller/support_data_controller.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import '../../../utils/colors.dart';
@@ -13,6 +14,7 @@ import '../../../widget/dropdown_textfield.dart';
 const String BASE_URL = 'https://dev-cetaphil.i-am.host/storage/';
 
 class TambahVisibility extends GetView<TambahVisibilityController> {
+  final supportController = Get.find<SupportDataController>();
   String? _getImageUrl(String? imagePath) {
     if (imagePath == null || imagePath.isEmpty) return null;
 
@@ -27,7 +29,7 @@ class TambahVisibility extends GetView<TambahVisibilityController> {
   @override
   Widget build(BuildContext context) {
     return WillPopScope(
-      onWillPop: ()async{
+      onWillPop: () async {
         final shouldPop = await Alerts.showConfirmDialog(context);
         return shouldPop ?? false;
       },
@@ -58,13 +60,43 @@ class TambahVisibility extends GetView<TambahVisibilityController> {
                         Expanded(
                           child: ListView(
                             children: [
-                              _buildReadOnlyField(
-                                label: "Jenis Visibility",
-                                value: controller.posmType.value,
+                              CustomDropdown(
+                                hint: "-- Pilih POSM Type --",
+                                value: controller.posmTypeId.value.isEmpty
+                                    ? null
+                                    : controller.posmTypeId.value,
+                                items: supportController.getPosmTypes().map((item) {
+                                  return DropdownMenuItem<String>(
+                                    value: item['id'],
+                                    child: Text(item['name']),
+                                  );
+                                }).toList(),
+                                onChanged: (value) {
+                                  controller.posmTypeId.value = value!;
+                                  controller.posmType.value = supportController
+                                      .getPosmTypes()
+                                      .firstWhere((element) => element['id'] == value)['name'];
+                                },
+                                title: "Jenis POSM",
                               ),
-                              _buildReadOnlyField(
-                                label: "Jenis Visual",
-                                value: controller.visualType.value,
+                              CustomDropdown(
+                                hint: "-- Pilih Visual Type --",
+                                value: controller.visualTypeId.value.isEmpty
+                                    ? null
+                                    : controller.visualTypeId.value,
+                                items: supportController.getVisualTypes().map((item) {
+                                  return DropdownMenuItem<String>(
+                                    value: item['id'],
+                                    child: Text(item['name']),
+                                  );
+                                }).toList(),
+                                onChanged: (value) {
+                                  controller.visualTypeId.value = value!;
+                                  controller.visualType.value = supportController
+                                      .getVisualTypes()
+                                      .firstWhere((element) => element['id'] == value)['name'];
+                                },
+                                title: "Jenis Visual",
                               ),
                               Text(
                                 "Planogram",
@@ -246,7 +278,8 @@ class TambahVisibility extends GetView<TambahVisibilityController> {
             onTap: isUploading
                 ? null
                 : () async {
-                    final File? result = await ImageUploadUtils.showImageSourceSelection(context, currentImage: image);
+                    final File? result = await ImageUploadUtils.showImageSourceSelection(context,
+                        currentImage: image);
                     if (result != null) {
                       controller.updateImage(index, result);
                     }
