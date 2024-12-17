@@ -9,7 +9,6 @@ import '../../../utils/colors.dart';
 class OrderPage extends GetView<TambahActivityController> {
   @override
   Widget build(BuildContext context) {
-
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
@@ -40,25 +39,22 @@ class OrderPage extends GetView<TambahActivityController> {
         ),
         SizedBox(height: 20),
         Obx(() {
+          if (controller.orderDraftItems.isEmpty) {
+            return Padding(
+              padding: const EdgeInsets.symmetric(vertical: 20.0),
+              child: Center(
+                child: Text(
+                  "Belum ada produk yang ditambahkan",
+                  style: TextStyle(
+                    color: Colors.grey[600],
+                    fontSize: 14,
+                  ),
+                ),
+              ),
+            );
+          }
+
           final groupedItems = <String, List<Map<String, dynamic>>>{};
-
-          // if (controller.detailDraft.isNotEmpty) {
-          //   for (var data in controller.detailDraft["orderItems"]) {
-          //
-          //     final item = tambahAvailabilityController.getSkuByDataApi(data['product_id']);
-          //     final newItem = {
-          //       'id': data['product_id'],
-          //       'category': item!['category']['name'],
-          //       'sku': item['sku'],
-          //       'jumlah': data['jumlah'],
-          //       'harga': data['harga'],
-          //     };
-          //     controller.addOrderItem(newItem);
-          //     tambahOrderController.clearForm();
-          //   }
-          // }
-
-          // Use orderDraftItems from TambahActivityController
           for (var item in controller.orderDraftItems) {
             final category = item['category'];
             if (groupedItems[category] == null) {
@@ -73,39 +69,268 @@ class OrderPage extends GetView<TambahActivityController> {
                 final category = entry.key;
                 final items = entry.value;
 
-                return Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    Padding(
-                      padding: const EdgeInsets.symmetric(vertical: 8.0),
-                      child: Text(
-                        category,
-                        style: TextStyle(
-                          fontSize: 14,
-                          fontWeight: FontWeight.bold,
-                          color: Color(0xFF023B5E),
+                return Padding(
+                  padding: const EdgeInsets.only(bottom: 8.0),
+                  child: CollapsibleCategoryGroup(
+                    category: category,
+                    items: items,
+                    onEdit: () async {
+                      // Get the controller
+                      if (!Get.isRegistered<TambahOrderController>()) {
+                        Get.put(TambahOrderController());
+                      }
+                      final prodController = Get.find<TambahOrderController>();
+
+                      // Find the category ID from the name
+                      final categoryId = prodController.supportDataController
+                          .getCategories()
+                          .firstWhere(
+                            (cat) => cat['name'] == category,
+                            orElse: () => {'id': null},
+                          )['id']
+                          ?.toString();
+
+                      // Set the category and pre-fill the data
+                      prodController.selectedCategory.value = categoryId;
+
+                      // Pre-populate the values for all products in this category
+                      for (var item in items) {
+                        final skuId = item['id'].toString();
+                        prodController.productValues[skuId] = {
+                          'jumlah': item['jumlah'].toString(),
+                          'harga': item['harga'].toString(),
+                        };
+                      }
+
+                      // Navigate to edit screen
+                      await Get.to(() => const TambahOrder());
+                    },
+                    onDelete: () async {
+                      if (!Get.isRegistered<TambahOrderController>()) {
+                        Get.put(TambahOrderController());
+                      }
+                      showDialog(
+                        context: context,
+                        builder: (context) => AlertDialog(
+                          title: Text('Hapus Item'),
+                          content: Text(
+                              'Apakah Anda yakin ingin menghapus Item ini?'),
+                          actions: [
+                            TextButton(
+                              onPressed: () => Navigator.pop(context),
+                              child: Text('Batal'),
+                            ),
+                            TextButton(
+                              onPressed: () async {
+                                Navigator.pop(context);
+                                final prodController =
+                                    Get.find<TambahOrderController>();
+                                controller.orderDraftItems.removeWhere(
+                                    (item) => item['category'] == category);
+                                prodController.productValues.clear();
+                                prodController.selectedCategory.value = null;
+                              },
+                              child: Text('Hapus'),
+                              style: TextButton.styleFrom(
+                                foregroundColor: Colors.red,
+                              ),
+                            ),
+                          ],
                         ),
-                      ),
-                    ),
-                    ...items.map((item) {
-                      return OrderProductCard(
-                        productName: item['sku'] ?? '',
-                        jumlahController:
-                            TextEditingController(text: item['jumlah']?.toString() ?? ''),
-                        hargaController:
-                            TextEditingController(text: item['harga']?.toString() ?? ''),
-                        isReadOnly: true,
-                        itemData: item,
                       );
-                    }).toList(),
-                    SizedBox(height: 10),
-                  ],
+                    },
+                  ),
                 );
               }).toList(),
             ],
           );
         }),
+        SizedBox(height: 20),
+        // Obx(() {
+        //   final groupedItems = <String, List<Map<String, dynamic>>>{};
+        //
+        //   // if (controller.detailDraft.isNotEmpty) {
+        //   //   for (var data in controller.detailDraft["orderItems"]) {
+        //   //
+        //   //     final item = tambahAvailabilityController.getSkuByDataApi(data['product_id']);
+        //   //     final newItem = {
+        //   //       'id': data['product_id'],
+        //   //       'category': item!['category']['name'],
+        //   //       'sku': item['sku'],
+        //   //       'jumlah': data['jumlah'],
+        //   //       'harga': data['harga'],
+        //   //     };
+        //   //     controller.addOrderItem(newItem);
+        //   //     tambahOrderController.clearForm();
+        //   //   }
+        //   // }
+        //
+        //   // Use orderDraftItems from TambahActivityController
+        //   for (var item in controller.orderDraftItems) {
+        //     final category = item['category'];
+        //     if (groupedItems[category] == null) {
+        //       groupedItems[category] = [];
+        //     }
+        //     groupedItems[category]!.add(item);
+        //   }
+        //
+        //   return Column(
+        //     children: [
+        //       ...groupedItems.entries.map((entry) {
+        //         final category = entry.key;
+        //         final items = entry.value;
+        //
+        //         return Column(
+        //           crossAxisAlignment: CrossAxisAlignment.start,
+        //           children: [
+        //             Padding(
+        //               padding: const EdgeInsets.symmetric(vertical: 8.0),
+        //               child: Text(
+        //                 category,
+        //                 style: TextStyle(
+        //                   fontSize: 14,
+        //                   fontWeight: FontWeight.bold,
+        //                   color: Color(0xFF023B5E),
+        //                 ),
+        //               ),
+        //             ),
+        //             ...items.map((item) {
+        //               return OrderProductCard(
+        //                 productName: item['sku'] ?? '',
+        //                 jumlahController:
+        //                     TextEditingController(text: item['jumlah']?.toString() ?? ''),
+        //                 hargaController:
+        //                     TextEditingController(text: item['harga']?.toString() ?? ''),
+        //                 isReadOnly: true,
+        //                 itemData: item,
+        //               );
+        //             }).toList(),
+        //             SizedBox(height: 10),
+        //           ],
+        //         );
+        //       }).toList(),
+        //     ],
+        //   );
+        // }),
+      ],
+    );
+  }
+}
 
+class CollapsibleCategoryGroup extends StatefulWidget {
+  final String category;
+  final List<Map<String, dynamic>> items;
+  final VoidCallback onEdit;
+  final VoidCallback onDelete;
+
+  const CollapsibleCategoryGroup({
+    Key? key,
+    required this.category,
+    required this.items,
+    required this.onEdit,
+    required this.onDelete,
+  }) : super(key: key);
+
+  @override
+  State<CollapsibleCategoryGroup> createState() =>
+      _CollapsibleCategoryGroupState();
+}
+
+class _CollapsibleCategoryGroupState extends State<CollapsibleCategoryGroup> {
+  bool isExpanded = false;
+
+  @override
+  Widget build(BuildContext context) {
+    return Column(
+      children: [
+        Container(
+          margin: EdgeInsets.only(bottom: isExpanded ? 8 : 0),
+          decoration: BoxDecoration(
+            color: Color(0xFFEDF8FF),
+            borderRadius: BorderRadius.circular(8),
+          ),
+          child: Material(
+            color: Colors.transparent,
+            child: InkWell(
+              borderRadius: BorderRadius.circular(8),
+              onTap: () {
+                setState(() {
+                  isExpanded = !isExpanded;
+                });
+              },
+              child: Padding(
+                padding:
+                    const EdgeInsets.symmetric(horizontal: 12.0, vertical: 8.0),
+                child: Row(
+                  children: [
+                    Icon(
+                      isExpanded
+                          ? Icons.keyboard_arrow_down
+                          : Icons.keyboard_arrow_right,
+                      color: Color(0xFF023B5E),
+                    ),
+                    SizedBox(width: 8),
+                    Expanded(
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          Text(
+                            widget.category,
+                            style: TextStyle(
+                              fontSize: 14,
+                              fontWeight: FontWeight.bold,
+                              color: Color(0xFF023B5E),
+                            ),
+                          ),
+                          Text(
+                            '${widget.items.length} products',
+                            style: TextStyle(
+                              fontSize: 12,
+                              color: Color(0xFF666666),
+                            ),
+                          ),
+                        ],
+                      ),
+                    ),
+                    IconButton(
+                      onPressed: widget.onEdit,
+                      icon: Icon(Icons.edit_outlined,
+                          color: Colors.blue, size: 20),
+                      padding: EdgeInsets.zero,
+                      constraints: BoxConstraints(),
+                      tooltip: 'Edit Category Products',
+                    ),
+                    IconButton(
+                      onPressed: widget.onDelete,
+                      icon: Icon(Icons.delete, color: Colors.red, size: 20),
+                      padding: EdgeInsets.zero,
+                      constraints: BoxConstraints(),
+                      tooltip: 'Delete Category Products',
+                    ),
+                  ],
+                ),
+              ),
+            ),
+          ),
+        ),
+        if (isExpanded)
+          AnimatedContainer(
+            duration: Duration(milliseconds: 200),
+            curve: Curves.easeInOut,
+            child: Column(
+              children: widget.items.map((item) {
+                return OrderProductCard(
+                  productName: item['sku'] ?? '',
+                  jumlahController: TextEditingController(
+                      text: item['jumlah']?.toString() ?? ''),
+                  hargaController: TextEditingController(
+                      text: item['harga']?.toString() ?? ''),
+                  isReadOnly: true,
+                  itemData: item,
+                );
+              }).toList(),
+            ),
+          ),
       ],
     );
   }
@@ -129,11 +354,8 @@ class OrderProductCard extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final orderController = Get.find<TambahOrderController>();
-    final activityController = Get.find<TambahActivityController>();
-
     return Container(
-      margin: EdgeInsets.only(bottom: 16),
+      margin: EdgeInsets.only(bottom: 16, top: 8, right: 8, left: 8),
       decoration: BoxDecoration(
         color: Colors.white,
         borderRadius: BorderRadius.circular(12),
@@ -149,66 +371,28 @@ class OrderProductCard extends StatelessWidget {
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
           Container(
+            width: double.infinity,
             padding: EdgeInsets.symmetric(horizontal: 16, vertical: 12),
             decoration: BoxDecoration(
-              color: Color(0xFFEDF8FF),
+              color: Colors.white,
               borderRadius: BorderRadius.only(
                 topLeft: Radius.circular(12),
                 topRight: Radius.circular(12),
               ),
+              border: Border(
+                bottom: BorderSide(
+                  color: Color(0xFFEEEEEE),
+                  width: 1,
+                ),
+              ),
             ),
-            child: Row(
-              mainAxisAlignment: MainAxisAlignment.spaceBetween,
-              children: [
-                Expanded(
-                  child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      Text(
-                        "Order Detail",
-                        style: TextStyle(
-                          fontSize: 14,
-                          fontWeight: FontWeight.bold,
-                          color: Color(0xFF023B5E),
-                        ),
-                      ),
-                      SizedBox(height: 4),
-                      Text(
-                        productName,
-                        style: TextStyle(
-                          fontSize: 12,
-                          color: Color(0xFF666666),
-                        ),
-                      ),
-                    ],
-                  ),
-                ),
-                Row(
-                  children: [
-                    IconButton(
-                      onPressed: () async {
-                        orderController.editItem(itemData);
-                        await Get.to(() => TambahOrder());
-                      },
-                      icon: Icon(Icons.edit_outlined, color: Colors.blue, size: 20),
-                      padding: EdgeInsets.zero,
-                      constraints: BoxConstraints(),
-                      tooltip: 'Edit Product',
-                    ),
-                    SizedBox(width: 8),
-                    IconButton(
-                      onPressed: () {
-                        // Use the new removeOrderItem method
-                        activityController.removeOrderItem(itemData['id']);
-                      },
-                      icon: Icon(Icons.delete_outline, color: Colors.red[400], size: 20),
-                      padding: EdgeInsets.zero,
-                      constraints: BoxConstraints(),
-                      tooltip: 'Remove Product',
-                    ),
-                  ],
-                ),
-              ],
+            child: Text(
+              productName,
+              style: TextStyle(
+                fontSize: 14,
+                fontWeight: FontWeight.bold,
+                color: Color(0xFF023B5E),
+              ),
             ),
           ),
           Padding(
@@ -372,9 +556,8 @@ class _PriceFieldState extends State<PriceField> {
   String _formatCurrency(String value) {
     if (value.isEmpty) return '';
     final number = int.parse(value.replaceAll(RegExp(r'[^\d]'), ''));
-    final formatted = number
-        .toString()
-        .replaceAllMapped(RegExp(r'(\d{1,3})(?=(\d{3})+(?!\d))'), (Match m) => '${m[1]}.');
+    final formatted = number.toString().replaceAllMapped(
+        RegExp(r'(\d{1,3})(?=(\d{3})+(?!\d))'), (Match m) => '${m[1]}.');
     return 'Rp $formatted';
   }
 
@@ -440,7 +623,8 @@ class _PriceFieldState extends State<PriceField> {
             ),
           ),
           filled: true,
-          fillColor: widget.readOnly ? Colors.grey[200] : const Color(0xFFE8F3FF),
+          fillColor:
+              widget.readOnly ? Colors.grey[200] : const Color(0xFFE8F3FF),
           focusedBorder: OutlineInputBorder(
             borderRadius: BorderRadius.circular(8),
             borderSide: const BorderSide(

@@ -59,8 +59,9 @@ class TambahActivityController extends GetxController {
 
   // Consolidated draft items for all sections
   final RxList<Map<String, dynamic>> availabilityDraftItems = <Map<String, dynamic>>[].obs;
+  final RxList<Map<String, dynamic>> orderDraftItems = <Map<String, dynamic>>[].obs;
   // final availabilityDraftItems = <Map<String, dynamic>>[].obs;
-  final orderDraftItems = <Map<String, dynamic>>[].obs;
+  // final orderDraftItems = <Map<String, dynamic>>[].obs;
   final visibilityDraftItems = <Map<String, dynamic>>[].obs;
 
   // Survey related fields

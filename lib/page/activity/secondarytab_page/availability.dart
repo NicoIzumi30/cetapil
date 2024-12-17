@@ -121,22 +121,38 @@ class AvailabilityPage extends GetView<TambahActivityController> {
                       await Get.to(() => const TambahAvailability());
                     },
                     onDelete: () async{
-                      if (!Get.isRegistered<
-                          TambahAvailabilityController>()) {
+                      if (!Get.isRegistered<TambahAvailabilityController>()) {
                         Get.put(TambahAvailabilityController());
                       }
-                      final prodController =
-                      Get.find<TambahAvailabilityController>();
-
-                      // Find the category ID from the name
-                      final categoryId =
-                      prodController.supportDataController
-                          .getCategories()
-                          .firstWhere(
-                            (cat) => cat['name'] == category,
-                        orElse: () => {'id': null},
-                      )['id']
-                          ?.toString();
+                      showDialog(
+                        context: context,
+                        builder: (context) => AlertDialog(
+                          title: Text('Hapus Item'),
+                          content: Text(
+                              'Apakah Anda yakin ingin menghapus Item ini?'),
+                          actions: [
+                            TextButton(
+                              onPressed: () => Navigator.pop(context),
+                              child: Text('Batal'),
+                            ),
+                            TextButton(
+                              onPressed: () async {
+                                Navigator.pop(context);
+                                final prodController =
+                                Get.find<TambahAvailabilityController>();
+                                controller.availabilityDraftItems.removeWhere(
+                                        (item) => item['category'] == category);
+                                prodController.productValues.clear();
+                                prodController.selectedCategory.value = null;
+                              },
+                              child: Text('Hapus'),
+                              style: TextButton.styleFrom(
+                                foregroundColor: Colors.red,
+                              ),
+                            ),
+                          ],
+                        ),
+                      );
                     },
                   ),
                 );
@@ -230,6 +246,7 @@ class _CollapsibleCategoryGroupState extends State<CollapsibleCategoryGroup> {
   @override
   Widget build(BuildContext context) {
     return Column(
+
       children: [
         Container(
           margin: EdgeInsets.only(bottom: isExpanded ? 8 : 0),
@@ -353,7 +370,7 @@ class SumAmountProduct extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Container(
-      margin: EdgeInsets.only(bottom: 16, top: 8, right: 8),
+      margin: EdgeInsets.only(bottom: 16, top: 8, right: 8,left: 8),
       decoration: BoxDecoration(
         color: Colors.white,
         borderRadius: BorderRadius.circular(12),
@@ -369,6 +386,7 @@ class SumAmountProduct extends StatelessWidget {
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
           Container(
+            width: double.infinity,
             padding: EdgeInsets.symmetric(horizontal: 16, vertical: 12),
             decoration: BoxDecoration(
               color: Colors.white,
