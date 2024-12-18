@@ -15,6 +15,10 @@ class TambahVisibilityController extends GetxController {
   final selectedCondition = ''.obs;
   final RxList<File?> visibilityImages = RxList([null, null]);
   final RxList<bool> isImageUploading = RxList([false, false]);
+
+  final Rx<TextEditingController> shelving = TextEditingController().obs;
+  final Rx<TextEditingController> lebarRak = TextEditingController().obs;
+
   dynamic visibility;
 
   void editItem(Map<String, dynamic> item) {

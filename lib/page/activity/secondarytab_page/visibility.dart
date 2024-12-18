@@ -23,265 +23,286 @@ class VisibilityPage extends GetView<ActivityController> {
   @override
   Widget build(BuildContext context) {
     return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        Obx(() {
-          // final allVisibilities =
-          //     controller.activity.expand((activity) => activity.visibilities ?? []).toList();
-          final allVisibilities = tambahActivityController.detailOutlet.value!.visibilities ?? [];
+        // === Primary Visibility ===
+        Text(
+          'Primary',
+          style: TextStyle(
+            fontSize: 18,
+            fontWeight: FontWeight.bold,
+            color: Colors.black87,
+          ),
+        ),
+        SizedBox(height: 16),
+        CollapsibleVisibilityGroup(
+          title: 'Core',
+          items: [
+            VisibilityCard(
+              posmType: 'Standee',
+              visualType: 'New soothing foam wash',
+              condition: 'Good',
+              imagePath: 'path_to_image',
+              isSubmitted: true,
+              onTapCard: () {
+                var id = "primary-core-1";
+                // Your custom tap handling here
+                if (!Get.isRegistered<TambahVisibilityController>()) {
+                  Get.put(TambahVisibilityController());
+                }
 
-          if (allVisibilities.isEmpty) {
-            return Center(
-              child: Padding(
-                padding: const EdgeInsets.all(16.0),
-                child: Text(
-                  'No visibility data available',
-                  style: TextStyle(fontSize: 16),
-                ),
-              ),
-            );
-          }
+                Get.to(() => TambahVisibility());
+              },
+            ),
+            VisibilityCard(
+              posmType: 'Standee',
+              visualType: 'New soothing foam wash',
+              condition: 'Good',
+              imagePath: 'path_to_image',
+              isSubmitted: true,
+            ),
+            VisibilityCard(
+              posmType: 'Standee',
+              visualType: 'New soothing foam wash',
+              condition: 'Good',
+              imagePath: 'path_to_image',
+              isSubmitted: true,
+            ),
+          ],
+        ),
+        SizedBox(height: 8),
+        CollapsibleVisibilityGroup(
+          title: 'Baby',
+          items: [
+            VisibilityCard(
+              posmType: 'Baby Standee',
+              visualType: 'Baby foam wash',
+              condition: 'Good',
+              imagePath: 'path_to_image',
+              isSubmitted: true,
+            ),
+            VisibilityCard(
+              posmType: 'Baby Standee',
+              visualType: 'Baby foam wash',
+              condition: 'Good',
+              imagePath: 'path_to_image',
+              isSubmitted: true,
+            ),
+            VisibilityCard(
+              posmType: 'Baby Standee',
+              visualType: 'Baby foam wash',
+              condition: 'Good',
+              imagePath: 'path_to_image',
+              isSubmitted: true,
+            ),
+          ],
+        ),
+        SizedBox(height: 16),
 
-          return ListView.builder(
-            shrinkWrap: true,
-            physics: NeverScrollableScrollPhysics(),
-            itemCount: allVisibilities.length,
-            itemBuilder: (context, index) {
-              final visibility = allVisibilities[index];
-              final posmType = supportController
-                  .getPosmTypes()
-                  .firstWhereOrNull((posm) => posm['id'] == visibility.posmTypeId);
-              final visualType = supportController
-                  .getVisualTypes()
-                  .firstWhereOrNull((visual) => visual['id'] == visibility.visualTypeId);
-              return VisibilityCard(
-                visibility: visibility,
-                posmTypeName: posmType?['name'] ?? 'Unknown POSM Type',
-                visualTypeName: visualType?['name'] ?? 'Unknown Visual Type',
-                onTapCard: () {
-                  if (!Get.isRegistered<TambahVisibilityController>()) {
-                    Get.put(TambahVisibilityController());
-                  }
-
-                  final controller = Get.find<TambahVisibilityController>();
-
-                  controller.editItem({
-                    'posmType': posmType,
-                    'visualType': visualType,
-                    'visibility': visibility,
-                    'condition': "Good",
-                  });
-
-                  Get.to(() => TambahVisibility());
-                },
-              );
-            },
-          );
-        }),
+        // === Secondary Visibility ===
+        Text(
+          'Secondary',
+          style: TextStyle(
+            fontSize: 18,
+            fontWeight: FontWeight.bold,
+            color: Colors.black87,
+          ),
+        ),
+        SizedBox(height: 16),
+        CollapsibleVisibilityGroup(
+          title: 'Core',
+          items: [
+            VisibilityCard(
+              posmType: 'Standee',
+              visualType: 'New soothing foam wash',
+              condition: 'Good',
+              imagePath: 'path_to_image',
+              isSubmitted: true,
+            ),
+            VisibilityCard(
+              posmType: 'Standee',
+              visualType: 'New soothing foam wash',
+              condition: 'Good',
+              imagePath: 'path_to_image',
+              isSubmitted: true,
+            ),
+          ],
+        ),
+        SizedBox(height: 8),
+        CollapsibleVisibilityGroup(
+          title: 'Baby',
+          items: [
+            VisibilityCard(
+              posmType: 'Baby Standee',
+              visualType: 'Baby foam wash',
+              condition: 'Good',
+              imagePath: 'path_to_image',
+              isSubmitted: true,
+            ),
+            VisibilityCard(
+              posmType: 'Baby Standee',
+              visualType: 'Baby foam wash',
+              condition: 'Good',
+              imagePath: 'path_to_image',
+              isSubmitted: true,
+            ),
+          ],
+        ),
       ],
     );
   }
 }
 
 class VisibilityCard extends StatelessWidget {
-  final Activity.Visibilities visibility;
-  final String posmTypeName;
-  final String visualTypeName;
-  final VoidCallback onTapCard;
+  final String posmType;
+  final String visualType;
+  final String condition;
+  final String? imagePath;
+  final bool isSubmitted;
+  final VoidCallback? onTapCard; // Added this parameter
 
   const VisibilityCard({
     Key? key,
-    required this.visibility,
-    required this.posmTypeName,
-    required this.visualTypeName,
-    required this.onTapCard,
+    required this.posmType,
+    required this.visualType,
+    required this.condition,
+    this.imagePath,
+    this.isSubmitted = false,
+    this.onTapCard, // Optional callback
   }) : super(key: key);
-
-  String? _getImageUrl(String? imagePath) {
-    if (imagePath == null || imagePath.isEmpty) return null;
-    if (imagePath.startsWith('data:image') || imagePath.startsWith('/9j/')) {
-      return null;
-    }
-    String path = imagePath.startsWith('/') ? imagePath.substring(1) : imagePath;
-    print('$BASE_URL$path');
-    return '$BASE_URL$path';
-  }
-
- Widget _buildImage() {
-    final tambahActivityController = Get.find<TambahActivityController>();
-    
-    // Check for draft image first
-    final draftItem = tambahActivityController.visibilityDraftItems
-        .firstWhereOrNull((draft) => draft['id'] == visibility.id);
-        
-    if (draftItem != null && draftItem['image1'] != null) {
-      // Show draft image1 if available
-      return ClipRRect(
-        borderRadius: BorderRadius.circular(10),
-        child: Image.file(
-          draftItem['image1'],
-          width: 120,
-          height: 120,
-          fit: BoxFit.cover,
-          errorBuilder: (context, error, stackTrace) => Container(
-            width: 120,
-            height: 120,
-            color: Colors.grey[200],
-            child: Icon(Icons.error),
-          ),
-        ),
-      );
-    }
-
-    // Fall back to original image logic
-    if (visibility.image == null) {
-      return Container(
-        width: 120,
-        height: 120,
-        decoration: BoxDecoration(
-          borderRadius: BorderRadius.circular(10),
-          color: Colors.grey[200],
-        ),
-        child: Icon(Icons.image_not_supported, color: Colors.grey),
-      );
-    }
-
-    final imageUrl = _getImageUrl(visibility.image);
-
-    if (imageUrl != null) {
-      return ClipRRect(
-        borderRadius: BorderRadius.circular(10),
-        child: CachedNetworkImage(
-          imageUrl: imageUrl,
-          width: 120,
-          height: 120,
-          fit: BoxFit.cover,
-          placeholder: (context, url) => Container(
-            color: Colors.grey[200],
-            child: Center(child: CircularProgressIndicator()),
-          ),
-          errorWidget: (context, url, error) => Container(
-            color: Colors.grey[200],
-            child: Icon(Icons.error),
-          ),
-        ),
-      );
-    } else if (visibility.image!.startsWith('data:image') || visibility.image!.startsWith('/9j/')) {
-      try {
-        return ClipRRect(
-          borderRadius: BorderRadius.circular(10),
-          child: Image.memory(
-            base64Decode(visibility.image!.split(',').last),
-            width: 120,
-            height: 120,
-            fit: BoxFit.cover,
-            errorBuilder: (context, error, stackTrace) => Container(
-              width: 120,
-              height: 120,
-              color: Colors.grey[200],
-              child: Icon(Icons.error),
-            ),
-          ),
-        );
-      } catch (e) {
-        print('Error loading base64 image: $e');
-        return Container(
-          width: 120,
-          height: 120,
-          color: Colors.grey[200],
-          child: Icon(Icons.error),
-        );
-      }
-    }
-
-    return Container(
-      width: 120,
-      height: 120,
-      decoration: BoxDecoration(
-        borderRadius: BorderRadius.circular(10),
-        color: Colors.grey[200],
-      ),
-      child: Icon(Icons.image_not_supported, color: Colors.grey),
-    );
-  }
 
   @override
   Widget build(BuildContext context) {
-    final tambahActivityController = Get.find<TambahActivityController>();
+    if (imagePath != null) {
+      return _buildCardWithImage();
+    } else {
+      return _buildCompactCard();
+    }
+  }
 
-    return Obx(() {
-      // Check if this visibility exists in draft items
-      final hasDraft =
-          tambahActivityController.visibilityDraftItems.any((draft) => draft['id'] == visibility.id);
-
-      return InkWell(
-        onTap: onTapCard,
-        child: Container(
-          margin: const EdgeInsets.only(bottom: 16),
-          padding: const EdgeInsets.all(16),
-          decoration: BoxDecoration(
-            borderRadius: BorderRadius.circular(10),
-            gradient: LinearGradient(
-              begin: Alignment.topCenter,
-              end: Alignment.bottomCenter,
-              colors: [
-                Color(0xFFFFFFFF),
-                Color(0x80FFFFFF),
-              ],
+  Widget _buildCompactCard() {
+    return InkWell(
+      onTap: onTapCard,
+      child: Container(
+        margin: EdgeInsets.symmetric(vertical: 8, horizontal: 5),
+        decoration: BoxDecoration(
+          color: Colors.white,
+          borderRadius: BorderRadius.circular(12),
+          boxShadow: [
+            BoxShadow(
+              color: Colors.black.withOpacity(0.03),
+              blurRadius: 4,
+              offset: Offset(0, 2),
             ),
-            border: Border.all(
-              color: hasDraft ? Colors.blue : Colors.grey.withOpacity(0.2),
-              width: hasDraft ? 2 : 1,
-            ),
-            boxShadow: [
-              BoxShadow(
-                color: Colors.grey.withOpacity(0.1),
-                spreadRadius: 1,
-                blurRadius: 2,
-                offset: Offset(0, 1),
-              ),
-            ],
-          ),
-          child: Stack(
-            children: [
-              Row(
+          ],
+        ),
+        child: Stack(
+          children: [
+            Padding(
+              padding: EdgeInsets.all(16),
+              child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
-                mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                children: [
+                  _buildInfoRow('POSM Type', posmType),
+                  SizedBox(height: 8),
+                  _buildInfoRow('Visual Type', visualType),
+                  SizedBox(height: 8),
+                  _buildInfoRow('Condition', condition),
+                ],
+              ),
+            ),
+            if (isSubmitted)
+              Positioned(
+                top: -4,
+                right: -4,
+                child: Container(
+                  padding: EdgeInsets.all(4),
+                  decoration: BoxDecoration(
+                    color: Colors.blue,
+                    shape: BoxShape.circle,
+                  ),
+                  child: Icon(
+                    Icons.check,
+                    color: Colors.white,
+                    size: 12,
+                  ),
+                ),
+              ),
+          ],
+        ),
+      ),
+    );
+  }
+
+  Widget _buildCardWithImage() {
+    return InkWell(
+      onTap: onTapCard,
+      child: Container(
+        margin: EdgeInsets.symmetric(vertical: 8, horizontal: 5),
+        decoration: BoxDecoration(
+          color: Colors.white.withOpacity(0.9),
+          borderRadius: BorderRadius.circular(12),
+          boxShadow: [
+            BoxShadow(
+              color: Colors.black.withOpacity(0.03),
+              blurRadius: 4,
+              offset: Offset(0, 2),
+            ),
+          ],
+        ),
+        child: Stack(
+          children: [
+            Padding(
+              padding: EdgeInsets.all(16),
+              child: Row(
+                crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
                   Expanded(
                     child: Column(
                       crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
-                        _buildInfoRow("POSM Type", posmTypeName),
+                        _buildInfoRow('POSM Type:', posmType),
                         SizedBox(height: 8),
-                        _buildInfoRow("Visual Type", visualTypeName),
+                        _buildInfoRow('Visual Type:', visualType),
+                        SizedBox(height: 8),
+                        _buildInfoRow('Condition', condition),
                       ],
                     ),
                   ),
-                  _buildImage(),
-                ],
-              ),
-              if (hasDraft)
-                Positioned(
-                  top: -8,
-                  right: -8,
-                  child: Container(
-                    padding: EdgeInsets.all(4),
-                    decoration: BoxDecoration(
-                      color: Colors.blue,
-                      shape: BoxShape.circle,
-                    ),
-                    child: Icon(
-                      Icons.check,
-                      color: Colors.white,
-                      size: 16,
+                  SizedBox(width: 12),
+                  ClipRRect(
+                    borderRadius: BorderRadius.circular(8),
+                    child: Container(
+                      width: 80,
+                      height: 80,
+                      color: Colors.grey[200],
+                      child: Icon(Icons.image_outlined, color: Colors.grey[400]),
                     ),
                   ),
+                ],
+              ),
+            ),
+            if (isSubmitted)
+              Positioned(
+                top: -4,
+                right: -4,
+                child: Container(
+                  padding: EdgeInsets.all(4),
+                  decoration: BoxDecoration(
+                    color: Colors.blue,
+                    shape: BoxShape.circle,
+                  ),
+                  child: Icon(
+                    Icons.check,
+                    color: Colors.white,
+                    size: 12,
+                  ),
                 ),
-            ],
-          ),
+              ),
+          ],
         ),
-      );
-    });
+      ),
+    );
   }
 
   Widget _buildInfoRow(String label, String value) {
@@ -289,20 +310,109 @@ class VisibilityCard extends StatelessWidget {
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
         Text(
-          "$label:",
+          label,
           style: TextStyle(
-            fontSize: 13,
-            fontWeight: FontWeight.bold,
+            fontSize: 12,
             color: Colors.grey[600],
+            fontWeight: FontWeight.w400,
           ),
         ),
+        SizedBox(height: 2),
         Text(
           value,
           style: TextStyle(
-            fontSize: 13,
+            fontSize: 14,
+            color: Colors.black87,
             fontWeight: FontWeight.w500,
           ),
         ),
+      ],
+    );
+  }
+}
+
+class CollapsibleVisibilityGroup extends StatefulWidget {
+  final String title;
+  final List<Widget> items;
+
+  const CollapsibleVisibilityGroup({
+    Key? key,
+    required this.title,
+    required this.items,
+  }) : super(key: key);
+
+  @override
+  State<CollapsibleVisibilityGroup> createState() => _CollapsibleVisibilityGroupState();
+}
+
+class _CollapsibleVisibilityGroupState extends State<CollapsibleVisibilityGroup> {
+  bool isExpanded = true;
+
+  @override
+  Widget build(BuildContext context) {
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        Container(
+          margin: EdgeInsets.only(bottom: isExpanded ? 8 : 0),
+          decoration: BoxDecoration(
+            color: Color(0xFFEDF8FF),
+            borderRadius: BorderRadius.circular(8),
+          ),
+          child: Material(
+            color: Colors.transparent,
+            child: InkWell(
+              borderRadius: BorderRadius.circular(8),
+              onTap: () {
+                setState(() {
+                  isExpanded = !isExpanded;
+                });
+              },
+              child: Padding(
+                padding: const EdgeInsets.symmetric(horizontal: 12.0, vertical: 8.0),
+                child: Row(
+                  children: [
+                    Icon(
+                      isExpanded ? Icons.keyboard_arrow_down : Icons.keyboard_arrow_right,
+                      color: Color(0xFF023B5E),
+                    ),
+                    SizedBox(width: 8),
+                    Expanded(
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          Text(
+                            widget.title,
+                            style: TextStyle(
+                              fontSize: 14,
+                              fontWeight: FontWeight.bold,
+                              color: Color(0xFF023B5E),
+                            ),
+                          ),
+                          Text(
+                            '${widget.items.length} items',
+                            style: TextStyle(
+                              fontSize: 12,
+                              color: Color(0xFF666666),
+                            ),
+                          ),
+                        ],
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+            ),
+          ),
+        ),
+        if (isExpanded)
+          AnimatedContainer(
+            duration: Duration(milliseconds: 200),
+            curve: Curves.easeInOut,
+            child: Column(
+              children: widget.items,
+            ),
+          ),
       ],
     );
   }

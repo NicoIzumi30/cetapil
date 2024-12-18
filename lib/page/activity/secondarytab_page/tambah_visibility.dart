@@ -3,6 +3,7 @@ import 'dart:io';
 import 'package:cached_network_image/cached_network_image.dart';
 import 'package:cetapil_mobile/controller/activity/tambah_visibility_controller.dart';
 import 'package:cetapil_mobile/controller/support_data_controller.dart';
+import 'package:cetapil_mobile/widget/text_field.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import '../../../utils/colors.dart';
@@ -121,7 +122,7 @@ class TambahVisibility extends GetView<TambahVisibilityController> {
                               ),
                               SizedBox(height: 15),
                               CustomDropdown(
-                                  hint: "-- Pilih condition --",
+                                  hint: "-- Pilih Condition --",
                                   value: controller.selectedCondition.value.isEmpty
                                       ? null
                                       : controller.selectedCondition.value,
@@ -135,8 +136,15 @@ class TambahVisibility extends GetView<TambahVisibilityController> {
                                     controller.selectedCondition.value = value!;
                                   },
                                   title: "Condition"),
-                              _buildImageUploader(context, "Foto Visibility 1", 0),
-                              _buildImageUploader(context, "Foto Visibility 2", 1),
+                              ModernTextField(
+                                title: "Lebar Rak (cm)",
+                                controller: controller.lebarRak.value,
+                              ),
+                              ModernTextField(
+                                title: "Shelving",
+                                controller: controller.shelving.value,
+                              ),
+                              _buildImageUploader(context, "Foto Visibility", 0),
                             ],
                           ),
                         )
