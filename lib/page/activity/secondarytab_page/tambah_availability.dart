@@ -1,5 +1,5 @@
 import 'package:cetapil_mobile/controller/activity/tambah_activity_controller.dart';
-import 'package:cetapil_mobile/page/activity/secondarytab_page/tambah_visibility.dart';
+import 'package:cetapil_mobile/page/activity/secondarytab_page/tambah_primary_visibility.dart';
 import 'package:cetapil_mobile/widget/dialog.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';

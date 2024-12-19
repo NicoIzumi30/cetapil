@@ -4,7 +4,7 @@ import 'dart:io';
 import 'package:cetapil_mobile/controller/activity/detail_activity_controller.dart';
 import 'package:cetapil_mobile/controller/activity/tambah_activity_controller.dart';
 import 'package:cetapil_mobile/controller/activity/tambah_visibility_controller.dart';
-import 'package:cetapil_mobile/page/activity/secondarytab_page/tambah_visibility.dart';
+import 'package:cetapil_mobile/page/activity/secondarytab_page/tambah_primary_visibility.dart';
 import 'package:cetapil_mobile/controller/activity/activity_controller.dart';
 import 'package:cetapil_mobile/controller/support_data_controller.dart';
 import 'package:cetapil_mobile/model/list_activity_response.dart' as Activity;

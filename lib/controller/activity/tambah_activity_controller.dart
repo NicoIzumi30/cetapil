@@ -81,6 +81,7 @@ class TambahActivityController extends GetxController {
 
   // Visibility specific fields
   final visibilityImages = RxList<File?>([null, null]);
+  final visibilitySecondaryImages = Rx<File?>(null);
   final isImageUploading = RxList<bool>([false, false]);
 
   // Order Section
@@ -487,6 +488,11 @@ class TambahActivityController extends GetxController {
     update();
   }
 
+  void updateVisibilitySecondaryImage(File? file) {
+    visibilitySecondaryImages.value = file;
+    update();
+  }
+
   // Product selection methods
   void handleProductSelect(String product) {
     selectedProducts.value.add(product);
@@ -650,6 +656,7 @@ class TambahActivityController extends GetxController {
 
     // Clear visibility related fields
     visibilityImages.value = [null, null];
+    visibilitySecondaryImages.value = null;
     isImageUploading.value = [false, false];
 
     // Clear product related fields

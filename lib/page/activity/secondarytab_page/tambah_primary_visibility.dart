@@ -14,7 +14,7 @@ import '../../../widget/dropdown_textfield.dart';
 
 const String BASE_URL = 'https://dev-cetaphil.i-am.host/storage/';
 
-class TambahVisibility extends GetView<TambahVisibilityController> {
+class TambahPrimaryVisibility extends GetView<TambahVisibilityController> {
   final supportController = Get.find<SupportDataController>();
   String? _getImageUrl(String? imagePath) {
     if (imagePath == null || imagePath.isEmpty) return null;

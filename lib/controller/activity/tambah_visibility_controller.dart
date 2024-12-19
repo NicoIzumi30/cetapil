@@ -131,6 +131,19 @@ class TambahVisibilityController extends GetxController {
     visibility = null;
   }
 
+
+  /// SECONDARY VISIBILITY
+  final toggleSecondaryYesNo = false.obs;
+  final Rx<TextEditingController> tipeDisplay = TextEditingController().obs;
+  final Rx<File?> displayImages = Rx<File?>(null);
+  final isdisplayImageUploading = false.obs;
+
+  void updatedisplayImage(File? file) {
+    displayImages.value = file;
+    activityController.updateVisibilitySecondaryImage(file);
+    update();
+  }
+
   @override
   void onClose() {
     super.onClose();

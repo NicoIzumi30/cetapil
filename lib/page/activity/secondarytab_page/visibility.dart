@@ -3,11 +3,12 @@ import 'dart:io';
 
 import 'package:cetapil_mobile/controller/activity/tambah_activity_controller.dart';
 import 'package:cetapil_mobile/controller/activity/tambah_visibility_controller.dart';
-import 'package:cetapil_mobile/page/activity/secondarytab_page/tambah_visibility.dart';
+import 'package:cetapil_mobile/page/activity/secondarytab_page/tambah_primary_visibility.dart';
 import 'package:cetapil_mobile/controller/activity/activity_controller.dart';
 import 'package:cetapil_mobile/controller/support_data_controller.dart';
 import 'package:cetapil_mobile/model/list_activity_response.dart' as Activity;
 import 'package:cached_network_image/cached_network_image.dart';
+import 'package:cetapil_mobile/page/activity/secondarytab_page/tambah_secondary_visibility.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 
@@ -51,7 +52,7 @@ class VisibilityPage extends GetView<ActivityController> {
                   Get.put(TambahVisibilityController());
                 }
 
-                Get.to(() => TambahVisibility());
+                Get.to(() => TambahPrimaryVisibility());
               },
             ),
             VisibilityCard(
@@ -118,6 +119,14 @@ class VisibilityPage extends GetView<ActivityController> {
               condition: 'Good',
               imagePath: 'path_to_image',
               isSubmitted: true,
+              onTapCard: (){
+                var id = "secondary-core-1";
+                if (!Get.isRegistered<TambahVisibilityController>()) {
+                  Get.put(TambahVisibilityController());
+                }
+
+                Get.to(() => TambahSecondaryVisibility());
+              },
             ),
             VisibilityCard(
               posmType: 'Standee',
