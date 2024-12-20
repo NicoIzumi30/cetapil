@@ -110,10 +110,11 @@ class AvailabilityPage extends GetView<TambahActivityController> {
                       for (var item in items) {
                         final skuId = item['id'].toString();
                         prodController.productValues[skuId] = {
-                          'stock': item['stock'].toString(),
+                          'availability_toggle': item['availability_toggle'].toString(),
+                          'stock_on_hand': item['stock_on_hand'].toString(),
+                          'stock_on_inventory': item['stock_on_inventory'].toString(),
                           'av3m': item['av3m'].toString(),
                           'recommend': item['recommend'].toString(),
-                          // 'price': item['price'].toString(),
                         };
                       }
 
@@ -322,8 +323,14 @@ class _CollapsibleCategoryGroupState extends State<CollapsibleCategoryGroup> {
               children: widget.items.map((item) {
                 return SumAmountProduct(
                   productName: item['sku'] ?? '',
-                  stockController: TextEditingController(
-                    text: item['stock'].toString(),
+                  availabilityYesNoController: TextEditingController(
+                    text: item['availability_toggle'].toString() == "true" ? "Ada" : "Tidak",
+                  ),
+                  stockOnHandController: TextEditingController(
+                    text: item['stock_on_hand'].toString(),
+                  ),
+                  stockOnInventoryController: TextEditingController(
+                    text: item['stock_on_inventory'].toString(),
                   ),
                   av3mController: TextEditingController(
                     text: item['av3m'].toString(),
@@ -331,9 +338,6 @@ class _CollapsibleCategoryGroupState extends State<CollapsibleCategoryGroup> {
                   recommendController: TextEditingController(
                     text: item['recommend'].toString(),
                   ),
-                  // priceController: TextEditingController(
-                  //   text: item['price'].toString(),
-                  // ),
                   isReadOnly: true,
                   itemData: item,
                   onDelete: () {},
@@ -348,7 +352,9 @@ class _CollapsibleCategoryGroupState extends State<CollapsibleCategoryGroup> {
 
 class SumAmountProduct extends StatelessWidget {
   final String productName;
-  final TextEditingController stockController;
+  final TextEditingController availabilityYesNoController;
+  final TextEditingController stockOnHandController;
+  final TextEditingController stockOnInventoryController;
   final TextEditingController av3mController;
   final TextEditingController recommendController;
   // final TextEditingController priceController;
@@ -356,15 +362,26 @@ class SumAmountProduct extends StatelessWidget {
   final VoidCallback onDelete;
   final Map<String, dynamic> itemData;
 
+  String checkStatus(String number) {
+    int num = int.parse(number);
+    if (num < 0) {
+      return "Kurang   ";
+    } else if (num > 0) {
+      return "Over   ";
+    } else {
+      return "Ideal   ";
+    }
+  }
+
   const SumAmountProduct({
     super.key,
     required this.productName,
-    required this.stockController,
+    required this.stockOnHandController,
     required this.av3mController,
     required this.recommendController,
     required this.onDelete,
     required this.itemData,
-    this.isReadOnly = false,
+    this.isReadOnly = false, required this.availabilityYesNoController, required this.stockOnInventoryController,
   });
 
   @override
@@ -412,15 +429,52 @@ class SumAmountProduct extends StatelessWidget {
           ),
           Padding(
             padding: EdgeInsets.all(16),
-            child: Row(
+            child: Column(
               children: [
-                _buildDetailField("Stock", stockController),
-                SizedBox(width: 12),
-                _buildDetailField("Av3m", av3mController),
-                SizedBox(width: 12),
-                _buildDetailField("Recommend", recommendController),
-              //   SizedBox(width: 12),
-              //   _buildDetailField("Price", priceController),
+                Row(
+                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                  children: [
+                    Expanded(
+                        flex: 3,
+                        child: Text("Availability (Y/N) ? ")),
+                    Expanded(
+                      flex: 1,
+                      child: NumberField(
+                        controller: availabilityYesNoController,
+                        readOnly: isReadOnly,
+                      ),
+                    ),
+                  ],
+                ),
+                Row(
+                  children: [
+                    _buildDetailField("Stock On Hand", stockOnHandController),
+                    SizedBox(width: 12),
+                    _buildDetailField("Stock On Inventory", stockOnInventoryController),
+                  ],
+                ),
+                Row(
+                  children: [
+                    _buildDetailField("Av3m", av3mController),
+                    SizedBox(width: 12),
+                    _buildDetailField("Recommend", recommendController),
+                  ],
+                ),
+                Row(
+                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                  children: [
+                    Text("Status",style: TextStyle(
+                        fontSize: 12,
+                        fontWeight: FontWeight.w500,
+                        color: Color(0xFF666666),
+                        fontStyle: FontStyle.italic
+                    ),),
+                    Text(checkStatus(recommendController.text),style: TextStyle(
+                      fontWeight: FontWeight.bold,
+                      color: Colors.blue,
+                    ),),
+                  ],
+                ),
               ],
             ),
           ),

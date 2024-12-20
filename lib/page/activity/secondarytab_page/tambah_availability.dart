@@ -10,6 +10,7 @@ import '../../../model/list_product_sku_response.dart';
 import '../../../model/list_category_response.dart' as Category;
 import '../../../utils/colors.dart';
 import '../../../widget/back_button.dart';
+import '../../../widget/custom_switch.dart';
 import '../../../widget/text_field.dart';
 import '../../selling/tambah_product_selling.dart';
 
@@ -390,14 +391,24 @@ class CompactProductCard extends StatefulWidget {
 }
 
 class _CompactProductCardState extends State<CompactProductCard> {
-  // late TextEditingController stockController;
-  // late TextEditingController sellingController;
-  // late TextEditingController balanceController;
-  // late TextEditingController priceController;
+  late TambahAvailabilityController controller = Get.find<TambahAvailabilityController>();
 
-  late TextEditingController stockController;
+  late TextEditingController stockOnHandController;
+  late TextEditingController stockOnInventoryController;
   late TextEditingController av3mController;
   late TextEditingController recommendController;
+  late ValueNotifier<bool> toggleAvailabilityYesNo;
+
+  String checkStatus(String number) {
+    int num = int.parse(number);
+    if (num < 0) {
+      return "Kurang   ";
+    } else if (num > 0) {
+      return "Over   ";
+    } else {
+      return "Ideal   ";
+    }
+  }
 
   @override
   void initState() {
@@ -418,12 +429,16 @@ class _CompactProductCardState extends State<CompactProductCard> {
     final skuId = widget.sku['id'].toString();
     final existingValues = controller.productValues[skuId] ??
         {
-          'stock': '0',
+          'availability_toggle': "false",
+          'stock_on_hand': '0',
+          'stock_on_inventory': '0',
           'av3m': '0',
           'recommend': '0',
         };
 
-    stockController = TextEditingController(text: existingValues['stock']);
+    toggleAvailabilityYesNo = existingValues['availability_toggle'] == "false" ? ValueNotifier(false) : ValueNotifier(true);
+    stockOnHandController = TextEditingController(text: existingValues['stock_on_hand']);
+    stockOnInventoryController = TextEditingController(text: existingValues['stock_on_inventory']);
     av3mController = TextEditingController(text: existingValues['av3m']);
     recommendController = TextEditingController(text: existingValues['recommend']);
     // priceController = TextEditingController(text: existingValues['price']);
@@ -434,25 +449,30 @@ class _CompactProductCardState extends State<CompactProductCard> {
   void _setupListeners() {
     void updateValues() {
       widget.onChanged({
-        'stock': stockController.text.isEmpty ? '0' : stockController.text,
+        'availability_toggle': toggleAvailabilityYesNo.value ? 'true' : 'false',
+        'stock_on_hand': stockOnHandController.text.isEmpty ? '0' : stockOnHandController.text,
+        'stock_on_inventory': stockOnInventoryController.text.isEmpty ? '0' : stockOnInventoryController.text,
         'av3m': av3mController.text.isEmpty ? '0' : av3mController.text,
         'recommend': recommendController.text.isEmpty ? '0' : recommendController.text,
         // 'price': priceController.text.isEmpty ? '0' : priceController.text,
       });
     }
 
-    stockController.addListener(updateValues);
+    toggleAvailabilityYesNo.addListener(updateValues);
+    stockOnHandController.addListener(updateValues);
+    stockOnInventoryController.addListener(updateValues);
     av3mController.addListener(updateValues);
     recommendController.addListener(updateValues);
-    // priceController.addListener(updateValues);
   }
 
   @override
   void dispose() {
-    stockController.dispose();
+    toggleAvailabilityYesNo.removeListener(() {});
+    toggleAvailabilityYesNo.dispose();
+    stockOnHandController.dispose();
+    stockOnInventoryController.dispose();
     av3mController.dispose();
     recommendController.dispose();
-    // priceController.dispose();
     super.dispose();
   }
 
@@ -526,20 +546,163 @@ class _CompactProductCardState extends State<CompactProductCard> {
           ),
           Padding(
             padding: EdgeInsets.all(16),
-            child: Row(
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                Expanded(child: _buildInputField('Stock', stockController)),
-                SizedBox(width: 8),
-                Expanded(child: _buildInputField('AV3M', av3mController)),
-                SizedBox(width: 8),
-                Expanded(child: _buildInputField('Recommend', recommendController)),
-                // SizedBox(width: 8),
-                // Expanded(child: _buildInputField('Price', priceController)),
+                Row(
+                  children: [
+                    Expanded(
+                      child: Text(
+                        "Availability ?",
+                        style: const TextStyle(
+                          fontSize: 12,
+                          fontWeight: FontWeight.w500,
+                          color: Color(0xFF666666),
+                        ),
+                      ),
+                    ),
+                    const SizedBox(width: 10),
+    CustomSegmentedSwitch(
+                      value: toggleAvailabilityYesNo.value,
+                      onChanged: (value) {
+                        setState(() {
+                          toggleAvailabilityYesNo.value = !toggleAvailabilityYesNo.value;
+                        });
+                      },
+                      activeColor: Colors.blue,
+                      inactiveColor: Colors.white,
+                    ),
+                  ],
+                ),
+                Divider(color: Colors.grey,),
+                Text("Stock",style: TextStyle(
+                  fontSize: 12,
+                  fontWeight: FontWeight.w500,
+                  color: Color(0xFF666666),
+                  fontStyle: FontStyle.italic
+                ),),
+                Row(
+                  children: [
+                    Expanded(child: _buildInputField('On Hand', stockOnHandController)),
+                    SizedBox(width: 8),
+                    Expanded(child: buildInputInventory('On Inventory', stockOnInventoryController)),
+                  ],
+                ),
+                Row(
+                  children: [
+                    Expanded(child: _buildInputField('AV3M', av3mController)),
+                    SizedBox(width: 8),
+                    Expanded(child: _buildDetailField('Recommend', recommendController,)),
+                  ],
+                ),
+                Row(
+                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                  children: [
+                    Text("Status",style: TextStyle(
+                        fontSize: 12,
+                        fontWeight: FontWeight.w500,
+                        color: Color(0xFF666666),
+                        fontStyle: FontStyle.italic
+                    ),),
+                    Text(checkStatus(recommendController.text),style: TextStyle(
+                    fontWeight: FontWeight.bold,
+                        color: Colors.blue,
+    ),),
+                  ],
+                ),
               ],
             ),
           ),
         ],
       ),
+    );
+  }
+
+  Widget buildInputInventory(String label, TextEditingController controller) {
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        Text(
+          label,
+          style: TextStyle(
+            fontSize: 12,
+            fontWeight: FontWeight.w500,
+            color: Color(0xFF666666),
+          ),
+        ),
+        Container(
+          margin: EdgeInsets.only(bottom: 10, top: 5),
+          decoration: BoxDecoration(
+            borderRadius: BorderRadius.circular(12),
+            boxShadow: [
+              BoxShadow(
+                color: Colors.grey.withOpacity(0.1),
+                spreadRadius: 1,
+                blurRadius: 3,
+                offset: const Offset(0, 2),
+              ),
+            ],
+          ),
+          child: TextFormField(
+            controller: controller,
+            keyboardType: TextInputType.number,
+            style: const TextStyle(
+              fontSize: 14,
+              color: Color(0xFF0077BD),
+            ),
+            onChanged: (value){
+             setState(() {
+                recommendController.text = (int.parse(value) - int.parse(av3mController.text)).toString();
+             });
+            },
+            textAlign: TextAlign.center,
+            inputFormatters: [
+              FilteringTextInputFormatter.allow(RegExp(r'^\d*\.?\d*$')),
+              FilteringTextInputFormatter.digitsOnly, // Only allows digits
+            ],
+            decoration: InputDecoration(
+              hintStyle: TextStyle(
+                color: Colors.grey[400],
+                fontSize: 14,
+              ),
+              contentPadding: const EdgeInsets.symmetric(
+                horizontal: 3,
+                vertical: 3,
+              ),
+              border: OutlineInputBorder(
+                borderRadius: BorderRadius.circular(8),
+                borderSide: const BorderSide(
+                  color: Color(0xFF64B5F6),
+                  width: 2,
+                ),
+              ),
+              filled: true,
+              fillColor: const Color(0xFFE8F3FF),
+              focusedBorder: OutlineInputBorder(
+                borderRadius: BorderRadius.circular(8),
+                borderSide: const BorderSide(
+                  color: Color(0xFF64B5F6),
+                  width: 1,
+                ),
+              ),
+              enabledBorder: OutlineInputBorder(
+                borderRadius: BorderRadius.circular(8),
+                borderSide: const BorderSide(
+                  color: Color(0xFF64B5F6),
+                  width: 1,
+                ),
+              ),
+              disabledBorder: OutlineInputBorder(
+                borderRadius: BorderRadius.circular(8),
+                borderSide: const BorderSide(
+                  color: Color(0xFF64B5F6),
+                  width: 1,
+                ),
+              ),
+            ),
+          ),
+        ),
+      ],
     );
   }
 
@@ -558,6 +721,27 @@ class _CompactProductCardState extends State<CompactProductCard> {
         SizedBox(height: 4),
         NumberField(
           controller: controller,
+        ),
+      ],
+    );
+  }
+
+  Widget _buildDetailField(String label, TextEditingController controller) {
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        Text(
+          label,
+          style: TextStyle(
+            fontSize: 12,
+            fontWeight: FontWeight.w500,
+            color: Color(0xFF666666),
+          ),
+        ),
+        SizedBox(height: 4),
+        NumberField(
+          controller: controller,
+          readOnly: true,
         ),
       ],
     );

@@ -18,6 +18,7 @@ class TambahAvailabilityController extends GetxController {
   final selectedSkuData = Rxn<Map<String, dynamic>>();
 
   // Form controllers
+  final toggleAvailabilityYesNo = false.obs;
   var stockController = TextEditingController().obs;
   var av3mController = TextEditingController().obs;
   var recommendController = TextEditingController().obs;
@@ -64,10 +65,11 @@ class TambahAvailabilityController extends GetxController {
         }
 
         savedProductValues[categoryId]![item['id'].toString()] = {
-          'stock': item['stock'].toString(),
+          'availability_toggle': item['availability_toggle'].toString(),
+          'stock_on_hand': item['stock_on_hand'].toString(),
+          'stock_on_inventory': item['stock_on_inventory'].toString(),
           'av3m': item['av3m'].toString(),
           'recommend': item['recommend'].toString(),
-          // 'price': item['price'].toString(),
         };
       }
     }
@@ -96,10 +98,11 @@ class TambahAvailabilityController extends GetxController {
             for (var item in matchingDraftItems) {
               final skuId = item['id'].toString();
               productValues[skuId] = {
-                'stock': item['stock'].toString(),
+                'availability_toggle': item['availability_toggle'].toString(),
+                'stock_on_hand': item['stock_on_hand'].toString(),
+                'stock_on_inventory': item['stock_on_inventory'].toString(),
                 'av3m': item['av3m'].toString(),
                 'recommend': item['recommend'].toString(),
-                // 'price': item['price'].toString(),
               };
             }
           } else {
@@ -115,10 +118,11 @@ class TambahAvailabilityController extends GetxController {
               for (var product in products) {
                 final skuId = product['id'].toString();
                 productValues[skuId] = {
-                  'stock': '0',
+                  'availability_toggle': 'false',
+                  'stock_on_hand': '0',
+                  'stock_on_inventory': '0',
                   'av3m': '0',
                   'recommend': '0',
-                  // 'price': '0',
                 };
               }
             }
@@ -144,10 +148,11 @@ class TambahAvailabilityController extends GetxController {
       final skuId = sku['id'].toString();
       final values = productValues[skuId] ??
           {
-            'stock': '0',
+            'availability_toggle': 'false',
+            'stock_on_hand': '0',
+            'stock_on_inventory': '0',
             'av3m': '0',
             'recommend': '0',
-            // 'price': '0',
           };
 
       updatedItems.add({
@@ -155,10 +160,11 @@ class TambahAvailabilityController extends GetxController {
         'product_id': sku['id'],
         'category': sku['category']['name'],
         'sku': sku['sku'],
-        'stock': int.tryParse(values['stock'] ?? '0') ?? 0,
+        'availability_toggle': bool.tryParse(values['availability_toggle'] ?? 'false') ?? false,
+        'stock_on_hand': int.tryParse(values['stock_on_hand'] ?? '0') ?? 0,
+        'stock_on_inventory': int.tryParse(values['stock_on_inventory'] ?? '0') ?? 0,
         'av3m': int.tryParse(values['av3m'] ?? '0') ?? 0,
         'recommend': int.tryParse(values['recommend'] ?? '0') ?? 0,
-        // 'price': int.tryParse(values['price'] ?? '0') ?? 0,
       });
     }
 
