@@ -58,4 +58,15 @@ class SalesActivity extends Model
     {
         $query->has('outlet');
     }
+
+    public function av3m(): BelongsTo
+    {
+        return $this->belongsTo(Av3m::class);
+    }
+
+    // Scope to get all av3ms for a specific outlet
+    public function scopeByOutlet($query, $outletId)
+    {
+        return $query->where('outlet_id', $outletId);
+    }
 }

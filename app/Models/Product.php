@@ -52,4 +52,8 @@ class Product extends Model
         return $this->belongsToMany(Channel::class, 'av3ms')
             ->withPivot('av3m');
     }
+    public function av3m()
+    {
+        return $this->hasOne(Av3m::class);
+    }
 }

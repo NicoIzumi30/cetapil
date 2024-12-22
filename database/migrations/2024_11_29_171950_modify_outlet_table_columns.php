@@ -29,7 +29,6 @@ return new class extends Migration
         Schema::table('outlets', function (Blueprint $table) {
             $table->dropForeign(['channel_id']);
             $table->string('channel');
-            $table->dropColumn('channel_id');
         });
     }
 };

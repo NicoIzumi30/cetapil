@@ -20,8 +20,9 @@ class OutletandAv3mDummySeeder extends Seeder
         // Sample outlet data
         $outlets = [
             [
-                'user_id' => '9dc709e3-442a-468e-8389-415ec5de36c0', // Replace with actual user_id
-                'city_id' => '797e02be-39cf-4c90-be2b-be273bb13a18', // Replace with actual city_id
+                'user_id' => '9dc89a30-8aac-48d8-a864-3670cd803388', // Replace with actual user_id
+                'city_id' => 'a305e2e1-f5ea-4333-896a-81ca5283fdc7', // Replace with actual city_id
+                'channel_id' => '9dc89a40-7a29-4a66-8f48-e610cb289ee1', // Replace with actual channel_id
                 'code' => 'OUT001',
                 'name' => 'Cetaphil Store Senopati',
                 'category' => 'MT',
@@ -37,8 +38,9 @@ class OutletandAv3mDummySeeder extends Seeder
                 'week_type' => 'ODD',
             ],
             [
-                'user_id' => '9dc709e3-442a-468e-8389-415ec5de36c0',
-                'city_id' => '797e02be-39cf-4c90-be2b-be273bb13a18',
+                'user_id' => '9dc89a30-8aac-48d8-a864-3670cd803388',
+                'city_id' => 'a305e2e1-f5ea-4333-896a-81ca5283fdc7',
+                'channel_id' => '9dc89a40-7a29-4a66-8f48-e610cb289ee1', // Replace with actual channel_id
                 'code' => 'OUT002',
                 'name' => 'Cetaphil Store Kemang',
                 'category' => 'GT',
@@ -54,8 +56,9 @@ class OutletandAv3mDummySeeder extends Seeder
                 'week_type' => 'EVEN',
             ],
             [
-                'user_id' => '9dc709e3-442a-468e-8389-415ec5de36c0',
-                'city_id' => '797e02be-39cf-4c90-be2b-be273bb13a18',
+                'user_id' => '9dc89a30-8aac-48d8-a864-3670cd803388',
+                'city_id' => 'a305e2e1-f5ea-4333-896a-81ca5283fdc7',
+                'channel_id' => '9dc89a40-7a29-4a66-8f48-e610cb289ee1', // Replace with actual channel_id
                 'code' => 'OUT003',
                 'name' => 'Cetaphil Store Kelapa Gading',
                 'category' => 'MT',

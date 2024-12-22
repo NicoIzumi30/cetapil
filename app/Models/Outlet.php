@@ -80,4 +80,6 @@ class Outlet extends Model
     {
         return $this->hasMany(Visibility::class);
     }
+
+    
 }

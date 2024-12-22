@@ -52,24 +52,18 @@ class SalesActivityController extends Controller
         $now = Carbon::now();
 
         $activities = SalesActivity::completeRelation()
-            ->with(['visibilities' => function ($query) use ($now) {
-                $query->where(function ($q) use ($now) {
-                    $q->where('started_at', '<=', $now)
-                        ->where('ended_at', '>=', $now);
-                });
-            }])
+            ->with(['outlet', 'outlet.channel', 'user'])
             ->where('user_id', $this->getAuthUserId())
             ->whereDate('checked_in', $now)
             ->get();
 
-        // return response()->json($activities);
         return new SalesActivityCollection($activities);
     }
     public function getAllProducts()
     {
 
-        $products = Product::with(['category', 'channels'])->get();
-        return new ProductChannelCollection($products);
+        $products = Product::with(['category'])->get();
+        return new ProductCollection($products);
     }
 
     public function getAllChannels()

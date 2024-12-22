@@ -2,6 +2,7 @@
 
 namespace App\Http\Resources\SalesActivity;
 
+use App\Models\Av3m;
 use Carbon\Carbon;
 use Illuminate\Http\Request;
 use Illuminate\Http\Resources\Json\JsonResource;
@@ -21,17 +22,15 @@ class SalesActivityResource extends JsonResource
             'outlet' => $this->outlet->only('id', 'name', 'category', 'city_id', 'longitude', 'latitude', 'visit_day'),
             'user' => $this->user->only('id', 'name'),
             'channel' => $this->outlet->channel ? $this->outlet->channel->only('id', 'name') : null,
-            'visibilities' => $this->whenLoaded('visibilities', function () {
-                return $this->visibilities->map(function ($visibility) {
+            'av3m_products' => Av3m::where('outlet_id', $this->outlet_id)
+                ->select('product_id', 'av3m')
+                ->get()
+                ->map(function ($av3m) {
                     return [
-                        'id' => $visibility->id,
-                        'posm_type_id' => $visibility->posm_type_id,
-                        'visual_type_id' => $visibility->visual_type_id,
-                        'filename' => $visibility->filename,
-                        'image' => $visibility->path,
+                        'product_id' => $av3m->product_id,
+                        'av3m' => $av3m->av3m
                     ];
-                });
-            }, []),
+                }),
             'checked_in' => $this->checked_in,
             'checked_out' => $this->checked_out,
             'views_knowledge' => $this->views_knowledge,
