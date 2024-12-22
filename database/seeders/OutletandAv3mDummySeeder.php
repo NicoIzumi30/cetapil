@@ -20,9 +20,9 @@ class OutletandAv3mDummySeeder extends Seeder
         // Sample outlet data
         $outlets = [
             [
-                'user_id' => '9dc89a30-8aac-48d8-a864-3670cd803388', // Replace with actual user_id
-                'city_id' => 'a305e2e1-f5ea-4333-896a-81ca5283fdc7', // Replace with actual city_id
-                'channel_id' => '9dc89a40-7a29-4a66-8f48-e610cb289ee1', // Replace with actual channel_id
+                'user_id' => '9dc8acdb-e5cb-4e78-9e10-46eba51c7fbd', // Replace with actual user_id
+                'city_id' => '697aafa1-415c-432c-9e44-816feb50085a', // Replace with actual city_id
+                'channel_id' => '9dc8aceb-4d13-4ad8-be1c-958160a05c74', // Replace with actual channel_id
                 'code' => 'OUT001',
                 'name' => 'Cetaphil Store Senopati',
                 'category' => 'MT',
@@ -38,9 +38,9 @@ class OutletandAv3mDummySeeder extends Seeder
                 'week_type' => 'ODD',
             ],
             [
-                'user_id' => '9dc89a30-8aac-48d8-a864-3670cd803388',
-                'city_id' => 'a305e2e1-f5ea-4333-896a-81ca5283fdc7',
-                'channel_id' => '9dc89a40-7a29-4a66-8f48-e610cb289ee1', // Replace with actual channel_id
+                'user_id' => '9dc8acdb-e5cb-4e78-9e10-46eba51c7fbd',
+                'city_id' => '697aafa1-415c-432c-9e44-816feb50085a',
+                'channel_id' => '9dc8aceb-4d13-4ad8-be1c-958160a05c74', // Replace with actual channel_id
                 'code' => 'OUT002',
                 'name' => 'Cetaphil Store Kemang',
                 'category' => 'GT',
@@ -56,9 +56,9 @@ class OutletandAv3mDummySeeder extends Seeder
                 'week_type' => 'EVEN',
             ],
             [
-                'user_id' => '9dc89a30-8aac-48d8-a864-3670cd803388',
-                'city_id' => 'a305e2e1-f5ea-4333-896a-81ca5283fdc7',
-                'channel_id' => '9dc89a40-7a29-4a66-8f48-e610cb289ee1', // Replace with actual channel_id
+                'user_id' => '9dc8acdb-e5cb-4e78-9e10-46eba51c7fbd',
+                'city_id' => '697aafa1-415c-432c-9e44-816feb50085a',
+                'channel_id' => '9dc8aceb-4d13-4ad8-be1c-958160a05c74', // Replace with actual channel_id
                 'code' => 'OUT003',
                 'name' => 'Cetaphil Store Kelapa Gading',
                 'category' => 'MT',
