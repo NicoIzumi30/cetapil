@@ -26,15 +26,34 @@ class DetailSalesActivityResource extends JsonResource
                 'id',
                 'name',
                 'category',
-                // 'city_id', 'longitude', 'latitude',
                 'visit_day',
             ),
-            // 'user' => $this->user->only('id', 'name'),
             'orders' => SalesOrderResource::collection($this->whenLoaded('orders')),
-            'visibilities' => SalesVisibilityResource::collection($this->whenLoaded('salesVisibilities')),
+            'visibilities' => [
+                'primary' => [
+                    'core' => $this->formatVisibilities('CORE', 'PRIMARY'),
+                    'baby' => $this->formatVisibilities('BABY', 'PRIMARY'),
+                ],
+                'secondary' => [
+                    'core' => $this->formatVisibilities('CORE', 'SECONDARY'),
+                    'baby' => $this->formatVisibilities('BABY', 'SECONDARY'),
+                ],
+            ],
             'availabilities' => SalesAvailabilityResource::collection($this->whenLoaded('availabilities')),
             'surveys' => SalesSurveyResource::collection($this->whenLoaded('surveys')),
         ];
+    }
+
+    private function formatVisibilities($category, $type)
+    {
+        return $this->salesVisibilities
+            ->where('category', $category)
+            ->where('type', $type)
+            ->sortBy('position')
+            ->values()
+            ->map(function ($visibility) {
+                return new VisibilityEntryResource($visibility);
+            });
     }
 }
 
@@ -45,7 +64,6 @@ class SalesOrderResource extends JsonResource
         return [
             'id' => $this->id,
             'sales_activity_id' => $this->sales_activity_id,
-            // 'outlet_id' => $this->outlet_id,
             'product_id' => $this->product_id,
             'total_items' => $this->total_items,
             'subtotal' => $this->subtotal,
@@ -53,19 +71,25 @@ class SalesOrderResource extends JsonResource
     }
 }
 
-class SalesVisibilityResource extends JsonResource
+class VisibilityEntryResource extends JsonResource
 {
     public function toArray($request)
     {
         return [
             'id' => $this->id,
-            'sales_activity_id' => $this->sales_activity_id,
-            'visibility_id' => $this->visibility_id,
-            // 'filename1' => $this->filename1,
-            // 'filename2' => $this->filename2,
-            'path1' => $this->path1,
-            'path2' => $this->path2,
+            'category' => $this->category,
+            'type' => $this->type,
+            'position' => $this->position,
+            'posm_type' => $this->posmType ? [
+                'id' => $this->posmType->id,
+                'name' => $this->posmType->name,
+            ] : null,
+            'visual_type' => $this->visual_type,
             'condition' => $this->condition,
+            'shelf_width' => $this->shelf_width,
+            'shelving' => $this->shelving,
+            'has_secondary_display' => $this->has_secondary_display,
+            'display_photo' => $this->display_photo,
         ];
     }
 }
@@ -77,13 +101,13 @@ class SalesAvailabilityResource extends JsonResource
         return [
             'id' => $this->id,
             'sales_activity_id' => $this->sales_activity_id,
-            // 'outlet_id' => $this->outlet_id,
             'product_id' => $this->product_id,
-            'availability_stock' => $this->availability_stock,
-            'average_stock' => $this->average_stock,
-            'ideal_stock' => $this->ideal_stock,
-            // 'status' => $this->status,
-            // 'detail' => $this->detail,
+            'stock_on_hand' => $this->stock_on_hand,
+            'stock_inventory' => $this->stock_inventory,
+            'av3m' => $this->av3m,
+            'status' => $this->status,
+            'rekomendasi' => $this->rekomendasi,
+            'availability' => $this->availability,
         ];
     }
 }
