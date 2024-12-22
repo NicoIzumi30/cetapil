@@ -41,6 +41,7 @@ use App\Traits\ProductTrait;
 use Illuminate\Http\Request;
 use Illuminate\Support\Carbon;
 use Illuminate\Http\JsonResponse;
+use Illuminate\Http\UploadedFile;
 use Illuminate\Support\Facades\DB;
 use Symfony\Component\HttpFoundation\Response;
 
@@ -198,6 +199,7 @@ class SalesActivityController extends Controller
         return new PosmTypeCollection($posm_types);
     }
 
+
     public function storeActivity(SaveActivityRequest $request)
     {
         $data = $request->validated();
@@ -210,7 +212,6 @@ class SalesActivityController extends Controller
                 Response::HTTP_BAD_REQUEST
             );
         }
-
 
         // Check if the authenticated user matches the activity's user
         if ($activity->user_id !== $this->getAuthUserId()) {
@@ -228,48 +229,6 @@ class SalesActivityController extends Controller
             );
         }
 
-
-        // Get all survey questions with their types
-        // $surveyQuestions = SurveyQuestion::get(['id', 'type'])->keyBy('id');
-        // $answeredQuestions = collect($data['survey'])->pluck('survey_question_id')->toArray();
-
-        // // Check if all questions are answered
-        // $missingQuestions = array_diff($surveyQuestions->pluck('id')->toArray(), $answeredQuestions);
-        // if (!empty($missingQuestions)) {
-        //     return $this->failedResponse(
-        //         'Please answer all survey questions',
-        //         Response::HTTP_BAD_REQUEST
-        //     );
-        // }
-
-        // // Validate answer types
-        // foreach ($data['survey'] as $item) {
-        //     $question = $surveyQuestions[$item['survey_question_id']];
-        //     $answer = $item['answer'];
-
-        //     // Validate based on question type
-        //     switch ($question->type) {
-        //         case 'bool':
-        //             if (!in_array($answer, ['true', 'false', '1', '0', true, false])) {
-        //                 return $this->failedResponse(
-        //                     "Question {$question->id} requires a boolean answer",
-        //                     Response::HTTP_BAD_REQUEST
-        //                 );
-        //             }
-        //             break;
-        //         case 'text':
-        //             if (!is_string($answer)) {
-        //                 return $this->failedResponse(
-        //                     "Question {$question->id} requires a text answer",
-        //                     Response::HTTP_BAD_REQUEST
-        //                 );
-        //             }
-        //             break;
-        //             // Add more cases for other types if needed
-        //     }
-        // }
-
-
         // Start transaction
         DB::beginTransaction();
         try {
@@ -285,38 +244,38 @@ class SalesActivityController extends Controller
                     'sales_activity_id' => $activity->id,
                     'outlet_id' => $data['outlet_id'],
                     'product_id' => $item['product_id'],
-                    'availability_stock' => $item['availability_stock'],
-                    'average_stock' => $item['average_stock'],
-                    'ideal_stock' => $item['ideal_stock'],
-                    'status' => true,
-                    'detail' => SalesAvailability::getDetail((int) $item['ideal_stock'] ?? 0)
+                    'stock_on_hand' => $item['stock_on_hand'],
+                    'stock_inventory' => $item['stock_inventory'],
+                    'av3m' => $item['av3m'],
+                    'status' => $item['status'],
+                    'rekomendasi' => $item['rekomendasi'],
+                    'availability' => $item['availability']
                 ]);
             }
 
             // Store visibility data
-            foreach ($data['visibility'] as $key => $item) {
-
-                $visibilityRecord = SalesVisibility::create([
+            foreach ($data['visibility'] as $item) {
+                $visibilityData = [
                     'sales_activity_id' => $activity->id,
-                    'visibility_id' => $item['visibility_id'],
-                    'condition' => $item['condition']
-                ]);
+                    'category' => $item['category'],
+                    'type' => $item['type'],
+                    'position' => $item['position'],
+                    'posm_type_id' => $item['posm_type_id'] ?? null,
+                    'visual_type' => $item['visual_type'] ?? null,
+                    'condition' => $item['condition'] ?? null,
+                    'shelf_width' => $item['shelf_width'] ?? null,
+                    'shelving' => $item['shelving'] ?? null,
+                    'has_secondary_display' => $item['has_secondary_display'] ?? null
+                ];
 
-                if ($request->hasFile("visibility.$key.file1")) {
-                    $file1 = $request->file("visibility.$key.file1");
-                    $media1 = saveFile($file1, "sales-visibility/$visibilityRecord->id/file1");
-                    $visibilityRecord->filename1 = $media1['filename'];
-                    $visibilityRecord->path1 = $media1['path'];
+                // Handle display photo upload
+                if (isset($item['display_photo']) && $item['display_photo'] instanceof UploadedFile) {
+                    $photo = $item['display_photo'];
+                    $media = saveFile($photo, "visibility-entries/{$activity->id}");
+                    $visibilityData['display_photo'] = $media['path'];
                 }
 
-                if ($request->hasFile("visibility.$key.file2")) {
-                    $file2 = $request->file("visibility.$key.file2");
-                    $media2 = saveFile($file2, "sales-visibility/$visibilityRecord->id/file2");
-                    $visibilityRecord->filename2 = $media2['filename'];
-                    $visibilityRecord->path2 = $media2['path'];
-                }
-
-                $visibilityRecord->save();
+                SalesVisibility::create($visibilityData);
             }
 
             // Store survey data
@@ -361,7 +320,6 @@ class SalesActivityController extends Controller
             );
         }
     }
-
     public function getActivityById(string $id)
     {
         try {
