@@ -28,14 +28,6 @@ class SellingProduct extends Model
     public function scopeCompleteRelation(Builder $query)
     {
         $query->has('sell')
-                ->has('product');
-    }
-
-    public function getImageAttribute()
-    {
-        if (!$this->path) {
-            return null;
-        }
-        return "/storage$this->path";
+              ->has('product');
     }
 }

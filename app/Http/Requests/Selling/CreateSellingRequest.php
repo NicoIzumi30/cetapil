@@ -26,15 +26,12 @@ class CreateSellingRequest extends FormRequest
     public function rules(): array
     {
         return [
-            'outlet_name' => 'required',
-            'category_outlet' => 'required|string',
+            'outlet_id' => 'required|exists:outlets,id',
             'longitude' => 'required|string',
             'latitude' => 'required|string',
             'products' => 'required|array',
             'products.*.id' => 'required|exists:products,id',
-            'products.*.stock' => 'required|numeric|min:0',
-            'products.*.selling' => 'required|numeric|min:0',
-            'products.*.balance' => 'required|numeric|min:0',
+            'products.*.qty' => 'required|numeric|min:0',
             'products.*.price' => 'required|numeric|min:0',
             'image' => 'required|file|mimes:jpg,png,jpeg|max:1024'
         ];

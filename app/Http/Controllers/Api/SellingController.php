@@ -22,7 +22,7 @@ class SellingController extends Controller
     public function index(Request $request): SellingCollection
     {
         $selling = Selling::query()
-            ->with(['products.product'])   // Eager load selling_products relationship
+            ->with(['products.product'])
             ->where('created_at', '>=', Carbon::today()->subDays(10))
             ->latest()
             ->get();
@@ -40,10 +40,7 @@ class SellingController extends Controller
         if ($request->hasFile('image')) {
             $file = $request->file('image');
             $media = saveFile($file, "sellings/$selling->id");
-
-            $selling->filename = $media['filename'];
-            $selling->path = $media['path'];
-            $selling->save();
+            $selling->update($media);
         }
 
         foreach ($request->products as $product) {
@@ -52,10 +49,9 @@ class SellingController extends Controller
                 'selling_id' => $selling->id,
                 'product_id' => $prod->id,
                 'product_name' => $prod->sku,
-                'stock' => $product['stock'],
-                'selling' => $product['selling'],
-                'balance' => $product['balance'],
-                'price' => $product['price']
+                'qty' => $product['qty'],
+                'price' => $product['price'],
+                'total' => $product['qty'] * $product['price']
             ]);
         }
 

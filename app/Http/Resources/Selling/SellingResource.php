@@ -18,26 +18,24 @@ class SellingResource extends JsonResource
         return [
             'id' => $this->id,
             'user' => $this->user->only('id', 'name'),
-            'outlet_name' => $this->outlet_name,
-            'category_outlet' => $this->category_outlet,
+            'outlet' => $this->outlet->only('id', 'name'),
             'products' => $this->whenLoaded('products', function () {
                 return $this->products->map(function ($selling_product) {
                     return [
                         'id' => $selling_product->id,
                         'product_id' => $selling_product->product_id,
-                        'category' => $selling_product->product->category == null ? null : $selling_product->product->category->only("id", "name"),
+                        'category' => $selling_product->product->category?->only("id", "name"),
                         'product_name' => $selling_product->product_name,
-                        'stock' => $selling_product->stock,
-                        'selling' => $selling_product->selling,
-                        'balance' => $selling_product->balance,
+                        'qty' => $selling_product->qty,
                         'price' => $selling_product->price,
+                        'total' => $selling_product->total,
                     ];
                 });
             }, []),
             'longitude' => $this->longitude,
             'latitude' => $this->latitude,
             'filename' => $this->filename,
-            'image' => $this->image,
+            'image' => "/storage{$this->path}",
             'created_at' => Carbon::parse($this->created_at)->toDateTimeLocalString()
         ];
     }
