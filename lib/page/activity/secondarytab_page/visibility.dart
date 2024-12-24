@@ -19,6 +19,7 @@ const String BASE_URL = 'https://dev-cetaphil.i-am.host/storage/';
 class VisibilityPage extends GetView<ActivityController> {
   final supportController = Get.find<SupportDataController>();
   final tambahActivityController = Get.find<TambahActivityController>();
+
   // final tambahVisibilityController = Get.find<TambahVisibilityController>();
 
   @override
@@ -39,63 +40,165 @@ class VisibilityPage extends GetView<ActivityController> {
         CollapsibleVisibilityGroup(
           title: 'Core',
           items: [
-            VisibilityCard(
-              posmType: 'Standee',
-              visualType: 'New soothing foam wash',
-              condition: 'Good',
-              imagePath: 'path_to_image',
-              isSubmitted: true,
-              onTapCard: () {
-                var id = "primary-core-1";
-                // Your custom tap handling here
-                if (!Get.isRegistered<TambahVisibilityController>()) {
-                  Get.put(TambahVisibilityController());
-                }
+            Obx(() {
+              var id = "primary-core-1";
+              var data = tambahActivityController.visibilityPrimaryDraftItems
+                  .firstWhere((item) => item['id'] == id, orElse: () => {});
+              return VisibilityCard(
+                isPrimary: true,
+                posmType: data['posm_type_name'] ?? "-",
+                visualType: data['visual_type_name'] ?? "-",
+                condition: data['condition'] ?? "-",
+                imagePath: data['image_visibility'],
+                isSubmitted: true,
+                onTapCard: () {
+                  // Your custom tap handling here
+                  if (!Get.isRegistered<TambahVisibilityController>()) {
+                    Get.put(TambahVisibilityController());
+                  }
+                  tambahActivityController.initPrimaryVisibilityItem(id);
 
-                Get.to(() => TambahPrimaryVisibility());
-              },
-            ),
-            VisibilityCard(
-              posmType: 'Standee',
-              visualType: 'New soothing foam wash',
-              condition: 'Good',
-              imagePath: 'path_to_image',
-              isSubmitted: true,
-            ),
-            VisibilityCard(
-              posmType: 'Standee',
-              visualType: 'New soothing foam wash',
-              condition: 'Good',
-              imagePath: 'path_to_image',
-              isSubmitted: true,
-            ),
+                  Get.to(() =>
+                      TambahPrimaryVisibility(
+                        id: id,
+                      ));
+                },
+              );
+            }),
+            Obx(() {
+              var id = "primary-core-2";
+              var data = tambahActivityController.visibilityPrimaryDraftItems
+                  .firstWhere((item) => item['id'] == id, orElse: () => {});
+              return VisibilityCard(
+                isPrimary: true,
+                posmType: data['posm_type_name'] ?? "-",
+                visualType: data['visual_type_name'] ?? "-",
+                condition: data['condition'] ?? "-",
+                imagePath: data['image_visibility'],
+                isSubmitted: true,
+                onTapCard: () {
+                  var id = "primary-core-2";
+                  // Your custom tap handling here
+                  if (!Get.isRegistered<TambahVisibilityController>()) {
+                    Get.put(TambahVisibilityController());
+                  }
+                  tambahActivityController.initPrimaryVisibilityItem(id);
+
+                  Get.to(() =>
+                      TambahPrimaryVisibility(
+                        id: id,
+                      ));
+                },
+              );
+            }),
+            Obx(() {
+              var id = "primary-core-3";
+              var data = tambahActivityController.visibilityPrimaryDraftItems
+                  .firstWhere((item) => item['id'] == id, orElse: () => {});
+              return VisibilityCard(
+                isPrimary: true,
+                posmType: data['posm_type_name'] ?? "-",
+                visualType: data['visual_type_name'] ?? "-",
+                condition: data['condition'] ?? "-",
+                imagePath: data['image_visibility'] ,
+                isSubmitted: true,
+                onTapCard: () {
+                  // Your custom tap handling here
+                  if (!Get.isRegistered<TambahVisibilityController>()) {
+                    Get.put(TambahVisibilityController());
+                  }
+                  tambahActivityController.initPrimaryVisibilityItem(id);
+
+                  Get.to(() =>
+                      TambahPrimaryVisibility(
+                        id: id,
+                      ));
+                },
+              );
+            }),
           ],
         ),
         SizedBox(height: 8),
         CollapsibleVisibilityGroup(
           title: 'Baby',
           items: [
-            VisibilityCard(
-              posmType: 'Baby Standee',
-              visualType: 'Baby foam wash',
-              condition: 'Good',
-              imagePath: 'path_to_image',
-              isSubmitted: true,
-            ),
-            VisibilityCard(
-              posmType: 'Baby Standee',
-              visualType: 'Baby foam wash',
-              condition: 'Good',
-              imagePath: 'path_to_image',
-              isSubmitted: true,
-            ),
-            VisibilityCard(
-              posmType: 'Baby Standee',
-              visualType: 'Baby foam wash',
-              condition: 'Good',
-              imagePath: 'path_to_image',
-              isSubmitted: true,
-            ),
+            Obx(() {
+              var id = "primary-baby-1";
+              var data = tambahActivityController.visibilityPrimaryDraftItems
+                  .firstWhere((item) => item['id'] == id, orElse: () => {});
+              return VisibilityCard(
+                isPrimary: true,
+                posmType: data['posm_type_name'] ?? "-",
+                visualType: data['visual_type_name'] ?? "-",
+                condition: data['condition'] ?? "-",
+                imagePath: data['image_visibility'],
+                isSubmitted: true,
+                onTapCard: () {
+                  // Your custom tap handling here
+                  if (!Get.isRegistered<TambahVisibilityController>()) {
+                    Get.put(TambahVisibilityController());
+                  }
+                  tambahActivityController.initPrimaryVisibilityItem(id);
+
+                  Get.to(() =>
+                      TambahPrimaryVisibility(
+                        id: id,
+                      ));
+                },
+              );
+            }),
+            Obx(() {
+              var id = "primary-baby-2";
+              var data = tambahActivityController.visibilityPrimaryDraftItems
+                  .firstWhere((item) => item['id'] == id, orElse: () => {});
+              return VisibilityCard(
+                isPrimary: true,
+                posmType: data['posm_type_name'] ?? "-",
+                visualType: data['visual_type_name'] ?? "-",
+                condition: data['condition'] ?? "-",
+                imagePath: data['image_visibility'] ,
+                isSubmitted: true,
+                onTapCard: () {
+                  var id = "primary-baby-2";
+                  // Your custom tap handling here
+                  if (!Get.isRegistered<TambahVisibilityController>()) {
+                    Get.put(TambahVisibilityController());
+                  }
+                  tambahActivityController.initPrimaryVisibilityItem(id);
+
+                  Get.to(() =>
+                      TambahPrimaryVisibility(
+                        id: id,
+                      ));
+                },
+              );
+            }),
+            Obx(() {
+              var id = "primary-baby-3";
+              var data = tambahActivityController.visibilityPrimaryDraftItems
+                  .firstWhere((item) => item['id'] == id, orElse: () => {});
+              return VisibilityCard(
+                isPrimary: true,
+                posmType: data['posm_type_name'] ?? "-",
+                visualType: data['visual_type_name'] ?? "-",
+                condition: data['condition'] ?? "-",
+                imagePath: data['image_visibility'],
+                isSubmitted: true,
+                onTapCard: () {
+                  var id = "primary-baby-3";
+                  // Your custom tap handling here
+                  if (!Get.isRegistered<TambahVisibilityController>()) {
+                    Get.put(TambahVisibilityController());
+                  }
+                  tambahActivityController.initPrimaryVisibilityItem(id);
+
+                  Get.to(() =>
+                      TambahPrimaryVisibility(
+                        id: id,
+                      ));
+                },
+              );
+            }),
           ],
         ),
         SizedBox(height: 16),
@@ -113,48 +216,88 @@ class VisibilityPage extends GetView<ActivityController> {
         CollapsibleVisibilityGroup(
           title: 'Core',
           items: [
-            VisibilityCard(
-              posmType: 'Standee',
-              visualType: 'New soothing foam wash',
-              condition: 'Good',
-              imagePath: 'path_to_image',
-              isSubmitted: true,
-              onTapCard: (){
-                var id = "secondary-core-1";
-                if (!Get.isRegistered<TambahVisibilityController>()) {
-                  Get.put(TambahVisibilityController());
-                }
-
-                Get.to(() => TambahSecondaryVisibility());
-              },
-            ),
-            VisibilityCard(
-              posmType: 'Standee',
-              visualType: 'New soothing foam wash',
-              condition: 'Good',
-              imagePath: 'path_to_image',
-              isSubmitted: true,
-            ),
+            Obx(() {
+              var id = "secondary-core-1";
+              var data = tambahActivityController.visibilitySecondaryDraftItems
+                  .firstWhere((item) => item['id'] == id, orElse: () => {});
+              return VisibilityCard(
+                isPrimary: false,
+                secondarydisplay: data['secondary_exist'] ?? "-",
+                typeDisplay: data['display_type'] ?? "-",
+                imagePath: data['display_image'] ,
+                isSubmitted: true,
+                onTapCard: () {
+                  if (!Get.isRegistered<TambahVisibilityController>()) {
+                    Get.put(TambahVisibilityController());
+                  }
+                  tambahActivityController.initSecondaryVisibilityItem(id);
+                  Get.to(() => TambahSecondaryVisibility(id: id,));
+                },
+              );
+            }),
+            Obx(() {
+              var id = "secondary-core-2";
+              var data = tambahActivityController.visibilitySecondaryDraftItems
+                  .firstWhere((item) => item['id'] == id, orElse: () => {});
+              return VisibilityCard(
+                isPrimary: false,
+                  secondarydisplay: data['secondary_exist']?? "-",
+                  typeDisplay: data['display_type']?? "-",
+                  imagePath: data['display_image'],
+                isSubmitted: true,
+                onTapCard: () {
+                  if (!Get.isRegistered<TambahVisibilityController>()) {
+                    Get.put(TambahVisibilityController());
+                  }
+                  tambahActivityController.initSecondaryVisibilityItem(id);
+                  Get.to(() => TambahSecondaryVisibility(id: id,));
+                },
+              );
+            }),
           ],
         ),
         SizedBox(height: 8),
         CollapsibleVisibilityGroup(
           title: 'Baby',
           items: [
-            VisibilityCard(
-              posmType: 'Baby Standee',
-              visualType: 'Baby foam wash',
-              condition: 'Good',
-              imagePath: 'path_to_image',
-              isSubmitted: true,
-            ),
-            VisibilityCard(
-              posmType: 'Baby Standee',
-              visualType: 'Baby foam wash',
-              condition: 'Good',
-              imagePath: 'path_to_image',
-              isSubmitted: true,
-            ),
+            Obx(() {
+              var id = "secondary-baby-1";
+              var data = tambahActivityController.visibilitySecondaryDraftItems
+                  .firstWhere((item) => item['id'] == id, orElse: () => {});
+              return VisibilityCard(
+                isPrimary: false,
+                secondarydisplay: data['secondary_exist']?? "-",
+                typeDisplay: data['display_type']?? "-",
+                imagePath: data['display_image'],
+                isSubmitted: true,
+                onTapCard: () {
+                  if (!Get.isRegistered<TambahVisibilityController>()) {
+                    Get.put(TambahVisibilityController());
+                  }
+                  tambahActivityController.initSecondaryVisibilityItem(id);
+                  Get.to(() => TambahSecondaryVisibility(id: id,));
+                },
+              );
+            }),
+            Obx(() {
+              var id = "secondary-baby-2";
+              var data = tambahActivityController.visibilitySecondaryDraftItems
+                  .firstWhere((item) => item['id'] == id, orElse: () => {});
+              return VisibilityCard(
+                isPrimary: false,
+                secondarydisplay: data['secondary_exist']?? "-",
+                typeDisplay: data['display_type']?? "-",
+                imagePath: data['display_image'],
+                isSubmitted: true,
+                onTapCard: () {
+                  if (!Get.isRegistered<TambahVisibilityController>()) {
+                    Get.put(TambahVisibilityController());
+                  }
+                  tambahActivityController.initSecondaryVisibilityItem(id);
+                  Get.to(() => TambahSecondaryVisibility(id: id,));
+                },
+              );
+            }),
           ],
         ),
       ],
@@ -163,85 +306,95 @@ class VisibilityPage extends GetView<ActivityController> {
 }
 
 class VisibilityCard extends StatelessWidget {
-  final String posmType;
-  final String visualType;
-  final String condition;
-  final String? imagePath;
+  final bool isPrimary;
+  ///primary
+  final String? posmType;
+  final String? visualType;
+  final String? condition;
+  ///secondary
+  final String? secondarydisplay;
+  final String? typeDisplay;
+
+  final File? imagePath;
   final bool isSubmitted;
   final VoidCallback? onTapCard; // Added this parameter
 
   const VisibilityCard({
     Key? key,
-    required this.posmType,
-    required this.visualType,
-    required this.condition,
+
+     this.posmType,
+     this.visualType,
+     this.condition,
+     this.secondarydisplay,
+     this.typeDisplay,
     this.imagePath,
     this.isSubmitted = false,
-    this.onTapCard, // Optional callback
+    this.onTapCard, required this.isPrimary, // Optional callback
   }) : super(key: key);
 
   @override
   Widget build(BuildContext context) {
-    if (imagePath != null) {
-      return _buildCardWithImage();
-    } else {
-      return _buildCompactCard();
-    }
+    return _buildCardWithImage();
+    // if (imagePath != null) {
+    //   return _buildCardWithImage();
+    // } else {
+    //   return _buildCompactCard();
+    // }
   }
 
-  Widget _buildCompactCard() {
-    return InkWell(
-      onTap: onTapCard,
-      child: Container(
-        margin: EdgeInsets.symmetric(vertical: 8, horizontal: 5),
-        decoration: BoxDecoration(
-          color: Colors.white,
-          borderRadius: BorderRadius.circular(12),
-          boxShadow: [
-            BoxShadow(
-              color: Colors.black.withOpacity(0.03),
-              blurRadius: 4,
-              offset: Offset(0, 2),
-            ),
-          ],
-        ),
-        child: Stack(
-          children: [
-            Padding(
-              padding: EdgeInsets.all(16),
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  _buildInfoRow('POSM Type', posmType),
-                  SizedBox(height: 8),
-                  _buildInfoRow('Visual Type', visualType),
-                  SizedBox(height: 8),
-                  _buildInfoRow('Condition', condition),
-                ],
-              ),
-            ),
-            if (isSubmitted)
-              Positioned(
-                top: -4,
-                right: -4,
-                child: Container(
-                  padding: EdgeInsets.all(4),
-                  decoration: BoxDecoration(
-                    color: Colors.blue,
-                    shape: BoxShape.circle,
-                  ),
-                  child: Icon(
-                    Icons.check,
-                    color: Colors.white,
-                    size: 12,
-                  ),
-                ),
-              ),
-          ],
-        ),
-      ),
-    );
-  }
+  // Widget _buildCompactCard() {
+  //   return InkWell(
+  //     onTap: onTapCard,
+  //     child: Container(
+  //       margin: EdgeInsets.symmetric(vertical: 8, horizontal: 5),
+  //       decoration: BoxDecoration(
+  //         color: Colors.white,
+  //         borderRadius: BorderRadius.circular(12),
+  //         boxShadow: [
+  //           BoxShadow(
+  //             color: Colors.black.withOpacity(0.03),
+  //             blurRadius: 4,
+  //             offset: Offset(0, 2),
+  //           ),
+  //         ],
+  //       ),
+  //       child: Stack(
+  //         children: [
+  //           Padding(
+  //             padding: EdgeInsets.all(16),
+  //             child: Column(
+  //               crossAxisAlignment: CrossAxisAlignment.start,
+  //               children: [
+  //                 _buildInfoRow('POSM Type', posmType),
+  //                 SizedBox(height: 8),
+  //                 _buildInfoRow('Visual Type', visualType),
+  //                 SizedBox(height: 8),
+  //                 _buildInfoRow('Condition', condition),
+  //               ],
+  //             ),
+  //           ),
+  //           if (isSubmitted)
+  //             Positioned(
+  //               top: -4,
+  //               right: -4,
+  //               child: Container(
+  //                 padding: EdgeInsets.all(4),
+  //                 decoration: BoxDecoration(
+  //                   color: Colors.blue,
+  //                   shape: BoxShape.circle,
+  //                 ),
+  //                 child: Icon(
+  //                   Icons.check,
+  //                   color: Colors.white,
+  //                   size: 12,
+  //                 ),
+  //               ),
+  //             ),
+  //         ],
+  //       ),
+  //     ),
+  //   );
+  // }
 
   Widget _buildCardWithImage() {
     return InkWell(
@@ -267,25 +420,42 @@ class VisibilityCard extends StatelessWidget {
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
                   Expanded(
-                    child: Column(
+                    child:
+                    isPrimary
+                    ? Column(
                       crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
-                        _buildInfoRow('POSM Type:', posmType),
+                        _buildInfoRow('POSM Type:', posmType!),
                         SizedBox(height: 8),
-                        _buildInfoRow('Visual Type:', visualType),
+                        _buildInfoRow('Visual Type:', visualType!),
                         SizedBox(height: 8),
-                        _buildInfoRow('Condition', condition),
+                        _buildInfoRow('Condition', condition!),
                       ],
-                    ),
+                    )
+                        :  Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        _buildInfoRow('Display Secondary:', secondarydisplay!),
+                        SizedBox(height: 8),
+                        _buildInfoRow('Display Type:', typeDisplay!),
+                      ],
+                    )
                   ),
                   SizedBox(width: 12),
                   ClipRRect(
                     borderRadius: BorderRadius.circular(8),
-                    child: Container(
+                    child:
+                    imagePath != null
+                        ? SizedBox(
+                        width: 80,
+                        height: 80,
+                        child: Image.file(imagePath!,fit: BoxFit.cover,))
+                        : Container(
                       width: 80,
                       height: 80,
                       color: Colors.grey[200],
-                      child: Icon(Icons.image_outlined, color: Colors.grey[400]),
+                      child:
+                      Icon(Icons.image_outlined, color: Colors.grey[400]),
                     ),
                   ),
                 ],
@@ -351,10 +521,12 @@ class CollapsibleVisibilityGroup extends StatefulWidget {
   }) : super(key: key);
 
   @override
-  State<CollapsibleVisibilityGroup> createState() => _CollapsibleVisibilityGroupState();
+  State<CollapsibleVisibilityGroup> createState() =>
+      _CollapsibleVisibilityGroupState();
 }
 
-class _CollapsibleVisibilityGroupState extends State<CollapsibleVisibilityGroup> {
+class _CollapsibleVisibilityGroupState
+    extends State<CollapsibleVisibilityGroup> {
   bool isExpanded = true;
 
   @override
@@ -378,11 +550,14 @@ class _CollapsibleVisibilityGroupState extends State<CollapsibleVisibilityGroup>
                 });
               },
               child: Padding(
-                padding: const EdgeInsets.symmetric(horizontal: 12.0, vertical: 8.0),
+                padding:
+                const EdgeInsets.symmetric(horizontal: 12.0, vertical: 8.0),
                 child: Row(
                   children: [
                     Icon(
-                      isExpanded ? Icons.keyboard_arrow_down : Icons.keyboard_arrow_right,
+                      isExpanded
+                          ? Icons.keyboard_arrow_down
+                          : Icons.keyboard_arrow_right,
                       color: Color(0xFF023B5E),
                     ),
                     SizedBox(width: 8),

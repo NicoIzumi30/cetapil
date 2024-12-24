@@ -23,8 +23,10 @@ class TambahActivityController extends GetxController {
       Get.find<TambahAvailabilityController>();
   late TambahVisibilityController tambahVisibilityController =
       Get.find<TambahVisibilityController>();
-  late TambahOrderController tambahOrderController = Get.find<TambahOrderController>();
-  late SupportDataController supportController = Get.find<SupportDataController>();
+  late TambahOrderController tambahOrderController =
+      Get.find<TambahOrderController>();
+  late SupportDataController supportController =
+      Get.find<SupportDataController>();
   // final activityController = Get.find<ActivityController>();
   // final tambahAvailabilityController = Get.find<TambahAvailabilityController>();
   // final tambahOrderController = Get.find<TambahOrderController>();
@@ -58,11 +60,14 @@ class TambahActivityController extends GetxController {
   final errorMessageOrder = ''.obs;
 
   // Consolidated draft items for all sections
-  final RxList<Map<String, dynamic>> availabilityDraftItems = <Map<String, dynamic>>[].obs;
-  final RxList<Map<String, dynamic>> orderDraftItems = <Map<String, dynamic>>[].obs;
-  // final availabilityDraftItems = <Map<String, dynamic>>[].obs;
-  // final orderDraftItems = <Map<String, dynamic>>[].obs;
-  final visibilityDraftItems = <Map<String, dynamic>>[].obs;
+  final RxList<Map<String, dynamic>> availabilityDraftItems =
+      <Map<String, dynamic>>[].obs;
+  final RxList<Map<String, dynamic>> orderDraftItems =
+      <Map<String, dynamic>>[].obs;
+  // final visibilityDraftItems = <Map<String, dynamic>>[].obs;
+
+  final visibilityPrimaryDraftItems = <Map<String, dynamic>>[].obs;
+  final visibilitySecondaryDraftItems = <Map<String, dynamic>>[].obs;
 
   // Survey related fields
   final Map<String, TextEditingController> priceControllers = {};
@@ -80,9 +85,9 @@ class TambahActivityController extends GetxController {
   final Map<String, Map<String, TextEditingController>> productControllers = {};
 
   // Visibility specific fields
-  final visibilityImages = RxList<File?>([null, null]);
-  final visibilitySecondaryImages = Rx<File?>(null);
-  final isImageUploading = RxList<bool>([false, false]);
+  // final visibilityPrimaryImages = Rx<File?>(null);
+  // final visibilitySecondaryImages = Rx<File?>(null);
+  // final isImageUploading = RxList<bool>([false, false]);
 
   // Order Section
   List<Map<String, dynamic>> listOrder = [];
@@ -101,7 +106,8 @@ class TambahActivityController extends GetxController {
     print(detailDraft.isNotEmpty);
     if (detailDraft.isNotEmpty) {
       for (var data in detailDraft["availabilityItems"]) {
-        final item = tambahAvailabilityController.getSkuByDataApi(data['product_id']);
+        final item =
+            tambahAvailabilityController.getSkuByDataApi(data['product_id']);
         final newItem = {
           'id': data['product_id'],
           'sku': item!['sku'],
@@ -120,7 +126,8 @@ class TambahActivityController extends GetxController {
     print(detailDraft.isNotEmpty);
     if (detailDraft.isNotEmpty) {
       for (var data in detailDraft["orderItems"]) {
-        final item = tambahAvailabilityController.getSkuByDataApi(data['product_id']);
+        final item =
+            tambahAvailabilityController.getSkuByDataApi(data['product_id']);
         final newItem = {
           'id': data['product_id'],
           'category': item!['category']['name'],
@@ -146,7 +153,8 @@ class TambahActivityController extends GetxController {
               .firstWhereOrNull((posm) => posm['id'] == dataApi.posmTypeId);
           final visualType = supportController
               .getVisualTypes()
-              .firstWhereOrNull((visual) => visual['id'] == dataApi.visualTypeId);
+              .firstWhereOrNull(
+                  (visual) => visual['id'] == dataApi.visualTypeId);
           final newItem = {
             'id': dataApi.id,
             'posm_type_id': dataApi.posmTypeId,
@@ -159,8 +167,8 @@ class TambahActivityController extends GetxController {
             'image1': File(dataDraft['image1']),
             'image2': File(dataDraft['image2']),
           };
-          addVisibilityItem(newItem);
-          tambahVisibilityController.clearForm();
+          addPrimaryVisibilityItem(newItem);
+          tambahVisibilityController.clearPrimaryForm();
         }
       }
     }
@@ -169,17 +177,6 @@ class TambahActivityController extends GetxController {
   @override
   void onInit() {
     super.onInit();
-    // activityController = Get.find<ActivityController>();
-    // tambahAvailabilityController = Get.find<TambahAvailabilityController>();
-    // tambahOrderController = Get.find<TambahOrderController>();
-    // supportController = Get.find<SupportDataController>();
-    // tambahVisibilityController = Get.find<TambahVisibilityController>();
-    // initDetailDraftAvailability();
-    // initDetailDraftOrder();
-    // initGetSurveyQuestion();
-    // initListCategory();
-    
-    // Initialize timers from draft data if available
     initDraftTimers();
     // Start the timer
     startTabTimer();
@@ -214,7 +211,8 @@ class TambahActivityController extends GetxController {
             final controller = priceControllers[id];
             surveyList.add({
               'survey_question_id': id,
-              'answer': (controller?.text.isEmpty ?? true) ? "0" : controller!.text,
+              'answer':
+                  (controller?.text.isEmpty ?? true) ? "0" : controller!.text,
             });
           } else if (survey['type'] == 'bool') {
             final switchState = switchStates[id];
@@ -229,7 +227,8 @@ class TambahActivityController extends GetxController {
       final response = await Api.submitActivity(
         data,
         availabilityDraftItems,
-        visibilityDraftItems,
+        visibilityPrimaryDraftItems,
+        visibilitySecondaryDraftItems,
         surveyList,
         orderDraftItems,
       );
@@ -239,8 +238,10 @@ class TambahActivityController extends GetxController {
       }
 
       _timer?.cancel();
+
       /// check apabila data ada di sqlite, maka hapus data
-      bool isExists = await db.checkSalesActivityExists(detailOutlet.value!.id!);
+      bool isExists =
+          await db.checkSalesActivityExists(detailOutlet.value!.id!);
       if (isExists) {
         await db.deleteSalesActivity(detailOutlet.value!.id!);
       }
@@ -266,7 +267,8 @@ class TambahActivityController extends GetxController {
     try {
       EasyLoading.show(status: 'Saving draft...');
 
-      bool isEditing = await db.checkSalesActivityExists(detailOutlet.value!.id!);
+      bool isEditing =
+          await db.checkSalesActivityExists(detailOutlet.value!.id!);
 
       // Get all survey questions from support controller to ensure we have all fields
       final allSurveys = supportController.getSurvey();
@@ -282,7 +284,8 @@ class TambahActivityController extends GetxController {
             final controller = priceControllers[id];
             surveyList.add({
               'survey_question_id': id,
-              'answer': (controller?.text.isEmpty ?? true) ? "0" : controller!.text,
+              'answer':
+                  (controller?.text.isEmpty ?? true) ? "0" : controller!.text,
             });
           } else if (survey['type'] == 'bool') {
             // For switches - ensure we save all with default false
@@ -317,7 +320,7 @@ class TambahActivityController extends GetxController {
         await db.updateSalesActivity(
           data: data,
           availabilityItems: availabilityDraftItems,
-          visibilityItems: visibilityDraftItems,
+          // visibilityItems: visibilityDraftItems,
           surveyItems: surveyList,
           orderItems: orderDraftItems,
         );
@@ -325,7 +328,7 @@ class TambahActivityController extends GetxController {
         await db.insertFullSalesActivity(
           data: data,
           availabilityItems: availabilityDraftItems,
-          visibilityItems: visibilityDraftItems,
+          // visibilityItems: visibilityDraftItems,
           surveyItems: surveyList,
           orderItems: orderDraftItems,
         );
@@ -357,9 +360,12 @@ class TambahActivityController extends GetxController {
   void initDraftTimers() {
     if (detailDraft.isNotEmpty) {
       // Initialize timers from draft data
-      availabilityTime.value = int.tryParse(detailDraft['time_availability'] ?? '0') ?? 0;
-      visibilityTime.value = int.tryParse(detailDraft['time_visibility'] ?? '0') ?? 0;
-      knowledgeTime.value = int.tryParse(detailDraft['time_knowledge'] ?? '0') ?? 0;
+      availabilityTime.value =
+          int.tryParse(detailDraft['time_availability'] ?? '0') ?? 0;
+      visibilityTime.value =
+          int.tryParse(detailDraft['time_visibility'] ?? '0') ?? 0;
+      knowledgeTime.value =
+          int.tryParse(detailDraft['time_knowledge'] ?? '0') ?? 0;
       surveyTime.value = int.tryParse(detailDraft['time_survey'] ?? '0') ?? 0;
       orderTime.value = int.tryParse(detailDraft['time_order'] ?? '0') ?? 0;
     } else {
@@ -432,66 +438,94 @@ class TambahActivityController extends GetxController {
   }
 
   // In TambahActivityController
-  void addVisibilityItem(Map<String, dynamic> item) {
-    final existingIndex =
-        visibilityDraftItems.indexWhere((existing) => existing['id'] == item['id']);
+  void addPrimaryVisibilityItem(Map<String, dynamic> item) {
+    final existingIndex = visibilityPrimaryDraftItems
+        .indexWhere((existing) => existing['id'] == item['id']);
 
     print(existingIndex);
 
     if (existingIndex != -1) {
       // Update existing item
-      visibilityDraftItems[existingIndex] = item;
+      visibilityPrimaryDraftItems[existingIndex] = item;
     } else {
       // Add new item
-      visibilityDraftItems.add(item);
+      visibilityPrimaryDraftItems.add(item);
     }
-    visibilityDraftItems.refresh();
+    visibilityPrimaryDraftItems.refresh();
   }
 
-  void removeAvailabilityItem(String id) {
-    availabilityDraftItems.removeWhere((item) => item['id'] == id);
-    availabilityDraftItems.refresh();
+  initPrimaryVisibilityItem(String id) {
+    tambahVisibilityController.clearPrimaryForm();
+    var data = visibilityPrimaryDraftItems
+        .firstWhere((item) => item['id'] == id, orElse: () => {});
+    print(data);
+    if (data.isEmpty) {
+      return;
+    }else{
+      tambahVisibilityController.posmTypeId.value = data['posm_type_id'];
+      tambahVisibilityController.posmType.value = data['posm_type_name'];
+      tambahVisibilityController.visualTypeId.value = data['visual_type_id'];
+      var visualName = supportController
+          .getVisualTypes()
+          .firstWhere((element) =>
+      element['id'] == data['visual_type_id'])['name']; /// get visualType name by id
+      if (visualName == "Others") {
+        tambahVisibilityController.isOtherVisual.value = true;
+        tambahVisibilityController.otherVisualController.value.text = data['visual_type_name'];
+      }  else {
+      tambahVisibilityController.visualType.value = data['visual_type_name'];
+      }
+
+      tambahVisibilityController.selectedCondition.value = data['condition'];
+      tambahVisibilityController.lebarRak.value.text = data['shelf_width'].toString();
+      tambahVisibilityController.shelving.value.text = data['shelving'].toString();
+      tambahVisibilityController.visibilityImages.value =
+      data['image_visibility'];
+    }
+
   }
 
-  void removeOrderItem(String id) {
-    orderDraftItems.removeWhere((item) => item['id'] == id);
-    orderDraftItems.refresh();
+  initSecondaryVisibilityItem(String id) {
+    tambahVisibilityController.clearSecondaryForm();
+    var data = visibilitySecondaryDraftItems
+        .firstWhere((item) => item['id'] == id, orElse: () => {});
+    print(data);
+    if (data.isEmpty) {
+      return;
+    }else{
+      tambahVisibilityController.toggleSecondaryYesNo.value = data['secondary_exist'] == "true" ? true : false;
+      tambahVisibilityController.tipeDisplay.value.text = data['display_type'];
+      tambahVisibilityController.displayImages.value =
+      data['display_image'];
+    }
+
   }
 
-  void removeVisibilityItem(int index) {
-    visibilityDraftItems.removeAt(index);
-    visibilityDraftItems.refresh();
+  void addSecondaryVisibilityItem(Map<String, dynamic> item) {
+    final existingIndex = visibilitySecondaryDraftItems
+        .indexWhere((existing) => existing['id'] == item['id']);
+
+    print(existingIndex);
+
+    if (existingIndex != -1) {
+      // Update existing item
+      visibilitySecondaryDraftItems[existingIndex] = item;
+    } else {
+      // Add new item
+      visibilitySecondaryDraftItems.add(item);
+    }
+    visibilitySecondaryDraftItems.refresh();
   }
 
-  // Availability methods
-  // initListCategory() async {
-  //   try {
-  //     setLoadingState(true);
-  //     setErrorState(false);
-  //     final response = await Api.getCategoryList();
-  //     if (response.status == "OK") {
-  //       itemsCategory.value = response.data!;
-  //     } else {
-  //       setErrorState(true, response.message ?? 'Failed to load data');
-  //     }
-  //   } catch (e) {
-  //     setErrorState(true, 'Connection error. Please check your internet connection and try again.');
-  //     print('Error initializing categories: $e');
-  //   } finally {
-  //     setLoadingState(false);
-  //   }
+  // void updateVisibilityImage(File? file) {
+  //   visibilityPrimaryImages.value = file;
+  //   update();
   // }
-
-  // Visibility image methods
-  void updateVisibilityImage(int index, File? file) {
-    visibilityImages[index] = file;
-    update();
-  }
-
-  void updateVisibilitySecondaryImage(File? file) {
-    visibilitySecondaryImages.value = file;
-    update();
-  }
+  //
+  // void updateVisibilitySecondaryImage(File? file) {
+  //   visibilitySecondaryImages.value = file;
+  //   update();
+  // }
 
   // Product selection methods
   void handleProductSelect(String product) {
@@ -650,14 +684,16 @@ class TambahActivityController extends GetxController {
     // Clear all draft items
     availabilityDraftItems.clear();
     orderDraftItems.clear();
-    visibilityDraftItems.clear();
+    visibilityPrimaryDraftItems.clear();
+    visibilitySecondaryDraftItems.clear();
 
     // Clear Data Detail Draft
 
     // Clear visibility related fields
-    visibilityImages.value = [null, null];
-    visibilitySecondaryImages.value = null;
-    isImageUploading.value = [false, false];
+    // visibilityPrimaryImages.value = null;
+    // visibilitySecondaryImages.value = null;
+    //
+    // isImageUploading.value = [false, false];
 
     // Clear product related fields
     selectedProducts.value.clear();
@@ -689,7 +725,8 @@ class TambahActivityController extends GetxController {
     // Refresh all observable lists
     availabilityDraftItems.refresh();
     orderDraftItems.refresh();
-    visibilityDraftItems.refresh();
+    visibilityPrimaryDraftItems.refresh();
+    visibilitySecondaryDraftItems.refresh();
     update();
   }
 

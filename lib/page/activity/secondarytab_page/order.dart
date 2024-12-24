@@ -319,6 +319,7 @@ class _CollapsibleCategoryGroupState extends State<CollapsibleCategoryGroup> {
             curve: Curves.easeInOut,
             child: Column(
               children: widget.items.map((item) {
+                print(item['harga']?.toString());
                 return OrderProductCard(
                   productName: item['sku'] ?? '',
                   jumlahController: TextEditingController(
@@ -397,17 +398,34 @@ class OrderProductCard extends StatelessWidget {
           ),
           Padding(
             padding: EdgeInsets.all(16),
-            child: Row(
+            child: Column(
               children: [
-                Expanded(
-                  flex: 2,
-                  child: _buildJumlahField(),
+                Row(
+                  children: [
+                    Expanded(
+                      flex: 2,
+                      child: _buildJumlahField(),
+                    ),
+                    SizedBox(width: 12),
+                    Expanded(
+                      flex: 5,
+                      child: _buildHargaField(),
+                    ),
+                  ],
                 ),
-                SizedBox(width: 12),
-                Expanded(
-                  flex: 5,
-                  child: _buildHargaField(),
-                ),
+                Row(
+                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                  children: [
+                    Text(
+                      "Total Harga",
+                      style: TextStyle(
+                        fontSize: 14,
+                        color: Color(0xFF0077BD),
+                      ),
+                    ),
+                    Text("Rp. ${ (double.parse(jumlahController.text) * double.parse(hargaController.text)).toStringAsFixed(0)}"),
+                  ],
+                )
               ],
             ),
           ),

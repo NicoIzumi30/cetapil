@@ -420,7 +420,8 @@ class Api {
   static Future<SubmitActivityResponse> submitActivity(
     Map<String, dynamic> data,
     List<Map<String, dynamic>> availabilityList,
-    List<Map<String, dynamic>> visibilityList,
+    List<Map<String, dynamic>> visibilityPrimaryList,
+    List<Map<String, dynamic>> visibilitySecondaryList,
     List<Map<String, dynamic>> surveyList,
     List<Map<String, dynamic>> orderList,
   ) async {
@@ -456,20 +457,32 @@ class Api {
     }
 
     ///Visibility Section
-    for (var i = 0; i < visibilityList.length; i++) {
-      request.fields["visibility[$i][visibility_id]"] = visibilityList[i]['id'].toString();
-      request.fields["visibility[$i][condition]"] =
-          visibilityList[i]['condition'].toString().toUpperCase();
+    for (var i = 0; i < visibilityPrimaryList.length; i++) {
+      request.fields["visibility[$i][category]"] = visibilityPrimaryList[i]['category'].toString();
+      request.fields["visibility[$i][type]"] = "PRIMARY";
+      request.fields["visibility[$i][position]"] = visibilityPrimaryList[i]['position'].toString();
+      request.fields["visibility[$i][posm_type_id]"] = visibilityPrimaryList[i]['posm_type_id'].toString().toUpperCase();
+      request.fields["visibility[$i][visual_type]"] = visibilityPrimaryList[i]['visual_type_name'].toString().toUpperCase();
+      request.fields["visibility[$i][condition]"] = visibilityPrimaryList[i]['condition'].toString().toUpperCase();
+      request.fields["visibility[$i][shelf_width]"] = visibilityPrimaryList[i]['shelf_width'].toString().toUpperCase();
+      request.fields["visibility[$i][shelving]"] = visibilityPrimaryList[i]['shelving'].toString().toUpperCase();
       request.files.add(await http.MultipartFile.fromPath(
-        'visibility[$i][file1]',
-        visibilityList[i]['image1'].path,
-      ));
-      request.files.add(await http.MultipartFile.fromPath(
-        'visibility[$i][file2]',
-        visibilityList[i]['image2'].path,
+        'visibility[$i][display_photo]', visibilityPrimaryList[i]['image_visibility'].path,
       ));
     }
-// print(orderList[0]);
+
+    for (var i = 0; i < visibilitySecondaryList.length; i++) {
+      request.fields["visibility[${i+6}][category]"] = visibilitySecondaryList[i]['category'].toString();
+      request.fields["visibility[${i+6}][type]"] = "SECONDARY";
+      request.fields["visibility[${i+6}][position]"] = visibilitySecondaryList[i]['position'].toString();
+      request.fields["visibility[${i+6}][visual_type]"] = visibilitySecondaryList[i]['display_type'].toString().toUpperCase();
+      request.fields["visibility[${i+6}][has_secondary_display]"] = visibilitySecondaryList[i]['secondary_exist'].toString() == "true" ? "Y" : "N";
+      request.files.add(await http.MultipartFile.fromPath(
+        'visibility[$i][display_photo]',
+        visibilitySecondaryList[i]['display_image'].path,
+      ));
+    }
+
     ///Survey Section
     for (var i = 0; i < surveyList.length; i++) {
       request.fields["survey[$i][survey_question_id]"] =

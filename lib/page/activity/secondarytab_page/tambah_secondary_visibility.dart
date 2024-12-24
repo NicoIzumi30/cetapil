@@ -16,7 +16,12 @@ import '../secondarytab_detail_page/survey.dart';
 const String BASE_URL = 'https://dev-cetaphil.i-am.host/storage/';
 
 class TambahSecondaryVisibility extends GetView<TambahVisibilityController> {
+  final String id;
+  TambahSecondaryVisibility({
+    super.key, required this.id,
+  });
   final supportController = Get.find<SupportDataController>();
+
   String? _getImageUrl(String? imagePath) {
     if (imagePath == null || imagePath.isEmpty) return null;
 
@@ -103,7 +108,7 @@ class TambahSecondaryVisibility extends GetView<TambahVisibilityController> {
                             side: BorderSide(color: AppColors.primary),
                           ),
                         ),
-                        onPressed: () {},
+                        onPressed: () => controller.saveSecondaryVisibility(id),
                         child: Text(
                           "Simpan Visibility",
                           style: TextStyle(
@@ -192,7 +197,7 @@ class TambahSecondaryVisibility extends GetView<TambahVisibilityController> {
                           children: [
                             Icon(Icons.camera_alt, color: Colors.black),
                             Text(
-                              "Klik disini untuk ambil foto dengan kamera",
+                              "Klik disini untuk ambil foto dengan kasssmera",
                               style: TextStyle(
                                 fontSize: 8,
                                 fontWeight: FontWeight.bold,

@@ -53,24 +53,40 @@ class ActivityDatabaseHelper {
     await db.execute('''
       CREATE TABLE availability (
         id TEXT PRIMARY KEY,
-        product_id TEXT, 
         sales_activity_id TEXT,
-        available_stock TEXT,
-        average_stock TEXT,
-        ideal_stock TEXT,
+        product_id TEXT, 
+        availability_exist TEXT,
+        stock_on_hand TEXT,
+        stock_on_inventory TEXT,
+        av3m TEXT,
         FOREIGN KEY (sales_activity_id) REFERENCES sales_activity (id)
       )
     ''');
 
     // Visibility items table
     await db.execute('''
-      CREATE TABLE visibility (
+      CREATE TABLE visibility_primary (
         id TEXT PRIMARY KEY,
         visibility_id TEXT,
         sales_activity_id TEXT,
+        posm_type TEXT,
+        visual_type TEXT,
         condition TEXT,
-        image1 TEXT,
-        image2 TEXT,
+        shelf_width TEXT,
+        shelving TEXT,
+        image_visibility TEXT,
+        FOREIGN KEY (sales_activity_id) REFERENCES sales_activity (id)
+      )
+    ''');
+
+    await db.execute('''
+      CREATE TABLE visibility_secondary (
+        id TEXT PRIMARY KEY,
+        visibility_id TEXT,
+        sales_activity_id TEXT,
+        secondary_exist TEXT,
+        display_type TEXT,
+        display_image TEXT,
         FOREIGN KEY (sales_activity_id) REFERENCES sales_activity (id)
       )
     ''');
@@ -94,6 +110,7 @@ class ActivityDatabaseHelper {
         sales_activity_id TEXT,
         jumlah TEXT,
         harga TEXT,
+        total_harga TEXT,
         FOREIGN KEY (sales_activity_id) REFERENCES sales_activity (id)
       )
     ''');

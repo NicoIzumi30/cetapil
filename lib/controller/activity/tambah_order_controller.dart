@@ -64,8 +64,6 @@ class TambahOrderController extends GetxController {
         savedProductValues[categoryId]![item['id'].toString()] = {
           'jumlah': item['jumlah'].toString(),
           'harga': item['harga'].toString(),
-          // 'recommend': item['recommend'].toString(),
-          // 'price': item['price'].toString(),
         };
       }
     }
@@ -96,8 +94,6 @@ class TambahOrderController extends GetxController {
               productValues[skuId] = {
                 'jumlah': item['jumlah'].toString(),
                 'harga': item['harga'].toString(),
-                // 'recommend': item['recommend'].toString(),
-                // 'price': item['price'].toString(),
               };
             }
           } else {
@@ -115,8 +111,6 @@ class TambahOrderController extends GetxController {
                 productValues[skuId] = {
                   'jumlah': '0',
                   'harga': '0',
-                  // 'recommend': '0',
-                  // 'price': '0',
                 };
               }
             }

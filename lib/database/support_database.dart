@@ -47,9 +47,7 @@ class SupportDatabaseHelper {
         id TEXT PRIMARY KEY,
         sku TEXT,
         category_id TEXT,
-        average_stock INTEGER DEFAULT 0,
-        md_price REAL DEFAULT 0,
-        sales_price REAL DEFAULT 0,
+        price REAL DEFAULT 0,
         FOREIGN KEY (category_id) REFERENCES categories (id)
       )
     ''');
@@ -151,31 +149,29 @@ class SupportDatabaseHelper {
           'id': product.id,
           'sku': product.sku,
           'category_id': product.category!.id,
-          'average_stock': product.averageStock ?? 0,
-          'md_price': product.mdPrice ?? 0,
-          'sales_price': product.salesPrice ?? 0,
+          'price': product.price ?? 0,
         },
         conflictAlgorithm: ConflictAlgorithm.replace,
       );
 
-      if (product.channelAv3M is Map) {
-        await txn.delete(
-          'product_channels',
-          where: 'product_id = ?',
-          whereArgs: [product.id],
-        );
-
-        (product.channelAv3M as Map<String, dynamic>).forEach((key, value) {
-          txn.insert(
-            'product_channels',
-            {
-              'product_id': product.id,
-              'channel_name': key,
-              'value': value,
-            },
-          );
-        });
-      }
+      // if (product.channelAv3M is Map) {
+      //   await txn.delete(
+      //     'product_channels',
+      //     where: 'product_id = ?',
+      //     whereArgs: [product.id],
+      //   );
+      //
+      //   (product.channelAv3M as Map<String, dynamic>).forEach((key, value) {
+      //     txn.insert(
+      //       'product_channels',
+      //       {
+      //         'product_id': product.id,
+      //         'channel_name': key,
+      //         'value': value,
+      //       },
+      //     );
+      //   });
+      // }
     });
   }
 
@@ -208,11 +204,9 @@ class SupportDatabaseHelper {
       result.add({
         'id': product['id'],
         'sku': product['sku'],
-        'average_stock': product['average_stock'],
-        'md_price': product['md_price'],
-        'sales_price': product['sales_price'],
         'category': category.first,
-        'channel_av3m': channelAv3m,
+        'price': product['price'],
+        // 'channel_av3m': channelAv3m,
       });
     }
 
