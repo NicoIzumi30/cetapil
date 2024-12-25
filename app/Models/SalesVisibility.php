@@ -19,6 +19,10 @@ class SalesVisibility extends Model
     {
         return $this->belongsTo(Visibility::class);
     }
+    public function salesActivity(): BelongsTo
+    {
+        return $this->belongsTo(SalesActivity::class);
+    }
 
     public function scopeCompleteRelation(Builder $query)
     {

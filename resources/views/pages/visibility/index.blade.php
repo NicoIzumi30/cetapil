@@ -175,18 +175,18 @@
                     },
                    
                     {
-                        data: 'product',
-                        name: 'product',
+                        data: 'code',
+                        name: 'code',
                         class: 'table-data'
                     },
                     {
-                        data: 'visual',
-                        name: 'visual',
+                        data: 'type',
+                        name: 'type',
                         class: 'table-data'
                     },
                     {
-                        data: 'condition',
-                        name: 'condition',
+                        data: 'channel',
+                        name: 'channel',
                         class: 'table-data'
                     },
                     {
