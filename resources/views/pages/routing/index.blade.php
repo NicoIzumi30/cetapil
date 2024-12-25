@@ -86,6 +86,27 @@
     </x-slot:cardAction>
     {{-- Routing Action End --}}
 
+	{{-- Update AV3M --}}
+	<x-modal id="update-av3m">
+        <x-slot:title>Update AV3M</x-slot:title>
+        <form id="av3mForm" class="grid grid-cols-2 gap-6">
+            @csrf
+            @foreach ($channels as $channel)
+                <div>
+                    <label for="channel{{$channel->id}}" class="!text-black">{{$channel->name}}</label>
+                    <input id="channel-{{$channel->id}}" class="form-control channer_{{$loop->iteration}}" type="text"
+                        name="channel_{{$loop->iteration}}" placeholder="Masukan A3M {{$channel->name}}"
+                        aria-describedby="channel-{{$channel->name}}" value="">
+                </div>
+            @endforeach
+
+            <x-slot:footer>
+                <x-button.primary class="w-full" id="saveAv3mBtn">Simpan Perubahan</x-button.primary>
+            </x-slot:footer>
+        </form>
+    </x-modal>
+    {{-- END Update AV3M --}}
+
     {{-- Routing Table --}}
     <table id="routing-table" class="table">
         <thead>

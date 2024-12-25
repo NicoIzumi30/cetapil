@@ -11,8 +11,5 @@
             data-name="{{ $item->sku }}">
             Hapus Data
         </a>
-        <button class="dropdown-option" id="view-av3m" data-id="{{ $productId }}">
-            Update AV3M
-        </button>
     </li>
 </x-action-table-dropdown>

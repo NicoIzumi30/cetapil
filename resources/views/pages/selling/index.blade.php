@@ -14,7 +14,6 @@
         <x-slot:cardAction>
             <x-input.search wire:model.live="search" class="border-0" placeholder="Cari data penjualan"></x-input.search>
             <x-button.info>Download</x-button.info>
-            <x-button.info href="/selling/create">Tambah Penjualan</x-button.info>
         </x-slot:cardAction>
         {{-- Selling Action End --}}
 
