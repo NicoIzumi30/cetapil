@@ -466,6 +466,7 @@ class Api {
 
     ///Visibility Section
     for (var i = 0; i < visibilityPrimaryList.length; i++) {
+      print(visibilityPrimaryList[i]);
       request.fields["visibility[$i][category]"] = visibilityPrimaryList[i]['category'].toString();
       request.fields["visibility[$i][type]"] = "PRIMARY";
       request.fields["visibility[$i][position]"] = visibilityPrimaryList[i]['position'].toString();
@@ -480,13 +481,14 @@ class Api {
     }
 
     for (var i = 0; i < visibilitySecondaryList.length; i++) {
+      print(visibilitySecondaryList[i]);
       request.fields["visibility[${i+6}][category]"] = visibilitySecondaryList[i]['category'].toString();
       request.fields["visibility[${i+6}][type]"] = "SECONDARY";
       request.fields["visibility[${i+6}][position]"] = visibilitySecondaryList[i]['position'].toString();
       request.fields["visibility[${i+6}][visual_type]"] = visibilitySecondaryList[i]['display_type'].toString().toUpperCase();
       request.fields["visibility[${i+6}][has_secondary_display]"] = visibilitySecondaryList[i]['secondary_exist'].toString() == "true" ? "Y" : "N";
       request.files.add(await http.MultipartFile.fromPath(
-        'visibility[$i][display_photo]',
+        'visibility[${i+6}][display_photo]',
         visibilitySecondaryList[i]['display_image'].path,
       ));
     }

@@ -211,6 +211,8 @@ class TambahVisibilityController extends GetxController {
       'display_type': tipeDisplay.value.text,
       'display_image': displayImages.value,
     };
+    print("asdasd $data");
+    print("asdasd ${data['display_image']}");
 
     activityController.addSecondaryVisibilityItem(data);
     clearSecondaryForm();

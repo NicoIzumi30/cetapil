@@ -5,6 +5,7 @@ import 'package:cetapil_mobile/controller/activity/tambah_visibility_controller.
 import 'package:cetapil_mobile/controller/support_data_controller.dart';
 import 'package:cetapil_mobile/widget/text_field.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:get/get.dart';
 import '../../../utils/colors.dart';
 import '../../../utils/image_upload.dart';
@@ -178,6 +179,9 @@ class TambahPrimaryVisibility extends GetView<TambahVisibilityController> {
                               ModernTextField(
                                 title: "Lebar Rak (cm)",
                                 keyboardType: TextInputType.number,
+                                inputFormatters:[
+                                  FilteringTextInputFormatter.digitsOnly
+                                ],
                                 controller: controller.lebarRak.value,
                               ),
                               ModernTextField(

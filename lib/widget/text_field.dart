@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:flutter/src/services/text_formatter.dart';
 import 'package:google_fonts/google_fonts.dart';
 
 class ModernTextField extends StatefulWidget {
@@ -12,6 +13,7 @@ class ModernTextField extends StatefulWidget {
   final void Function(String)? onChanged;
   final String? Function(String?)? validator;
   final bool readOnly;
+  final List<TextInputFormatter>? inputFormatters;
 
   ModernTextField({
     Key? key,
@@ -25,6 +27,7 @@ class ModernTextField extends StatefulWidget {
     this.readOnly = false,
     this.suffixIcon = false,
     this.maxlines,
+    this.inputFormatters,
   }) : super(key: key);
 
   @override
@@ -70,6 +73,7 @@ class _ModernTextFieldState extends State<ModernTextField> {
               fontSize: 14,
               color: Color(0xFF0077BD),
             ),
+            inputFormatters: widget.inputFormatters,
             decoration: InputDecoration(
               hintText: widget.title,
               hintStyle: TextStyle(

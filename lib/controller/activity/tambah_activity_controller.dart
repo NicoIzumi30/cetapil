@@ -236,6 +236,7 @@ class TambahActivityController extends GetxController {
       /// Filter when data stock on hand and inventory in availability 0
       availabilityDraftItems
           .removeWhere((item) => item['stock_on_hand'] == 0 && item['stock_on_inventory'] == 0);
+      orderDraftItems.removeWhere((item) => item['jumlah'] == 0);
 
       final response = await Api.submitActivity(
         data,
@@ -506,8 +507,6 @@ class TambahActivityController extends GetxController {
     final existingIndex =
         visibilityPrimaryDraftItems.indexWhere((existing) => existing['id'] == item['id']);
 
-    print(existingIndex);
-
     if (existingIndex != -1) {
       // Update existing item
       visibilityPrimaryDraftItems[existingIndex] = item;
@@ -551,7 +550,6 @@ class TambahActivityController extends GetxController {
     tambahVisibilityController.clearSecondaryForm();
     var data =
         visibilitySecondaryDraftItems.firstWhere((item) => item['id'] == id, orElse: () => {});
-    print(data);
     if (data.isEmpty) {
       return;
     } else {
