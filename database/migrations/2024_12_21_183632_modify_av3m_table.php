@@ -20,7 +20,8 @@ return new class extends Migration
 
             // Add outlet_id column with foreign key reference
 
-            $table->foreignUuid('outlet_id')->references('id')->on('outlets');
+            $table->foreignUuid('outlet_id')->references('id')->on('outlets')
+                ->onDelete('cascade');
         });
     }
 
@@ -33,8 +34,8 @@ return new class extends Migration
             // Drop the new foreign key and column
             $table->dropForeign(['outlet_id']);
             $table->dropColumn('outlet_id');
-            $table->foreignUuid('outlet_id')->references('id')->on('outlets');
-
+            $table->foreignUuid('outlet_id')->references('id')->on('outlets')
+                ->onDelete('cascade');
         });
     }
 };
