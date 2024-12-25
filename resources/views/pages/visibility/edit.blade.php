@@ -166,12 +166,6 @@
 				</div>
 			</div>
         </x-section-card>
-        <x-button.info type="button" id="submitBtn" class="w-full mt-20 !text-xl" onclick="submitForm()">
-            <span id="submitBtnText">Simpan Perubahan</span>
-            <span id="submitBtnLoading" class="hidden">
-                <i class="fas fa-spinner fa-spin mr-2"></i>Menyimpan...
-            </span>
-        </x-button.info>
         </form>
     </x-card>
 @endsection

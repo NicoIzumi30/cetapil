@@ -122,7 +122,6 @@
             </x-modal>
 
             {{-- Edit Produk Modal End --}}
-
             <x-button.info onclick="openModal('unggah-produk-bulk')">Unggah Secara Bulk</x-button.info>
             <x-modal id="unggah-produk-bulk">
                 <div class="flex flex-col items-center w-full">
@@ -203,37 +202,16 @@
                 </tr>
             </thead>
         </table>
-
-        {{-- TAMBAH AV3M --}}
-        <x-modal id="update-av3m">
-            <x-slot:title>Update AV3M</x-slot:title>
-            <form id="av3mForm" class="grid grid-cols-2 gap-6">
-                @csrf
-                @foreach ($channels as $channel)
-                    <div>
-                        <label for="channel{{$channel->id}}" class="!text-black">{{$channel->name}}</label>
-                        <input id="channel-{{$channel->id}}" class="form-control channer_{{$loop->iteration}}" type="text"
-                            name="channel_{{$loop->iteration}}" placeholder="Masukan A3M {{$channel->name}}"
-                            aria-describedby="channel-{{$channel->name}}" value="">
-                    </div>
-                @endforeach
-
-                <x-slot:footer>
-                    <x-button.primary class="w-full" id="saveAv3mBtn">Simpan Perubahan</x-button.primary>
-                </x-slot:footer>
-            </form>
-        </x-modal>
-        {{-- END TAMBAH AV3M --}}
     </x-card>
     {{-- Daftar Produk End --}}
 
-    {{-- Stock On Hand --}}
+    {{-- Availability --}}
     <x-card>
         <x-slot:cardTitle>
-            Stock-On-Hand
+            Availability
         </x-slot:cardTitle>
 
-        {{-- Stock-on-Hand Action --}}
+        {{-- Availability Action --}}
         <x-slot:cardAction>
             <x-button.light id="downloadBtnStockOnHand">
                 <span id="downloadBtnText">Download</span>
@@ -254,15 +232,15 @@
             <x-input.datepicker id="stock-date-range"></x-input.datepicker>
             {{-- <input type='text' id="basic-date" placeholder="Select Date..."> --}}
         </x-slot:cardAction>
-        {{-- Stock-on-Hand Action End --}}
+        {{-- Availability Action End --}}
 
-        {{-- Tabel Stock-on-Hand --}}
+        {{-- Tabel Availability --}}
         <table id="stock-on-hand-table" class="table">
             <thead>
                 <tr>
                     <th scope="col" class="text-center">
                         <a class="table-head">
-                            {{ __('Outlet') }}
+                            {{ __('Nama Outlet') }}
                             <x-icons.sort />
                         </a>
                     </th>
@@ -274,7 +252,7 @@
                     </th>
                     <th scope="col" class="text-center">
                         <a class="table-head">
-                            {{ __('Stock-on-Hand(pcs)') }}
+                            {{ __('Kode Outlet') }}
                             <x-icons.sort />
                         </a>
                     </th>
@@ -284,28 +262,153 @@
                             <x-icons.sort />
                         </a>
                     </th>
+                </tr>
+            </thead>
+        </table>
+        {{-- Tabel Availability End --}}
+
+    </x-card>
+    {{-- Availability End --}}
+
+	 {{-- Power SKU Hand --}}
+	 <x-card>
+        <x-slot:cardTitle>
+            Power SKU
+        </x-slot:cardTitle>
+
+        {{-- Power SKU Action --}}
+        <x-slot:cardAction>
+			<x-input.search class="border-0" placeholder="Cari data power SKU..." id="power-sku-search"></x-input.search>
+			<x-button.info onclick="openModal('tambah-power-sku')">
+                Tambah Power SKU
+            </x-button.info>
+			{{-- Tambah Power SKU Modal --}}
+			<x-modal id="tambah-power-sku">
+					<x-slot:title>
+						Tambah Power SKU
+					</x-slot:title>
+					<form id="createPowerSkuForm" class="grid grid-cols-2 gap-6">
+						@csrf
+						<div>
+							<label for="power-sku-product-categories" class="!text-black">Kategori Produk</label>
+							<div>
+								<select id="power-sku-product-categories" name="power-sku-category_id"
+									class="w-full form-control @error('power-sku-category_id') is-invalid @enderror">
+									<option value="" selected disabled>-- Pilih Category Product --</option>
+									@foreach ($categories as $category)
+										<option value="{{ $category->id }}">
+											{{ $category->name }}
+										</option>
+									@endforeach
+								</select>
+								<span id="power-sku-product-category_id-error" class="text-red-500 text-xs hidden"></span>
+							</div>
+						</div>
+						<div>
+							<label for="power-sku" class="!text-black">Power SKU</label>
+							<input id="power-sku" class="form-control @error('power-sku') is-invalid @enderror" type="text" name="power-sku"
+								placeholder="Masukan Power SKU">
+							<span id="power-sku-error" class="text-red-500 text-xs hidden"></span>
+						</div>
+						<x-slot:footer>
+							<x-button.primary type="submit" id="savePowerSkuBtn" class="w-full">
+								<span id="savePowerSkuBtnText">Konfirmasi</span>
+								<span id="savePowerSkuBtnLoading" class="hidden">Menyimpan...</span>
+							</x-button.primary>
+						</x-slot:footer>
+					</form>
+			</x-modal>
+			{{-- Tambah Power SKU End --}}
+        </x-slot:cardAction>
+        {{-- Power SKU Action End --}}
+
+        {{-- Tabel Power SKU --}}
+        <table id="power-sku-table" class="table">
+            <thead>
+                <tr>
                     <th scope="col" class="text-center">
                         <a class="table-head">
-                            AV3M
+                            {{ __('Kategori Produk') }}
+                            <x-icons.sort />
                         </a>
                     </th>
                     <th scope="col" class="text-center">
                         <a class="table-head">
-                            Rekomendasi
+                            {{ __('Power SKU') }}
+                            <x-icons.sort />
                         </a>
                     </th>
-                    <th scope="col" class="text-center">
+					<th scope="col" class="text-right">
                         <a class="table-head">
-                            Keterangan
+                            Aksi
                         </a>
                     </th>
                 </tr>
             </thead>
+			<tbody>
+					<tr class="table-row">
+						<td scope="row" >
+							{{ 'Power SKU' }}
+						</td>
+						<td >
+							{{ 'Kategori Produk' }}
+						</td>
+						<td class="text-left">
+							<x-action-table-dropdown>
+								<li>
+									<button onclick="openModal('edit-power-sku')" class="dropdown-option ">Lihat
+										Data</button>
+								</li>
+								<li>
+									<button
+										class="dropdown-option text-red-400">Hapus
+										Data</button>
+								</li>
+							</x-action-table-dropdown>
+						</td>
+					</tr>
+			</tbody>
         </table>
-        {{-- Tabel Stock-on-Hand End --}}
+        {{-- Tabel Power SKU End --}}
 
+		<x-modal id="edit-power-sku">
+			<x-slot:title>
+				Edit Power SKU
+			</x-slot:title>
+			<form id="editPowerSkuForm" class="grid grid-cols-2 gap-6">
+				@csrf
+				<div>
+					<label for="edit-power-sku-product-categories" class="!text-black">Kategori Produk</label>
+					<div>
+						<select id="edit-power-sku-product-categories" name="edit-power-sku-category_id"
+							class="w-full form-control @error('edit-power-sku-category_id') is-invalid @enderror">
+							<option value="" selected disabled>-- Pilih Category Product --</option>
+							@foreach ($categories as $category)
+								<option value="{{ $category->id }}">
+									{{ $category->name }}
+								</option>
+							@endforeach
+						</select>
+						<span id="power-sku-product-category_id-error" class="text-red-500 text-xs hidden"></span>
+					</div>
+				</div>
+				<div>
+					<label for="edit-power-sku" class="!text-black">Power SKU</label>
+					<input id="edit-power-sku" class="form-control @error('edit-power-sku') is-invalid @enderror" type="text" name="edit-power-sku"
+						placeholder="Masukan Power SKU">
+					<span id="edit-power-sku-error" class="text-red-500 text-xs hidden"></span>
+				</div>
+				<x-slot:footer>
+					<x-button.primary type="submit" id="saveEditedPowerSkuBtn" class="w-full">
+						<span id="saveEditedPowerSkuBtnText">Simpan Perubahan</span>
+						<span id="saveEditedPowerSkuBtnLoading" class="hidden">Menyimpan...</span>
+					</x-button.primary>
+				</x-slot:footer>
+			</form>
+
+		</x-modal>
     </x-card>
-    {{-- Stock On Hand End --}}
+    {{-- Power SKU End --}}
 </main>
 @endsection
 
@@ -315,9 +418,8 @@
     <script>
         $(document).ready(function () {
             // Inisialisasi komponen
-            $('.categories, .edit-category').select2();
+            $('#categories, #edit-category, #power-sku-product-categories, #edit-power-sku-product-categories').select2();
             $("#stock-date-range").flatpickr({ mode: "range" });
-
             // Konfigurasi DataTable utama
             let table = $('#product-table').DataTable({
                 processing: true,
@@ -375,14 +477,12 @@
                     }
                 ]
             });
-
             // Search dengan debounce
             let searchTimer;
             $('#global-search').on('input', function () {
                 clearTimeout(searchTimer);
                 searchTimer = setTimeout(() => table.ajax.reload(null, false), 500);
             });
-
             // Stock on hand table
             let tableSOD = $('#stock-on-hand-table').DataTable({
                 processing: true,

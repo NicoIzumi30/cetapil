@@ -113,19 +113,18 @@ class VisibilityController extends Controller
     }
     public function getDataActivity(Request $request)
     {
-        $query = SalesVisibility::with([ 'visibility.outlet','visibility.product','visibility.user','visibility.visualType'])->orderBy('created_at', 'desc');
+        $query = SalesVisibility::with([ 'salesActivity.outlet','salesActivity.outlet.channel', 'salesActivity.user'])->orderBy('created_at', 'desc');
 
         if ($request->filled('search_term')) {
             $searchTerm = $request->search_term;
             $query->where(function ( $q) use ($searchTerm) {
                 $q->wherehas('outlet', function ($q) use ($searchTerm) {
                     $q->where('name', 'like', "%{$searchTerm}%");
+                    $q->orWhere('code', 'like', "%{$searchTerm}%");
+                    $q->orWhere('tipe_outlet', 'like', "%{$searchTerm}%");
+                    
                 });
-            })->orWhereHas('product', function ($q) use ($searchTerm) {
-                $q->where('sku', 'like', "%{$searchTerm}%");
             })->orWhereHas('user', function ($q) use ($searchTerm) {
-                $q->where('name', 'like', "%{$searchTerm}%");
-            })->orWhereHas('visualType', function ($q) use ($searchTerm) {
                 $q->where('name', 'like', "%{$searchTerm}%");
             });
         }
@@ -154,11 +153,12 @@ class VisibilityController extends Controller
             'data' => $result->map(function ($item) {
                 return [
                     'id' => $item->id,
-                    'outlet' => $item->visibility->outlet->name,
-                    'sales' => $item->visibility->user->name,
-                    'product' => $item->visibility->product->sku,
-                    'visual' => $item->visibility->visualType->name,
+                    'outlet' => $item->salesActivity->outlet->name,
+                    'sales' => $item->salesActivity->user->name,
+                    'code' => $item->salesActivity->outlet->code,
+                    'type' => $item->visual_type,
                     'condition' => $item->condition,
+                    'channel' => $item->salesActivity->outlet->channel->name,
                     'actions' => view('pages.visibility.action_activity', [
                         'activityId' => $item->id
                     ])->render()

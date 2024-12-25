@@ -289,7 +289,6 @@
 @push('scripts')
     <script>
         $(document).ready(function() {
-
 			function sumBalance(stock, selling) {
 				return Number(stock) + Number(selling);
 			}
