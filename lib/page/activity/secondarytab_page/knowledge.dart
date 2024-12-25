@@ -13,7 +13,7 @@ class KnowledgePage extends GetView<KnowledgeController> {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        // Training Video Section
+        // Video Section
         Padding(
           padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
           child: Text(
@@ -33,11 +33,31 @@ class KnowledgePage extends GetView<KnowledgeController> {
           ),
           child: ClipRRect(
             borderRadius: BorderRadius.circular(12),
-            child: CachedVideoPlayerWidget(),
+            child: Obx(() {
+              if (controller.videoPath.value == null || controller.videoPath.value!.isEmpty) {
+                return Container(
+                  height: 240,
+                  child: Center(
+                    child: Column(
+                      mainAxisAlignment: MainAxisAlignment.center,
+                      children: [
+                        Icon(Icons.videocam_off, size: 48, color: Colors.grey),
+                        SizedBox(height: 16),
+                        Text(
+                          'No video available',
+                          style: TextStyle(color: Colors.grey[600]),
+                        ),
+                      ],
+                    ),
+                  ),
+                );
+              }
+              return CachedVideoPlayerWidget();
+            }),
           ),
         ),
 
-        // Training Material Section
+        // PDF Section
         Padding(
           padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
           child: Text(
@@ -57,7 +77,27 @@ class KnowledgePage extends GetView<KnowledgeController> {
           ),
           child: ClipRRect(
             borderRadius: BorderRadius.circular(12),
-            child: CachedPDFViewerWidget(),
+            child: Obx(() {
+              if (controller.pdfPath.value == null || controller.pdfPath.value!.isEmpty) {
+                return Container(
+                  height: 240,
+                  child: Center(
+                    child: Column(
+                      mainAxisAlignment: MainAxisAlignment.center,
+                      children: [
+                        Icon(Icons.picture_as_pdf, size: 48, color: Colors.grey),
+                        SizedBox(height: 16),
+                        Text(
+                          'No PDF available',
+                          style: TextStyle(color: Colors.grey[600]),
+                        ),
+                      ],
+                    ),
+                  ),
+                );
+              }
+              return CachedPDFViewerWidget();
+            }),
           ),
         ),
       ],

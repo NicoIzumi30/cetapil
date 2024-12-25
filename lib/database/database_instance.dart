@@ -181,9 +181,11 @@ class DatabaseHelper {
 ''');
 
     await db.execute('''
-  CREATE TABLE sales_activities (
+   CREATE TABLE sales_activities (
     id TEXT PRIMARY KEY,
     outlet_id TEXT NOT NULL,  
+    user_id TEXT,
+    user_name TEXT,
     channel_id TEXT,
     channel_name TEXT,
     checked_in TEXT,
@@ -194,11 +196,22 @@ class DatabaseHelper {
     time_knowledge INTEGER DEFAULT 0,
     time_survey INTEGER DEFAULT 0,
     time_order INTEGER DEFAULT 0,
-    status TEXT CHECK(status IN ('IN_PROGRESS' , 'DRAFTED' , 'SUBMITTED', 'CANCELLED')) DEFAULT 'IN_PROGRESS',
+    status TEXT CHECK(status IN ('IN_PROGRESS', 'DRAFTED', 'SUBMITTED', 'CANCELLED')) DEFAULT 'IN_PROGRESS',
     created_at TEXT NOT NULL,
     updated_at TEXT NOT NULL,
     deleted_at TEXT,
     FOREIGN KEY (outlet_id) REFERENCES outlet_activities (id)
+  )
+''');
+
+    await db.execute('''
+  CREATE TABLE activity_av3m_products (
+    id TEXT PRIMARY KEY,
+    activity_id TEXT NOT NULL,
+    product_id TEXT NOT NULL,
+    av3m INTEGER,
+    created_at TEXT NOT NULL,
+    FOREIGN KEY (activity_id) REFERENCES sales_activities (id)
   )
 ''');
 
@@ -963,13 +976,13 @@ class DatabaseHelper {
       await txn.insert(
         'outlet_activities',
         {
-          'id': data['outlet_id'],
-          'name': data['name'],
-          'category': data['category'],
-          'city_id': data['city_id'],
-          'longitude': data['longitude'],
-          'latitude': data['latitude'],
-          'visit_day': data['visit_day'],
+          'id': data['outlet']['id'],
+          'name': data['outlet']['name'],
+          'category': data['outlet']['category'],
+          'city_id': data['outlet']['city_id'],
+          'longitude': data['outlet']['longitude'],
+          'latitude': data['outlet']['latitude'],
+          'visit_day': data['outlet']['visit_day'],
           'created_at': DateTime.now().toIso8601String(),
           'updated_at': DateTime.now().toIso8601String(),
         },
@@ -981,9 +994,11 @@ class DatabaseHelper {
         'sales_activities',
         {
           'id': data['id'],
-          'outlet_id': data['outlet_id'],
-          'channel_id': data['channel_id'],
-          'channel_name': data['channel_name'],
+          'outlet_id': data['outlet']['id'],
+          'user_id': data['user']?['id'],
+          'user_name': data['user']?['name'],
+          'channel_id': data['channel']?['id'],
+          'channel_name': data['channel']?['name'],
           'checked_in': data['checked_in'],
           'checked_out': data['checked_out'],
           'views_knowledge': data['views_knowledge'],
@@ -999,18 +1014,16 @@ class DatabaseHelper {
         conflictAlgorithm: ConflictAlgorithm.replace,
       );
 
-      // Insert visibilities if they exist
-      if (data['visibilities'] != null) {
-        for (var visibility in data['visibilities']) {
+      // Insert av3m products
+      if (data['av3m_products'] != null) {
+        for (var product in data['av3m_products']) {
           await txn.insert(
-            'activity_visibilities',
+            'activity_av3m_products',
             {
-              'id': visibility['id'] ?? const Uuid().v4(),
+              'id': const Uuid().v4(),
               'activity_id': data['id'],
-              'posm_type_id': visibility['posm_type_id'],
-              'visual_type_id': visibility['visual_type_id'],
-              'filename': visibility['filename'],
-              'image': visibility['image'],
+              'product_id': product['product_id'],
+              'av3m': product['av3m'],
               'created_at': DateTime.now().toIso8601String(),
             },
             conflictAlgorithm: ConflictAlgorithm.replace,
@@ -1035,9 +1048,9 @@ class DatabaseHelper {
         whereArgs: [activityMap['outlet_id']],
       );
 
-      // Get visibilities for this activity
-      final visibilityMaps = await db.query(
-        'activity_visibilities',
+      // Get av3m products for this activity
+      final productMaps = await db.query(
+        'activity_av3m_products',
         where: 'activity_id = ?',
         whereArgs: [activityMap['id']],
       );
@@ -1045,19 +1058,20 @@ class DatabaseHelper {
       final activities = Activity.Data(
         id: activityMap['id'],
         outlet: outletMaps.isNotEmpty ? Activity.Outlet.fromJson(outletMaps.first) : null,
+        user: Activity.User(
+          id: activityMap['user_id'],
+          name: activityMap['user_name'],
+        ),
         channel: activityMap['channel_id'] != null
             ? Activity.Channel(
                 id: activityMap['channel_id'],
                 name: activityMap['channel_name'],
               )
             : null,
-        visibilities: visibilityMaps
-            .map((v) => Activity.Visibilities(
-                  id: v['id']?.toString() ?? '',
-                  posmTypeId: v['posm_type_id']?.toString() ?? '',
-                  visualTypeId: v['visual_type_id']?.toString() ?? '',
-                  filename: v['filename']?.toString() ?? '',
-                  image: v['image']?.toString() ?? '',
+        av3mProducts: productMaps
+            .map((p) => Activity.Av3mProducts(
+                  productId: p['product_id'].toString(),
+                  av3M: int.parse(p['av3m'].toString()),
                 ))
             .toList(),
         checkedIn: activityMap['checked_in'],
@@ -1073,6 +1087,19 @@ class DatabaseHelper {
 
       return activities;
     }));
+  }
+
+  Future<List<String>> getDraftActivityIds() async {
+    final db = await database;
+
+    final List<Map<String, dynamic>> results = await db.query(
+      'sales_activities',
+      columns: ['id'],
+      where: 'status = ?',
+      whereArgs: ['DRAFTED'],
+    );
+
+    return results.map((result) => result['id'] as String).toList();
   }
 
   // Add this method to your DatabaseHelper class

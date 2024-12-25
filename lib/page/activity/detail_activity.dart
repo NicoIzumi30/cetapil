@@ -89,7 +89,7 @@ class DetailActivity extends GetView<DetailActivityController> {
     final tambahAvailabilityController = Get.find<TambahAvailabilityController>();
     final tambahOrderController = Get.find<TambahOrderController>();
     late SupportDataController supportController = Get.find<SupportDataController>();
-    final allVisibilities = controller.detailOutlet.value!.visibilities ?? [];
+    final allVisibilities = [];
 
     /// AVAILABILITY SECTION
     detailActivityController.availabilitItems.value = snapshot.data?.availabilities?.map((item) => {

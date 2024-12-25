@@ -142,7 +142,7 @@ class TambahActivityController extends GetxController {
   }
 
   initDetailDraftVisibility() {
-    final allVisibilities = detailOutlet.value!.visibilities ?? [];
+    final allVisibilities =  [];
     final visibilityDraft = detailDraft["visibilityItems"];
 
     if (allVisibilities.isNotEmpty && visibilityDraft != null) {

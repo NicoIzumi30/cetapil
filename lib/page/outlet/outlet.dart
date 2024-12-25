@@ -189,8 +189,11 @@ class OutletPage extends GetView<OutletController> {
           child: Column(
             mainAxisAlignment: MainAxisAlignment.center,
             children: [
-              SvgPicture.asset("assets/icon/Vector2.svg",height: 64,
-                color: Colors.grey,),
+              SvgPicture.asset(
+                "assets/icon/Vector2.svg",
+                height: 64,
+                color: Colors.grey,
+              ),
               SizedBox(height: 16),
               Text(
                 'Tidak ada outlet',
@@ -225,9 +228,63 @@ class OutletCard extends StatelessWidget {
     required this.outlet,
   }) : super(key: key);
 
+  Widget _buildPlaceholderImage() {
+    return Container(
+      height: 100,
+      width: 100,
+      decoration: BoxDecoration(
+        color: Colors.grey[200],
+        borderRadius: BorderRadius.circular(8),
+      ),
+      child: Column(
+        mainAxisAlignment: MainAxisAlignment.center,
+        children: [
+          Icon(
+            Icons.image_not_supported,
+            color: Colors.grey[400],
+            size: 32,
+          ),
+          SizedBox(height: 4),
+          Text(
+            'No Image',
+            style: TextStyle(
+              color: Colors.grey[600],
+              fontSize: 12,
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+
+  Widget _buildInfoRow(String label, String? value) {
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        Text(
+          '$label :',
+          style: TextStyle(
+            color: Colors.grey[600],
+            fontSize: 12,
+          ),
+        ),
+        const SizedBox(height: 4),
+        Text(
+          value?.isNotEmpty == true ? value! : 'No Data',
+          style: TextStyle(
+            fontWeight: FontWeight.bold,
+            color: value?.isNotEmpty == true ? Colors.black : Colors.grey[500],
+          ),
+          maxLines: label == 'Alamat' ? 2 : 1,
+          overflow: TextOverflow.ellipsis,
+        ),
+        const SizedBox(height: 8),
+      ],
+    );
+  }
+
   @override
   Widget build(BuildContext context) {
-    print(outlet.images!.first.image);
     return Container(
       margin: const EdgeInsets.only(bottom: 16),
       decoration: BoxDecoration(
@@ -255,75 +312,10 @@ class OutletCard extends StatelessWidget {
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-                  // Outlet Name
-                  Text(
-                    'Nama Outlet :',
-                    style: TextStyle(
-                      color: Colors.grey[600],
-                      fontSize: 11,
-                    ),
-                  ),
-                  const SizedBox(height: 4),
-                  Text(
-                    outlet.name ?? 'Unnamed Outlet',
-                    style: const TextStyle(
-                      fontWeight: FontWeight.bold,
-                    ),
-                  ),
-                  const SizedBox(height: 8),
-
-                  // Category
-                  Text(
-                    'Kategori Outlet',
-                    style: TextStyle(
-                      color: Colors.grey[600],
-                      fontSize: 12,
-                    ),
-                  ),
-                  const SizedBox(height: 4),
-                  Text(
-                    outlet.category ?? 'Uncategorized',
-                    style: const TextStyle(
-                      fontWeight: FontWeight.bold,
-                    ),
-                  ),
-                  const SizedBox(height: 8),
-
-                  // City
-                  Text(
-                    'Kota :',
-                    style: TextStyle(
-                      color: Colors.grey[600],
-                      fontSize: 12,
-                    ),
-                  ),
-                  const SizedBox(height: 4),
-                  Text(
-                    outlet.city?.name ?? 'Not Specified',
-                    style: const TextStyle(
-                      fontWeight: FontWeight.bold,
-                    ),
-                  ),
-                  const SizedBox(height: 8),
-
-                  // Address
-                  Text(
-                    'Alamat :',
-                    style: TextStyle(
-                      color: Colors.grey[600],
-                      fontSize: 12,
-                    ),
-                  ),
-                  const SizedBox(height: 4),
-                  Text(
-                    outlet.address ?? 'No Address',
-                    style: const TextStyle(
-                      fontWeight: FontWeight.bold,
-                    ),
-                    maxLines: 2,
-                    overflow: TextOverflow.ellipsis,
-                  ),
-                  const SizedBox(height: 8),
+                  _buildInfoRow('Nama Outlet', outlet.name),
+                  _buildInfoRow('Kategori Outlet', outlet.category),
+                  _buildInfoRow('Kota', outlet.city?.name),
+                  _buildInfoRow('Alamat', outlet.address),
 
                   // Draft Status
                   if (outlet.dataSource == 'DRAFT')
@@ -346,13 +338,13 @@ class OutletCard extends StatelessWidget {
                     ),
                   const SizedBox(height: 16),
 
-                  // Action Button
+                  // Action Buttons
                   Row(
                     children: [
                       ElevatedButton(
                         onPressed: () {
                           outlet.dataSource != "DRAFT"
-                              ? Get.to(() => DetailOutlet(outlet: outlet,isCheckin: false,))
+                              ? Get.to(() => DetailOutlet(outlet: outlet, isCheckin: false))
                               : outletController.setDraftValue(outlet);
                         },
                         style: ElevatedButton.styleFrom(
@@ -371,7 +363,6 @@ class OutletCard extends StatelessWidget {
                         SizedBox(width: 8),
                         OutlinedButton(
                           onPressed: () {
-                            // Add delete confirmation dialog
                             showDialog(
                               context: context,
                               builder: (context) => AlertDialog(
@@ -416,31 +407,27 @@ class OutletCard extends StatelessWidget {
             const SizedBox(width: 16),
             Column(
               children: [
-                ClipRRect(
-                  borderRadius: BorderRadius.circular(8),
-                  ///check if image is not null and image is not from draft
-                  child: outlet.images != null && outlet.images!.isNotEmpty && !outlet.images!.first.image!.contains("/data".toLowerCase())
-                      ? Image.network(
-                          "https://dev-cetaphil.i-am.host${outlet.images!.first.image}",
-                          width: 100,
-                          height: 100,
-                          fit: BoxFit.cover,
-                          errorBuilder: (context, error, stackTrace) {
-                            return Container(
-                              height: 100,
-                              width: 100,
-                              color: Colors.black12,
-                              child: Icon(Icons.error),
-                            );
-                          },
-                        )
-                      : Image.file(
-                          File(outlet.images!.first.image!),
-                          width: 100,
-                          height: 100,
-                          fit: BoxFit.cover,
-                        ),
-                ),
+                if (outlet.images == null || outlet.images!.isEmpty)
+                  _buildPlaceholderImage()
+                else
+                  ClipRRect(
+                    borderRadius: BorderRadius.circular(8),
+                    child: !outlet.images!.first.image!.contains("/data".toLowerCase())
+                        ? Image.network(
+                            "https://dev-cetaphil.i-am.host${outlet.images!.first.image}",
+                            width: 100,
+                            height: 100,
+                            fit: BoxFit.cover,
+                            errorBuilder: (context, error, stackTrace) => _buildPlaceholderImage(),
+                          )
+                        : Image.file(
+                            File(outlet.images!.first.image!),
+                            width: 100,
+                            height: 100,
+                            fit: BoxFit.cover,
+                            errorBuilder: (context, error, stackTrace) => _buildPlaceholderImage(),
+                          ),
+                  ),
               ],
             ),
           ],

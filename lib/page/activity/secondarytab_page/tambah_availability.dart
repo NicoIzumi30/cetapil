@@ -70,64 +70,62 @@ class TambahAvailability extends GetView<TambahAvailabilityController> {
                 ),
                 SizedBox(height: 20),
                 controller.selectedCategory.value != null
-                ? ModernTextField(
-                  enable: false,
-                  title: "Kategori",
-                  controller:
-                  TextEditingController(text: controller.filteredCategory),
-                )
-                :
-                Container(
-                  margin: EdgeInsets.only(bottom: 10),
-                  decoration: BoxDecoration(
-                    borderRadius: BorderRadius.circular(8),
-                    boxShadow: [
-                      BoxShadow(
-                        color: Colors.grey.withOpacity(0.1),
-                        spreadRadius: 1,
-                        blurRadius: 3,
-                        offset: const Offset(0, 2),
-                      ),
-                    ],
-                  ),
-                  child: Obx(() {
-                    final categories = controller.supportDataController.getCategories();
-                    return DropdownButtonFormField<String>(
-                      style: const TextStyle(
-                        fontSize: 14,
-                        color: Color(0xFF0077BD),
-                      ),
-                      decoration: InputDecoration(
-                        contentPadding: const EdgeInsets.symmetric(
-                          horizontal: 16,
-                          vertical: 12,
-                        ),
-                        border: OutlineInputBorder(
+                    ? ModernTextField(
+                        enable: false,
+                        title: "Kategori",
+                        controller: TextEditingController(text: controller.filteredCategory),
+                      )
+                    : Container(
+                        margin: EdgeInsets.only(bottom: 10),
+                        decoration: BoxDecoration(
                           borderRadius: BorderRadius.circular(8),
-                          borderSide: BorderSide.none,
+                          boxShadow: [
+                            BoxShadow(
+                              color: Colors.grey.withOpacity(0.1),
+                              spreadRadius: 1,
+                              blurRadius: 3,
+                              offset: const Offset(0, 2),
+                            ),
+                          ],
                         ),
-                        filled: true,
-                        fillColor: const Color(0xFFE8F3FF),
+                        child: Obx(() {
+                          final categories = controller.supportDataController.getCategories();
+                          return DropdownButtonFormField<String>(
+                            style: const TextStyle(
+                              fontSize: 14,
+                              color: Color(0xFF0077BD),
+                            ),
+                            decoration: InputDecoration(
+                              contentPadding: const EdgeInsets.symmetric(
+                                horizontal: 16,
+                                vertical: 12,
+                              ),
+                              border: OutlineInputBorder(
+                                borderRadius: BorderRadius.circular(8),
+                                borderSide: BorderSide.none,
+                              ),
+                              filled: true,
+                              fillColor: const Color(0xFFE8F3FF),
+                            ),
+                            hint: Text(
+                              "-- Pilih Kategori --",
+                              style: TextStyle(
+                                color: Colors.grey[400],
+                                fontSize: 14,
+                              ),
+                            ),
+                            value: controller.selectedCategory.value,
+                            items: categories.map((category) {
+                              return DropdownMenuItem<String>(
+                                value: category['id'].toString(),
+                                child: Text(category['name'] ?? ''),
+                              );
+                            }).toList(),
+                            onChanged: controller.onCategorySelected,
+                            isExpanded: true,
+                          );
+                        }),
                       ),
-                      hint: Text(
-                        "-- Pilih Kategori --",
-                        style: TextStyle(
-                          color: Colors.grey[400],
-                          fontSize: 14,
-                        ),
-                      ),
-                      value: controller.selectedCategory.value,
-                      items: categories.map((category) {
-                        return DropdownMenuItem<String>(
-                          value: category['id'].toString(),
-                          child: Text(category['name'] ?? ''),
-                        );
-                      }).toList(),
-                      onChanged: controller.onCategorySelected,
-                      isExpanded: true,
-                    );
-                  }),
-                ),
                 Expanded(
                   child: Obx(() {
                     final skus = controller.filteredSkus; // Get the filtered SKUs
@@ -210,25 +208,24 @@ class _CompactProductCardState extends State<CompactProductCard> {
   String checkStatus(String number) {
     int num = int.parse(number);
     if (num < 0) {
-      return "Less";
+      return "MINUS";
     } else if (num > 0) {
-      return "Over";
+      return "OVER";
     } else {
-      return "Ideal";
+      return "IDEAL";
     }
   }
 
-  statusColor(String value){
-    switch(value) {
-      case "Over":
+  statusColor(String value) {
+    switch (value) {
+      case "OVER":
         return Color(0xffff7171);
-      case "Less":
+      case "MINUS":
         return Color(0xfff2c665);
-      case "Ideal":
+      case "IDEAL":
         return Color(0xff0177be);
       default:
     }
-
   }
 
   @override
@@ -248,21 +245,27 @@ class _CompactProductCardState extends State<CompactProductCard> {
   void initializeControllers() {
     final controller = Get.find<TambahAvailabilityController>();
     final skuId = widget.sku['id'].toString();
+
+    // Get AV3M value for this product from the activity data
+    final av3mValue = controller.getAv3mForProduct(skuId);
+
     final existingValues = controller.productValues[skuId] ??
         {
           'availability_toggle': "false",
           'stock_on_hand': '0',
           'stock_on_inventory': '0',
-          'av3m': '0',
+          'av3m': av3mValue?.toString() ?? '0', // Use AV3M from database
           'recommend': '0',
         };
 
-    toggleAvailabilityYesNo = existingValues['availability_toggle'] == "false" ? ValueNotifier(false) : ValueNotifier(true);
+    toggleAvailabilityYesNo = existingValues['availability_toggle'] == "false"
+        ? ValueNotifier(false)
+        : ValueNotifier(true);
     stockOnHandController = TextEditingController(text: existingValues['stock_on_hand']);
     stockOnInventoryController = TextEditingController(text: existingValues['stock_on_inventory']);
-    av3mController = TextEditingController(text: existingValues['av3m']);
+    av3mController =
+        TextEditingController(text: av3mValue?.toString() ?? '0'); // Pre-fill with AV3M value
     recommendController = TextEditingController(text: existingValues['recommend']);
-    // priceController = TextEditingController(text: existingValues['price']);
 
     _setupListeners();
   }
@@ -272,7 +275,8 @@ class _CompactProductCardState extends State<CompactProductCard> {
       widget.onChanged({
         'availability_toggle': toggleAvailabilityYesNo.value ? 'true' : 'false',
         'stock_on_hand': stockOnHandController.text.isEmpty ? '0' : stockOnHandController.text,
-        'stock_on_inventory': stockOnInventoryController.text.isEmpty ? '0' : stockOnInventoryController.text,
+        'stock_on_inventory':
+            stockOnInventoryController.text.isEmpty ? '0' : stockOnInventoryController.text,
         'av3m': av3mController.text.isEmpty ? '0' : av3mController.text,
         'recommend': recommendController.text.isEmpty ? '0' : recommendController.text,
         // 'price': priceController.text.isEmpty ? '0' : priceController.text,
@@ -383,7 +387,7 @@ class _CompactProductCardState extends State<CompactProductCard> {
                       ),
                     ),
                     const SizedBox(width: 10),
-    CustomSegmentedSwitch(
+                    CustomSegmentedSwitch(
                       value: toggleAvailabilityYesNo.value,
                       onChanged: (value) {
                         setState(() {
@@ -395,22 +399,35 @@ class _CompactProductCardState extends State<CompactProductCard> {
                     ),
                   ],
                 ),
-                Divider(color: Colors.grey,),
+                Divider(
+                  color: Colors.grey,
+                ),
                 Row(
                   crossAxisAlignment: CrossAxisAlignment.center,
                   children: [
                     Expanded(child: _buildInputField('Stock On Hand', stockOnHandController)),
                     SizedBox(width: 8),
-                    Expanded(child: buildInputInventory('Stock On Inventory', stockOnInventoryController)),
+                    Expanded(
+                        child:
+                            buildInputInventory('Stock On Inventory', stockOnInventoryController)),
                     SizedBox(width: 8),
-                    Expanded(child: _buildInputField('AV3M(Pcs)', av3mController)),
+                    Expanded(
+                        child: _buildInputField('AV3M(Pcs)', av3mController,
+                            readOnly: true)), // Make AV3M read-only
                   ],
                 ),
                 Row(
                   children: [
-                    Expanded(child: _buildDetailField(false,'Recommend', recommendController,)),
+                    Expanded(
+                        child: _buildDetailField(
+                      false,
+                      'Recommend',
+                      recommendController,
+                    )),
                     SizedBox(width: 8),
-                    Expanded(child: _buildDetailField(true,'Status', TextEditingController(text: checkStatus(recommendController.text)))),
+                    Expanded(
+                        child: _buildDetailField(true, 'Status',
+                            TextEditingController(text: checkStatus(recommendController.text)))),
                   ],
                 ),
               ],
@@ -420,7 +437,6 @@ class _CompactProductCardState extends State<CompactProductCard> {
       ),
     );
   }
-
 
   Widget buildInputInventory(String label, TextEditingController controller) {
     return Column(
@@ -455,15 +471,18 @@ class _CompactProductCardState extends State<CompactProductCard> {
               fontSize: 14,
               color: Color(0xFF0077BD),
             ),
-            onChanged: (value){
+            onChanged: (value) {
               setState(() {
                 if (value.isEmpty) {
-                  recommendController.text = (int.parse("0") - int.parse(av3mController.text)).toString();
-                }else{
+                  recommendController.text =
+                      (int.parse("0") - int.parse(av3mController.text)).toString();
+                } else {
                   try {
-                    recommendController.text = (int.parse(value) - int.parse(av3mController.text)).toString();
+                    recommendController.text =
+                        (int.parse(value) - int.parse(av3mController.text)).toString();
                   } catch (e) {
-                    recommendController.text = (int.parse("0") - int.parse(av3mController.text)).toString();
+                    recommendController.text =
+                        (int.parse("0") - int.parse(av3mController.text)).toString();
                   }
                 }
               });
@@ -519,7 +538,7 @@ class _CompactProductCardState extends State<CompactProductCard> {
     );
   }
 
-  Widget _buildInputField(String label, TextEditingController controller) {
+  Widget _buildInputField(String label, TextEditingController controller, {bool readOnly = false}) {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
@@ -534,12 +553,13 @@ class _CompactProductCardState extends State<CompactProductCard> {
         SizedBox(height: 2),
         NumberField(
           controller: controller,
+          readOnly: readOnly,
         ),
       ],
     );
   }
 
-  Widget _buildDetailField(bool isStatus,String label, TextEditingController controller) {
+  Widget _buildDetailField(bool isStatus, String label, TextEditingController controller) {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
@@ -605,14 +625,14 @@ class _CompactProductCardState extends State<CompactProductCard> {
               ),
               enabledBorder: OutlineInputBorder(
                 borderRadius: BorderRadius.circular(8),
-                borderSide:  BorderSide(
+                borderSide: BorderSide(
                   color: isStatus ? statusColor(controller.text) : Color(0xFF64B5F6),
                   width: 1,
                 ),
               ),
               disabledBorder: OutlineInputBorder(
                 borderRadius: BorderRadius.circular(8),
-                borderSide:  BorderSide(
+                borderSide: BorderSide(
                   color: isStatus ? statusColor(controller.text) : Color(0xFF64B5F6),
                   width: 1,
                 ),

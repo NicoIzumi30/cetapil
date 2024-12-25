@@ -52,13 +52,13 @@ class ActivityPage extends GetView<ActivityController> {
                   },
                   child: controller.isLoading.value
                       ? Center(child: CircularProgressIndicator())
-                      : controller.filteredOutlets.isEmpty
+                      : controller.filteredActivities.isEmpty
                           ? _buildEmptyState()
                           : ListView.builder(
-                              itemCount: controller.filteredOutlets.length,
+                              itemCount: controller.filteredActivities.length,
                               itemBuilder: (context, index) {
                                 final activity =
-                                    controller.filteredOutlets[index];
+                                    controller.filteredActivities[index];
                                 return ActivityCard(
                                   activity: activity,
                                   statusDraft: activity.status!,

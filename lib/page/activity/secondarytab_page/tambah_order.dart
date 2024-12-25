@@ -45,8 +45,7 @@ class TambahOrder extends GetView<TambahOrderController> {
                         shape: RoundedRectangleBorder(
                           borderRadius: BorderRadius.circular(8),
                         ),
-                        padding:
-                            EdgeInsets.symmetric(horizontal: 16, vertical: 12),
+                        padding: EdgeInsets.symmetric(horizontal: 16, vertical: 12),
                       ),
                       onPressed: () {
                         controller.saveAllProducts();
@@ -67,8 +66,7 @@ class TambahOrder extends GetView<TambahOrderController> {
                     ? ModernTextField(
                         enable: false,
                         title: "Kategori",
-                        controller: TextEditingController(
-                            text: controller.filteredCategory),
+                        controller: TextEditingController(text: controller.filteredCategory),
                       )
                     : Container(
                         margin: EdgeInsets.only(bottom: 10),
@@ -84,8 +82,7 @@ class TambahOrder extends GetView<TambahOrderController> {
                           ],
                         ),
                         child: Obx(() {
-                          final categories =
-                              controller.supportDataController.getCategories();
+                          final categories = controller.supportDataController.getCategories();
                           return DropdownButtonFormField<String>(
                             style: const TextStyle(
                               fontSize: 14,
@@ -124,8 +121,7 @@ class TambahOrder extends GetView<TambahOrderController> {
                       ),
                 Expanded(
                   child: Obx(() {
-                    final skus =
-                        controller.filteredSkus; // Get the filtered SKUs
+                    final skus = controller.filteredSkus; // Get the filtered SKUs
                     return ListView.builder(
                       padding: EdgeInsets.symmetric(vertical: 8),
                       itemCount: skus.length,
@@ -133,8 +129,8 @@ class TambahOrder extends GetView<TambahOrderController> {
                         final sku = skus[index];
                         return CompactProductCard(
                           sku: sku,
-                          onChanged: (values) => controller.updateProductValues(
-                              sku['id'].toString(), values),
+                          onChanged: (values) =>
+                              controller.updateProductValues(sku['id'].toString(), values),
                         );
                       },
                     );
@@ -387,9 +383,8 @@ class CompactProductCard extends StatefulWidget {
 class _CompactProductCardState extends State<CompactProductCard> {
   late TextEditingController jumlahController;
   late TextEditingController hargaController;
-   double totalPrice = 0;
-  final formatter =
-      NumberFormat.currency(locale: 'id_ID', symbol: "", decimalDigits: 0);
+  double totalPrice = 0;
+  final formatter = NumberFormat.currency(locale: 'id_ID', symbol: "Rp ", decimalDigits: 0);
 
   @override
   void initState() {
@@ -411,11 +406,19 @@ class _CompactProductCardState extends State<CompactProductCard> {
     final existingValues = controller.productValues[skuId] ??
         {
           'jumlah': '0',
-          'harga': '0',
+          'harga': widget.sku['price'].toString(),
         };
 
     jumlahController = TextEditingController(text: existingValues['jumlah']);
     hargaController = TextEditingController(text: formatter.format(widget.sku['price']));
+
+    if (jumlahController.text.isNotEmpty) {
+      try {
+        totalPrice = widget.sku['price'] * int.parse(jumlahController.text);
+      } catch (e) {
+        totalPrice = 0.0;
+      }
+    }
 
     _setupListeners();
   }
@@ -424,12 +427,11 @@ class _CompactProductCardState extends State<CompactProductCard> {
     void updateValues() {
       widget.onChanged({
         'jumlah': jumlahController.text.isEmpty ? '0' : jumlahController.text,
-        'harga': formatter.format(widget.sku['price']).toString(),
+        'harga': widget.sku['price'].toString(),
       });
     }
 
     jumlahController.addListener(updateValues);
-    hargaController.addListener(updateValues);
   }
 
   @override
@@ -442,7 +444,7 @@ class _CompactProductCardState extends State<CompactProductCard> {
   @override
   Widget build(BuildContext context) {
     return Container(
-      margin: EdgeInsets.symmetric(vertical: 6),
+      margin: EdgeInsets.only(bottom: 16, top: 8, right: 8, left: 8),
       decoration: BoxDecoration(
         color: Colors.white,
         borderRadius: BorderRadius.circular(12),
@@ -458,53 +460,28 @@ class _CompactProductCardState extends State<CompactProductCard> {
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
           Container(
+            width: double.infinity,
             padding: EdgeInsets.symmetric(horizontal: 16, vertical: 12),
             decoration: BoxDecoration(
-              color: Color(0xFFEDF8FF),
+              color: Colors.white,
               borderRadius: BorderRadius.only(
                 topLeft: Radius.circular(12),
                 topRight: Radius.circular(12),
               ),
+              border: Border(
+                bottom: BorderSide(
+                  color: Color(0xFFEEEEEE),
+                  width: 1,
+                ),
+              ),
             ),
-            child: Row(
-              children: [
-                Container(
-                  width: 40,
-                  height: 40,
-                  decoration: BoxDecoration(
-                    color: Colors.white,
-                    borderRadius: BorderRadius.circular(8),
-                  ),
-                  child: Icon(
-                    Icons.inventory_2_outlined,
-                    size: 24,
-                    color: Color(0xFF0077BD),
-                  ),
-                ),
-                SizedBox(width: 12),
-                Expanded(
-                  child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      Text(
-                        widget.sku['sku'] ?? '',
-                        style: TextStyle(
-                          fontSize: 14,
-                          fontWeight: FontWeight.bold,
-                          color: Color(0xFF023B5E),
-                        ),
-                      ),
-                      Text(
-                        widget.sku['category']['name'] ?? '',
-                        style: TextStyle(
-                          fontSize: 12,
-                          color: Colors.grey[600],
-                        ),
-                      ),
-                    ],
-                  ),
-                ),
-              ],
+            child: Text(
+              widget.sku['sku'] ?? '',
+              style: TextStyle(
+                fontSize: 14,
+                fontWeight: FontWeight.bold,
+                color: Color(0xFF023B5E),
+              ),
             ),
           ),
           Padding(
@@ -514,14 +491,171 @@ class _CompactProductCardState extends State<CompactProductCard> {
                 Row(
                   children: [
                     Expanded(
-                        flex: 2,
-                        child: buildInputField('Jumlah', jumlahController)),
-                    SizedBox(width: 8),
+                      flex: 2,
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          Text(
+                            'Jumlah',
+                            style: TextStyle(
+                              fontSize: 12,
+                              color: Colors.black54,
+                            ),
+                          ),
+                          SizedBox(height: 4),
+                          Container(
+                            margin: EdgeInsets.only(bottom: 10, top: 5),
+                            decoration: BoxDecoration(
+                              borderRadius: BorderRadius.circular(12),
+                              boxShadow: [
+                                BoxShadow(
+                                  color: Colors.grey.withOpacity(0.1),
+                                  spreadRadius: 1,
+                                  blurRadius: 3,
+                                  offset: const Offset(0, 2),
+                                ),
+                              ],
+                            ),
+                            child: TextField(
+                              controller: jumlahController,
+                              keyboardType: TextInputType.number,
+                              style: TextStyle(
+                                fontSize: 16,
+                                fontWeight: FontWeight.w500,
+                                color: Color(0xFF0077BD),
+                              ),
+                              inputFormatters: [
+                                FilteringTextInputFormatter.digitsOnly,
+                              ],
+                              textAlign: TextAlign.center,
+                              decoration: InputDecoration(
+                                hintStyle: TextStyle(
+                                  color: Colors.grey[400],
+                                  fontSize: 14,
+                                ),
+                                contentPadding: const EdgeInsets.symmetric(
+                                  horizontal: 3,
+                                  vertical: 3,
+                                ),
+                                border: OutlineInputBorder(
+                                  borderRadius: BorderRadius.circular(8),
+                                  borderSide: const BorderSide(
+                                    color: Color(0xFF64B5F6),
+                                    width: 2,
+                                  ),
+                                ),
+                                filled: true,
+                                fillColor: const Color(0xFFE8F3FF),
+                                focusedBorder: OutlineInputBorder(
+                                  borderRadius: BorderRadius.circular(8),
+                                  borderSide: const BorderSide(
+                                    color: Color(0xFF64B5F6),
+                                    width: 1,
+                                  ),
+                                ),
+                                enabledBorder: OutlineInputBorder(
+                                  borderRadius: BorderRadius.circular(8),
+                                  borderSide: const BorderSide(
+                                    color: Color(0xFF64B5F6),
+                                    width: 1,
+                                  ),
+                                ),
+                              ),
+                              onChanged: (value) {
+                                setState(() {
+                                  if (value.isEmpty) {
+                                    totalPrice = 0.0;
+                                  } else {
+                                    try {
+                                      totalPrice = widget.sku['price'] * int.parse(value);
+                                    } catch (e) {
+                                      totalPrice = 0.0;
+                                    }
+                                  }
+                                });
+                              },
+                            ),
+                          ),
+                        ],
+                      ),
+                    ),
+                    SizedBox(width: 12),
                     Expanded(
-                        child: _buildDetailField(
-                      'Harga',
-                     hargaController
-                    )),
+                      flex: 5,
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          Text(
+                            'Jumlah',
+                            style: TextStyle(
+                              fontSize: 12,
+                              color: Colors.black54,
+                            ),
+                          ),
+                          SizedBox(height: 4),
+                          Container(
+                            margin: EdgeInsets.only(bottom: 10, top: 5),
+                            decoration: BoxDecoration(
+                              borderRadius: BorderRadius.circular(12),
+                              boxShadow: [
+                                BoxShadow(
+                                  color: Colors.grey.withOpacity(0.1),
+                                  spreadRadius: 1,
+                                  blurRadius: 3,
+                                  offset: const Offset(0, 2),
+                                ),
+                              ],
+                            ),
+                            child: TextField(
+                              controller: hargaController,
+                              keyboardType: TextInputType.number,
+                              style: TextStyle(
+                                fontSize: 16,
+                                fontWeight: FontWeight.w500,
+                                color: Color(0xFF0077BD),
+                              ),
+                              textAlign: TextAlign.left,
+                              decoration: InputDecoration(
+                                hintStyle: TextStyle(
+                                  color: Colors.grey[400],
+                                  fontSize: 14,
+                                ),
+                                contentPadding: const EdgeInsets.symmetric(
+                                  horizontal: 12,
+                                  vertical: 12,
+                                ),
+                                border: OutlineInputBorder(
+                                  borderRadius: BorderRadius.circular(8),
+                                  borderSide: const BorderSide(
+                                    color: Color(0xFF64B5F6),
+                                    width: 2,
+                                  ),
+                                ),
+                                filled: true,
+                                fillColor: const Color(0xFFE8F3FF),
+                                focusedBorder: OutlineInputBorder(
+                                  borderRadius: BorderRadius.circular(8),
+                                  borderSide: const BorderSide(
+                                    color: Color(0xFF64B5F6),
+                                    width: 1,
+                                  ),
+                                ),
+                                enabledBorder: OutlineInputBorder(
+                                  borderRadius: BorderRadius.circular(8),
+                                  borderSide: const BorderSide(
+                                    color: Color(0xFF64B5F6),
+                                    width: 1,
+                                  ),
+                                ),
+                              ),
+                              inputFormatters: [
+                                FilteringTextInputFormatter.digitsOnly,
+                              ],
+                            ),
+                          ),
+                        ],
+                      ),
+                    ),
                   ],
                 ),
                 Row(
@@ -534,7 +668,14 @@ class _CompactProductCardState extends State<CompactProductCard> {
                         color: Color(0xFF0077BD),
                       ),
                     ),
-                    Text("Rp. ${formatter.format(totalPrice)}"),
+                    Text(
+                      "${formatter.format(totalPrice)}",
+                      style: TextStyle(
+                        fontSize: 14,
+                        color: Color(0xFF0077BD),
+                        fontWeight: FontWeight.w500,
+                      ),
+                    ),
                   ],
                 )
               ],
@@ -542,117 +683,6 @@ class _CompactProductCardState extends State<CompactProductCard> {
           ),
         ],
       ),
-    );
-  }
-
-  Widget buildInputField(String label, TextEditingController controller) {
-    return Column(
-      crossAxisAlignment: CrossAxisAlignment.start,
-      children: [
-        Text(
-          label,
-          style: TextStyle(
-            fontSize: 12,
-            fontWeight: FontWeight.w500,
-            color: Color(0xFF666666),
-          ),
-        ),
-        Container(
-          margin: EdgeInsets.only(bottom: 10, top: 5),
-          decoration: BoxDecoration(
-            borderRadius: BorderRadius.circular(12),
-            boxShadow: [
-              BoxShadow(
-                color: Colors.grey.withOpacity(0.1),
-                spreadRadius: 1,
-                blurRadius: 3,
-                offset: const Offset(0, 2),
-              ),
-            ],
-          ),
-          child: TextFormField(
-            controller: controller,
-            keyboardType: TextInputType.number,
-            style: const TextStyle(
-              fontSize: 14,
-              color: Color(0xFF0077BD),
-            ),
-            textAlign: TextAlign.center,
-            inputFormatters: [
-              FilteringTextInputFormatter.digitsOnly,
-            ],
-            onChanged: (value) {
-              setState(() {
-                if (value.isEmpty) {
-                  totalPrice = 0.0;
-                } else{
-                  try {
-                    totalPrice = widget.sku['price'] * int.parse(value);
-                  } catch (e) {
-                    totalPrice = 0.0;
-                  }
-                }
-              });
-
-
-            },
-            decoration: InputDecoration(
-              hintStyle: TextStyle(
-                color: Colors.grey[400],
-                fontSize: 14,
-              ),
-              contentPadding: const EdgeInsets.symmetric(
-                horizontal: 3,
-                vertical: 3,
-              ),
-              border: OutlineInputBorder(
-                borderRadius: BorderRadius.circular(8),
-                borderSide: const BorderSide(
-                  color: Color(0xFF64B5F6),
-                  width: 2,
-                ),
-              ),
-              filled: true,
-              fillColor: const Color(0xFFE8F3FF),
-              focusedBorder: OutlineInputBorder(
-                borderRadius: BorderRadius.circular(8),
-                borderSide: const BorderSide(
-                  color: Color(0xFF64B5F6),
-                  width: 1,
-                ),
-              ),
-              enabledBorder: OutlineInputBorder(
-                borderRadius: BorderRadius.circular(8),
-                borderSide: const BorderSide(
-                  color: Color(0xFF64B5F6),
-                  width: 1,
-                ),
-              ),
-            ),
-          ),
-        )
-      ],
-    );
-  }
-
-  Widget _buildDetailField(String label, TextEditingController controller) {
-    return Column(
-      crossAxisAlignment: CrossAxisAlignment.start,
-      children: [
-        Text(
-          label,
-          style: TextStyle(
-            fontSize: 12,
-            fontWeight: FontWeight.w500,
-            color: Color(0xFF666666),
-          ),
-        ),
-        SizedBox(height: 4),
-        NumberField(
-          controller: controller,
-          readOnly: true,
-        ),
-      ],
     );
   }
 }

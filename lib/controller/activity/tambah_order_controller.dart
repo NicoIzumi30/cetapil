@@ -26,7 +26,6 @@ class TambahOrderController extends GetxController {
     _loadSavedValues();
   }
 
-
   List<Map<String, dynamic>> get filteredSkus {
     if (selectedCategory.value == null) return [];
     return supportDataController
@@ -39,8 +38,8 @@ class TambahOrderController extends GetxController {
     if (selectedCategory.value == null) return "";
     return supportDataController.getCategories().firstWhere(
           (cat) => cat['id'].toString() == selectedCategory.value,
-      orElse: () => {'name': null},
-    )['name'];
+          orElse: () => {'name': null},
+        )['name'];
   }
 
   void _loadSavedValues() {
@@ -50,10 +49,10 @@ class TambahOrderController extends GetxController {
     for (var item in tambahActivityController.orderDraftItems) {
       final product = supportDataController.getProducts().firstWhere(
             (product) => product['id'].toString() == item['id'].toString(),
-        orElse: () => {
-          'category': {'id': null}
-        },
-      );
+            orElse: () => {
+              'category': {'id': null}
+            },
+          );
 
       final categoryId = product['category']?['id']?.toString();
       if (categoryId != null) {
@@ -79,13 +78,13 @@ class TambahOrderController extends GetxController {
         // First check if there are matching draft items in the sellingGetController
         final categoryName = supportDataController.getCategories().firstWhere(
               (cat) => cat['id'].toString() == categoryId,
-          orElse: () => {'name': null},
-        )['name'];
+              orElse: () => {'name': null},
+            )['name'];
 
         if (categoryName != null) {
           // Find draft items matching this category
-          final matchingDraftItems =
-          tambahActivityController.orderDraftItems.where((item) => item['category'] == categoryName);
+          final matchingDraftItems = tambahActivityController.orderDraftItems
+              .where((item) => item['category'] == categoryName);
 
           if (matchingDraftItems.isNotEmpty) {
             // Populate values from matching draft items
@@ -140,13 +139,17 @@ class TambahOrderController extends GetxController {
             'harga': '0',
           };
 
+      // Parse harga value - remove currency formatting
+      String hargaValue = values['harga'] ?? '0';
+      hargaValue = hargaValue.replaceAll(RegExp(r'[^\d]'), ''); // Remove non-digits
+
       updatedItems.add({
         'id': skuId,
         'product_id': sku['id'],
         'category': sku['category']['name'],
         'sku': sku['sku'],
         'jumlah': int.tryParse(values['jumlah'] ?? '0') ?? 0,
-        'harga': int.tryParse(values['harga'] ?? '0') ?? 0,
+        'harga': int.tryParse(hargaValue) ?? 0, // Use cleaned harga value
       });
     }
 
@@ -156,17 +159,16 @@ class TambahOrderController extends GetxController {
           .getProducts()
           .firstWhere(
             (product) => product['id'].toString() == item['id'].toString(),
-        orElse: () => {
-          'category': {'id': null}
-        },
-      )['category']['id']
+            orElse: () => {
+              'category': {'id': null}
+            },
+          )['category']['id']
           ?.toString();
       return itemCategory != selectedCategory.value;
     }).toList();
 
     tambahActivityController.orderDraftItems.clear();
     tambahActivityController.orderDraftItems.addAll([...remainingItems, ...updatedItems]);
-    print(tambahActivityController.orderDraftItems);
     tambahActivityController.orderDraftItems.refresh();
 
     // Clear the form
@@ -182,8 +184,6 @@ class TambahOrderController extends GetxController {
     productValues[skuId] = values;
   }
 
-
-
   /// function isnot used
   Map<String, dynamic>? get getSelectedSkuData {
     if (selectedSku.value == null) return null;
@@ -192,7 +192,6 @@ class TambahOrderController extends GetxController {
       orElse: () => {},
     );
   }
-
 
   void onSkuSelected(String? skuId) {
     selectedSku.value = skuId;

@@ -365,21 +365,21 @@ class SumAmountProduct extends StatelessWidget {
   String checkStatus(String number) {
     int num = int.parse(number);
     if (num < 0) {
-      return "Kurang";
+      return "MINUS";
     } else if (num > 0) {
-      return "Over";
+      return "OVER";
     } else {
-      return "Ideal";
+      return "IDEAL";
     }
   }
 
   statusColor(String value){
     switch(value) {
-      case "Over":
+      case "OVER":
         return Color(0xffff7171);
-      case "Kurang":
+      case "MINUS":
         return Color(0xfff2c665);
-      case "Ideal":
+      case "IDEAL":
         return Color(0xff0177be);
       default:
     }

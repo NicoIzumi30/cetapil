@@ -42,8 +42,18 @@ class TambahAvailabilityController extends GetxController {
     if (selectedCategory.value == null) return "";
     return supportDataController.getCategories().firstWhere(
           (cat) => cat['id'].toString() == selectedCategory.value,
-      orElse: () => {'name': null},
-    )['name'];
+          orElse: () => {'name': null},
+        )['name'];
+  }
+
+  int? getAv3mForProduct(String productId) {
+    final activityData = tambahActivityController.detailOutlet.value;
+    if (activityData?.av3mProducts != null) {
+      final av3mProduct =
+          activityData!.av3mProducts!.firstWhereOrNull((product) => product.productId == productId);
+      return av3mProduct?.av3M;
+    }
+    return null;
   }
 
   void _loadSavedValues() {
@@ -53,10 +63,10 @@ class TambahAvailabilityController extends GetxController {
     for (var item in tambahActivityController.availabilityDraftItems) {
       final product = supportDataController.getProducts().firstWhere(
             (product) => product['id'].toString() == item['id'].toString(),
-        orElse: () => {
-          'category': {'id': null}
-        },
-      );
+            orElse: () => {
+              'category': {'id': null}
+            },
+          );
 
       final categoryId = product['category']?['id']?.toString();
       if (categoryId != null) {
@@ -85,13 +95,13 @@ class TambahAvailabilityController extends GetxController {
         // First check if there are matching draft items in the sellingGetController
         final categoryName = supportDataController.getCategories().firstWhere(
               (cat) => cat['id'].toString() == categoryId,
-          orElse: () => {'name': null},
-        )['name'];
+              orElse: () => {'name': null},
+            )['name'];
 
         if (categoryName != null) {
           // Find draft items matching this category
-          final matchingDraftItems =
-          tambahActivityController.availabilityDraftItems.where((item) => item['category'] == categoryName);
+          final matchingDraftItems = tambahActivityController.availabilityDraftItems
+              .where((item) => item['category'] == categoryName);
 
           if (matchingDraftItems.isNotEmpty) {
             // Populate values from matching draft items
@@ -174,10 +184,10 @@ class TambahAvailabilityController extends GetxController {
           .getProducts()
           .firstWhere(
             (product) => product['id'].toString() == item['id'].toString(),
-        orElse: () => {
-          'category': {'id': null}
-        },
-      )['category']['id']
+            orElse: () => {
+              'category': {'id': null}
+            },
+          )['category']['id']
           ?.toString();
       return itemCategory != selectedCategory.value;
     }).toList();
@@ -205,7 +215,7 @@ class TambahAvailabilityController extends GetxController {
 
     final categories = supportDataController.getCategories();
     final categoryData = categories.firstWhere(
-          (cat) => cat['name'] == item['category'],
+      (cat) => cat['name'] == item['category'],
       orElse: () => <String, dynamic>{},
     );
 
@@ -215,7 +225,7 @@ class TambahAvailabilityController extends GetxController {
 
       final skus = filteredSkus;
       final skuData = skus.firstWhere(
-            (sku) => sku['id'].toString() == item['id'].toString(),
+        (sku) => sku['id'].toString() == item['id'].toString(),
         orElse: () => <String, dynamic>{},
       );
 
@@ -233,24 +243,23 @@ class TambahAvailabilityController extends GetxController {
   Map<String, dynamic>? get getSelectedSkuData {
     if (selectedSku.value == null) return null;
     return filteredSkus.firstWhere(
-          (product) => product['id'].toString() == selectedSku.value,
+      (product) => product['id'].toString() == selectedSku.value,
       orElse: () => {},
     );
   }
 
-  List<Map<String, dynamic>>filteredSkusByDataApi(String categoryId) {
+  List<Map<String, dynamic>> filteredSkusByDataApi(String categoryId) {
     return supportDataController
         .getProducts()
-        .where((product) =>
-    product['category']['id'].toString() == categoryId)
+        .where((product) => product['category']['id'].toString() == categoryId)
         .toList();
   }
 
   Map<String, dynamic>? getSkuByDataApi(String skuId) {
     return supportDataController.getProducts().firstWhere(
           (item) => item['id'] == skuId,
-      orElse: () => {},
-    );
+          orElse: () => {},
+        );
   }
 
   void onSkuSelected(String? skuId) {
@@ -263,8 +272,7 @@ class TambahAvailabilityController extends GetxController {
       if (selectedSkuData.value != null &&
           selectedSkuData.value!['channel_av3m'] != null &&
           outletChannel != null) {
-        final channelAv3m =
-            selectedSkuData.value!['channel_av3m'] as Map<String, dynamic>;
+        final channelAv3m = selectedSkuData.value!['channel_av3m'] as Map<String, dynamic>;
         final channelValue = channelAv3m[outletChannel];
 
         if (channelValue != null) {
@@ -301,8 +309,6 @@ class TambahAvailabilityController extends GetxController {
     stockController.value.clear();
     recommendController.value.clear();
   }
-
-
 
   @override
   void onClose() {

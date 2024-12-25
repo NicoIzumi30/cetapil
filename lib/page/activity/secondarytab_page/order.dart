@@ -113,8 +113,7 @@ class OrderPage extends GetView<TambahActivityController> {
                         context: context,
                         builder: (context) => AlertDialog(
                           title: Text('Hapus Item'),
-                          content: Text(
-                              'Apakah Anda yakin ingin menghapus Item ini?'),
+                          content: Text('Apakah Anda yakin ingin menghapus Item ini?'),
                           actions: [
                             TextButton(
                               onPressed: () => Navigator.pop(context),
@@ -123,10 +122,9 @@ class OrderPage extends GetView<TambahActivityController> {
                             TextButton(
                               onPressed: () async {
                                 Navigator.pop(context);
-                                final prodController =
-                                    Get.find<TambahOrderController>();
-                                controller.orderDraftItems.removeWhere(
-                                    (item) => item['category'] == category);
+                                final prodController = Get.find<TambahOrderController>();
+                                controller.orderDraftItems
+                                    .removeWhere((item) => item['category'] == category);
                                 prodController.productValues.clear();
                                 prodController.selectedCategory.value = null;
                               },
@@ -232,8 +230,7 @@ class CollapsibleCategoryGroup extends StatefulWidget {
   }) : super(key: key);
 
   @override
-  State<CollapsibleCategoryGroup> createState() =>
-      _CollapsibleCategoryGroupState();
+  State<CollapsibleCategoryGroup> createState() => _CollapsibleCategoryGroupState();
 }
 
 class _CollapsibleCategoryGroupState extends State<CollapsibleCategoryGroup> {
@@ -259,14 +256,11 @@ class _CollapsibleCategoryGroupState extends State<CollapsibleCategoryGroup> {
                 });
               },
               child: Padding(
-                padding:
-                    const EdgeInsets.symmetric(horizontal: 12.0, vertical: 8.0),
+                padding: const EdgeInsets.symmetric(horizontal: 12.0, vertical: 8.0),
                 child: Row(
                   children: [
                     Icon(
-                      isExpanded
-                          ? Icons.keyboard_arrow_down
-                          : Icons.keyboard_arrow_right,
+                      isExpanded ? Icons.keyboard_arrow_down : Icons.keyboard_arrow_right,
                       color: Color(0xFF023B5E),
                     ),
                     SizedBox(width: 8),
@@ -294,8 +288,7 @@ class _CollapsibleCategoryGroupState extends State<CollapsibleCategoryGroup> {
                     ),
                     IconButton(
                       onPressed: widget.onEdit,
-                      icon: Icon(Icons.edit_outlined,
-                          color: Colors.blue, size: 20),
+                      icon: Icon(Icons.edit_outlined, color: Colors.blue, size: 20),
                       padding: EdgeInsets.zero,
                       constraints: BoxConstraints(),
                       tooltip: 'Edit Category Products',
@@ -322,10 +315,8 @@ class _CollapsibleCategoryGroupState extends State<CollapsibleCategoryGroup> {
                 print(item['harga']?.toString());
                 return OrderProductCard(
                   productName: item['sku'] ?? '',
-                  jumlahController: TextEditingController(
-                      text: item['jumlah']?.toString() ?? ''),
-                  hargaController: TextEditingController(
-                      text: item['harga']?.toString() ?? ''),
+                  jumlahController: TextEditingController(text: item['jumlah']?.toString() ?? ''),
+                  hargaController: TextEditingController(text: item['harga']?.toString() ?? ''),
                   isReadOnly: true,
                   itemData: item,
                 );
@@ -423,7 +414,14 @@ class OrderProductCard extends StatelessWidget {
                         color: Color(0xFF0077BD),
                       ),
                     ),
-                    Text("Rp. ${ (double.parse(jumlahController.text) * double.parse(hargaController.text)).toStringAsFixed(0)}"),
+                    Text(
+                      "Rp ${_calculateTotal()}",
+                      style: TextStyle(
+                        fontSize: 14,
+                        color: Color(0xFF0077BD),
+                        fontWeight: FontWeight.w500,
+                      ),
+                    ),
                   ],
                 )
               ],
@@ -432,6 +430,16 @@ class OrderProductCard extends StatelessWidget {
         ],
       ),
     );
+  }
+
+  String _calculateTotal() {
+    final jumlah = int.tryParse(jumlahController.text.replaceAll(RegExp(r'[^\d]'), '')) ?? 0;
+    final harga = int.tryParse(hargaController.text.replaceAll(RegExp(r'[^\d]'), '')) ?? 0;
+    final total = jumlah * harga;
+
+    return total
+        .toString()
+        .replaceAllMapped(RegExp(r'(\d{1,3})(?=(\d{3})+(?!\d))'), (Match m) => '${m[1]}.');
   }
 
   Widget _buildJumlahField() {
@@ -457,6 +465,17 @@ class OrderProductCard extends StatelessWidget {
   }
 
   Widget _buildHargaField() {
+    String formattedValue = '';
+    if (hargaController.text.isNotEmpty) {
+      final number = int.tryParse(hargaController.text.replaceAll(RegExp(r'[^\d]'), '')) ?? 0;
+      formattedValue =
+          'Rp ${number.toString().replaceAllMapped(RegExp(r'(\d{1,3})(?=(\d{3})+(?!\d))'), (Match m) => '${m[1]}.')}';
+
+      // Update controller with formatted value if it's not already formatted
+      if (hargaController.text != formattedValue) {
+        hargaController.text = formattedValue;
+      }
+    }
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
@@ -574,8 +593,9 @@ class _PriceFieldState extends State<PriceField> {
   String _formatCurrency(String value) {
     if (value.isEmpty) return '';
     final number = int.parse(value.replaceAll(RegExp(r'[^\d]'), ''));
-    final formatted = number.toString().replaceAllMapped(
-        RegExp(r'(\d{1,3})(?=(\d{3})+(?!\d))'), (Match m) => '${m[1]}.');
+    final formatted = number
+        .toString()
+        .replaceAllMapped(RegExp(r'(\d{1,3})(?=(\d{3})+(?!\d))'), (Match m) => '${m[1]}.');
     return 'Rp $formatted';
   }
 
@@ -619,7 +639,7 @@ class _PriceFieldState extends State<PriceField> {
           }
         },
         decoration: InputDecoration(
-          prefixText: 'Rp ',
+          prefixText: '',
           prefixStyle: TextStyle(
             fontSize: 16,
             fontWeight: FontWeight.w500,
@@ -641,8 +661,7 @@ class _PriceFieldState extends State<PriceField> {
             ),
           ),
           filled: true,
-          fillColor:
-              widget.readOnly ? Colors.grey[200] : const Color(0xFFE8F3FF),
+          fillColor: widget.readOnly ? Colors.grey[200] : const Color(0xFFE8F3FF),
           focusedBorder: OutlineInputBorder(
             borderRadius: BorderRadius.circular(8),
             borderSide: const BorderSide(

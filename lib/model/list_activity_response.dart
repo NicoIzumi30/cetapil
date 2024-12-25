@@ -38,7 +38,7 @@ class Data {
   Outlet? outlet;
   User? user;
   Channel? channel;
-  List<Visibilities>? visibilities;
+  List<Av3mProducts>? av3mProducts;
   String? checkedIn;
   dynamic checkedOut;
   int? viewsKnowledge;
@@ -49,7 +49,7 @@ class Data {
   int? timeOrder;
   String? status;
 
-  Data({this.id, this.outlet, this.user, this.channel, this.visibilities, this.checkedIn, this.checkedOut, this.viewsKnowledge, this.timeAvailability, this.timeVisibility, this.timeKnowledge, this.timeSurvey, this.timeOrder, this.status});
+  Data({this.id, this.outlet, this.user, this.channel, this.av3mProducts, this.checkedIn, this.checkedOut, this.viewsKnowledge, this.timeAvailability, this.timeVisibility, this.timeKnowledge, this.timeSurvey, this.timeOrder, this.status});
 
   Data.fromJson(Map<String, dynamic> json) {
     if(json["id"] is String) {
@@ -64,8 +64,8 @@ class Data {
     if(json["channel"] is Map) {
       channel = json["channel"] == null ? null : Channel.fromJson(json["channel"]);
     }
-    if(json["visibilities"] is List) {
-      visibilities = json["visibilities"] == null ? null : (json["visibilities"] as List).map((e) => Visibilities.fromJson(e)).toList();
+    if(json["av3m_products"] is List) {
+      av3mProducts = json["av3m_products"] == null ? null : (json["av3m_products"] as List).map((e) => Av3mProducts.fromJson(e)).toList();
     }
     if(json["checked_in"] is String) {
       checkedIn = json["checked_in"];
@@ -110,8 +110,8 @@ class Data {
     if(channel != null) {
       _data["channel"] = channel?.toJson();
     }
-    if(visibilities != null) {
-      _data["visibilities"] = visibilities?.map((e) => e.toJson()).toList();
+    if(av3mProducts != null) {
+      _data["av3m_products"] = av3mProducts?.map((e) => e.toJson()).toList();
     }
     _data["checked_in"] = checkedIn;
     _data["checked_out"] = checkedOut;
@@ -126,44 +126,29 @@ class Data {
   }
 }
 
-class Visibilities {
-  String? id;
-  String? posmTypeId;
-  String? visualTypeId;
-  String? filename;
-  String? image;
+class Av3mProducts {
+  String? productId;
+  int? av3M;
 
-  Visibilities({this.id, this.posmTypeId, this.visualTypeId, this.filename, this.image});
+  Av3mProducts({this.productId, this.av3M});
 
-  Visibilities.fromJson(Map<String, dynamic> json) {
-    if(json["id"] is String) {
-      id = json["id"];
+  Av3mProducts.fromJson(Map<String, dynamic> json) {
+    if(json["product_id"] is String) {
+      productId = json["product_id"];
     }
-    if(json["posm_type_id"] is String) {
-      posmTypeId = json["posm_type_id"];
-    }
-    if(json["visual_type_id"] is String) {
-      visualTypeId = json["visual_type_id"];
-    }
-    if(json["filename"] is String) {
-      filename = json["filename"];
-    }
-    if(json["image"] is String) {
-      image = json["image"];
+    if(json["av3m"] is int) {
+      av3M = json["av3m"];
     }
   }
 
-  static List<Visibilities> fromList(List<Map<String, dynamic>> list) {
-    return list.map(Visibilities.fromJson).toList();
+  static List<Av3mProducts> fromList(List<Map<String, dynamic>> list) {
+    return list.map(Av3mProducts.fromJson).toList();
   }
 
   Map<String, dynamic> toJson() {
     final Map<String, dynamic> _data = <String, dynamic>{};
-    _data["id"] = id;
-    _data["posm_type_id"] = posmTypeId;
-    _data["visual_type_id"] = visualTypeId;
-    _data["filename"] = filename;
-    _data["image"] = image;
+    _data["product_id"] = productId;
+    _data["av3m"] = av3M;
     return _data;
   }
 }

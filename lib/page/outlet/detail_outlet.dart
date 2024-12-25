@@ -123,15 +123,11 @@ class DetailOutlet extends GetView<OutletController> {
                             ),
                             Row(
                               children: [
-                                ClipImage(url: outlet.images![0].image!),
-                                SizedBox(
-                                  width: 8,
-                                ),
-                                ClipImage(url: outlet.images![1].image!),
-                                SizedBox(
-                                  width: 8,
-                                ),
-                                ClipImage(url: outlet.images![2].image!),
+                                ClipImage(url: outlet.images?.elementAtOrNull(0)?.image),
+                                SizedBox(width: 8),
+                                ClipImage(url: outlet.images?.elementAtOrNull(1)?.image),
+                                SizedBox(width: 8),
+                                ClipImage(url: outlet.images?.elementAtOrNull(2)?.image),
                               ],
                             ),
                             SizedBox(
@@ -280,51 +276,10 @@ class ClipImage extends StatelessWidget {
     this.fit = BoxFit.cover,
   });
 
-  String _sanitizeUrl(String url) {
-    return "https://dev-cetaphil.i-am.host${url}";
-  }
-
-  @override
-  Widget build(BuildContext context) {
-    return Expanded(
-      child: GestureDetector(
-        onTap: url != null
-            ? () {
-                Navigator.push(
-                  context,
-                  MaterialPageRoute(
-                    builder: (context) => ImageViewerScreen(
-                      image: _sanitizeUrl(url!),
-                    ),
-                  ),
-                );
-              }
-            : null,
-        child: AspectRatio(
-          aspectRatio: 1,
-          child: Container(
-            decoration: BoxDecoration(
-              color: Colors.white,
-              border: Border.all(
-                color: Colors.blue,
-                width: 1,
-              ),
-              borderRadius: BorderRadius.circular(5),
-            ),
-            child: ClipRRect(
-              borderRadius: BorderRadius.circular(5),
-              child: url != null
-                  ? Image.network(
-                      _sanitizeUrl(url!),
-                      fit: fit,
-                      errorBuilder: _buildErrorWidget,
-                    )
-                  : _buildErrorWidget(context, null, null),
-            ),
-          ),
-        ),
-      ),
-    );
+  String? _sanitizeUrl(String? url) {
+    if (url == null || url.isEmpty) return null;
+    if (url.toLowerCase().contains("/data")) return url;
+    return "https://dev-cetaphil.i-am.host$url";
   }
 
   Widget _buildErrorWidget(BuildContext context, Object? error, StackTrace? stackTrace) {
@@ -334,12 +289,61 @@ class ClipImage extends StatelessWidget {
         mainAxisAlignment: MainAxisAlignment.center,
         children: [
           Icon(Icons.image_not_supported, color: Colors.grey[400], size: 24),
-          SizedBox(height: 8),
+          SizedBox(height: 4),
           Text(
             'No Image',
-            style: TextStyle(fontSize: 12, color: Colors.grey[600]),
+            style: TextStyle(
+              fontSize: 12,
+              color: Colors.grey[600],
+            ),
+            textAlign: TextAlign.center,
           ),
         ],
+      ),
+    );
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    final sanitizedUrl = _sanitizeUrl(url);
+
+    return Expanded(
+      child: GestureDetector(
+        onTap: sanitizedUrl != null
+            ? () {
+                Navigator.push(
+                  context,
+                  MaterialPageRoute(
+                    builder: (context) => ImageViewerScreen(
+                      image: sanitizedUrl,
+                    ),
+                  ),
+                );
+              }
+            : null,
+        child: AspectRatio(
+          aspectRatio: 1,
+          child: Container(
+            decoration: BoxDecoration(
+              color: Colors.grey[200],
+              border: Border.all(
+                color: Colors.blue.withOpacity(0.5),
+                width: 1,
+              ),
+              borderRadius: BorderRadius.circular(5),
+            ),
+            child: ClipRRect(
+              borderRadius: BorderRadius.circular(5),
+              child: sanitizedUrl != null
+                  ? Image.network(
+                      sanitizedUrl,
+                      fit: fit,
+                      errorBuilder: _buildErrorWidget,
+                    )
+                  : _buildErrorWidget(context, null, null),
+            ),
+          ),
+        ),
       ),
     );
   }
