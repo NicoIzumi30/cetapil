@@ -12,7 +12,7 @@ class ProductKnowledgeController extends Controller
 {
     public function index()
     {
-        $productKnowledge = ProductKnowledge::with('channel')->get();
+        $productKnowledge = ProductKnowledge::get();
         return new ProductKnowladgeCollection($productKnowledge);
     }
 }

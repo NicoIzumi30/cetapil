@@ -7,12 +7,9 @@ use Illuminate\Database\Eloquent\SoftDeletes;
 use Illuminate\Database\Eloquent\Concerns\HasUuids;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 
-class ProductKnowledge extends Model
+class  ProductKnowledge extends Model
 {
     use HasFactory, HasUuids, SoftDeletes;
 
     protected $guarded = [];
-    public function channel(){
-        return $this->belongsTo(Channel::class);
-    } 
 }
