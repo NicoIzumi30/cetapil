@@ -23,12 +23,13 @@
 @endsection
 
 @section('dashboard-content')
+
     <main class="w-full p-6">
         <div class="flex flex-col md:flex-row w-full gap-5 ">
             <x-pages.dashboard.total-card :title="'Total Report'" :total="7.432" :trendValue="56" :date="'03 November 2024'" />
-            <x-pages.dashboard.total-card :title="'Total Sales'" :total="7.432" :trendValue="32" :date="'03 November 2024'" />
-            <x-pages.dashboard.total-card :title="'Total Routing'" :total="7.432" :trendValue="-12" :date="'03 November 2024'" />
-            <x-pages.dashboard.total-card :title="'Total Visibility'" :total="7.432" :trendValue="-2" :date="'03 November 2024'" />
+            <x-pages.dashboard.total-card :title="'Total Sales'" :total="$user['total']" :date="$user['date']" />
+            <x-pages.dashboard.total-card :title="'Total Routing'" :total="$routes['total']" :date="$routes['date']" />
+            <x-pages.dashboard.total-card :title="'Total Visibility Activity'" :total="$visibility_activity['total']" :trendValue="-2" :date="$visibility_activity['date']" />
         </div>
         <div class="flex flex-wrap xl:flex-nowrap gap-6 w-full mt-6">
             <x-pages.dashboard.chart-routing />
@@ -163,79 +164,10 @@
 
     <script>
         // Data definitions
-        const dataStock = [
-            ['id-ac', 113],
-            ['id-jt', 124],
-            ['id-be', 133],
-            ['id-bt', 141],
-            ['id-kb', 153],
-            ['id-bb', 161],
-            ['id-ba', 17],
-            ['id-ji', 18],
-            ['id-ks', 19],
-            ['id-nt', 20],
-            ['id-se', 21],
-            ['id-kr', 22],
-            ['id-ib', 230],
-            ['id-su', 24],
-            ['id-ri', 25],
-            ['id-sw', 26],
-            ['id-ku', 27],
-            ['id-la', 28],
-            ['id-sb', 29],
-            ['id-ma', 30],
-            ['id-nb', 31],
-            ['id-sg', 32],
-            ['id-st', 33],
-            ['id-pa', 34],
-            ['id-jr', 35],
-            ['id-ki', 36],
-            ['id-1024', 37],
-            ['id-jk', 38],
-            ['id-go', 39],
-            ['id-yo', 40],
-            ['id-sl', 41],
-            ['id-sr', 42],
-            ['id-ja', 43],
-            ['id-kt', 44]
-        ];
+        const dataStock = {!!$stock!!}
+        
 
-        const dataVisibility = [
-            ['id-ac', 11],
-            ['id-jt', 12],
-            ['id-be', 13],
-            ['id-bt', 14],
-            ['id-kb', 15],
-            ['id-bb', 16],
-            ['id-ba', 17],
-            ['id-ji', 18],
-            ['id-ks', 19],
-            ['id-nt', 20],
-            ['id-se', 21],
-            ['id-kr', 22],
-            ['id-ib', 23],
-            ['id-su', 24],
-            ['id-ri', 25],
-            ['id-sw', 26],
-            ['id-ku', 27],
-            ['id-la', 28],
-            ['id-sb', 29],
-            ['id-ma', 30],
-            ['id-nb', 31],
-            ['id-sg', 32],
-            ['id-st', 33],
-            ['id-pa', 34],
-            ['id-jr', 35],
-            ['id-ki', 36],
-            ['id-1024', 37],
-            ['id-jk', 38],
-            ['id-go', 39],
-            ['id-yo', 40],
-            ['id-sl', 41],
-            ['id-sr', 42],
-            ['id-ja', 43],
-            ['id-kt', 44]
-        ];
+        const dataVisibility = {!!$count!!}
 
         // Marker Data
         const markerData = {
