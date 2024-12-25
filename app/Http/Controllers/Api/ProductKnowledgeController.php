@@ -12,7 +12,7 @@ class ProductKnowledgeController extends Controller
 {
     public function index()
     {
-        $productKnowledge = ProductKnowledge::get();
-        return new ProductKnowladgeCollection($productKnowledge);
+        $productKnowledge = ProductKnowledge::latest('created_at')->first();
+        return new ProductKnowladgeCollection(collect([$productKnowledge]));
     }
 }
