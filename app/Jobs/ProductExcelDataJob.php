@@ -38,8 +38,7 @@ class ProductExcelDataJob implements ShouldQueue
                                 $product = Product::create([
                                     'category_id' => $category['id'],
                                     'sku' => $row['produk_sku'],
-                                    'md_price' => $row['harga_md'] ?? 0,
-                                    'sales_price' => $row['harga_sales'] ?? 0,
+                                    'price' => $row['harga'] ?? 0,
                                 ]);
                             } else {
                                 throw new Exception("Category not found: " . $row['kategori_produk']);
@@ -47,28 +46,7 @@ class ProductExcelDataJob implements ShouldQueue
                         }
                     }
 
-                    if ($product) {
-                        $channelMappings = [
-                            'av3m_chain_pharmacy' => 'Chain Pharmacy',
-                            'av3m_minimarket' => 'Minimarket',
-                            'av3m_hfs_atau_gt' => 'HFS/GT',
-                            'av3m_hsm_hyper_suparmarket' => 'HSM (Hyper Suparmarket)'
-                        ];
-
-                        foreach ($channelMappings as $excelColumn => $channelName) {
-                            if (isset($row[$excelColumn])) {
-                                $channel = getChannelByName($channelName);
-                                if ($channel) {
-                                    Av3m::updateOrCreate(
-                                        ['product_id' => $product->id, 'channel_id' => $channel['id']],
-                                        ['av3m' => $row[$excelColumn]]
-                                    );
-                                } else {
-                                    throw new Exception("Channel not found: " . $channelName);
-                                }
-                            }
-                        }
-                    }
+            
                 } catch (\Exception $e) {
                     $errorRow = $key + 1;
                     $data = [

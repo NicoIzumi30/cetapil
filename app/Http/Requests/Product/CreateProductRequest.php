@@ -27,8 +27,7 @@ class CreateProductRequest extends FormRequest
         return [
             'category_id' => 'required|exists:categories,id',
             'sku' => 'required|string|unique:products,sku',
-            'md_price' => 'required|numeric|min:0',
-            'sales_price' => 'required|numeric|min:0'
+            'price' => 'required|numeric|min:0'
         ]
         ;
     }

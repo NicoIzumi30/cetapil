@@ -70,8 +70,7 @@ class ProductController extends Controller
                     'id' => $item->id, // Tambahkan id product
                     'category' => $item->category->name,
                     'sku' => $item->sku,
-                    'md_price' => number_format($item->md_price, 0, ',', '.'),
-                    'sales_price' => number_format($item->sales_price, 0, ',', '.'),
+                    'price' => number_format($item->price, 0, ',', '.'),
                     'actions' => view('pages.product.action', [
                         'item' => $item,
                         'productId' => $item->id // Pass product id ke view actions
@@ -177,8 +176,7 @@ class ProductController extends Controller
             'id' => $product->id,
             'category_id' => $product->category_id,
             'sku' => $product->sku,
-            'md_price' => $product->md_price,
-            'sales_price' => $product->sales_price
+            'price' => $product->price
         ]);
     }
 
@@ -188,8 +186,7 @@ class ProductController extends Controller
             $product->update([
                 'category_id' => $request->category_id,
                 'sku' => $request->sku,
-                'md_price' => $request->md_price,
-                'sales_price' => $request->sales_price
+                'price' => $request->price,
             ]);
 
             return response()->json([

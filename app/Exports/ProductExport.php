@@ -35,14 +35,8 @@ class ProductExport implements FromCollection, WithHeadings, WithMapping, WithSt
         $headers = [
             'Kategori Produk',
             'Produk SKU',
-            'Harga MD',
-            'Harga Sales',
+            'Harga',
         ];
-
-        // Add channel names to headers
-        foreach ($this->channels as $channel) {
-            $headers[] = 'AV3M ' . $channel->name;
-        }
 
         return $headers;
     }
@@ -54,17 +48,9 @@ class ProductExport implements FromCollection, WithHeadings, WithMapping, WithSt
             $row = [
                 $product->category->name ?? 'Uncategorized',
                 $product->sku,
-                'Rp ' . number_format($product->md_price, 0, ',', '.'),
-                'Rp ' . number_format($product->sales_price, 0, ',', '.'),
+                'Rp ' . number_format($product->price, 0, ',', '.'),
             ];
 
-            // Create associative array of av3m values by channel_id
-            $av3mByChannel = $product->av3ms->pluck('av3m', 'channel_id')->toArray();
-
-            // Add av3m values for each channel
-            foreach ($this->channels as $channel) {
-                $row[] = $av3mByChannel[$channel->id] ?? 0;
-            }
 
             return $row;
         } catch (\Exception $e) {
@@ -78,7 +64,7 @@ class ProductExport implements FromCollection, WithHeadings, WithMapping, WithSt
 
     public function styles(Worksheet $sheet)
     {
-        $lastColumn = chr(65 + 3 + $this->channels->count()); // A + number of base columns + number of channels
+        $lastColumn = chr(65 + 2); // A + number of base columns + number of channels
         $lastRow = $sheet->getHighestRow();
 
         // Header styles
@@ -114,10 +100,7 @@ class ProductExport implements FromCollection, WithHeadings, WithMapping, WithSt
         $sheet->getStyle("B2:B{$lastRow}")->getAlignment()->setHorizontal(Alignment::HORIZONTAL_CENTER);
 
         // Align prices right
-        $sheet->getStyle("C2:D{$lastRow}")->getAlignment()->setHorizontal(Alignment::HORIZONTAL_RIGHT);
-
-        // Align AV3M values center
-        $sheet->getStyle("E2:{$lastColumn}{$lastRow}")->getAlignment()->setHorizontal(Alignment::HORIZONTAL_CENTER);
+        $sheet->getStyle("C2:C{$lastRow}")->getAlignment()->setHorizontal(Alignment::HORIZONTAL_RIGHT);
 
         // Set row height
         $sheet->getDefaultRowDimension()->setRowHeight(25);

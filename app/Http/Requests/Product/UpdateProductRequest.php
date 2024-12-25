@@ -29,8 +29,7 @@ class UpdateProductRequest extends FormRequest
                 'required',
                 Rule::unique('products', 'sku')->ignore($this->product),
             ],
-            'md_price' => 'required|numeric|min:0',
-            'sales_price' => 'required|numeric|min:0'
+            'price' => 'required|numeric|min:0'
         ]
         ;
     }

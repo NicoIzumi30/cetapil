@@ -52,16 +52,10 @@
                         <span id="sku-error" class="text-red-500 text-xs hidden"></span>
                     </div>
                     <div>
-                        <label for="md_price" class="!text-black">Harga MD</label>
-                        <input id="md_price" class="form-control" type="number" name="md_price"
-                            placeholder="Masukan Harga MD">
-                        <span id="md_price-error" class="text-red-500 text-xs hidden"></span>
-                    </div>
-                    <div>
-                        <label for="sales_price" class="!text-black">Harga Sales</label>
-                        <input id="sales_price" class="form-control" type="number" name="sales_price"
-                            placeholder="Masukan Harga Sales">
-                        <span id="sales_price-error" class="text-red-500 text-xs hidden"></span>
+                        <label for="price" class="!text-black">Harga</label>
+                        <input id="price" class="form-control" type="number" name="price"
+                            placeholder="Masukan Harga">
+                        <span id="price-error" class="text-red-500 text-xs hidden"></span>
                     </div>
                     <x-slot:footer>
                         <x-button.primary type="submit" id="saveBtn" class="w-full">
@@ -101,18 +95,12 @@
                         <span id="edit-sku-error" class="text-red-500 text-xs hidden"></span>
                     </div>
                     <div>
-                        <label for="edit-md-price" class="!text-black">Harga MD</label>
-                        <input id="edit-md-price" class="form-control" type="number" name="md_price"
-                            placeholder="Masukan Harga MD">
-                        <span id="edit-md_price-error" class="text-red-500 text-xs hidden"></span>
+                        <label for="edit-price" class="!text-black">Harga</label>
+                        <input id="edit-price" class="form-control" type="number" name="price"
+                            placeholder="Masukan Harga">
+                        <span id="edit-price-error" class="text-red-500 text-xs hidden"></span>
                     </div>
-                    <div>
-                        <label for="edit-sales-price" class="!text-black">Harga Sales</label>
-                        <input id="edit-sales-price" class="form-control" type="number" name="sales_price"
-                            placeholder="Masukan Harga Sales">
-                        <span id="edit-sales_price-error" class="text-red-500 text-xs hidden"></span>
-                    </div>
-                </form>
+                                 </form>
                 <x-slot:footer>
                     <x-button.primary type="submit" id="updateBtn" class="w-full">
                         <span id="updateBtnText">Simpan Perubahan</span>
@@ -182,15 +170,9 @@
                             <x-icons.sort />
                         </a>
                     </th>
-                    <th scope="col" class="text-center">
+                                      <th scope="col" class="text-center">
                         <a class="table-head">
-                            {{ __('Harga MD') }}
-                            <x-icons.sort />
-                        </a>
-                    </th>
-                    <th scope="col" class="text-center">
-                        <a class="table-head">
-                            {{ __('Harga Sales') }}
+                            {{ __('Harga') }}
                             <x-icons.sort />
                         </a>
                     </th>
@@ -457,15 +439,10 @@
                     { data: 'category', name: 'category.name', className: 'table-data', },
 
                     { data: 'sku', name: 'sku', className: 'table-data', },
+                    
                     {
-                        data: 'md_price',
-                        name: 'md_price',
-                        className: 'table-data',
-                        render: data => 'Rp ' + data
-                    },
-                    {
-                        data: 'sales_price',
-                        name: 'sales_price',
+                        data: 'price',
+                        name: 'price',
                         className: 'table-data',
                         render: data => 'Rp ' + data
                     },
@@ -603,8 +580,7 @@
                     success: function (response) {
                         $('#edit-category').val(response.category_id).trigger('change');
                         $('#edit-sku').val(response.sku);
-                        $('#edit-md-price').val(response.md_price);
-                        $('#edit-sales-price').val(response.sales_price);
+                        $('#edit-price').val(response.price);
                         $('#editProductForm').data('id', response.id);
                         openModal('edit-produk');
                     },
@@ -621,8 +597,7 @@
                 const formData = {
                     category_id: $('#edit-category').val(),
                     sku: $('#edit-sku').val(),
-                    md_price: $('#edit-md-price').val().replace(/[^\d]/g, ''),
-                    sales_price: $('#edit-sales-price').val().replace(/[^\d]/g, '')
+                    price: $('#edit-price').val().replace(/[^\d]/g, ''),
                 };
 
                 resetFormErrors();
