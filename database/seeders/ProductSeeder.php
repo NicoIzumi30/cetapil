@@ -33,7 +33,7 @@ class ProductSeeder extends Seeder
                 ['sku' => 'CETAPHIL BABY SHAMPOO 200 ML', 'price' => 75636],
                 ['sku' => 'Cetaphil Baby Wash & Shampoo with Organic Calendula 230 ml', 'price' => 95473],
                 ['sku' => 'Cetaphil Baby Wash & Shampoo with Organic Calendula 400 ml', 'price' => 138280],
-                ['sku' => 'Cetaphil Baby with Organic Calendula Advanced Protection Cream', 'price' => 71464],
+                ['sku' => 'Cetaphil Baby with Organic Calendula Advanced Protection Cream 85G', 'price' => 71464],
             ],
             'BHR' => [
                 ['sku' => 'Cetaphil Bright Healthy Radiance Gentle Renewing Cleanser 100', 'price' => 138566],
@@ -46,7 +46,7 @@ class ProductSeeder extends Seeder
                 ['sku' => 'Cetaphil Brightness Reveal Creamy Cleanser 100ml', 'price' => 138286],
             ],
             'Cleanser' => [
-                ['sku' => 'CETAPHIL FACIAL CLEANSER 236ML', 'price' => 144493],
+                ['sku' => 'CETAPHIL DAILY FACIAL CLEANSER 236ML', 'price' => 144493],
                 ['sku' => 'CETAPHIL Exfoliating Cleanser 178 ML', 'price' => 81689],
                 ['sku' => 'CETAPHIL GENTLE SKIN CLEANSER 1000 ML', 'price' => 273216],
                 ['sku' => 'CETAPHIL GENTLE SKIN CLEANSER 125 ML', 'price' => 62095],
@@ -60,9 +60,9 @@ class ProductSeeder extends Seeder
             ],
             'Moisturizer' => [
                 ['sku' => 'CETAPHIL DAILY ADV ULT HYDRA LOTION 85 G', 'price' => 95878],
-                ['sku' => 'CETAPHIL MOISTURISING LOTION 237 mL', 'price' => 144493],
+                ['sku' => 'CETAPHIL MOISTURISING LOTION 237 ml', 'price' => 144493],
                 ['sku' => 'CETAPHIL MOISTURIZING CREAM 453 G', 'price' => 242500],
-                ['sku' => 'CETAPHIL MOISTURIZING CREAM - 100 G', 'price' => 112770],
+                ['sku' => 'CETAPHIL MOISTURIZING CREAM 100 G', 'price' => 112770],
                 ['sku' => 'CETAPHIL MOISTURIZING LOTION 200 ML', 'price' => 132703],
                 ['sku' => 'CETAPHIL MOISTURIZING LOTION 59 ML', 'price' => 48254],
             ],

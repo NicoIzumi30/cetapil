@@ -23,37 +23,66 @@ class SurveySeeder extends Seeder
         $categories = [
             'Availability' => [
                 'Apakah POWER SKU tersedia di toko?' => [
-                    'CETAPHIL Gentle Skin Cleanser 125 ML',
-                    'CETAPHIL Gentle Skin Cleanser 500 ML',
-                    'CETAPHIL Oily Skin Cleanser 125 ML',
-                    'CETAPHIL Exfoliating Cleanser 178 ML',
-                    'CETAPHIL MOISTURIZING LOTION 200 ML',
-                    'Cetaphil Brightness Refresh Toner 150 ML'
+                    "CETAPHIL GENTLE SKIN CLEANSER 125 ML",
+                    "CETAPHIL GENTLE SKIN CLEANSER 250 ML",
+                    "CETAPHIL DAILY FACIAL CLEANSER 236ML",
+                    "CETAPHIL Exfoliating Cleanser 178 ML",
+                    "CETAPHIL HYDRATING FOAMING CREAM CLEANSER 236 ML",
+                    "CETAPHIL ULTRA GENTLE BODY WASH 500 ML",
+                    "Cetaphil Baby Daily Lotion with Organic Calendula 400 ml",
+                    "CETAPHIL BABY GTL WASH & SHAMPOO 400 ML",
+                    "Cetaphil Baby Wash & Shampoo with Organic Calendula 400 ml",
+                    "CETAPHIL BABY DAILY LOTION 400 ML",
+                    "Cetaphil Baby with Organic Calendula Advanced Protection Cream 85G",
+                    "CETAPHIL Sun SPF50+ Light Gel 50ml",
+                    "CETAPHIL MOISTURISING LOTION 237 ml",
+                    "CETAPHIL MOISTURIZING CREAM 100 G",
+                    "Cetaphil Brightness Reveal Creamy Cleanser 100ml",
                 ],
                 'Berapa harga POWER SKU di toko?' => [
-                    'CETAPHIL Gentle Skin Cleanser 125 ML',
-                    'CETAPHIL Gentle Skin Cleanser 500 ML',
-                    'CETAPHIL Oily Skin Cleanser 125 ML',
-                    'CETAPHIL Exfoliating Cleanser 178 ML',
-                    'CETAPHIL MOISTURIZING LOTION 200 ML',
-                    'Cetaphil Brightness Refresh Toner 150 ML'
+                    "CETAPHIL GENTLE SKIN CLEANSER 125 ML",
+                    "CETAPHIL GENTLE SKIN CLEANSER 250 ML",
+                    "CETAPHIL DAILY FACIAL CLEANSER 236ML",
+                    "CETAPHIL Exfoliating Cleanser 178 ML",
+                    "CETAPHIL HYDRATING FOAMING CREAM CLEANSER 236 ML",
+                    "CETAPHIL ULTRA GENTLE BODY WASH 500 ML",
+                    "Cetaphil Baby Daily Lotion with Organic Calendula 400 ml",
+                    "CETAPHIL BABY GTL WASH & SHAMPOO 400 ML",
+                    "Cetaphil Baby Wash & Shampoo with Organic Calendula 400 ml",
+                    "CETAPHIL BABY DAILY LOTION 400 ML",
+                    "Cetaphil Baby with Organic Calendula Advanced Protection Cream 85G",
+                    "CETAPHIL Sun SPF50+ Light Gel 50ml",
+                    "CETAPHIL MOISTURISING LOTION 237 ml",
+                    "CETAPHIL MOISTURIZING CREAM 100 G",
+                    "Cetaphil Brightness Reveal Creamy Cleanser 100ml",
                 ],
                 'Berapa harga kompetitor di toko?' => [
-                    'Bioderma Sensibio H2O Micellar Water 100 ML',
-                    'Bioderma Sensibio H2O Micellar Water 500 ML Pump',
-                    'Bioderma Sensibio Defensive 40 ML Antioxidant Soothing Moisturizer',
-                    'Bioderma Gel Moussant 200 ML Soothing Gentle Cleanser'
+                    "CETAPHIL GENTLE SKIN CLEANSER 125 ML",
+                    "CETAPHIL GENTLE SKIN CLEANSER 250 ML",
+                    "CETAPHIL DAILY FACIAL CLEANSER 236ML",
+                    "CETAPHIL Exfoliating Cleanser 178 ML",
+                    "CETAPHIL HYDRATING FOAMING CREAM CLEANSER 236 ML",
+                    "CETAPHIL ULTRA GENTLE BODY WASH 500 ML",
+                    "Cetaphil Baby Daily Lotion with Organic Calendula 400 ml",
+                    "CETAPHIL BABY GTL WASH & SHAMPOO 400 ML",
+                    "Cetaphil Baby Wash & Shampoo with Organic Calendula 400 ml",
+                    "CETAPHIL BABY DAILY LOTION 400 ML",
+                    "Cetaphil Baby with Organic Calendula Advanced Protection Cream 85G",
+                    "CETAPHIL Sun SPF50+ Light Gel 50ml",
+                    "CETAPHIL MOISTURISING LOTION 237 ml",
+                    "CETAPHIL MOISTURIZING CREAM 100 G",
+                    "Cetaphil Brightness Reveal Creamy Cleanser 100ml",
                 ]
             ],
             'Visibility' => [
                 'N' => [
-                    'Rak Reguler: Apakah lokasi Cetaphil berada di Kategori Derma atau Sensitive Skin?',
-                    'Rak Reguler: Apakah 6 Power SKU berada pada top level atau eye level?',
-                    'Rak Reguler: Apakah Cetaphil memiliki shelf share sama atau lebih besar dari Bioderma?',
-                    'Rak Reguler: Apakah Cetaphil memiliki POSM (shelftalker, wobbler, backwall, standee, dll) di toko?',
-                    'Apakah Claim Cetaphil #1 MEREK DERMATOLOGIS terlihat di Rak Regular dan/atau secondary display di toko?',
-                    'BHR: Apakah ada Penempatan Khusus untuk highlight BHR (glorifier,standee,backwall,COC,sample?',
-                    'Apakah Cetaphil terdisplay di Lokasi selain rak regular dengan minimal 2 SKUs?'
+                    "Rak Reguler: Apakah lokasi Cetaphil berada di Kategori Derma atau Sensitive Skin?",
+                    "Rak Reguler: Apakah 6 Power SKU berada pada top level atau eye level?",
+                    "Rak Reguler: Apakah Cetaphil memiliki POSM di regular shelf (Shelf talker, Wobbler, Header, Glorifier, dll) di toko?",
+                    "Rak Reguler: Apakah Cetaphil memiliki shelf share sama atau lebih besar dari Cerave?",
+                    "Apakah Claim Cetaphil #1 MEREK DERMATOLOGIS terlihat di Rak Regular dan/atau secondary display di toko?",
+                    "Apakah Cetaphil memiliki secondary display di toko (Gondola, Standee, Stack Rack, CoC)",
+                    "Apakah Cetaphil terdisplay di Lokasi selain rak regular dengan minimal 2 SKUs?",
                 ]
             ],
             'Recommndation' => [
@@ -76,10 +105,11 @@ class SurveySeeder extends Seeder
                     foreach ($product as $quest) {
                         $type = 'text';
                         if (($categoryTitle === 'Apakah POWER SKU tersedia di toko?' || $categoryName === 'Visibility') ||
-                            ($categoryName === 'Recommndation' && $quest === 'Apakah ada produk detailing/training di 3 bulan terakhir ke 80% Apoteker atau Staff Toko?')) {
+                            ($categoryName === 'Recommndation' && $quest === 'Apakah ada produk detailing/training di 3 bulan terakhir ke 80% Apoteker atau Staff Toko?')
+                        ) {
                             $type = 'bool';
                         }
-                        $prod = Product::whereRaw('LOWER(`sku`) LIKE ? ', strtolower($quest).'%')->first();
+                        $prod = Product::whereRaw('LOWER(`sku`) LIKE ? ', strtolower($quest) . '%')->first();
                         $prod_id = null;
                         if ($prod) {
                             $prod_id = $prod->id;
