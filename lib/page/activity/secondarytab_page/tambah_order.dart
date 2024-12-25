@@ -424,7 +424,7 @@ class _CompactProductCardState extends State<CompactProductCard> {
     void updateValues() {
       widget.onChanged({
         'jumlah': jumlahController.text.isEmpty ? '0' : jumlahController.text,
-        'harga': formatter.format(widget.sku['price']),
+        'harga': formatter.format(widget.sku['price']).toString(),
       });
     }
 

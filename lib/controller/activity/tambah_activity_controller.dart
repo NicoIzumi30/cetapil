@@ -223,6 +223,8 @@ class TambahActivityController extends GetxController {
           }
         }
       }
+      /// Filter when data stock on hand and inventory in availability 0
+      availabilityDraftItems.removeWhere((item) => item['stock_on_hand'] == 0 && item['stock_on_inventory'] == 0);
 
       final response = await Api.submitActivity(
         data,

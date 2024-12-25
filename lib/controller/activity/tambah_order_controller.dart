@@ -166,6 +166,7 @@ class TambahOrderController extends GetxController {
 
     tambahActivityController.orderDraftItems.clear();
     tambahActivityController.orderDraftItems.addAll([...remainingItems, ...updatedItems]);
+    print(tambahActivityController.orderDraftItems);
     tambahActivityController.orderDraftItems.refresh();
 
     // Clear the form

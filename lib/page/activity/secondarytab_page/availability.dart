@@ -365,12 +365,25 @@ class SumAmountProduct extends StatelessWidget {
   String checkStatus(String number) {
     int num = int.parse(number);
     if (num < 0) {
-      return "Kurang   ";
+      return "Kurang";
     } else if (num > 0) {
-      return "Over   ";
+      return "Over";
     } else {
-      return "Ideal   ";
+      return "Ideal";
     }
+  }
+
+  statusColor(String value){
+    switch(value) {
+      case "Over":
+        return Color(0xffff7171);
+      case "Kurang":
+        return Color(0xfff2c665);
+      case "Ideal":
+        return Color(0xff0177be);
+      default:
+    }
+
   }
 
   const SumAmountProduct({
@@ -428,7 +441,7 @@ class SumAmountProduct extends StatelessWidget {
             ),
           ),
           Padding(
-            padding: EdgeInsets.all(16),
+            padding: EdgeInsets.symmetric(horizontal: 16, vertical: 5),
             child: Column(
               children: [
                 Row(
@@ -436,7 +449,11 @@ class SumAmountProduct extends StatelessWidget {
                   children: [
                     Expanded(
                         flex: 3,
-                        child: Text("Availability (Y/N) ? ")),
+                        child: Text("Availability",style: TextStyle(
+                          fontSize: 13,
+                          fontWeight: FontWeight.w500,
+                          color: Color(0xFF666666),
+                        ),)),
                     Expanded(
                       flex: 1,
                       child: NumberField(
@@ -451,28 +468,15 @@ class SumAmountProduct extends StatelessWidget {
                     _buildDetailField("Stock On Hand", stockOnHandController),
                     SizedBox(width: 12),
                     _buildDetailField("Stock On Inventory", stockOnInventoryController),
-                  ],
-                ),
-                Row(
-                  children: [
-                    _buildDetailField("Av3m", av3mController),
                     SizedBox(width: 12),
-                    _buildDetailField("Recommend", recommendController),
+                    _buildDetailField("Av3m", av3mController),
                   ],
                 ),
                 Row(
-                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
                   children: [
-                    Text("Status",style: TextStyle(
-                        fontSize: 12,
-                        fontWeight: FontWeight.w500,
-                        color: Color(0xFF666666),
-                        fontStyle: FontStyle.italic
-                    ),),
-                    Text(checkStatus(recommendController.text),style: TextStyle(
-                      fontWeight: FontWeight.bold,
-                      color: Colors.blue,
-                    ),),
+                    _buildDetailField("Recommend", recommendController),
+                    SizedBox(width: 12),
+                    _buildDetailStatus("Status", checkStatus(recommendController.text)),
                   ],
                 ),
               ],
@@ -491,7 +495,7 @@ class SumAmountProduct extends StatelessWidget {
           Text(
             label,
             style: TextStyle(
-              fontSize: 12,
+              fontSize: 10,
               fontWeight: FontWeight.w500,
               color: Color(0xFF666666),
             ),
@@ -505,6 +509,83 @@ class SumAmountProduct extends StatelessWidget {
       ),
     );
   }
+
+  Widget _buildDetailStatus(String label, String value) {
+    return Expanded(
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Text(
+            label,
+            style: TextStyle(
+              fontSize: 10,
+              fontWeight: FontWeight.w500,
+              color: Color(0xFF666666),
+            ),
+          ),
+          SizedBox(height: 4),
+          Container(
+            margin: EdgeInsets.only(bottom: 10, top: 5),
+            decoration: BoxDecoration(
+              borderRadius: BorderRadius.circular(12),
+              boxShadow: [
+                BoxShadow(
+                  color: Colors.grey.withOpacity(0.1),
+                  spreadRadius: 1,
+                  blurRadius: 3,
+                  offset: const Offset(0, 2),
+                ),
+              ],
+            ),
+            child: TextFormField(
+              controller: TextEditingController(text: value),
+              keyboardType: TextInputType.number,
+              readOnly: true,
+              style: TextStyle(
+                fontSize: 14,
+                color: Colors.white,
+              ),
+              textAlign: TextAlign.center,
+              decoration: InputDecoration(
+                hintStyle: TextStyle(
+                  color: Colors.grey[400],
+                  fontSize: 14,
+                ),
+                contentPadding: const EdgeInsets.symmetric(
+                  horizontal: 3,
+                  vertical: 3,
+                ),
+                border: OutlineInputBorder(
+                  borderRadius: BorderRadius.circular(8),
+                  borderSide: BorderSide(
+                    color: statusColor(value),
+                    width: 1,
+                  ),
+                ),
+                filled: true,
+                fillColor: statusColor(value),
+                focusedBorder: OutlineInputBorder(
+                  borderRadius: BorderRadius.circular(8),
+                  borderSide: BorderSide(
+                    color: statusColor(value),
+                    width: 1,
+                  ),
+                ),
+                enabledBorder: OutlineInputBorder(
+                  borderRadius: BorderRadius.circular(8),
+                  borderSide:  BorderSide(
+                    color: statusColor(value),
+                    width: 1,
+                  ),
+                ),
+              ),
+            ),
+          )
+        ],
+      ),
+    );
+  }
+
 }
 
 class NumberField extends StatelessWidget {

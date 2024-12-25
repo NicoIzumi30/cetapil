@@ -441,19 +441,27 @@ class Api {
     request.fields["time_survey"] = data["time_survey"].toString();
     request.fields["time_order"] = data["time_order"].toString();
     request.fields["current_time"] = data["current_time"].toString();
-    request.fields["time_survey"] = data["time_survey"].toString();
 
+
+    String checkStatus(String number) {
+      int num = int.parse(number);
+      if (num < 0) {
+        return "MINUS";
+      } else if (num > 0) {
+        return "OVER";
+      } else {
+        return "IDEAL";
+      }
+    }
     /// Availability Section
     for (var i = 0; i < availabilityList.length; i++) {
-      request.fields["availability[$i][product_id]"] = availabilityList[i]["id"].toString();
-      request.fields["availability[$i][availability_stock]"] =
-          availabilityList[i]["stock"].toString();
-      request.fields["availability[$i][average_stock]"] = "1";
-
-      /// Hardcode karna av3m null
-      // request.fields["availability[$i][average_stock]"] =
-      //     availabilityList[i]["av3m"].toString() ?? "";
-      request.fields["availability[$i][ideal_stock]"] = availabilityList[i]["recommend"].toString();
+      request.fields["availability[$i][product_id]"] = availabilityList[i]["product_id"].toString();
+      request.fields["availability[$i][stock_on_hand]"] = availabilityList[i]["stock_on_hand"].toString();
+      request.fields["availability[$i][stock_inventory]"] = availabilityList[i]["stock_on_inventory"].toString();
+      request.fields["availability[$i][av3m]"] = availabilityList[i]["av3m"].toString();
+      request.fields["availability[$i][status]"] = checkStatus(availabilityList[i]["recommend"].toString());
+      request.fields["availability[$i][rekomendasi]"] = availabilityList[i]["recommend"].toString();
+      request.fields["availability[$i][availability]"] = availabilityList[i]["availability_toggle"] ? "Y" : "N";
     }
 
     ///Visibility Section

@@ -210,12 +210,25 @@ class _CompactProductCardState extends State<CompactProductCard> {
   String checkStatus(String number) {
     int num = int.parse(number);
     if (num < 0) {
-      return "Kurang   ";
+      return "Less";
     } else if (num > 0) {
-      return "Over   ";
+      return "Over";
     } else {
-      return "Ideal   ";
+      return "Ideal";
     }
+  }
+
+  statusColor(String value){
+    switch(value) {
+      case "Over":
+        return Color(0xffff7171);
+      case "Less":
+        return Color(0xfff2c665);
+      case "Ideal":
+        return Color(0xff0177be);
+      default:
+    }
+
   }
 
   @override
@@ -383,39 +396,21 @@ class _CompactProductCardState extends State<CompactProductCard> {
                   ],
                 ),
                 Divider(color: Colors.grey,),
-                Text("Stock",style: TextStyle(
-                  fontSize: 12,
-                  fontWeight: FontWeight.w500,
-                  color: Color(0xFF666666),
-                  fontStyle: FontStyle.italic
-                ),),
                 Row(
+                  crossAxisAlignment: CrossAxisAlignment.center,
                   children: [
-                    Expanded(child: _buildInputField('On Hand', stockOnHandController)),
+                    Expanded(child: _buildInputField('Stock On Hand', stockOnHandController)),
                     SizedBox(width: 8),
-                    Expanded(child: buildInputInventory('On Inventory', stockOnInventoryController)),
+                    Expanded(child: buildInputInventory('Stock On Inventory', stockOnInventoryController)),
+                    SizedBox(width: 8),
+                    Expanded(child: _buildInputField('AV3M(Pcs)', av3mController)),
                   ],
                 ),
                 Row(
                   children: [
-                    Expanded(child: _buildInputField('AV3M', av3mController)),
+                    Expanded(child: _buildDetailField(false,'Recommend', recommendController,)),
                     SizedBox(width: 8),
-                    Expanded(child: _buildDetailField('Recommend', recommendController,)),
-                  ],
-                ),
-                Row(
-                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                  children: [
-                    Text("Status",style: TextStyle(
-                        fontSize: 12,
-                        fontWeight: FontWeight.w500,
-                        color: Color(0xFF666666),
-                        fontStyle: FontStyle.italic
-                    ),),
-                    Text(checkStatus(recommendController.text),style: TextStyle(
-                    fontWeight: FontWeight.bold,
-                        color: Colors.blue,
-    ),),
+                    Expanded(child: _buildDetailField(true,'Status', TextEditingController(text: checkStatus(recommendController.text)))),
                   ],
                 ),
               ],
@@ -426,6 +421,7 @@ class _CompactProductCardState extends State<CompactProductCard> {
     );
   }
 
+
   Widget buildInputInventory(String label, TextEditingController controller) {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
@@ -433,11 +429,12 @@ class _CompactProductCardState extends State<CompactProductCard> {
         Text(
           label,
           style: TextStyle(
-            fontSize: 12,
-            fontWeight: FontWeight.w500,
+            fontSize: 10,
+            fontWeight: FontWeight.bold,
             color: Color(0xFF666666),
           ),
         ),
+        SizedBox(height: 2),
         Container(
           margin: EdgeInsets.only(bottom: 10, top: 5),
           decoration: BoxDecoration(
@@ -461,12 +458,12 @@ class _CompactProductCardState extends State<CompactProductCard> {
             onChanged: (value){
               setState(() {
                 if (value.isEmpty) {
-                  recommendController.text = "0";
+                  recommendController.text = (int.parse("0") - int.parse(av3mController.text)).toString();
                 }else{
                   try {
                     recommendController.text = (int.parse(value) - int.parse(av3mController.text)).toString();
                   } catch (e) {
-                    recommendController.text = "0";
+                    recommendController.text = (int.parse("0") - int.parse(av3mController.text)).toString();
                   }
                 }
               });
@@ -529,12 +526,12 @@ class _CompactProductCardState extends State<CompactProductCard> {
         Text(
           label,
           style: TextStyle(
-            fontSize: 12,
-            fontWeight: FontWeight.w500,
+            fontSize: 10,
+            fontWeight: FontWeight.bold,
             color: Color(0xFF666666),
           ),
         ),
-        SizedBox(height: 4),
+        SizedBox(height: 2),
         NumberField(
           controller: controller,
         ),
@@ -542,166 +539,230 @@ class _CompactProductCardState extends State<CompactProductCard> {
     );
   }
 
-  Widget _buildDetailField(String label, TextEditingController controller) {
+  Widget _buildDetailField(bool isStatus,String label, TextEditingController controller) {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
         Text(
           label,
           style: TextStyle(
-            fontSize: 12,
-            fontWeight: FontWeight.w500,
+            fontSize: 10,
+            fontWeight: FontWeight.bold,
             color: Color(0xFF666666),
           ),
         ),
-        SizedBox(height: 4),
-        NumberField(
-          controller: controller,
-          readOnly: true,
-        ),
+        SizedBox(height: 2),
+        Container(
+          margin: EdgeInsets.only(bottom: 10, top: 5),
+          decoration: BoxDecoration(
+            borderRadius: BorderRadius.circular(12),
+            boxShadow: [
+              BoxShadow(
+                color: Colors.grey.withOpacity(0.1),
+                spreadRadius: 1,
+                blurRadius: 3,
+                offset: const Offset(0, 2),
+              ),
+            ],
+          ),
+          child: TextFormField(
+            controller: controller,
+            keyboardType: TextInputType.number,
+            readOnly: true,
+            style: TextStyle(
+              fontSize: 14,
+              color: isStatus ? Colors.white : Color(0xFF0077BD),
+            ),
+            textAlign: TextAlign.center,
+            inputFormatters: [
+              FilteringTextInputFormatter.allow(RegExp(r'^\d*\.?\d*$')),
+              FilteringTextInputFormatter.digitsOnly, // Only allows digits
+            ],
+            decoration: InputDecoration(
+              hintStyle: TextStyle(
+                color: Colors.grey[400],
+                fontSize: 14,
+              ),
+              contentPadding: const EdgeInsets.symmetric(
+                horizontal: 3,
+                vertical: 3,
+              ),
+              border: OutlineInputBorder(
+                borderRadius: BorderRadius.circular(8),
+                borderSide: BorderSide(
+                  color: isStatus ? statusColor(controller.text) : Color(0xFF64B5F6),
+                  width: 1,
+                ),
+              ),
+              filled: true,
+              fillColor: isStatus ? statusColor(controller.text) : Colors.grey[200],
+              focusedBorder: OutlineInputBorder(
+                borderRadius: BorderRadius.circular(8),
+                borderSide: const BorderSide(
+                  color: Color(0xFF64B5F6),
+                  width: 1,
+                ),
+              ),
+              enabledBorder: OutlineInputBorder(
+                borderRadius: BorderRadius.circular(8),
+                borderSide:  BorderSide(
+                  color: isStatus ? statusColor(controller.text) : Color(0xFF64B5F6),
+                  width: 1,
+                ),
+              ),
+              disabledBorder: OutlineInputBorder(
+                borderRadius: BorderRadius.circular(8),
+                borderSide:  BorderSide(
+                  color: isStatus ? statusColor(controller.text) : Color(0xFF64B5F6),
+                  width: 1,
+                ),
+              ),
+            ),
+          ),
+        )
       ],
     );
   }
 }
 
-class SumAmountProduct extends StatefulWidget {
-  final String productName;
-  final TextEditingController stockController;
-  final TextEditingController AV3MController;
-  final TextEditingController recommendController;
-
-  const SumAmountProduct({
-    super.key,
-    required this.productName,
-    required this.stockController,
-    required this.AV3MController,
-    required this.recommendController,
-  });
-
-  @override
-  State<SumAmountProduct> createState() => _SumAmountProductState();
-}
-
-class _SumAmountProductState extends State<SumAmountProduct> {
-  @override
-  void initState() {
-    super.initState();
-    widget.stockController.addListener(_calculateRecommend);
-  }
-
-  @override
-  void dispose() {
-    widget.stockController.removeListener(_calculateRecommend);
-    super.dispose();
-  }
-
-  void _calculateRecommend() {
-    try {
-      int stock = int.tryParse(widget.stockController.text) ?? 0;
-      int av3m = int.tryParse(widget.AV3MController.text) ?? 0;
-      int recommend = stock - av3m;
-      widget.recommendController.text = recommend.toString();
-    } catch (e) {
-      widget.recommendController.text = '0';
-    }
-  }
-
-  @override
-  Widget build(BuildContext context) {
-    return Container(
-      margin: EdgeInsets.only(bottom: 16),
-      decoration: BoxDecoration(
-        color: Colors.white,
-        borderRadius: BorderRadius.circular(12),
-        boxShadow: [
-          BoxShadow(
-            color: Colors.black.withOpacity(0.05),
-            blurRadius: 8,
-            offset: Offset(0, 2),
-          ),
-        ],
-      ),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          Container(
-            padding: EdgeInsets.symmetric(horizontal: 16, vertical: 12),
-            decoration: BoxDecoration(
-              color: Color(0xFFEDF8FF),
-              borderRadius: BorderRadius.only(
-                topLeft: Radius.circular(12),
-                topRight: Radius.circular(12),
-              ),
-            ),
-            child: Row(
-              children: [
-                Expanded(
-                  child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      Text(
-                        "Stock On Hand",
-                        style: TextStyle(
-                          fontSize: 14,
-                          fontWeight: FontWeight.bold,
-                          color: Color(0xFF023B5E),
-                        ),
-                      ),
-                      SizedBox(height: 4),
-                      Text(
-                        widget.productName,
-                        style: TextStyle(
-                          fontSize: 12,
-                          color: Color(0xFF666666),
-                        ),
-                      ),
-                    ],
-                  ),
-                ),
-              ],
-            ),
-          ),
-          Padding(
-            padding: EdgeInsets.all(16),
-            child: Row(
-              children: [
-                _buildDetailField("Stock", widget.stockController),
-                SizedBox(width: 12),
-                _buildDetailField("AV3M(Pcs)", widget.AV3MController, readOnly: true),
-                SizedBox(width: 12),
-                _buildDetailField("Recommend", widget.recommendController, readOnly: true),
-              ],
-            ),
-          ),
-        ],
-      ),
-    );
-  }
-
-  Widget _buildDetailField(String label, TextEditingController controller,
-      {bool readOnly = false}) {
-    return Expanded(
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          Text(
-            label,
-            style: TextStyle(
-              fontSize: 12,
-              fontWeight: FontWeight.w500,
-              color: Color(0xFF666666),
-            ),
-          ),
-          SizedBox(height: 4),
-          NumberField(
-            controller: controller,
-            readOnly: readOnly,
-          ),
-        ],
-      ),
-    );
-  }
-}
+// class SumAmountProduct extends StatefulWidget {
+//   final String productName;
+//   final TextEditingController stockController;
+//   final TextEditingController AV3MController;
+//   final TextEditingController recommendController;
+//
+//   const SumAmountProduct({
+//     super.key,
+//     required this.productName,
+//     required this.stockController,
+//     required this.AV3MController,
+//     required this.recommendController,
+//   });
+//
+//   @override
+//   State<SumAmountProduct> createState() => _SumAmountProductState();
+// }
+//
+// class _SumAmountProductState extends State<SumAmountProduct> {
+//   @override
+//   void initState() {
+//     super.initState();
+//     widget.stockController.addListener(_calculateRecommend);
+//   }
+//
+//   @override
+//   void dispose() {
+//     widget.stockController.removeListener(_calculateRecommend);
+//     super.dispose();
+//   }
+//
+//   void _calculateRecommend() {
+//     try {
+//       int stock = int.tryParse(widget.stockController.text) ?? 0;
+//       int av3m = int.tryParse(widget.AV3MController.text) ?? 0;
+//       int recommend = stock - av3m;
+//       widget.recommendController.text = recommend.toString();
+//     } catch (e) {
+//       widget.recommendController.text = '0';
+//     }
+//   }
+//
+//   @override
+//   Widget build(BuildContext context) {
+//     return Container(
+//       margin: EdgeInsets.only(bottom: 16),
+//       decoration: BoxDecoration(
+//         color: Colors.white,
+//         borderRadius: BorderRadius.circular(12),
+//         boxShadow: [
+//           BoxShadow(
+//             color: Colors.black.withOpacity(0.05),
+//             blurRadius: 8,
+//             offset: Offset(0, 2),
+//           ),
+//         ],
+//       ),
+//       child: Column(
+//         crossAxisAlignment: CrossAxisAlignment.start,
+//         children: [
+//           Container(
+//             padding: EdgeInsets.symmetric(horizontal: 16, vertical: 12),
+//             decoration: BoxDecoration(
+//               color: Color(0xFFEDF8FF),
+//               borderRadius: BorderRadius.only(
+//                 topLeft: Radius.circular(12),
+//                 topRight: Radius.circular(12),
+//               ),
+//             ),
+//             child: Row(
+//               children: [
+//                 Expanded(
+//                   child: Column(
+//                     crossAxisAlignment: CrossAxisAlignment.start,
+//                     children: [
+//                       Text(
+//                         "Stock On Hand",
+//                         style: TextStyle(
+//                           fontSize: 14,
+//                           fontWeight: FontWeight.bold,
+//                           color: Color(0xFF023B5E),
+//                         ),
+//                       ),
+//                       SizedBox(height: 4),
+//                       Text(
+//                         widget.productName,
+//                         style: TextStyle(
+//                           fontSize: 12,
+//                           color: Color(0xFF666666),
+//                         ),
+//                       ),
+//                     ],
+//                   ),
+//                 ),
+//               ],
+//             ),
+//           ),
+//           Padding(
+//             padding: EdgeInsets.all(16),
+//             child: Row(
+//               children: [
+//                 _buildDetailField("Stock", widget.stockController),
+//                 SizedBox(width: 12),
+//                 _buildDetailField("AV3M(Pcs)", widget.AV3MController, readOnly: true),
+//                 SizedBox(width: 12),
+//                 _buildDetailField("Recommend", widget.recommendController, readOnly: true),
+//               ],
+//             ),
+//           ),
+//         ],
+//       ),
+//     );
+//   }
+//
+//   Widget _buildDetailField(String label, TextEditingController controller,
+//       {bool readOnly = false}) {
+//     return Expanded(
+//       child: Column(
+//         crossAxisAlignment: CrossAxisAlignment.start,
+//         children: [
+//           Text(
+//             label,
+//             style: TextStyle(
+//               fontSize: 12,
+//               fontWeight: FontWeight.w500,
+//               color: Color(0xFF666666),
+//             ),
+//           ),
+//           SizedBox(height: 4),
+//           NumberField(
+//             controller: controller,
+//             readOnly: readOnly,
+//           ),
+//         ],
+//       ),
+//     );
+//   }
+// }
 
 class NumberField extends StatelessWidget {
   final TextEditingController controller;
