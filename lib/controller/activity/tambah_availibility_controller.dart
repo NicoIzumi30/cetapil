@@ -195,6 +195,7 @@ class TambahAvailabilityController extends GetxController {
     tambahActivityController.availabilityDraftItems.clear();
     tambahActivityController.availabilityDraftItems.addAll([...remainingItems, ...updatedItems]);
     tambahActivityController.availabilityDraftItems.refresh();
+    tambahActivityController.checkAvailabilityForSurvey();
 
     // Clear the form
     clearForm();

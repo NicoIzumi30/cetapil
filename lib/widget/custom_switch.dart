@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 
 class CustomSegmentedSwitch extends StatefulWidget {
   final bool value;
+  final bool enable;
   final ValueChanged<bool> onChanged;
   final Color activeColor;
   final Color inactiveColor;
@@ -16,6 +17,7 @@ class CustomSegmentedSwitch extends StatefulWidget {
     this.inactiveColor = Colors.white,
     this.width = 120,
     this.height = 45,
+    this.enable = true,
   }) : super(key: key);
 
   @override
@@ -42,9 +44,7 @@ class _CustomSegmentedSwitchState extends State<CustomSegmentedSwitch> {
           AnimatedAlign(
             duration: const Duration(milliseconds: 200),
             curve: Curves.easeInOut,
-            alignment: widget.value
-                ? Alignment.centerLeft
-                : Alignment.centerRight,
+            alignment: widget.value ? Alignment.centerLeft : Alignment.centerRight,
             child: Container(
               width: widget.width / 2,
               height: widget.height,
@@ -59,15 +59,13 @@ class _CustomSegmentedSwitchState extends State<CustomSegmentedSwitch> {
             children: [
               Expanded(
                 child: GestureDetector(
-                  onTap: () => widget.onChanged(true),
+                  onTap: () => widget.enable ? widget.onChanged(true) : null,
                   child: Center(
                     child: Text(
                       'Ada',
                       style: TextStyle(
                         fontSize: 12,
-                        color: widget.value
-                            ? Colors.white
-                            : Colors.blue,
+                        color: widget.value ? Colors.white : Colors.blue,
                         fontWeight: FontWeight.bold,
                       ),
                     ),
@@ -76,15 +74,13 @@ class _CustomSegmentedSwitchState extends State<CustomSegmentedSwitch> {
               ),
               Expanded(
                 child: GestureDetector(
-                  onTap: () => widget.onChanged(false),
+                  onTap: () => widget.enable ? widget.onChanged(false) : null,
                   child: Center(
                     child: Text(
                       'Tidak',
                       style: TextStyle(
                         fontSize: 12,
-                        color: !widget.value
-                            ? Colors.white
-                            : Colors.blue,
+                        color: !widget.value ? Colors.white : Colors.blue,
                         fontWeight: FontWeight.bold,
                       ),
                     ),

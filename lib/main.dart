@@ -1,5 +1,3 @@
-import 'package:cetapil_mobile/controller/activity/tambah_activity_controller.dart';
-import 'package:cetapil_mobile/controller/activity/tambah_visibility_controller.dart';
 import 'package:cetapil_mobile/controller/outlet/outlet_controller.dart';
 import 'package:cetapil_mobile/controller/routing/routing_controller.dart';
 import 'package:cetapil_mobile/controller/routing/tambah_routing_controller.dart';
@@ -19,13 +17,8 @@ import 'package:get_storage/get_storage.dart';
 import 'package:intl/intl.dart';
 
 import 'controller/activity/activity_controller.dart';
-import 'controller/activity/knowledge_controller.dart';
-import 'controller/activity/tambah_availibility_controller.dart';
-import 'controller/activity/tambah_order_controller.dart';
 import 'controller/bottom_nav_controller.dart';
-import 'controller/connectivity_controller.dart';
 import 'controller/dashboard/dashboard_controller.dart';
-import 'controller/gps_controller.dart';
 import 'controller/login_controller.dart';
 import 'controller/pdf_controller.dart';
 

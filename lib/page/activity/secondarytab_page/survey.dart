@@ -29,7 +29,7 @@ class SurveyPage extends GetView<TambahActivityController> {
     String? sectionTitle;
     if (questionGroup['name'] == 'Visibility') {
       sectionTitle = "Survey Visibility";
-    } else if (questionGroup['name'] == 'Recommendation') {
+    } else if (questionGroup['name'] == 'Recommndation') {
       sectionTitle = "Survey Recommendation";
     }
 
@@ -60,15 +60,26 @@ class SurveyPage extends GetView<TambahActivityController> {
         if (!controller.switchStates.containsKey(id)) {
           controller.switchStates[id] = true.obs; // Initialize with true for 'Ada'
         }
+        if (questionGroup['title'] == "Apakah POWER SKU tersedia di toko?") {
+          return BooleanQuestion(
+              title: survey['question'] ?? '', surveyId: id, controller: controller, enable: false);
+        }
         return BooleanQuestion(
           title: survey['question'] ?? '',
           surveyId: id,
           controller: controller,
         );
       } else if (survey['type'] == 'text') {
+        if (survey['question'] ==
+            'Berapa kali di Kuartal ini pernah dijalankan product detailing di toko ini?') {
+          return TextQuestion(
+              title: survey['question'] ?? '',
+              controller: controller.priceControllers[id]!,
+              enable: false);
+        }
         return PriceQuestion(
           title: survey['question'] ?? '',
-          controller: controller.priceControllers[id] ?? TextEditingController(),
+          controller: controller.priceControllers[id]!,
         );
       }
       return const SizedBox.shrink();
@@ -78,74 +89,7 @@ class SurveyPage extends GetView<TambahActivityController> {
   @override
   Widget build(BuildContext context) {
     return Obx(() {
-      // Check loading state for Survey tab
-      // if (controller.isLoadingSurvey.value) {
-      //   return const Padding(
-      //     padding: EdgeInsets.symmetric(vertical: 20),
-      //     child: Center(
-      //       child: CircularProgressIndicator(),
-      //     ),
-      //   );
-      // }
-      //
-      // // Check error state for Survey tab
-      // if (controller.hasErrorSurvey.value) {
-      //   return Padding(
-      //     padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 40),
-      //     child: Column(
-      //       mainAxisAlignment: MainAxisAlignment.center,
-      //       children: [
-      //         const Icon(
-      //           Icons.error_outline,
-      //           color: Colors.red,
-      //           size: 60,
-      //         ),
-      //         const SizedBox(height: 16),
-      //         Text(
-      //           controller.errorMessageSurvey.value,
-      //           style: const TextStyle(
-      //             fontSize: 16,
-      //             color: Colors.red,
-      //           ),
-      //           textAlign: TextAlign.center,
-      //         ),
-      //         const SizedBox(height: 16),
-      //         ElevatedButton.icon(
-      //           onPressed: () => controller.initGetSurveyQuestion(),
-      //           icon: const Icon(Icons.refresh),
-      //           label: const Text('Retry'),
-      //           style: ElevatedButton.styleFrom(
-      //             backgroundColor: const Color(0xFF0077BD),
-      //             foregroundColor: Colors.white,
-      //             padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 12),
-      //             shape: RoundedRectangleBorder(
-      //               borderRadius: BorderRadius.circular(8),
-      //             ),
-      //           ),
-      //         ),
-      //       ],
-      //     ),
-      //   );
-      // }
-      //
-      // if (controller.surveyQuestions.isEmpty) {
-      //   return const Padding(
-      //     padding: EdgeInsets.symmetric(vertical: 20),
-      //     child: Center(
-      //       child: Text(
-      //         'No survey questions available',
-      //         style: TextStyle(
-      //           fontSize: 16,
-      //           color: Colors.grey,
-      //         ),
-      //       ),
-      //     ),
-      //   );
-      // }
-
-      // Your existing ListView implementation
-
-       var questionGroup = <Map<String, dynamic>>[];
+      var questionGroup = <Map<String, dynamic>>[];
       if (controller.detailDraft.isNotEmpty) {
         final data = controller.detailDraft['surveyItems'];
 
@@ -162,9 +106,8 @@ class SurveyPage extends GetView<TambahActivityController> {
             'surveys': filteredSurveys
           };
         }).toList();
-
-      }else{
-       questionGroup = supportController.getSurvey();
+      } else {
+        questionGroup = supportController.getSurvey();
       }
       return ListView.builder(
         shrinkWrap: true,
@@ -183,20 +126,20 @@ class SurveyPage extends GetView<TambahActivityController> {
       );
     });
   }
-
-
 }
 
 class BooleanQuestion extends StatelessWidget {
   final String title;
   final String surveyId;
   final TambahActivityController controller;
+  final bool enable;
 
   const BooleanQuestion({
     super.key,
     required this.title,
     required this.surveyId,
     required this.controller,
+    this.enable = true,
   });
 
   @override
@@ -213,12 +156,13 @@ class BooleanQuestion extends StatelessWidget {
             ),
             const SizedBox(width: 10),
             Obx(() => CustomSegmentedSwitch(
-                  value: controller.getSwitchValue(surveyId),
+                  value: !controller.getSwitchValue(surveyId),
                   onChanged: (value) {
                     controller.toggleSwitch(surveyId, value);
                   },
                   activeColor: Colors.blue,
                   inactiveColor: Colors.white,
+                  enable: enable,
                 )),
           ],
         ),
@@ -231,11 +175,13 @@ class BooleanQuestion extends StatelessWidget {
 class PriceQuestion extends StatelessWidget {
   final String title;
   final TextEditingController controller;
+  final bool enable;
 
   const PriceQuestion({
     super.key,
     required this.title,
     required this.controller,
+    this.enable = true,
   });
 
   @override
@@ -260,6 +206,7 @@ class PriceQuestion extends StatelessWidget {
                   fontSize: 14,
                   color: Color(0xFF0077BD),
                 ),
+                onChanged: (_) => Get.find<TambahActivityController>().priceControllers.refresh(),
                 keyboardType: const TextInputType.numberWithOptions(decimal: false), // Only numbers
                 inputFormatters: [
                   FilteringTextInputFormatter.digitsOnly, // Allows only digits
@@ -281,6 +228,7 @@ class PriceQuestion extends StatelessWidget {
                     return oldValue;
                   }),
                 ],
+                enabled: enable,
                 decoration: InputDecoration(
                   prefixText: 'Rp ', // Add currency prefix
                   prefixStyle: const TextStyle(
@@ -290,6 +238,66 @@ class PriceQuestion extends StatelessWidget {
                   floatingLabelBehavior: FloatingLabelBehavior.always,
                   alignLabelWithHint: true,
                   hintText: "Masukan Harga",
+                  hintStyle: TextStyle(fontSize: 12, color: Colors.grey[400]),
+                  filled: true,
+                  fillColor: Colors.white,
+                  border: OutlineInputBorder(
+                    borderRadius: BorderRadius.circular(8),
+                    borderSide: BorderSide.none,
+                  ),
+                ),
+                textAlign: TextAlign.right, // Align numbers to the right
+                textAlignVertical: TextAlignVertical.center,
+              ),
+            )
+          ],
+        ),
+        const SizedBox(height: 10)
+      ],
+    );
+  }
+}
+
+class TextQuestion extends StatelessWidget {
+  final String title;
+  final TextEditingController controller;
+  final bool enable;
+
+  const TextQuestion({
+    super.key,
+    required this.title,
+    required this.controller,
+    this.enable = true,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    return Column(
+      children: [
+        Row(
+          children: [
+            Expanded(
+              child: Text(
+                title,
+                style: const TextStyle(fontSize: 12),
+              ),
+            ),
+            const SizedBox(width: 10),
+            SizedBox(
+              height: 40,
+              width: 140,
+              child: TextFormField(
+                controller: controller,
+                style: const TextStyle(
+                  fontSize: 14,
+                  color: Color(0xFF0077BD),
+                ),
+                enabled: enable,
+                onChanged: (_) => Get.find<TambahActivityController>().priceControllers.refresh(),
+                decoration: InputDecoration(
+                  floatingLabelBehavior: FloatingLabelBehavior.always,
+                  alignLabelWithHint: true,
+                  hintText: "",
                   hintStyle: TextStyle(fontSize: 12, color: Colors.grey[400]),
                   filled: true,
                   fillColor: Colors.white,

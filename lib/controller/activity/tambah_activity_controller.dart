@@ -23,10 +23,8 @@ class TambahActivityController extends GetxController {
       Get.find<TambahAvailabilityController>();
   late TambahVisibilityController tambahVisibilityController =
       Get.find<TambahVisibilityController>();
-  late TambahOrderController tambahOrderController =
-      Get.find<TambahOrderController>();
-  late SupportDataController supportController =
-      Get.find<SupportDataController>();
+  late TambahOrderController tambahOrderController = Get.find<TambahOrderController>();
+  late SupportDataController supportController = Get.find<SupportDataController>();
   // final activityController = Get.find<ActivityController>();
   // final tambahAvailabilityController = Get.find<TambahAvailabilityController>();
   // final tambahOrderController = Get.find<TambahOrderController>();
@@ -60,17 +58,16 @@ class TambahActivityController extends GetxController {
   final errorMessageOrder = ''.obs;
 
   // Consolidated draft items for all sections
-  final RxList<Map<String, dynamic>> availabilityDraftItems =
-      <Map<String, dynamic>>[].obs;
-  final RxList<Map<String, dynamic>> orderDraftItems =
-      <Map<String, dynamic>>[].obs;
+  final RxList<Map<String, dynamic>> availabilityDraftItems = <Map<String, dynamic>>[].obs;
+  final RxList<Map<String, dynamic>> orderDraftItems = <Map<String, dynamic>>[].obs;
   // final visibilityDraftItems = <Map<String, dynamic>>[].obs;
 
   final visibilityPrimaryDraftItems = <Map<String, dynamic>>[].obs;
   final visibilitySecondaryDraftItems = <Map<String, dynamic>>[].obs;
 
   // Survey related fields
-  final Map<String, TextEditingController> priceControllers = {};
+  final RxMap<String, TextEditingController> priceControllers =
+      RxMap<String, TextEditingController>();
   final Map<String, RxBool> switchStates = {};
   var switchValue = true.obs;
 
@@ -106,8 +103,7 @@ class TambahActivityController extends GetxController {
     print(detailDraft.isNotEmpty);
     if (detailDraft.isNotEmpty) {
       for (var data in detailDraft["availabilityItems"]) {
-        final item =
-            tambahAvailabilityController.getSkuByDataApi(data['product_id']);
+        final item = tambahAvailabilityController.getSkuByDataApi(data['product_id']);
         final newItem = {
           'id': data['product_id'],
           'sku': item!['sku'],
@@ -126,8 +122,7 @@ class TambahActivityController extends GetxController {
     print(detailDraft.isNotEmpty);
     if (detailDraft.isNotEmpty) {
       for (var data in detailDraft["orderItems"]) {
-        final item =
-            tambahAvailabilityController.getSkuByDataApi(data['product_id']);
+        final item = tambahAvailabilityController.getSkuByDataApi(data['product_id']);
         final newItem = {
           'id': data['product_id'],
           'category': item!['category']['name'],
@@ -142,7 +137,7 @@ class TambahActivityController extends GetxController {
   }
 
   initDetailDraftVisibility() {
-    final allVisibilities =  [];
+    final allVisibilities = [];
     final visibilityDraft = detailDraft["visibilityItems"];
 
     if (allVisibilities.isNotEmpty && visibilityDraft != null) {
@@ -153,8 +148,7 @@ class TambahActivityController extends GetxController {
               .firstWhereOrNull((posm) => posm['id'] == dataApi.posmTypeId);
           final visualType = supportController
               .getVisualTypes()
-              .firstWhereOrNull(
-                  (visual) => visual['id'] == dataApi.visualTypeId);
+              .firstWhereOrNull((visual) => visual['id'] == dataApi.visualTypeId);
           final newItem = {
             'id': dataApi.id,
             'posm_type_id': dataApi.posmTypeId,
@@ -179,7 +173,23 @@ class TambahActivityController extends GetxController {
     super.onInit();
     initDraftTimers();
     // Start the timer
+    _initializeSurveyControllers(); // Add this
     startTabTimer();
+  }
+
+  void _initializeSurveyControllers() {
+    final surveys = supportController.getSurvey();
+    for (var group in surveys) {
+      for (var survey in group['surveys']) {
+        if (survey['type'] == 'text') {
+          final id = survey['id'];
+          if (!priceControllers.containsKey(id)) {
+            priceControllers[id] = TextEditingController();
+          }
+        }
+      }
+    }
+    priceControllers.refresh();
   }
 
   // Also update submitApiActivity to use the same logic
@@ -211,8 +221,7 @@ class TambahActivityController extends GetxController {
             final controller = priceControllers[id];
             surveyList.add({
               'survey_question_id': id,
-              'answer':
-                  (controller?.text.isEmpty ?? true) ? "0" : controller!.text,
+              'answer': (controller?.text.isEmpty ?? true) ? "0" : controller!.text,
             });
           } else if (survey['type'] == 'bool') {
             final switchState = switchStates[id];
@@ -223,8 +232,10 @@ class TambahActivityController extends GetxController {
           }
         }
       }
+
       /// Filter when data stock on hand and inventory in availability 0
-      availabilityDraftItems.removeWhere((item) => item['stock_on_hand'] == 0 && item['stock_on_inventory'] == 0);
+      availabilityDraftItems
+          .removeWhere((item) => item['stock_on_hand'] == 0 && item['stock_on_inventory'] == 0);
 
       final response = await Api.submitActivity(
         data,
@@ -242,8 +253,7 @@ class TambahActivityController extends GetxController {
       _timer?.cancel();
 
       /// check apabila data ada di sqlite, maka hapus data
-      bool isExists =
-          await db.checkSalesActivityExists(detailOutlet.value!.id!);
+      bool isExists = await db.checkSalesActivityExists(detailOutlet.value!.id!);
       if (isExists) {
         await db.deleteSalesActivity(detailOutlet.value!.id!);
       }
@@ -269,8 +279,7 @@ class TambahActivityController extends GetxController {
     try {
       EasyLoading.show(status: 'Saving draft...');
 
-      bool isEditing =
-          await db.checkSalesActivityExists(detailOutlet.value!.id!);
+      bool isEditing = await db.checkSalesActivityExists(detailOutlet.value!.id!);
 
       // Get all survey questions from support controller to ensure we have all fields
       final allSurveys = supportController.getSurvey();
@@ -286,8 +295,7 @@ class TambahActivityController extends GetxController {
             final controller = priceControllers[id];
             surveyList.add({
               'survey_question_id': id,
-              'answer':
-                  (controller?.text.isEmpty ?? true) ? "0" : controller!.text,
+              'answer': (controller?.text.isEmpty ?? true) ? "0" : controller!.text,
             });
           } else if (survey['type'] == 'bool') {
             // For switches - ensure we save all with default false
@@ -362,12 +370,9 @@ class TambahActivityController extends GetxController {
   void initDraftTimers() {
     if (detailDraft.isNotEmpty) {
       // Initialize timers from draft data
-      availabilityTime.value =
-          int.tryParse(detailDraft['time_availability'] ?? '0') ?? 0;
-      visibilityTime.value =
-          int.tryParse(detailDraft['time_visibility'] ?? '0') ?? 0;
-      knowledgeTime.value =
-          int.tryParse(detailDraft['time_knowledge'] ?? '0') ?? 0;
+      availabilityTime.value = int.tryParse(detailDraft['time_availability'] ?? '0') ?? 0;
+      visibilityTime.value = int.tryParse(detailDraft['time_visibility'] ?? '0') ?? 0;
+      knowledgeTime.value = int.tryParse(detailDraft['time_knowledge'] ?? '0') ?? 0;
       surveyTime.value = int.tryParse(detailDraft['time_survey'] ?? '0') ?? 0;
       orderTime.value = int.tryParse(detailDraft['time_order'] ?? '0') ?? 0;
     } else {
@@ -424,6 +429,63 @@ class TambahActivityController extends GetxController {
       availabilityDraftItems.add(item);
     }
     availabilityDraftItems.refresh();
+
+    // Add this line to auto-update surveys
+    checkAvailabilityForSurvey();
+  }
+
+  void checkAvailabilityForSurvey({bool knowledge = false}) {
+    final surveys = supportController.getSurvey();
+    if (!knowledge) {
+      final availabilityGroup =
+          surveys.firstWhere((g) => g['title'] == "Apakah POWER SKU tersedia di toko?");
+      final priceGroup = surveys.firstWhere((g) => g['title'] == "Berapa harga POWER SKU di toko?");
+
+      for (var survey in availabilityGroup['surveys']) {
+        final id = survey['id'];
+        final productId = survey['product_id'];
+
+        bool isAvailable = availabilityDraftItems.any((item) {
+          return item['product_id'] == productId &&
+              item['availability_toggle'] != 'true' &&
+              (int.parse(item['stock_on_hand'].toString()) > 0 ||
+                  int.parse(item['stock_on_inventory'].toString()) > 0);
+        });
+
+        toggleSwitch(id, isAvailable);
+
+        if (isAvailable) {
+          try {
+            final priceSurvey =
+                priceGroup['surveys'].firstWhere((s) => s['product_id'] == productId);
+
+            final priceId = priceSurvey['id'];
+            if (priceControllers.containsKey(priceId)) {
+              priceControllers[priceId]?.text = '0';
+            }
+          } catch (e) {
+            print('No matching price survey found for product $productId');
+          }
+        }
+      }
+    }
+
+    final recommendationGroup = surveys.firstWhere((g) => g['name'] == "Recommndation");
+    final detailingSurveyId = recommendationGroup['surveys'][0]['id']; // bool question
+    final detailingCountId = recommendationGroup['surveys'][1]['id']; // text question
+
+    if (knowledgeTime.value > 0) {
+      // Enable survey if knowledge time exists
+      toggleSwitch(detailingSurveyId, true);
+
+      // Increment counter
+      print(detailingCountId);
+
+      if (priceControllers.containsKey(detailingCountId)) {
+        final currentCount = int.tryParse(priceControllers[detailingCountId]?.text ?? '0') ?? 0;
+        priceControllers[detailingCountId]?.text = (currentCount + 1).toString();
+      }
+    }
   }
 
   void addOrderItem(Map<String, dynamic> item) {
@@ -441,8 +503,8 @@ class TambahActivityController extends GetxController {
 
   // In TambahActivityController
   void addPrimaryVisibilityItem(Map<String, dynamic> item) {
-    final existingIndex = visibilityPrimaryDraftItems
-        .indexWhere((existing) => existing['id'] == item['id']);
+    final existingIndex =
+        visibilityPrimaryDraftItems.indexWhere((existing) => existing['id'] == item['id']);
 
     print(existingIndex);
 
@@ -458,54 +520,51 @@ class TambahActivityController extends GetxController {
 
   initPrimaryVisibilityItem(String id) {
     tambahVisibilityController.clearPrimaryForm();
-    var data = visibilityPrimaryDraftItems
-        .firstWhere((item) => item['id'] == id, orElse: () => {});
+    var data = visibilityPrimaryDraftItems.firstWhere((item) => item['id'] == id, orElse: () => {});
     print(data);
     if (data.isEmpty) {
       return;
-    }else{
+    } else {
       tambahVisibilityController.posmTypeId.value = data['posm_type_id'];
       tambahVisibilityController.posmType.value = data['posm_type_name'];
       tambahVisibilityController.visualTypeId.value = data['visual_type_id'];
       var visualName = supportController
           .getVisualTypes()
-          .firstWhere((element) =>
-      element['id'] == data['visual_type_id'])['name']; /// get visualType name by id
+          .firstWhere((element) => element['id'] == data['visual_type_id'])['name'];
+
+      /// get visualType name by id
       if (visualName == "Others") {
         tambahVisibilityController.isOtherVisual.value = true;
         tambahVisibilityController.otherVisualController.value.text = data['visual_type_name'];
-      }  else {
-      tambahVisibilityController.visualType.value = data['visual_type_name'];
+      } else {
+        tambahVisibilityController.visualType.value = data['visual_type_name'];
       }
 
       tambahVisibilityController.selectedCondition.value = data['condition'];
       tambahVisibilityController.lebarRak.value.text = data['shelf_width'].toString();
       tambahVisibilityController.shelving.value.text = data['shelving'].toString();
-      tambahVisibilityController.visibilityImages.value =
-      data['image_visibility'];
+      tambahVisibilityController.visibilityImages.value = data['image_visibility'];
     }
-
   }
 
   initSecondaryVisibilityItem(String id) {
     tambahVisibilityController.clearSecondaryForm();
-    var data = visibilitySecondaryDraftItems
-        .firstWhere((item) => item['id'] == id, orElse: () => {});
+    var data =
+        visibilitySecondaryDraftItems.firstWhere((item) => item['id'] == id, orElse: () => {});
     print(data);
     if (data.isEmpty) {
       return;
-    }else{
-      tambahVisibilityController.toggleSecondaryYesNo.value = data['secondary_exist'] == "true" ? true : false;
+    } else {
+      tambahVisibilityController.toggleSecondaryYesNo.value =
+          data['secondary_exist'] == "true" ? true : false;
       tambahVisibilityController.tipeDisplay.value.text = data['display_type'];
-      tambahVisibilityController.displayImages.value =
-      data['display_image'];
+      tambahVisibilityController.displayImages.value = data['display_image'];
     }
-
   }
 
   void addSecondaryVisibilityItem(Map<String, dynamic> item) {
-    final existingIndex = visibilitySecondaryDraftItems
-        .indexWhere((existing) => existing['id'] == item['id']);
+    final existingIndex =
+        visibilitySecondaryDraftItems.indexWhere((existing) => existing['id'] == item['id']);
 
     print(existingIndex);
 
@@ -600,21 +659,25 @@ class TambahActivityController extends GetxController {
 
   void toggleSwitch(String id, bool value) {
     if (!switchStates.containsKey(id)) {
-      switchStates[id] = false.obs; // Default to false when initializing
+      switchStates[id] = false.obs; // Initialize with true (which shows as "Tidak")
     }
-    switchStates[id]?.value = value;
+    // Invert the value because "true" shows as "Tidak" in the UI
+    switchStates[id]?.value = !value;
   }
 
   bool getSwitchValue(String id) {
     if (!switchStates.containsKey(id)) {
-      switchStates[id] = false.obs; // Default to false if doesn't exist
+      switchStates[id] = false.obs;
     }
-    return switchStates[id]?.value ?? false; // Return false as fallback
+    return switchStates[id]?.value ?? false;
   }
 
   // Tab management methods
   void changeTab(int index) {
     selectedTab.value = index;
+    if (selectedTab.value == 2) {
+      checkAvailabilityForSurvey(knowledge: true);
+    }
     update();
   }
 
@@ -737,6 +800,7 @@ class TambahActivityController extends GetxController {
     for (var controller in priceControllers.values) {
       controller.dispose();
     }
+    priceControllers.clear();
     for (var controllerMap in productControllers.values) {
       for (var controller in controllerMap.values) {
         controller.dispose();

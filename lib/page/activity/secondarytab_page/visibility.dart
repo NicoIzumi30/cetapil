@@ -50,7 +50,7 @@ class VisibilityPage extends GetView<ActivityController> {
                 visualType: data['visual_type_name'] ?? "-",
                 condition: data['condition'] ?? "-",
                 imagePath: data['image_visibility'],
-                isSubmitted: true,
+                isSubmitted: false,
                 onTapCard: () {
                   // Your custom tap handling here
                   if (!Get.isRegistered<TambahVisibilityController>()) {
@@ -75,7 +75,7 @@ class VisibilityPage extends GetView<ActivityController> {
                 visualType: data['visual_type_name'] ?? "-",
                 condition: data['condition'] ?? "-",
                 imagePath: data['image_visibility'],
-                isSubmitted: true,
+                isSubmitted: false,
                 onTapCard: () {
                   var id = "primary-core-2";
                   // Your custom tap handling here
@@ -101,7 +101,7 @@ class VisibilityPage extends GetView<ActivityController> {
                 visualType: data['visual_type_name'] ?? "-",
                 condition: data['condition'] ?? "-",
                 imagePath: data['image_visibility'] ,
-                isSubmitted: true,
+                isSubmitted: false,
                 onTapCard: () {
                   // Your custom tap handling here
                   if (!Get.isRegistered<TambahVisibilityController>()) {
@@ -132,7 +132,7 @@ class VisibilityPage extends GetView<ActivityController> {
                 visualType: data['visual_type_name'] ?? "-",
                 condition: data['condition'] ?? "-",
                 imagePath: data['image_visibility'],
-                isSubmitted: true,
+                isSubmitted: false,
                 onTapCard: () {
                   // Your custom tap handling here
                   if (!Get.isRegistered<TambahVisibilityController>()) {
@@ -157,7 +157,7 @@ class VisibilityPage extends GetView<ActivityController> {
                 visualType: data['visual_type_name'] ?? "-",
                 condition: data['condition'] ?? "-",
                 imagePath: data['image_visibility'] ,
-                isSubmitted: true,
+                isSubmitted: false,
                 onTapCard: () {
                   var id = "primary-baby-2";
                   // Your custom tap handling here
@@ -183,7 +183,7 @@ class VisibilityPage extends GetView<ActivityController> {
                 visualType: data['visual_type_name'] ?? "-",
                 condition: data['condition'] ?? "-",
                 imagePath: data['image_visibility'],
-                isSubmitted: true,
+                isSubmitted: false,
                 onTapCard: () {
                   var id = "primary-baby-3";
                   // Your custom tap handling here
@@ -225,7 +225,7 @@ class VisibilityPage extends GetView<ActivityController> {
                 secondarydisplay: data['secondary_exist'] ?? "-",
                 typeDisplay: data['display_type'] ?? "-",
                 imagePath: data['display_image'] ,
-                isSubmitted: true,
+                isSubmitted: false,
                 onTapCard: () {
                   if (!Get.isRegistered<TambahVisibilityController>()) {
                     Get.put(TambahVisibilityController());
@@ -244,7 +244,7 @@ class VisibilityPage extends GetView<ActivityController> {
                   secondarydisplay: data['secondary_exist']?? "-",
                   typeDisplay: data['display_type']?? "-",
                   imagePath: data['display_image'],
-                isSubmitted: true,
+                isSubmitted: false,
                 onTapCard: () {
                   if (!Get.isRegistered<TambahVisibilityController>()) {
                     Get.put(TambahVisibilityController());
@@ -269,7 +269,7 @@ class VisibilityPage extends GetView<ActivityController> {
                 secondarydisplay: data['secondary_exist']?? "-",
                 typeDisplay: data['display_type']?? "-",
                 imagePath: data['display_image'],
-                isSubmitted: true,
+                isSubmitted: false,
                 onTapCard: () {
                   if (!Get.isRegistered<TambahVisibilityController>()) {
                     Get.put(TambahVisibilityController());
@@ -288,7 +288,7 @@ class VisibilityPage extends GetView<ActivityController> {
                 secondarydisplay: data['secondary_exist']?? "-",
                 typeDisplay: data['display_type']?? "-",
                 imagePath: data['display_image'],
-                isSubmitted: true,
+                isSubmitted: false,
                 onTapCard: () {
                   if (!Get.isRegistered<TambahVisibilityController>()) {
                     Get.put(TambahVisibilityController());
