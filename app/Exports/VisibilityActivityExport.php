@@ -76,10 +76,13 @@ class VisibilityActivityExport implements FromCollection, WithHeadings, WithMapp
             'Apakah Ada Secondary Display',
             'Foto Secondary Core 1',
             'Tipe Display Secondary Core 2',
+            'Apakah Ada Secondary Display',
             'Foto Secondary Core 2',
             'Tipe Display Secondary Baby 1',
+            'Apakah Ada Secondary Display',
             'Foto Secondary Baby 1',
             'Tipe Display Secondary Baby 2',
+            'Apakah Ada Secondary Display',
             'Foto Secondary Baby 2',
             'Created At',
             'Ended At',
@@ -90,42 +93,66 @@ class VisibilityActivityExport implements FromCollection, WithHeadings, WithMapp
 
     public function map($row): array
     {
-        // Get first visibility record if exists
-        $visibility = $row->salesVisibilities->first();
+        $categories = ['CORE', 'BABY']; // Define categories
+        $data = []; // Initialize data array
 
-        return [
+        foreach ($categories as $category) {
+            for ($position = 1; $position <= 3; $position++) {
+                // Find the first matching record for the category and position
+                $visibility = $row->salesVisibilities
+                    ->where('type', 'PRIMARY')
+                    ->where('category', $category)
+                    ->where('position', $position)
+                    ->first();
+
+                // Append data for this category and position
+                $data[] = @$visibility->posmType->name ?: '-';
+                $data[] = @$visibility->visual_type ?: '-';
+                $data[] = @$visibility->condition ?: '-';
+                $data[] = @$visibility->display_photo ?: '-';
+                $data[] = @$visibility->shelf_width ?: '-';
+                $data[] = @$visibility->shelving ?: '-';
+            }
+
+            for ($position = 1; $position <= 2; $position++) {
+                // Find the first matching record for the category and position
+                $visibility = $row->salesVisibilities
+                    ->where('type', 'SECONDARY')
+                    ->where('category', $category)
+                    ->where('position', $position)
+                    ->first();
+
+                // Append data for this category and position
+                $data[] = @$visibility->visual_type ?: '-';
+                $data[] = @$visibility->has_secondary_display ? 'Yes' : 'No';
+                $data[] = @$visibility->display_photo ?: '-';
+            }
+        }
+        $data[] = $row->created_at->format('Y-m-d H:i:s'); // Created At
+
+        // Calculate Ended At
+        $endedAt = $row->created_at->addSeconds($row->time_visibility);
+        $data[] = $endedAt->format('Y-m-d H:i:s'); // Ended At
+
+        // Format Duration
+        $durationInSeconds = $row->time_visibility;
+        $duration = gmdate('H:i:s', $durationInSeconds); // Converts seconds to HH:mm:ss
+        $data[] = $duration; // Duration
+
+        // Calculate Week
+        $data[] = $row->created_at->format('W'); // Week number
+
+
+        // Return the activity data and visibility data
+        return array_merge([
             // Activity Data
             @$row->outlet->name ?: '-',
             @$row->outlet->code ?: '-',
             @$row->outlet->type ?: '-',
             @$row->outlet->account ?: '-',
-            @$row->outlet->channel ?: '-',
+            @$row->outlet->channel->name ?: '-',
             @$row->user->name ?: '-',
-            @$row->checked_in ? Carbon::parse($row->checked_in)->format('d F Y H:i:s') : '-',
-            @$row->checked_out ? Carbon::parse($row->checked_out)->format('d F Y H:i:s') : '-',
-            $this->calculateDuration($row->checked_in, $row->checked_out),
-            @$row->radius_status ?: '-',
-            @$row->time_availability ?: '-',
-            @$row->time_visibility ?: '-',
-            @$row->time_knowledge ?: '-',
-            @$row->time_survey ?: '-',
-            @$row->time_order ?: '-',
-            @$row->status ?: '-',
-            @$row->latitude ?: '-',
-            @$row->longitude ?: '-',
-            // Visibility Data
-            @$visibility->category ?: '-',
-            @$visibility->type ?: '-',
-            @$visibility->position ?: '-',
-            @$visibility->visual_type ?: '-',
-            @$visibility->condition ?: '-',
-            @$visibility->display_photo ?: '-',
-            @$visibility->shelf_width ?: '-',
-            @$visibility->shelving ?: '-',
-            @$visibility->has_secondary_display ? 'Yes' : 'No',
-            @$row->created_at ? Carbon::parse($row->created_at)->format('d F Y H:i:s') : '-',
-            @$row->created_at ? Carbon::parse($row->created_at)->format('W') : '-'
-        ];
+        ], $data);
     }
 
     private function calculateDuration($checkIn, $checkOut)

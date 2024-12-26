@@ -28,6 +28,10 @@ class SalesVisibility extends Model
     {
         $query->has('visibility');
     }
+    public function posmType(): BelongsTo
+    {
+        return $this->belongsTo(PosmType::class); // Adjust the model name and foreign key if necessary
+    }
 
     public function getImageAttribute()
     {
