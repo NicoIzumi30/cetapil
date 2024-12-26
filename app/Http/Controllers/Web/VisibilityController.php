@@ -120,13 +120,11 @@ class VisibilityController extends Controller
 
         if ($request->filled('search_term')) {
             $searchTerm = $request->search_term;
-            $query->where(function ($q) use ($searchTerm) {
-                $q->wherehas('outlet', function ($q) use ($searchTerm) {
-                    $q->where('name', 'like', "%{$searchTerm}%");
-                    $q->orWhere('code', 'like', "%{$searchTerm}%");
-                    $q->orWhere('tipe_outlet', 'like', "%{$searchTerm}%");
-                });
-            })->orWhereHas('user', function ($q) use ($searchTerm) {
+            $query->whereHas('salesActivity.outlet', function ($q) use ($searchTerm) {
+                $q->where('name', 'like', "%{$searchTerm}%");
+                $q->orWhere('code', 'like', "%{$searchTerm}%");
+                $q->orWhere('tipe_outlet', 'like', "%{$searchTerm}%");
+            })->orWhereHas('salesActivity.user', function ($q) use ($searchTerm) {
                 $q->where('name', 'like', "%{$searchTerm}%");
             });
         }
