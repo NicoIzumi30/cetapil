@@ -7,6 +7,102 @@
 @section('dashboard-content')
 <x-card>
     <x-slot:cardTitle>
+
+        Daftar Visibility
+    </x-slot:cardTitle>
+    {{-- Visibility Action --}}
+    <x-slot:cardAction>
+        <x-input.search wire:model.live="search" type="text" class="border-0" name="search" id="global-search"
+            placeholder="Cari data visibility"></x-input.search>
+        <x-select.light :title="'Filter Jenis Visibility'" id="posm-filter" name="posm_type_id">
+            <option value="all">Semua Jenis</option>
+            @foreach($posmTypes as $type)
+                <option value="{{ $type->id }}" {{ request('posm_type_id') == $type->id ? 'selected' : '' }}>
+                    {{ $type->name }}
+                </option>
+            @endforeach
+        </x-select.light>
+        <x-button.info onclick="openModal('update-photo')">Update Foto</x-button.info>
+    </x-slot:cardAction>
+    {{-- Visibility Action End --}}
+
+    <x-modal id="update-photo">
+        <x:slot:title>Update Foto Visibility Berdasarkan Jenis POSM</x:slot:title>
+        <form id="posmImageForm" enctype="multipart/form-data">
+            @csrf
+            <div class="flex">
+                <x-input.image class="!text-primary" id="backwall" name="backwall" label="Backwall" :max-size="5" />
+                <x-input.image class="!text-primary" id="standee" name="standee" label="Standee" :max-size="5" />
+                <x-input.image class="!text-primary" id="glolifier" name="glolifier" label="Glolifier" :max-size="5" />
+                <x-input.image class="!text-primary" id="coc" name="coc" label="COC" :max-size="5" />
+            </div>
+            <x:slot:footer>
+                <!-- Ubah type menjadi "button" dan tambahkan id -->
+                <x-button.info class="w-full" type="button" id="submitPosmBtn">
+                    <span id="submitBtnText">Konfirmasi</span>
+                    <span id="submitBtnLoading" class="hidden">
+                        <i class="fas fa-spinner fa-spin mr-2"></i>Menyimpan...
+                    </span>
+                </x-button.info>
+            </x:slot:footer>
+        </form>
+    </x-modal>
+
+
+
+    {{-- Visibility Table --}}
+    <table id="visibility-table" class="table">
+        <thead>
+            <tr>
+                <th scope="col">
+                    <a class="table-head">
+                        {{ __('Nama Outlet') }}
+                        <x-icons.sort />
+                    </a>
+                </th>
+                <th scope="col">
+                    <a class="table-head">
+                        {{ __('Nama Sales') }}
+                        <x-icons.sort />
+                    </a>
+                </th>
+                <th scope="col">
+                    <a class="table-head">
+                        {{ __('SKU') }}
+                        <x-icons.sort />
+                    </a>
+                </th>
+                <th scope="col">
+                    <a class="table-head">
+                        {{ __('Visual') }}
+                        <x-icons.sort />
+                    </a>
+                </th>
+                <th scope="col">
+                    <a class="table-head">
+                        {{ __('Status') }}
+                        <x-icons.sort />
+                    </a>
+                </th>
+                <th scope="col">
+                    <a class="table-head">
+                        {{ __('Jangka Waktu') }}
+                        <x-icons.sort />
+                    </a>
+                </th>
+                <th scope="col">
+                    <a class="table-head">
+                        Aksi
+                    </a>
+                </th>
+            </tr>
+        </thead>
+    </table>
+    {{-- Visibility Table End --}}
+</x-card>
+
+<x-card>
+    <x-slot:cardTitle>
         Visibility Activity
     </x-slot:cardTitle>
     <x-slot:cardAction>

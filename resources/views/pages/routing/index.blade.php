@@ -255,7 +255,6 @@
             dom: 'rt<"bottom-container"<"bottom-left"l><"bottom-right"p>>',
             language: {
                 lengthMenu: "Menampilkan _MENU_ dari _TOTAL_ data",
-                processing: "Memuat data...",
                 paginate: {
                     previous: '<',
                     next: '>',
@@ -318,7 +317,6 @@
             dom: 'rt<"bottom-container"<"bottom-left"l><"bottom-right"p>>',
             language: {
                 lengthMenu: "Menampilkan _MENU_ dari _TOTAL_ data",
-                processing: "Memuat data...",
                 paginate: {
                     previous: '<',
                     next: '>',
@@ -590,6 +588,7 @@
             const $btnText = $btn.find('#downloadBtnTextRouting');
             const $btnLoading = $btn.find('#downloadBtnLoadingRouting');
 
+
             $btnText.addClass('hidden');
             $btnLoading.removeClass('hidden');
             $btn.prop('disabled', true);
@@ -597,14 +596,6 @@
             // Redirect to download - Gunakan route() helper
             window.location.href = "{{ route('routing.download-filtered') }}?" + new URLSearchParams(filters).toString();
 
-            // Reset button state after a delay
-            setTimeout(() => {
-                $btnText.removeClass('hidden');
-                $btnLoading.addClass('hidden');
-                $btn.prop('disabled', false);
-                toast('success', 'File sedang diunduh', 300);
-            }, 1000);
-        });
 
         $('#downloadBtnSalesActivity').click(function (e) {
             e.preventDefault();

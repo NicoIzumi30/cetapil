@@ -71,18 +71,38 @@
                 @endif
             </div>
             <div>
+                <label for="outlet_type" class="form-label">Tipe Outlet</label>
+                <input id="outlet_type" class="form-control @error('outlet_type') is-invalid @enderror" value="{{ old('outlet_type') }}" type="text" name="outlet_type"
+                    placeholder="Masukan tipe outlet" aria-describedby="outlet_type" />
+                @if ($errors->has('outlet_type'))
+                    <span id="outlet_type-error" class="text-sm text-red-600 mt-1">{{ $errors->first('outlet_type') }}</span>
+                @endif
+            </div>
+            <div>
+                <label for="account_type" class="form-label">Tipe Akun</label>
+                <input id="account_type" class="form-control @error('account_type') is-invalid @enderror" value="{{ old('account_type') }}" type="text" name="account_type"
+                    placeholder="Masukan tipe akun" aria-describedby="name" />
+                @if ($errors->has('account_type'))
+                    <span id="account_type-error" class="text-sm text-red-600 mt-1">{{ $errors->first('account_type') }}</span>
+                @endif
+            </div>
+            <div>
                 <label for="user_id">Nama Sales</label>
-                <select id="user_id" name="user_id" class="w-full">
+                <select id="user_id" name="user_id" class="form-control @error('user_id') is-invalid @enderror">
                     <option value="" selected disabled>
                         -- Pilih nama sales yang ditugaskan --
                     </option>
                     @foreach ($salesUsers as $sales)
-                        <option value="{{ $sales->id }}" {{ old('user_id') == $sales->id ? 'selected' : ''}}>{{ $sales->name }}</option>
+                        <option value="{{ $sales->id }}" {{ old('user_id') == $sales->id ? 'selected' : ''}}>
+                            {{ $sales->name }}
+                        </option>
                     @endforeach
                 </select>
-                @if ($errors->has('user_id'))
-                    <span id="user_id-error" class="text-sm text-red-600 mt-1">{{ $errors->first('name') }}</span>
-                @endif
+                @error('user_id')
+                    <span class="invalid-feedback" role="alert">
+                        <strong>{{ $message }}</strong>
+                    </span>
+                @enderror
             </div>
             <div>
                 <label for="category">Kategori Outlet</label>
@@ -129,19 +149,16 @@
                     <span id="cycle-error" class="text-sm text-red-600 mt-1">{{ $errors->first('cycle') }}</span>
                 @endif
             </div>
-            <div id="week-container" class="hidden">
-                <label for="week_type">Week</label>
-                <select id="week_type" name="week_type" class=" w-full">
-                    <option value="" selected disabled>
-                        -- Pilih Week --
-                    </option>
-                    @foreach ($weekType as $week)
-                        <option value="{{$week['value']}}" {{ old('week_type') == $week['value'] ? 'selected' : ''}}>{{$week['name']}}</option>
-                    @endforeach
+            <div id="week-container" class="@if(!in_array(old('cycle', ''), ['1x2', '1x4'])) hidden @endif">
+                <label for="week" class="form-label">Week</label>
+                <select id="week" name="week" class="form-control @error('week') is-invalid @enderror">
+                    <option value="" selected disabled>-- Pilih Week --</option>
                 </select>
-                @if ($errors->has('week_type'))
-                    <span id="week_type-error" class="text-sm text-red-600 mt-1">{{ $errors->first('week_type') }}</span>
-                @endif
+                @error('week')
+                    <span class="invalid-feedback" role="alert">
+                        <strong>{{ $message }}</strong>
+                    </span>
+                @enderror
             </div>
             <div>
                 <label for="channel">Channel</label>
@@ -184,16 +201,30 @@
                 <h3 class="font-bold text-2xl text-white py-2 mb-6">
                     {{ $category->name }}
                 </h3>
-                @foreach ($category->products as $product)
-						<div class="grid grid-cols-2 items-center my-3">
-							<p class="text-white">{{$product->sku}}</p>
-							<div class="w-1/2">
-								<label for="av3m" class="form-label">AV3M</label>
-								<input class="form-control" type="number" name="av3m" id="av3m-{{$product->sku}}" placeholder="Masukan Jumlah AV3M"
-									aria-describedby="av3m" />
-							</div>
-						</div>
-                @endforeach
+                <div class="grid grid-cols-1 gap-4">
+                    @foreach ($category->products as $product)
+                        <div class="grid grid-cols-3 items-center p-4 rounded-lg">
+                            <div class="col-span-2">
+                                <p class="text-white font-medium">{{$product->sku}}</p>
+                            </div>
+                            <div>
+                                <label for="av3m-{{$product->sku}}" class="form-label text-white">AV3M</label>
+                                <input 
+                                    type="number" 
+                                    name="av3m[{{$product->sku}}]" 
+                                    id="av3m-{{$product->sku}}" 
+                                    class="form-control av3m-input w-full" 
+                                    min="0"
+                                    placeholder="Masukan Jumlah AV3M"
+                                    value="{{ old('av3m.'.$product->sku, 0) }}"
+                                />
+                                @error('av3m.'.$product->sku)
+                                    <span class="text-red-500 text-sm">{{ $message }}</span>
+                                @enderror
+                            </div>
+                        </div>
+                    @endforeach
+                </div>
             </div>
         @endforeach
 
@@ -233,9 +264,9 @@
                     @endif
                 </div>
                 <div>
-                    <label for="adresss" class="form-label">Alamat Lengkap</label>
-                    <input id="adresss" class="form-control" value="{{ old('address') }}" type="text" name="adresss"
-                        placeholder="Masukkan Alamat Lengkap" aria-describedby="adresss" />
+                    <label for="address" class="form-label">Alamat Lengkap</label>
+                    <input id="address" class="form-control" value="{{ old('address') }}" type="text" name="address"
+                        placeholder="Masukkan Alamat Lengkap" aria-describedby="address" />
                     @if ($errors->has('address'))
                         <span id="address-error" class="text-sm text-red-600 mt-1">{{ $errors->first('address') }}</span>
                     @endif
@@ -306,7 +337,10 @@
                 @endif
             @endforeach
             </div>
-            <x-button.info class="w-full mt-20 !text-xl" type="submit">Konfirmasi</x-button.info>
+            <x-button.info class="w-full mt-20 !text-xl" type="submit" id="submitBtn">
+                <span id="submitBtnText">Konfirmasi</span>
+                <span id="submitBtnLoading" class="hidden">Menyimpan...</span>
+            </x-button.info>
 
         </x-section-card>
     </form>
@@ -456,47 +490,237 @@
 
 @push('scripts')
     <script>
-        $(document).ready(function () {
-            const weekContainer = document.getElementById('week-container');
-            $('#cycle').change(function () {
-                if ($(this).val() == '1x2') {
-                    weekContainer.classList.add('block')
-                    weekContainer.classList.remove('hidden')
-                }
-                if ($(this).val() == '1x1') {
-                    weekContainer.classList.add('hidden')
-                    weekContainer.classList.remove('block')
-                }
-            })
-
-            const gihCheckbox = document.querySelector('#gih-checkbox');
-            const gihChecked = document.querySelector('#gih-checked');
-            const gihUnChecked = document.querySelector('#gih-unchecked');
-            gihChecked.addEventListener('click', function () {
-                $('#gih-checkbox').val('Sudah');
-                gihChecked.classList.add("bg-blue-400", "!text-white");
-                gihUnChecked.classList.remove("bg-blue-400", "!text-white");
-            });
-            gihUnChecked.addEventListener('click', function () {
-                $('#gih-checkbox').val('Belum');
-                gihUnChecked.classList.add("bg-blue-400", "!text-white");
-                gihChecked.classList.remove("bg-blue-400", "!text-white");
-                gihChecked.classList.add("text-blue-400");
-            });
-
-            // gihCheckbox.addEventListener('change', function () {
-            //     if (this.checked) {
-            //         $('#gih-checkbox').val('Sudah');
-            //         gihChecked.classList.add("bg-blue-400", "!text-white");
-            //         gihUnChecked.classList.remove("bg-blue-400", "!text-white");
-            //     } else {
-            //         $('#gih-checkbox').val('Belum');
-            //         gihUnChecked.classList.add("bg-blue-400", "!text-white");
-            //         gihChecked.classList.remove("bg-blue-400", "!text-white");
-            //         gihChecked.classList.add("text-blue-400");
-            //     }
-            // });
+    $(document).ready(function () {
+        $('#week').select2({
+            minimumResultsForSearch: Infinity,
+            placeholder: "-- Pilih Week --"
         });
+        
+        const weekContainer = document.getElementById('week-container');
+        
+        const weekOptions = {
+            '1x4': [
+                {name: 'Week 1', value: '1'},
+                {name: 'Week 2', value: '2'},
+                {name: 'Week 3', value: '3'},
+                {name: 'Week 4', value: '4'}
+            ],
+            '1x2': [
+                {name: 'Week 1 & 3', value: '13'},
+                {name: 'Week 2 & 4', value: '24'}
+            ]
+        };
+
+        function updateWeekOptions(cycle) {
+            const weekSelect = $('#week');
+            weekSelect.empty();
+            
+            // Destroy and reinitialize select2
+            if (weekSelect.data('select2')) {
+                weekSelect.select2('destroy');
+            }
+            
+            weekSelect.append(`<option value="" selected disabled>-- Pilih Week --</option>`);
+
+            if (cycle === '1x2' || cycle === '1x4') {
+                weekContainer.classList.remove('hidden');
+                const options = weekOptions[cycle];
+                
+                options.forEach(option => {
+                    weekSelect.append(new Option(option.name, option.value));
+                });
+                
+                // Make week field required
+                weekSelect.prop('required', true);
+            } else {
+                weekContainer.classList.add('hidden');
+                weekSelect.val('').prop('required', false);
+            }
+
+            // Reinitialize select2
+            weekSelect.select2({
+                minimumResultsForSearch: Infinity,
+                placeholder: "-- Pilih Week --",
+                width: '100%'
+            });
+        }
+
+        // Handle cycle change
+        $('#cycle').on('change', function() {
+            const selectedCycle = $(this).val();
+            updateWeekOptions(selectedCycle);
+        });
+
+        // Form submission validation
+        $('form').on('submit', function(e) {
+            const cycle = $('#cycle').val();
+            const week = $('#week').val();
+            
+            if ((cycle === '1x2' || cycle === '1x4') && !week) {
+                e.preventDefault();
+                alert('Mohon pilih Week terlebih dahulu');
+                return false;
+            }
+        });
+
+        // Initialize with current value if exists
+        const initialCycle = $('#cycle').val();
+        if (initialCycle) {
+            updateWeekOptions(initialCycle);
+            
+            // Set initial week value if exists
+            const initialWeek = "{{ old('week') }}";
+            if (initialWeek) {
+                $('#week').val(initialWeek).trigger('change');
+            }
+        }
+    });
+
+
+        $(document).ready(function () {
+        // Existing Select2 initialization
+        $('#product_category').on('change', function () {
+            // Hide all product sections first
+            $('[id^="category-"]').hide();
+            
+            var selectedCategories = $(this).find(':selected');
+            selectedCategories.each(function () {
+                var categoryName = $(this).data('name');
+                $('#' + categoryName).show();
+                
+                // Initialize AV3M inputs for visible products
+                $('#' + categoryName + ' .av3m-input').prop('required', true);
+            });
+
+            // Make AV3M inputs not required for hidden sections
+            $('[id^="category-"]:hidden .av3m-input').prop('required', false);
+        });
+
+        // Handle numeric validation for AV3M inputs
+        $('.av3m-input').on('input', function() {
+            var value = $(this).val();
+            if (value < 0) {
+                $(this).val(0);
+            }
+        });
+
+        // Form validation for AV3M
+        $('form').on('submit', function(e) {
+            var hasError = false;
+            $('.av3m-input:visible').each(function() {
+                if ($(this).val() === '') {
+                    hasError = true;
+                    $(this).addClass('is-invalid');
+                } else {
+                    $(this).removeClass('is-invalid');
+                }
+            });
+
+            if (hasError) {
+                e.preventDefault();
+                alert('Mohon isi semua data AV3M untuk produk yang dipilih');
+                return false;
+            }
+        });
+    });
+
+    $(document).ready(function() {
+    // Form submission handling
+    $('form').on('submit', function(e) {
+        e.preventDefault();
+        
+        // Reset any previous errors
+        resetFormErrors();
+        
+        // Show loading state
+        toggleLoading(true, 'submit');
+        
+        // Create FormData object to handle file uploads
+        const formData = new FormData(this);
+        
+        $.ajax({
+            url: $(this).attr('action'),
+            type: 'POST',
+            data: formData,
+            processData: false,
+            contentType: false,
+            success: function(response) {
+                // Show success message
+                toast('success', response.message, 300);
+                
+                // Redirect after delay
+                setTimeout(() => {
+                    window.location.href = "{{ route('routing.index') }}";
+                }, 1500);
+            },
+            error: function(xhr) {
+                toggleLoading(false, 'submit');
+                
+                if (xhr.status === 422) {
+                    // Validation errors
+                    handleFieldErrors(xhr.responseJSON.errors);
+                } else {
+                    // General error
+                    toast('error', xhr.responseJSON.message || 'Terjadi kesalahan', 200);
+                }
+            }
+        });
+    });
+
+    // Helper functions
+    function resetFormErrors() {
+        $('.text-red-500').addClass('hidden');
+        $('input, select').removeClass('border-red-500');
+    }
+
+    function handleFieldErrors(errors) {
+        $.each(errors, function(key, value) {
+            $(`#${key}-error`).text(value[0]).removeClass('hidden');
+            $(`[name="${key}"]`).addClass('border-red-500');
+        });
+    }
+
+    function toggleLoading(show, btnId) {
+        const $btn = $(`#${btnId}Btn`);
+        const $btnText = $(`#${btnId}BtnText`);
+        const $btnLoading = $(`#${btnId}BtnLoading`);
+        
+        if (show) {
+            $btnText.addClass('hidden');
+            $btnLoading.removeClass('hidden');
+            $btn.prop('disabled', true);
+        } else {
+            $btnText.removeClass('hidden');
+            $btnLoading.addClass('hidden');
+            $btn.prop('disabled', false);
+        }
+    }
+});
+
+    function deleteOutlet(id) {
+            if (confirm('Apakah Anda yakin ingin menghapus outlet ini?')) {
+                $.ajax({
+                    url: `/routing/${id}`,
+                    type: 'DELETE',
+                    data: {
+                        _token: '{{ csrf_token() }}'
+                    },
+                    success: function(response) {
+                        if (response.status === 'success') {
+                            // Refresh datatable atau redirect
+                            toast('success', response.message);
+                            setTimeout(() => window.location.reload(), 1500);
+                        } else {
+                            toast('error', response.message);
+                        }
+                    },
+                    error: function(xhr) {
+                        toast('error', 'Gagal menghapus outlet');
+                    }
+                });
+            }
+        }
+        
     </script>
 @endpush
 

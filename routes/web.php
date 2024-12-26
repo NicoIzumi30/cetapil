@@ -1,5 +1,6 @@
 <?php
 
+use App\Http\Controllers\Web\SurveyController;
 use App\Models\Visibility;
 use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\Web\PosmController;
@@ -52,14 +53,16 @@ Route::middleware('auth')->group(function () {
         ->name('routing.download-filtered')
         ->middleware('permission:menu_routing');
 
-    Route::get('/routing/download-sales-activity', [RoutingController::class, 'downloadSalesActivityExcel'])
-        ->name('routing.download-sales-activity')
-        ->middleware('permission:menu_routing');
+
+    Route::get('/routing/download-sales-activity', [RoutingController::class, 'downloadSalesActivityExcel'])    
+    ->name('routing.download-sales-activity')
+    ->middleware('permission:menu_routing');
 
     Route::post('/routing/bulk', [RoutingController::class, 'bulk'])->name('routing.bulk')->middleware('permission:menu_routing');
     Route::get('routing/generate-excel', [RoutingController::class, 'downloadExcel'])->name('routing.generae-excel')->middleware('permission:menu_routing');
     Route::get('routing/data', [RoutingController::class, 'getData'])->name('routing.data')->middleware('permission:menu_routing');
     Route::resource('routing', RoutingController::class)->middleware('permission:menu_routing');
+    // Route::delete('/routing/{id}', [RoutingController::class, 'destroy'])->name('routing.destroy');
 
     Route::put('update-product-knowledge', [ProductKnowledgeControler::class, 'update'])->name('update-product-knowledge')->middleware('permission:menu_routing');
     Route::get('/visibility/download-activity', [VisibilityController::class, 'downloadActivityData'])
@@ -80,6 +83,13 @@ Route::middleware('auth')->group(function () {
             ->name('visibility.products');
     });
 
+    // Survey Management
+    Route::prefix('survey')->name('survey.')->group(function () {
+        Route::get('/', [SurveyController::class, 'index'])->name('index');
+        Route::get('/data', [SurveyController::class, 'getData'])->name('data');
+        Route::get('/{id}/detail', [SurveyController::class, 'detail'])->name('detail');
+
+    });
 
     // Selling Management
     Route::prefix('selling')->name('selling.')->middleware('permission:menu_selling')->group(function () {
@@ -87,17 +97,11 @@ Route::middleware('auth')->group(function () {
         Route::get('/create', function () {
             return view('pages.selling.create');
         });
+        Route::get('/download', [SellingController::class, 'downloadData'])->name('download');
         Route::get('/{id}/detail', [SellingController::class, 'detail'])->name('detail');
         Route::get('/data', [SellingController::class, 'getData'])->name('data');
     });
 
-	// Survey Management
-	Route::get('/survey', function () {
-		return view('pages.survey.index');
-	});
-	Route::get('/survey/detail', function () {
-		return view('pages.survey.detail');
-	});
 
     // User Management
     Route::get('users/data', [UserController::class, 'getData'])->name('users.data');

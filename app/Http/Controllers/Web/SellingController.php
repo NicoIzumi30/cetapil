@@ -4,10 +4,13 @@ namespace App\Http\Controllers\Web;
 
 use App\Http\Controllers\Controller;
 
-use App\Models\Selling;
 use Carbon\Carbon;
-use Illuminate\Http\Request;
 use function GuzzleHttp\json_encode;
+use App\Models\Selling;
+use Illuminate\Http\Request;
+use App\Exports\SellingExport;
+use Maatwebsite\Excel\Facades\Excel;
+use Illuminate\Support\Facades\Log;
 
 class SellingController extends Controller
 {
@@ -104,4 +107,17 @@ class SellingController extends Controller
         ];
         return view('pages.selling.detail', compact('response'));
     } 
+
+    public function downloadData()
+    {
+        try {
+            $filename = 'selling_data_' . date('Y-m-d_His') . '.xlsx';
+            return Excel::download(new SellingExport, $filename);
+        } catch (\Exception $e) {
+            Log::error('Error downloading selling data: ' . $e->getMessage());
+            return response()->json(['error' => 'Failed to download data'], 500);
+        }
+    }
+
+ 
 }
