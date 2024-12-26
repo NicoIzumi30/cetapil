@@ -114,18 +114,17 @@ class VisibilityController extends Controller
         ]);
     }
     public function getDataActivity(Request $request)
-{
-    $query = SalesVisibility::with(['salesActivity.outlet', 'salesActivity.outlet.channel', 'salesActivity.user'])
-        ->orderBy('created_at', 'desc');
+    {
+        $query = SalesVisibility::with(['salesActivity.outlet', 'salesActivity.outlet.channel', 'salesActivity.user'])
+            ->orderBy('created_at', 'desc');
 
         if ($request->filled('search_term')) {
             $searchTerm = $request->search_term;
-            $query->where(function ( $q) use ($searchTerm) {
+            $query->where(function ($q) use ($searchTerm) {
                 $q->wherehas('outlet', function ($q) use ($searchTerm) {
                     $q->where('name', 'like', "%{$searchTerm}%");
                     $q->orWhere('code', 'like', "%{$searchTerm}%");
                     $q->orWhere('tipe_outlet', 'like', "%{$searchTerm}%");
-
                 });
             })->orWhereHas('user', function ($q) use ($searchTerm) {
                 $q->where('name', 'like', "%{$searchTerm}%");
@@ -146,36 +145,36 @@ class VisibilityController extends Controller
         }
         $filteredRecords = (clone $query)->count();
 
-    // Use MAX for ordering and selecting grouped columns
-    $query->selectRaw('sales_activity_id, MAX(id) AS id, MAX(created_at) AS created_at')
-        ->groupBy('sales_activity_id')
-        ->orderBy('created_at', 'desc');
+        // Use MAX for ordering and selecting grouped columns
+        $query->selectRaw('sales_activity_id, MAX(id) AS id, MAX(created_at) AS created_at')
+            ->groupBy('sales_activity_id')
+            ->orderBy('created_at', 'desc');
 
-    $result = $query->skip($request->start)
-        ->take($request->length)
-        ->get();
+        $result = $query->skip($request->start)
+            ->take($request->length)
+            ->get();
 
-    return response()->json([
-        'draw' => intval($request->draw),
-        'recordsTotal' => $filteredRecords,
-        'recordsFiltered' => $filteredRecords,
-        'data' => $result->map(function ($item) {
-            $salesVisibility = SalesVisibility::find($item->id);
-            return [
-                'id' => $salesVisibility->id,
-                'outlet' => $salesVisibility->salesActivity->outlet->name,
-                'sales' => $salesVisibility->salesActivity->user->name,
-                'code' => $salesVisibility->salesActivity->outlet->code,
-                'type' => $salesVisibility->visual_type,
-                'condition' => $salesVisibility->condition,
-                'channel' => $salesVisibility->salesActivity->outlet->channel->name,
-                'actions' => view('pages.visibility.action_activity', [
-                    'activityId' => $salesVisibility->id
-                ])->render()
-            ];
-        })
-    ]);
-}
+        return response()->json([
+            'draw' => intval($request->draw),
+            'recordsTotal' => $filteredRecords,
+            'recordsFiltered' => $filteredRecords,
+            'data' => $result->map(function ($item) {
+                $salesVisibility = SalesVisibility::find($item->id);
+                return [
+                    'id' => $salesVisibility->id,
+                    'outlet' => $salesVisibility->salesActivity->outlet->name,
+                    'sales' => $salesVisibility->salesActivity->user->name,
+                    'code' => $salesVisibility->salesActivity->outlet->code,
+                    'type' => $salesVisibility->visual_type,
+                    'condition' => $salesVisibility->condition,
+                    'channel' => $salesVisibility->salesActivity->outlet->channel->name,
+                    'actions' => view('pages.visibility.action_activity', [
+                        'activityId' => $salesVisibility->id
+                    ])->render()
+                ];
+            })
+        ]);
+    }
 
 
     /**
@@ -383,7 +382,8 @@ class VisibilityController extends Controller
             $query = SalesActivity::with([
                 'outlet',
                 'user',
-                'salesVisibilities'
+                'salesVisibilities',
+                'salesVisibilities.posmType', // Load the posm_type relationship
             ]);
 
             // Apply date filter
