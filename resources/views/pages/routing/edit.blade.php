@@ -30,6 +30,26 @@
                 @endif
             </div>
             <div>
+                <label for="outlet_type" class="form-label">Tipe Outlet</label>
+                <input id="outlet_type" class="form-control @error('outlet_type') is-invalid @enderror" 
+                    value="{{ $outlet->tipe_outlet }}" {{-- Change from old() to outlet value --}}
+                    type="text" name="outlet_type"
+                    placeholder="Masukan tipe outlet" aria-describedby="outlet_type" />
+                @if ($errors->has('outlet_type'))
+                    <span id="outlet_type-error" class="text-sm text-red-600 mt-1">{{ $errors->first('outlet_type') }}</span>
+                @endif
+            </div>
+            <div>
+                <label for="account_type" class="form-label">Tipe Akun</label>
+                <input id="account_type" class="form-control @error('account_type') is-invalid @enderror" 
+                    value="{{ $outlet->account }}" {{-- Change from old() to outlet value --}}
+                    type="text" name="account_type"
+                    placeholder="Masukan tipe akun" aria-describedby="name" />
+                @if ($errors->has('account_type'))
+                    <span id="account_type-error" class="text-sm text-red-600 mt-1">{{ $errors->first('account_type') }}</span>
+                @endif
+            </div>
+            <div>
                 <label for="user_id">Nama Sales</label>
                 <select id="user_id" name="user_id" class="w-full">
                     <option value="" selected disabled>
@@ -92,30 +112,34 @@
                     <span id="cycle-error" class="text-sm text-red-600 mt-1">{{ $errors->first('cycle') }}</span>
                 @endif
             </div>
-            <div id="week-container" class="hidden">
-                <label for="week_type">Week</label>
-                <select id="week_type" name="week_type" class=" w-full">
-                    <option value="" selected disabled>
-                        -- Pilih Week --
-                    </option>
-                    @foreach ($weekType as $week)
-                        <option value="{{$week['value']}}" {{$week['value'] == $outlet->week_type ? 'selected' : ''}}>
-                            {{$week['name']}}
-                        </option>
-                    @endforeach
+            <div id="week-container" class="@if(!in_array($outlet->cycle, ['1x2', '1x4'])) hidden @endif">
+                <label for="week" class="form-label">Week</label>
+                <select id="week" name="week" class="form-control @error('week') is-invalid @enderror">
+                    <option value="" selected disabled>-- Pilih Week --</option>
+                    @if($outlet->cycle === '1x2')
+                        <option value="13" {{ $outlet->week === '1&3' ? 'selected' : '' }}>Week 1 & 3</option>
+                        <option value="24" {{ $outlet->week === '2&4' ? 'selected' : '' }}>Week 2 & 4</option>
+                    @elseif($outlet->cycle === '1x4')
+                        @for($i = 1; $i <= 4; $i++)
+                            <option value="{{ $i }}" {{ $outlet->week == $i ? 'selected' : '' }}>Week {{ $i }}</option>
+                        @endfor
+                    @endif
                 </select>
-                @if ($errors->has('week_type'))
-                    <span id="week_type-error" class="text-sm text-red-600 mt-1">{{ $errors->first('week_type') }}</span>
-                @endif
+                @error('week')
+                    <span class="invalid-feedback" role="alert">
+                        <strong>{{ $message }}</strong>
+                    </span>
+                @enderror
             </div>
             <div>
                 <label for="channel">Channel</label>
-                <select id="channel" name="channel" class=" w-full">
+                <select id="channel" name="channel" class="w-full">
                     <option value="" selected disabled>
                         -- Pilih Channel --
                     </option>
                     @foreach ($channels as $channel)
-                        <option value="{{$channel->id}}" {{$channel->id == $outlet->channel ? 'selected' : ''}}>
+                        <option value="{{$channel->id}}" 
+                            {{$channel->id == $outlet->channel_id ? 'selected' : ''}}>
                             {{$channel->name}}
                         </option>
                     @endforeach
@@ -127,45 +151,53 @@
         </div>
 
         <x-section-card :title="'Produk'">
-    <div class="grid grid-cols-2 gap-4">
-        <div>
-            <label for="product_category">Kategori Produk</label>
-            <select id="product_category" name="product_category[]" class="w-full" multiple="multiple">
-                @foreach ($categories as $category)
-                    <option 
-                        value="{{ $category->id }}" data-name="{{ \Str::slug($category->name) }}" 
-                        {{ $category->hasProductInOutlet ? 'selected' : '' }}>
-                        {{ $category->name }}
-                    </option>
-                @endforeach
-            </select>
-            @error('product_category')
-                <span id="product_category-error" class="text-sm text-red-600 mt-1">{{ $message }}</span>
-            @enderror
-        </div>
-    </div>
-</x-section-card>
+            <div class="grid grid-cols-2 gap-4">
+                <div>
+                    <label for="product_category">Kategori Produk</label>
+                    <select id="product_category" name="product_category[]" class="w-full" multiple="multiple">
+                        @foreach ($categories as $category)
+                            <option 
+                                value="{{ $category->id }}" data-name="{{ \Str::slug($category->name) }}" 
+                                {{ $category->hasProductInOutlet ? 'selected' : '' }}>
+                                {{ $category->name }}
+                            </option>
+                        @endforeach
+                    </select>
+                    @error('product_category')
+                        <span id="product_category-error" class="text-sm text-red-600 mt-1">{{ $message }}</span>
+                    @enderror
+                </div>
+            </div>
+        </x-section-card>
 
-@foreach ($categories as $category)
-    <div id="{{ \Str::slug($category->name) }}" class="category-field border-b-2 border-dashed py-6">
-        <h3 class="font-bold text-2xl text-white py-2 mb-6">
-            {{ $category->name }}
-        </h3>
         @foreach ($category->products as $product)
-            @php
-                $isInOutlet = $product->outlets->isNotEmpty();
-            @endphp
-			<div class="grid grid-cols-2 items-center my-3">
-				<p class="text-white">{{$product->sku}}</p>
-				<div class="w-1/2">
-					<label for="av3m" class="form-label">AV3M</label>
-					<input class="form-control" type="number" checked="{{$isInOutlet}}" name="av3m" id="av3m-{{$product->sku}}" placeholder="Masukan Jumlah AV3M"
-						aria-describedby="av3m" />
-				</div>
-			</div>
-        @endforeach
-    </div>
-@endforeach
+
+        @php
+            $av3mValue = App\Models\Av3m::where('outlet_id', $outlet->id)
+                ->where('product_id', $product->id)
+                ->value('av3m') ?? 0;
+        @endphp
+        <div class="grid grid-cols-3 items-center p-4 rounded-lg">
+            <div class="col-span-2">
+                <p class="text-white font-medium">{{$product->sku}}</p>
+            </div>
+            <div>
+                <label for="av3m-{{$product->sku}}" class="form-label text-white">AV3M</label>
+                <input 
+                    type="number" 
+                    name="av3m[{{$product->sku}}]" 
+                    id="av3m-{{$product->sku}}" 
+                    class="form-control av3m-input w-full" 
+                    min="0"
+                    placeholder="Masukan Jumlah AV3M"
+                    value="{{ old('av3m.'.$product->sku, $av3mValue) }}"
+                />
+                @error('av3m.'.$product->sku)
+                    <span class="text-red-500 text-sm">{{ $message }}</span>
+                @enderror
+            </div>
+        </div>
+    @endforeach
 
         <x-section-card :title="'Area Domisili Outlet'">
             <div class="grid grid-cols-2 gap-6">
@@ -277,7 +309,10 @@
                     @endif
                 @endforeach
             </div>
-            <x-button.info class="w-full mt-20 !text-xl" type="submit">Simpan perubahan</x-button.info>
+            <x-button.info class="w-full mt-20 !text-xl" type="submit" id="submitBtn">
+                <span id="submitBtnText">Simpan Perubahan</span>
+                <span id="submitBtnLoading" class="hidden">Menyimpan...</span>
+            </x-button.info>
 
         </x-section-card>
     </form>
@@ -401,20 +436,33 @@
 @push('scripts')
     <script>
         $(document).ready(function () {
-            const weekContainer = document.getElementById('week-container');
-
-            function weekHandler(value) {
-                // Pastikan weekContainer ada
-                if (!weekContainer) return;
-
-                if (value === '1x2') {
-                    weekContainer.classList.add('block');
-                    weekContainer.classList.remove('hidden');
-                } else if (value === '1x1') {
-                    weekContainer.classList.add('hidden');
-                    weekContainer.classList.remove('block');
-                }
+            const cycle = "{{ $outlet->cycle }}";
+            if (cycle === '1x2' || cycle === '1x4') {
+                $('#week-container').removeClass('hidden');
             }
+
+            $('#cycle').on('change', function() {
+                const selectedCycle = $(this).val();
+                const weekContainer = $('#week-container');
+                const weekSelect = $('#week');
+                
+                weekSelect.empty().append('<option value="" disabled selected>-- Pilih Week --</option>');
+                
+                if (selectedCycle === '1x2') {
+                    weekContainer.removeClass('hidden');
+                    weekSelect.append(`
+                        <option value="13">Week 1 & 3</option>
+                        <option value="24">Week 2 & 4</option>
+                    `);
+                } else if (selectedCycle === '1x4') {
+                    weekContainer.removeClass('hidden');
+                    for(let i = 1; i <= 4; i++) {
+                        weekSelect.append(`<option value="${i}">Week ${i}</option>`);
+                    }
+                } else {
+                    weekContainer.addClass('hidden');
+                }
+            });
 
             // Versi jQuery
             $('#cycle').change(function () {
@@ -462,5 +510,106 @@
             // });
         });
     </script>
+@endpush
+
+@push('scripts')
+<script>
+$(document).ready(function() {
+    // Initialize current product categories
+    var currentCategories = $('#product_category').find(':selected');
+    currentCategories.each(function() {
+        var categoryName = $(this).data('name');
+        $('#' + categoryName).show();
+    });
+
+    // Form submission handling
+    $('form').on('submit', function(e) {
+        e.preventDefault();
+        
+        // Reset any previous errors
+        resetFormErrors();
+        
+        // Show loading state
+        toggleLoading(true, 'submit');
+        
+        // Create FormData object
+        const formData = new FormData(this);
+        
+        // Add PUT method for Laravel
+        formData.append('_method', 'PUT');
+        
+        $.ajax({
+            url: $(this).attr('action'),
+            type: 'POST', // Always use POST for FormData
+            data: formData,
+            processData: false,
+            contentType: false,
+            success: function(response) {
+                // Show success message
+                toast('success', response.message, 300);
+                
+                // Redirect after delay
+                setTimeout(() => {
+                    window.location.href = "{{ route('routing.index') }}";
+                }, 1500);
+            },
+            error: function(xhr) {
+                toggleLoading(false, 'submit');
+                
+                if (xhr.status === 422) {
+                    // Validation errors
+                    handleFieldErrors(xhr.responseJSON.errors);
+                } else {
+                    // General error
+                    toast('error', xhr.responseJSON.message || 'Terjadi kesalahan', 200);
+                }
+            }
+        });
+    });
+
+    // Helper functions
+    function resetFormErrors() {
+        $('.text-red-500').addClass('hidden');
+        $('input, select').removeClass('border-red-500');
+    }
+
+    function handleFieldErrors(errors) {
+        $.each(errors, function(key, value) {
+            $(`#${key}-error`).text(value[0]).removeClass('hidden');
+            $(`[name="${key}"]`).addClass('border-red-500');
+        });
+    }
+
+    function toggleLoading(show, btnId) {
+        const $btn = $(`#${btnId}Btn`);
+        const $btnText = $(`#${btnId}BtnText`);
+        const $btnLoading = $(`#${btnId}BtnLoading`);
+        
+        if (show) {
+            $btnText.addClass('hidden');
+            $btnLoading.removeClass('hidden');
+            $btn.prop('disabled', true);
+        } else {
+            $btnText.removeClass('hidden');
+            $btnLoading.addClass('hidden');
+            $btn.prop('disabled', false);
+        }
+    }
+
+    // Handle product category changes
+    $('#product_category').on('change', function() {
+        var selectedCategories = $(this).find(':selected');
+        
+        // Hide all categories first
+        $('[id^=category-]').hide();
+        
+        // Show selected categories
+        selectedCategories.each(function() {
+            var categoryName = $(this).data('name');
+            $('#' + categoryName).show();
+        });
+    });
+});
+</script>
 @endpush
 

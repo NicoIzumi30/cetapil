@@ -53,14 +53,16 @@ Route::middleware('auth')->group(function () {
         ->name('routing.download-filtered')
         ->middleware('permission:menu_routing');
 
-    Route::get('/routing/download-sales-activity', [RoutingController::class, 'downloadSalesActivityExcel'])
-        ->name('routing.download-sales-activity')
-        ->middleware('permission:menu_routing');
+
+    Route::get('/routing/download-sales-activity', [RoutingController::class, 'downloadSalesActivityExcel'])    
+    ->name('routing.download-sales-activity')
+    ->middleware('permission:menu_routing');
 
     Route::post('/routing/bulk', [RoutingController::class, 'bulk'])->name('routing.bulk')->middleware('permission:menu_routing');
     Route::get('routing/generate-excel', [RoutingController::class, 'downloadExcel'])->name('routing.generae-excel')->middleware('permission:menu_routing');
     Route::get('routing/data', [RoutingController::class, 'getData'])->name('routing.data')->middleware('permission:menu_routing');
     Route::resource('routing', RoutingController::class)->middleware('permission:menu_routing');
+    Route::delete('/routing/{id}', [RoutingController::class, 'destroy'])->name('routing.destroy');
 
     Route::put('update-product-knowledge', [ProductKnowledgeControler::class, 'update'])->name('update-product-knowledge')->middleware('permission:menu_routing');
     Route::get('/visibility/download-activity', [VisibilityController::class, 'downloadActivityData'])
@@ -95,6 +97,7 @@ Route::middleware('auth')->group(function () {
         Route::get('/create', function () {
             return view('pages.selling.create');
         });
+        Route::get('/download', [SellingController::class, 'downloadData'])->name('download');
         Route::get('/{id}/detail', [SellingController::class, 'detail'])->name('detail');
         Route::get('/data', [SellingController::class, 'getData'])->name('data');
     });

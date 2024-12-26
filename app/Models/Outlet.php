@@ -16,6 +16,7 @@ class Outlet extends Model
     use HasFactory, HasUuids, SoftDeletes;
 
     protected $guarded = [];
+    
 
     /**
      * Get the city that owns the outlet.

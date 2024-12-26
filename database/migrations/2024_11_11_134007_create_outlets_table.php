@@ -29,8 +29,8 @@ return new class extends Migration {
             $table->string('latitude')->nullable();
             $table->text('address')->nullable();
             $table->enum('status', ['APPROVED', 'PENDING', 'REJECTED'])->default('PENDING');
-            $table->enum('cycle', ['1x1', '1x2'])->default('1x1');
-            $table->enum('week_type', ['ODD', 'EVEN'])->nullable();
+            $table->enum('cycle', ['1x1', '1x2', '1x4'])->default('1x1');
+            $table->enum('week', ['1', '2', '3', '4','1&3','2&4'])->nullable();
             $table->timestamps();
             $table->softDeletes();
         });

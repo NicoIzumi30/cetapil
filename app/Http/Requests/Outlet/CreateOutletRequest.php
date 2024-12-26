@@ -25,25 +25,39 @@ class CreateOutletRequest extends FormRequest
      */
     public function rules(): array
     {
-        return [
+        $rules = [
             'user_id' => 'required|exists:users,id',
-            'city' => 'required|string|exists:cities,name',
+            'city' => 'required|exists:cities,id',
+            'code' => 'required|string|unique:outlets,code',
             'name' => 'required|string',
             'category' => 'required|string',
             'visit_day' => 'required|integer|between:1,7',
             'longitude' => 'required|string',
             'latitude' => 'required|string',
             'address' => 'nullable|string',
-            'cycle' => 'required|in:1x1,1x2',
-            'week_type' => 'required_if:cycle,1x2|in:ODD,EVEN',
-            // 'status' => 'required|in:APPROVED,PENDING,REJECTED',
-            'img_front' => 'nullable|file|mimes:png,jpg,jpeg|max:1024',
-            'img_banner' => 'nullable|file|mimes:png,jpg,jpeg|max:1024',
-            'img_main_road' => 'nullable|file|mimes:png,jpg,jpeg|max:1024',
+            'cycle' => 'required|in:1x1,1x2,1x4',
+            'week' => 'required_if:cycle,1x2,1x4',
+            'outlet_type' => 'required|string',
+            'account_type' => 'required|string',
+            'channel' => 'required|exists:channels,id',
+            'product_category' => 'nullable|array',
+            'product_category.*' => 'exists:categories,id',
+        ];
 
-            'products' => 'nullable|string',
-            'products.*.id' => 'required|exists:products,id',
-            'products.*.av3m' => 'required|numeric|min:0',
+        if ($this->input('cycle') === '1x4') {
+            $rules['week'] = 'required|in:1,2,3,4';
+        } elseif ($this->input('cycle') === '1x2') {
+            $rules['week'] = 'required|in:13,24';
+        }
+
+        return $rules;
+    }
+
+    public function messages()
+    {
+        return [
+            'week.required_if' => 'Week harus diisi ketika cycle adalah 1x2 atau 1x4',
+            'week.in' => 'Nilai Week tidak valid untuk cycle yang dipilih',
         ];
     }
 
