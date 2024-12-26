@@ -14,11 +14,14 @@ class SalesAvailability extends Model
     use HasFactory, HasUuids, SoftDeletes;
 
     protected $guarded = [];
-
+    protected $appends = ['status_ideal'];
     protected $casts = [
         'status' => 'boolean'
     ];
-
+    public function getStatusIdealAttribute()
+    {
+        return $this->attributes['status'];
+    }
     public function outlet(): BelongsTo
     {
         return $this->belongsTo(Outlet::class);
