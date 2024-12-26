@@ -385,8 +385,8 @@
             function handleSuccess(modalId, message) {
                 toggleLoading(false, 'update');
                 closeModal(modalId);
-                toast('success', message, 150);
-                setTimeout(() => window.location.reload(), 1500);
+                toast('success', message, 300);
+                setTimeout(() => window.location.reload(), 300);
             }
             $('#importBtn').click(function () {
                 const file = $('#file_upload')[0].files[0];
@@ -405,7 +405,10 @@
                     processData: false,
                     contentType: false,
                     success: function (response) {
-                        handleSuccess('unggah-routing-bulk', response.message);
+                        toggleLoading(false, 'import');
+                        closeModal('unggah-routing-bulk');   
+                        toast('success', response.message, 400);
+                        setTimeout(() => window.location.replace('/routing'), 4000);
                     },
                     error: function (xhr) {
                         toggleLoading(false, 'import');
@@ -681,18 +684,18 @@
     }
 
     function toggleLoading(show, btnId) {
-        const $btn = $(`#${btnId}Btn`);
-        const $btnText = $(`#${btnId}BtnText`);
-        const $btnLoading = $(`#${btnId}BtnLoading`);
+        const btn = $(`#${btnId}Btn`);
+        const btnText = $(`#${btnId}BtnText`);
+        const btnLoading = $(`#${btnId}BtnLoading`);
         
         if (show) {
-            $btnText.addClass('hidden');
-            $btnLoading.removeClass('hidden');
-            $btn.prop('disabled', true);
+            btnText.addClass('hidden');
+            btnLoading.removeClass('hidden');
+            btn.prop('disabled', true);
         } else {
-            $btnText.removeClass('hidden');
-            $btnLoading.addClass('hidden');
-            $btn.prop('disabled', false);
+            btnText.removeClass('hidden');
+            btnLoading.addClass('hidden');
+            btn.prop('disabled', false);
         }
     }
 });

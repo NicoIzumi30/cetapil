@@ -17,7 +17,7 @@ class Outlet extends Model
 
     protected $guarded = [];
     
-    protected $fillable = ['id','channel_id', 'product_id', 'av3m','outlet_id',];
+    // protected $fillable = ['id','channel_id', 'product_id', 'av3m','outlet_id',];
     /**
      * Get the city that owns the outlet.
      */

@@ -29,9 +29,9 @@ class RoutingExcelDataJob implements ShouldQueue
         collect($this->excelData)->chunk(50)->each(function ($chunk) {
             foreach ($chunk as $key => $row) {
                 try {
-                    $user = getUserByName($row['nama_md']);
+                    $user = getUserByName($row['nama_sales']);
                     if(!$user) {
-                        throw new Exception('User not found: ' . $row['nama_md']);
+                        throw new Exception('User not found: ' . $row['nama_sales']);
                     }
                     $city = getCityByName($row['kota']);
                     if(!$city) {
@@ -61,8 +61,10 @@ class RoutingExcelDataJob implements ShouldQueue
                                 'address' => $row['alamat'],
                                 'status' => 'APPROVED',
                                 'cycle' => $row['cycle'],
-                                'week_type'=> $row['week_type'],
-
+                                'week'=> $row['week'],
+                                'account' => $row['account'],
+                                'tipe_outlet' => $row['tipe_outlet'],
+                                'TSO' => $row['tso'],
                             ]);
                         }
                     }
@@ -73,7 +75,7 @@ class RoutingExcelDataJob implements ShouldQueue
                         'ROW' => $errorRow,
                         'ERROR_MESSAGE' => $e->getMessage(),
                         'CHANNEL' => $row['channel'],
-                        'USER' => $row['nama_md'],
+                        'USER' => $row['nama_sales'],
                         'KOTA' => $row['kota'],
                     ];
                     Log::channel('routingErrorLog')->error(json_encode($data));
