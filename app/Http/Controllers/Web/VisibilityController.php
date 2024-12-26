@@ -114,16 +114,18 @@ class VisibilityController extends Controller
         ]);
     }
     public function getDataActivity(Request $request)
-    {
-        $query = SalesVisibility::with(['salesActivity.outlet', 'salesActivity.outlet.channel', 'salesActivity.user'])->orderBy('created_at', 'desc');
+{
+    $query = SalesVisibility::with(['salesActivity.outlet', 'salesActivity.outlet.channel', 'salesActivity.user'])
+        ->orderBy('created_at', 'desc');
 
         if ($request->filled('search_term')) {
             $searchTerm = $request->search_term;
-            $query->where(function ($q) use ($searchTerm) {
+            $query->where(function ( $q) use ($searchTerm) {
                 $q->wherehas('outlet', function ($q) use ($searchTerm) {
                     $q->where('name', 'like', "%{$searchTerm}%");
                     $q->orWhere('code', 'like', "%{$searchTerm}%");
                     $q->orWhere('tipe_outlet', 'like', "%{$searchTerm}%");
+
                 });
             })->orWhereHas('user', function ($q) use ($searchTerm) {
                 $q->where('name', 'like', "%{$searchTerm}%");
@@ -143,30 +145,57 @@ class VisibilityController extends Controller
             }
         }
         $filteredRecords = (clone $query)->count();
-
-        $result = $query->skip($request->start)
-            ->take($request->length)
-            ->get();
-        return response()->json([
-            'draw' => intval($request->draw),
-            'recordsTotal' => $filteredRecords,
-            'recordsFiltered' => $filteredRecords,
-            'data' => $result->map(function ($item) {
-                return [
-                    'id' => $item->id,
-                    'outlet' => $item->salesActivity->outlet->name,
-                    'sales' => $item->salesActivity->user->name,
-                    'code' => $item->salesActivity->outlet->code,
-                    'type' => $item->visual_type,
-                    'condition' => $item->condition,
-                    'channel' => $item->salesActivity->outlet->channel->name,
-                    'actions' => view('pages.visibility.action_activity', [
-                        'activityId' => $item->id
-                    ])->render()
-                ];
-            })
-        ]);
+            });
+        });
     }
+
+    if ($request->filled('date')) {
+        $dateParam = $request->date;
+        if (str_contains($dateParam, ' to ')) {
+            [$startDate, $endDate] = explode(' to ', $dateParam);
+            $query->whereBetween('created_at', [
+                Carbon::parse($startDate)->startOfDay(),
+                Carbon::parse($endDate)->endOfDay()
+            ]);
+        } else {
+            $query->whereDate('created_at', Carbon::parse($dateParam));
+        }
+    }
+
+    $filteredRecords = (clone $query)->count();
+
+    // Use MAX for ordering and selecting grouped columns
+    $query->selectRaw('sales_activity_id, MAX(id) AS id, MAX(created_at) AS created_at')
+        ->groupBy('sales_activity_id')
+        ->orderBy('created_at', 'desc');
+
+    $result = $query->skip($request->start)
+        ->take($request->length)
+        ->get();
+
+    return response()->json([
+        'draw' => intval($request->draw),
+        'recordsTotal' => $filteredRecords,
+        'recordsFiltered' => $filteredRecords,
+        'data' => $result->map(function ($item) {
+            $salesVisibility = SalesVisibility::find($item->id);
+            return [
+                'id' => $salesVisibility->id,
+                'outlet' => $salesVisibility->salesActivity->outlet->name,
+                'sales' => $salesVisibility->salesActivity->user->name,
+                'code' => $salesVisibility->salesActivity->outlet->code,
+                'type' => $salesVisibility->visual_type,
+                'condition' => $salesVisibility->condition,
+                'channel' => $salesVisibility->salesActivity->outlet->channel->name,
+                'actions' => view('pages.visibility.action_activity', [
+                    'activityId' => $salesVisibility->id
+                ])->render()
+            ];
+        })
+    ]);
+}
+
+
     /**
      * Show the form for creating a new resource.
      */
