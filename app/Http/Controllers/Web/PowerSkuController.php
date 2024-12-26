@@ -28,15 +28,13 @@ class PowerSkuController extends Controller
         // Apply search filters if a search term is provided
         if ($request->filled('search_term')) {
             $searchTerm = $request->search_term;
-
-            $query->where(function ($q) use ($searchTerm) {
-                $q->where('sku', 'like', "%{$searchTerm}%") // Search within SKU
-                    ->orWhereHas('product.category', function ($q) use ($searchTerm) {
-                        $q->where('name', 'like', "%{$searchTerm}%"); // Search within category name
-                    });
+            $query->whereHas('product', function ($q) use ($searchTerm) {
+                $q->where('sku', 'like', "%{$searchTerm}%");
+            })->orWhereHas('product.category', function ($q) use ($searchTerm) {
+                $q->where('name', 'like', "%{$searchTerm}%");
             });
         }
-
+            
         // Calculate the total records after filtering
         $filteredRecords = (clone $query)->count();
 

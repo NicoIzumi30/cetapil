@@ -1090,7 +1090,10 @@
                         $('#savePowerSkuBtn').prop('disabled', false);
 
                         // Show success message and close modal
-                        toast('success', response.message, 300);
+                        toast('success', response.message, 200);
+                        setTimeout(function() {
+                            window.location.reload();
+                        }, 2000);
                         $('#tambah-power-sku').addClass('hidden');
 
                         // Reset form
@@ -1101,9 +1104,7 @@
                         powerSkuTable.ajax.reload();
 
                         // Refresh page after delay
-                        setTimeout(function() {
-                            window.location.reload();
-                        }, 1500);
+                        
                     },
                     error: function(xhr) {
                         // Reset loading state
