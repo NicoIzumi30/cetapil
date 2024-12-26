@@ -28,7 +28,7 @@ Route::middleware('guest')->group(function () {
 Route::middleware('auth')->group(function () {
     // Dashboard
     Route::get('/', [DashboardController::class, 'index'])->name('dashboard');
-    
+
     //profile
     Route::get('/profile', [ProfileController::class, 'index'])->name('profile');
 
@@ -46,16 +46,15 @@ Route::middleware('auth')->group(function () {
         Route::put('/{id}/approve', [RoutingRequestControler::class, 'approve'])->name('approve');
         Route::put('/{id}/reject', [RoutingRequestControler::class, 'reject'])->name('reject');
         Route::delete('/delete/', [RoutingRequestControler::class, 'destroy'])->name('delete');
-
     });
 
     Route::get('/routing/download-filtered', [RoutingController::class, 'downloadFilteredExcel'])
-    ->name('routing.download-filtered')
-    ->middleware('permission:menu_routing');
+        ->name('routing.download-filtered')
+        ->middleware('permission:menu_routing');
 
-Route::get('/routing/download-sales-activity', [RoutingController::class, 'downloadSalesActivityExcel'])
-    ->name('routing.download-sales-activity')
-    ->middleware('permission:menu_routing');
+    Route::get('/routing/download-sales-activity', [RoutingController::class, 'downloadSalesActivityExcel'])
+        ->name('routing.download-sales-activity')
+        ->middleware('permission:menu_routing');
 
     Route::post('/routing/bulk', [RoutingController::class, 'bulk'])->name('routing.bulk')->middleware('permission:menu_routing');
     Route::get('routing/generate-excel', [RoutingController::class, 'downloadExcel'])->name('routing.generae-excel')->middleware('permission:menu_routing');
@@ -63,12 +62,13 @@ Route::get('/routing/download-sales-activity', [RoutingController::class, 'downl
     Route::resource('routing', RoutingController::class)->middleware('permission:menu_routing');
 
     Route::put('update-product-knowledge', [ProductKnowledgeControler::class, 'update'])->name('update-product-knowledge')->middleware('permission:menu_routing');
-
+    Route::get('/visibility/download-activity', [VisibilityController::class, 'downloadActivityData'])
+        ->name('visibility.download-activity');
     // Visibility Management
     Route::middleware('permission:menu_visibility')->group(function () {
         Route::get('/visibility/data', [VisibilityController::class, 'getData'])->name('visibility.data');
-        Route::get('visibility/activity/data',[VisibilityController::class,'getDataActivity'])->name('visibility.activity.data');
-        Route::get('visibility/activity/{id}/detail',[VisibilityController::class,'detail_activity'])->name('visibility.activity.detail');
+        Route::get('visibility/activity/data', [VisibilityController::class, 'getDataActivity'])->name('visibility.activity.data');
+        Route::get('visibility/activity/{id}/detail', [VisibilityController::class, 'detail_activity'])->name('visibility.activity.detail');
         Route::resource('visibility', VisibilityController::class);
         Route::get('posm/get-images', [PosmController::class, 'getImages'])
             ->name('posm.get-images');
@@ -78,8 +78,6 @@ Route::get('/routing/download-sales-activity', [RoutingController::class, 'downl
         Route::post('posm-types', [PosmController::class, 'store'])->name('posm.store');
         Route::get('/visibility/products/{category}', [VisibilityController::class, 'getProducts'])
             ->name('visibility.products');
-            Route::get('/visibility/download-activity', [VisibilityController::class, 'downloadActivityData'])
-        ->name('visibility.download-activity');
     });
 
 
@@ -92,6 +90,14 @@ Route::get('/routing/download-sales-activity', [RoutingController::class, 'downl
         Route::get('/{id}/detail', [SellingController::class, 'detail'])->name('detail');
         Route::get('/data', [SellingController::class, 'getData'])->name('data');
     });
+
+	// Survey Management
+	Route::get('/survey', function () {
+		return view('pages.survey.index');
+	});
+	Route::get('/survey/detail', function () {
+		return view('pages.survey.detail');
+	});
 
     // User Management
     Route::get('users/data', [UserController::class, 'getData'])->name('users.data');
@@ -109,7 +115,7 @@ Route::get('/routing/download-sales-activity', [RoutingController::class, 'downl
         Route::get('/data', [ProductController::class, 'getData'])->name('data');
         Route::get('/data-stock-on-hand', [ProductController::class, 'getDataStockOnHand'])->name('data-stock-on-hand');
         Route::get('/download-stock-on-hand', [ProductController::class, 'downloadStockOnHand'])
-        ->name('download-stock-on-hand');
+            ->name('download-stock-on-hand');
     });
     Route::resource('products', ProductController::class)->middleware('permission:menu_product');
     // Logout
@@ -119,6 +125,4 @@ Route::get('/routing/download-sales-activity', [RoutingController::class, 'downl
     Route::get('/unauthorized', function () {
         return view('pages.unauthorized');
     })->name('unauthorized');
-
 });
-
