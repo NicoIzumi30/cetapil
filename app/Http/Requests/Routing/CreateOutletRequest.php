@@ -52,7 +52,10 @@ class CreateOutletRequest extends FormRequest
             'survey' => 'required|array',
             'survey.*' => 'required|string',
             'av3m' => 'array',
-            'av3m.*' => 'numeric|min:0'
+            'av3m.*' => 'numeric|min:0',
+            'img_front' => 'required|file|mimes:png,jpg,jpeg|max:2048',
+            'img_banner' => 'required|file|mimes:png,jpg,jpeg|max:2048',
+            'img_main_road' => 'required|file|mimes:png,jpg,jpeg|max:2048',
         ];
     
         if ($this->input('cycle') === '1x4') {

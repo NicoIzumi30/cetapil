@@ -100,7 +100,7 @@
             </div>
             <div>
                 <label for="cycle">Cycle</label>
-                <select id="cycle" name="cycle" class=" w-full">
+                <select id="cycle" name="cycle" class="w-full">
                     <option value="" selected disabled>
                         -- Pilih cycle --
                     </option>
@@ -114,7 +114,7 @@
             </div>
             <div id="week-container" class="@if(!in_array($outlet->cycle, ['1x2', '1x4'])) hidden @endif">
                 <label for="week" class="form-label">Week</label>
-                <select id="week" name="week" class="form-control @error('week') is-invalid @enderror">
+                <select id="week" name="week" class="w-full form-control @error('week') is-invalid @enderror">
                     <option value="" selected disabled>-- Pilih Week --</option>
                     @if($outlet->cycle === '1x2')
                         <option value="13" {{ $outlet->week === '1&3' ? 'selected' : '' }}>Week 1 & 3</option>
@@ -158,8 +158,7 @@
                         @foreach ($categories as $category)
                             <option 
                                 value="{{ $category->id }}" data-name="{{ \Str::slug($category->name) }}" 
-                                {{ $category->hasProductInOutlet ? 'selected' : '' }}>
-                                {{ $category->name }}
+                                {{ $category->hasProductInOutlet ? 'selected' : '' }}>{{ $category->name }}
                             </option>
                         @endforeach
                     </select>
@@ -170,14 +169,18 @@
             </div>
         </x-section-card>
 
+        @foreach ($categories as $category)
+    <div id="{{ \Str::slug($category->name) }}" class="category-field border-b-2 border-dashed py-6">
+        <h3 class="font-bold text-2xl text-white py-2 mb-6">
+            {{ $category->name }}
+        </h3>
         @foreach ($category->products as $product)
-        
         @php
             $av3mValue = App\Models\Av3m::where('outlet_id', $outlet->id)
                 ->where('product_id', $product->id)
                 ->value('av3m') ?? 0;
         @endphp
-        <div class="grid grid-cols-3 items-center p-4 rounded-lg">
+            <div class="grid grid-cols-3 items-center p-4 rounded-lg">
             <div class="col-span-2">
                 <p class="text-white font-medium">{{$product->sku}}</p>
             </div>
@@ -196,7 +199,10 @@
                 @enderror
             </div>
         </div>
-    @endforeach
+            
+        @endforeach
+    </div>
+@endforeach
 
         <x-section-card :title="'Area Domisili Outlet'">
             <div class="grid grid-cols-2 gap-6">
