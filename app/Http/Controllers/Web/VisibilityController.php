@@ -145,24 +145,6 @@ class VisibilityController extends Controller
             }
         }
         $filteredRecords = (clone $query)->count();
-            });
-        });
-    }
-
-    if ($request->filled('date')) {
-        $dateParam = $request->date;
-        if (str_contains($dateParam, ' to ')) {
-            [$startDate, $endDate] = explode(' to ', $dateParam);
-            $query->whereBetween('created_at', [
-                Carbon::parse($startDate)->startOfDay(),
-                Carbon::parse($endDate)->endOfDay()
-            ]);
-        } else {
-            $query->whereDate('created_at', Carbon::parse($dateParam));
-        }
-    }
-
-    $filteredRecords = (clone $query)->count();
 
     // Use MAX for ordering and selecting grouped columns
     $query->selectRaw('sales_activity_id, MAX(id) AS id, MAX(created_at) AS created_at')
