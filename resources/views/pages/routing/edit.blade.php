@@ -155,10 +155,14 @@
             @php
                 $isInOutlet = $product->outlets->isNotEmpty();
             @endphp
-            <x-pages.routing.product-form 
-                :label="$product->sku"
-                :checked="$isInOutlet"
-            />
+			<div class="grid grid-cols-2 items-center my-3">
+				<p class="text-white">{{$product->sku}}</p>
+				<div class="w-1/2">
+					<label for="av3m" class="form-label">AV3M</label>
+					<input class="form-control" type="number" checked="{{$isInOutlet}}" name="av3m" id="av3m-{{$product->sku}}" placeholder="Masukan Jumlah AV3M"
+						aria-describedby="av3m" />
+				</div>
+			</div>
         @endforeach
     </div>
 @endforeach
