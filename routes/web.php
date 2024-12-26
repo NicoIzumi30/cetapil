@@ -1,5 +1,6 @@
 <?php
 
+use App\Http\Controllers\Web\SurveyController;
 use App\Models\Visibility;
 use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\Web\PosmController;
@@ -80,6 +81,13 @@ Route::middleware('auth')->group(function () {
             ->name('visibility.products');
     });
 
+    // Survey Management
+    Route::prefix('survey')->name('survey.')->group(function () {
+        Route::get('/', [SurveyController::class, 'index'])->name('index');
+        Route::get('/data', [SurveyController::class, 'getData'])->name('data');
+        Route::get('/{id}/detail', [SurveyController::class, 'detail'])->name('detail');
+
+    });
 
     // Selling Management
     Route::prefix('selling')->name('selling.')->middleware('permission:menu_selling')->group(function () {
@@ -91,13 +99,6 @@ Route::middleware('auth')->group(function () {
         Route::get('/data', [SellingController::class, 'getData'])->name('data');
     });
 
-	// Survey Management
-	Route::get('/survey', function () {
-		return view('pages.survey.index');
-	});
-	Route::get('/survey/detail', function () {
-		return view('pages.survey.detail');
-	});
 
     // User Management
     Route::get('users/data', [UserController::class, 'getData'])->name('users.data');
