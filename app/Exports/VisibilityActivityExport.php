@@ -131,7 +131,7 @@ class VisibilityActivityExport implements FromCollection, WithHeadings, WithMapp
         $data[] = $row->created_at->format('Y-m-d H:i:s'); // Created At
 
         // Calculate Ended At
-        $endedAt = $row->created_at->addSeconds($row->time_visibility);
+        $endedAt = $row->created_at->addSeconds($row->time_availability + $row->time_visibility);
         $data[] = $endedAt->format('Y-m-d H:i:s'); // Ended At
 
         // Format Duration
