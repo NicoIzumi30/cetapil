@@ -32,14 +32,21 @@ class StockOnHandExport implements FromCollection, WithHeadings, WithMapping, Wi
         return [
             'Nama Sales',
             'Outlet',
+            'Kode Outlet',
+            'Tipe Outlet',
             'Kota/Area',
+            'Account',
             'Channel',
+            'TSO',
             'SKU',
-            'Stock On-Hand',
-            'Status',
+            'Stock On-Shelf (in pcs)',
+            'Stock Inventory (in pcs)',
+            'Availability',
             'AV3M',
             'Rekomendasi',
             'Keterangan',
+            'Duration',
+            'Week',
             'Created At',
             'Updated At'
         ];
@@ -49,18 +56,25 @@ class StockOnHandExport implements FromCollection, WithHeadings, WithMapping, Wi
     {
         try {
             return [
-                $row->outlet->user->name ?? 'N/A', // Nama Sales
-                $row->outlet->name ?? 'N/A', // Outlet
-                $row->outlet->city->name ?? 'N/A', // Kota/Area
-                $row->outlet->channel->name ?? 'N/A', // Channel
-                $row->product->sku ?? 'N/A', // SKU
-                $row->availability_stock ?? '0', // Stock On-Hand
-                $row->status == '1' ? 'YES' : 'NO', // Status
-                $row->average_stock ?? '0', // AV3M
-                $row->ideal_stock ?? '0', // Rekomendasi
-                $row->detail ?? 'N/A', // Keterangan
-                $row->created_at ? $row->created_at->format('Y-m-d H:i:s') : 'N/A', // Created At
-                $row->updated_at ? $row->updated_at->format('Y-m-d H:i:s') : 'N/A'  // Updated At
+                $row->outlet->user->name ?? '',
+                $row->outlet->name ?? '', 
+                $row->outlet->code ?? '', 
+                $row->outlet->tipe_outlet ?? '', 
+                $row->outlet->city->name ?? '', 
+                $row->outlet->account ?? '', 
+                $row->outlet->channel->name ?? '', 
+                $row->outlet->TSO ?? '', 
+                $row->product->sku ?? '', 
+                $row->stock_on_hand ?? '0', 
+                $row->stock_inventory ?? '0', 
+                $row->availability ?? '0', // 
+                 $row->av3m ?? '0', 
+                $row->rekomendasi ?? '0', 
+                $row->status_ideal ?? '', 
+             '', 
+             '', 
+                $row->created_at ? $row->created_at->format('Y-m-d H:i:s') : '', 
+                $row->updated_at ? $row->updated_at->format('Y-m-d H:i:s') : ''  
             ];
         } catch (\Exception $e) {
             Log::error('Error in StockOnHandExport mapping', [
@@ -76,7 +90,7 @@ class StockOnHandExport implements FromCollection, WithHeadings, WithMapping, Wi
     {
         try {
             $lastRow = $sheet->getHighestRow();
-            $lastCol = 'L'; // 12 columns A to L
+            $lastCol = 'S'; // 12 columns A to L
 
             // Header styling
             $sheet->getStyle("A1:{$lastCol}1")->applyFromArray([

@@ -127,11 +127,12 @@ class ProductController extends Controller
                     'id' => $item->id, // Tambahkan id product
                     'outlet' => $item->outlet->name,
                     'sku' => $item->product->sku,
-                    'sod' => $item->availability_stock,
-                    'status' => spanColor($item->status == '1' ? 'YES' : 'NO', $item->status == '1' ? 'green' : 'red'),
-                    'av3m' => $item->average_stock,
-                    'ideal' => spanColor($item->ideal_stock, $item->ideal_stock > 0 ? 'green' : 'red'),
-                    'keterangan' => spanColor($item->detail, $item->detail == 'Ideal' ? 'green' : 'red'),
+                    'sod' => $item->stock_on_hand,
+                    'si' => $item->stock_inventory,
+                    'rekomendasi' => spanColor($item->rekomendasi, $item->rekomendasi > 0 ? 'green' : 'red'),
+                    'av3m' => $item->av3m,
+                    'status' => spanColor($item->status_ideal, $item->status_ideal == 'IDEAL' ? 'green' : 'red'),
+                    'availability' => spanColor($item->availability, $item->availability == 'Y' ? 'green' : 'red'),
                 ];
             })
         ]);
@@ -338,7 +339,7 @@ class ProductController extends Controller
         // Ganti query yang lama dengan yang baru
         $query = SalesAvailability::with([
             'product:id,sku',
-            'outlet:id,name,city_id,channel_id,user_id',
+            'outlet:id,name,code,tipe_outlet,TSO,city_id,channel_id,user_id,account',
             'outlet.user:id,name',
             'outlet.city:id,name', 
             'outlet.channel:id,name'
