@@ -6,6 +6,7 @@ use App\Http\Controllers\Controller;
 use App\Http\Requests\PowerSku\CreatePowerSkuRequest;
 use App\Models\PowerSku;
 use App\Models\Product;
+use Illuminate\Http\Request;
 use Yajra\DataTables\Facades\DataTables;
 use Illuminate\Support\Facades\Log;
 
@@ -19,44 +20,67 @@ class PowerSkuController extends Controller
         return view('pages.products.index', compact('products'));
     }
 
-    public function data()
+    public function data(Request $request)
     {
-        $powerSkus = PowerSku::with('product.category')->get();
+        // Define the base query with eager loading
+        $query = PowerSku::with(['product.category']);
 
-        return DataTables::of($powerSkus)
-            ->addColumn('category', function ($powerSku) {
-                return $powerSku->product->category->name;
-            })
-            ->addColumn('sku', function ($powerSku) {
-                return $powerSku->product->sku;
-            })
-            ->addColumn('actions', function ($powerSku) {
-                return view('components.action-button', [
-                    'id' => $powerSku->id,
-                    'sku' => $powerSku->product->sku
-                ])->render();
-            })
-            ->rawColumns(['actions'])
-            ->make(true);
+        // Apply search filters if a search term is provided
+        if ($request->filled('search_term')) {
+            $searchTerm = $request->search_term;
+
+            $query->where(function ($q) use ($searchTerm) {
+                $q->where('sku', 'like', "%{$searchTerm}%") // Search within SKU
+                    ->orWhereHas('product.category', function ($q) use ($searchTerm) {
+                        $q->where('name', 'like', "%{$searchTerm}%"); // Search within category name
+                    });
+            });
+        }
+
+        // Calculate the total records after filtering
+        $filteredRecords = (clone $query)->count();
+
+        // Fetch paginated results
+        $result = $query->skip($request->start)
+            ->take($request->length)
+            ->get();
+
+        // Return the response in DataTables format
+        return response()->json([
+            'draw' => intval($request->draw),
+            'recordsTotal' => PowerSku::count(), // Total unfiltered records
+            'recordsFiltered' => $filteredRecords, // Total filtered records
+            'data' => $result->map(function ($item) {
+                return [
+                    'category' => optional($item->product->category)->name ?? '-', // Handle null gracefully
+                    'sku' => $item->product->sku,
+                    'actions' => view('pages.product.action-power-sku', [
+                        'id' => $item->id,
+                        'sku' => $item->sku
+                    ])->render(),
+                ];
+            }),
+        ]);
     }
+
 
     public function store(CreatePowerSkuRequest $request)
     {
         try {
             Log::info('PowerSku store request:', $request->all());
-            
+
             // Buat product baru dengan menambahkan price
             $product = Product::create([
                 'category_id' => $request->input('power-sku-category_id'),
                 'sku' => $request->input('power-sku'),
-                'price' => 0 
+                'price' => 0
             ]);
-    
+
             // Buat Power SKU dengan product_id
             PowerSku::create([
                 'product_id' => $product->id
             ]);
-    
+
             return response()->json([
                 'message' => 'Power SKU berhasil ditambahkan'
             ], 201);
@@ -81,7 +105,7 @@ class PowerSkuController extends Controller
     {
         try {
             $product = Product::findOrFail($request->product_id);
-            
+
             $powerSku->update([
                 'product_id' => $product->id
             ]);
