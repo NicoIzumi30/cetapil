@@ -13,8 +13,9 @@ class PowerSku extends Model
     use HasFactory, HasUuids, SoftDeletes;
 
     protected $guarded = [];
+    protected $fillable = ['product_id'];
 
-    public function product(): BelongsTo
+    public function product()
     {
         return $this->belongsTo(Product::class);
     }

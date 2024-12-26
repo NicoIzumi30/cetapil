@@ -318,11 +318,13 @@
 							<span id="power-sku-error" class="text-red-500 text-xs hidden"></span>
 						</div>
 						<x-slot:footer>
-							<x-button.primary type="submit" id="savePowerSkuBtn" class="w-full">
-								<span id="savePowerSkuBtnText">Konfirmasi</span>
-								<span id="savePowerSkuBtnLoading" class="hidden">Menyimpan...</span>
-							</x-button.primary>
-						</x-slot:footer>
+                            <div class="col-span-2">
+                                <button type="button" id="savePowerSkuBtn" class="w-full bg-blue-500 text-white px-4 py-2 rounded">
+                                    <span id="savePowerSkuBtnText">Konfirmasi</span>
+                                    <span id="savePowerSkuBtnLoading" class="hidden">Menyimpan...</span>
+                                </button>
+                            </div>
+                    </x-slot:footer>
 					</form>
 			</x-modal>
 			{{-- Tambah Power SKU End --}}
@@ -361,17 +363,25 @@
 							{{ 'Kategori Produk' }}
 						</td>
 						<td class="text-left">
-							<x-action-table-dropdown>
-								<li>
-									<button onclick="openModal('edit-power-sku')" class="dropdown-option ">Lihat
-										Data</button>
-								</li>
-								<li>
-									<button
-										class="dropdown-option text-red-400">Hapus
-										Data</button>
-								</li>
-							</x-action-table-dropdown>
+							{{-- <div class="flex justify-end">
+                                <x-action-table-dropdown>
+                                    <li>
+                                        <button 
+                                            id="view-power-sku"
+                                            data-id="{{ $id }}"
+                                            class="dropdown-option">
+                                            Lihat Data
+                                        </button>
+                                    </li>
+                                    <li>
+                                        <a href="{{ route('products.power-skus.destroy', $id) }}"
+                                           data-name="{{ $sku }}"
+                                           class="dropdown-option text-red-400 delete-btn">
+                                            Hapus Data
+                                        </a>
+                                    </li>
+                                </x-action-table-dropdown>
+                            </div> --}}
 						</td>
 					</tr>
 			</tbody>
@@ -840,54 +850,259 @@
         });
 
         $('#downloadBtnStockOnHand').click(function(e) {
-    e.preventDefault();
-    
-    // Get current filter values
-    const filters = {
-        filter_date: $('#stock-date-range').val() === 'Date Range' ? '' : $('#stock-date-range').val(),
-        filter_product: $('#filter_product').val() || 'all',
-        filter_area: $('#filter_area').val() || 'all'
-    };
-
-    // Show loading state
-    const $btn = $(this);
-    const $btnText = $btn.find('#downloadBtnText');
-    const $btnLoading = $btn.find('#downloadBtnLoading');
-    
-    $btnText.addClass('hidden');
-    $btnLoading.removeClass('hidden');
-    $btn.prop('disabled', true);
-
-    // Gunakan fetch untuk download
-    fetch('/products/download-stock-on-hand?' + new URLSearchParams(filters), {
-        method: 'GET',
-    })
-    .then(response => {
-        if (!response.ok) throw new Error('Network response was not ok');
-        return response.blob();
-    })
-    .then(blob => {
-        // Create download link
-        const url = window.URL.createObjectURL(blob);
-        const a = document.createElement('a');
-        a.href = url;
-        a.download = 'stock_on_hand_' + new Date().toISOString().slice(0,19).replace(/[:]/g, '-') + '.xlsx';
-        document.body.appendChild(a);
-        a.click();
-        window.URL.revokeObjectURL(url);
-        a.remove();
+        e.preventDefault();
         
-        toast('success', 'File berhasil diunduh', 300);
-    })
-    .catch(error => {
-        console.error('Download error:', error);
-        toast('error', 'Gagal mengunduh file', 200);
-    })
-    .finally(() => {
-        $btnText.removeClass('hidden');
-        $btnLoading.addClass('hidden');
-        $btn.prop('disabled', false);
+        // Get current filter values
+        const filters = {
+            filter_date: $('#stock-date-range').val() === 'Date Range' ? '' : $('#stock-date-range').val(),
+            filter_product: $('#filter_product').val() || 'all',
+            filter_area: $('#filter_area').val() || 'all'
+        };
+
+        // Show loading state
+        const $btn = $(this);
+        const $btnText = $btn.find('#downloadBtnText');
+        const $btnLoading = $btn.find('#downloadBtnLoading');
+        
+        $btnText.addClass('hidden');
+        $btnLoading.removeClass('hidden');
+        $btn.prop('disabled', true);
+
+        // Gunakan fetch untuk download
+        fetch('/products/download-stock-on-hand?' + new URLSearchParams(filters), {
+            method: 'GET',
+        })
+        .then(response => {
+            if (!response.ok) throw new Error('Network response was not ok');
+            return response.blob();
+        })
+        .then(blob => {
+            // Create download link
+            const url = window.URL.createObjectURL(blob);
+            const a = document.createElement('a');
+            a.href = url;
+            a.download = 'stock_on_hand_' + new Date().toISOString().slice(0,19).replace(/[:]/g, '-') + '.xlsx';
+            document.body.appendChild(a);
+            a.click();
+            window.URL.revokeObjectURL(url);
+            a.remove();
+            
+            toast('success', 'File berhasil diunduh', 300);
+        })
+        .catch(error => {
+            console.error('Download error:', error);
+            toast('error', 'Gagal mengunduh file', 200);
+        })
+        .finally(() => {
+            $btnText.removeClass('hidden');
+            $btnLoading.addClass('hidden');
+            $btn.prop('disabled', false);
+        });
+    });
+
+
+    let powerSkuTable = $('#power-sku-table').DataTable({
+        processing: true,
+        serverSide: true,
+        paging: true,
+        searching: false,
+        info: true,
+        pageLength: 10,
+        lengthMenu: [10, 20, 30, 40, 50],
+        dom: 'rt<"bottom-container"<"bottom-left"l><"bottom-right"p>>',
+        language: {
+            lengthMenu: "Menampilkan _MENU_ dari _TOTAL_ data",
+            paginate: {
+                previous: '<',
+                next: '>',
+                last: 'Terakhir',
+            },
+            info: "Menampilkan _START_ sampai _END_ dari _TOTAL_ data",
+            infoEmpty: "Menampilkan 0 sampai 0 dari 0 data",
+            emptyTable: "Tidak ada data yang tersedia"
+        },
+        ajax: {
+            url: "{{ route('products.power-skus.data') }}", // Update this line
+            data: function (d) {
+                d.search_term = $('#power-sku-search').val();
+            }
+        },
+        columns: [
+            { data: 'category', name: 'category', className: 'table-data' },
+            { data: 'sku', name: 'sku', className: 'table-data' },
+            {
+                data: 'actions',
+                name: 'actions',
+                orderable: false,
+                searchable: false
+            }
+        ]
+    });
+
+    // Create Power SKU
+    $(document).ready(function() {
+    $('#savePowerSkuBtn').on('click', function(e) {
+        e.preventDefault();
+        
+        // Show loading state
+        $('#savePowerSkuBtnText').addClass('hidden');
+        $('#savePowerSkuBtnLoading').removeClass('hidden');
+        $(this).prop('disabled', true);
+        
+        // Get form data
+        const formData = {
+            'power-sku-category_id': $('#power-sku-product-categories').val(),
+            'power-sku': $('#power-sku').val(),
+            '_token': $('input[name="_token"]').val()
+        };
+
+        // Submit form via AJAX
+        $.ajax({
+            type: 'POST',
+            url: '{{ route("products.power-skus.store") }}',
+            data: formData,
+            success: function(response) {
+                // Reset loading state
+                $('#savePowerSkuBtnText').removeClass('hidden');
+                $('#savePowerSkuBtnLoading').addClass('hidden');
+                $('#savePowerSkuBtn').prop('disabled', false);
+                
+                // Show success message and close modal
+                toast('success', response.message, 300);
+                $('#tambah-power-sku').addClass('hidden');
+                
+                // Reset form
+                $('#createPowerSkuForm')[0].reset();
+                $('#power-sku-product-categories').val('').trigger('change');
+                
+                // Reload table
+                powerSkuTable.ajax.reload();
+                
+                // Refresh page after delay
+                setTimeout(function() {
+                    window.location.reload();
+                }, 1500);
+            },
+            error: function(xhr) {
+                // Reset loading state
+                $('#savePowerSkuBtnText').removeClass('hidden'); 
+                $('#savePowerSkuBtnLoading').addClass('hidden');
+                $('#savePowerSkuBtn').prop('disabled', false);
+                
+                if (xhr.status === 422) {
+                    const errors = xhr.responseJSON.errors;
+                    Object.keys(errors).forEach(function(key) {
+                        $(`#${key}-error`).text(errors[key][0]).removeClass('hidden');
+                        $(`[name="${key}"]`).addClass('border-red-500');
+                    });
+                }
+                
+                toast('error', xhr.responseJSON.message || 'Terjadi kesalahan saat menyimpan data', 200);
+            }
+        });
     });
 });
+
+// Helper function for loading state
+function toggleLoading(show, type) {
+    const btn = $(`#${type}Btn`);
+    const text = $(`#${type}BtnText`);
+    const loading = $(`#${type}BtnLoading`);
+    
+    if (show) {
+        text.addClass('hidden');
+        loading.removeClass('hidden');
+        btn.prop('disabled', true);
+    } else {
+        text.removeClass('hidden');
+        loading.addClass('hidden');
+        btn.prop('disabled', false);
+    }
+}
+
+// Toast notification function (if not already defined)
+function toast(type, message, duration = 3000) {
+    Swal.fire({
+        icon: type,
+        title: message,
+        toast: true,
+        position: 'top-end',
+        showConfirmButton: false,
+        timer: duration,
+        timerProgressBar: true
+    });
+}
+
+// Modal close function (if not already defined)
+function closeModal(modalId) {
+    $(`#${modalId}`).addClass('hidden');
+    $('body').removeClass('modal-open');
+}
+
+    // Edit Power SKU handler
+    $(document).on('click', '#view-power-sku', function(e) {
+        e.preventDefault();
+        const powerSkuId = $(this).data('id');
+        resetFormErrors();
+
+        $.ajax({
+            url: `/products/power-skus/${powerSkuId}/edit`, // Updated path
+            type: 'GET',
+            success: function(response) {
+                $('#edit-power-sku-product-categories').val(response.product.category_id).trigger('change');
+                $('#edit-power-sku').val(response.product.sku);
+                $('#editPowerSkuForm').data('id', response.id);
+                openModal('edit-power-sku');
+            },
+            error: function() {
+                toast('error', 'Terjadi kesalahan saat mengambil data Power SKU', 200);
+            }
+        });
+    });
+
+    // Update Power SKU handler
+    $('#saveEditedPowerSkuBtn').click(function(e) {
+        e.preventDefault();
+        const powerSkuId = $('#editPowerSkuForm').data('id');
+        
+        resetFormErrors();
+        toggleLoading(true, 'saveEditedPowerSku');
+
+        $.ajax({
+            url: `/products/power-skus/${powerSkuId}`, // Updated path
+            type: 'PUT',
+            data: $('#editPowerSkuForm').serialize(),
+            success: function(response) {
+                handleSuccess('edit-power-sku', response.message);
+            },
+            error: handleFormErrors
+        });
+    });
+    // Delete Power SKU handler
+    $(document).on('click', '#power-sku-table .delete-btn', function(e) {
+        e.preventDefault();
+        const url = $(this).attr('href');
+        const name = $(this).data('name');
+        deleteData(url, name);
+    });
+
+    // Search with debounce for Power SKU
+    let powerSkuSearchTimer;
+    $('#power-sku-search').on('input', function() {
+        clearTimeout(powerSkuSearchTimer);
+        powerSkuSearchTimer = setTimeout(() => powerSkuTable.ajax.reload(null, false), 500);
+    });
+
+    function toggleLoading(show, type) {
+    if (show) {
+        $(`#${type}BtnText`).addClass('hidden');
+        $(`#${type}BtnLoading`).removeClass('hidden');
+        $(`#${type}Btn`).prop('disabled', true);
+    } else {
+        $(`#${type}BtnText`).removeClass('hidden');
+        $(`#${type}BtnLoading`).addClass('hidden');
+        $(`#${type}Btn`).prop('disabled', false);
+    }
+}
     </script>
 @endpush
