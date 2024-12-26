@@ -91,6 +91,14 @@ Route::middleware('auth')->group(function () {
         Route::get('/data', [SellingController::class, 'getData'])->name('data');
     });
 
+	// Survey Management
+	Route::get('/survey', function () {
+		return view('pages.survey.index');
+	});
+	Route::get('/survey/detail', function () {
+		return view('pages.survey.detail');
+	});
+
     // User Management
     Route::get('users/data', [UserController::class, 'getData'])->name('users.data');
     Route::resource('users', UserController::class)->middleware('permission:menu_user');
