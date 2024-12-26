@@ -57,91 +57,71 @@ class StockOnHandExport implements FromCollection, WithHeadings, WithMapping, Wi
         try {
             return [
                 $row->outlet->user->name ?? '',
-                $row->outlet->name ?? '', 
-                $row->outlet->code ?? '', 
-                $row->outlet->tipe_outlet ?? '', 
-                $row->outlet->city->name ?? '', 
-                $row->outlet->account ?? '', 
-                $row->outlet->channel->name ?? '', 
-                $row->outlet->TSO ?? '', 
-                $row->product->sku ?? '', 
-                $row->stock_on_hand ?? '0', 
-                $row->stock_inventory ?? '0', 
-                $row->availability ?? '0', // 
-                 $row->av3m ?? '0', 
-                $row->rekomendasi ?? '0', 
-                $row->status_ideal ?? '', 
-             '', 
-             '', 
-                $row->created_at ? $row->created_at->format('Y-m-d H:i:s') : '', 
-                $row->updated_at ? $row->updated_at->format('Y-m-d H:i:s') : ''  
+                $row->outlet->name ?? '',
+                $row->outlet->code ?? '',
+                $row->outlet->tipe_outlet ?? '',
+                $row->outlet->city->name ?? '',
+                $row->outlet->account ?? '',
+                $row->outlet->channel->name ?? '',
+                $row->outlet->TSO ?? '',
+                $row->product->sku ?? '',
+                ($row->stock_on_hand !== null) ? (string)$row->stock_on_hand : '0',
+                ($row->stock_inventory !== null) ? (string)$row->stock_inventory : '0',
+                ($row->availability !== null) ? (string)$row->availability : '0',
+                ($row->av3m !== null) ? (string)$row->av3m : '0',
+                ($row->rekomendasi !== null) ? (string)$row->rekomendasi : '0',
+                $row->status_ideal ?? '',
+                '',
+                '',
+                $row->created_at ? $row->created_at->format('Y-m-d H:i:s') : '',
+                $row->updated_at ? $row->updated_at->format('Y-m-d H:i:s') : ''
             ];
         } catch (\Exception $e) {
             Log::error('Error in StockOnHandExport mapping', [
                 'error' => $e->getMessage(),
                 'row' => $row->id ?? 'unknown'
             ]);
-            
+
             return array_fill(0, 12, 'Error');
         }
     }
 
     public function styles(Worksheet $sheet)
     {
-        try {
-            $lastRow = $sheet->getHighestRow();
-            $lastCol = 'S'; // 12 columns A to L
+        $lastRow = $sheet->getHighestRow();
+        $lastColumn = $sheet->getHighestColumn();
 
-            // Header styling
-            $sheet->getStyle("A1:{$lastCol}1")->applyFromArray([
-                'font' => [
-                    'bold' => true,
-                    'color' => ['rgb' => 'FFFFFF'],
+        // Apply styling to entire worksheet (headers and content)
+        $sheet->getStyle("A1:{$lastColumn}{$lastRow}")->applyFromArray([
+            'alignment' => [
+                'horizontal' => Alignment::HORIZONTAL_CENTER,
+                'vertical' => Alignment::VERTICAL_CENTER,
+                'wrapText' => true,
+            ],
+            'borders' => [
+                'allBorders' => [
+                    'borderStyle' => Border::BORDER_THIN,
                 ],
-                'fill' => [
-                    'fillType' => Fill::FILL_SOLID,
-                    'startColor' => ['rgb' => '4A90E2'],
-                ],
-                'alignment' => [
-                    'horizontal' => Alignment::HORIZONTAL_CENTER,
-                    'vertical' => Alignment::VERTICAL_CENTER,
-                ],
-            ]);
+            ],
+        ]);
 
-            // Data styling
-            $sheet->getStyle("A2:{$lastCol}{$lastRow}")->applyFromArray([
-                'borders' => [
-                    'allBorders' => [
-                        'borderStyle' => Border::BORDER_THIN,
-                        'color' => ['rgb' => '000000'],
-                    ],
-                ],
-                'alignment' => [
-                    'vertical' => Alignment::VERTICAL_CENTER,
-                ],
-            ]);
+        // Additional header styling
+        $sheet->getStyle("A1:{$lastColumn}1")->applyFromArray([
+            'font' => [
+                'bold' => true,
+                'color' => ['rgb' => 'FFFFFF'],
+            ],
+            'fill' => [
+                'fillType' => Fill::FILL_SOLID,
+                'startColor' => ['rgb' => '4A90E2'],
+            ],
+        ]);
 
-            // Left align text columns
-            $sheet->getStyle("A2:D{$lastRow}")->getAlignment()->setHorizontal(Alignment::HORIZONTAL_LEFT);
-            $sheet->getStyle("E2:E{$lastRow}")->getAlignment()->setHorizontal(Alignment::HORIZONTAL_LEFT); // SKU
-            
-            // Center align numeric/status columns
-            $sheet->getStyle("F2:L{$lastRow}")->getAlignment()->setHorizontal(Alignment::HORIZONTAL_CENTER);
+        // Set row height
+        $sheet->getDefaultRowDimension()->setRowHeight(25);
 
-            // Set row height
-            $sheet->getDefaultRowDimension()->setRowHeight(25);
-
-            // Freeze panes
-            $sheet->freezePane('A2');
-
-            return [
-                1 => ['font' => ['bold' => true]],
-            ];
-        } catch (\Exception $e) {
-            Log::error('Error in StockOnHandExport styles', [
-                'error' => $e->getMessage()
-            ]);
-            throw $e;
-        }
+        return [
+            1 => ['font' => ['bold' => true]],
+        ];
     }
 }

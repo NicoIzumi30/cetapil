@@ -65,7 +65,7 @@ class RoutingController extends Controller
         $waktuKunjungan = $this->waktuKunjungan;
         $cities = City::all();
         $countPending = Outlet::where('status', 'PENDING')->count();
-        return view("pages.routing.index", compact('channels', 'waktuKunjungan','countPending', 'cities'));
+        return view("pages.routing.index", compact('channels', 'waktuKunjungan', 'countPending', 'cities'));
     }
     public function getData(Request $request)
     {
@@ -83,7 +83,7 @@ class RoutingController extends Controller
         }
         if ($request->filled('filter_day')) {
             $filter_day = $request->filter_day;
-            if($filter_day != 'all') {
+            if ($filter_day != 'all') {
                 $query->where(function ($q) use ($filter_day) {
                     $q->where('visit_day', 'like', "%{$filter_day}%");
                 });
@@ -121,7 +121,7 @@ class RoutingController extends Controller
     {
         $salesUsers = User::role('sales')->get();
         $waktuKunjungan = $this->waktuKunjungan;
-        $cycles = ["1x1", "1x2","1x4"];
+        $cycles = ["1x1", "1x2", "1x4"];
         $cities = City::all();
         $channels = Channel::all();
         $category_product = Category::all();
@@ -148,7 +148,7 @@ class RoutingController extends Controller
     {
         try {
             DB::beginTransaction();
-            
+
             // Create outlet
             $outlet = new Outlet();
             $outlet->status = 'APPROVED';
@@ -165,19 +165,19 @@ class RoutingController extends Controller
             $outlet->cycle = $request->cycle;
             $outlet->tipe_outlet = $request->outlet_type;
             $outlet->account = $request->account_type;
-            
+
             if (in_array($request->cycle, ['1x2', '1x4'])) {
                 if (empty($request->week)) {
                     throw new Exception('Week is required when cycle is 1x2 or 1x4');
                 }
-                $outlet->week = $request->cycle === '1x2' ? 
-                    ($request->week === '13' ? '1&3' : '2&4') : 
+                $outlet->week = $request->cycle === '1x2' ?
+                    ($request->week === '13' ? '1&3' : '2&4') :
                     $request->week;
             }
-            
+
             $outlet->save();
-            
-    
+
+
             // Store AV3M data
             foreach ($request->product_category as $category) {
                 $products = Product::where('category_id', $category)->get();
@@ -189,7 +189,7 @@ class RoutingController extends Controller
                         'product_id' => $product->id,
                         'av3m' => $request->av3m[$product->sku] ?? 0,
                     ]);
-                    
+
                     // Create outlet product relationship
                     OutletProduct::create([
                         'outlet_id' => $outlet->id,
@@ -197,7 +197,7 @@ class RoutingController extends Controller
                     ]);
                 }
             }
-    
+
             // Handle images
             $images = ['img_front', 'img_banner', 'img_main_road'];
             foreach ($images as $key => $image) {
@@ -212,7 +212,7 @@ class RoutingController extends Controller
                     ]);
                 }
             }
-    
+
             // Store survey answers
             foreach ($request->survey as $formId => $answer) {
                 OutletFormAnswer::create([
@@ -221,15 +221,14 @@ class RoutingController extends Controller
                     'answer' => $answer,
                 ]);
             }
-    
+
             DB::commit();
-    
+
             // Return success response for Ajax
             return response()->json([
                 'status' => 'success',
                 'message' => 'Outlet berhasil ditambahkan'
             ]);
-    
         } catch (Exception $e) {
             DB::rollBack();
             // Return error response for Ajax
@@ -294,10 +293,11 @@ class RoutingController extends Controller
         ]);
     }
 
-    public function request(){
+    public function request()
+    {
         $outletRequest = Outlet::with('user')->where('status', 'PENDING')->orWhere('status', 'REJECTED')->orderBy('created_at', 'desc')->get();
         return view('pages.routing.request', compact('outletRequest'));
-    } 
+    }
     /**
      * Update the specified resource in storage.
      */
@@ -305,7 +305,7 @@ class RoutingController extends Controller
     {
         try {
             DB::beginTransaction();
-    
+
             $outlet = Outlet::findOrFail($id);
             $outlet->user_id = $request->user_id;
             $outlet->city_id = $request->city;
@@ -320,23 +320,23 @@ class RoutingController extends Controller
             $outlet->cycle = $request->cycle;
             $outlet->tipe_outlet = $request->outlet_type;
             $outlet->account = $request->account_type;
-            
+
             if (in_array($request->cycle, ['1x2', '1x4'])) {
                 if (empty($request->week)) {
                     throw new Exception('Week is required when cycle is 1x2 or 1x4');
                 }
-                $outlet->week = $request->cycle === '1x2' ? 
-                    ($request->week === '13' ? '1&3' : '2&4') : 
+                $outlet->week = $request->cycle === '1x2' ?
+                    ($request->week === '13' ? '1&3' : '2&4') :
                     $request->week;
             }
-            
+
             $outlet->save();
-    
+
             // Update AV3M data
-            if($request->product_category) {
+            if ($request->product_category) {
                 // Delete existing AV3M records
                 Av3m::where('outlet_id', $outlet->id)->delete();
-                
+
                 // Create new AV3M records
                 foreach ($request->product_category as $category) {
                     $products = Product::where('category_id', $category)->get();
@@ -350,9 +350,9 @@ class RoutingController extends Controller
                     }
                 }
             }
-    
+
             // Update outlet products
-            if($request->product_category) {
+            if ($request->product_category) {
                 OutletProduct::where('outlet_id', $outlet->id)->delete();
                 foreach ($request->product_category as $category) {
                     $products = Product::where('category_id', $category)->get();
@@ -364,19 +364,19 @@ class RoutingController extends Controller
                     }
                 }
             }
-    
+
             // Handle images
             $images = ['img_front', 'img_banner', 'img_main_road'];
             foreach ($images as $key => $image) {
                 if ($request->hasFile($image)) {
                     $file = $request->file($image);
                     $media = saveFile($file, "outlets/$outlet->id");
-                    
+
                     // Update or create image record
                     $imageRecord = OutletImage::where('outlet_id', $outlet->id)
                         ->where('position', $key + 1)
                         ->first();
-                        
+
                     if ($imageRecord) {
                         removeFile($imageRecord->path);
                         $imageRecord->update([
@@ -393,9 +393,9 @@ class RoutingController extends Controller
                     }
                 }
             }
-    
+
             // Update survey answers
-            if($request->survey) {
+            if ($request->survey) {
                 foreach ($request->survey as $formId => $answer) {
                     OutletFormAnswer::updateOrCreate(
                         [
@@ -406,14 +406,13 @@ class RoutingController extends Controller
                     );
                 }
             }
-    
+
             DB::commit();
-    
+
             return response()->json([
                 'status' => 'success',
                 'message' => 'Outlet berhasil diperbarui'
             ]);
-    
         } catch (Exception $e) {
             DB::rollBack();
             return response()->json([
@@ -468,12 +467,12 @@ class RoutingController extends Controller
     {
         try {
             DB::beginTransaction();
-            
+
             // Hapus data terkait terlebih dahulu
             OutletProduct::where('outlet_id', $id)->delete();
             OutletFormAnswer::where('outlet_id', $id)->delete();
             OutletImage::where('outlet_id', $id)->delete();
-            
+
             // Kemudian hapus outlet
             $outlet = Outlet::findOrFail($id);
             $outlet->delete();
@@ -483,7 +482,6 @@ class RoutingController extends Controller
                 'status' => 'success',
                 'message' => 'Outlet berhasil dihapus'
             ]);
-
         } catch (Exception $e) {
             DB::rollBack();
             return response()->json([
@@ -492,16 +490,18 @@ class RoutingController extends Controller
             ], 500);
         }
     }
-    public function salesActivity($id){
+    public function salesActivity($id)
+    {
         return view('pages.routing.sales-activity', compact('id'));
-    } 
+    }
 
 
     public function downloadFilteredExcel(Request $request)
     {
         try {
             $query = Outlet::with(['user', 'city', 'channel']);
-    
+
+
             // Apply search filter
             if ($request->filled('search_term')) {
                 $searchTerm = $request->search_term;
@@ -512,26 +512,25 @@ class RoutingController extends Controller
                         });
                 });
             }
-    
+
             // Apply day filter
-            if ($request->filled('filter_day') && $request->filter_day != 'all') {
+
+            if ($request->filter_day != null && $request->filter_day != "null" && $request->filled('filter_day') && $request->filter_day != 'all') {
                 $query->where('visit_day', $request->filter_day);
             }
-    
             $data = $query->get();
-            
+
             return Excel::download(
-                new OutletFilteredExport($data), 
+                new OutletFilteredExport($data),
                 'routing_data_' . now()->format('Y-m-d_His') . '.xlsx'
             );
-    
         } catch (\Exception $e) {
             Log::error('Routing Excel Download Error', [
                 'message' => $e->getMessage(),
                 'file' => $e->getFile(),
                 'line' => $e->getLine()
             ]);
-    
+
             return response()->json([
                 'status' => 'error',
                 'message' => 'Gagal membuat file Excel: ' . $e->getMessage()
@@ -542,32 +541,32 @@ class RoutingController extends Controller
     {
         try {
             DB::enableQueryLog();
-            
+
             // Start query with proper eager loading
             $query = SalesActivity::with([
-                'outlet' => function($q) {
+                'outlet' => function ($q) {
                     $q->select('id', 'name', 'visit_day', 'city_id');
                 },
-                'user' => function($q) {
+                'user' => function ($q) {
                     $q->select('id', 'name');
                 }
             ])
-            ->whereNull('deleted_at'); // Make sure to only get non-deleted records
-    
+                ->whereNull('deleted_at'); // Make sure to only get non-deleted records
+
             // Apply day filter
             if ($request->filled('filter_day_sales') && $request->filter_day_sales != 'all') {
-                $query->whereHas('outlet', function($q) use ($request) {
+                $query->whereHas('outlet', function ($q) use ($request) {
                     $q->where('visit_day', $request->filter_day_sales);
                 });
             }
-    
+
             // Apply area filter
             if ($request->filled('filter_area') && $request->filter_area != 'all') {
-                $query->whereHas('outlet', function($q) use ($request) {
+                $query->whereHas('outlet', function ($q) use ($request) {
                     $q->where('city_id', $request->filter_area);
                 });
             }
-    
+
             // Apply date filter
             if ($request->filled('date') && $request->date !== 'Date Range') {
                 $dateRange = explode(' to ', $request->date);
@@ -580,52 +579,51 @@ class RoutingController extends Controller
                     $query->whereDate('checked_in', Carbon::parse($request->date));
                 }
             }
-    
+
             // Apply search term
             if ($request->filled('search_term')) {
                 $searchTerm = $request->search_term;
-                $query->where(function($q) use ($searchTerm) {
-                    $q->whereHas('user', function($q) use ($searchTerm) {
+                $query->where(function ($q) use ($searchTerm) {
+                    $q->whereHas('user', function ($q) use ($searchTerm) {
                         $q->where('name', 'like', "%{$searchTerm}%");
                     })
-                    ->orWhereHas('outlet', function($q) use ($searchTerm) {
-                        $q->where('name', 'like', "%{$searchTerm}%");
-                    });
+                        ->orWhereHas('outlet', function ($q) use ($searchTerm) {
+                            $q->where('name', 'like', "%{$searchTerm}%");
+                        });
                 });
             }
-    
+
             // Log query information
             Log::info('Download Query Parameters:', [
                 'filters' => $request->all(),
                 'sql' => $query->toSql(),
                 'bindings' => $query->getBindings()
             ]);
-    
+
             // Get data
             $data = $query->get();
-    
+
             // Log retrieved data
             Log::info('Downloaded Data:', [
                 'count' => $data->count(),
                 'first_record' => $data->first()
             ]);
-    
+
             // Generate filename with timestamp
             $filename = 'sales_activity_' . now()->format('Y-m-d_His') . '.xlsx';
-    
+
             // Return Excel download
             return Excel::download(
                 new SalesActivityExport($data),
                 $filename,
                 \Maatwebsite\Excel\Excel::XLSX
             );
-    
         } catch (\Exception $e) {
             Log::error('Download Error:', [
                 'message' => $e->getMessage(),
                 'trace' => $e->getTraceAsString()
             ]);
-            
+
             return response()->json([
                 'status' => 'error',
                 'message' => 'Gagal mengunduh file: ' . $e->getMessage()

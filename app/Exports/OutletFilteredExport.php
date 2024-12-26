@@ -29,17 +29,22 @@ class OutletFilteredExport implements FromCollection, WithHeadings, WithMapping,
     public function headings(): array
     {
         return [
-            'Name',
-            'Category (Account)',
-            'City',
-            'Sales',
-            'Visit Day',
+            'Nama Outlet',
+            'Nama Sales',
+            'Kode Outlet',
+            'Kategori Outlet',
+            'Hari Kunjungan',
             'Cycle',
-            'Status',
+            'Tipe Minggu',
+            'Channel',
+            'Account',
+            'Distributor',
+            'TSO',
+            'KAM',
+            'Kota',
+            'Alamat',
             'Longitude',
             'Latitude',
-            'Address',
-            'Channel',
             'Created At',
             'Updated At'
         ];
@@ -49,16 +54,21 @@ class OutletFilteredExport implements FromCollection, WithHeadings, WithMapping,
     {
         return [
             $outlet->name,
+            $outlet->user->name,
+            $outlet->code,
             $outlet->category,
-            $outlet->city->name ?? 'KABUPATEN BANDUNG',
-            $outlet->user->name ?? '',
             getVisitDayByNumber($outlet->visit_day),
             $outlet->cycle,
-            $outlet->status,
+            $outlet->week ?? "Tiap Minggu",
+            $outlet->channel->name ?? '',
+            $outlet->account,
+            $outlet->distributor,
+            $outlet->TSO,
+            $outlet->KAM,
+            $outlet->city->name ?? '',
+            $outlet->address,
             $outlet->longitude,
             $outlet->latitude,
-            $outlet->address,
-            $outlet->channel->name ?? '',
             $outlet->created_at->format('Y-m-d H:i:s'),
             $outlet->updated_at->format('Y-m-d H:i:s')
         ];
@@ -66,10 +76,24 @@ class OutletFilteredExport implements FromCollection, WithHeadings, WithMapping,
 
     public function styles(Worksheet $sheet)
     {
-        $lastColumn = 'M';  // Setelah menghapus kolom, sekarang hanya ada 13 kolom (A hingga M)
         $lastRow = $sheet->getHighestRow();
+        $lastColumn = $sheet->getHighestColumn();
 
-        // Header styles
+        // Apply styling to entire worksheet (headers and content)
+        $sheet->getStyle("A1:{$lastColumn}{$lastRow}")->applyFromArray([
+            'alignment' => [
+                'horizontal' => Alignment::HORIZONTAL_CENTER,
+                'vertical' => Alignment::VERTICAL_CENTER,
+                'wrapText' => true,
+            ],
+            'borders' => [
+                'allBorders' => [
+                    'borderStyle' => Border::BORDER_THIN,
+                ],
+            ],
+        ]);
+
+        // Additional header styling
         $sheet->getStyle("A1:{$lastColumn}1")->applyFromArray([
             'font' => [
                 'bold' => true,
@@ -79,30 +103,10 @@ class OutletFilteredExport implements FromCollection, WithHeadings, WithMapping,
                 'fillType' => Fill::FILL_SOLID,
                 'startColor' => ['rgb' => '4A90E2'],
             ],
-            'alignment' => [
-                'horizontal' => Alignment::HORIZONTAL_CENTER,
-                'vertical' => Alignment::VERTICAL_CENTER,
-            ],
-        ]);
-
-        // Data styles
-        $sheet->getStyle("A2:{$lastColumn}{$lastRow}")->applyFromArray([
-            'alignment' => [
-                'vertical' => Alignment::VERTICAL_CENTER,
-            ],
-            'borders' => [
-                'allBorders' => [
-                    'borderStyle' => Border::BORDER_THIN,
-                    'color' => ['rgb' => '000000'],
-                ],
-            ],
         ]);
 
         // Set row height
         $sheet->getDefaultRowDimension()->setRowHeight(25);
-
-        // Freeze panes
-        $sheet->freezePane('A2');
 
         return [
             1 => ['font' => ['bold' => true]],
