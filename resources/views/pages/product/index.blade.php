@@ -234,7 +234,25 @@
                     </th>
                     <th scope="col" class="text-center">
                         <a class="table-head">
-                            {{ __('Kode Outlet') }}
+                            {{ __('Stock On Hand (Pcs)') }}
+                            <x-icons.sort />
+                        </a>
+                    </th>
+                    <th scope="col" class="text-center">
+                        <a class="table-head">
+                            {{ __('Stock Inventory (PCS)') }}
+                            <x-icons.sort />
+                        </a>
+                    </th>
+                    <th scope="col" class="text-center">
+                        <a class="table-head">
+                            {{ __('AV3M (Pcs)') }}
+                            <x-icons.sort />
+                        </a>
+                    </th>
+                    <th scope="col" class="text-center">
+                        <a class="table-head">
+                            {{ __('Rekomendasi') }}
                             <x-icons.sort />
                         </a>
                     </th>
@@ -244,6 +262,13 @@
                             <x-icons.sort />
                         </a>
                     </th>
+                    <th scope="col" class="text-center">
+                        <a class="table-head">
+                            {{ __('Tersedia') }}
+                            <x-icons.sort />
+                        </a>
+                    </th>
+                    
                 </tr>
             </thead>
         </table>
@@ -507,8 +532,8 @@
                         class: 'table-data'
                     },
                     {
-                        data: 'status',
-                        name: 'status',
+                        data: 'si',
+                        name: 'si',
                         class: 'table-data'
                     },
                     {
@@ -517,14 +542,20 @@
                         class: 'table-data'
                     },
                     {
-                        data: 'ideal',
-                        name: 'ideal',
+                        data: 'rekomendasi',
+                        name: 'rekomendasi',
+                        class: 'table-data'
+                    },
+                   
+                    {
+                        data: 'status',
+                        name: 'status',
                         class: 'table-data'
                     },
 
                     {
-                        data: 'keterangan',
-                        name: 'keterangan',
+                        data: 'availability',
+                        name: 'availability',
                         class: 'table-data'
                     }
                 ],
