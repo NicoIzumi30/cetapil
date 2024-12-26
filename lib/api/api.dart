@@ -470,7 +470,7 @@ class Api {
       request.fields["visibility[$i][category]"] = visibilityPrimaryList[i]['category'].toString();
       request.fields["visibility[$i][type]"] = "PRIMARY";
       request.fields["visibility[$i][position]"] = visibilityPrimaryList[i]['position'].toString();
-      request.fields["visibility[$i][posm_type_id]"] = visibilityPrimaryList[i]['posm_type_id'].toString().toUpperCase();
+      request.fields["visibility[$i][posm_type_id]"] = visibilityPrimaryList[i]['posm_type_id'].toString();
       request.fields["visibility[$i][visual_type]"] = visibilityPrimaryList[i]['visual_type_name'].toString().toUpperCase();
       request.fields["visibility[$i][condition]"] = visibilityPrimaryList[i]['condition'].toString().toUpperCase();
       request.fields["visibility[$i][shelf_width]"] = visibilityPrimaryList[i]['shelf_width'].toString().toUpperCase();
