@@ -176,6 +176,7 @@ class RoutingController extends Controller
             }
             
             $outlet->save();
+            
     
             // Store AV3M data
             foreach ($request->product_category as $category) {

@@ -62,7 +62,7 @@ Route::middleware('auth')->group(function () {
     Route::get('routing/generate-excel', [RoutingController::class, 'downloadExcel'])->name('routing.generae-excel')->middleware('permission:menu_routing');
     Route::get('routing/data', [RoutingController::class, 'getData'])->name('routing.data')->middleware('permission:menu_routing');
     Route::resource('routing', RoutingController::class)->middleware('permission:menu_routing');
-    Route::delete('/routing/{id}', [RoutingController::class, 'destroy'])->name('routing.destroy');
+    // Route::delete('/routing/{id}', [RoutingController::class, 'destroy'])->name('routing.destroy');
 
     Route::put('update-product-knowledge', [ProductKnowledgeControler::class, 'update'])->name('update-product-knowledge')->middleware('permission:menu_routing');
     Route::get('/visibility/download-activity', [VisibilityController::class, 'downloadActivityData'])

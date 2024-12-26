@@ -171,7 +171,7 @@
         </x-section-card>
 
         @foreach ($category->products as $product)
-
+        
         @php
             $av3mValue = App\Models\Av3m::where('outlet_id', $outlet->id)
                 ->where('product_id', $product->id)
@@ -189,7 +189,6 @@
                     id="av3m-{{$product->sku}}" 
                     class="form-control av3m-input w-full" 
                     min="0"
-                    placeholder="Masukan Jumlah AV3M"
                     value="{{ old('av3m.'.$product->sku, $av3mValue) }}"
                 />
                 @error('av3m.'.$product->sku)

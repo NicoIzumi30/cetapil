@@ -17,13 +17,17 @@ class Outlet extends Model
 
     protected $guarded = [];
     
-
+    protected $fillable = ['id','channel_id', 'product_id', 'av3m','outlet_id',];
     /**
      * Get the city that owns the outlet.
      */
     public function city(): BelongsTo
     {
         return $this->belongsTo(City::class);
+    }
+    public function Av3m(): BelongsTo
+    {
+        return $this->belongsTo(Av3m::class);
     }
     /**
      * Get the user that owns the outlet.
