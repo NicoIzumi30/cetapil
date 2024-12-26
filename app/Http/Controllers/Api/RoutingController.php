@@ -18,55 +18,66 @@ use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Support\Carbon;
 use Symfony\Component\HttpFoundation\Response;
 use Illuminate\Support\Arr;
+use Illuminate\Support\Facades\DB;
+use Illuminate\Support\FacadesDB;
+use Illuminate\Support\Facades\Log;
 
 class RoutingController extends Controller
 {
     use HasAuthUser, OutletTrait;
     public function index(Request $request)
-    {
-        Carbon::setLocale('id');
-        $weekNumber = date('W');
-        $currentDay = Carbon::now()->dayOfWeek;
-        $currentDay = $currentDay === 0 ? '7' : (string) $currentDay;
+{
+    Carbon::setLocale('id');
+    $currentWeek = Carbon::now()->weekOfMonth;
+    $currentDay = Carbon::now()->dayOfWeek;
+    $currentDay = $currentDay === 0 ? '7' : (string) $currentDay;
+    $weekNumber = $currentWeek > 4 ? $currentWeek % 4 : $currentWeek;
+    $user = $this->getAuthUser();
 
-        $week = 'ODD';
-        if ($weekNumber % 2 == 0) {
-            $week = 'EVEN';
-        }
+    $outlets = Outlet::query()
+        ->approved()
+        ->where('user_id', $user->id)
+        ->where(function ($query) use ($currentDay, $weekNumber) {
+            // 1x1 cycle with NULL week
+            $query->orWhere(function ($q) use ($currentDay) {
+                $q->where('cycle', '1x1')
+                    ->where('visit_day', $currentDay);
+            });
 
-        $user = $this->getAuthUser();
-        $outlets = Outlet::query()
-            ->approved()
-            ->where('user_id', $user->id)
-            ->where(function ($query) use ($week) {
-                $query->where('cycle', '1x1')
-                    ->orWhere(function ($q) use ($week) {
-                        $q->where('cycle', '1x2')
-                            ->where('week_type', $week);
-                    });
-            })
-            ->with(['salesActivities' => function ($query) use ($user) {
-                $query->where('user_id', $user->id)
-                    ->whereDate('checked_in', Carbon::today())
-                    ->select('id', 'outlet_id', 'checked_in', 'checked_out', 'status');
-            }])
-            ->where(function ($query) use ($currentDay, $user) {
-                $query->where('visit_day', $currentDay)
-                    ->orWhereHas('salesActivities', function ($q) use ($user) {
-                        $q->where('user_id', $user->id)
-                            ->whereDate('checked_in', Carbon::today());
+            // 1x2 cycle (unchanged)
+            $query->orWhere(function ($q) use ($currentDay, $weekNumber) {
+                $q->where('cycle', '1x2')
+                    ->where('visit_day', $currentDay)
+                    ->where(function ($w) use ($weekNumber) {
+                        $w->orWhere('week', (string)$weekNumber);
+                        if (in_array($weekNumber, [1, 3])) {
+                            $w->orWhere('week', '1&3');
+                        }
+                        if (in_array($weekNumber, [2, 4])) {
+                            $w->orWhere('week', '2&4');
+                        }
                     });
             });
 
-        // if ($request->filled('keyword')) {
-        //     $outlets->where(function ($query) use ($request) {
-        //         $query->where('name', 'like', '%' . $request->keyword . '%');
-        //     });
-        // }
+            // 1x4 cycle (unchanged)
+            $query->orWhere(function ($q) use ($currentDay, $weekNumber) {
+                $q->where([
+                    ['cycle', '1x4'],
+                    ['visit_day', $currentDay],
+                    ['week', (string)$weekNumber]
+                ]);
+            });
+        })
+        ->with(['salesActivities' => function ($query) use ($user) {
+            $query->where('user_id', $user->id)
+                ->whereDate('checked_in', Carbon::today())
+                ->select('id', 'outlet_id', 'checked_in', 'checked_out', 'status');
+        }]);
 
-        $outlets = $outlets->get();
-        return new RoutingCollection($outlets);
-    }
+    $result = $outlets->get();
+    return new RoutingCollection($result);
+}
+
     public function checkIn(CheckInRequest $request)
     {
         $now = Carbon::now();
