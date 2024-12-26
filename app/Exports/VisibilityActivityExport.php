@@ -181,7 +181,21 @@ class VisibilityActivityExport implements FromCollection, WithHeadings, WithMapp
         $lastRow = $sheet->getHighestRow();
         $lastColumn = $sheet->getHighestColumn();
 
-        // Header styling
+        // Apply styling to entire worksheet (headers and content)
+        $sheet->getStyle("A1:{$lastColumn}{$lastRow}")->applyFromArray([
+            'alignment' => [
+                'horizontal' => Alignment::HORIZONTAL_CENTER,
+                'vertical' => Alignment::VERTICAL_CENTER,
+                'wrapText' => true,
+            ],
+            'borders' => [
+                'allBorders' => [
+                    'borderStyle' => Border::BORDER_THIN,
+                ],
+            ],
+        ]);
+
+        // Additional header styling
         $sheet->getStyle("A1:{$lastColumn}1")->applyFromArray([
             'font' => [
                 'bold' => true,
@@ -191,28 +205,10 @@ class VisibilityActivityExport implements FromCollection, WithHeadings, WithMapp
                 'fillType' => Fill::FILL_SOLID,
                 'startColor' => ['rgb' => '4A90E2'],
             ],
-            'alignment' => [
-                'horizontal' => Alignment::HORIZONTAL_CENTER,
-            ],
-        ]);
-
-        // Content styling
-        $sheet->getStyle("A2:{$lastColumn}{$lastRow}")->applyFromArray([
-            'borders' => [
-                'allBorders' => [
-                    'borderStyle' => Border::BORDER_THIN,
-                ],
-            ],
-            'alignment' => [
-                'vertical' => Alignment::VERTICAL_CENTER,
-            ],
         ]);
 
         // Set row height
         $sheet->getDefaultRowDimension()->setRowHeight(25);
-
-        // Apply text wrapping to all columns
-        $sheet->getStyle("A1:{$lastColumn}{$lastRow}")->getAlignment()->setWrapText(true);
 
         return [
             1 => ['font' => ['bold' => true]],
