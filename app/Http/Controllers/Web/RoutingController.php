@@ -65,7 +65,8 @@ class RoutingController extends Controller
         $waktuKunjungan = $this->waktuKunjungan;
         $cities = City::all();
         $countPending = Outlet::where('status', 'PENDING')->count();
-        return view("pages.routing.index", compact('channels', 'waktuKunjungan', 'countPending', 'cities'));
+
+        return view("pages.routing.index", compact('channels', 'waktuKunjungan','countPending', 'cities'));
     }
     public function getData(Request $request)
     {

@@ -8,7 +8,7 @@
     <li>
         <a href="{{ route('products.destroy', $productId) }}"
             class="dropdown-option text-red-400 delete-btn" 
-            data-name="{{ $item->sku }}">
+            data-name="{{ $sku }}">
             Hapus Data
         </a>
     </li>

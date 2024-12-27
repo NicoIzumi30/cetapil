@@ -29,11 +29,11 @@ class ProductController extends Controller
 {
     public function index(Request $request)
     {
-      
+
         $categories = Category::all();
         $channels = Channel::all();
-        $cities = City::select('id','name')->get();
-        $products = Product::select('id','sku')->get();
+        $cities = City::select('id', 'name')->get();
+        $products = Product::select('id', 'sku')->get();
         return view('pages.product.index', [
             'categories' => $categories,
             'cities' => $cities,
@@ -44,36 +44,37 @@ class ProductController extends Controller
     public function getData(Request $request)
     {
         $query = Product::with('category');
-        
+
         if ($request->filled('search_term')) {
             $searchTerm = $request->search_term;
-            $query->where(function($q) use ($searchTerm) {
+            $query->where(function ($q) use ($searchTerm) {
                 $q->where('sku', 'like', "%{$searchTerm}%")
-                  ->orWhereHas('category', function($q) use ($searchTerm) {
-                      $q->where('name', 'like', "%{$searchTerm}%");
-                  });
+                    ->orWhereHas('category', function ($q) use ($searchTerm) {
+                        $q->where('name', 'like', "%{$searchTerm}%");
+                    });
             });
         }
-        
+
         $filteredRecords = (clone $query)->count();
-        
+
         $result = $query->skip($request->start)
-                       ->take($request->length)
-                       ->get();
-        
+            ->take($request->length)
+            ->get();
+
         return response()->json([
             'draw' => intval($request->draw),
             'recordsTotal' => $filteredRecords,
             'recordsFiltered' => $filteredRecords,
-            'data' => $result->map(function($item) {
+            'data' => $result->map(function ($item) {
                 return [
-                    'id' => $item->id, // Tambahkan id product
+                    'id' => $item->id,
                     'category' => $item->category->name,
                     'sku' => $item->sku,
                     'price' => number_format($item->price, 0, ',', '.'),
                     'actions' => view('pages.product.action', [
-                        'item' => $item,
-                        'productId' => $item->id // Pass product id ke view actions
+                        'productId' => $item->id,
+                        'sku' => $item->sku,
+                        'categories' => Category::all() 
                     ])->render()
                 ];
             })
@@ -81,10 +82,10 @@ class ProductController extends Controller
     }
     public function getDataStockOnHand(Request $request)
     {
-        $query = SalesAvailability::with(['product:id,sku','outlet:id,name']);
+        $query = SalesAvailability::with(['product:id,sku', 'outlet:id,name']);
         if ($request->filled('date')) {
             $dateParam = $request->date;
-            
+
             if (str_contains($dateParam, ' to ')) {
                 [$startDate, $endDate] = explode(' to ', $dateParam);
                 $query->whereBetween('created_at', [
@@ -95,14 +96,14 @@ class ProductController extends Controller
                 $query->whereDate('created_at', Carbon::parse($dateParam));
             }
         }
-    
+
         if ($request->filled('filter_product')) {
             $filter_product = $request->filter_product;
             if ($filter_product != 'all') {
                 $query->where('product_id', $filter_product);
             }
         }
-    
+
         if ($request->filled('filter_area')) {
             $filter_area = $request->filter_area;
             if ($filter_area != 'all') {
@@ -114,15 +115,15 @@ class ProductController extends Controller
             }
         }
         $filteredRecords = (clone $query)->count();
-        
+
         $result = $query->skip($request->start)
-                       ->take($request->length)
-                       ->get();
+            ->take($request->length)
+            ->get();
         return response()->json([
             'draw' => intval($request->draw),
             'recordsTotal' => $filteredRecords,
             'recordsFiltered' => $filteredRecords,
-            'data' => $result->map(function($item) {
+            'data' => $result->map(function ($item) {
                 return [
                     'id' => $item->id, // Tambahkan id product
                     'outlet' => $item->outlet->name,
@@ -181,6 +182,14 @@ class ProductController extends Controller
         ]);
     }
 
+    public function getProductsByCategory($categoryId)
+    {
+        $products = Product::where('category_id', $categoryId)
+                        ->select('id', 'sku')
+                        ->get();
+                        
+        return response()->json($products);
+    }
     public function update(UpdateProductRequest $request, Product $product)
     {
         try {
@@ -332,65 +341,64 @@ class ProductController extends Controller
 
 
     public function downloadStockOnHand(Request $request)
-{
-    try {
-        DB::enableQueryLog();
-        
-        // Ganti query yang lama dengan yang baru
-        $query = SalesAvailability::with([
-            'product:id,sku',
-            'outlet:id,name,code,tipe_outlet,TSO,city_id,channel_id,user_id,account',
-            'outlet.user:id,name',
-            'outlet.city:id,name', 
-            'outlet.channel:id,name'
-        ]);
+    {
+        try {
+            DB::enableQueryLog();
 
-        // Sisanya tetap sama
-        if ($request->filled('filter_date') && $request->filter_date !== 'Date Range') {
-            $dateParam = $request->filter_date;
-            if (str_contains($dateParam, ' to ')) {
-                [$startDate, $endDate] = explode(' to ', $dateParam);
-                $query->whereBetween('created_at', [
-                    Carbon::parse($startDate)->startOfDay(),
-                    Carbon::parse($endDate)->endOfDay()
-                ]);
-            } else {
-                $query->whereDate('created_at', Carbon::parse($dateParam));
+            // Ganti query yang lama dengan yang baru
+            $query = SalesAvailability::with([
+                'product:id,sku',
+                'outlet:id,name,code,tipe_outlet,TSO,city_id,channel_id,user_id,account',
+                'outlet.user:id,name',
+                'outlet.city:id,name',
+                'outlet.channel:id,name'
+            ]);
+
+            // Sisanya tetap sama
+            if ($request->filled('filter_date') && $request->filter_date !== 'Date Range') {
+                $dateParam = $request->filter_date;
+                if (str_contains($dateParam, ' to ')) {
+                    [$startDate, $endDate] = explode(' to ', $dateParam);
+                    $query->whereBetween('created_at', [
+                        Carbon::parse($startDate)->startOfDay(),
+                        Carbon::parse($endDate)->endOfDay()
+                    ]);
+                } else {
+                    $query->whereDate('created_at', Carbon::parse($dateParam));
+                }
             }
-        }
 
-        if ($request->filled('filter_product') && $request->filter_product !== 'all') {
-            $query->where('product_id', $request->filter_product);
-        }
+            if ($request->filled('filter_product') && $request->filter_product !== 'all') {
+                $query->where('product_id', $request->filter_product);
+            }
 
-        if ($request->filled('filter_area') && $request->filter_area !== 'all') {
-            $query->whereHas('outlet', function ($q) use ($request) {
-                $q->where('city_id', $request->filter_area);
-            });
-        }
-    
+            if ($request->filled('filter_area') && $request->filter_area !== 'all') {
+                $query->whereHas('outlet', function ($q) use ($request) {
+                    $q->where('city_id', $request->filter_area);
+                });
+            }
+
             $data = $query->get();
-    
+
             // Log untuk debugging
             Log::info('Stock On Hand Export Data', [
                 'filters' => $request->all(),
                 'query' => DB::getQueryLog(),
                 'record_count' => $data->count()
             ]);
-    
+
             return Excel::download(
                 new StockOnHandExport($data),
                 'stock_on_hand_' . now()->format('Y-m-d_His') . '.xlsx',
                 \Maatwebsite\Excel\Excel::XLSX
             );
-    
         } catch (\Exception $e) {
             Log::error('Stock On Hand Export Error', [
                 'message' => $e->getMessage(),
                 'trace' => $e->getTraceAsString(),
                 'filters' => $request->all()
             ]);
-    
+
             return response()->json([
                 'error' => true,
                 'message' => 'Gagal mengunduh file: ' . $e->getMessage()

@@ -1,13 +1,17 @@
-{{-- resources/views/pages/action-power-sku.blade.php --}}
 <x-action-table-dropdown>
     <li>
-        <button id="view-power-sku" data-id="{{ $id }}" class="dropdown-option">
+        <button 
+            type="button"
+            data-id="{{ $powerSku->id }}"
+            class="dropdown-option view-power-sku"
+            onclick="openModal('edit-power-sku'); getPowerSkuData('{{ $powerSku->id }}')">
             Lihat Data
         </button>
     </li>
     <li>
-        <a href="{{ route('products.power-skus.destroy', $id) }}" data-name="{{ $sku }}"
-            class="dropdown-option text-red-400 delete-btn">
+        <a href="{{ route('products.power-skus.destroy', $powerSku->id) }}"
+           data-name="{{ $powerSku->product->sku }}"
+           class="dropdown-option text-red-400 delete-btn">
             Hapus Data
         </a>
     </li>
