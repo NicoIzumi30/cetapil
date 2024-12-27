@@ -7,53 +7,89 @@
 @section('dashboard-content')
     <x-card>
         <x-slot:cardTitle>
-            Detail Visibility Activity
+            Detail Survey Activity
         </x-slot:cardTitle>
-
-        <div class="grid grid-cols-2 gap-6">
-            <div>
-                <label for="outlet-name" class="form-label">Nama Outlet</label>
-                <input id="outlet-name" value="{{ $data['outlet'] }}" class="form-control" type="text" name="outlet-name" aria-describedby="outlet-name" disabled />
-            </div>
-            <div>
-                <label for="sales-name" class="form-label">Nama Sales</label>
-                <input id="sales-name" value="{{$data['sales']}}" class="form-control" type="text" name="sales-name" aria-describedby="sales-name" disabled />
-            </div>
-            <div>
-                <label for="product-sku" class="form-label">Produk SKU</label>
-                <input id="product-sku" value="{{ $data['sku'] }}" class="form-control" type="text"
-                    name="product-sku" aria-describedby="product-sku" disabled />
-            </div>
-            <div>
-                <label for="visual" class="form-label">Visual</label>
-                <input id="visual" value="{{ $data['visual'] }}" class="form-control" type="text" name="visual" aria-describedby="visual" disabled />
-            </div>
-            <div>
-                <label for="program-date" class="form-label">Jangka Waktu Program</label>
-                <input id="program-date" value="{{ $data['periode'] }}" class="form-control" type="text"
-                    name="program-date" aria-describedby="program-date"
-                    disabled />
-            </div>
-            <div>
-                <label for="condition" class="form-label">Condition</label>
-                <input id="condition" value="{{ $data['condition'] }}" class="form-control" type="text" name="condition"" aria-describedby="condition" disabled />
-            </div>
-        </div>
-
+        <hr class="w-full border-dashed border">
+        <table class="w-full mt-6">
+            <tbody>
+                <tr>
+                    <td class="detail-title">Nama Outlet</td>
+                    <td class="colon">:</td>
+                    <td class="detail">Wisma 2</td>
+                    <td class="detail-title">Nama Sales</td>
+                    <td class="colon">:</td>
+                    <td class="detail">runaskdnas</td>
+                </tr>
+                <tr>
+                    <td class="detail-title">Kode Outlet</td>
+                    <td class="colon">:</td>
+                    <td class="detail">d</td>
+                    <td class="detail-title">Tipe Outlet</td>
+                    <td class="colon">:</td>
+                    <td class="detail">d</td>
+                </tr>
+                <tr>
+                    <td class="detail-title">Channel</td>
+                    <td class="colon">:</td>
+                    <td class="detail">d</td>
+                </tr>
+            </tbody>
+        </table>
         <x-section-card>
-            <x-slot:title>Actual Visibility</x-slot:title>
-            <div class="flex flex-col items-center w-full gap-6">
-                <div class="w-full relative">
-                    <img id="actual-visibility-1" src="{{ asset($data['path1']) }}" alt="Actual Visibility 1"
-                        class="w-full h-[260px] mx-auto rounded-lg object-cover" />
+            <x-slot:title>Primary</x-slot:title>
+            <div>
+                <h2 class="font-semibold text-xl mb-8 text-white">Core 1</h2>
+                <div class="grid grid-cols-2 gap-2 items-start">
+                    <div class="grid grid-cols-2 gap-4 w-full text-white">
+                        <p class="font-bold text-sm">Jenis POSM : <span class="font-normal">Glofier</span></p>
+                        <p class="font-bold text-sm">Lebar Rak : <span class="font-normal">Glofier</span></p>
+                        <p class="font-bold text-sm">Jenis Visual : <span class="font-normal">Glofier</span></p>
+                        <p class="font-bold text-sm">Shelving: <span class="font-normal">Glofier</span></p>
+                        <p class="font-bold text-sm">Condition: <span class="font-normal">Glofier</span></p>
+                    </div>
+                    <div>
+                        <h2 class="font-bold text-sm text-white mb-4">Foto Display</h2>
+                        <img class="w-full " src="{{ asset('/assets/images/banner-placeholder.png') }}" alt="Foto Display">
+                    </div>
                 </div>
-                <div class="w-full relative">
-                    <img id="actual-visibility-2" src="{{ asset($data['path2']) }}" alt="Actual Visibility 2"
-                        class="w-full h-[260px] mx-auto rounded-lg object-cover" />
-                        <!-- <img id="actual-visibility-2" src="{{ 'http://dev-cetaphil.i-am.host/storage'.$data['path2']}}" alt="Actual Visibility 2"
-                        class="w-full h-[260px] mx-auto rounded-lg object-cover" /> -->
+            </div>
+            <div>
+                <h2 class="font-semibold text-xl mb-8 text-white">Baby 1</h2>
+                <div class="grid grid-cols-2 gap-2 items-start">
+                    <div class="grid grid-cols-2 gap-4 w-full text-white">
+                        <p class="font-bold text-sm">Jenis POSM : <span class="font-normal">Glofier</span></p>
+                        <p class="font-bold text-sm">Lebar Rak : <span class="font-normal">Glofier</span></p>
+                        <p class="font-bold text-sm">Jenis Visual : <span class="font-normal">Glofier</span></p>
+                        <p class="font-bold text-sm">Shelving: <span class="font-normal">Glofier</span></p>
+                        <p class="font-bold text-sm">Condition: <span class="font-normal">Glofier</span></p>
+                    </div>
+                    <div>
+                        <h2 class="font-bold text-sm text-white mb-4">Foto Display</h2>
+                        <img class="w-full " src="{{ asset('/assets/images/banner-placeholder.png') }}" alt="Foto Display">
+                    </div>
                 </div>
             </div>
         </x-section-card>
+		<x-section-card>
+            <x-slot:title>Secondary</x-slot:title>
+			<div class="grid gap-12">
+				<div>
+					<h2 class="font-semibold text-xl mb-4 text-white">Core 1</h2>
+						<p class="font-bold text-sm mb-6 text-white">Jenis POSM : <span class="font-normal">Glofier</span></p>
+						<div>
+							<h2 class="font-bold text-sm text-white mb-4">Foto Display</h2>
+							<img class="w-[500px] h-[500px]" src="{{ asset('/assets/images/banner-placeholder.png') }}" alt="Foto Display">
+						</div>
+				</div>
+				<div>
+					<h2 class="font-semibold text-xl mb-8 text-white">Baby 1</h2>
+						<p class="font-bold text-sm mb-6 text-white">Jenis POSM : <span class="font-normal">Glofier</span></p>
+						<div>
+							<h2 class="font-bold text-sm text-white mb-4">Foto Display</h2>
+							<img class="w-[500px] h-[500px]" src="{{ asset('/assets/images/banner-placeholder.png') }}" alt="Foto Display">
+						</div>
+				</div>
+			</div>
+        </x-section-card>
     </x-card>
-@endsection
+@endsection;
