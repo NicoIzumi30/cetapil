@@ -108,9 +108,11 @@ class TambahActivityController extends GetxController {
           'id': data['product_id'],
           'sku': item!['sku'],
           'category': item['category']['name'],
-          'stock': data['available_stock'],
-          'av3m': data['average_stock'],
-          'recommend': data['ideal_stock'],
+          'availability_exist': data['availability_exist'],
+          'stock_on_hand': data['stock_on_hand'],
+          'stock_on_inventory': data['stock_on_inventory'],
+          'av3m': data['av3m'],
+          'recommend': (int.parse(data['stock_on_inventory']) - int.parse(data['av3m'])).toString(),
         };
         addAvailabilityItem(newItem);
         tambahAvailabilityController.clearForm();
@@ -137,33 +139,39 @@ class TambahActivityController extends GetxController {
   }
 
   initDetailDraftVisibility() {
-    final allVisibilities = [];
-    final visibilityDraft = detailDraft["visibilityItems"];
+    final visibilityPrimaryDraft = detailDraft["visibilityPrimaryItems"];
+    final visibilitySecondaryDraft = detailDraft["visibilitySecondaryItems"];
 
-    if (allVisibilities.isNotEmpty && visibilityDraft != null) {
-      for (var dataApi in allVisibilities) {
-        for (var dataDraft in visibilityDraft) {
-          final posmType = supportController
-              .getPosmTypes()
-              .firstWhereOrNull((posm) => posm['id'] == dataApi.posmTypeId);
-          final visualType = supportController
-              .getVisualTypes()
-              .firstWhereOrNull((visual) => visual['id'] == dataApi.visualTypeId);
-          final newItem = {
-            'id': dataApi.id,
-            'posm_type_id': dataApi.posmTypeId,
-            'posm_type_name': posmType!['name'],
-            'visual_type_id': dataApi.visualTypeId,
-            'visual_type_name': visualType!['name'],
-            'condition': dataDraft['condition'],
+    if(visibilityPrimaryDraft != null){
+      for (var data in visibilityPrimaryDraft) {
+        final newItem = {
+          'id': 'primary-${data["category"].toString().toLowerCase()}-${data["position"]}',
+          'category': data['category'],
+          'position': data['position'],
+          'posm_type_id': data['posm_type'],
+          'visual_type_id': data['visual_type'],
+          'condition': data['condition'],
+          'shelf_width': data['shelf_width'],
+          'shelving': data['shelving'],
+          'image_visibility': File(data['image_visibility']),
+        };
+        addPrimaryVisibilityItem(newItem);
+        tambahVisibilityController.clearPrimaryForm();
+      }
+    }
 
-            /// ERROR KARNA dataDraft['image1'] ADALAH STRING
-            'image1': File(dataDraft['image1']),
-            'image2': File(dataDraft['image2']),
-          };
-          addPrimaryVisibilityItem(newItem);
-          tambahVisibilityController.clearPrimaryForm();
-        }
+    if(visibilitySecondaryDraft != null){
+      for (var data in visibilitySecondaryDraft) {
+        final newItem = {
+          'id': 'secondary-${data["category"].toString().toLowerCase()}-${data["position"]}',
+          'category': data['category'],
+          'position': data['position'],
+          'secondary_exist': data['secondary_exist'] == "true" ? "ada" : "tidak" ,
+          'display_type': data['display_type'],
+          'display_image': File(data['display_image']),
+        };
+        addSecondaryVisibilityItem(newItem);
+        tambahVisibilityController.clearSecondaryForm();
       }
     }
   }
@@ -292,14 +300,12 @@ class TambahActivityController extends GetxController {
           final id = survey['id'].toString();
 
           if (survey['type'] == 'text') {
-            // For price inputs - ensure we save all fields with default "0"
             final controller = priceControllers[id];
             surveyList.add({
               'survey_question_id': id,
               'answer': (controller?.text.isEmpty ?? true) ? "0" : controller!.text,
             });
           } else if (survey['type'] == 'bool') {
-            // For switches - ensure we save all with default false
             final switchState = switchStates[id];
             surveyList.add({
               'survey_question_id': id,
@@ -339,7 +345,8 @@ class TambahActivityController extends GetxController {
         await db.insertFullSalesActivity(
           data: data,
           availabilityItems: availabilityDraftItems,
-          // visibilityItems: visibilityDraftItems,
+          visibilityPrimaryItems: visibilityPrimaryDraftItems,
+          visibilitySecondaryItems: visibilitySecondaryDraftItems,
           surveyItems: surveyList,
           orderItems: orderDraftItems,
         );

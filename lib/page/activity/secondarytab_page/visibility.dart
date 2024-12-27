@@ -95,6 +95,7 @@ class VisibilityPage extends GetView<ActivityController> {
               var id = "primary-core-3";
               var data = tambahActivityController.visibilityPrimaryDraftItems
                   .firstWhere((item) => item['id'] == id, orElse: () => {});
+              print("primary = ${tambahActivityController.visibilityPrimaryDraftItems}");
               return VisibilityCard(
                 isPrimary: true,
                 posmType: data['posm_type_name'] ?? "-",
@@ -220,6 +221,7 @@ class VisibilityPage extends GetView<ActivityController> {
               var id = "secondary-core-1";
               var data = tambahActivityController.visibilitySecondaryDraftItems
                   .firstWhere((item) => item['id'] == id, orElse: () => {});
+              print("secondary = ${tambahActivityController.visibilitySecondaryDraftItems}");
               return VisibilityCard(
                 isPrimary: false,
                 secondarydisplay: data['secondary_exist'] ?? "-",
@@ -335,67 +337,7 @@ class VisibilityCard extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return _buildCardWithImage();
-    // if (imagePath != null) {
-    //   return _buildCardWithImage();
-    // } else {
-    //   return _buildCompactCard();
-    // }
   }
-
-  // Widget _buildCompactCard() {
-  //   return InkWell(
-  //     onTap: onTapCard,
-  //     child: Container(
-  //       margin: EdgeInsets.symmetric(vertical: 8, horizontal: 5),
-  //       decoration: BoxDecoration(
-  //         color: Colors.white,
-  //         borderRadius: BorderRadius.circular(12),
-  //         boxShadow: [
-  //           BoxShadow(
-  //             color: Colors.black.withOpacity(0.03),
-  //             blurRadius: 4,
-  //             offset: Offset(0, 2),
-  //           ),
-  //         ],
-  //       ),
-  //       child: Stack(
-  //         children: [
-  //           Padding(
-  //             padding: EdgeInsets.all(16),
-  //             child: Column(
-  //               crossAxisAlignment: CrossAxisAlignment.start,
-  //               children: [
-  //                 _buildInfoRow('POSM Type', posmType),
-  //                 SizedBox(height: 8),
-  //                 _buildInfoRow('Visual Type', visualType),
-  //                 SizedBox(height: 8),
-  //                 _buildInfoRow('Condition', condition),
-  //               ],
-  //             ),
-  //           ),
-  //           if (isSubmitted)
-  //             Positioned(
-  //               top: -4,
-  //               right: -4,
-  //               child: Container(
-  //                 padding: EdgeInsets.all(4),
-  //                 decoration: BoxDecoration(
-  //                   color: Colors.blue,
-  //                   shape: BoxShape.circle,
-  //                 ),
-  //                 child: Icon(
-  //                   Icons.check,
-  //                   color: Colors.white,
-  //                   size: 12,
-  //                 ),
-  //               ),
-  //             ),
-  //         ],
-  //       ),
-  //     ),
-  //   );
-  // }
-
   Widget _buildCardWithImage() {
     return InkWell(
       onTap: onTapCard,

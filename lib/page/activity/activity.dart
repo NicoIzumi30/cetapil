@@ -83,7 +83,6 @@ class ActivityPage extends GetView<ActivityController> {
                                     if (!Get.isRegistered<KnowledgeController>()) {
                                       Get.lazyPut(() => KnowledgeController());
                                     }
-
                                     if (activity.status! == "SUBMITTED") {
                                       if (!Get.isRegistered<DetailActivityController>()) {
                                         Get.lazyPut(() => DetailActivityController());
@@ -99,7 +98,6 @@ class ActivityPage extends GetView<ActivityController> {
                                         Get.lazyPut(() => TambahActivityController());
                                       }
                                       final dbActivity = ActivityDatabaseHelper.instance;
-
                                       final tambahActivityController = Get.find<TambahActivityController>();
                                       var fetchedData = await dbActivity.getDetailSalesActivity(activity.id!);
                                       tambahActivityController.selectedTab.value = 0;
@@ -107,8 +105,8 @@ class ActivityPage extends GetView<ActivityController> {
                                       tambahActivityController.startTabTimer();
                                       tambahActivityController.setDetailOutlet(activity);
                                       tambahActivityController.initDetailDraftAvailability();
-                                      tambahActivityController.initDetailDraftOrder();
                                       tambahActivityController.initDetailDraftVisibility();
+                                      // tambahActivityController.initDetailDraftOrder();
                                       Get.to(() => TambahActivity());
                                     }
                                     else{

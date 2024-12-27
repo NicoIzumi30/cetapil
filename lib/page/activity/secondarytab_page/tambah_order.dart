@@ -586,7 +586,7 @@ class _CompactProductCardState extends State<CompactProductCard> {
                         crossAxisAlignment: CrossAxisAlignment.start,
                         children: [
                           Text(
-                            'Jumlah',
+                            'Harga',
                             style: TextStyle(
                               fontSize: 12,
                               color: Colors.black54,
