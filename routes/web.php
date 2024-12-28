@@ -131,7 +131,13 @@ Route::middleware('auth')->group(function () {
             Route::put('/{powerSku}', [PowerSkuController::class, 'update'])->name('update');
             Route::delete('/{powerSku}', [PowerSkuController::class, 'destroy'])->name('destroy');
         });
+        Route::prefix('av3ms')->name('av3ms.')->group(function() {
+            Route::get('/download', [ProductController::class, 'downloadAv3m'])->name('download');
+            Route::get('/template', [ProductController::class, 'templateAv3m'])->name('template');
+        });
+
     });
+
     Route::resource('products', ProductController::class)->middleware('permission:menu_product');
     // Logout
 

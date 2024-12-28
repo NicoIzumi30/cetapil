@@ -762,6 +762,10 @@
             $('#downloadTemplate').click(function() {
                 window.location.href = "{{ asset('assets/template/template_bulk_product.xlsx') }}";
             });
+            $('#downloadTemplateAv3m').click(function() {
+                window.location.href = "{{route('products.av3ms.template')}}";
+            });
+
 
             $('#importBtn').click(function() {
                 const file = $('#file_upload')[0].files[0];

@@ -27,7 +27,7 @@ return [
     */
 
     'env' => env('APP_ENV', 'production'),
-
+    'storage_url' => env('APP_STORAGE', 'https://dev-cetaphil.i-am.host/storage'),
     /*
     |--------------------------------------------------------------------------
     | Application Debug Mode

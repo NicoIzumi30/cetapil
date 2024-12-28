@@ -151,11 +151,10 @@ class VisibilityController extends Controller
         $result = $query->skip($request->start)
             ->take($request->length)
             ->get();
-
         return response()->json([
             'draw' => intval($request->draw),
-            'recordsTotal' => $filteredRecords,
-            'recordsFiltered' => $filteredRecords,
+            'recordsTotal' => $result->count(),
+            'recordsFiltered' => $result->count(),
             'data' => $result->map(function ($item) {
                 $salesVisibility = SalesVisibility::find($item->id);
                 return [
@@ -163,11 +162,11 @@ class VisibilityController extends Controller
                     'outlet' => $salesVisibility->salesActivity->outlet->name,
                     'sales' => $salesVisibility->salesActivity->user->name,
                     'code' => $salesVisibility->salesActivity->outlet->code,
-                    'type' => $salesVisibility->visual_type,
+                    'type' => $salesVisibility->salesActivity->outlet->tipe_outlet,
                     'condition' => $salesVisibility->condition,
                     'channel' => $salesVisibility->salesActivity->outlet->channel->name,
                     'actions' => view('pages.visibility.action_activity', [
-                        'activityId' => $salesVisibility->id
+                        'activityId' => $salesVisibility->salesActivity->id
                     ])->render()
                 ];
             })
@@ -331,19 +330,9 @@ class VisibilityController extends Controller
     }
     public function detail_activity($id)
     {
-        $activity = SalesVisibility::with(['visibility', 'visibility.user:id,name', 'visibility.outlet:id,name', 'visibility.product:id,sku', 'visibility.visualType:id,name'])->where('id', $id)->first();
-        $data = [
-            'id' => $activity->id,
-            'outlet' => $activity->visibility->outlet->name,
-            'sku' => $activity->visibility->product->sku,
-            'sales' => $activity->visibility->user->name,
-            'visual' => $activity->visibility->visualType->name,
-            'periode' => Carbon::parse($activity->visibility->started_at)->format('d-m-Y') . ' Sampai ' . Carbon::parse($activity->visibility->ended_at)->format('d-m-Y'),
-            'condition' => $activity->condition,
-            'path1' => $activity->path1,
-            'path2' => $activity->path2
-        ];
-        return view('pages.visibility.visibility-activity', compact('data'));
+        $salesActivity = SalesActivity::with(['user:id,name', 'outlet:id,name,code,tipe_outlet', 'outlet.channel:id,name'])->find($id);
+        $salesVisibility = SalesVisibility::with(['posmType'])->where('sales_activity_id', $id)->get();
+        return view('pages.visibility.visibility-activity', compact('salesActivity', 'salesVisibility'));
     }
 
     /**
