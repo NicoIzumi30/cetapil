@@ -284,7 +284,7 @@ class SellingController extends GetxController {
       final draftIdToDelete = currentDraftId.value;
 
       // Validate required data before showing loading
-      if (outletName.value.text.isEmpty) {
+      if (selectedOutlet.value == null) {
         throw 'Nama outlet harus diisi';
       }
 
@@ -303,8 +303,7 @@ class SellingController extends GetxController {
       CustomAlerts.showLoading(Get.context!, "Mengirim", "Mengirim data ke server...");
 
       final requestData = {
-        'outlet_name': outletName.value.text,
-        'category_outlet': selectedCategory.value,
+        'outlet_id': selectedOutlet.value!.id,
         'longitude': _gpsController.currentPosition.value!.longitude.toString(),
         'latitude': _gpsController.currentPosition.value!.latitude.toString(),
         'image': sellingImage.value!.path,
@@ -313,6 +312,7 @@ class SellingController extends GetxController {
       // Convert draftItems to listProduct format if needed
       listProduct.clear();
       listProduct.addAll(draftItems);
+      print(listProduct);
 
       final response = await Api.submitSelling(requestData, listProduct);
 

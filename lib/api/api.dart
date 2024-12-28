@@ -389,17 +389,14 @@ class Api {
     request.headers["Content-type"] = 'application/json';
     request.headers["Authorization"] = 'Bearer $token';
 
-    request.fields["outlet_name"] = data["outlet_name"].toString();
-    request.fields["category_outlet"] = data["category_outlet"].toString();
+    request.fields["outlet_id"] = data["outlet_id"].toString();
     request.fields["longitude"] = data["longitude"].toString();
     request.fields["latitude"] = data["latitude"].toString();
 
     for (var i = 0; i < productList.length; i++) {
       request.fields["products[$i][id]"] = productList[i]["id"].toString();
-      request.fields["products[$i][stock]"] = productList[i]["stock"].toString();
-      request.fields["products[$i][selling]"] = productList[i]["selling"].toString();
-      request.fields["products[$i][balance]"] = productList[i]["balance"].toString();
-      request.fields["products[$i][price]"] = productList[i]["price"].toString();
+      request.fields["products[$i][qty]"] = productList[i]["qty"].toString();
+      request.fields["products[$i][price]"] = productList[i]["harga"].toString();
     }
     request.files.add(await http.MultipartFile.fromPath(
       'image',
@@ -410,6 +407,7 @@ class Api {
     var responseJson = await http.Response.fromStream(response);
 
     print(response.statusCode);
+    print(responseJson.body);
     if (response.statusCode == 200) {
       return SubmitSellingResponse.fromJson(jsonDecode(responseJson.body));
     } else {

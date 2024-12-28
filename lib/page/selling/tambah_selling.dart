@@ -95,8 +95,7 @@ class TambahSelling extends GetView<SellingController> {
                                     ),
                                   ),
                                 ),
-                                SizedBox(height: 20),
-                                Obx(() => ProductSummaryCard(draftItems: controller.draftItems)),
+                                ProductSummaryCard(),
                                 SizedBox(height: 20),
                                 Obx(() {
                                   if (controller.draftItems.isEmpty) {
@@ -527,25 +526,12 @@ class _CollapsibleCategoryGroupState extends State<CollapsibleCategoryGroup> {
   }
 }
 
-class ProductSummaryCard extends StatelessWidget {
-  final List<Map<String, dynamic>> draftItems;
-
-  const ProductSummaryCard({
-    Key? key,
-    required this.draftItems,
-  }) : super(key: key);
+class ProductSummaryCard extends GetView<SellingController> {
+  const ProductSummaryCard({Key? key}) : super(key: key);
 
   @override
   Widget build(BuildContext context) {
     final formatter = NumberFormat.currency(locale: 'id_ID', symbol: "Rp ", decimalDigits: 0);
-    int totalQty = 0;
-    double totalPrice = 0.0;
-
-    // Calculate totals from draft items
-    for (var item in draftItems) {
-      totalQty += (item['qty'] as num).toInt();
-      totalPrice += (item['qty'] as num) * (item['harga'] as num);
-    }
 
     return Container(
       margin: EdgeInsets.symmetric(vertical: 10),
@@ -580,13 +566,29 @@ class ProductSummaryCard extends StatelessWidget {
                 ),
               ),
               SizedBox(height: 4),
-              Text(
-                totalQty.toString(),
-                style: TextStyle(
-                  fontSize: 16,
-                  fontWeight: FontWeight.bold,
-                  color: Color(0xFF0077BD),
-                ),
+              GetX<SellingController>(
+                builder: (ctrl) {
+                  int totalQty = 0;
+                  try {
+                    if (ctrl.draftItems.isNotEmpty) {
+                      for (var item in ctrl.draftItems) {
+                        if (item != null && item['qty'] != null) {
+                          totalQty += (item['qty'] as num).toInt();
+                        }
+                      }
+                    }
+                  } catch (e) {
+                    print('Error calculating quantity: $e');
+                  }
+                  return Text(
+                    totalQty.toString(),
+                    style: TextStyle(
+                      fontSize: 16,
+                      fontWeight: FontWeight.bold,
+                      color: Color(0xFF0077BD),
+                    ),
+                  );
+                },
               ),
             ],
           ),
@@ -601,13 +603,31 @@ class ProductSummaryCard extends StatelessWidget {
                 ),
               ),
               SizedBox(height: 4),
-              Text(
-                formatter.format(totalPrice),
-                style: TextStyle(
-                  fontSize: 16,
-                  fontWeight: FontWeight.bold,
-                  color: Color(0xFF0077BD),
-                ),
+              GetX<SellingController>(
+                builder: (ctrl) {
+                  double totalPrice = 0.0;
+                  try {
+                    if (ctrl.draftItems.isNotEmpty) {
+                      for (var item in ctrl.draftItems) {
+                        if (item != null && item['qty'] != null && item['harga'] != null) {
+                          final qty = (item['qty'] as num).toInt();
+                          final price = (item['harga'] as num).toDouble();
+                          totalPrice += qty * price;
+                        }
+                      }
+                    }
+                  } catch (e) {
+                    print('Error calculating price: $e');
+                  }
+                  return Text(
+                    formatter.format(totalPrice),
+                    style: TextStyle(
+                      fontSize: 16,
+                      fontWeight: FontWeight.bold,
+                      color: Color(0xFF0077BD),
+                    ),
+                  );
+                },
               ),
             ],
           ),

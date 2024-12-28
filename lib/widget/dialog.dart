@@ -7,7 +7,7 @@ class Alerts {
   static showConfirmDialog(
     BuildContext context, {
     bool useGetBack = true,
-    Function? onContinue, // Add callback parameter
+    Function? onContinue,
   }) async {
     return showDialog(
       context: context,
@@ -15,8 +15,8 @@ class Alerts {
         shape: RoundedRectangleBorder(
           borderRadius: BorderRadius.circular(20),
         ),
-        child: Container(
-          padding: EdgeInsets.all(20),
+        child: Padding(
+          padding: const EdgeInsets.all(20),
           child: Column(
             mainAxisSize: MainAxisSize.min,
             children: [
@@ -37,46 +37,84 @@ class Alerts {
                 style: TextStyle(fontSize: 13),
               ),
               SizedBox(height: 24),
-              Row(
-                mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-                children: [
-                  ElevatedButton(
-                    style: ElevatedButton.styleFrom(
-                      backgroundColor: AppColors.primary,
-                      padding: EdgeInsets.symmetric(horizontal: 30, vertical: 12),
-                      shape: RoundedRectangleBorder(
-                        borderRadius: BorderRadius.circular(10),
-                      ),
-                    ),
-                    onPressed: () {
-                      useGetBack ? Get.back() : Navigator.pop(dialogContext);
-                    },
-                    child: Text('Batalkan', style: TextStyle(color: Colors.white)),
-                  ),
-                  ElevatedButton(
-                    style: ElevatedButton.styleFrom(
-                      backgroundColor: Colors.white,
-                      padding: EdgeInsets.symmetric(horizontal: 30, vertical: 12),
-                      shape: RoundedRectangleBorder(
-                          borderRadius: BorderRadius.circular(10),
-                          side: BorderSide(color: AppColors.primary, width: 1)),
-                    ),
-                    onPressed: () {
-                      // Execute callback if provided
-                      onContinue?.call();
+              LayoutBuilder(
+                builder: (context, constraints) {
+                  // Calculate adaptive padding based on available width
+                  final horizontalPadding = (constraints.maxWidth < 300) 
+                      ? 15.0  // Smaller padding for very narrow screens
+                      : (constraints.maxWidth < 400) 
+                          ? 20.0  // Medium padding for narrow screens
+                          : 30.0;  // Default padding for wider screens
 
-                      // Handle navigation
-                      if (useGetBack) {
-                        Get.back();
-                        Get.back();
-                      } else {
-                        Navigator.pop(dialogContext);
-                        Navigator.pop(context);
-                      }
-                    },
-                    child: Text('Lanjutkan', style: TextStyle(color: AppColors.primary)),
-                  ),
-                ],
+                  return Row(
+                    mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+                    children: [
+                      Flexible(
+                        child: SizedBox(
+                          width: constraints.maxWidth * 0.4, // Limit button width
+                          child: ElevatedButton(
+                            style: ElevatedButton.styleFrom(
+                              backgroundColor: AppColors.primary,
+                              padding: EdgeInsets.symmetric(
+                                horizontal: horizontalPadding,
+                                vertical: 12,
+                              ),
+                              shape: RoundedRectangleBorder(
+                                borderRadius: BorderRadius.circular(10),
+                              ),
+                            ),
+                            onPressed: () {
+                              useGetBack ? Get.back() : Navigator.pop(dialogContext);
+                            },
+                            child: FittedBox(
+                              fit: BoxFit.scaleDown,
+                              child: Text(
+                                'Batalkan',
+                                style: TextStyle(color: Colors.white),
+                              ),
+                            ),
+                          ),
+                        ),
+                      ),
+                      SizedBox(width: 8), // Add spacing between buttons
+                      Flexible(
+                        child: SizedBox(
+                          width: constraints.maxWidth * 0.4, // Limit button width
+                          child: ElevatedButton(
+                            style: ElevatedButton.styleFrom(
+                              backgroundColor: Colors.white,
+                              padding: EdgeInsets.symmetric(
+                                horizontal: horizontalPadding,
+                                vertical: 12,
+                              ),
+                              shape: RoundedRectangleBorder(
+                                borderRadius: BorderRadius.circular(10),
+                                side: BorderSide(color: AppColors.primary, width: 1),
+                              ),
+                            ),
+                            onPressed: () {
+                              onContinue?.call();
+                              if (useGetBack) {
+                                Get.back();
+                                Get.back();
+                              } else {
+                                Navigator.pop(dialogContext);
+                                Navigator.pop(context);
+                              }
+                            },
+                            child: FittedBox(
+                              fit: BoxFit.scaleDown,
+                              child: Text(
+                                'Lanjutkan',
+                                style: TextStyle(color: AppColors.primary),
+                              ),
+                            ),
+                          ),
+                        ),
+                      ),
+                    ],
+                  );
+                },
               ),
             ],
           ),
@@ -93,8 +131,8 @@ class Alerts {
         shape: RoundedRectangleBorder(
           borderRadius: BorderRadius.circular(20),
         ),
-        child: Container(
-          padding: EdgeInsets.all(20),
+        child: Padding(
+          padding: const EdgeInsets.all(20),
           child: Column(
             mainAxisSize: MainAxisSize.min,
             children: [
@@ -111,34 +149,74 @@ class Alerts {
                 style: TextStyle(fontSize: 13),
               ),
               SizedBox(height: 34),
-              Row(
-                mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-                children: [
-                  ElevatedButton(
-                    style: ElevatedButton.styleFrom(
-                      backgroundColor: AppColors.primary,
-                      padding: EdgeInsets.symmetric(horizontal: 30, vertical: 12),
-                      shape: RoundedRectangleBorder(
-                        borderRadius: BorderRadius.circular(10),
+              LayoutBuilder(
+                builder: (context, constraints) {
+                  final horizontalPadding = (constraints.maxWidth < 300) 
+                      ? 15.0 
+                      : (constraints.maxWidth < 400) 
+                          ? 20.0 
+                          : 30.0;
+
+                  return Row(
+                    mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+                    children: [
+                      Flexible(
+                        child: SizedBox(
+                          width: constraints.maxWidth * 0.4,
+                          child: ElevatedButton(
+                            style: ElevatedButton.styleFrom(
+                              backgroundColor: AppColors.primary,
+                              padding: EdgeInsets.symmetric(
+                                horizontal: horizontalPadding,
+                                vertical: 12,
+                              ),
+                              shape: RoundedRectangleBorder(
+                                borderRadius: BorderRadius.circular(10),
+                              ),
+                            ),
+                            onPressed: () {
+                              useGetBack ? Get.back() : Navigator.pop(dialogContext);
+                            },
+                            child: FittedBox(
+                              fit: BoxFit.scaleDown,
+                              child: Text(
+                                'Batalkan',
+                                style: TextStyle(color: Colors.white),
+                              ),
+                            ),
+                          ),
+                        ),
                       ),
-                    ),
-                    onPressed: () {
-                      useGetBack ? Get.back() : Navigator.pop(dialogContext);
-                    },
-                    child: Text('Batalkan', style: TextStyle(color: Colors.white)),
-                  ),
-                  ElevatedButton(
-                    style: ElevatedButton.styleFrom(
-                      backgroundColor: Colors.white,
-                      padding: EdgeInsets.symmetric(horizontal: 30, vertical: 12),
-                      shape: RoundedRectangleBorder(
-                          borderRadius: BorderRadius.circular(10),
-                          side: BorderSide(color: AppColors.primary, width: 1)),
-                    ),
-                    onPressed: () => controller.logOut(),
-                    child: Text('Lanjutkan', style: TextStyle(color: AppColors.primary)),
-                  ),
-                ],
+                      SizedBox(width: 8),
+                      Flexible(
+                        child: SizedBox(
+                          width: constraints.maxWidth * 0.4,
+                          child: ElevatedButton(
+                            style: ElevatedButton.styleFrom(
+                              backgroundColor: Colors.white,
+                              padding: EdgeInsets.symmetric(
+                                horizontal: horizontalPadding,
+                                vertical: 12,
+                              ),
+                              shape: RoundedRectangleBorder(
+                                borderRadius: BorderRadius.circular(10),
+                                side: BorderSide(color: AppColors.primary, width: 1),
+                              ),
+                            ),
+                            onPressed: () => controller.logOut(),
+                            child: FittedBox(
+                              fit: BoxFit.scaleDown,
+                              child: Text(
+                                'Lanjutkan',
+                                style: TextStyle(color: AppColors.primary),
+                              ),
+                            ),
+                          ),
+                        ),
+                      ),
+                    ],
+                  );
+                },
               ),
             ],
           ),
