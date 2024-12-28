@@ -4,6 +4,7 @@ import 'package:cetapil_mobile/utils/image_upload.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:get/get.dart';
+import 'package:intl/intl.dart';
 import '../../controller/selling/selling_controller.dart';
 import '../../controller/selling/tambah_produk_selling_controller.dart';
 import '../../widget/back_button.dart';
@@ -51,16 +52,9 @@ class TambahSelling extends GetView<SellingController> {
                             child: Column(
                               crossAxisAlignment: CrossAxisAlignment.start,
                               children: [
-                                ModernTextField(
-                                  title: "Nama Outlet",
-                                  controller: controller.outletName.value,
-                                ),
-                                CategoryDropdown<SellingController>(
+                                OutletSearchDropdown(
                                   title: "Nama Outlet",
                                   controller: controller,
-                                  selectedCategoryGetter: (controller) =>
-                                  controller.selectedCategory,
-                                  categoriesGetter: (controller) => controller.categories,
                                 ),
                                 CategoryDropdown<SellingController>(
                                   title: "Kategori Outlet",
@@ -101,6 +95,8 @@ class TambahSelling extends GetView<SellingController> {
                                     ),
                                   ),
                                 ),
+                                SizedBox(height: 20),
+                                Obx(() => ProductSummaryCard(draftItems: controller.draftItems)),
                                 SizedBox(height: 20),
                                 Obx(() {
                                   if (controller.draftItems.isEmpty) {
@@ -164,10 +160,8 @@ class TambahSelling extends GetView<SellingController> {
                                               for (var item in items) {
                                                 final skuId = item['id'].toString();
                                                 prodController.productValues[skuId] = {
-                                                  'stock': item['stock'].toString(),
-                                                  'selling': item['selling'].toString(),
-                                                  'balance': item['balance'].toString(),
-                                                  'price': item['price'].toString(),
+                                                  'qty': item['qty'].toString(),
+                                                  'harga': item['harga'].toString(),
                                                 };
                                               }
 
@@ -441,6 +435,7 @@ class CollapsibleCategoryGroup extends StatefulWidget {
 
 class _CollapsibleCategoryGroupState extends State<CollapsibleCategoryGroup> {
   bool isExpanded = false;
+  final formatter = NumberFormat.currency(locale: 'id_ID', symbol: "Rp ", decimalDigits: 0);
 
   @override
   Widget build(BuildContext context) {
@@ -513,18 +508,13 @@ class _CollapsibleCategoryGroupState extends State<CollapsibleCategoryGroup> {
               children: widget.items.map((item) {
                 return SumAmountProduct(
                   productName: item['sku'] ?? '',
-                  stockController: TextEditingController(
-                    text: item['stock'].toString(),
+                  qtyController: TextEditingController(
+                    text: item['qty'].toString(),
                   ),
-                  sellingController: TextEditingController(
-                    text: item['selling'].toString(),
+                  hargaController: TextEditingController(
+                    text: formatter.format(item['harga']),
                   ),
-                  balanceController: TextEditingController(
-                    text: item['balance'].toString(),
-                  ),
-                  priceController: TextEditingController(
-                    text: item['price'].toString(),
-                  ),
+                  totalPrice: item['qty'] * item['harga'],
                   isReadOnly: true,
                   itemData: item,
                   onDelete: () {},
@@ -537,28 +527,117 @@ class _CollapsibleCategoryGroupState extends State<CollapsibleCategoryGroup> {
   }
 }
 
+class ProductSummaryCard extends StatelessWidget {
+  final List<Map<String, dynamic>> draftItems;
+
+  const ProductSummaryCard({
+    Key? key,
+    required this.draftItems,
+  }) : super(key: key);
+
+  @override
+  Widget build(BuildContext context) {
+    final formatter = NumberFormat.currency(locale: 'id_ID', symbol: "Rp ", decimalDigits: 0);
+    int totalQty = 0;
+    double totalPrice = 0.0;
+
+    // Calculate totals from draft items
+    for (var item in draftItems) {
+      totalQty += (item['qty'] as num).toInt();
+      totalPrice += (item['qty'] as num) * (item['harga'] as num);
+    }
+
+    return Container(
+      margin: EdgeInsets.symmetric(vertical: 10),
+      padding: EdgeInsets.all(16),
+      decoration: BoxDecoration(
+        color: Color(0xFFEDF8FF),
+        borderRadius: BorderRadius.circular(8),
+        border: Border.all(
+          color: Color(0xFF64B5F6),
+          width: 1,
+        ),
+        boxShadow: [
+          BoxShadow(
+            color: Colors.grey.withOpacity(0.1),
+            spreadRadius: 1,
+            blurRadius: 3,
+            offset: Offset(0, 2),
+          ),
+        ],
+      ),
+      child: Row(
+        mainAxisAlignment: MainAxisAlignment.spaceBetween,
+        children: [
+          Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Text(
+                'Total Quantity',
+                style: TextStyle(
+                  fontSize: 12,
+                  color: Colors.black54,
+                ),
+              ),
+              SizedBox(height: 4),
+              Text(
+                totalQty.toString(),
+                style: TextStyle(
+                  fontSize: 16,
+                  fontWeight: FontWeight.bold,
+                  color: Color(0xFF0077BD),
+                ),
+              ),
+            ],
+          ),
+          Column(
+            crossAxisAlignment: CrossAxisAlignment.end,
+            children: [
+              Text(
+                'Total Price',
+                style: TextStyle(
+                  fontSize: 12,
+                  color: Colors.black54,
+                ),
+              ),
+              SizedBox(height: 4),
+              Text(
+                formatter.format(totalPrice),
+                style: TextStyle(
+                  fontSize: 16,
+                  fontWeight: FontWeight.bold,
+                  color: Color(0xFF0077BD),
+                ),
+              ),
+            ],
+          ),
+        ],
+      ),
+    );
+  }
+}
+
 class SumAmountProduct extends StatelessWidget {
   final String productName;
-  final TextEditingController stockController;
-  final TextEditingController sellingController;
-  final TextEditingController balanceController;
-  final TextEditingController priceController;
+  final TextEditingController qtyController;
+  final TextEditingController hargaController;
+  final double totalPrice;
   final bool isReadOnly;
   final VoidCallback onDelete;
   final Map<String, dynamic> itemData;
 
-  const SumAmountProduct({
+  SumAmountProduct({
     super.key,
     required this.productName,
-    required this.stockController,
-    required this.sellingController,
-    required this.balanceController,
-    required this.priceController,
+    required this.qtyController,
+    required this.hargaController,
+    required this.totalPrice,
     required this.onDelete,
     required this.itemData,
     this.isReadOnly = false,
   });
 
+  final formatter = NumberFormat.currency(locale: 'id_ID', symbol: "Rp ", decimalDigits: 0);
   @override
   Widget build(BuildContext context) {
     return Container(
@@ -603,15 +682,187 @@ class SumAmountProduct extends StatelessWidget {
           ),
           Padding(
             padding: EdgeInsets.all(16),
-            child: Row(
+            child: Column(
               children: [
-                _buildDetailField("Stock", stockController),
-                SizedBox(width: 12),
-                _buildDetailField("Selling", sellingController),
-                SizedBox(width: 12),
-                _buildDetailField("Balance", balanceController),
-                SizedBox(width: 12),
-                _buildDetailField("Price", priceController),
+                Row(
+                  children: [
+                    Expanded(
+                      flex: 2,
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          Text(
+                            'Qty',
+                            style: TextStyle(
+                              fontSize: 12,
+                              color: Colors.black54,
+                            ),
+                          ),
+                          SizedBox(height: 4),
+                          Container(
+                            margin: EdgeInsets.only(bottom: 10, top: 5),
+                            decoration: BoxDecoration(
+                              borderRadius: BorderRadius.circular(12),
+                              boxShadow: [
+                                BoxShadow(
+                                  color: Colors.grey.withOpacity(0.1),
+                                  spreadRadius: 1,
+                                  blurRadius: 3,
+                                  offset: const Offset(0, 2),
+                                ),
+                              ],
+                            ),
+                            child: TextField(
+                              controller: qtyController,
+                              keyboardType: TextInputType.number,
+                              readOnly: true,
+                              style: TextStyle(
+                                fontSize: 16,
+                                fontWeight: FontWeight.w500,
+                                color: Color(0xFF0077BD),
+                              ),
+                              inputFormatters: [
+                                FilteringTextInputFormatter.digitsOnly,
+                              ],
+                              textAlign: TextAlign.center,
+                              decoration: InputDecoration(
+                                hintStyle: TextStyle(
+                                  color: Colors.grey[400],
+                                  fontSize: 14,
+                                ),
+                                contentPadding: const EdgeInsets.symmetric(
+                                  horizontal: 3,
+                                  vertical: 3,
+                                ),
+                                border: OutlineInputBorder(
+                                  borderRadius: BorderRadius.circular(8),
+                                  borderSide: const BorderSide(
+                                    color: Color(0xFF64B5F6),
+                                    width: 2,
+                                  ),
+                                ),
+                                filled: true,
+                                fillColor: const Color(0xFFE8F3FF),
+                                focusedBorder: OutlineInputBorder(
+                                  borderRadius: BorderRadius.circular(8),
+                                  borderSide: const BorderSide(
+                                    color: Color(0xFF64B5F6),
+                                    width: 1,
+                                  ),
+                                ),
+                                enabledBorder: OutlineInputBorder(
+                                  borderRadius: BorderRadius.circular(8),
+                                  borderSide: const BorderSide(
+                                    color: Color(0xFF64B5F6),
+                                    width: 1,
+                                  ),
+                                ),
+                              ),
+                            ),
+                          ),
+                        ],
+                      ),
+                    ),
+                    SizedBox(width: 12),
+                    Expanded(
+                      flex: 5,
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          Text(
+                            'Harga',
+                            style: TextStyle(
+                              fontSize: 12,
+                              color: Colors.black54,
+                            ),
+                          ),
+                          SizedBox(height: 4),
+                          Container(
+                            margin: EdgeInsets.only(bottom: 10, top: 5),
+                            decoration: BoxDecoration(
+                              borderRadius: BorderRadius.circular(12),
+                              boxShadow: [
+                                BoxShadow(
+                                  color: Colors.grey.withOpacity(0.1),
+                                  spreadRadius: 1,
+                                  blurRadius: 3,
+                                  offset: const Offset(0, 2),
+                                ),
+                              ],
+                            ),
+                            child: TextField(
+                              controller: hargaController,
+                              keyboardType: TextInputType.number,
+                              readOnly: true,
+                              style: TextStyle(
+                                fontSize: 16,
+                                fontWeight: FontWeight.w500,
+                                color: Color(0xFF0077BD),
+                              ),
+                              textAlign: TextAlign.left,
+                              decoration: InputDecoration(
+                                hintStyle: TextStyle(
+                                  color: Colors.grey[400],
+                                  fontSize: 14,
+                                ),
+                                contentPadding: const EdgeInsets.symmetric(
+                                  horizontal: 12,
+                                  vertical: 12,
+                                ),
+                                border: OutlineInputBorder(
+                                  borderRadius: BorderRadius.circular(8),
+                                  borderSide: const BorderSide(
+                                    color: Color(0xFF64B5F6),
+                                    width: 2,
+                                  ),
+                                ),
+                                filled: true,
+                                fillColor: const Color(0xFFE8F3FF),
+                                focusedBorder: OutlineInputBorder(
+                                  borderRadius: BorderRadius.circular(8),
+                                  borderSide: const BorderSide(
+                                    color: Color(0xFF64B5F6),
+                                    width: 1,
+                                  ),
+                                ),
+                                enabledBorder: OutlineInputBorder(
+                                  borderRadius: BorderRadius.circular(8),
+                                  borderSide: const BorderSide(
+                                    color: Color(0xFF64B5F6),
+                                    width: 1,
+                                  ),
+                                ),
+                              ),
+                              inputFormatters: [
+                                FilteringTextInputFormatter.digitsOnly,
+                              ],
+                            ),
+                          ),
+                        ],
+                      ),
+                    ),
+                  ],
+                ),
+                Row(
+                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                  children: [
+                    Text(
+                      "Total Harga",
+                      style: TextStyle(
+                        fontSize: 14,
+                        color: Color(0xFF0077BD),
+                      ),
+                    ),
+                    Text(
+                      "${formatter.format(totalPrice)}",
+                      style: TextStyle(
+                        fontSize: 14,
+                        color: Color(0xFF0077BD),
+                        fontWeight: FontWeight.w500,
+                      ),
+                    ),
+                  ],
+                )
               ],
             ),
           ),
@@ -704,6 +955,207 @@ class NumberField extends StatelessWidget {
           ),
         ),
       ),
+    );
+  }
+}
+
+class OutletSearchDropdown extends StatefulWidget {
+  final String title;
+  final SellingController controller;
+
+  const OutletSearchDropdown({
+    Key? key,
+    required this.title,
+    required this.controller,
+  }) : super(key: key);
+
+  @override
+  State<OutletSearchDropdown> createState() => _OutletSearchDropdownState();
+}
+
+class _OutletSearchDropdownState extends State<OutletSearchDropdown> {
+  final LayerLink _layerLink = LayerLink();
+  final TextEditingController _searchController = TextEditingController();
+  bool _isOpen = false;
+  OverlayEntry? _overlayEntry;
+
+  @override
+  void dispose() {
+    _searchController.dispose();
+    _overlayEntry?.remove();
+    super.dispose();
+  }
+
+  void _toggleDropdown() {
+    setState(() {
+      if (_isOpen) {
+        _closeDropdown();
+      } else {
+        _openDropdown();
+      }
+    });
+  }
+
+  void _openDropdown() {
+    _isOpen = true;
+    _overlayEntry = _createOverlayEntry();
+    Overlay.of(context).insert(_overlayEntry!);
+  }
+
+  void _closeDropdown() {
+    _isOpen = false;
+    _overlayEntry?.remove();
+    _overlayEntry = null;
+    widget.controller.searchOutletQuery.value = '';
+    _searchController.clear();
+  }
+
+  OverlayEntry _createOverlayEntry() {
+    final renderBox = context.findRenderObject() as RenderBox;
+    final size = renderBox.size;
+
+    return OverlayEntry(
+      builder: (context) => Positioned(
+        width: size.width,
+        child: CompositedTransformFollower(
+          link: _layerLink,
+          showWhenUnlinked: false,
+          offset: Offset(0, size.height * .6),
+          child: Material(
+            elevation: 4,
+            borderRadius: BorderRadius.circular(8),
+            child: Container(
+              constraints: const BoxConstraints(
+                maxHeight: 300,
+              ),
+              decoration: BoxDecoration(
+                color: Colors.white,
+                borderRadius: BorderRadius.circular(8),
+              ),
+              child: Column(
+                mainAxisSize: MainAxisSize.min,
+                children: [
+                  Padding(
+                    padding: const EdgeInsets.all(8.0),
+                    child: TextField(
+                      controller: _searchController,
+                      decoration: InputDecoration(
+                        hintText: 'Search ${widget.title}...',
+                        prefixIcon: const Icon(Icons.search),
+                        border: OutlineInputBorder(
+                          borderRadius: BorderRadius.circular(8),
+                        ),
+                      ),
+                      onChanged: (value) {
+                        widget.controller.searchOutletQuery.value = value;
+                        _overlayEntry?.markNeedsBuild();
+                      },
+                    ),
+                  ),
+                  Flexible(
+                    child: Obx(() {
+                      final outlets = widget.controller.filteredOutlets;
+                      return ListView.builder(
+                        shrinkWrap: true,
+                        itemCount: outlets.length,
+                        itemBuilder: (context, index) {
+                          final outlet = outlets[index];
+                          return ListTile(
+                            title: Text(
+                              outlet.name ?? '',
+                              style: const TextStyle(
+                                fontSize: 14,
+                                color: Color(0xFF0077BD),
+                              ),
+                            ),
+                            subtitle: Text(
+                              outlet.address ?? '',
+                              style: const TextStyle(fontSize: 12),
+                              maxLines: 1,
+                              overflow: TextOverflow.ellipsis,
+                            ),
+                            selected: widget.controller.selectedOutlet.value?.id == outlet.id,
+                            onTap: () {
+                              widget.controller.setSelectedOutlet(outlet);
+                              _closeDropdown();
+                            },
+                          );
+                        },
+                      );
+                    }),
+                  ),
+                ],
+              ),
+            ),
+          ),
+        ),
+      ),
+    );
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        Text(
+          widget.title,
+          style: const TextStyle(fontSize: 13, fontWeight: FontWeight.w700),
+        ),
+        const SizedBox(height: 10),
+        CompositedTransformTarget(
+          link: _layerLink,
+          child: GestureDetector(
+            onTap: _toggleDropdown,
+            child: Container(
+              margin: const EdgeInsets.only(bottom: 10),
+              padding: const EdgeInsets.symmetric(
+                horizontal: 18,
+                vertical: 13,
+              ),
+              decoration: BoxDecoration(
+                color: const Color(0xFFE8F3FF),
+                borderRadius: BorderRadius.circular(8),
+                border: Border.all(
+                  color: const Color(0xFF64B5F6),
+                  width: 1,
+                ),
+                boxShadow: [
+                  BoxShadow(
+                    color: Colors.grey.withOpacity(0.1),
+                    spreadRadius: 1,
+                    blurRadius: 3,
+                    offset: const Offset(0, 2),
+                  ),
+                ],
+              ),
+              child: Row(
+                mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                children: [
+                  Expanded(
+                    child: Obx(() => Text(
+                          widget.controller.selectedOutletName.value.isEmpty
+                              ? widget.title
+                              : widget.controller.selectedOutletName.value,
+                          style: TextStyle(
+                            fontSize: 14,
+                            color: widget.controller.selectedOutletName.value.isEmpty
+                                ? Colors.grey[400]
+                                : const Color(0xFF0077BD),
+                          ),
+                          overflow: TextOverflow.ellipsis,
+                        )),
+                  ),
+                  Icon(
+                    _isOpen ? Icons.arrow_drop_up : Icons.arrow_drop_down,
+                    color: const Color(0xFF0077BD),
+                  ),
+                ],
+              ),
+            ),
+          ),
+        ),
+      ],
     );
   }
 }

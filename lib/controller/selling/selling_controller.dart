@@ -1,8 +1,10 @@
 import 'dart:io';
 import 'package:cetapil_mobile/controller/gps_controller.dart';
+import 'package:cetapil_mobile/controller/outlet/outlet_controller.dart';
 import 'package:cetapil_mobile/controller/support_data_controller.dart';
 import 'package:cetapil_mobile/database/selling_database.dart';
 import 'package:cetapil_mobile/model/list_selling_response.dart';
+import 'package:cetapil_mobile/model/outlet.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:uuid/uuid.dart';
@@ -13,6 +15,7 @@ class SellingController extends GetxController {
   // Dependencies
   final GPSLocationController _gpsController = Get.find<GPSLocationController>();
   final SupportDataController _supportDataController = Get.find<SupportDataController>();
+  final OutletController outletController = Get.find<OutletController>();
   final SellingDatabaseHelper _dbHelper = SellingDatabaseHelper.instance;
   final Uuid _uuid = Uuid();
 
@@ -38,10 +41,31 @@ class SellingController extends GetxController {
   // Category options
   List<String> get categories => ['GT', 'MT'];
 
+  Rx<Outlet?> selectedOutlet = Rx<Outlet?>(null);
+  Rx<String> selectedOutletName = ''.obs;
+  RxString searchOutletQuery = ''.obs;
+
   @override
   void onInit() {
     super.onInit();
     _initialize();
+  }
+
+  List<Outlet> get filteredOutlets {
+    if (searchOutletQuery.value.isEmpty) {
+      return outletController.filteredOutletsApproval;
+    }
+    return outletController.filteredOutletsApproval
+        .where((outlet) =>
+            outlet.name?.toLowerCase().contains(searchOutletQuery.value.toLowerCase()) ?? false)
+        .toList();
+  }
+
+  // Method to handle outlet selection
+  void setSelectedOutlet(Outlet outlet) {
+    selectedOutlet.value = outlet;
+    selectedOutletName.value = outlet.name ?? '';
+    outletName.value.text = outlet.name ?? ''; // Update the outletName TextEditingController
   }
 
   void setImageUploading(bool value) {

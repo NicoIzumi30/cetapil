@@ -46,10 +46,8 @@ class TambahProdukSellingController extends GetxController {
         }
 
         savedProductValues[categoryId]![item['id'].toString()] = {
-          'stock': item['stock'].toString(),
-          'selling': item['selling'].toString(),
-          'balance': item['balance'].toString(),
-          'price': item['price'].toString(),
+          'qty': item['qty'].toString(),
+          'harga': item['harga'].toString(),
         };
       }
     }
@@ -78,10 +76,8 @@ class TambahProdukSellingController extends GetxController {
             for (var item in matchingDraftItems) {
               final skuId = item['id'].toString();
               productValues[skuId] = {
-                'stock': item['stock'].toString(),
-                'selling': item['selling'].toString(),
-                'balance': item['balance'].toString(),
-                'price': item['price'].toString(),
+                'qty': item['qty'].toString(),
+                'harga': item['harga'].toString(),
               };
             }
           } else {
@@ -97,10 +93,8 @@ class TambahProdukSellingController extends GetxController {
               for (var product in products) {
                 final skuId = product['id'].toString();
                 productValues[skuId] = {
-                  'stock': '0',
-                  'selling': '0',
-                  'balance': '0',
-                  'price': '0',
+                  'qty': '0',
+                  'harga': '0',
                 };
               }
             }
@@ -126,10 +120,8 @@ class TambahProdukSellingController extends GetxController {
       final skuId = sku['id'].toString();
       final values = productValues[skuId] ??
           {
-            'stock': '0',
-            'selling': '0',
-            'balance': '0',
-            'price': '0',
+            'qty': '0',
+            'harga': '0',
           };
 
       updatedItems.add({
@@ -137,10 +129,8 @@ class TambahProdukSellingController extends GetxController {
         'product_id': sku['id'],
         'category': sku['category']['name'],
         'sku': sku['sku'],
-        'stock': int.tryParse(values['stock'] ?? '0') ?? 0,
-        'selling': int.tryParse(values['selling'] ?? '0') ?? 0,
-        'balance': int.tryParse(values['balance'] ?? '0') ?? 0,
-        'price': int.tryParse(values['price'] ?? '0') ?? 0,
+        'qty': int.tryParse(values['qty'] ?? '0') ?? 0,
+        'harga': sku['price'] ?? 0,
       });
     }
 
