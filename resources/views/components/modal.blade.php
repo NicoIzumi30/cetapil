@@ -42,7 +42,6 @@
         function openModal(modalId) {
             const modal = document.getElementById(modalId);
             modal.classList.remove('hidden');
-            document.body.style.overflow = 'hidden';
 
             // Close on escape key
             document.addEventListener('keydown', function(e) {
@@ -60,7 +59,6 @@
         function closeModal(modalId) {
             const modal = document.getElementById(modalId);
             modal.classList.add('hidden');
-            document.body.style.overflow = 'auto';
         }
     </script>
 @endonce

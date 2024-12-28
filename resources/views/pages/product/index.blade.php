@@ -297,7 +297,22 @@
                     </x-slot:title>
                     <form id="createPowerSkuForm" class="grid grid-cols-2 gap-6">
                         @csrf
-                        <div>
+						<div>
+                            <label for="select-input-survey-data" class="!text-black">Kategori Survey</label>
+                            <div>
+                                <select id="select-input-survey-data" name="survey_id"
+                                    class="w-full form-control">
+                                    <option value="" selected disabled>-- Pilih Category Survey --</option>
+                                        <option value="power-sku">
+                                            Power SKU
+                                        </option>
+                                        <option value="harga-kompetitor">
+                                            Harga Kompetitor
+                                        </option>
+                                </select>
+                            </div>
+                        </div>
+						<div id="product-category-container" class="hidden">
                             <label for="power-sku-product-categories" class="!text-black">Kategori Produk</label>
                             <div>
                                 <select id="power-sku-product-categories" name="power-sku-category_id"
@@ -312,12 +327,12 @@
                                 <span id="power-sku-product-category_id-error" class="text-red-500 text-xs hidden"></span>
                             </div>
                         </div>
-                        <div>
-                            <label for="power-sku" class="!text-black">Power SKU & Competitor</label>
+                        <div id="power-sku-container" class="hidden">
+                            <label for="power-sku" class="!text-black">Power SKU</label>
                             <div>
                                 <select id="power-sku" name="power-sku"
                                     class="w-full form-control @error('power-sku') is-invalid @enderror">
-                                    <option value="" selected disabled>-- Pilih Power SKU & Competitor --</option>
+                                    <option value="" selected disabled>-- Pilih Power SKU --</option>
                                     @foreach ($products as $product)
                                         <option value="{{ $product->id }}">{{ $product->sku }}</option>
                                     @endforeach
@@ -1071,16 +1086,12 @@
                 // Pre-initialize select2 with caching
                 $('#power-sku-product-categories, #edit-power-sku-product-categories').select2({
                     placeholder: '-- Pilih Category Product --',
-                    allowClear: true,
                     width: '100%'
                 });
 
-                $('#power-sku, #edit-power-sku').select2({
-                    dropdownParent: $('#edit-power-sku').closest('.modal-content'),
-                    dropdownPosition: 'below',
-                    width: '100%',
-                    dropdownCssClass: 'select2-dropdown-below' // Tambahkan class kustom
-                });
+                $('#power-sku, #edit-power-sku, #select-input-survey-data').select2({
+					minimumResultsForSearch: Infinity
+				});
 
                 // Handle category change for add modal
                 $('#power-sku-product-categories').on('change', function() {
@@ -1151,8 +1162,22 @@
                     }
                 });
             }
-        });
 
+			$('#select-input-survey-data').change(function(e) {
+				if(e.target.value == 'harga-kompetitor') {
+					$('#product-category-container').removeClass('hidden');
+					$('#product-category-container').addClass('block');
+					$('#power-sku-container').addClass('hidden');
+				}
+				if(e.target.value == 'power-sku') {
+					$('#power-sku-container').removeClass('hidden');
+					$('#power-sku-container').addClass('block');
+					$('#product-category-container').addClass('hidden');
+				}
+			})
+
+			initializePowerSkuComponents()
+        });
 
         // Create Power SKU
         $('#savePowerSkuBtn').click(function(e) {
