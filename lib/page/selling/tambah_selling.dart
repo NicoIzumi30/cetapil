@@ -56,6 +56,13 @@ class TambahSelling extends GetView<SellingController> {
                                   controller: controller.outletName.value,
                                 ),
                                 CategoryDropdown<SellingController>(
+                                  title: "Nama Outlet",
+                                  controller: controller,
+                                  selectedCategoryGetter: (controller) =>
+                                  controller.selectedCategory,
+                                  categoriesGetter: (controller) => controller.categories,
+                                ),
+                                CategoryDropdown<SellingController>(
                                   title: "Kategori Outlet",
                                   controller: controller,
                                   selectedCategoryGetter: (controller) =>

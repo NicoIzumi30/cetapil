@@ -116,13 +116,11 @@ class TambahVisibilityController extends GetxController {
     return true;
   }
 
-  void  savePrimaryVisibility(String id) {
+  void savePrimaryVisibility(String id) {
     if (!validatePrimaryForm()) return;
     var id_part = id.split('-'); /// (primary, core , 1)
      print(otherVisualController.value.text);
-    final data = {
-      // 'id': visibility?.id ?? DateTime.now().toString(),
-      'id': id,
+    final data = {'id': id,
       'category': id_part[1].toUpperCase(), /// (CORE)
       'position': id_part[2], /// (1)
       'posm_type_id': posmTypeId.value,
@@ -203,7 +201,6 @@ class TambahVisibilityController extends GetxController {
     if (!validateSecondaryForm()) return;
     var id_part = id.split('-'); /// (secondaru, core , 1)
     final data = {
-      // 'id': visibility?.id ?? DateTime.now().toString(),
       'id': id,
       'category': id_part[1].toUpperCase(), /// (CORE)
       'position': id_part[2], /// (1)
@@ -211,8 +208,6 @@ class TambahVisibilityController extends GetxController {
       'display_type': tipeDisplay.value.text,
       'display_image': displayImages.value,
     };
-    print("asdasd $data");
-    print("asdasd ${data['display_image']}");
 
     activityController.addSecondaryVisibilityItem(data);
     clearSecondaryForm();

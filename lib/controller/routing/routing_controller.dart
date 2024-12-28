@@ -220,6 +220,7 @@ class RoutingController extends GetxController {
         }
 
         if (response.status != "OK") {
+          // _handleError('You still have an activity that has not checked out yet');
           throw 'Gagal melakukan check in';
         }
 
@@ -253,7 +254,8 @@ class RoutingController extends GetxController {
       if (Get.context != null && Get.context!.mounted) {
         CustomAlerts.dismissLoading();
       }
-      _handleError('Gagal melakukan check in: $e');
+      _handleError('You still have an activity that has not checked out yet');
+      // _handleError('Gagal melakukan check in: $e');
     }
   }
 

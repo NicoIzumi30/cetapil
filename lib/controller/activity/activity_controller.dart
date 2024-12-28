@@ -5,11 +5,13 @@ import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 
 import '../../api/api.dart';
+import '../../database/activity_database.dart';
 import '../../model/list_activity_response.dart' as Activity;
 
 class ActivityController extends GetxController {
   RxList<Activity.Data> activity = <Activity.Data>[].obs;
   final db = DatabaseHelper.instance;
+  final dbActivity = ActivityDatabaseHelper.instance;
   RxString searchQuery = ''.obs;
   final selectedTab = 0.obs;
   var isLoading = false.obs;
@@ -99,8 +101,7 @@ class ActivityController extends GetxController {
         }
 
         // Get local draft IDs if you're still handling drafts
-        final localDraftIds = await db.getDraftActivityIds();
-
+        final localDraftIds = await dbActivity.getDraftActivityIds();
         // Update any activities that have local drafts
         for (String id in localDraftIds) {
           await db.updateSalesActivityStatus(id);

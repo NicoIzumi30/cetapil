@@ -55,6 +55,7 @@ class ActivityDatabaseHelper {
         id TEXT PRIMARY KEY,
         sales_activity_id TEXT,
         product_id TEXT, 
+        category TEXT,
         availability_exist TEXT,
         stock_on_hand TEXT,
         stock_on_inventory TEXT,
@@ -67,8 +68,9 @@ class ActivityDatabaseHelper {
     await db.execute('''
       CREATE TABLE visibility_primary (
         id TEXT PRIMARY KEY,
-        visibility_id TEXT,
         sales_activity_id TEXT,
+        category TEXT,
+        position TEXT,
         posm_type TEXT,
         visual_type TEXT,
         condition TEXT,
@@ -82,8 +84,9 @@ class ActivityDatabaseHelper {
     await db.execute('''
       CREATE TABLE visibility_secondary (
         id TEXT PRIMARY KEY,
-        visibility_id TEXT,
         sales_activity_id TEXT,
+        category TEXT,
+        position TEXT,
         secondary_exist TEXT,
         display_type TEXT,
         display_image TEXT,
@@ -95,8 +98,8 @@ class ActivityDatabaseHelper {
     await db.execute('''
       CREATE TABLE survey (
         id TEXT PRIMARY KEY,
-        survey_id TEXT,
         sales_activity_id TEXT,
+        survey_id TEXT,
         answer TEXT,
         FOREIGN KEY (sales_activity_id) REFERENCES sales_activity (id)
       )
@@ -106,11 +109,11 @@ class ActivityDatabaseHelper {
     await db.execute('''
       CREATE TABLE orders (
         id TEXT PRIMARY KEY,
-        product_id TEXT,
         sales_activity_id TEXT,
+        product_id TEXT,
+        category TEXT,
         jumlah TEXT,
         harga TEXT,
-        total_harga TEXT,
         FOREIGN KEY (sales_activity_id) REFERENCES sales_activity (id)
       )
     ''');
@@ -130,7 +133,8 @@ class ActivityDatabaseHelper {
   Future<void>  insertFullSalesActivity({
     required Map<String, dynamic> data,
     List<Map<String, dynamic>>? availabilityItems,
-    List<Map<String, dynamic>>? visibilityItems,
+    List<Map<String, dynamic>>? visibilityPrimaryItems,
+    List<Map<String, dynamic>>? visibilitySecondaryItems,
     List<Map<String, dynamic>>? surveyItems,
     List<Map<String, dynamic>>? orderItems,
   }) async {
@@ -162,24 +166,44 @@ class ActivityDatabaseHelper {
           await txn.insert('availability', {
             'id': uuid.v4(),
             'product_id': item['id'].toString(),
-            'available_stock': item['stock'].toString(),
-            'average_stock': item['av3m'] ?? "1",
-            'ideal_stock': item['recommend'].toString(),
+            'category': item['category'].toString(),
+            'availability_exist': item['availability_toggle'].toString(),
+            'stock_on_hand': item['stock_on_hand'].toString(),
+            'stock_on_inventory': item['stock_on_inventory'].toString(),
+            'av3m': item['av3m'].toString(),
             'sales_activity_id': data['sales_activity_id'],
           });
         }
       }
 
       // Insert visibility items
-      if (visibilityItems != null) {
-        for (var item in visibilityItems) {
-          await txn.insert('visibility', {
+      if (visibilityPrimaryItems != null) {
+        for (var item in visibilityPrimaryItems) {
+          await txn.insert('visibility_primary', {
             'id': uuid.v4(),
-            'visibility_id': item['id'].toString(),
-            'condition': item['condition'].toString().toUpperCase(),
-            'image1': item['image1'].path,
-            'image2': item['image2'].path,
             'sales_activity_id': data['sales_activity_id'],
+            'category': item['category'].toString(),
+            'position': item['position'].toString(),
+            'posm_type_id': item['posm_type_id'].toString(),
+            'visual_type_id': item['visual_type_id'].toString(),
+            'condition': item['condition'].toString().toUpperCase(),
+            'shelf_width': item['shelf_width'].toString(),
+            'shelving': item['shelving'].toString(),
+            'image_visibility': item['image_visibility'].path,
+          });
+        }
+      }
+
+      if (visibilitySecondaryItems != null) {
+        for (var item in visibilitySecondaryItems) {
+          await txn.insert('visibility_secondary', {
+            'id': uuid.v4(),
+            'sales_activity_id': data['sales_activity_id'],
+            'category': item['category'].toString(),
+            'position': item['position'].toString(),
+            'secondary_exist': item['secondary_exist'].toString(),
+            'display_type': item['display_type'].toString(),
+            'display_image': item['display_image'].path,
           });
         }
       }
@@ -202,8 +226,9 @@ class ActivityDatabaseHelper {
           await txn.insert('orders', {
             'id': uuid.v4(),
             'product_id': item['id'],
-            'jumlah': item['jumlah'],
-            'harga': item['harga'],
+            'category': item['category'],
+            'jumlah': item['jumlah'].toString(),
+            'harga': item['harga'].toString(),
             'sales_activity_id': data['sales_activity_id'],
           });
         }
@@ -232,8 +257,14 @@ class ActivityDatabaseHelper {
         whereArgs: [salesActivityId],
       );
 
-      final List<Map<String, dynamic>> visibility = await db.query(
-        'visibility',
+      final List<Map<String, dynamic>> visibility_primary = await db.query(
+        'visibility_primary',
+        where: 'sales_activity_id = ?',
+        whereArgs: [salesActivityId],
+      );
+
+      final List<Map<String, dynamic>> visibility_secondary = await db.query(
+        'visibility_secondary',
         where: 'sales_activity_id = ?',
         whereArgs: [salesActivityId],
       );
@@ -254,7 +285,8 @@ class ActivityDatabaseHelper {
       return {
         ...activity.first,
         'availabilityItems': availability,
-        'visibilityItems': visibility,
+        'visibilityPrimaryItems': visibility_primary,
+        'visibilitySecondaryItems': visibility_secondary,
         'surveyItems': survey,
         'orderItems': orders,
       };
@@ -264,32 +296,19 @@ class ActivityDatabaseHelper {
     }
   }
 
-  // Only Get List Data SalesActivitu
-  Future<List<Map<String, dynamic>>> getSalesActivities() async {
+
+  Future<List<String>> getDraftActivityIds() async {
     final db = await database;
-    try {
-      return await db.query('sales_activity');
-    } catch (e) {
-      print('Error getting sales activities: $e');
-      return [];
-    }
+
+    final List<Map<String, dynamic>> results = await db.query(
+      'sales_activity',
+      columns: ['id'],
+      where: 'status = ?',
+      whereArgs: ['DRAFTED'],
+    );
+
+    return results.map((result) => result['id'] as String).toList();
   }
-
-  Future<List<String>> getSalesActivityIds() async {
-    final db = await database;
-    try {
-      final List<Map<String, dynamic>> maps = await db.query(
-        'sales_activity',
-        columns: ['id'], // Only select the id column
-      );
-
-      return maps.map((map) => map['id'] as String).toList();
-    } catch (e) {
-      print('Error getting sales activity IDs: $e');
-      return [];
-    }
-  }
-
 
 // Update Function
   Future<void> updateSalesActivity({
