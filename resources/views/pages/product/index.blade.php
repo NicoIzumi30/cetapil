@@ -277,23 +277,23 @@
         </x-card>
         {{-- Availability End --}}
 
-        {{-- Power SKU Hand --}}
+        {{-- Power SKU & Competitor Hand --}}
         <x-card>
             <x-slot:cardTitle>
-                Power SKU
+                Power SKU & Competitor
             </x-slot:cardTitle>
 
-            {{-- Power SKU Action --}}
+            {{-- Power SKU & Competitor Action --}}
             <x-slot:cardAction>
-                <x-input.search class="border-0" placeholder="Cari data power SKU..."
+                <x-input.search class="border-0" placeholder="Cari data Power SKU & Competitor..."
                     id="power-sku-search"></x-input.search>
                 <x-button.info onclick="openModal('tambah-power-sku')">
-                    Tambah Power SKU
+                    Tambah Power SKU & Competitor
                 </x-button.info>
-                {{-- Tambah Power SKU Modal --}}
+                {{-- Tambah Power SKU & Competitor Modal --}}
                 <x-modal id="tambah-power-sku">
                     <x-slot:title>
-                        Tambah Power SKU
+                        Tambah Power SKU & Competitor
                     </x-slot:title>
                     <form id="createPowerSkuForm" class="grid grid-cols-2 gap-6">
                         @csrf
@@ -313,14 +313,14 @@
                             </div>
                         </div>
                         <div>
-                            <label for="power-sku" class="!text-black">Power SKU</label>
+                            <label for="power-sku" class="!text-black">Power SKU & Competitor</label>
                             <div>
-                                <select id="power-sku" name="power-sku" 
+                                <select id="power-sku" name="power-sku"
                                     class="w-full form-control @error('power-sku') is-invalid @enderror">
-                                    <option value="" selected disabled>-- Pilih Power SKU --</option>
-                                        @foreach ($products as $product)
-                                            <option value="{{ $product->id }}">{{ $product->sku }}</option>
-                                        @endforeach
+                                    <option value="" selected disabled>-- Pilih Power SKU & Competitor --</option>
+                                    @foreach ($products as $product)
+                                        <option value="{{ $product->id }}">{{ $product->sku }}</option>
+                                    @endforeach
                                 </select>
                                 <span id="power-sku-error" class="text-red-500 text-xs hidden"></span>
                             </div>
@@ -336,11 +336,11 @@
                         </x-slot:footer>
                     </form>
                 </x-modal>
-                {{-- Tambah Power SKU End --}}
+                {{-- Tambah Power SKU & Competitor End --}}
             </x-slot:cardAction>
-            {{-- Power SKU Action End --}}
+            {{-- Power SKU & Competitor Action End --}}
 
-            {{-- Tabel Power SKU --}}
+            {{-- Tabel Power SKU & Competitor --}}
             <table id="power-sku-table" class="table">
                 <thead>
                     <tr>
@@ -352,7 +352,7 @@
                         </th>
                         <th scope="col" class="text-center">
                             <a class="table-head">
-                                {{ __('Power SKU') }}
+                                {{ __('Power SKU & Competitor') }}
                                 <x-icons.sort />
                             </a>
                         </th>
@@ -364,11 +364,11 @@
                     </tr>
                 </thead>
             </table>
-            {{-- Tabel Power SKU End --}}
+            {{-- Tabel Power SKU & Competitor End --}}
 
             <x-modal id="edit-power-sku">
                 <x-slot:title>
-                    Edit Power SKU
+                    Edit Power SKU & Competitor
                 </x-slot:title>
                 <form id="editPowerSkuForm" class="grid grid-cols-2 gap-6">
                     @csrf
@@ -379,7 +379,7 @@
                                 class="w-full form-control">
                                 <option value="" disabled>-- Pilih Category Product --</option>
                                 @foreach ($categories as $category)
-                                    <option value="{{ $category->id }}" 
+                                    <option value="{{ $category->id }}"
                                         {{ isset($productToEdit) && $productToEdit->category_id == $category->id ? 'selected' : '' }}>
                                         {{ $category->name }}
                                     </option>
@@ -389,12 +389,12 @@
                         </div>
                     </div>
                     <div>
-                        <label for="edit-power-sku" class="!text-black">Power SKU</label>
+                        <label for="edit-power-sku" class="!text-black">Power SKU & Competitor</label>
                         <div>
                             <select id="edit-power-sku" name="edit-power-sku" class="w-full form-control">
-                                <option value="" disabled>-- Pilih Power SKU --</option>
+                                <option value="" disabled>-- Pilih Power SKU & Competitor --</option>
                                 @foreach ($products as $product)
-                                    <option value="{{ $product->id }}" 
+                                    <option value="{{ $product->id }}"
                                         {{ isset($productToEdit) && $productToEdit->id == $product->id ? 'selected' : '' }}>
                                         {{ $product->sku }}
                                     </option>
@@ -410,9 +410,9 @@
                         </x-button.primary>
                     </x-slot:footer>
                 </form>
-            </x-modal>            
+            </x-modal>
         </x-card>
-        {{-- Power SKU End --}}
+        {{-- Power SKU & Competitor End --}}
     </main>
 @endsection
 
@@ -978,33 +978,36 @@
             // Handle view action
             function getPowerSkuData(powerSkuId) {
                 resetFormErrors();
-                
+
                 $.ajax({
                     url: `/products/power-skus/${powerSkuId}/edit`,
                     type: 'GET',
                     success: function(response) {
                         const categoryId = response.product.category_id;
                         const productId = response.product.id;
-                        
+
                         $('#edit-power-sku-product-categories')
                             .val(categoryId)
                             .trigger('change');
-                        
+
                         $.ajax({
                             url: `/products/get-products-by-category/${categoryId}`,
                             type: 'GET',
                             success: function(products) {
-                                let options = '<option value="" disabled>-- Pilih Power SKU --</option>';
+                                let options =
+                                    '<option value="" disabled>-- Pilih Power SKU --</option>';
                                 products.forEach(product => {
-                                    const selected = product.id === productId ? 'selected' : '';
-                                    options += `<option value="${product.id}" ${selected}>${product.sku}</option>`;
+                                    const selected = product.id === productId ?
+                                        'selected' : '';
+                                    options +=
+                                        `<option value="${product.id}" ${selected}>${product.sku}</option>`;
                                 });
-                                
+
                                 $('#edit-power-sku')
                                     .html(options)
                                     .val(productId)
                                     .trigger('change');
-                                
+
                                 $('#editPowerSkuForm').data('id', response.id);
                             }
                         });
@@ -1016,7 +1019,7 @@
             }
             // Handle delete action
             $(document).on('click', '.delete-btn', function(e) {
-                e.preventDefault(); 
+                e.preventDefault();
                 const url = $(this).attr('href');
                 const name = $(this).data('name');
 
@@ -1063,128 +1066,138 @@
                 });
             }
 
-            
+
             function initializePowerSkuComponents() {
-    // Pre-initialize select2 with caching
-    $('#power-sku-product-categories, #edit-power-sku-product-categories').select2({
-        placeholder: '-- Pilih Category Product --',
-        allowClear: true,
-        width: '100%'
-    });
+                // Pre-initialize select2 with caching
+                $('#power-sku-product-categories, #edit-power-sku-product-categories').select2({
+                    placeholder: '-- Pilih Category Product --',
+                    allowClear: true,
+                    width: '100%'
+                });
 
-    $('#power-sku, #edit-power-sku').select2({
-    dropdownParent: $('#edit-power-sku').closest('.modal-content'),
-    dropdownPosition: 'below',
-    width: '100%',
-    dropdownCssClass: 'select2-dropdown-below' // Tambahkan class kustom
-});
+                $('#power-sku, #edit-power-sku').select2({
+                    dropdownParent: $('#edit-power-sku').closest('.modal-content'),
+                    dropdownPosition: 'below',
+                    width: '100%',
+                    dropdownCssClass: 'select2-dropdown-below' // Tambahkan class kustom
+                });
 
-    // Handle category change for add modal
-    $('#power-sku-product-categories').on('change', function() {
-        const categoryId = $(this).val();
-        if (categoryId) {
-            // Show loading in the SKU select
-            $('#power-sku').html('<option value="">Loading...</option>').prop('disabled', true);
-            
-            $.ajax({
-                url: `/products/get-products-by-category/${categoryId}`,
-                type: 'GET',
-                success: function(products) {
-                    let options = '<option value="" selected disabled>-- Pilih Power SKU --</option>';
-                    if (products && products.length > 0) {
-                        products.forEach(product => {
-                            options += `<option value="${product.id}">${product.sku}</option>`;
+                // Handle category change for add modal
+                $('#power-sku-product-categories').on('change', function() {
+                    const categoryId = $(this).val();
+                    if (categoryId) {
+                        // Show loading in the SKU select
+                        $('#power-sku').html('<option value="">Loading...</option>').prop('disabled', true);
+
+                        $.ajax({
+                            url: `/products/get-products-by-category/${categoryId}`,
+                            type: 'GET',
+                            success: function(products) {
+                                let options =
+                                    '<option value="" selected disabled>-- Pilih Power SKU --</option>';
+                                if (products && products.length > 0) {
+                                    products.forEach(product => {
+                                        options +=
+                                            `<option value="${product.id}">${product.sku}</option>`;
+                                    });
+                                }
+                                $('#power-sku')
+                                    .html(options)
+                                    .prop('disabled', false)
+                                    .trigger('change');
+                            },
+                            error: function() {
+                                toast('error', 'Gagal memuat daftar SKU', 200);
+                                $('#power-sku')
+                                    .html(
+                                        '<option value="" selected disabled>-- Pilih Power SKU --</option>'
+                                        )
+                                    .prop('disabled', false);
+                            }
                         });
                     }
-                    $('#power-sku')
-                        .html(options)
-                        .prop('disabled', false)
-                        .trigger('change');
+                });
+
+                // Handle category change for edit modal
+                $('#edit-power-sku-product-categories').on('change', function() {
+                    const categoryId = $(this).val();
+                    if (categoryId) {
+                        $('#edit-power-sku').html('<option value="">Loading...</option>').prop('disabled',
+                            true);
+
+                        $.ajax({
+                            url: `/products/get-products-by-category/${categoryId}`,
+                            type: 'GET',
+                            success: function(products) {
+                                let options =
+                                    '<option value="" disabled>-- Pilih Power SKU --</option>';
+                                products.forEach(product => {
+                                    options +=
+                                        `<option value="${product.id}">${product.sku}</option>`;
+                                });
+                                $('#edit-power-sku')
+                                    .html(options)
+                                    .prop('disabled', false);
+                            },
+                            error: function() {
+                                toast('error', 'Gagal memuat daftar SKU', 200);
+                                $('#edit-power-sku')
+                                    .html(
+                                        '<option value="" disabled>-- Pilih Power SKU --</option>'
+                                        )
+                                    .prop('disabled', false);
+                            }
+                        });
+                    }
+                });
+            }
+        });
+
+
+        // Create Power SKU
+        $('#savePowerSkuBtn').click(function(e) {
+            e.preventDefault();
+
+            // Show loading state
+            $('#savePowerSkuBtnText').addClass('hidden');
+            $('#savePowerSkuBtnLoading').removeClass('hidden');
+            $(this).prop('disabled', true);
+
+            const formData = {
+                'power-sku-category_id': $('#power-sku-product-categories').val(),
+                'power-sku': $('#power-sku').val(),
+                '_token': $('input[name="_token"]').val()
+            };
+
+            $.ajax({
+                type: 'POST',
+                url: '{{ route('products.power-skus.store') }}',
+                data: formData,
+                success: function(response) {
+                    toast('success', response.message, 200);
+                    // Refresh halaman setelah data berhasil disimpan
+                    setTimeout(() => {
+                        window.location.reload();
+                    }, 1000);
                 },
-                error: function() {
-                    toast('error', 'Gagal memuat daftar SKU', 200);
-                    $('#power-sku')
-                        .html('<option value="" selected disabled>-- Pilih Power SKU --</option>')
-                        .prop('disabled', false);
+                error: function(xhr) {
+                    $('#savePowerSkuBtnText').removeClass('hidden');
+                    $('#savePowerSkuBtnLoading').addClass('hidden');
+                    $('#savePowerSkuBtn').prop('disabled', false);
+
+                    if (xhr.status === 422) {
+                        const errors = xhr.responseJSON.errors;
+                        Object.keys(errors).forEach(function(key) {
+                            $(`#${key}-error`).text(errors[key][0]).removeClass('hidden');
+                            $(`[name="${key}"]`).addClass('border-red-500');
+                        });
+                    }
+
+                    toast('error', xhr.responseJSON.message || 'Terjadi kesalahan saat menyimpan data',
+                        200);
                 }
             });
-        }
-    });
-
-    // Handle category change for edit modal
-    $('#edit-power-sku-product-categories').on('change', function() {
-    const categoryId = $(this).val();
-    if (categoryId) {
-        $('#edit-power-sku').html('<option value="">Loading...</option>').prop('disabled', true);
-        
-        $.ajax({
-            url: `/products/get-products-by-category/${categoryId}`,
-            type: 'GET',
-            success: function(products) {
-                let options = '<option value="" disabled>-- Pilih Power SKU --</option>';
-                products.forEach(product => {
-                    options += `<option value="${product.id}">${product.sku}</option>`;
-                });
-                $('#edit-power-sku')
-                    .html(options)
-                    .prop('disabled', false);
-            },
-            error: function() {
-                toast('error', 'Gagal memuat daftar SKU', 200);
-                $('#edit-power-sku')
-                    .html('<option value="" disabled>-- Pilih Power SKU --</option>')
-                    .prop('disabled', false);
-            }
         });
-    }
-});
-}
-    });
-
-
-   // Create Power SKU
-    $('#savePowerSkuBtn').click(function(e) {
-        e.preventDefault();
-        
-        // Show loading state
-        $('#savePowerSkuBtnText').addClass('hidden');
-        $('#savePowerSkuBtnLoading').removeClass('hidden');
-        $(this).prop('disabled', true);
-
-        const formData = {
-            'power-sku-category_id': $('#power-sku-product-categories').val(),
-            'power-sku': $('#power-sku').val(),
-            '_token': $('input[name="_token"]').val()
-        };
-
-        $.ajax({
-            type: 'POST',
-            url: '{{ route("products.power-skus.store") }}',
-            data: formData,
-            success: function(response) {
-                toast('success', response.message, 200);
-                // Refresh halaman setelah data berhasil disimpan
-                setTimeout(() => {
-                    window.location.reload();
-                }, 1000);
-            },
-            error: function(xhr) {
-                $('#savePowerSkuBtnText').removeClass('hidden');
-                $('#savePowerSkuBtnLoading').addClass('hidden');
-                $('#savePowerSkuBtn').prop('disabled', false);
-
-                if (xhr.status === 422) {
-                    const errors = xhr.responseJSON.errors;
-                    Object.keys(errors).forEach(function(key) {
-                        $(`#${key}-error`).text(errors[key][0]).removeClass('hidden');
-                        $(`[name="${key}"]`).addClass('border-red-500');
-                    });
-                }
-
-                toast('error', xhr.responseJSON.message || 'Terjadi kesalahan saat menyimpan data', 200);
-            }
-        });
-    });
 
         // Helper function for loading state
         function toggleLoading(show, type) {
@@ -1225,61 +1238,62 @@
         // Edit Power SKU handler
         function initializePowerSkuEdit() {
 
-    // Handle form submission for editing Power SKU
-    $('#saveEditedPowerSkuBtn').click(function(e) {
-        e.preventDefault();
-        const id = $('#editPowerSkuForm').data('id');
-        
-        // Show loading state
-        $('#saveEditedPowerSkuBtnText').addClass('hidden');
-        $('#saveEditedPowerSkuBtnLoading').removeClass('hidden');
-        $(this).prop('disabled', true);
+            // Handle form submission for editing Power SKU
+            $('#saveEditedPowerSkuBtn').click(function(e) {
+                e.preventDefault();
+                const id = $('#editPowerSkuForm').data('id');
 
-        const formData = {
-            'power-sku-category_id': $('#edit-power-sku-product-categories').val(),
-            'power-sku': $('#edit-power-sku').val(),
-            '_token': $('meta[name="csrf-token"]').attr('content'),
-            '_method': 'PUT'
-        };
+                // Show loading state
+                $('#saveEditedPowerSkuBtnText').addClass('hidden');
+                $('#saveEditedPowerSkuBtnLoading').removeClass('hidden');
+                $(this).prop('disabled', true);
 
-        $.ajax({
-            url: `/products/power-skus/${id}`,
-            type: 'POST',
-            data: formData,
-            success: function(response) {
-                toast('success', response.message, 300);
-                closeModal('edit-power-sku');
-                // Refresh table
-                $('#power-sku-table').DataTable().ajax.reload();
-            },
-            error: function(xhr) {
-                // Reset loading state
-                $('#saveEditedPowerSkuBtnText').removeClass('hidden');
-                $('#saveEditedPowerSkuBtnLoading').addClass('hidden');
-                $('#saveEditedPowerSkuBtn').prop('disabled', false);
+                const formData = {
+                    'power-sku-category_id': $('#edit-power-sku-product-categories').val(),
+                    'power-sku': $('#edit-power-sku').val(),
+                    '_token': $('meta[name="csrf-token"]').attr('content'),
+                    '_method': 'PUT'
+                };
 
-                if (xhr.status === 422) {
-                    const errors = xhr.responseJSON.errors;
-                    Object.keys(errors).forEach(function(key) {
-                        $(`#edit-${key}-error`).text(errors[key][0]).removeClass('hidden');
-                        $(`[name="edit-${key}"]`).addClass('border-red-500');
-                    });
-                }
-                toast('error', xhr.responseJSON.message || 'Gagal memperbarui Power SKU', 200);
-            }
+                $.ajax({
+                    url: `/products/power-skus/${id}`,
+                    type: 'POST',
+                    data: formData,
+                    success: function(response) {
+                        toast('success', response.message, 300);
+                        closeModal('edit-power-sku');
+                        // Refresh table
+                        $('#power-sku-table').DataTable().ajax.reload();
+                    },
+                    error: function(xhr) {
+                        // Reset loading state
+                        $('#saveEditedPowerSkuBtnText').removeClass('hidden');
+                        $('#saveEditedPowerSkuBtnLoading').addClass('hidden');
+                        $('#saveEditedPowerSkuBtn').prop('disabled', false);
+
+                        if (xhr.status === 422) {
+                            const errors = xhr.responseJSON.errors;
+                            Object.keys(errors).forEach(function(key) {
+                                $(`#edit-${key}-error`).text(errors[key][0]).removeClass(
+                                    'hidden');
+                                $(`[name="edit-${key}"]`).addClass('border-red-500');
+                            });
+                        }
+                        toast('error', xhr.responseJSON.message || 'Gagal memperbarui Power SKU', 200);
+                    }
+                });
+            });
+        }
+
+
+        // Reset form errors
+        function resetFormErrors() {
+            $('.text-red-500').addClass('hidden');
+            $('input, select').removeClass('border-red-500');
+        }
+
+        $(document).ready(function() {
+            initializePowerSkuEdit();
         });
-    });
-}
-
-
-    // Reset form errors
-    function resetFormErrors() {
-        $('.text-red-500').addClass('hidden');
-        $('input, select').removeClass('border-red-500');
-    }
-
-    $(document).ready(function() {
-    initializePowerSkuEdit();
-});
     </script>
 @endpush
