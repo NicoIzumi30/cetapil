@@ -484,7 +484,7 @@
                             </div>
                         </div>
                         <div>
-                            <label for="edit-power-sku" class="!text-black">Power SKU & Competitor</label>
+                            <label for="edit-power-sku" class="!text-black">Power SKU</label>
                             <div>
                                 <select id="edit-power-sku" name="edit-power-sku" class="w-full form-control">
                                     <option value="" disabled>-- Pilih Power SKU & Competitor --</option>
