@@ -6,6 +6,7 @@ use App\Http\Controllers\Controller;
 use App\Http\Requests\PowerSku\CreatePowerSkuRequest;
 use App\Models\PowerSku;
 use App\Models\Product;
+use App\Models\Category;
 use Illuminate\Http\Request;
 use Yajra\DataTables\Facades\DataTables;
 use Illuminate\Support\Facades\Log;
@@ -17,15 +18,34 @@ class PowerSkuController extends Controller
     public function index()
     {
         $products = Product::with('category')->get();
-        return view('pages.products.index', compact('products'));
+        $categories = Category::all();
+        return view('pages.products.index', compact('products', 'categories'));
+    }
+
+    public function getProductsByCategory($category_id)
+    {
+        try {
+            $products = Product::where('category_id', $category_id)
+                ->whereNotIn('id', function($query) {
+                    $query->select('product_id')
+                          ->from('power_skus')
+                          ->whereNull('deleted_at');
+                })
+                ->select('id', 'sku')
+                ->get();
+            
+            return response()->json($products);
+        } catch (\Exception $e) {
+            return response()->json([
+                'message' => 'Gagal mengambil data produk: ' . $e->getMessage()
+            ], 500);
+        }
     }
 
     public function data(Request $request)
     {
-        // Define the base query with eager loading
         $query = PowerSku::with(['product.category']);
-
-        // Apply search filters if a search term is provided
+        
         if ($request->filled('search_term')) {
             $searchTerm = $request->search_term;
             $query->whereHas('product', function ($q) use ($searchTerm) {
@@ -35,50 +55,51 @@ class PowerSkuController extends Controller
             });
         }
             
-        // Calculate the total records after filtering
         $filteredRecords = (clone $query)->count();
-
-        // Fetch paginated results
         $result = $query->skip($request->start)
             ->take($request->length)
             ->get();
 
-        // Return the response in DataTables format
         return response()->json([
             'draw' => intval($request->draw),
-            'recordsTotal' => PowerSku::count(), // Total unfiltered records
-            'recordsFiltered' => $filteredRecords, // Total filtered records
-            'data' => $result->map(function ($item) {
+            'recordsTotal' => PowerSku::count(),
+            'recordsFiltered' => $filteredRecords,
+            'data' => $result->map(function ($powerSku) {
                 return [
-                    'category' => optional($item->product->category)->name ?? '-', // Handle null gracefully
-                    'sku' => $item->product->sku,
+                    'category' => optional($powerSku->product->category)->name ?? '-',
+                    'sku' => $powerSku->product->sku,
                     'actions' => view('pages.product.action-power-sku', [
-                        'id' => $item->id,
-                        'sku' => $item->sku
+                        'powerSku' => $powerSku // Pass entire model
                     ])->render(),
                 ];
             }),
         ]);
     }
 
-
     public function store(CreatePowerSkuRequest $request)
     {
         try {
             Log::info('PowerSku store request:', $request->all());
-
-            // Buat product baru dengan menambahkan price
-            $product = Product::create([
-                'category_id' => $request->input('power-sku-category_id'),
-                'sku' => $request->input('power-sku'),
-                'price' => 0
-            ]);
-
-            // Buat Power SKU dengan product_id
+    
+            // Find the existing product
+            $product = Product::findOrFail($request->input('power-sku'));
+    
+            // Validate that this product isn't already a power SKU
+            $existingPowerSku = PowerSku::where('product_id', $product->id)
+                ->whereNull('deleted_at')
+                ->first();
+                
+            if ($existingPowerSku) {
+                return response()->json([
+                    'message' => 'Produk ini sudah menjadi Power SKU'
+                ], 422);
+            }
+    
+            // Create Power SKU
             PowerSku::create([
                 'product_id' => $product->id
             ]);
-
+    
             return response()->json([
                 'message' => 'Power SKU berhasil ditambahkan'
             ], 201);
@@ -92,28 +113,38 @@ class PowerSkuController extends Controller
 
     public function edit(PowerSku $powerSku)
     {
+        $powerSku->load('product.category');
         return response()->json([
             'id' => $powerSku->id,
-            'product_id' => $powerSku->product_id,
-            'product' => $powerSku->product
+            'product' => [
+                'id' => $powerSku->product->id,
+                'sku' => $powerSku->product->sku,
+                'category_id' => $powerSku->product->category_id
+            ]
         ]);
+    
     }
 
     public function update(CreatePowerSkuRequest $request, PowerSku $powerSku)
     {
         try {
-            $product = Product::findOrFail($request->product_id);
-
-            $powerSku->update([
-                'product_id' => $product->id
+            $validated = $request->validate([
+                'power-sku' => 'required|exists:products,id',
+                'power-sku-category_id' => 'required|exists:categories,id'
             ]);
-
+    
+            $powerSku->update([
+                'product_id' => $request->input('power-sku')
+            ]);
+    
             return response()->json([
+                'status' => 'success',
                 'message' => 'Power SKU berhasil diperbarui'
             ]);
         } catch (\Exception $e) {
             return response()->json([
-                'message' => 'Gagal memperbarui Power SKU'
+                'status' => 'error',
+                'message' => 'Gagal memperbarui Power SKU: ' . $e->getMessage()
             ], 500);
         }
     }

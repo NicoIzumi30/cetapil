@@ -42,8 +42,8 @@
         </footer>
     </div>
     {{-- BG-Image --}}
-    <img class="fixed w-full top-0 left-0 pointer-events-none z-0 h-full"
-        src="{{ asset('/assets/images/dashboard-bg.webp') }}" alt="logo">
+    <img class="fixed w-full top-0 left-0 -z-[1] h-full"
+        src="{{ asset('/assets/images/dashboard-bg.webp') }}" alt="layout background">
     @stack('scripts')
     <script src="https://cdn.jsdelivr.net/npm/simple-notify@1.0.4/dist/simple-notify.min.js"></script>
 

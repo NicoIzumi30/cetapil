@@ -122,13 +122,15 @@ Route::middleware('auth')->group(function () {
         Route::get('/data-stock-on-hand', [ProductController::class, 'getDataStockOnHand'])->name('data-stock-on-hand');
         Route::get('/download-stock-on-hand', [ProductController::class, 'downloadStockOnHand'])
             ->name('download-stock-on-hand');
-            Route::prefix('power-skus')->name('power-skus.')->group(function() {
-                Route::get('/data', [PowerSkuController::class, 'data'])->name('data');
-                Route::post('/', [PowerSkuController::class, 'store'])->name('store');
-                Route::get('/{powerSku}/edit', [PowerSkuController::class, 'edit'])->name('edit');
-                Route::put('/{powerSku}', [PowerSkuController::class, 'update'])->name('update');
-                Route::delete('/{powerSku}', [PowerSkuController::class, 'destroy'])->name('destroy');
-            });
+        Route::get('/get-products-by-category/{category}', [ProductController::class, 'getProductsByCategory'])
+        ->name('get-products-by-category');
+        Route::prefix('power-skus')->name('power-skus.')->group(function() {
+            Route::get('/data', [PowerSkuController::class, 'data'])->name('data');
+            Route::post('/', [PowerSkuController::class, 'store'])->name('store');
+            Route::get('/{powerSku}/edit', [PowerSkuController::class, 'edit'])->name('edit');
+            Route::put('/{powerSku}', [PowerSkuController::class, 'update'])->name('update');
+            Route::delete('/{powerSku}', [PowerSkuController::class, 'destroy'])->name('destroy');
+        });
     });
     Route::resource('products', ProductController::class)->middleware('permission:menu_product');
     // Logout

@@ -7,102 +7,6 @@
 @section('dashboard-content')
 <x-card>
     <x-slot:cardTitle>
-
-        Daftar Visibility
-    </x-slot:cardTitle>
-    {{-- Visibility Action --}}
-    <x-slot:cardAction>
-        <x-input.search wire:model.live="search" type="text" class="border-0" name="search" id="global-search"
-            placeholder="Cari data visibility"></x-input.search>
-        <x-select.light :title="'Filter Jenis Visibility'" id="posm-filter" name="posm_type_id">
-            <option value="all">Semua Jenis</option>
-            @foreach($posmTypes as $type)
-                <option value="{{ $type->id }}" {{ request('posm_type_id') == $type->id ? 'selected' : '' }}>
-                    {{ $type->name }}
-                </option>
-            @endforeach
-        </x-select.light>
-        <x-button.info onclick="openModal('update-photo')">Update Foto</x-button.info>
-    </x-slot:cardAction>
-    {{-- Visibility Action End --}}
-
-    <x-modal id="update-photo">
-        <x:slot:title>Update Foto Visibility Berdasarkan Jenis POSM</x:slot:title>
-        <form id="posmImageForm" enctype="multipart/form-data">
-            @csrf
-            <div class="flex">
-                <x-input.image class="!text-primary" id="backwall" name="backwall" label="Backwall" :max-size="5" />
-                <x-input.image class="!text-primary" id="standee" name="standee" label="Standee" :max-size="5" />
-                <x-input.image class="!text-primary" id="glolifier" name="glolifier" label="Glolifier" :max-size="5" />
-                <x-input.image class="!text-primary" id="coc" name="coc" label="COC" :max-size="5" />
-            </div>
-            <x:slot:footer>
-                <!-- Ubah type menjadi "button" dan tambahkan id -->
-                <x-button.info class="w-full" type="button" id="submitPosmBtn">
-                    <span id="submitBtnText">Konfirmasi</span>
-                    <span id="submitBtnLoading" class="hidden">
-                        <i class="fas fa-spinner fa-spin mr-2"></i>Menyimpan...
-                    </span>
-                </x-button.info>
-            </x:slot:footer>
-        </form>
-    </x-modal>
-
-
-
-    {{-- Visibility Table --}}
-    <table id="visibility-table" class="table">
-        <thead>
-            <tr>
-                <th scope="col">
-                    <a class="table-head">
-                        {{ __('Nama Outlet') }}
-                        <x-icons.sort />
-                    </a>
-                </th>
-                <th scope="col">
-                    <a class="table-head">
-                        {{ __('Nama Sales') }}
-                        <x-icons.sort />
-                    </a>
-                </th>
-                <th scope="col">
-                    <a class="table-head">
-                        {{ __('SKU') }}
-                        <x-icons.sort />
-                    </a>
-                </th>
-                <th scope="col">
-                    <a class="table-head">
-                        {{ __('Visual') }}
-                        <x-icons.sort />
-                    </a>
-                </th>
-                <th scope="col">
-                    <a class="table-head">
-                        {{ __('Status') }}
-                        <x-icons.sort />
-                    </a>
-                </th>
-                <th scope="col">
-                    <a class="table-head">
-                        {{ __('Jangka Waktu') }}
-                        <x-icons.sort />
-                    </a>
-                </th>
-                <th scope="col">
-                    <a class="table-head">
-                        Aksi
-                    </a>
-                </th>
-            </tr>
-        </thead>
-    </table>
-    {{-- Visibility Table End --}}
-</x-card>
-
-<x-card>
-    <x-slot:cardTitle>
         Visibility Activity
     </x-slot:cardTitle>
     <x-slot:cardAction>
@@ -171,55 +75,6 @@
             const btnText = $('#submitBtnText');
             const loadingText = $('#submitBtnLoading');
 
-            let table = $('#visibility-table').DataTable({
-                processing: true,
-                serverSide: true,
-                paging: true,
-                searching: false,
-                info: true,
-                pageLength: 10,
-                lengthMenu: [10, 20, 30, 40, 50],
-                dom: 'rt<"bottom-container"<"bottom-left"l><"bottom-right"p>>',
-                language: {
-                    lengthMenu: "Menampilkan _MENU_ dari _TOTAL_ data",
-                    processing: "Memuat data...",
-                    paginate: {
-                        previous: '<',
-                        next: '>',
-                        last: 'Terakhir',
-                    },
-                    info: "Menampilkan _START_ sampai _END_ dari _TOTAL_ data",
-                    infoEmpty: "Menampilkan 0 sampai 0 dari 0 data",
-                    emptyTable: "Tidak ada data yang tersedia"
-                },
-                ajax: {
-                    url: "{{ route('visibility.data') }}",
-                    data: function (d) {
-                        d.search_term = $('#global-search').val();
-                        d.filter_visibility = $('#posm-filter').val();
-                    },
-                    dataSrc: function (json) {
-                        $('.dt-length select').closest('.dt-length')
-                            .find('label')
-                            .html(`Menampilkan <select  name="request-table_length" aria-controls="request-table" class="dt-input" id="dt-length-0">${$('.dt-length select').html()}</select> dari ${json.recordsFiltered} data`);
-                        return json.data;
-                    }
-                },
-                columns: [
-                    { data: 'outlet', name: 'name', className: 'table-data' },
-                    { data: 'sales', name: 'user.name', className: 'table-data' },
-                    { data: 'product', name: 'product', className: 'table-data', orderable: false },
-                    { data: 'visual', name: 'visual', className: 'table-data' },
-                    { data: 'status', name: 'status', className: 'table-data', escapeHtml: false },
-                    { data: 'periode', name: 'periode', className: 'table-data', escapeHtml: false },
-                    {
-                        data: 'actions',
-                        name: 'actions',
-                        orderable: false,
-                        searchable: false
-                    }
-                ]
-            });
             let searchTimer;
             $('#global-search').on('input', function () {
                 clearTimeout(searchTimer);
@@ -240,7 +95,6 @@
                 dom: 'rt<"bottom-container"<"bottom-left"l><"bottom-right"p>>',
                 language: {
                     lengthMenu: "Menampilkan _MENU_ dari _TOTAL_ data",
-                    processing: "Memuat data...",
                     paginate: {
                         previous: '<',
                         next: '>',

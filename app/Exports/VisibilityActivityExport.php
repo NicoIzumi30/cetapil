@@ -109,11 +109,12 @@ class VisibilityActivityExport implements FromCollection, WithHeadings, WithMapp
                 $data[] = @$visibility->posmType->name ?: '-';
                 $data[] = @$visibility->visual_type ?: '-';
                 $data[] = @$visibility->condition ?: '-';
-                $data[] = @$visibility->display_photo ?: '-';
+                $data[] = !empty($visibility->display_photo) ? "https://dev-cetaphil.i-am.host/storage/" . $visibility->display_photo : '-';
                 $data[] = @$visibility->shelf_width ?: '-';
                 $data[] = @$visibility->shelving ?: '-';
             }
-
+        }
+        foreach ($categories as $category) {
             for ($position = 1; $position <= 2; $position++) {
                 // Find the first matching record for the category and position
                 $visibility = $row->salesVisibilities
@@ -125,7 +126,7 @@ class VisibilityActivityExport implements FromCollection, WithHeadings, WithMapp
                 // Append data for this category and position
                 $data[] = @$visibility->visual_type ?: '-';
                 $data[] = @$visibility->has_secondary_display ? 'Yes' : 'No';
-                $data[] = @$visibility->display_photo ?: '-';
+                $data[] = !empty($visibility->display_photo) ? "https://dev-cetaphil.i-am.host/storage/" . $visibility->display_photo : '-';
             }
         }
         $data[] = $row->created_at->format('Y-m-d H:i:s'); // Created At

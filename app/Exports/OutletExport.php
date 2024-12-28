@@ -41,10 +41,14 @@ class OutletExport implements FromCollection, WithHeadings, WithMapping, WithSty
             'Cycle',
             'Tipe Minggu',
             'Channel',
+            'Account',
+            'Distributor',
+            'TSO',
+            'KAM',
+            'Kota',
+            'Alamat',
             'Longitude',
             'Latitude',
-            'Kota',
-            'Alamat'
         ];
     }
 
@@ -57,12 +61,15 @@ class OutletExport implements FromCollection, WithHeadings, WithMapping, WithSty
                 $outlet->category,
                 getVisitDayByNumber($outlet->visit_day),
                 $outlet->cycle,
-                $outlet->week_type,
+                $outlet->week,
                 $outlet->channel_name->name ?? '',
+                $outlet->account,
+                $outlet->TSO,
+                $outlet->KAM,
+                $outlet->city->name ?? '',
+                $outlet->address,
                 $outlet->longitude,
                 $outlet->latitude,
-                $outlet->city->name ?? '',
-                $outlet->address
             ];
         } catch (\Exception $e) {
             Log::error('Error in ProductExport mapping', [
@@ -110,16 +117,16 @@ class OutletExport implements FromCollection, WithHeadings, WithMapping, WithSty
         // Mengatur lebar kolom secara optimal
         foreach (range('A', $lastColumn) as $column) {
             $sheet->getColumnDimension($column)->setAutoSize(true);
-            
+
             // Mendapatkan lebar kolom setelah autosize
             $columnWidth = $sheet->getColumnDimension($column)->getWidth();
-            
+
             // Menyesuaikan lebar kolom dalam batas minimum dan maksimum
             if ($columnWidth < $this->minimumWidth) {
                 $sheet->getColumnDimension($column)->setWidth($this->minimumWidth);
             } elseif ($columnWidth > $this->maximumWidth) {
                 $sheet->getColumnDimension($column)->setWidth($this->maximumWidth);
-                
+
                 // Mengaktifkan text wrapping untuk kolom yang terlalu lebar
                 $sheet->getStyle($column . '1:' . $column . $lastRow)
                     ->getAlignment()
