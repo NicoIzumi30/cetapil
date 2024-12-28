@@ -1,10 +1,10 @@
 @extends('layouts.main')
-
+ 
 @section('banner-content')
     <x-banner-content :title="'Produk'" />
 @endsection
-
-
+ 
+ 
 @section('dashboard-content')
     <main class="w-full">
         {{-- Daftar Produk --}}
@@ -12,7 +12,7 @@
             <x-slot:cardTitle>
                 Daftar Produk
             </x-slot:cardTitle>
-
+ 
             {{-- Product Action --}}
             <x-slot:cardAction>
                 <x-input.search class="border-0" placeholder="Cari data produk" id="global-search"></x-input.search>
@@ -64,10 +64,10 @@
                             </x-button.primary>
                         </x-slot:footer>
                     </form>
-
+ 
                 </x-modal>
                 {{-- Tambah Produk Modal End --}}
-
+ 
                 {{-- Edit Produk Modal --}}
                 <x-modal id="edit-produk">
                     <x-slot:title>Ubah Produk</x-slot:title>
@@ -108,7 +108,7 @@
                         </x-button.primary>
                     </x-slot:footer>
                 </x-modal>
-
+ 
                 {{-- Edit Produk Modal End --}}
                 <x-button.info onclick="openModal('unggah-produk-bulk')">Unggah Secara Bulk</x-button.info>
                 <x-modal id="unggah-produk-bulk">
@@ -153,7 +153,7 @@
                 </x-modal>
             </x-slot:cardAction>
             {{-- Product Action End --}}
-
+ 
             {{-- Tabel Daftar Produk --}}
             <table id="product-table" class="table">
                 <thead>
@@ -186,13 +186,13 @@
             </table>
         </x-card>
         {{-- Daftar Produk End --}}
-
+ 
         {{-- Availability --}}
         <x-card>
             <x-slot:cardTitle>
                 Availability
             </x-slot:cardTitle>
-
+ 
             {{-- Availability Action --}}
             <x-slot:cardAction>
                 <x-button.light id="downloadBtnStockOnHand">
@@ -218,7 +218,7 @@
                 {{-- <input type='text' id="basic-date" placeholder="Select Date..."> --}}
             </x-slot:cardAction>
             {{-- Availability Action End --}}
-
+ 
             {{-- Upload AV3M Bulk --}}
             <x-modal id="unggah-av3m-bulk">
                 <div class="flex flex-col items-center w-full">
@@ -260,7 +260,7 @@
                 </x-slot:footer>
             </x-modal>
             {{-- END Upload AV3M Bulk --}}
-
+ 
             {{-- Tabel Availability --}}
             <table id="stock-on-hand-table" class="table">
                 <thead>
@@ -313,21 +313,21 @@
                                 <x-icons.sort />
                             </a>
                         </th>
-
+ 
                     </tr>
                 </thead>
             </table>
             {{-- Tabel Availability End --}}
-
+ 
         </x-card>
         {{-- Availability End --}}
-
+ 
         {{-- Power SKU & Competitor Hand --}}
         <x-card>
             <x-slot:cardTitle>
                 Power SKU & Competitor
             </x-slot:cardTitle>
-
+ 
             {{-- Power SKU & Competitor Action --}}
             <x-slot:cardAction>
                 <x-input.search class="border-0" placeholder="Cari data Power SKU & Competitor..."
@@ -340,49 +340,59 @@
                     <x-slot:title>
                         Tambah Power SKU & Competitor
                     </x-slot:title>
-                    <form id="createPowerSkuForm" class="grid grid-cols-2 gap-6">
+                    <form id="createPowerSkuForm">
                         @csrf
-						<div>
+                        <div>
                             <label for="select-input-survey-data" class="!text-black">Kategori Survey</label>
                             <div>
-                                <select id="select-input-survey-data" name="survey_id"
-                                    class="w-full form-control">
+                                <select id="select-input-survey-data" name="survey_id" class="w-full form-control">
                                     <option value="" selected disabled>-- Pilih Category Survey --</option>
-                                        <option value="power-sku">
-                                            Power SKU
-                                        </option>
-                                        <option value="harga-kompetitor">
-                                            Harga Kompetitor
-                                        </option>
+                                    <option value="power-sku">
+                                        Power SKU
+                                    </option>
+                                    <option value="harga-kompetitor">
+                                        Harga Kompetitor
+                                    </option>
                                 </select>
                             </div>
                         </div>
-						<div id="product-category-container" class="hidden">
-                            <label for="power-sku-product-categories" class="!text-black">Kategori Produk</label>
+                        <div id="product-competitor-container" class="hidden mt-4">
                             <div>
-                                <select id="power-sku-product-categories" name="power-sku-category_id"
-                                    class="w-full form-control @error('power-sku-category_id') is-invalid @enderror">
-                                    <option value="" selected disabled>-- Pilih Category Product --</option>
-                                    @foreach ($categories as $category)
-                                        <option value="{{ $category->id }}">
-                                            {{ $category->name }}
-                                        </option>
-                                    @endforeach
-                                </select>
-                                <span id="power-sku-product-category_id-error" class="text-red-500 text-xs hidden"></span>
+                                <label for="product-competitor" class="!text-black">Harga</label>
+                                <input id="product-competitor" class="form-control" type="number"
+                                    name="product-competitor" placeholder="Masukan Harga">
+                                <span id="product-competitor-error" class="text-red-500 text-xs hidden"></span>
                             </div>
                         </div>
-                        <div>
-                            <label for="power-sku" class="!text-black">Power SKU</label>
+                        <div id="power-sku-container" class="hidden grid-cols-2 gap-6 mt-4">
                             <div>
-                                <select id="power-sku" name="power-sku"
-                                    class="w-full form-control @error('power-sku') is-invalid @enderror">
-                                    <option value="" selected disabled>-- Pilih Power SKU --</option>
-                                    @foreach ($products as $product)
-                                        <option value="{{ $product->id }}">{{ $product->sku }}</option>
-                                    @endforeach
-                                </select>
-                                <span id="power-sku-error" class="text-red-500 text-xs hidden"></span>
+                                <label for="power-sku-product-categories" class="!text-black">Kategori Produk</label>
+                                <div>
+                                    <select id="power-sku-product-categories" name="power-sku-category_id"
+                                        class="w-full form-control @error('power-sku-category_id') is-invalid @enderror">
+                                        <option value="" selected disabled>-- Pilih Category Product --</option>
+                                        @foreach ($categories as $category)
+                                            <option value="{{ $category->id }}">
+                                                {{ $category->name }}
+                                            </option>
+                                        @endforeach
+                                    </select>
+                                    <span id="power-sku-product-category_id-error"
+                                        class="text-red-500 text-xs hidden"></span>
+                                </div>
+                            </div>
+                            <div>
+                                <label for="power-sku" class="!text-black">Power SKU</label>
+                                <div>
+                                    <select id="power-sku" name="power-sku"
+                                        class="w-full form-control @error('power-sku') is-invalid @enderror">
+                                        <option value="" selected disabled>-- Pilih Power SKU --</option>
+                                        @foreach ($products as $product)
+                                            <option value="{{ $product->id }}">{{ $product->sku }}</option>
+                                        @endforeach
+                                    </select>
+                                    <span id="power-sku-error" class="text-red-500 text-xs hidden"></span>
+                                </div>
                             </div>
                         </div>
                         <x-slot:footer>
@@ -399,7 +409,7 @@
                 {{-- Tambah Power SKU & Competitor End --}}
             </x-slot:cardAction>
             {{-- Power SKU & Competitor Action End --}}
-
+ 
             {{-- Tabel Power SKU & Competitor --}}
             <table id="power-sku-table" class="table">
                 <thead>
@@ -425,43 +435,68 @@
                 </thead>
             </table>
             {{-- Tabel Power SKU & Competitor End --}}
-
+ 
             {{-- Edit Power SKU Modal  --}}
-            <x-modal id="edit-power-sku">
+            <x-modal id="edit-power-sku-modal">
                 <x-slot:title>
                     Edit Power SKU & Competitor
                 </x-slot:title>
                 <form id="editPowerSkuForm">
                     @csrf
                     <div>
-                        <label for="edit-power-sku-product-categories" class="!text-black">Kategori Produk</label>
+                        <label for="edit-select-input-survey-data" class="!text-black">Kategori Survey</label>
                         <div>
-                            <select id="edit-power-sku-product-categories" name="edit-power-sku-category_id"
+                            <select id="edit-select-input-survey-data" name="edit-select-survey-data"
                                 class="w-full form-control">
-                                <option value="" disabled>-- Pilih Category Product --</option>
-                                @foreach ($categories as $category)
-                                    <option value="{{ $category->id }}"
-                                        {{ isset($productToEdit) && $productToEdit->category_id == $category->id ? 'selected' : '' }}>
-                                        {{ $category->name }}
-                                    </option>
-                                @endforeach
+                                <option value="" selected disabled>-- Pilih Category Survey --</option>
+                                <option value="power-sku">
+                                    Power SKU
+                                </option>
+                                <option value="harga-kompetitor">
+                                    Harga Kompetitor
+                                </option>
                             </select>
-                            <span id="edit-power-sku-category_id-error" class="text-red-500 text-xs hidden"></span>
                         </div>
                     </div>
-                    <div>
-                        <label for="edit-power-sku" class="!text-black">Power SKU & Competitor</label>
+                    <div id="edit-product-competitor-container" class="hidden mt-4">
                         <div>
-                            <select id="edit-power-sku" name="edit-power-sku" class="w-full form-control">
-                                <option value="" disabled>-- Pilih Power SKU & Competitor --</option>
-                                @foreach ($products as $product)
-                                    <option value="{{ $product->id }}"
-                                        {{ isset($productToEdit) && $productToEdit->id == $product->id ? 'selected' : '' }}>
-                                        {{ $product->sku }}
-                                    </option>
-                                @endforeach
-                            </select>
-                            <span id="edit-power-sku-error" class="text-red-500 text-xs hidden"></span>
+                            <label for="edit-product-competitor" class="!text-black">Nama Produk</label>
+                            <input id="edit-product-competitor" class="form-control" type="text"
+                                name="edit-product-competitor" placeholder="Masukan nama produk">
+                            <span id="edit-product-competitor-error" class="text-red-500 text-xs hidden"></span>
+                        </div>
+                    </div>
+                    <div id="edit-power-sku-container" class="hidden grid-cols-2 gap-6 mt-4">
+                        <div>
+                            <label for="edit-power-sku-product-categories" class="!text-black">Kategori Produk</label>
+                            <div>
+                                <select id="edit-power-sku-product-categories" name="edit-power-sku-category_id"
+                                    class="w-full form-control">
+                                    <option value="" disabled>-- Pilih Category Product --</option>
+                                    @foreach ($categories as $category)
+                                        <option value="{{ $category->id }}"
+                                            {{ isset($productToEdit) && $productToEdit->category_id == $category->id ? 'selected' : '' }}>
+                                            {{ $category->name }}
+                                        </option>
+                                    @endforeach
+                                </select>
+                                <span id="edit-power-sku-category_id-error" class="text-red-500 text-xs hidden"></span>
+                            </div>
+                        </div>
+                        <div>
+                            <label for="edit-power-sku" class="!text-black">Power SKU</label>
+                            <div>
+                                <select id="edit-power-sku" name="edit-power-sku" class="w-full form-control">
+                                    <option value="" disabled>-- Pilih Power SKU  --</option>
+                                    @foreach ($products as $product)
+                                        <option value="{{ $product->id }}"
+                                            {{ isset($productToEdit) && $productToEdit->id == $product->id ? 'selected' : '' }}>
+                                            {{ $product->sku }}
+                                        </option>
+                                    @endforeach
+                                </select>
+                                <span id="edit-power-sku-error" class="text-red-500 text-xs hidden"></span>
+                            </div>
                         </div>
                     </div>
                     <x-slot:footer>
@@ -473,12 +508,12 @@
                 </form>
             </x-modal>
             {{-- Edit Power SKU Modal End --}}
-
+ 
         </x-card>
         {{-- Power SKU & Competitor End --}}
     </main>
 @endsection
-
+ 
 @push('scripts')
     <script>
         $(document).ready(function() {
@@ -528,13 +563,13 @@
                         name: 'category.name',
                         className: 'table-data',
                     },
-
+ 
                     {
                         data: 'sku',
                         name: 'sku',
                         className: 'table-data',
                     },
-
+ 
                     {
                         data: 'price',
                         name: 'price',
@@ -616,13 +651,13 @@
                         name: 'rekomendasi',
                         class: 'table-data'
                     },
-
+ 
                     {
                         data: 'status',
                         name: 'status',
                         class: 'table-data'
                     },
-
+ 
                     {
                         data: 'availability',
                         name: 'availability',
@@ -638,11 +673,11 @@
                 var length = $(this).val();
                 tableSOD.page.len(length).draw();
             });
-
+ 
             $('#stock-date-range').on('change', function() {
                 tableSOD.ajax.reload(null, false);
             });
-
+ 
             $('#filter_area').on('change', function() {
                 tableSOD.ajax.reload(null, false);
             });
@@ -659,7 +694,7 @@
             $('#saveBtn').click(function() {
                 resetFormErrors();
                 toggleLoading(true, 'save');
-
+ 
                 $.ajax({
                     type: 'POST',
                     url: '{{ route('products.store') }}',
@@ -670,13 +705,13 @@
                     error: handleFormErrors
                 });
             });
-
+ 
             // Edit product handler
             $(document).on('click', '#view-product', function(e) {
                 e.preventDefault();
                 const productId = $(this).data('id');
                 resetFormErrors();
-
+ 
                 $.ajax({
                     url: `/products/${productId}/edit`,
                     type: 'GET',
@@ -692,7 +727,7 @@
                     }
                 });
             });
-
+ 
             // Update product handler
             $('#updateBtn').click(function(e) {
                 e.preventDefault();
@@ -702,10 +737,10 @@
                     sku: $('#edit-sku').val(),
                     price: $('#edit-price').val().replace(/[^\d]/g, ''),
                 };
-
+ 
                 resetFormErrors();
                 toggleLoading(true, 'update');
-
+ 
                 $.ajax({
                     url: `/products/${productId}`,
                     type: 'PUT',
@@ -716,14 +751,14 @@
                     error: handleFormErrors
                 });
             });
-
+ 
             // AV3M update handler
             $(document).on('click', '#view-av3m', function(e) {
                 e.preventDefault();
                 const productId = $(this).data('id');
                 resetFormErrors();
                 openModal('update-av3m');
-
+ 
                 $.ajax({
                     url: `/products/${productId}/av3m`,
                     type: 'GET',
@@ -736,12 +771,12 @@
                     }
                 });
             });
-
+ 
             // Save AV3M handler
             $('#saveAv3mBtn').click(function(e) {
                 e.preventDefault();
                 const productId = $('#av3mForm').data('id');
-
+ 
                 $.ajax({
                     url: `/products/${productId}/av3m`,
                     type: 'POST',
@@ -757,7 +792,7 @@
                     }
                 });
             });
-
+ 
             // Import/Upload handlers
             $('#downloadTemplate').click(function() {
                 window.location.href = "{{ asset('assets/template/template_bulk_product.xlsx') }}";
@@ -772,11 +807,11 @@
                 if (!file) {
                     return toast('error', 'Silakan pilih file terlebih dahulu', 200);
                 }
-
+ 
                 const formData = new FormData();
                 formData.append('excel_file', file);
                 toggleLoading(true, 'import');
-
+ 
                 $.ajax({
                     url: '/products/bulk',
                     type: 'POST',
@@ -792,25 +827,25 @@
                     }
                 });
             });
-
+ 
             // Download Excel handler
             $('#downloadBtn').click(function(e) {
                 e.preventDefault();
-
+ 
                 // Show loading state
                 const $btn = $(this);
                 const $btnText = $btn.find('#downloadBtnText');
                 const $btnLoading = $btn.find('#downloadBtnLoadingProduct');
-
+ 
                 $btnText.addClass('hidden');
                 $btnLoading.removeClass('hidden');
                 $btn.prop('disabled', true);
-
+ 
                 const form = document.createElement('form');
                 form.method = 'GET';
                 form.action = '/products/generate-excel';
                 document.body.appendChild(form);
-
+ 
                 fetch('/products/generate-excel')
                     .then(response => {
                         if (response.ok) {
@@ -835,7 +870,7 @@
                         }, 1000);
                     });
             });
-
+ 
             // File Upload Area
             const setupFileUpload = () => {
                 const uploadArea = document.getElementById('upload-area');
@@ -843,9 +878,9 @@
                 const displayFileName = document.getElementById('filename-display');
                 const uploadHelptext = document.getElementById('upload-helptext');
                 const maxFileSize = 5 * 1024 * 1024;
-
+ 
                 uploadArea.addEventListener('click', () => fileInput.click());
-
+ 
                 ['dragover', 'dragleave', 'drop'].forEach(eventName => {
                     uploadArea.addEventListener(eventName, (e) => {
                         e.preventDefault();
@@ -853,59 +888,59 @@
                         if (eventName === 'drop') handleFiles(e.dataTransfer.files);
                     });
                 });
-
+ 
                 fileInput.addEventListener('change', (e) => handleFiles(e.target.files));
-
+ 
                 function handleFiles(files) {
                     if (!files.length) return;
-
+ 
                     const file = files[0];
                     const validTypes = [
                         'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet',
                         'application/wps-office.xlsx',
                         'application/vnd.ms-excel'
                     ];
-
+ 
                     if (!validTypes.includes(file.type)) {
                         alert('Upload file gagal, Tolong Unggah Hanya file berformat .xlsx');
                         fileInput.value = '';
                         return;
                     }
-
+ 
                     if (file.size > maxFileSize) {
                         alert('Upload file gagal, Ukuran file lebih dari 5 MB');
                         fileInput.value = '';
                         return;
                     }
-
+ 
                     displayFileName.classList.remove('hidden');
                     uploadHelptext.classList.add('hidden');
                     displayFileName.innerText = file.name;
                 }
             };
-
+ 
             setupFileUpload();
-
+ 
             // Helper functions
             function resetFormErrors() {
                 $('.text-red-500').addClass('hidden');
                 $('input, select').removeClass('border-red-500');
             }
-
+ 
             function handleSuccess(modalId, message) {
                 toggleLoading(false, 'update');
                 closeModal(modalId);
                 toast('success', message, 300);
                 setTimeout(() => window.location.reload(), 1500);
             }
-
+ 
             function handleFormErrors(xhr) {
                 toggleLoading(false, 'update');
                 if (xhr.status === 422) {
                     handleFieldErrors(xhr.responseJSON.errors);
                 }
             }
-
+ 
             function handleFieldErrors(errors, isAv3m = false) {
                 $.each(errors, function(key, value) {
                     const prefix = isAv3m ? '.' : '#edit-';
@@ -915,26 +950,26 @@
                 });
             }
         });
-
+ 
         $('#downloadBtnStockOnHand').click(function(e) {
             e.preventDefault();
-
+ 
             // Get current filter values
             const filters = {
                 filter_date: $('#stock-date-range').val() === 'Date Range' ? '' : $('#stock-date-range').val(),
                 filter_product: $('#filter_product').val() || 'all',
                 filter_area: $('#filter_area').val() || 'all'
             };
-
+ 
             // Show loading state
             const $btn = $(this);
             const $btnText = $btn.find('#downloadBtnText');
             const $btnLoading = $btn.find('#downloadBtnLoading');
-
+ 
             $btnText.addClass('hidden');
             $btnLoading.removeClass('hidden');
             $btn.prop('disabled', true);
-
+ 
             // Gunakan fetch untuk download
             fetch('/products/download-stock-on-hand?' + new URLSearchParams(filters), {
                     method: 'GET',
@@ -954,7 +989,7 @@
                     a.click();
                     window.URL.revokeObjectURL(url);
                     a.remove();
-
+ 
                     toast('success', 'File berhasil diunduh', 300);
                 })
                 .catch(error => {
@@ -967,7 +1002,7 @@
                     $btn.prop('disabled', false);
                 });
         });
-
+ 
         // Initialize DataTable for Power SKU
         $(document).ready(function() {
             const powerSkuTable = $('#power-sku-table').DataTable({
@@ -1026,35 +1061,35 @@
                     [0, 'asc']
                 ]
             });
-
+ 
             // Search functionality with debounce
             let searchTimer;
             $('#power-sku-search').on('input', function() {
                 clearTimeout(searchTimer);
                 searchTimer = setTimeout(() => powerSkuTable.ajax.reload(null, false), 500);
             });
-
+ 
             // Handle pagination length change
             $(document).on('change', '#dt-length-power-sku', function() {
                 const length = $(this).val();
                 powerSkuTable.page.len(length).draw();
             });
-
+ 
             // Handle view action
             function getPowerSkuData(powerSkuId) {
                 resetFormErrors();
-
+ 
                 $.ajax({
                     url: `/products/power-skus/${powerSkuId}/edit`,
                     type: 'GET',
                     success: function(response) {
                         const categoryId = response.product.category_id;
                         const productId = response.product.id;
-
+ 
                         $('#edit-power-sku-product-categories')
                             .val(categoryId)
                             .trigger('change');
-
+ 
                         $.ajax({
                             url: `/products/get-products-by-category/${categoryId}`,
                             type: 'GET',
@@ -1067,12 +1102,12 @@
                                     options +=
                                         `<option value="${product.id}" ${selected}>${product.sku}</option>`;
                                 });
-
+ 
                                 $('#edit-power-sku')
                                     .html(options)
                                     .val(productId)
                                     .trigger('change');
-
+ 
                                 $('#editPowerSkuForm').data('id', response.id);
                             }
                         });
@@ -1087,7 +1122,7 @@
                 e.preventDefault();
                 const url = $(this).attr('href');
                 const name = $(this).data('name');
-
+ 
                 Swal.fire({
                     title: 'Hapus Data?',
                     text: `Apakah anda yakin ingin menghapus data ${name}?`,
@@ -1117,7 +1152,7 @@
                     }
                 });
             });
-
+ 
             // Utility function for toast notifications
             function toast(type, message, duration = 3000) {
                 Swal.fire({
@@ -1130,25 +1165,25 @@
                     timerProgressBar: true
                 });
             }
-
-
+ 
+ 
             function initializePowerSkuComponents() {
                 // Pre-initialize select2 with caching
-                $('#power-sku-product-categories, #edit-power-sku-product-categories').select2();
-
+                $('#power-sku-product-categories').select2();
+ 
                 $('#power-sku, #edit-power-sku').select2();
-
+ 
                 $('#select-input-survey-data, #edit-select-input-survey-data').select2({
                     minimumResultsForSearch: Infinity
                 })
-
+ 
                 // Handle category change for add modal
                 $('#power-sku-product-categories').on('change', function() {
                     const categoryId = $(this).val();
                     if (categoryId) {
                         // Show loading in the SKU select
                         $('#power-sku').html('<option value="">Loading...</option>').prop('disabled', true);
-
+ 
                         $.ajax({
                             url: `/products/get-products-by-category/${categoryId}`,
                             type: 'GET',
@@ -1177,14 +1212,14 @@
                         });
                     }
                 });
-
+ 
                 // Handle category change for edit modal
                 $('#edit-power-sku-product-categories').on('change', function() {
                     const categoryId = $(this).val();
                     if (categoryId) {
                         $('#edit-power-sku').html('<option value="">Loading...</option>').prop('disabled',
                             true);
-
+ 
                         $.ajax({
                             url: `/products/get-products-by-category/${categoryId}`,
                             type: 'GET',
@@ -1211,74 +1246,111 @@
                     }
                 });
             }
-
-			$('#select-input-survey-data').change(function(e) {
-				if(e.target.value == 'harga-kompetitor') {
-					$('#product-category-container').removeClass('hidden');
-					$('#product-category-container').addClass('block');
-					$('#power-sku-container').addClass('hidden');
-				}
-				if(e.target.value == 'power-sku') {
-					$('#power-sku-container').removeClass('hidden');
-					$('#power-sku-container').addClass('block');
-					$('#product-category-container').addClass('hidden');
-				}
-			})
-
+ 
+            $('#select-input-survey-data').change(function(e) {
+                if (e.target.value == 'harga-kompetitor') {
+                    $('#product-competitor-container').removeClass('hidden');
+                    $('#product-competitor-container').addClass('block');
+                    $('#power-sku-container').addClass('hidden');
+                }
+                if (e.target.value == 'power-sku') {
+                    $('#power-sku-container').removeClass('hidden');
+                    $('#power-sku-container').addClass('grid');
+                    $('#product-competitor-container').addClass('hidden');
+                }
+            })
+ 
+            $('#edit-select-input-survey-data').change(function(e) {
+                if (e.target.value == 'harga-kompetitor') {
+                    $('#edit-product-competitor-container').removeClass('hidden');
+                    $('#edit-product-competitor-container').addClass('block');
+                    $('#edit-power-sku-container').addClass('hidden');
+                }
+                if (e.target.value == 'power-sku') {
+                    $('#edit-power-sku-container').removeClass('hidden');
+                    $('#edit-power-sku-container').addClass('grid');
+                    $('#edit-product-competitor-container').addClass('hidden');
+                }
+            })
+ 
             initializePowerSkuComponents()
         });
-
+ 
         // Create Power SKU
         $('#savePowerSkuBtn').click(function(e) {
-            e.preventDefault();
+    e.preventDefault();
+    
+    // Reset previous error states
+    resetFormErrors();
+    
+    // Show loading state
+    $('#savePowerSkuBtnText').addClass('hidden');
+    $('#savePowerSkuBtnLoading').removeClass('hidden');
+    $(this).prop('disabled', true);
+    
+    const surveyType = $('#select-input-survey-data').val();
+    let formData = {
+        'select-input-survey-data': surveyType,
+        '_token': $('meta[name="csrf-token"]').attr('content')
+    };
+    
+    // Add specific fields based on survey type
+    if (surveyType === 'power-sku') {
+        formData['power-sku-category_id'] = $('#power-sku-product-categories').val();
+        formData['power-sku'] = $('#power-sku').val();
+    } else if (surveyType === 'harga-kompetitor') {
+        formData['product-competitor'] = $('#product-competitor').val();
+    }
+    
+    $.ajax({
+        type: 'POST',
+        url: '{{ route("products.power-skus.store") }}',
+        data: formData,
+        success: function(response) {
+            toast('success', response.message, 300);
+            closeModal('tambah-power-sku');
+            // Refresh the data table
+            $('#power-sku-table').DataTable().ajax.reload();
+            
+            // Reset form
+            $('#createPowerSkuForm')[0].reset();
+            $('#power-sku-product-categories').val('').trigger('change');
+            $('#power-sku').val('').trigger('change');
+            
+            // Hide both containers
+            $('#power-sku-container').addClass('hidden');
+            $('#product-competitor-container').addClass('hidden');
+        },
+        error: function(xhr) {
+            // Reset loading state
+            $('#savePowerSkuBtnText').removeClass('hidden');
+            $('#savePowerSkuBtnLoading').addClass('hidden');
+            $('#savePowerSkuBtn').prop('disabled', false);
+            
+            if (xhr.status === 422) {
+                const errors = xhr.responseJSON.errors;
+                Object.keys(errors).forEach(function(key) {
+                    // Show error messages
+                    $(`#${key}-error`).text(errors[key][0]).removeClass('hidden');
+                    $(`[name="${key}"]`).addClass('border-red-500');
+                });
+            }
+            
+            toast('error', xhr.responseJSON.message || 'Gagal menyimpan data', 200);
+        }
+    });
+});
 
-            // Show loading state
-            $('#savePowerSkuBtnText').addClass('hidden');
-            $('#savePowerSkuBtnLoading').removeClass('hidden');
-            $(this).prop('disabled', true);
-
-            const formData = {
-                'power-sku-category_id': $('#power-sku-product-categories').val(),
-                'power-sku': $('#power-sku').val(),
-                '_token': $('input[name="_token"]').val()
-            };
-
-            $.ajax({
-                type: 'POST',
-                url: '{{ route('products.power-skus.store') }}',
-                data: formData,
-                success: function(response) {
-                    toast('success', response.message, 200);
-                    // Refresh halaman setelah data berhasil disimpan
-                    setTimeout(() => {
-                        window.location.reload();
-                    }, 1000);
-                },
-                error: function(xhr) {
-                    $('#savePowerSkuBtnText').removeClass('hidden');
-                    $('#savePowerSkuBtnLoading').addClass('hidden');
-                    $('#savePowerSkuBtn').prop('disabled', false);
-
-                    if (xhr.status === 422) {
-                        const errors = xhr.responseJSON.errors;
-                        Object.keys(errors).forEach(function(key) {
-                            $(`#${key}-error`).text(errors[key][0]).removeClass('hidden');
-                            $(`[name="${key}"]`).addClass('border-red-500');
-                        });
-                    }
-
-                    toast('error', xhr.responseJSON.message || 'Terjadi kesalahan saat menyimpan data',
-                        200);
-                }
-            });
-        });
-
+function resetFormErrors() {
+    $('.text-red-500').addClass('hidden');
+    $('input, select').removeClass('border-red-500');
+}
         // Helper function for loading state
         function toggleLoading(show, type) {
             const btn = $(`#${type}Btn`);
             const text = $(`#${type}BtnText`);
             const loading = $(`#${type}BtnLoading`);
-
+ 
             if (show) {
                 text.addClass('hidden');
                 loading.removeClass('hidden');
@@ -1289,7 +1361,7 @@
                 btn.prop('disabled', false);
             }
         }
-
+ 
         // Toast notification function (if not already defined)
         function toast(type, message, duration = 3000) {
             Swal.fire({
@@ -1302,40 +1374,40 @@
                 timerProgressBar: true
             });
         }
-
+ 
         // Modal close function (if not already defined)
         function closeModal(modalId) {
             $(`#${modalId}`).addClass('hidden');
             $('body').removeClass('modal-open');
         }
-
+ 
         // Edit Power SKU handler
         function initializePowerSkuEdit() {
-
+ 
             // Handle form submission for editing Power SKU
             $('#saveEditedPowerSkuBtn').click(function(e) {
                 e.preventDefault();
                 const id = $('#editPowerSkuForm').data('id');
-
+ 
                 // Show loading state
                 $('#saveEditedPowerSkuBtnText').addClass('hidden');
                 $('#saveEditedPowerSkuBtnLoading').removeClass('hidden');
                 $(this).prop('disabled', true);
-
+ 
                 const formData = {
                     'power-sku-category_id': $('#edit-power-sku-product-categories').val(),
                     'power-sku': $('#edit-power-sku').val(),
                     '_token': $('meta[name="csrf-token"]').attr('content'),
                     '_method': 'PUT'
                 };
-
+ 
                 $.ajax({
                     url: `/products/power-skus/${id}`,
                     type: 'POST',
                     data: formData,
                     success: function(response) {
                         toast('success', response.message, 300);
-                        closeModal('edit-power-sku');
+                        closeModal('edit-power-sku-modal');
                         // Refresh table
                         $('#power-sku-table').DataTable().ajax.reload();
                     },
@@ -1344,7 +1416,7 @@
                         $('#saveEditedPowerSkuBtnText').removeClass('hidden');
                         $('#saveEditedPowerSkuBtnLoading').addClass('hidden');
                         $('#saveEditedPowerSkuBtn').prop('disabled', false);
-
+ 
                         if (xhr.status === 422) {
                             const errors = xhr.responseJSON.errors;
                             Object.keys(errors).forEach(function(key) {
@@ -1358,20 +1430,20 @@
                 });
             });
         }
-
+ 
         // Reset form errors
         function resetFormErrors() {
             $('.text-red-500').addClass('hidden');
             $('input, select').removeClass('border-red-500');
         }
-
+ 
         $(document).ready(function() {
             initializePowerSkuEdit();
         });
     </script>
 @endpush
-
-
+ 
+ 
 @push('scripts')
     <script>
         document.addEventListener('DOMContentLoaded', function() {
@@ -1380,62 +1452,62 @@
             const displayFileName = document.getElementById('filename-display-av3m');
             const uploadHelptext = document.getElementById('upload-helptext-av3m');
             const maxFileSize = 2 * 1024 * 1024;
-
+ 
             // Click handler for the upload area
             uploadArea.addEventListener('click', () => {
                 fileInput.click();
             });
-
+ 
             // Drag and drop handlers
             uploadArea.addEventListener('dragover', (e) => {
                 e.preventDefault();
                 uploadArea.classList.add('drag-over');
             });
-
+ 
             uploadArea.addEventListener('dragleave', (e) => {
                 e.preventDefault();
                 uploadArea.classList.remove('drag-over');
             });
-
+ 
             uploadArea.addEventListener('drop', (e) => {
                 e.preventDefault();
                 uploadArea.classList.remove('drag-over');
-
+ 
                 const files = e.dataTransfer.files;
                 handleFiles(files);
             });
-
+ 
             fileInput.addEventListener('change', (e) => {
                 handleFiles(e.target.files);
             });
-
+ 
             function handleFiles(files) {
                 if (files.length === 0) return;
-
+ 
                 const file = files[0];
-
+ 
                 const validTypes = [
                     'text/csv',
                     'application/vnd.ms-excel',
                     'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet'
                 ];
-
+ 
                 if (!validTypes.includes(file.type)) {
                     alert('Upload file gagal, Tolong Unggah Hanya file berformat .csv/xls');
                     fileInput.value = '';
                     return;
                 }
-
+ 
                 if (file.size > maxFileSize) {
                     alert('Upload file gagal, Ukuran file lebih dari 5 MB');
                     fileInput.value = '';
                     return;
                 }
-
+ 
                 if (file.size > maxFileSize && file.size > maxFileSize) {
                     return
                 }
-
+ 
                 const reader = new FileReader();
                 reader.onload = function(e) {
                     displayFileName.classList.remove('hidden')

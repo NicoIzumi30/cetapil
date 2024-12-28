@@ -4,7 +4,7 @@
             type="button"
             data-id="{{ $powerSku->id }}"
             class="dropdown-option view-power-sku"
-            onclick="openModal('edit-power-sku'); getPowerSkuData('{{ $powerSku->id }}')">
+            onclick="openModal('edit-power-sku-modal'); getPowerSkuData('{{ $powerSku->id }}')">
             Lihat Data
         </button>
     </li>

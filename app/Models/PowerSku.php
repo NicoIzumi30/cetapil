@@ -13,7 +13,11 @@ class PowerSku extends Model
     use HasFactory, HasUuids, SoftDeletes;
 
     protected $guarded = [];
-    protected $fillable = ['product_id'];
+    protected $fillable = [
+        'category',
+        'product_id',
+        'product_competitor_price'
+    ];
 
     public function product()
     {

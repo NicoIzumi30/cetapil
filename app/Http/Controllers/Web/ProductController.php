@@ -10,6 +10,7 @@ use App\Models\Channel;
 use App\Models\Product;
 use App\Models\Category;
 use App\Exports\Av3mExport;
+use App\Models\PowerSku;
 use Illuminate\Http\Request;
 use App\Exports\ProductExport;
 use App\Imports\ProductImport;
@@ -263,6 +264,31 @@ class ProductController extends Controller
             return response()->json([
                 'status' => 'error',
                 'message' => 'Terjadi kesalahan: ' . $e->getMessage()
+            ], 500);
+        }
+    }
+
+    public function getProductBySurveyType(Request $request)
+    {
+        try {
+            if ($request->type === 'power_sku') {
+                // Get products that are not yet power SKUs
+                $products = Product::select('id', 'sku')
+                    ->whereNotIn('id', PowerSku::pluck('product_id'))
+                    ->get();
+                    
+                return response()->json($products);
+                
+            } else if ($request->type === 'competitor') {
+                // Get all products
+                $products = Product::select('id', 'sku')->get();
+                return response()->json($products);
+            }
+            
+            return response()->json(['message' => 'Invalid survey type'], 400);
+        } catch (\Exception $e) {
+            return response()->json([
+                'message' => 'Error fetching products: ' . $e->getMessage()
             ], 500);
         }
     }
