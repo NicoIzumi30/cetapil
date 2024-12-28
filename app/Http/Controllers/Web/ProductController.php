@@ -9,12 +9,14 @@ use App\Models\City;
 use App\Models\Channel;
 use App\Models\Product;
 use App\Models\Category;
+use App\Exports\Av3mExport;
 use Illuminate\Http\Request;
 use App\Exports\ProductExport;
-use App\Exports\StockOnHandExport;
 use App\Imports\ProductImport;
 use App\Models\SalesAvailability;
+use App\Exports\StockOnHandExport;
 use Illuminate\Support\Facades\DB;
+use App\Exports\Av3mTemplateExport;
 use Illuminate\Support\Facades\Log;
 use App\Http\Controllers\Controller;
 use Maatwebsite\Excel\Facades\Excel;
@@ -74,7 +76,7 @@ class ProductController extends Controller
                     'actions' => view('pages.product.action', [
                         'productId' => $item->id,
                         'sku' => $item->sku,
-                        'categories' => Category::all() 
+                        'categories' => Category::all()
                     ])->render()
                 ];
             })
@@ -185,9 +187,9 @@ class ProductController extends Controller
     public function getProductsByCategory($categoryId)
     {
         $products = Product::where('category_id', $categoryId)
-                        ->select('id', 'sku')
-                        ->get();
-                        
+            ->select('id', 'sku')
+            ->get();
+
         return response()->json($products);
     }
     public function update(UpdateProductRequest $request, Product $product)
@@ -397,6 +399,83 @@ class ProductController extends Controller
                 'message' => $e->getMessage(),
                 'trace' => $e->getTraceAsString(),
                 'filters' => $request->all()
+            ]);
+
+            return response()->json([
+                'error' => true,
+                'message' => 'Gagal mengunduh file: ' . $e->getMessage()
+            ], 500);
+        }
+    }
+
+    public function downloadAv3m()
+    {
+        try {
+            DB::enableQueryLog();
+
+            $data = DB::table('outlets')
+                ->crossJoin('products')
+                ->leftJoin('av3ms', function ($join) {
+                    $join->on('outlets.id', '=', 'av3ms.outlet_id')
+                        ->on('products.id', '=', 'av3ms.product_id');
+                })
+                ->select([
+                    'outlets.code',
+                    'outlets.name as outlet_name',
+                    'products.sku as product_sku',
+                    'av3ms.updated_at as last_update',
+                    'av3ms.av3m as av3m',
+                ])
+                ->where('outlets.status', 'APPROVED')
+                ->where('outlets.deleted_at', null)
+                ->where('products.deleted_at', null)
+                ->orderBy('outlets.code', 'asc')
+                ->orderBy('products.sku', 'asc')
+                ->get();
+           
+            // Log untuk debugging
+            Log::info('Av3m Export Data', [
+                'query' => DB::getQueryLog(),
+                'record_count' => $data->count()
+            ]);
+            return Excel::download(
+                new Av3mExport($data),
+                'av3m_' . now()->format('Y-m-d_His') . '.xlsx',
+                \Maatwebsite\Excel\Excel::XLSX
+            );
+        } catch (\Exception $e) {
+            Log::error('Av3m Export Error', [
+                'message' => $e->getMessage(),
+                'trace' => $e->getTraceAsString(),
+            ]);
+
+            return response()->json([
+                'error' => true,
+                'message' => 'Gagal mengunduh file: ' . $e->getMessage()
+            ], 500);
+        }
+    }
+    public function templateAv3m()
+    {
+        try {
+            DB::enableQueryLog();
+
+            $data = Product::with('category')->get();
+           
+            // Log untuk debugging
+            Log::info('Av3m Template Data', [
+                'query' => DB::getQueryLog(),
+                'record_count' => $data->count()
+            ]);
+            return Excel::download(
+                new Av3mTemplateExport($data),
+                'av3m_template_' . now()->format('Y-m-d_His') . '.xlsx',
+                \Maatwebsite\Excel\Excel::XLSX
+            );
+        } catch (\Exception $e) {
+            Log::error('Av3m Template Error', [
+                'message' => $e->getMessage(),
+                'trace' => $e->getTraceAsString(),
             ]);
 
             return response()->json([
