@@ -2,15 +2,16 @@
 
 namespace App\Http\Controllers\Web;
 
-use App\Http\Controllers\Controller;
-
 use Carbon\Carbon;
-use function GuzzleHttp\json_encode;
+
 use App\Models\Selling;
 use Illuminate\Http\Request;
 use App\Exports\SellingExport;
-use Maatwebsite\Excel\Facades\Excel;
+use App\Models\SellingProduct;
 use Illuminate\Support\Facades\Log;
+use App\Http\Controllers\Controller;
+use function GuzzleHttp\json_encode;
+use Maatwebsite\Excel\Facades\Excel;
 
 class SellingController extends Controller
 {
@@ -26,8 +27,10 @@ class SellingController extends Controller
         if ($request->filled('search_term')) {
             $searchTerm = $request->search_term;
             $query->where(function($q) use ($searchTerm) {
-                $q->where('outlet_name', 'like', "%{$searchTerm}%")
-                  ->orWhereHas('user', function($q) use ($searchTerm) {
+                $q->WhereHas('user', function($q) use ($searchTerm) {
+                      $q->where('name', 'like', "%{$searchTerm}%");
+                  })
+                  ->orWhereHas('outlet', function($q) use ($searchTerm) {
                       $q->where('name', 'like', "%{$searchTerm}%");
                   });
             });
@@ -43,13 +46,13 @@ class SellingController extends Controller
             'recordsTotal' => $filteredRecords,
             'recordsFiltered' => $filteredRecords,
             'data' => $result->map(function($item) {
-                $totalSelling = $item->products->sum('selling');
+                $totalSelling = SellingProduct::where('selling_id', $item->id)->sum('total');
                 return [
                     'id' => $item->id, // Tambahkan id product
                     'waktu' => Carbon::parse($item->created_at)->format('d-m-Y H:i:s'),
                     'sales' => $item->user->name,
-                    'outlet' => $item->outlet_name,
-                    'total' => $totalSelling,
+                    'outlet' => $item->outlet->name,
+                    'total' => number_format($totalSelling, 0, ',', '.'),
                     'actions' => view('pages.selling.action', [
                         'sellingId' => $item->id
                     ])->render()
@@ -58,6 +61,26 @@ class SellingController extends Controller
         ]);
     }
     public function detail($id){
+        $selling = Selling::with('user:id,name', 'products', 'outlet:id,name,TSO,account,channel_id,city_id,tipe_outlet,code', 'outlet.channel:id,name', 'outlet.city:id,name')->where('id', $id)->first();
+        $groupedProducts = $selling->products->groupBy(function($sellingProduct) {
+            return $sellingProduct->product->category->name;
+        })->map(function($products, $categoryName) {
+            return [
+                'category_name' => $categoryName,
+                'products' => $products->map(function($sellingProduct) {
+                    return [
+                        'id' => $sellingProduct->id,
+                        'product_name' => $sellingProduct->product->sku,
+                        'qty' => $sellingProduct->qty,
+                        'price' => $sellingProduct->price,
+                        'total' => $sellingProduct->total
+                    ];
+                })
+            ];
+        })->values();
+        return view('pages.selling.detail',compact('selling','groupedProducts'));
+    } 
+    public function detailo($id){
         $selling = Selling::select([
             'id',
             'user_id',
@@ -96,7 +119,7 @@ class SellingController extends Controller
         $response = [
             'id' => $selling->id,
             'user_id' => $selling->user_id,
-            'outlet_name' => $selling->outlet_name,
+            'outlet_name' => $selling->outlet->name,
             'longitude' => $selling->longitude,
             'latitude' => $selling->latitude,
             'user' => [

@@ -14,15 +14,40 @@
 			<div class="grid grid-cols-2 gap-4">
 				<div>
 					<label for="sales-name">Nama Sales</label>
-					<input id="sales" class="form-control disabled"type="text" value="{{ $response['user']['name'] }}" name="sales" disabled aria-describedby="sales" />
+					<input id="sales" class="form-control disabled"type="text" value="{{$selling->user->name}}" name="sales" disabled aria-describedby="sales" />
+				</div>
+				<div>
+					<label for="tso-name">TSO</label>
+					<input id="tso" class="form-control disabled"type="text" value="{{$selling->outlet->TSO}}" name="tso" disabled aria-describedby="tso" />
 				</div>
 				<div>
 					<label for="outlet-name">Nama Outlet</label>
-					<input id="outlet" class="form-control"type="text" value="{{ $response['outlet_name'] }}" name="outlet" disabled aria-describedby="outlet" />
+					<input id="outlet" class="form-control"type="text" value="{{$selling->outlet->name}}" name="outlet" disabled aria-describedby="outlet" />
 				</div>
+				<div>
+					<label for="outlet-code">Kode Outlet</label>
+					<input id="outlet-code" class="form-control"type="text" value="{{$selling->outlet->code}}" name="outlet-code" disabled aria-describedby="outlet-code" />
+				</div>
+				<div>
+					<label for="outlet-type">Tipe Outlet</label>
+					<input id="outlet-type" class="form-control"type="text" value="{{$selling->outlet->tipe_outlet}}" name="outlet-type" disabled aria-describedby="outlet-type" />
+				</div>
+				<div>
+					<label for="account">Account</label>
+					<input id="account" class="form-control"type="text" value="{{$selling->outlet->account}}" name="account" disabled aria-describedby="account" />
+				</div>
+				<div>
+					<label for="channel">Channel</label>
+					<input id="channel" class="form-control"type="text" value="{{$selling->outlet->channel->name}}" name="channel" disabled aria-describedby="channel" />
+				</div>
+				<div>
+					<label for="Kota">Kota</label>
+					<input id="Kota" class="form-control"type="text" value="{{$selling->outlet->city->name}}" name="Kota" disabled aria-describedby="Kota" />
+				</div>
+
 			</div>
 
-			@foreach ($response['products_by_category'] as $productsByCategory)
+			@foreach ($groupedProducts as $productsByCategory)
 			<div class="border-b-2 border-dashed py-6">
 				<h3 class="font-bold text-2xl text-white py-2 mb-6">
 					{{ $productsByCategory['category_name'] }}
@@ -32,16 +57,16 @@
 					<p class="text-white">{{ $product['product_name'] }}</p>
 					<div class="flex items-center gap-4">
 						<div>
-							<label for="stock" class="form-label">Stock</label>
-							<input id="stock" class="form-control" value="{{ $product['stock'] }}" disabled type="text" aria-describedby="stock" />
+							<label for="price" class="form-label">Price</label>
+							<input id="price" class="form-control" value="Rp. {{ number_format($product['price'], 2) }}" disabled type="text" aria-describedby="price" />
 						</div>
 						<div>
-							<label for="selling" class="form-label">Selling</label>
-							<input id="selling" class="form-control" value="{{ $product['selling'] }}" disabled type="text" aria-describedby="selling" />
+							<label for="qty" class="form-label">Qty</label>
+							<input id="qty" class="form-control" value="{{ $product['qty'] }}" disabled type="text" aria-describedby="qty" />
 						</div>
 						<div>
-							<label for="balance" class="form-label">Balance</label>
-							<input id="balance" class="form-control" value="{{ $product['balance'] }}" disabled type="text" aria-describedby="balance-500" />
+							<label for="total" class="form-label">Total</label>
+							<input id="total" class="form-control" value="Rp. {{ number_format($product['total'], 2) }}" disabled type="text" aria-describedby="total-500" />
 						</div>
 					</div>
 				</div>
@@ -49,19 +74,17 @@
 
 			</div>
 			@endforeach
-	
-	
 			<x-section-card :title="'Area Domisili Outlet'">
 				<div class="grid grid-cols-2 gap-6">
 					<div>
 						<label for="longitude" class="form-label">Longitudes <span class="font-normal">(DD
 								Coordinates)</span></label>
-						<input id="longitude" class="form-control" type="text" name="longitude" value="{{ $response['longitude'] }}" disabled aria-describedby="longitude" />
+						<input id="longitude" class="form-control" type="text" name="longitude" value="{{$selling->longitude}}" disabled aria-describedby="longitude" />
 					</div>
 					<div>
 						<label for="latitude" class="form-label">Latitudes <span class="font-normal">(DMS
 								Coordinates)</span></label>
-						<input id="latitude" class="form-control" type="text" name="latitude" value="{{ $response['latitude'] }}" disabled aria-describedby="latitude" />
+						<input id="latitude" class="form-control" type="text" name="latitude" value="{{$selling->latitude}}" disabled aria-describedby="latitude" />
 					</div>
 				</div>
 				<div class="relative mt-6">
@@ -82,7 +105,7 @@
 				<div class="flex flex-col items-center w-full">
 					<div class="relative w-full mx-3 border-red">
 						<div class="flex justify-center items-center flex-col py-1 h-[450px]">\
-							<img src="https://asset.kompas.com/crops/-fgwA_-9Kc_utIpIQ2krARwyIfg=/2x0:508x337/1200x800/data/photo/2021/01/06/5ff598a54774b.jpg" class="w-full h-full rounded-md object-cover" alt="">
+							<img src="{{env('APP_URL') .$selling->path}}" class="w-full h-full rounded-md object-cover" alt="">
 						</div>
 					</div>
 				</div>

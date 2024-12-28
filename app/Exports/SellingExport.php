@@ -3,6 +3,7 @@
 namespace App\Exports;
 
 use App\Models\Selling;
+use App\Models\SellingProduct;
 use Maatwebsite\Excel\Concerns\FromQuery;
 use Maatwebsite\Excel\Concerns\WithHeadings;
 use Maatwebsite\Excel\Concerns\WithMapping;
@@ -17,44 +18,58 @@ class SellingExport implements FromQuery, WithHeadings, WithMapping, WithStyles,
 {
     public function query()
     {
-        return Selling::with(['user', 'products.product']);
+        return SellingProduct::query()->with(['product', 'sell'])->completeRelation();
     }
 
     public function headings(): array
     {
         return [
-            'Product',
+            'Nama Sales',
+            'TSO',
             'Outlet',
-            'Sales',
-            'Stock',
-            'Selling',
-            'Balance',
-            'Image URL'
+            'Kode Outlet',
+            'Tipe Outlet',
+            'Account',
+            'Channel',
+            'Kota',
+            'Category',
+            'SKU Name',
+            'Qty Order',
+            'Harga',
+            'Total',
+            'Created At',
+            'Ended At',
+            'Duration',
+            'Week'
         ];
     }
 
     public function map($selling): array
     {
-        $rows = [];
-        
-        foreach ($selling->products as $product) {
-            $rows[] = [
-                $product->product->sku ?? 'N/A',
-                $selling->outlet_name,
-                $selling->user->name,
-                $product->stock ?? 0,
-                $product->selling ?? 0,
-                $product->balance ?? 0,
-                $selling->path ? url($selling->path) : 'N/A',
-            ];
-        }
-
-        return $rows;
+        return [
+            $selling->sell->user->name,
+            $selling->sell->outlet->TSO,
+            $selling->sell->outlet->name,
+            $selling->sell->code,
+            $selling->sell->outlet->tipe_outlet,
+            $selling->sell->outlet->account,
+            $selling->sell->outlet->channel->name,
+            $selling->sell->outlet->city->name,
+            $selling->product->category->name,
+            $selling->product->sku,
+            $selling->qty,
+            $selling->price,
+            $selling->total,
+            $selling->sell->created_at,
+            $selling->sell->ended_at,
+            $selling->sell->duration,
+            $selling->sell->week
+        ];
     }
 
     public function styles(Worksheet $sheet)
     {
-        $lastColumn = 'G'; // Last column in our dataset
+        $lastColumn = 'Q'; // Last column in our dataset
         $lastRow = $sheet->getHighestRow();
 
         // Header styles
