@@ -26,10 +26,10 @@
 
     <main class="w-full p-6">
         <div class="flex flex-col md:flex-row w-full gap-5 ">
-            <x-pages.dashboard.total-card :title="'Total Report'" :total="7.432" :trendValue="56" :date="'03 November 2024'" />
-            <x-pages.dashboard.total-card :title="'Total Sales'" :total="$user['total']" :date="$user['date']" />
-            <x-pages.dashboard.total-card :title="'Total Routing'" :total="$routes['total']" :date="$routes['date']" />
-            <x-pages.dashboard.total-card :title="'Total Visibility Activity'" :total="$visibility_activity['total']" :trendValue="-2" :date="$visibility_activity['date']" />
+            <x-pages.dashboard.total-card :title="'Total Outlet'" :total="$routes['total']" :date="$routes['date']" />
+            <x-pages.dashboard.total-card :title="'Total Visit'" :total="$visit['total']"  :date="$visit['date']" />
+            <x-pages.dashboard.total-card :title="'Total Selling'" :total="$selling['total']" :date="$selling['date']" />
+            <x-pages.dashboard.total-card :title="'Total SMD'" :total="$user['total']" :date="$user['date']" />
         </div>
         <div class="flex flex-wrap xl:flex-nowrap gap-6 w-full mt-6">
             <x-pages.dashboard.chart-routing />
@@ -52,13 +52,13 @@
                                 <label
                                     class="btn flex-1 py-2 px-4 rounded-md text-center cursor-pointer transition-all duration-200 bg-[#0288d1] text-white hover:bg-[#0277bd]"
                                     for="btnStock">
-                                    Stock On-Hand
+                                    Stock Inventory
                                 </label>
                                 <input type="radio" class="hidden" name="frame" value="true" id="btnVisibility">
                                 <label
                                     class="btn flex-1 py-2 px-4 rounded-md text-center cursor-pointer transition-all duration-200 bg-[#333] text-white hover:bg-[#444]"
                                     for="btnVisibility">
-                                    Visibility
+                                    Shelving
                                 </label>
                             </div>
                         </div>
@@ -167,7 +167,7 @@
         const dataStock = {!!$stock!!}
         
 
-        const dataVisibility = {!!$count!!}
+        const dataVisibility = {!!$shelving!!}
 
         // Marker Data
         const markerData = {

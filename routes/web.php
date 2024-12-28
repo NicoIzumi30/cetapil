@@ -30,6 +30,7 @@ Route::middleware('guest')->group(function () {
 Route::middleware('auth')->group(function () {
     // Dashboard
     Route::get('/', [DashboardController::class, 'index'])->name('dashboard');
+    Route::get('/getRouting', [DashboardController::class, 'getRoutingPercentage'])->name('getRoutingPercentage');
 
     //profile
     Route::get('/profile', [ProfileController::class, 'index'])->name('profile');
