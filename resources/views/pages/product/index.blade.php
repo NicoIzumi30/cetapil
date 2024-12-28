@@ -340,49 +340,59 @@
                     <x-slot:title>
                         Tambah Power SKU & Competitor
                     </x-slot:title>
-                    <form id="createPowerSkuForm" class="grid grid-cols-2 gap-6">
+                    <form id="createPowerSkuForm">
                         @csrf
-						<div>
+                        <div>
                             <label for="select-input-survey-data" class="!text-black">Kategori Survey</label>
                             <div>
-                                <select id="select-input-survey-data" name="survey_id"
-                                    class="w-full form-control">
+                                <select id="select-input-survey-data" name="survey_id" class="w-full form-control">
                                     <option value="" selected disabled>-- Pilih Category Survey --</option>
-                                        <option value="power-sku">
-                                            Power SKU
-                                        </option>
-                                        <option value="harga-kompetitor">
-                                            Harga Kompetitor
-                                        </option>
+                                    <option value="power-sku">
+                                        Power SKU
+                                    </option>
+                                    <option value="harga-kompetitor">
+                                        Harga Kompetitor
+                                    </option>
                                 </select>
                             </div>
                         </div>
-						<div id="product-category-container" class="hidden">
-                            <label for="power-sku-product-categories" class="!text-black">Kategori Produk</label>
+                        <div id="product-competitor-container" class="hidden mt-4">
                             <div>
-                                <select id="power-sku-product-categories" name="power-sku-category_id"
-                                    class="w-full form-control @error('power-sku-category_id') is-invalid @enderror">
-                                    <option value="" selected disabled>-- Pilih Category Product --</option>
-                                    @foreach ($categories as $category)
-                                        <option value="{{ $category->id }}">
-                                            {{ $category->name }}
-                                        </option>
-                                    @endforeach
-                                </select>
-                                <span id="power-sku-product-category_id-error" class="text-red-500 text-xs hidden"></span>
+                                <label for="product-competitor" class="!text-black">Harga</label>
+                                <input id="product-competitor" class="form-control" type="number"
+                                    name="product-competitor" placeholder="Masukan Harga">
+                                <span id="product-competitor-error" class="text-red-500 text-xs hidden"></span>
                             </div>
                         </div>
-                        <div>
-                            <label for="power-sku" class="!text-black">Power SKU</label>
+                        <div id="power-sku-container" class="hidden grid-cols-2 gap-6 mt-4">
                             <div>
-                                <select id="power-sku" name="power-sku"
-                                    class="w-full form-control @error('power-sku') is-invalid @enderror">
-                                    <option value="" selected disabled>-- Pilih Power SKU --</option>
-                                    @foreach ($products as $product)
-                                        <option value="{{ $product->id }}">{{ $product->sku }}</option>
-                                    @endforeach
-                                </select>
-                                <span id="power-sku-error" class="text-red-500 text-xs hidden"></span>
+                                <label for="power-sku-product-categories" class="!text-black">Kategori Produk</label>
+                                <div>
+                                    <select id="power-sku-product-categories" name="power-sku-category_id"
+                                        class="w-full form-control @error('power-sku-category_id') is-invalid @enderror">
+                                        <option value="" selected disabled>-- Pilih Category Product --</option>
+                                        @foreach ($categories as $category)
+                                            <option value="{{ $category->id }}">
+                                                {{ $category->name }}
+                                            </option>
+                                        @endforeach
+                                    </select>
+                                    <span id="power-sku-product-category_id-error"
+                                        class="text-red-500 text-xs hidden"></span>
+                                </div>
+                            </div>
+                            <div>
+                                <label for="power-sku" class="!text-black">Power SKU</label>
+                                <div>
+                                    <select id="power-sku" name="power-sku"
+                                        class="w-full form-control @error('power-sku') is-invalid @enderror">
+                                        <option value="" selected disabled>-- Pilih Power SKU --</option>
+                                        @foreach ($products as $product)
+                                            <option value="{{ $product->id }}">{{ $product->sku }}</option>
+                                        @endforeach
+                                    </select>
+                                    <span id="power-sku-error" class="text-red-500 text-xs hidden"></span>
+                                </div>
                             </div>
                         </div>
                         <x-slot:footer>
@@ -434,34 +444,59 @@
                 <form id="editPowerSkuForm">
                     @csrf
                     <div>
-                        <label for="edit-power-sku-product-categories" class="!text-black">Kategori Produk</label>
+                        <label for="edit-select-input-survey-data" class="!text-black">Kategori Survey</label>
                         <div>
-                            <select id="edit-power-sku-product-categories" name="edit-power-sku-category_id"
+                            <select id="edit-select-input-survey-data" name="edit-select-survey-data"
                                 class="w-full form-control">
-                                <option value="" disabled>-- Pilih Category Product --</option>
-                                @foreach ($categories as $category)
-                                    <option value="{{ $category->id }}"
-                                        {{ isset($productToEdit) && $productToEdit->category_id == $category->id ? 'selected' : '' }}>
-                                        {{ $category->name }}
-                                    </option>
-                                @endforeach
+                                <option value="" selected disabled>-- Pilih Category Survey --</option>
+                                <option value="power-sku">
+                                    Power SKU
+                                </option>
+                                <option value="harga-kompetitor">
+                                    Harga Kompetitor
+                                </option>
                             </select>
-                            <span id="edit-power-sku-category_id-error" class="text-red-500 text-xs hidden"></span>
                         </div>
                     </div>
-                    <div>
-                        <label for="edit-power-sku" class="!text-black">Power SKU & Competitor</label>
+                    <div id="edit-product-competitor-container" class="hidden mt-4">
                         <div>
-                            <select id="edit-power-sku" name="edit-power-sku" class="w-full form-control">
-                                <option value="" disabled>-- Pilih Power SKU & Competitor --</option>
-                                @foreach ($products as $product)
-                                    <option value="{{ $product->id }}"
-                                        {{ isset($productToEdit) && $productToEdit->id == $product->id ? 'selected' : '' }}>
-                                        {{ $product->sku }}
-                                    </option>
-                                @endforeach
-                            </select>
-                            <span id="edit-power-sku-error" class="text-red-500 text-xs hidden"></span>
+                            <label for="edit-product-competitor" class="!text-black">Harga</label>
+                            <input id="edit-product-competitor" class="form-control" type="number"
+                                name="edit-product-competitor" placeholder="Masukan Harga">
+                            <span id="edit-product-competitor-error" class="text-red-500 text-xs hidden"></span>
+                        </div>
+                    </div>
+                    <div id="edit-power-sku-container" class="hidden grid-cols-2 gap-6 mt-4">
+                        <div>
+                            <label for="edit-power-sku-product-categories" class="!text-black">Kategori Produk</label>
+                            <div>
+                                <select id="edit-power-sku-product-categories" name="edit-power-sku-category_id"
+                                    class="w-full form-control">
+                                    <option value="" disabled>-- Pilih Category Product --</option>
+                                    @foreach ($categories as $category)
+                                        <option value="{{ $category->id }}"
+                                            {{ isset($productToEdit) && $productToEdit->category_id == $category->id ? 'selected' : '' }}>
+                                            {{ $category->name }}
+                                        </option>
+                                    @endforeach
+                                </select>
+                                <span id="edit-power-sku-category_id-error" class="text-red-500 text-xs hidden"></span>
+                            </div>
+                        </div>
+                        <div>
+                            <label for="edit-power-sku" class="!text-black">Power SKU & Competitor</label>
+                            <div>
+                                <select id="edit-power-sku" name="edit-power-sku" class="w-full form-control">
+                                    <option value="" disabled>-- Pilih Power SKU & Competitor --</option>
+                                    @foreach ($products as $product)
+                                        <option value="{{ $product->id }}"
+                                            {{ isset($productToEdit) && $productToEdit->id == $product->id ? 'selected' : '' }}>
+                                            {{ $product->sku }}
+                                        </option>
+                                    @endforeach
+                                </select>
+                                <span id="edit-power-sku-error" class="text-red-500 text-xs hidden"></span>
+                            </div>
                         </div>
                     </div>
                     <x-slot:footer>
@@ -1208,18 +1243,31 @@
                 });
             }
 
-			$('#select-input-survey-data').change(function(e) {
-				if(e.target.value == 'harga-kompetitor') {
-					$('#product-category-container').removeClass('hidden');
-					$('#product-category-container').addClass('block');
-					$('#power-sku-container').addClass('hidden');
-				}
-				if(e.target.value == 'power-sku') {
-					$('#power-sku-container').removeClass('hidden');
-					$('#power-sku-container').addClass('block');
-					$('#product-category-container').addClass('hidden');
-				}
-			})
+            $('#select-input-survey-data').change(function(e) {
+                if (e.target.value == 'harga-kompetitor') {
+                    $('#product-competitor-container').removeClass('hidden');
+                    $('#product-competitor-container').addClass('block');
+                    $('#power-sku-container').addClass('hidden');
+                }
+                if (e.target.value == 'power-sku') {
+                    $('#power-sku-container').removeClass('hidden');
+                    $('#power-sku-container').addClass('grid');
+                    $('#product-competitor-container').addClass('hidden');
+                }
+            })
+
+            $('#edit-select-input-survey-data').change(function(e) {
+                if (e.target.value == 'harga-kompetitor') {
+                    $('#edit-product-competitor-container').removeClass('hidden');
+                    $('#edit-product-competitor-container').addClass('block');
+                    $('#edit-power-sku-container').addClass('hidden');
+                }
+                if (e.target.value == 'power-sku') {
+                    $('#edit-power-sku-container').removeClass('hidden');
+                    $('#edit-power-sku-container').addClass('grid');
+                    $('#edit-product-competitor-container').addClass('hidden');
+                }
+            })
 
             initializePowerSkuComponents()
         });
