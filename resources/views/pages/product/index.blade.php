@@ -437,7 +437,7 @@
             {{-- Tabel Power SKU & Competitor End --}}
 
             {{-- Edit Power SKU Modal  --}}
-            <x-modal id="edit-power-sku">
+            <x-modal id="edit-power-sku-modal">
                 <x-slot:title>
                     Edit Power SKU & Competitor
                 </x-slot:title>
@@ -487,7 +487,7 @@
                             <label for="edit-power-sku" class="!text-black">Power SKU</label>
                             <div>
                                 <select id="edit-power-sku" name="edit-power-sku" class="w-full form-control">
-                                    <option value="" disabled>-- Pilih Power SKU & Competitor --</option>
+                                    <option value="" disabled>-- Pilih Power SKU  --</option>
                                     @foreach ($products as $product)
                                         <option value="{{ $product->id }}"
                                             {{ isset($productToEdit) && $productToEdit->id == $product->id ? 'selected' : '' }}>
@@ -1165,7 +1165,7 @@
 
             function initializePowerSkuComponents() {
                 // Pre-initialize select2 with caching
-                $('#power-sku-product-categories, #edit-power-sku-product-categories').select2();
+                $('#power-sku-product-categories').select2();
 
                 $('#power-sku, #edit-power-sku').select2();
 
@@ -1379,7 +1379,7 @@
                     data: formData,
                     success: function(response) {
                         toast('success', response.message, 300);
-                        closeModal('edit-power-sku');
+                        closeModal('edit-power-sku-modal');
                         // Refresh table
                         $('#power-sku-table').DataTable().ajax.reload();
                     },
