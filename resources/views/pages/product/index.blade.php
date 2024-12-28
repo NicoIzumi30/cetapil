@@ -199,6 +199,9 @@
                     <span id="downloadBtnText">Download</span>
                     <span id="downloadBtnLoading" class="hidden">Downloading...</span>
                 </x-button.light>
+                <x-button.info onclick="openModal('unggah-av3m-bulk')">
+                    Upload AV3M
+                </x-button.info>
                 <x-select.light :title="'Filter Produk'" id="filter_product">
                     <option value="all">Semua</option>
                     @foreach ($products as $product)
@@ -215,6 +218,48 @@
                 {{-- <input type='text' id="basic-date" placeholder="Select Date..."> --}}
             </x-slot:cardAction>
             {{-- Availability Action End --}}
+
+            {{-- Upload AV3M Bulk --}}
+            <x-modal id="unggah-av3m-bulk">
+                <div class="flex flex-col items-center w-full">
+                    <div class="relative w-full mx-3">
+                        {{-- Upload Area --}}
+                        <div class="cursor-pointer w-full h-[300px] text-center grid place-items-center rounded-md border-2 border-dashed border-blue-400 bg-[#EFF9FF]rounded-lg p-4"
+                            id="upload-area-av3m">
+                            <div id="upload-helptext-av3m" class="flex flex-col items-center text-center">
+                                <svg width="30" height="63" viewBox="0 0 64 63" fill="none"
+                                    xmlns="http://www.w3.org/2000/svg">
+                                    <path
+                                        d="M28 43.2577C28 45.4323 29.7909 47.1952 32 47.1952C34.2091 47.1952 36 45.4323 36 43.2577V15.074L48.971 27.8423L54.6279 22.2739L32.0005 0L9.37305 22.2739L15.0299 27.8423L28 15.0749V43.2577Z"
+                                        fill="#39B5FF" />
+                                    <path
+                                        d="M0 39.375H8V55.125H56V39.375H64V55.125C64 59.4742 60.4183 63 56 63H8C3.58172 63 0 59.4742 0 55.125V39.375Z"
+                                        fill="#39B5FF" />
+                                </svg>
+                                <h5 class="text-primary font-medium mt-2">Tarik atau klik disini untuk mulai unggah
+                                    dokumen berformat CSV/XLS</h5>
+                                <p class="text-primary font-light text-sm">
+                                    Ukuran maksimal file <strong>5MB</strong>
+                                </p>
+                            </div>
+                            <p class="hidden text-primary font-bold text-xl" id="filename-display-av3m"></p>
+                        </div>
+                        {{-- Hidden File Input --}}
+                        <input type="file" name="file_upload-av3m" id="file_upload-av3m" class="hidden">
+                    </div>
+                </div>
+                <x-slot:footer>
+                    <div class="flex gap-4">
+                        <x-button.light onclick="closeModal('unggah-av3m-bulk')"
+                            class="w-full border rounded-md ">Batalkan</x-button.light>
+                        <x-button.light class="w-full !text-white !bg-primary " id="importBtnAv3m">Mulai
+                            Unggah</x-button.light>
+                        <x-button.light id="downloadTemplateAv3m" class="w-full !text-white !bg-primary ">Download
+                            Template</x-button.light>
+                    </div>
+                </x-slot:footer>
+            </x-modal>
+            {{-- END Upload AV3M Bulk --}}
 
             {{-- Tabel Availability --}}
             <table id="stock-on-hand-table" class="table">
@@ -327,7 +372,7 @@
                                 <span id="power-sku-product-category_id-error" class="text-red-500 text-xs hidden"></span>
                             </div>
                         </div>
-                        <div id="power-sku-container" class="hidden">
+                        <div>
                             <label for="power-sku" class="!text-black">Power SKU</label>
                             <div>
                                 <select id="power-sku" name="power-sku"
@@ -381,11 +426,12 @@
             </table>
             {{-- Tabel Power SKU & Competitor End --}}
 
+            {{-- Edit Power SKU Modal  --}}
             <x-modal id="edit-power-sku">
                 <x-slot:title>
                     Edit Power SKU & Competitor
                 </x-slot:title>
-                <form id="editPowerSkuForm" class="grid grid-cols-2 gap-6">
+                <form id="editPowerSkuForm">
                     @csrf
                     <div>
                         <label for="edit-power-sku-product-categories" class="!text-black">Kategori Produk</label>
@@ -426,12 +472,12 @@
                     </x-slot:footer>
                 </form>
             </x-modal>
+            {{-- Edit Power SKU Modal End --}}
+
         </x-card>
         {{-- Power SKU & Competitor End --}}
     </main>
 @endsection
-
-
 
 @push('scripts')
     <script>
@@ -1084,14 +1130,13 @@
 
             function initializePowerSkuComponents() {
                 // Pre-initialize select2 with caching
-                $('#power-sku-product-categories, #edit-power-sku-product-categories').select2({
-                    placeholder: '-- Pilih Category Product --',
-                    width: '100%'
-                });
+                $('#power-sku-product-categories, #edit-power-sku-product-categories').select2();
 
-                $('#power-sku, #edit-power-sku, #select-input-survey-data').select2({
-					minimumResultsForSearch: Infinity
-				});
+                $('#power-sku, #edit-power-sku').select2();
+
+                $('#select-input-survey-data, #edit-select-input-survey-data').select2({
+                    minimumResultsForSearch: Infinity
+                })
 
                 // Handle category change for add modal
                 $('#power-sku-product-categories').on('change', function() {
@@ -1122,7 +1167,7 @@
                                 $('#power-sku')
                                     .html(
                                         '<option value="" selected disabled>-- Pilih Power SKU --</option>'
-                                        )
+                                    )
                                     .prop('disabled', false);
                             }
                         });
@@ -1155,7 +1200,7 @@
                                 $('#edit-power-sku')
                                     .html(
                                         '<option value="" disabled>-- Pilih Power SKU --</option>'
-                                        )
+                                    )
                                     .prop('disabled', false);
                             }
                         });
@@ -1176,7 +1221,7 @@
 				}
 			})
 
-			initializePowerSkuComponents()
+            initializePowerSkuComponents()
         });
 
         // Create Power SKU
@@ -1310,7 +1355,6 @@
             });
         }
 
-
         // Reset form errors
         function resetFormErrors() {
             $('.text-red-500').addClass('hidden');
@@ -1319,6 +1363,83 @@
 
         $(document).ready(function() {
             initializePowerSkuEdit();
+        });
+    </script>
+@endpush
+
+
+@push('scripts')
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            const uploadArea = document.getElementById('upload-area-av3m');
+            const fileInput = document.getElementById('file_upload-av3m');
+            const displayFileName = document.getElementById('filename-display-av3m');
+            const uploadHelptext = document.getElementById('upload-helptext-av3m');
+            const maxFileSize = 2 * 1024 * 1024;
+
+            // Click handler for the upload area
+            uploadArea.addEventListener('click', () => {
+                fileInput.click();
+            });
+
+            // Drag and drop handlers
+            uploadArea.addEventListener('dragover', (e) => {
+                e.preventDefault();
+                uploadArea.classList.add('drag-over');
+            });
+
+            uploadArea.addEventListener('dragleave', (e) => {
+                e.preventDefault();
+                uploadArea.classList.remove('drag-over');
+            });
+
+            uploadArea.addEventListener('drop', (e) => {
+                e.preventDefault();
+                uploadArea.classList.remove('drag-over');
+
+                const files = e.dataTransfer.files;
+                handleFiles(files);
+            });
+
+            fileInput.addEventListener('change', (e) => {
+                handleFiles(e.target.files);
+            });
+
+            function handleFiles(files) {
+                if (files.length === 0) return;
+
+                const file = files[0];
+
+                const validTypes = [
+                    'text/csv',
+                    'application/vnd.ms-excel',
+                    'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet'
+                ];
+
+                if (!validTypes.includes(file.type)) {
+                    alert('Upload file gagal, Tolong Unggah Hanya file berformat .csv/xls');
+                    fileInput.value = '';
+                    return;
+                }
+
+                if (file.size > maxFileSize) {
+                    alert('Upload file gagal, Ukuran file lebih dari 5 MB');
+                    fileInput.value = '';
+                    return;
+                }
+
+                if (file.size > maxFileSize && file.size > maxFileSize) {
+                    return
+                }
+
+                const reader = new FileReader();
+                reader.onload = function(e) {
+                    displayFileName.classList.remove('hidden')
+                    uploadHelptext.classList.add('hidden')
+                    displayFileName.innerText = file.name
+                };
+                reader.readAsText(file);
+            }
         });
     </script>
 @endpush
