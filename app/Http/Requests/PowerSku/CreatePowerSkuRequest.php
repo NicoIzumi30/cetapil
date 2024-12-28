@@ -19,22 +19,36 @@ class CreatePowerSkuRequest extends FormRequest
      *
      * @return array<string, \Illuminate\Contracts\Validation\ValidationRule|array<mixed>|string>
      */
-    public function rules(): array
+    public function rules()
     {
-        return [
-            'power-sku-category_id' => 'required|exists:categories,id',
-            'power-sku' => 'required|string|max:255|unique:products,sku',
+        $rules = [
+            'select-input-survey-data' => 'required|in:power-sku,harga-kompetitor',
         ];
+
+        if ($this->input('select-input-survey-data') === 'power-sku') {
+            $rules['power-sku'] = 'required|exists:products,id';
+            $rules['power-sku-category_id'] = 'required|exists:categories,id';
+        }
+
+        if ($this->input('select-input-survey-data') === 'harga-kompetitor') {
+            $rules['product-competitor'] = 'required|numeric|min:0';
+        }
+
+        return $rules;
     }
 
-    public function messages(): array
+    public function messages()
     {
         return [
+            'select-input-survey-data.required' => 'Kategori survey harus dipilih',
+            'select-input-survey-data.in' => 'Kategori survey tidak valid',
+            'power-sku.required' => 'Power SKU harus dipilih',
+            'power-sku.exists' => 'Power SKU tidak valid',
             'power-sku-category_id.required' => 'Kategori produk harus dipilih',
             'power-sku-category_id.exists' => 'Kategori produk tidak valid',
-            'power-sku.required' => 'Power SKU harus diisi',
-            'power-sku.max' => 'Power SKU maksimal 255 karakter'
+            'product-competitor.required' => 'Harga kompetitor harus diisi',
+            'product-competitor.numeric' => 'Harga kompetitor harus berupa angka',
+            'product-competitor.min' => 'Harga kompetitor tidak boleh kurang dari 0',
         ];
-
     }
 }
