@@ -26,7 +26,7 @@ use Illuminate\Validation\ValidationException;
 use App\Http\Requests\Product\UpdateAv3mRequest;
 use App\Http\Requests\Product\CreateProductRequest;
 use App\Http\Requests\Product\UpdateProductRequest;
-
+use App\Imports\ProductAV3MImport;
 
 class ProductController extends Controller
 {
@@ -276,15 +276,14 @@ class ProductController extends Controller
                 $products = Product::select('id', 'sku')
                     ->whereNotIn('id', PowerSku::pluck('product_id'))
                     ->get();
-                    
+
                 return response()->json($products);
-                
             } else if ($request->type === 'competitor') {
                 // Get all products
                 $products = Product::select('id', 'sku')->get();
                 return response()->json($products);
             }
-            
+
             return response()->json(['message' => 'Invalid survey type'], 400);
         } catch (\Exception $e) {
             return response()->json([
@@ -458,7 +457,7 @@ class ProductController extends Controller
                 ->orderBy('outlets.code', 'asc')
                 ->orderBy('products.sku', 'asc')
                 ->get();
-           
+
             // Log untuk debugging
             Log::info('Av3m Export Data', [
                 'query' => DB::getQueryLog(),
@@ -487,7 +486,7 @@ class ProductController extends Controller
             DB::enableQueryLog();
 
             $data = Product::with('category')->get();
-           
+
             // Log untuk debugging
             Log::info('Av3m Template Data', [
                 'query' => DB::getQueryLog(),
@@ -508,6 +507,48 @@ class ProductController extends Controller
                 'error' => true,
                 'message' => 'Gagal mengunduh file: ' . $e->getMessage()
             ], 500);
+        }
+    }
+    // public function bulk(Request $request)
+    // {
+    //     $request->validate([
+    //         'excel_file' => 'required|mimes:xlsx|max:10240'
+    //     ]);
+
+    //     try {
+    //         $file = $request->file('excel_file');
+    //         $fileName = $file->getClientOriginalName();
+    //         $import = new ProductImport($fileName);
+    //         Excel::import($import, $file);
+
+    //         if ($import->response['status'] == 'error') {
+    //             throw new Exception($import->response['message']);
+    //         }
+
+    //         return response()->json(['message' => 'Import success'], 200);
+    //     } catch (\Exception $e) {
+    //         return response()->json(['message' => $e->getMessage()], 500);
+    //     }
+    // }
+    public function av3mBulk(Request $request)
+    {
+        $request->validate([
+            'excel_file' => 'required|mimes:xlsx|max:10240'
+        ]);
+
+        try {
+            $file = $request->file('excel_file');
+            $fileName = $file->getClientOriginalName();
+            $import = new ProductAV3MImport($fileName);
+            Excel::import($import, $file);
+
+            if ($import->response['status'] == 'error') {
+                throw new Exception($import->response['message']);
+            }
+
+            return response()->json(['message' => 'Import success'], 200);
+        } catch (\Exception $e) {
+            return response()->json(['message' => $e->getMessage()], 500);
         }
     }
 }

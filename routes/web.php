@@ -56,7 +56,7 @@ Route::middleware('auth')->group(function () {
         ->middleware('permission:menu_routing');
 
 
-    Route::get('/routing/download-sales-activity', [RoutingController::class, 'downloadSalesActivityExcel'])    
+    Route::get('/routing/download-sales-activity', [RoutingController::class, 'downloadSalesActivityExcel'])
     ->name('routing.download-sales-activity')
     ->middleware('permission:menu_routing');
 
@@ -132,6 +132,7 @@ Route::middleware('auth')->group(function () {
             Route::delete('/{powerSku}', [PowerSkuController::class, 'destroy'])->name('destroy');
         });
         Route::prefix('av3ms')->name('av3ms.')->group(function() {
+            Route::post('/bulk', [ProductController::class, 'av3mBulk'])->name('bulk');
             Route::get('/download', [ProductController::class, 'downloadAv3m'])->name('download');
             Route::get('/template', [ProductController::class, 'templateAv3m'])->name('template');
         });

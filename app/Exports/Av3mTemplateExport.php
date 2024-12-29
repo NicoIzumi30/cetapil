@@ -35,6 +35,8 @@ class Av3mTemplateExport implements FromCollection, WithHeadings, WithMapping, W
             'Av3m',
             '',
             '',
+            '',
+            '',
             'GIH SKU',
             'Product Category',
             'Harga'
@@ -45,6 +47,8 @@ class Av3mTemplateExport implements FromCollection, WithHeadings, WithMapping, W
     {
         try {
             return [
+                '',
+                '',
                 '',
                 '',
                 '',
@@ -69,7 +73,7 @@ class Av3mTemplateExport implements FromCollection, WithHeadings, WithMapping, W
         $lastRow = $sheet->getHighestRow();
         $lastColumn = $sheet->getHighestColumn();
 
-        // Apply styling to entire worksheet (headers and content)
+        // Rest of your existing styling
         $sheet->getStyle("A1:C1")->applyFromArray([
             'alignment' => [
                 'horizontal' => Alignment::HORIZONTAL_CENTER,
@@ -82,7 +86,7 @@ class Av3mTemplateExport implements FromCollection, WithHeadings, WithMapping, W
                 ],
             ],
         ]);
-        $sheet->getStyle("F1:H{$lastRow}")->applyFromArray([
+        $sheet->getStyle("H1:J{$lastRow}")->applyFromArray([
             'alignment' => [
                 'horizontal' => Alignment::HORIZONTAL_CENTER,
                 'vertical' => Alignment::VERTICAL_CENTER,

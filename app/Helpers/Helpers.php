@@ -17,6 +17,12 @@ if (!function_exists('getOutletByName')) {
         return Outlet::where('name', $name)->first();
     }
 }
+if (!function_exists('getOutletByCode')) {
+    function getOutletByCode($code)
+    {
+        return Outlet::where('code', $code)->first();
+    }
+}
 
 if (!function_exists('getProductBySku')) {
     function getProductBySku($sku)
