@@ -533,7 +533,7 @@ class ProductController extends Controller
     public function av3mBulk(Request $request)
     {
         $request->validate([
-            'excel_file' => 'required|mimes:xlsx|max:10240'
+            'excel_file' => 'required|mimes:xlsx|max:5120'
         ]);
 
         try {
