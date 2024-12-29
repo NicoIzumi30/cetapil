@@ -358,9 +358,9 @@
                         </div>
                         <div id="product-competitor-container" class="hidden mt-4">
                             <div>
-                                <label for="product-competitor" class="!text-black">Harga</label>
-                                <input id="product-competitor" class="form-control" type="number"
-                                    name="product-competitor" placeholder="Masukan Harga">
+                                <label for="product-competitor" class="!text-black">Nama Produk</label>
+                                <input id="product-competitor" class="form-control" type="text"
+                                    name="product-competitor" placeholder="Masukan Nama Produk">
                                 <span id="product-competitor-error" class="text-red-500 text-xs hidden"></span>
                             </div>
                         </div>
