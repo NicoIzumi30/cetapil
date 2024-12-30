@@ -1,10 +1,11 @@
+import 'dart:async';
 import 'dart:io';
 import 'package:cetapil_mobile/controller/gps_controller.dart';
 import 'package:cetapil_mobile/controller/outlet/outlet_controller.dart';
 import 'package:cetapil_mobile/controller/support_data_controller.dart';
 import 'package:cetapil_mobile/database/selling_database.dart';
 import 'package:cetapil_mobile/model/list_selling_response.dart';
-import 'package:cetapil_mobile/model/outlet.dart';
+import 'package:cetapil_mobile/model/outlet.dart' as O;
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:uuid/uuid.dart';
@@ -41,9 +42,14 @@ class SellingController extends GetxController {
   // Category options
   List<String> get categories => ['GT', 'MT'];
 
-  Rx<Outlet?> selectedOutlet = Rx<Outlet?>(null);
+  Rx<O.Outlet?> selectedOutlet = Rx<O.Outlet?>(null);
   Rx<String> selectedOutletName = ''.obs;
   RxString searchOutletQuery = ''.obs;
+
+  final duration = 0.obs;
+  Timer? _durationTimer;
+  final Rx<DateTime> checkedIn = Rx<DateTime>(DateTime.now());
+  final Rx<DateTime> checkedOut = Rx<DateTime>(DateTime.now()); // Initialize with current time
 
   @override
   void onInit() {
@@ -51,7 +57,27 @@ class SellingController extends GetxController {
     _initialize();
   }
 
-  List<Outlet> get filteredOutlets {
+  void onOpen() {
+    _initialize();
+    startDurationTimer();
+    checkedIn.value = DateTime.now();
+  }
+
+  void onReset() {
+    duration.value = 0;
+    _durationTimer?.cancel();
+  }
+
+  void startDurationTimer() {
+    duration.value = 0;
+    _durationTimer?.cancel();
+    _durationTimer = Timer.periodic(const Duration(seconds: 1), (timer) {
+      duration.value++;
+      print("duration : ${duration.value}");
+    });
+  }
+
+  List<O.Outlet> get filteredOutlets {
     if (searchOutletQuery.value.isEmpty) {
       return outletController.filteredOutletsApproval;
     }
@@ -62,7 +88,7 @@ class SellingController extends GetxController {
   }
 
   // Method to handle outlet selection
-  void setSelectedOutlet(Outlet outlet) {
+  void setSelectedOutlet(O.Outlet outlet) {
     selectedOutlet.value = outlet;
     selectedOutletName.value = outlet.name ?? '';
     outletName.value.text = outlet.name ?? ''; // Update the outletName TextEditingController
@@ -161,8 +187,8 @@ class SellingController extends GetxController {
 
   void _setDraftBasicInfo(Data draftData) {
     currentDraftId.value = draftData.id ?? '';
-    outletName.value.text = draftData.outletName ?? '';
-    selectedCategory.value = draftData.categoryOutlet ?? 'MT';
+    selectedOutlet.value =
+        filteredOutlets.firstWhere((outlet) => outlet.id == draftData.outlet!.id);
   }
 
   void _loadDraftProducts(Data draftData) {
@@ -190,9 +216,7 @@ class SellingController extends GetxController {
       'id': product.id,
       'product_id': product.productId,
       'sku': product.productName,
-      'stock': product.stock,
-      'selling': product.selling,
-      'balance': product.balance,
+      'qty': product.qty,
       'price': product.price,
       'category': productData['category']['name'] ?? 'No Category',
     };
@@ -245,8 +269,10 @@ class SellingController extends GetxController {
   Data _prepareDraftData() {
     return Data(
       id: currentDraftId.value.isNotEmpty ? currentDraftId.value : _uuid.v4(),
-      outletName: outletName.value.text,
-      categoryOutlet: selectedCategory.value,
+      outlet: Outlet(
+        id: selectedOutlet.value?.id,
+        name: selectedOutlet.value?.name,
+      ),
       products: _createProductsList(),
       longitude: _gpsController.currentPosition.value!.longitude.toString(),
       latitude: _gpsController.currentPosition.value!.latitude.toString(),
@@ -312,6 +338,7 @@ class SellingController extends GetxController {
       // Convert draftItems to listProduct format if needed
       listProduct.clear();
       listProduct.addAll(draftItems);
+      print(listProduct);
 
       final response = await Api.submitSelling(requestData, listProduct);
 
@@ -357,9 +384,7 @@ class SellingController extends GetxController {
               id: item['id'] ?? _uuid.v4(),
               productId: item['product_id'],
               productName: item['sku'],
-              stock: int.tryParse(item['stock'].toString()) ?? 0,
-              selling: int.tryParse(item['selling'].toString()) ?? 0,
-              balance: int.tryParse(item['balance'].toString()) ?? 0,
+              qty: int.tryParse(item['qty'].toString()) ?? 0,
               price: int.tryParse(item['price'].toString()) ?? 0,
             ))
         .toList();
@@ -403,7 +428,7 @@ class SellingController extends GetxController {
   }
 
   List<Data> get filteredSellingData => sellingData.where((data) {
-        return data.outletName?.toLowerCase().contains(searchQuery.value.toLowerCase()) ?? false;
+        return data.outlet?.name?.toLowerCase().contains(searchQuery.value.toLowerCase()) ?? false;
       }).toList();
 
   void clearForm() {
@@ -416,6 +441,8 @@ class SellingController extends GetxController {
   @override
   void onClose() {
     outletName.value.dispose();
+    print("asdadasdadasd");
+    _durationTimer?.cancel();
     super.onClose();
   }
 }

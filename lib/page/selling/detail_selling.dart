@@ -63,11 +63,11 @@ class DetailSelling extends GetView<SellingController> {
                     children: [
                       UnderlineTextField.readOnly(
                         title: "Nama Outlet",
-                        value: selling.outletName,
+                        value: selling.outlet!.name,
                       ),
                       UnderlineTextField.readOnly(
                         title: "Kategori Outlet",
-                        value: selling.categoryOutlet,
+                        value: controller.filteredOutlets.where((element) => element.id == selling.outlet!.id).first.category,
                       ),
                       // Column(
                       //   children: selling.products!.map((product) {
@@ -117,11 +117,11 @@ class DetailSelling extends GetView<SellingController> {
                                   (product) => SumAmountProduct(
                                     productName: product.productName!,
                                     stockController:
-                                        TextEditingController(text: product.stock!.toString()),
+                                        TextEditingController(text: product.qty!.toString()),
                                     sellingController:
-                                        TextEditingController(text: product.selling!.toString()),
+                                        TextEditingController(text: "product.selling!".toString()),
                                     balanceController:
-                                        TextEditingController(text: product.balance!.toString()),
+                                        TextEditingController(text: "product.balance!".toString()),
                                     priceController:
                                         TextEditingController(text: product.price!.toString()),
                                   ),

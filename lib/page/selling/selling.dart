@@ -1,6 +1,7 @@
 import 'package:cetapil_mobile/page/selling/detail_selling.dart';
 import 'package:cetapil_mobile/page/selling/tambah_selling.dart';
 import 'package:cetapil_mobile/utils/colors.dart';
+import 'package:cetapil_mobile/model/outlet.dart' as O;
 import 'package:flutter/material.dart';
 import 'package:flutter_svg/svg.dart';
 import 'package:get/get.dart';
@@ -53,10 +54,12 @@ class SellingPage extends GetView<SellingController> {
                                   final selling = controller.filteredSellingData[index];
                                   return SellingCard(
                                     selling: selling,
+                                    controller: controller,
                                     ontap: () {
                                       if (selling.isDrafted ?? false) {
                                         // Load draft data into controller before navigating
                                         controller.loadDraftForEdit(selling);
+                                        // controller.checked_in = selling.checkedIn;
                                         Get.to(() => TambahSelling());
                                       } else {
                                         // print("asd");
@@ -100,6 +103,7 @@ class SellingPage extends GetView<SellingController> {
       floatingActionButton: FloatingActionButton(
         onPressed: () {
           controller.clearForm();
+          controller.onOpen();
           Get.to(() => TambahSelling());
         },
         backgroundColor: Colors.blue,
@@ -117,8 +121,11 @@ class SellingPage extends GetView<SellingController> {
           child: Column(
             mainAxisAlignment: MainAxisAlignment.center,
             children: [
-              SvgPicture.asset("assets/icon/Vector4.svg",height: 64,
-                color: Colors.grey,),
+              SvgPicture.asset(
+                "assets/icon/Vector4.svg",
+                height: 64,
+                color: Colors.grey,
+              ),
               SizedBox(height: 16),
               Text(
                 'Tidak ada data penjualan',
@@ -146,14 +153,18 @@ class SellingPage extends GetView<SellingController> {
 
 class SellingCard extends StatelessWidget {
   final Data selling;
+  final SellingController controller;
   final VoidCallback ontap;
 
   const SellingCard({
     Key? key,
     required this.selling,
+    required this.controller,
     required this.ontap,
   }) : super(key: key);
 
+  O.Outlet get outlet =>
+      controller.filteredOutlets.where((element) => element.id == selling.outlet!.id).first;
   @override
   Widget build(BuildContext context) {
     return Container(
@@ -188,17 +199,17 @@ class SellingCard extends StatelessWidget {
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
                       Text(
-                        selling.outletName ?? 'No Name',
+                        selling.outlet!.name ?? 'No Name',
                         style: const TextStyle(
                           fontWeight: FontWeight.bold,
                         ),
                       ),
                       const SizedBox(height: 8),
-                      if (selling.categoryOutlet != null)
+                      if (outlet.category != null)
                         Padding(
                           padding: const EdgeInsets.only(top: 4),
                           child: Text(
-                            'Kategori Outlet: ${selling.categoryOutlet}',
+                            'Kategori Outlet: ${outlet.category}',
                             style: TextStyle(
                               color: Colors.grey[600],
                               fontSize: 13,
