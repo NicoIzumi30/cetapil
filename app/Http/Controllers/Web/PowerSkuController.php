@@ -86,8 +86,8 @@ class PowerSkuController extends Controller
             $data = $request->validated();
 
             if ($data['select-input-survey-data'] === 'power-sku') {
-                $surveyQuestionCategory1 = SurveyCategory::where('title', 'Apakah POWER SKU tersedia di toko?')->first();
-                $surveyQuestionCategory2 = SurveyCategory::where('title', 'Berapa harga POWER SKU di toko?')->first();
+                $surveyQuestionCategory1 = SurveyCategory::where('title', 'Apakah POWER SKU tersedia di toko?')->first()->id;
+                $surveyQuestionCategory2 = SurveyCategory::where('title', 'Berapa harga POWER SKU di toko?')->first()->id;
                 $product = Product::find($data['power-sku'])->first();
                 // Apakah ada Power SKU di toko?
                 $survey1 = SurveyQuestion::create([
@@ -95,35 +95,36 @@ class PowerSkuController extends Controller
                     'type' => "bool",
                     'product_id' => $data['power-sku'],
                     'question' => $product->sku,
-                ]);
+                ])->id;
                 // Berapa harga POWER SKU di toko?
                 $survey2 =  SurveyQuestion::create([
                     'survey_category_id' => $surveyQuestionCategory2,
                     'type' => "text",
                     'product_id' => $data['power-sku'],
                     'question' => $product->sku,
-                ]);
+                ])->id;
                 SurveyAvailability::create([
-                    'category' => $data['select-input-survey-data'],
+                    'category' => "Power SKU",
                     'survey_question_id' => $survey1,
                     'survey_question_id_2' => $survey2,
                     'product_id' => $data['select-input-survey-data'] === 'power-sku' ? $data['power-sku'] : null,
-                    'produuct_name' => $product->sku,
+                    'product_name' => $product->sku,
                 ]);
                 PowerSku::create([
                     'product_id' => $data['power-sku'],
                 ]);
             }
             if ($data['select-input-survey-data'] === 'harga-kompetitor') {
-                $surveyQuestionCategory1 = SurveyCategory::where('title', 'Berapa harga kompetitor di toko?')->first();
-                SurveyQuestion::create([
+                $surveyQuestionCategory1 = SurveyCategory::where('title', 'Berapa harga kompetitor di toko?')->first()->id;
+                $survey1 = SurveyQuestion::create([
                     'survey_category_id' => $surveyQuestionCategory1,
                     'type' => "text",
                     'question' => $data['product-competitor'],
-                ]);
+                ])->id;
                 SurveyAvailability::create([
-                    'category' => $data['select-input-survey-data'],
-                    'produuct_name' => $data['product-competitor'],
+                    'category' => "Harga Kompetitif",
+                    'survey_question_id' => $survey1,
+                    'product_name' => $data['product-competitor'],
                 ]);
             }
 
@@ -133,7 +134,7 @@ class PowerSkuController extends Controller
         } catch (\Exception $e) {
             Log::error('Failed to store Power SKU: ' . $e->getMessage());
             return response()->json([
-                'message' => 'Gagal menambahkan Power SKU'
+                'message' => 'Gagal menambahkan Power SKU' . $e->getMessage()
             ], 500);
         }
     }
