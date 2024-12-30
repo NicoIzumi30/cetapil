@@ -32,17 +32,6 @@
                 <form action="{{ route('update-product-knowledge') }}" method="POST" enctype="multipart/form-data">
                     @csrf
                     @method('PUT')
-                    <div class="mb-6">
-                        <label for="channel" class="!text-black">Channel</label>
-                        <select id="channel" name="channel_id" class=" w-full">
-                            <option value="" selected disabled>
-                                -- Pilih Channel --
-                            </option>
-                            @foreach ($channels as $channel)
-                                <option value="{{ $channel->id }}">{{ $channel->name }}</option>
-                            @endforeach
-                        </select>
-                    </div>
                     <div class="flex gap-4 w-full">
                         <div class="w-full">
                             <label for="pamflet_file" class="!text-black">
@@ -214,9 +203,6 @@
         $(document).ready(function() {
             $("#sales-date-range").flatpickr({
                 mode: "range"
-            });
-            $('#channel').select2({
-                minimumResultsForSearch: Infinity
             });
         });
     </script>
@@ -403,7 +389,6 @@
 
 @push('scripts')
     <script>
-        $('#channel').select2();
         $('#updateBtn').click(function(e) {
             e.preventDefault();
 
@@ -411,7 +396,6 @@
             const MAX_VIDEO_SIZE = 5 * 1024 * 1024; // 5MB
             const MAX_PDF_SIZE = 5 * 1024 * 1024; // 5MB
             const MAX_VIDEO_DURATION = 180; // 3 menit dalam detik
-            const MAX_VIDEO_HEIGHT = 360; // 360p resolution
 
             const formData = new FormData();
             const pdfFile = $('#pamflet_file')[0].files[0];
@@ -490,14 +474,7 @@
             proceedWithUpload();
 
             function proceedWithUpload() {
-                const channelId = $('#channel').val();
-                if (!channelId) {
-                    alert('Channel ID wajib diisi');
-                    return;
-                }
-                formData.append('channel_id', channelId);
                 formData.append('_method', 'PUT');
-
                 $.ajax({
                     url: '{{ route('update-product-knowledge') }}',
                     type: 'POST',
