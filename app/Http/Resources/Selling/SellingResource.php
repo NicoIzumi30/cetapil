@@ -36,7 +36,10 @@ class SellingResource extends JsonResource
             'latitude' => $this->latitude,
             'filename' => $this->filename,
             'image' => "/storage{$this->path}",
-            'created_at' => Carbon::parse($this->created_at)->toDateTimeLocalString()
+            'created_at' => Carbon::parse($this->created_at)->toDateTimeLocalString(),
+            'checked_in' => $this->checked_in ? Carbon::parse($this->checked_in)->toDateTimeLocalString() : null,
+            'checked_out' => $this->checked_out ? Carbon::parse($this->checked_out)->toDateTimeLocalString() : null,
+            'duration' => $this->duration,
         ];
     }
 }
