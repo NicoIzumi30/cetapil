@@ -2,9 +2,12 @@
 
 namespace App\Http\Controllers\Web;
 
-use App\Http\Controllers\Controller;
-use App\Models\SalesActivity;
 use Illuminate\Http\Request;
+use App\Exports\SurveyExport;
+use App\Models\SalesActivity;
+use Illuminate\Support\Facades\Log;
+use App\Http\Controllers\Controller;
+use Maatwebsite\Excel\Facades\Excel;
 
 class SurveyController extends Controller
 {
@@ -52,6 +55,16 @@ class SurveyController extends Controller
                 ];
             })
         ]);
+    }
+    public function downloadData()
+    {
+        try {
+            $filename = 'market_survey_' . date('Y-m-d_His') . '.xlsx';
+            return Excel::download(new SurveyExport(), $filename);
+        } catch (\Exception $e) {
+            Log::error('Error downloading market survey data: ' . $e->getMessage());
+            return response()->json(['error' => 'Failed to download data'], 500);
+        }
     }
     public function detail($id){
         $salesActivity = SalesActivity::with(['user:id,name', 'outlet:id,name,visit_day'])->find($id);

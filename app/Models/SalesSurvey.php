@@ -18,4 +18,5 @@ class SalesSurvey extends Model
     {
         return $this->belongsTo(SurveyQuestion::class, 'survey_question_id');
     }
+    
 }
