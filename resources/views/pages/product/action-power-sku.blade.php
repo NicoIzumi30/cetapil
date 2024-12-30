@@ -1,6 +1,6 @@
 <x-action-table-dropdown>
     <li>
-        <button 
+        <button
             type="button"
             data-id="{{ $powerSku->id }}"
             class="dropdown-option view-power-sku"
@@ -10,7 +10,7 @@
     </li>
     <li>
         <a href="{{ route('products.power-skus.destroy', $powerSku->id) }}"
-           data-name="{{ $powerSku->product->sku }}"
+           data-name="{{ $powerSku->product_name }}"
            class="dropdown-option text-red-400 delete-btn">
             Hapus Data
         </a>
