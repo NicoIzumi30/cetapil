@@ -22,7 +22,9 @@ class Selling extends Model
     {
         return $this->belongsTo(User::class);
     }
-
+    public function salesActivity() {
+        return $this->belongsTo(SalesActivity::class);
+    }
     public function outlet(): BelongsTo
     {
         return $this->belongsTo(Outlet::class);

@@ -38,6 +38,9 @@ class SalesAvailability extends Model
                 ->has('product');
     }
 
+    public function salesActivity(){
+        return $this->belongsTo(SalesActivity::class);
+    } 
     public static function getDetail(int $stock)
     {
         if ($stock < 0) return 'MINUS';

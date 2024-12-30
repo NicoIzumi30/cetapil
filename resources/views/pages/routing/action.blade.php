@@ -10,9 +10,4 @@
             Hapus Data
         </a>
     </li>
-	<li>
-		<button onclick="openModal('update-av3m')" class="dropdown-option">
-			Update AV3M
-		</button>
-	</li>
 </x-action-table-dropdown>

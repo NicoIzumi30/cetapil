@@ -1156,7 +1156,9 @@
                             },
                             success: function(response) {
                                 toast('success', response.message, 300);
-                                powerSkuTable.ajax.reload();
+                                setTimeout(() => {
+                                    window.location.reload();
+                                }, 3000); 
                             },
                             error: function(xhr) {
                                 toast('error', xhr.responseJSON.message ||

@@ -105,7 +105,7 @@
 				<div class="flex flex-col items-center w-full">
 					<div class="relative w-full mx-3 border-red">
 						<div class="flex justify-center items-center flex-col py-1 h-[450px]">\
-							<img src="{{env('APP_URL') .$selling->path}}" class="w-full h-full rounded-md object-cover" alt="">
+							<img src="{{ config('app.storage_url').$selling->path}}" class="w-full h-full rounded-md object-cover" alt="">
 						</div>
 					</div>
 				</div>
