@@ -416,12 +416,6 @@
                     <tr>
                         <th scope="col" class="text-center">
                             <a class="table-head">
-                                {{ __('Kategori Produk') }}
-                                <x-icons.sort />
-                            </a>
-                        </th>
-                        <th scope="col" class="text-center">
-                            <a class="table-head">
                                 {{ __('Power SKU & Competitor') }}
                                 <x-icons.sort />
                             </a>
@@ -1063,11 +1057,7 @@
                         return json.data;
                     }
                 },
-                columns: [{
-                        data: 'category',
-                        name: 'category',
-                        className: 'table-data'
-                    },
+                columns: [
                     {
                         data: 'sku',
                         name: 'sku',

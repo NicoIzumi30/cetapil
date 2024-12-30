@@ -129,7 +129,7 @@ Route::middleware('auth')->group(function () {
             Route::post('/', [PowerSkuController::class, 'store'])->name('store');
             Route::get('/{powerSku}/edit', [PowerSkuController::class, 'edit'])->name('edit');
             Route::put('/{powerSku}', [PowerSkuController::class, 'update'])->name('update');
-            Route::delete('/{powerSku}', [PowerSkuController::class, 'destroy'])->name('destroy');
+            Route::delete('/{id}', [PowerSkuController::class, 'destroy'])->name('destroy');
         });
         Route::prefix('av3ms')->name('av3ms.')->group(function() {
             Route::post('/bulk', [ProductController::class, 'av3mBulk'])->name('bulk');

@@ -48,14 +48,12 @@ class PowerSkuController extends Controller
 
     public function data(Request $request)
     {
-        $query = PowerSku::with(['product.category']);
+        $query = SurveyAvailability::with(['product']);
 
         if ($request->filled('search_term')) {
             $searchTerm = $request->search_term;
             $query->whereHas('product', function ($q) use ($searchTerm) {
                 $q->where('sku', 'like', "%{$searchTerm}%");
-            })->orWhereHas('product.category', function ($q) use ($searchTerm) {
-                $q->where('name', 'like', "%{$searchTerm}%");
             });
         }
 
@@ -70,8 +68,8 @@ class PowerSkuController extends Controller
             'recordsFiltered' => $filteredRecords,
             'data' => $result->map(function ($powerSku) {
                 return [
-                    'category' => optional($powerSku->product->category)->name ?? '-',
-                    'sku' => $powerSku->product->sku,
+                    // 'category' => optional($powerSku->product->category)->name ?? '-',
+                    'sku' => $powerSku->product_name,
                     'actions' => view('pages.product.action-power-sku', [
                         'powerSku' => $powerSku // Pass entire model
                     ])->render(),
@@ -134,7 +132,7 @@ class PowerSkuController extends Controller
         } catch (\Exception $e) {
             Log::error('Failed to store Power SKU: ' . $e->getMessage());
             return response()->json([
-                'message' => 'Gagal menambahkan Power SKU' . $e->getMessage()
+                'message' => 'Gagal menambahkan Power SKU'
             ], 500);
         }
     }
@@ -143,17 +141,21 @@ class PowerSkuController extends Controller
 
     public function update(CreatePowerSkuRequest $request, PowerSku $powerSku) {}
 
-    public function destroy(PowerSku $powerSku)
+    public function destroy($id)
     {
         try {
-            $powerSku->delete();
+            $surveyAvail = SurveyAvailability::where('id', $id)->first();
+            PowerSku::where('product_id', $surveyAvail->product_id)->delete();
+            SurveyQuestion::where('id', $surveyAvail->survey_question_id)->delete();
+            SurveyQuestion::where('id', $surveyAvail->survey_question_id_2)->delete();
+            $surveyAvail->delete();
 
             return response()->json([
-                'message' => 'Power SKU berhasil dihapus'
+                'message' => 'Power SKU & Harga Kompetitif berhasil dihapus'
             ]);
         } catch (\Exception $e) {
             return response()->json([
-                'message' => 'Gagal menghapus Power SKU'
+                'message' => 'Gagal menghapus Power SKU & Harga Kompetitif'
             ], 500);
         }
     }
