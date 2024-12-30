@@ -19,7 +19,7 @@ class ProductKnowledgeControler extends Controller
             DB::beginTransaction();
             $files = ['file_pdf', 'file_video'];
             // Cek data existing sekali saja di awal
-            $productKnowledge = ProductKnowledge::where('channel_id', $request->channel_id)->first();
+            $productKnowledge = ProductKnowledge::first();
             foreach ($files as $fileKey) {
                 if ($request->hasFile($fileKey)) {
                     // Tentukan tipe berdasarkan nama file
@@ -42,7 +42,6 @@ class ProductKnowledgeControler extends Controller
                     } else {
                         // Jika belum ada data, buat baru
                         $productKnowledge = ProductKnowledge::create([
-                            'channel_id' => $request->channel_id,
                             "filename_{$type}" => $media['filename'],
                             "path_{$type}" => $media['path']
                         ]);
