@@ -33,6 +33,9 @@ class CreateSellingRequest extends FormRequest
             'products.*.id' => 'required|exists:products,id',
             'products.*.qty' => 'required|numeric|min:0',
             'products.*.price' => 'required|numeric|min:0',
+            'checked_in' => 'required|date_format:Y-m-d H:i:s',
+            'checked_out' => 'nullable|date_format:Y-m-d H:i:s|after:checked_in',
+            'duration' => 'nullable|integer|min:0',
             'image' => 'required|file|mimes:jpg,png,jpeg|max:1024'
         ];
     }
