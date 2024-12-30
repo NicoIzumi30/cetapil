@@ -1,3 +1,4 @@
+import 'package:cetapil_mobile/controller/support_data_controller.dart';
 import 'package:cetapil_mobile/database/database_instance.dart';
 import 'package:cetapil_mobile/model/list_activity_response.dart';
 import 'package:cetapil_mobile/widget/custom_alert.dart';
@@ -10,6 +11,7 @@ import '../../model/list_activity_response.dart' as Activity;
 
 class ActivityController extends GetxController {
   RxList<Activity.Data> activity = <Activity.Data>[].obs;
+  final supportController = Get.find<SupportDataController>();
   final db = DatabaseHelper.instance;
   final dbActivity = ActivityDatabaseHelper.instance;
   RxString searchQuery = ''.obs;
@@ -47,6 +49,9 @@ class ActivityController extends GetxController {
       activity.clear();
 
       CustomAlerts.showLoading(Get.context!, "Processing", "Mengambil data aktivitas...");
+      
+      // Refresh support data first
+      await supportController.refreshData();
 
       final response = await Api.getActivityList();
       if (response.status == "OK" && response.data != null && response.data!.isNotEmpty) {

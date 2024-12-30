@@ -5,8 +5,7 @@ import '../../controller/activity/tambah_activity_controller.dart';
 import '../../controller/support_data_controller.dart';
 
 class TambahVisibilityController extends GetxController {
-  late TambahActivityController activityController =
-      Get.find<TambahActivityController>();
+  late TambahActivityController activityController = Get.find<TambahActivityController>();
   final supportDataController = Get.find<SupportDataController>();
 
   final posmType = ''.obs;
@@ -27,41 +26,49 @@ class TambahVisibilityController extends GetxController {
 
   dynamic visibility;
 
-  // void editItem(Map<String, dynamic> item) {
-  //   clearPrimaryForm();
-  //
-  //   final visibilityId = item['visibility']?.id;
-  //   final existingDraft = activityController.visibilityDraftItems
-  //       .firstWhereOrNull((draft) => draft['id'] == visibilityId);
-  //
-  //   if (existingDraft != null) {
-  //     posmType.value = existingDraft['posm_type_name'];
-  //     posmTypeId.value = existingDraft['posm_type_id'];
-  //     visualType.value = existingDraft['visual_type_name'];
-  //     visualTypeId.value = existingDraft['visual_type_id'];
-  //     selectedCondition.value = existingDraft['condition'] ?? 'Good';
-  //
-  //     if (existingDraft['image1'] != null) {
-  //       visibilityImages.value = existingDraft['image1'];
-  //     }
-  //     // if (existingDraft['image2'] != null) {
-  //     //   visibilityImages[1] = existingDraft['image2'];
-  //     // }
-  //   } else {
-  //     if (item['posmType'] != null) {
-  //       posmType.value = item['posmType']['name'] ?? '';
-  //       posmTypeId.value = item['posmType']['id'] ?? '';
-  //     }
-  //     if (item['visualType'] != null) {
-  //       visualType.value = item['visualType']['name'] ?? '';
-  //       visualTypeId.value = item['visualType']['id'] ?? '';
-  //     }
-  //     selectedCondition.value = 'Good';
-  //   }
-  //
-  //   visibility = item['visibility'];
-  //   update();
-  // }
+  initPrimaryVisibilityItem(String id) {
+    clearPrimaryForm();
+    var data = activityController.visibilityPrimaryDraftItems.firstWhere((item) => item['id'] == id, orElse: () => {});
+    if (data.isEmpty) {
+      print("posmTypeId.value");
+      return;
+    } else {
+      posmTypeId.value = data['posm_type_id'];
+      print(data['posm_type_name']);
+      print(posmTypeId.value);
+      visualTypeId.value = data['visual_type_id'];
+      var visualName = supportDataController
+          .getVisualTypes()
+          .firstWhere((element) => element['id'] == data['visual_type_id'])['name'];
+
+      /// get visualType name by id
+      if (visualName == "Others") {
+        isOtherVisual.value = true;
+        otherVisualController.value.text = data['visual_type_name'];
+      } else {
+        visualType.value = data['visual_type_name'];
+      }
+
+      selectedCondition.value = data['condition'];
+      lebarRak.value.text = data['shelf_width'].toString();
+      shelving.value.text = data['shelving'].toString();
+      visibilityImages.value = data['image_visibility'];
+    }
+  }
+
+  initSecondaryVisibilityItem(String id) {
+    clearSecondaryForm();
+    var data =
+        activityController.visibilitySecondaryDraftItems.firstWhere((item) => item['id'] == id, orElse: () => {});
+    if (data.isEmpty) {
+      return;
+    } else {
+      toggleSecondaryYesNo.value =
+          data['secondary_exist'] == "true" ? true : false;
+      tipeDisplay.value.text = data['display_type'];
+      displayImages.value = data['display_image'];
+    }
+  }
 
   void updateImage(File? file) {
     visibilityImages.value = file;
@@ -100,8 +107,7 @@ class TambahVisibilityController extends GetxController {
       Get.dialog(
         AlertDialog(
           title: Text('Required Fields'),
-          content: Text(
-              'Please fill in the following fields:\n\n${missingFields.join('\n')}'),
+          content: Text('Please fill in the following fields:\n\n${missingFields.join('\n')}'),
           actions: [
             TextButton(
               onPressed: () => Get.back(),
@@ -118,15 +124,22 @@ class TambahVisibilityController extends GetxController {
 
   void savePrimaryVisibility(String id) {
     if (!validatePrimaryForm()) return;
-    var id_part = id.split('-'); /// (primary, core , 1)
-     print(otherVisualController.value.text);
-    final data = {'id': id,
-      'category': id_part[1].toUpperCase(), /// (CORE)
-      'position': id_part[2], /// (1)
+    var id_part = id.split('-');
+
+    /// (primary, core , 1)
+    final data = {
+      'id': id,
+      'category': id_part[1].toUpperCase(),
+
+      /// (CORE)
+      'position': id_part[2],
+
+      /// (1)
       'posm_type_id': posmTypeId.value,
       'posm_type_name': posmType.value,
       'visual_type_id': visualTypeId.value,
-      'visual_type_name': visualType.value == "Others" ? otherVisualController.value.text : visualType.value,
+      'visual_type_name':
+          visualType.value == "Others" ? otherVisualController.value.text : visualType.value,
       'condition': selectedCondition.value,
       'shelf_width': lebarRak.value.text,
       'shelving': shelving.value.text,
@@ -152,8 +165,6 @@ class TambahVisibilityController extends GetxController {
     isVisibilityImageUploading.value = false;
     visibility = null;
   }
-
-
 
   /// SECONDARY VISIBILITY
   final toggleSecondaryYesNo = false.obs;
@@ -181,8 +192,7 @@ class TambahVisibilityController extends GetxController {
       Get.dialog(
         AlertDialog(
           title: Text('Required Fields'),
-          content: Text(
-              'Please fill in the following fields:\n\n${missingFields.join('\n')}'),
+          content: Text('Please fill in the following fields:\n\n${missingFields.join('\n')}'),
           actions: [
             TextButton(
               onPressed: () => Get.back(),
@@ -199,12 +209,18 @@ class TambahVisibilityController extends GetxController {
 
   void saveSecondaryVisibility(String id) {
     if (!validateSecondaryForm()) return;
-    var id_part = id.split('-'); /// (secondaru, core , 1)
+    var id_part = id.split('-');
+
+    /// (secondaru, core , 1)
     final data = {
       'id': id,
-      'category': id_part[1].toUpperCase(), /// (CORE)
-      'position': id_part[2], /// (1)
-     'secondary_exist': toggleSecondaryYesNo.toString(),
+      'category': id_part[1].toUpperCase(),
+
+      /// (CORE)
+      'position': id_part[2],
+
+      /// (1)
+      'secondary_exist': toggleSecondaryYesNo.toString(),
       'display_type': tipeDisplay.value.text,
       'display_image': displayImages.value,
     };

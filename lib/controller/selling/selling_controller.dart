@@ -312,7 +312,6 @@ class SellingController extends GetxController {
       // Convert draftItems to listProduct format if needed
       listProduct.clear();
       listProduct.addAll(draftItems);
-      print(listProduct);
 
       final response = await Api.submitSelling(requestData, listProduct);
 

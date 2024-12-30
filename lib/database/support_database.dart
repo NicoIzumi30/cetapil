@@ -7,6 +7,7 @@ import '../model/list_posm_response.dart' as Posm;
 import '../model/list_visual_response.dart' as Visual;
 import 'package:sqflite/sqflite.dart';
 import 'package:path/path.dart';
+import 'dart:io';
 
 import '../model/survey_question_response.dart';
 
@@ -17,7 +18,7 @@ class SupportDatabaseHelper {
   SupportDatabaseHelper._init();
 
   Future<Database> get database async {
-    if (_database != null) return _database!;
+    if (_database != null && _database!.isOpen) return _database!;
     _database = await _initDB('data_support.db');
     return _database!;
   }
@@ -26,11 +27,49 @@ class SupportDatabaseHelper {
     final dbPath = await getDatabasesPath();
     final path = join(dbPath, filePath);
 
+    try {
+      await Directory(dirname(path)).create(recursive: true);
+      await File(path).delete();
+    } catch (e) {
+      print('Setup error: $e');
+    }
+
     return await openDatabase(
       path,
       version: 1,
       onCreate: _createDB,
+      readOnly: false,
     );
+  }
+
+  Future<void> clearAllTables() async {
+    final db = await database;
+    await db.transaction((txn) async {
+      // Clear related tables first due to foreign key constraints
+      await txn.delete('product_channels');
+      await txn.delete('surveys');
+      await txn.delete('products');
+      await txn.delete('categories');
+      await txn.delete('category');
+      await txn.delete('channel');
+      await txn.delete('knowledge');
+      await txn.delete('knowledge_channel');
+      await txn.delete('survey_questions');
+      await txn.delete('posm_types');
+      await txn.delete('visual_types');
+    });
+  }
+
+  Future<void> clearTable(String tableName) async {
+    final db = await database;
+    await db.delete(tableName);
+  }
+
+  Future<void> close() async {
+    if (_database != null) {
+      await _database!.close();
+      _database = null;
+    }
   }
 
   Future _createDB(Database db, int version) async {

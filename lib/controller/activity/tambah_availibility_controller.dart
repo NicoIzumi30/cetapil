@@ -26,6 +26,7 @@ class TambahAvailabilityController extends GetxController {
   @override
   void onInit() {
     super.onInit();
+    productValues.value = {};
     _loadSavedValues();
   }
 
@@ -75,7 +76,7 @@ class TambahAvailabilityController extends GetxController {
         }
 
         savedProductValues[categoryId]![item['id'].toString()] = {
-          'availability_toggle': item['availability_toggle'].toString(),
+          'availability_toggle': item['availability_exist'].toString(),
           'stock_on_hand': item['stock_on_hand'].toString(),
           'stock_on_inventory': item['stock_on_inventory'].toString(),
           'av3m': item['av3m'].toString(),

@@ -3,6 +3,7 @@ import 'package:cetapil_mobile/page/activity/secondarytab_page/tambah_order.dart
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:get/get.dart';
+import 'package:intl/intl.dart';
 import '../../../controller/activity/tambah_order_controller.dart';
 import '../../../utils/colors.dart';
 
@@ -37,7 +38,9 @@ class OrderPage extends GetView<TambahActivityController> {
             ),
           ),
         ),
-        SizedBox(height: 20),
+        SizedBox(height: 10),
+        OrderSummaryCard(),
+        SizedBox(height: 10),
         Obx(() {
           if (controller.orderDraftItems.isEmpty) {
             return Padding(
@@ -144,72 +147,6 @@ class OrderPage extends GetView<TambahActivityController> {
           );
         }),
         SizedBox(height: 20),
-        // Obx(() {
-        //   final groupedItems = <String, List<Map<String, dynamic>>>{};
-        //
-        //   // if (controller.detailDraft.isNotEmpty) {
-        //   //   for (var data in controller.detailDraft["orderItems"]) {
-        //   //
-        //   //     final item = tambahAvailabilityController.getSkuByDataApi(data['product_id']);
-        //   //     final newItem = {
-        //   //       'id': data['product_id'],
-        //   //       'category': item!['category']['name'],
-        //   //       'sku': item['sku'],
-        //   //       'jumlah': data['jumlah'],
-        //   //       'harga': data['harga'],
-        //   //     };
-        //   //     controller.addOrderItem(newItem);
-        //   //     tambahOrderController.clearForm();
-        //   //   }
-        //   // }
-        //
-        //   // Use orderDraftItems from TambahActivityController
-        //   for (var item in controller.orderDraftItems) {
-        //     final category = item['category'];
-        //     if (groupedItems[category] == null) {
-        //       groupedItems[category] = [];
-        //     }
-        //     groupedItems[category]!.add(item);
-        //   }
-        //
-        //   return Column(
-        //     children: [
-        //       ...groupedItems.entries.map((entry) {
-        //         final category = entry.key;
-        //         final items = entry.value;
-        //
-        //         return Column(
-        //           crossAxisAlignment: CrossAxisAlignment.start,
-        //           children: [
-        //             Padding(
-        //               padding: const EdgeInsets.symmetric(vertical: 8.0),
-        //               child: Text(
-        //                 category,
-        //                 style: TextStyle(
-        //                   fontSize: 14,
-        //                   fontWeight: FontWeight.bold,
-        //                   color: Color(0xFF023B5E),
-        //                 ),
-        //               ),
-        //             ),
-        //             ...items.map((item) {
-        //               return OrderProductCard(
-        //                 productName: item['sku'] ?? '',
-        //                 jumlahController:
-        //                     TextEditingController(text: item['jumlah']?.toString() ?? ''),
-        //                 hargaController:
-        //                     TextEditingController(text: item['harga']?.toString() ?? ''),
-        //                 isReadOnly: true,
-        //                 itemData: item,
-        //               );
-        //             }).toList(),
-        //             SizedBox(height: 10),
-        //           ],
-        //         );
-        //       }).toList(),
-        //     ],
-        //   );
-        // }),
       ],
     );
   }
@@ -679,5 +616,96 @@ class _PriceFieldState extends State<PriceField> {
         ),
       ),
     );
+  }
+}
+
+class OrderSummaryCard extends GetView<TambahActivityController> {
+  const OrderSummaryCard({Key? key}) : super(key: key);
+
+  @override
+  Widget build(BuildContext context) {
+    final formatter = NumberFormat.currency(locale: 'id_ID', symbol: "Rp ", decimalDigits: 0);
+
+    return Obx(() {
+      int totalQty = 0;
+      double totalPrice = 0.0;
+      var ctrl = Get.find<TambahActivityController>();
+      
+      try {
+        if (ctrl.orderDraftItems.isNotEmpty) {
+          for (var item in ctrl.orderDraftItems) {
+            if (item != null && item['jumlah'] != null) {
+              totalQty += (item['jumlah'] as num).toInt();
+              totalPrice += (item['jumlah'] as num) * (item['harga'] as num);
+            }
+          }
+        }
+      } catch (e) {
+        print('Error calculating quantity: $e');
+      }
+
+      return Container(
+        margin: EdgeInsets.symmetric(vertical: 8),
+        padding: EdgeInsets.all(16),
+        decoration: BoxDecoration(
+          color: Colors.white,
+          borderRadius: BorderRadius.circular(12),
+          boxShadow: [
+            BoxShadow(
+              color: Colors.black.withOpacity(0.05),
+              blurRadius: 8,
+              offset: Offset(0, 2),
+            ),
+          ],
+        ),
+        child: Row(
+          mainAxisAlignment: MainAxisAlignment.spaceBetween,
+          children: [
+            Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Text(
+                  'Total Quantity',
+                  style: TextStyle(
+                    fontSize: 12,
+                    color: Colors.black54,
+                  ),
+                ),
+                SizedBox(height: 4),
+                Text(
+                  totalQty.toString(),
+                  style: TextStyle(
+                    fontSize: 16,
+                    fontWeight: FontWeight.bold,
+                    color: Color(0xFF0077BD),
+                  ),
+                ),
+              ],
+            ),
+            Column(
+              crossAxisAlignment: CrossAxisAlignment.end,
+              children: [
+                Text(
+                  'Total Price',
+                  style: TextStyle(
+                    fontSize: 12,
+                    color: Colors.black54,
+                  ),
+                ),
+                SizedBox(height: 4),
+                Text(
+                  formatter.format(totalPrice),
+                  style: TextStyle(
+                    fontSize: 16,
+                    fontWeight: FontWeight.bold,
+                    color: Color(0xFF0077BD),
+                  ),
+                ),
+              ],
+            ),
+          ],
+        ),
+      );
+    });
   }
 }

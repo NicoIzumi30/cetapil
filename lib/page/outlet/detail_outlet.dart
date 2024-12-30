@@ -384,7 +384,7 @@ class UnderlineTextField extends StatelessWidget {
           style: TextStyle(fontSize: 13, fontWeight: FontWeight.w700),
         ),
         SizedBox(
-          height: 10,
+          height: 5,
         ),
         TextField(
           controller: readOnly ? TextEditingController(text: value) : controller,
@@ -398,7 +398,7 @@ class UnderlineTextField extends StatelessWidget {
               disabledBorder: UnderlineInputBorder(borderSide: BorderSide(color: Colors.white))),
         ),
         SizedBox(
-          height: 15,
+          height: 10,
         ),
       ],
     );

@@ -100,7 +100,6 @@ class TambahActivityController extends GetxController {
   // final groupedItemsAvailability = <String, List<Map<String, dynamic>>>{};
   //
   initDetailDraftAvailability() {
-    print(detailDraft.isNotEmpty);
     if (detailDraft.isNotEmpty) {
       for (var data in detailDraft["availabilityItems"]) {
         final item = tambahAvailabilityController.getSkuByDataApi(data['product_id']);
@@ -142,14 +141,16 @@ class TambahActivityController extends GetxController {
     final visibilityPrimaryDraft = detailDraft["visibilityPrimaryItems"];
     final visibilitySecondaryDraft = detailDraft["visibilitySecondaryItems"];
 
-    if(visibilityPrimaryDraft != null){
+    if (visibilityPrimaryDraft != null) {
       for (var data in visibilityPrimaryDraft) {
         final newItem = {
           'id': 'primary-${data["category"].toString().toLowerCase()}-${data["position"]}',
           'category': data['category'],
           'position': data['position'],
-          'posm_type_id': data['posm_type'],
-          'visual_type_id': data['visual_type'],
+          'posm_type_id': data['posm_type_id'],
+          'posm_type_name': data['posm_type_name'],
+          'visual_type_id': data['visual_type_id'],
+          'visual_type_name': data['visual_type_name'],
           'condition': data['condition'],
           'shelf_width': data['shelf_width'],
           'shelving': data['shelving'],
@@ -160,13 +161,13 @@ class TambahActivityController extends GetxController {
       }
     }
 
-    if(visibilitySecondaryDraft != null){
+    if (visibilitySecondaryDraft != null) {
       for (var data in visibilitySecondaryDraft) {
         final newItem = {
           'id': 'secondary-${data["category"].toString().toLowerCase()}-${data["position"]}',
           'category': data['category'],
           'position': data['position'],
-          'secondary_exist': data['secondary_exist'] == "true" ? "ada" : "tidak" ,
+          'secondary_exist': data['secondary_exist'] == "true" ? "ada" : "tidak",
           'display_type': data['display_type'],
           'display_image': File(data['display_image']),
         };
@@ -183,6 +184,7 @@ class TambahActivityController extends GetxController {
     // Start the timer
     _initializeSurveyControllers(); // Add this
     startTabTimer();
+    checkAvailabilityForSurvey();
   }
 
   void _initializeSurveyControllers() {
@@ -338,6 +340,8 @@ class TambahActivityController extends GetxController {
           data: data,
           availabilityItems: availabilityDraftItems,
           // visibilityItems: visibilityDraftItems,
+          visibilityPrimaryItems: visibilityPrimaryDraftItems,
+          visibilitySecondaryItems: visibilitySecondaryDraftItems,
           surveyItems: surveyList,
           orderItems: orderDraftItems,
         );
@@ -391,6 +395,7 @@ class TambahActivityController extends GetxController {
       surveyTime.value = 0;
       orderTime.value = 0;
     }
+
   }
 
   void startTabTimer() {
@@ -456,8 +461,7 @@ class TambahActivityController extends GetxController {
         bool isAvailable = availabilityDraftItems.any((item) {
           return item['product_id'] == productId &&
               item['availability_toggle'] != 'true' &&
-              (int.parse(item['stock_on_hand'].toString()) > 0 ||
-                  int.parse(item['stock_on_inventory'].toString()) > 0);
+              (int.parse(item['stock_on_inventory'].toString()) > 0);
         });
 
         toggleSwitch(id, isAvailable);
@@ -485,9 +489,6 @@ class TambahActivityController extends GetxController {
     if (knowledgeTime.value > 0) {
       // Enable survey if knowledge time exists
       toggleSwitch(detailingSurveyId, true);
-
-      // Increment counter
-      print(detailingCountId);
 
       if (priceControllers.containsKey(detailingCountId)) {
         final currentCount = int.tryParse(priceControllers[detailingCountId]?.text ?? '0') ?? 0;
@@ -522,49 +523,6 @@ class TambahActivityController extends GetxController {
       visibilityPrimaryDraftItems.add(item);
     }
     visibilityPrimaryDraftItems.refresh();
-  }
-
-  initPrimaryVisibilityItem(String id) {
-    tambahVisibilityController.clearPrimaryForm();
-    var data = visibilityPrimaryDraftItems.firstWhere((item) => item['id'] == id, orElse: () => {});
-    print(data);
-    if (data.isEmpty) {
-      return;
-    } else {
-      tambahVisibilityController.posmTypeId.value = data['posm_type_id'];
-      tambahVisibilityController.posmType.value = data['posm_type_name'];
-      tambahVisibilityController.visualTypeId.value = data['visual_type_id'];
-      var visualName = supportController
-          .getVisualTypes()
-          .firstWhere((element) => element['id'] == data['visual_type_id'])['name'];
-
-      /// get visualType name by id
-      if (visualName == "Others") {
-        tambahVisibilityController.isOtherVisual.value = true;
-        tambahVisibilityController.otherVisualController.value.text = data['visual_type_name'];
-      } else {
-        tambahVisibilityController.visualType.value = data['visual_type_name'];
-      }
-
-      tambahVisibilityController.selectedCondition.value = data['condition'];
-      tambahVisibilityController.lebarRak.value.text = data['shelf_width'].toString();
-      tambahVisibilityController.shelving.value.text = data['shelving'].toString();
-      tambahVisibilityController.visibilityImages.value = data['image_visibility'];
-    }
-  }
-
-  initSecondaryVisibilityItem(String id) {
-    tambahVisibilityController.clearSecondaryForm();
-    var data =
-        visibilitySecondaryDraftItems.firstWhere((item) => item['id'] == id, orElse: () => {});
-    if (data.isEmpty) {
-      return;
-    } else {
-      tambahVisibilityController.toggleSecondaryYesNo.value =
-          data['secondary_exist'] == "true" ? true : false;
-      tambahVisibilityController.tipeDisplay.value.text = data['display_type'];
-      tambahVisibilityController.displayImages.value = data['display_image'];
-    }
   }
 
   void addSecondaryVisibilityItem(Map<String, dynamic> item) {
@@ -810,6 +768,16 @@ class TambahActivityController extends GetxController {
       for (var controller in controllerMap.values) {
         controller.dispose();
       }
+    }
+
+    if (Get.isRegistered<TambahAvailabilityController>()) {
+      Get.delete<TambahAvailabilityController>();
+    }
+    if (Get.isRegistered<TambahVisibilityController>()) {
+      Get.delete<TambahVisibilityController>();
+    }
+    if (Get.isRegistered<TambahOrderController>()) {
+      Get.delete<TambahOrderController>();
     }
     _timer?.cancel(); // Cancel timer when controller is disposed
     super.onClose();

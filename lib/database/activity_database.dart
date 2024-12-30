@@ -3,8 +3,7 @@ import 'package:path/path.dart';
 import 'package:uuid/uuid.dart';
 
 class ActivityDatabaseHelper {
-  static final ActivityDatabaseHelper instance =
-      ActivityDatabaseHelper._internal();
+  static final ActivityDatabaseHelper instance = ActivityDatabaseHelper._internal();
   static Database? _database;
   final uuid = Uuid();
 
@@ -71,8 +70,10 @@ class ActivityDatabaseHelper {
         sales_activity_id TEXT,
         category TEXT,
         position TEXT,
-        posm_type TEXT,
-        visual_type TEXT,
+        posm_type_id TEXT,
+        posm_type_name TEXT,
+        visual_type_id TEXT,
+        visual_type_name TEXT,
         condition TEXT,
         shelf_width TEXT,
         shelving TEXT,
@@ -130,7 +131,7 @@ class ActivityDatabaseHelper {
   }
 
   // Insert methods
-  Future<void>  insertFullSalesActivity({
+  Future<void> insertFullSalesActivity({
     required Map<String, dynamic> data,
     List<Map<String, dynamic>>? availabilityItems,
     List<Map<String, dynamic>>? visibilityPrimaryItems,
@@ -185,7 +186,9 @@ class ActivityDatabaseHelper {
             'category': item['category'].toString(),
             'position': item['position'].toString(),
             'posm_type_id': item['posm_type_id'].toString(),
+            'posm_type_name': item['posm_type_name'].toString(),
             'visual_type_id': item['visual_type_id'].toString(),
+            'visual_type_name': item['visual_type_name'].toString(),
             'condition': item['condition'].toString().toUpperCase(),
             'shelf_width': item['shelf_width'].toString(),
             'shelving': item['shelving'].toString(),
@@ -237,8 +240,7 @@ class ActivityDatabaseHelper {
   }
 
   // Get methods with relationships
-  Future<Map<String, dynamic>?> getDetailSalesActivity(
-      String salesActivityId) async {
+  Future<Map<String, dynamic>?> getDetailSalesActivity(String salesActivityId) async {
     final db = await database;
     try {
       // Get main sales activity
@@ -296,7 +298,6 @@ class ActivityDatabaseHelper {
     }
   }
 
-
   Future<List<String>> getDraftActivityIds() async {
     final db = await database;
 
@@ -314,7 +315,8 @@ class ActivityDatabaseHelper {
   Future<void> updateSalesActivity({
     required Map<String, dynamic> data,
     List<Map<String, dynamic>>? availabilityItems,
-    List<Map<String, dynamic>>? visibilityItems,
+    List<Map<String, dynamic>>? visibilityPrimaryItems,
+    List<Map<String, dynamic>>? visibilitySecondaryItems,
     List<Map<String, dynamic>>? surveyItems,
     List<Map<String, dynamic>>? orderItems,
   }) async {
@@ -357,29 +359,55 @@ class ActivityDatabaseHelper {
           await txn.insert('availability', {
             'id': uuid.v4(),
             'product_id': item['id'].toString(),
-            'available_stock': item['stock'].toString(),
-            'average_stock': item['av3m'] ?? "1",
-            'ideal_stock': item['recommend'].toString(),
+            'category': item['category'].toString(),
+            'availability_exist': item['availability_toggle'].toString(),
+            'stock_on_hand': item['stock_on_hand'].toString(),
+            'stock_on_inventory': item['stock_on_inventory'].toString(),
+            'av3m': item['av3m'].toString(),
             'sales_activity_id': data['sales_activity_id'],
           });
         }
       }
-
       // Update visibility items
-      if (visibilityItems != null) {
+      if (visibilityPrimaryItems != null) {
         await txn.delete(
-          'visibility',
+          'visibility_primary',
           where: 'sales_activity_id = ?',
           whereArgs: [data['sales_activity_id']],
         );
-        for (var item in visibilityItems) {
-          await txn.insert('visibility', {
+        for (var item in visibilityPrimaryItems) {
+          await txn.insert('visibility_primary', {
             'id': uuid.v4(),
-            'visibility_id': item['id'].toString(),
-            'condition': item['condition'].toString().toUpperCase(),
-            'image1': item['image1'].path,
-            'image2': item['image2'].path,
             'sales_activity_id': data['sales_activity_id'],
+            'category': item['category'].toString(),
+            'position': item['position'].toString(),
+            'posm_type_id': item['posm_type_id'].toString(),
+            'posm_type_name': item['posm_type_name'].toString(),
+            'visual_type_id': item['visual_type_id'].toString(),
+            'visual_type_name': item['visual_type_name'].toString(),
+            'condition': item['condition'].toString().toUpperCase(),
+            'shelf_width': item['shelf_width'].toString(),
+            'shelving': item['shelving'].toString(),
+            'image_visibility': item['image_visibility'].path,
+          });
+        }
+      }
+
+      if (visibilitySecondaryItems != null) {
+        await txn.delete(
+          'visibility_secondary',
+          where: 'sales_activity_id = ?',
+          whereArgs: [data['sales_activity_id']],
+        );
+        for (var item in visibilitySecondaryItems) {
+          await txn.insert('visibility_secondary', {
+            'id': uuid.v4(),
+            'sales_activity_id': data['sales_activity_id'],
+            'category': item['category'].toString(),
+            'position': item['position'].toString(),
+            'secondary_exist': item['secondary_exist'].toString(),
+            'display_type': item['display_type'].toString(),
+            'display_image': item['display_image'].path,
           });
         }
       }
@@ -400,7 +428,6 @@ class ActivityDatabaseHelper {
           });
         }
       }
-
       // Update order items
       if (orderItems != null) {
         await txn.delete(
@@ -411,7 +438,8 @@ class ActivityDatabaseHelper {
         for (var item in orderItems) {
           await txn.insert('orders', {
             'id': uuid.v4(),
-            'product_id': item['id'].toString(),
+            'product_id': item['id'],
+            'category': item['category'],
             'jumlah': item['jumlah'].toString(),
             'harga': item['harga'].toString(),
             'sales_activity_id': data['sales_activity_id'],
@@ -426,14 +454,10 @@ class ActivityDatabaseHelper {
     final db = await database;
     await db.transaction((txn) async {
       // Delete related records first
-      await txn.delete('availability',
-          where: 'sales_activity_id = ?', whereArgs: [id]);
-      await txn.delete('visibility',
-          where: 'sales_activity_id = ?', whereArgs: [id]);
-      await txn
-          .delete('survey', where: 'sales_activity_id = ?', whereArgs: [id]);
-      await txn
-          .delete('orders', where: 'sales_activity_id = ?', whereArgs: [id]);
+      await txn.delete('availability', where: 'sales_activity_id = ?', whereArgs: [id]);
+      await txn.delete('visibility', where: 'sales_activity_id = ?', whereArgs: [id]);
+      await txn.delete('survey', where: 'sales_activity_id = ?', whereArgs: [id]);
+      await txn.delete('orders', where: 'sales_activity_id = ?', whereArgs: [id]);
       // Delete main record
       await txn.delete('sales_activity', where: 'id = ?', whereArgs: [id]);
     });

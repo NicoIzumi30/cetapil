@@ -7,11 +7,12 @@ import 'package:flutter/services.dart';
 import 'package:get/get.dart';
 import '../../../controller/support_data_controller.dart';
 import '../../../utils/price_formatter.dart';
-
 class SurveyPage extends GetView<TambahActivityController> {
   final SupportDataController supportController = Get.find<SupportDataController>();
 
-  _buildSectionTitle(Map<String, dynamic> questionGroup) {
+  SurveyPage({super.key});
+
+  Widget _buildSectionTitle(Map<String, dynamic> questionGroup) {
     if (questionGroup['title'] != null) {
       return Column(
         crossAxisAlignment: CrossAxisAlignment.start,
@@ -25,7 +26,6 @@ class SurveyPage extends GetView<TambahActivityController> {
       );
     }
 
-    // Handle special section titles
     String? sectionTitle;
     if (questionGroup['name'] == 'Visibility') {
       sectionTitle = "Survey Visibility";
@@ -53,16 +53,27 @@ class SurveyPage extends GetView<TambahActivityController> {
     return const SizedBox.shrink();
   }
 
-  buildSurveyQuestions(Map<String, dynamic> questionGroup) {
-    return (questionGroup['surveys'] ?? []).map((survey) {
-      final id = survey['id'] ?? '';
+  List<Widget> buildSurveyQuestions(Map<String, dynamic> questionGroup) {
+    return (questionGroup['surveys'] as List<dynamic>? ?? []).map((survey) {
+      final id = survey['id']?.toString() ?? '';
+      
+      // Initialize controller if it doesn't exist
+      if (survey['type'] == 'text' && !controller.priceControllers.containsKey(id)) {
+        controller.priceControllers[id] = TextEditingController();
+      }
+
       if (survey['type'] == 'bool') {
         if (!controller.switchStates.containsKey(id)) {
-          controller.switchStates[id] = true.obs; // Initialize with true for 'Ada'
+          controller.switchStates[id] = true.obs;
         }
+        
         if (questionGroup['title'] == "Apakah POWER SKU tersedia di toko?") {
           return BooleanQuestion(
-              title: survey['question'] ?? '', surveyId: id, controller: controller, enable: false);
+            title: survey['question'] ?? '',
+            surveyId: id,
+            controller: controller,
+            enable: false,
+          );
         }
         return BooleanQuestion(
           title: survey['question'] ?? '',
@@ -70,16 +81,21 @@ class SurveyPage extends GetView<TambahActivityController> {
           controller: controller,
         );
       } else if (survey['type'] == 'text') {
-        if (survey['question'] ==
-            'Berapa kali di Kuartal ini pernah dijalankan product detailing di toko ini?') {
+        final textController = controller.priceControllers[id];
+        if (textController == null) {
+          return const SizedBox.shrink();
+        }
+
+        if (survey['question'] == 'Berapa kali di Kuartal ini pernah dijalankan product detailing di toko ini?') {
           return TextQuestion(
-              title: survey['question'] ?? '',
-              controller: controller.priceControllers[id]!,
-              enable: false);
+            title: survey['question'] ?? '',
+            controller: textController,
+            enable: false,
+          );
         }
         return PriceQuestion(
           title: survey['question'] ?? '',
-          controller: controller.priceControllers[id]!,
+          controller: textController,
         );
       }
       return const SizedBox.shrink();
@@ -92,7 +108,7 @@ class SurveyPage extends GetView<TambahActivityController> {
       var questionGroup = <Map<String, dynamic>>[];
       if (controller.detailDraft.isNotEmpty) {
         final data = controller.detailDraft['surveyItems'];
-
+        
         questionGroup = supportController.getSurvey().map((entry) {
           var surveys = entry['surveys'] as List;
           var filteredSurveys = surveys.where((survey) {
@@ -109,6 +125,7 @@ class SurveyPage extends GetView<TambahActivityController> {
       } else {
         questionGroup = supportController.getSurvey();
       }
+
       return ListView.builder(
         shrinkWrap: true,
         physics: const NeverScrollableScrollPhysics(),

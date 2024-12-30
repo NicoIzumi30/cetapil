@@ -255,23 +255,28 @@ class _CompactProductCardState extends State<CompactProductCard> {
           'stock_on_hand': '0',
           'stock_on_inventory': '0',
           'av3m': av3mValue?.toString() ?? '0', // Use AV3M from database
-          'recommend': '0',
+          'recommend': (0 - av3mValue!).toString(),
         };
 
-    toggleAvailabilityYesNo = existingValues['availability_toggle'] == "false"
-        ? ValueNotifier(false)
-        : ValueNotifier(true);
+    toggleAvailabilityYesNo = existingValues['availability_toggle'] == "true"
+        ? ValueNotifier(true)
+        : ValueNotifier(false);
     stockOnHandController = TextEditingController(text: existingValues['stock_on_hand']);
     stockOnInventoryController = TextEditingController(text: existingValues['stock_on_inventory']);
     av3mController =
         TextEditingController(text: av3mValue?.toString() ?? '0'); // Pre-fill with AV3M value
-    recommendController = TextEditingController(text: existingValues['recommend']);
+    recommendController = TextEditingController(
+        text: (int.parse(existingValues['stock_on_inventory'].toString()) - av3mValue!).toString());
 
     _setupListeners();
   }
 
   void _setupListeners() {
     void updateValues() {
+      toggleAvailabilityYesNo.value = stockOnInventoryController.text.isNotEmpty &&
+              int.parse(stockOnInventoryController.text) > 0
+          ? true
+          : false;
       widget.onChanged({
         'availability_toggle': toggleAvailabilityYesNo.value ? 'true' : 'false',
         'stock_on_hand': stockOnHandController.text.isEmpty ? '0' : stockOnHandController.text,

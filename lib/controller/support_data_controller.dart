@@ -43,11 +43,74 @@ class SupportDataController extends GetxController {
     super.onClose();
   }
 
+  Future<void> refreshData() async {
+    try {
+      isLoading.value = true;
+      await supportDB.close(); // Close existing connection
+      await supportDB.database; // Reopen connection
+      await _clearExistingData();
+      await initRefreshData();
+    } catch (e) {
+      print('Error during refresh: $e');
+      rethrow;
+    } finally {
+      isLoading.value = false;
+    }
+  }
+
+  Future<void> _clearExistingData() async {
+    try {
+      final db = await supportDB.database;
+      await supportDB.clearAllTables(); // Use existing method
+
+      // Clear observable lists
+      // products.clear();
+      // categories.clear();
+      // channels.clear();
+      // knowledge.clear();
+      // survey.clear();
+      // posmTypes.clear();
+      // visualTypes.clear();
+    } catch (e) {
+      print('Error clearing data: $e');
+      rethrow;
+    }
+  }
+
+  Future<void> initRefreshData() async {
+    try {
+      await Future.wait([
+        initProductListData(),
+        initCategoryListData(),
+        initChannelListData(),
+        initKnowledgeData(),
+        initQuestionSurvey(),
+        initPosmTypeData(),
+        initVisualTypeData(),
+      ]);
+      await loadLocalData();
+
+      // Update last fetch date
+      final today = DateTime.now().toString().split(' ')[0];
+      storage.write(LAST_FETCH_DATE_KEY, today);
+    } catch (e) {
+      print("Error refreshing data: $e");
+      throw e;
+    }
+  }
+
   Future<void> checkData() async {
     await loadLocalData();
 
     // Only force refresh if data is empty
-    if (products.isEmpty || categories.isEmpty || channels.isEmpty || knowledge.isEmpty || survey.isEmpty || formOutlet.isEmpty || posmTypes.isEmpty || visualTypes.isEmpty) {
+    if (products.isEmpty ||
+        categories.isEmpty ||
+        channels.isEmpty ||
+        knowledge.isEmpty ||
+        survey.isEmpty ||
+        formOutlet.isEmpty ||
+        posmTypes.isEmpty ||
+        visualTypes.isEmpty) {
       await initAllData();
     } else {
       // If data exists, check for daily refresh
@@ -76,7 +139,7 @@ class SupportDataController extends GetxController {
 
       // Load POSM types
       posmTypes.value = await supportDB.getAllPosmTypes();
-      
+
       // Load Visual types
       visualTypes.value = await supportDB.getAllVisualTypes();
 

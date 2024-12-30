@@ -440,7 +440,6 @@ class Api {
     request.fields["time_order"] = data["time_order"].toString();
     request.fields["current_time"] = data["current_time"].toString();
 
-
     String checkStatus(String number) {
       int num = int.parse(number);
       if (num < 0) {
@@ -451,15 +450,20 @@ class Api {
         return "IDEAL";
       }
     }
+
     /// Availability Section
     for (var i = 0; i < availabilityList.length; i++) {
       request.fields["availability[$i][product_id]"] = availabilityList[i]["product_id"].toString();
-      request.fields["availability[$i][stock_on_hand]"] = availabilityList[i]["stock_on_hand"].toString();
-      request.fields["availability[$i][stock_inventory]"] = availabilityList[i]["stock_on_inventory"].toString();
+      request.fields["availability[$i][stock_on_hand]"] =
+          availabilityList[i]["stock_on_hand"].toString();
+      request.fields["availability[$i][stock_inventory]"] =
+          availabilityList[i]["stock_on_inventory"].toString();
       request.fields["availability[$i][av3m]"] = availabilityList[i]["av3m"].toString();
-      request.fields["availability[$i][status]"] = checkStatus(availabilityList[i]["recommend"].toString());
+      request.fields["availability[$i][status]"] =
+          checkStatus(availabilityList[i]["recommend"].toString());
       request.fields["availability[$i][rekomendasi]"] = availabilityList[i]["recommend"].toString();
-      request.fields["availability[$i][availability]"] = availabilityList[i]["availability_toggle"] ? "Y" : "N";
+      request.fields["availability[$i][availability]"] =
+          availabilityList[i]["availability_toggle"] == "true" ? "Y" : "N";
     }
 
     ///Visibility Section
@@ -468,25 +472,35 @@ class Api {
       request.fields["visibility[$i][category]"] = visibilityPrimaryList[i]['category'].toString();
       request.fields["visibility[$i][type]"] = "PRIMARY";
       request.fields["visibility[$i][position]"] = visibilityPrimaryList[i]['position'].toString();
-      request.fields["visibility[$i][posm_type_id]"] = visibilityPrimaryList[i]['posm_type_id'].toString();
-      request.fields["visibility[$i][visual_type]"] = visibilityPrimaryList[i]['visual_type_name'].toString().toUpperCase();
-      request.fields["visibility[$i][condition]"] = visibilityPrimaryList[i]['condition'].toString().toUpperCase();
-      request.fields["visibility[$i][shelf_width]"] = visibilityPrimaryList[i]['shelf_width'].toString().toUpperCase();
-      request.fields["visibility[$i][shelving]"] = visibilityPrimaryList[i]['shelving'].toString().toUpperCase();
+      request.fields["visibility[$i][posm_type_id]"] =
+          visibilityPrimaryList[i]['posm_type_id'].toString();
+      request.fields["visibility[$i][visual_type]"] =
+          visibilityPrimaryList[i]['visual_type_name'].toString().toUpperCase();
+      request.fields["visibility[$i][condition]"] =
+          visibilityPrimaryList[i]['condition'].toString().toUpperCase();
+      request.fields["visibility[$i][shelf_width]"] =
+          visibilityPrimaryList[i]['shelf_width'].toString().toUpperCase();
+      request.fields["visibility[$i][shelving]"] =
+          visibilityPrimaryList[i]['shelving'].toString().toUpperCase();
       request.files.add(await http.MultipartFile.fromPath(
-        'visibility[$i][display_photo]', visibilityPrimaryList[i]['image_visibility'].path,
+        'visibility[$i][display_photo]',
+        visibilityPrimaryList[i]['image_visibility'].path,
       ));
     }
 
     for (var i = 0; i < visibilitySecondaryList.length; i++) {
       print(visibilitySecondaryList[i]);
-      request.fields["visibility[${i+6}][category]"] = visibilitySecondaryList[i]['category'].toString();
-      request.fields["visibility[${i+6}][type]"] = "SECONDARY";
-      request.fields["visibility[${i+6}][position]"] = visibilitySecondaryList[i]['position'].toString();
-      request.fields["visibility[${i+6}][visual_type]"] = visibilitySecondaryList[i]['display_type'].toString().toUpperCase();
-      request.fields["visibility[${i+6}][has_secondary_display]"] = visibilitySecondaryList[i]['secondary_exist'].toString() == "true" ? "Y" : "N";
+      request.fields["visibility[${i + 6}][category]"] =
+          visibilitySecondaryList[i]['category'].toString();
+      request.fields["visibility[${i + 6}][type]"] = "SECONDARY";
+      request.fields["visibility[${i + 6}][position]"] =
+          visibilitySecondaryList[i]['position'].toString();
+      request.fields["visibility[${i + 6}][visual_type]"] =
+          visibilitySecondaryList[i]['display_type'].toString().toUpperCase();
+      request.fields["visibility[${i + 6}][has_secondary_display]"] =
+          visibilitySecondaryList[i]['secondary_exist'].toString() == "true" ? "Y" : "N";
       request.files.add(await http.MultipartFile.fromPath(
-        'visibility[${i+6}][display_photo]',
+        'visibility[${i + 6}][display_photo]',
         visibilitySecondaryList[i]['display_image'].path,
       ));
     }
@@ -566,7 +580,7 @@ class Api {
     }
   }
 
-  static Future<CalendarResponse> getCalendarDashboard(int month,int year) async {
+  static Future<CalendarResponse> getCalendarDashboard(int month, int year) async {
     var url = "$baseUrl/api/dashboard/calendar?month=$month&year=$year";
     var token = await storage.read('token');
     var response = await http.get(

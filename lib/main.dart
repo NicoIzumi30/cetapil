@@ -13,6 +13,7 @@ import 'package:geolocator/geolocator.dart';
 import 'package:get/get.dart';
 import 'package:get/get_core/src/get_main.dart';
 import 'package:get/get_navigation/src/root/get_material_app.dart';
+import 'package:permission_handler/permission_handler.dart';
 import 'package:get_storage/get_storage.dart';
 import 'package:intl/intl.dart';
 
@@ -24,6 +25,10 @@ import 'controller/pdf_controller.dart';
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
+  await [
+    Permission.storage,
+    Permission.manageExternalStorage,
+  ].request();
 
   try {
     Intl.defaultLocale = 'id';

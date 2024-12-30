@@ -77,7 +77,7 @@ class TambahActivity extends GetView<TambahActivityController> {
                       onTabChanged: controller.changeTab);
                 }),
                 SizedBox(
-                  height: 15,
+                  height: 10,
                 ),
                 Expanded(
                   child: SingleChildScrollView(

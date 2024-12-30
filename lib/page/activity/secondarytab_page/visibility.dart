@@ -56,10 +56,9 @@ class VisibilityPage extends GetView<ActivityController> {
                   if (!Get.isRegistered<TambahVisibilityController>()) {
                     Get.put(TambahVisibilityController());
                   }
-                  tambahActivityController.initPrimaryVisibilityItem(id);
+                  Get.find<TambahVisibilityController>().initPrimaryVisibilityItem(id);
 
-                  Get.to(() =>
-                      TambahPrimaryVisibility(
+                  Get.to(() => TambahPrimaryVisibility(
                         id: id,
                       ));
                 },
@@ -82,10 +81,9 @@ class VisibilityPage extends GetView<ActivityController> {
                   if (!Get.isRegistered<TambahVisibilityController>()) {
                     Get.put(TambahVisibilityController());
                   }
-                  tambahActivityController.initPrimaryVisibilityItem(id);
+                  Get.find<TambahVisibilityController>().initPrimaryVisibilityItem(id);
 
-                  Get.to(() =>
-                      TambahPrimaryVisibility(
+                  Get.to(() => TambahPrimaryVisibility(
                         id: id,
                       ));
                 },
@@ -101,17 +99,16 @@ class VisibilityPage extends GetView<ActivityController> {
                 posmType: data['posm_type_name'] ?? "-",
                 visualType: data['visual_type_name'] ?? "-",
                 condition: data['condition'] ?? "-",
-                imagePath: data['image_visibility'] ,
+                imagePath: data['image_visibility'],
                 isSubmitted: data.isNotEmpty,
                 onTapCard: () {
                   // Your custom tap handling here
                   if (!Get.isRegistered<TambahVisibilityController>()) {
                     Get.put(TambahVisibilityController());
                   }
-                  tambahActivityController.initPrimaryVisibilityItem(id);
+                  Get.find<TambahVisibilityController>().initPrimaryVisibilityItem(id);
 
-                  Get.to(() =>
-                      TambahPrimaryVisibility(
+                  Get.to(() => TambahPrimaryVisibility(
                         id: id,
                       ));
                 },
@@ -139,10 +136,9 @@ class VisibilityPage extends GetView<ActivityController> {
                   if (!Get.isRegistered<TambahVisibilityController>()) {
                     Get.put(TambahVisibilityController());
                   }
-                  tambahActivityController.initPrimaryVisibilityItem(id);
+                  Get.find<TambahVisibilityController>().initPrimaryVisibilityItem(id);
 
-                  Get.to(() =>
-                      TambahPrimaryVisibility(
+                  Get.to(() => TambahPrimaryVisibility(
                         id: id,
                       ));
                 },
@@ -157,7 +153,7 @@ class VisibilityPage extends GetView<ActivityController> {
                 posmType: data['posm_type_name'] ?? "-",
                 visualType: data['visual_type_name'] ?? "-",
                 condition: data['condition'] ?? "-",
-                imagePath: data['image_visibility'] ,
+                imagePath: data['image_visibility'],
                 isSubmitted: data.isNotEmpty,
                 onTapCard: () {
                   var id = "primary-baby-2";
@@ -165,10 +161,9 @@ class VisibilityPage extends GetView<ActivityController> {
                   if (!Get.isRegistered<TambahVisibilityController>()) {
                     Get.put(TambahVisibilityController());
                   }
-                  tambahActivityController.initPrimaryVisibilityItem(id);
+                  Get.find<TambahVisibilityController>().initPrimaryVisibilityItem(id);
 
-                  Get.to(() =>
-                      TambahPrimaryVisibility(
+                  Get.to(() => TambahPrimaryVisibility(
                         id: id,
                       ));
                 },
@@ -191,10 +186,9 @@ class VisibilityPage extends GetView<ActivityController> {
                   if (!Get.isRegistered<TambahVisibilityController>()) {
                     Get.put(TambahVisibilityController());
                   }
-                  tambahActivityController.initPrimaryVisibilityItem(id);
+                  Get.find<TambahVisibilityController>().initPrimaryVisibilityItem(id);
 
-                  Get.to(() =>
-                      TambahPrimaryVisibility(
+                  Get.to(() => TambahPrimaryVisibility(
                         id: id,
                       ));
                 },
@@ -226,14 +220,16 @@ class VisibilityPage extends GetView<ActivityController> {
                 isPrimary: false,
                 secondarydisplay: data['secondary_exist'] ?? "-",
                 typeDisplay: data['display_type'] ?? "-",
-                imagePath: data['display_image'] ,
+                imagePath: data['display_image'],
                 isSubmitted: data.isNotEmpty,
                 onTapCard: () {
                   if (!Get.isRegistered<TambahVisibilityController>()) {
                     Get.put(TambahVisibilityController());
                   }
-                  tambahActivityController.initSecondaryVisibilityItem(id);
-                  Get.to(() => TambahSecondaryVisibility(id: id,));
+                  Get.find<TambahVisibilityController>().initSecondaryVisibilityItem(id);
+                  Get.to(() => TambahSecondaryVisibility(
+                        id: id,
+                      ));
                 },
               );
             }),
@@ -243,16 +239,18 @@ class VisibilityPage extends GetView<ActivityController> {
                   .firstWhere((item) => item['id'] == id, orElse: () => {});
               return VisibilityCard(
                 isPrimary: false,
-                  secondarydisplay: data['secondary_exist']?? "-",
-                  typeDisplay: data['display_type']?? "-",
-                  imagePath: data['display_image'],
+                secondarydisplay: data['secondary_exist'] ?? "-",
+                typeDisplay: data['display_type'] ?? "-",
+                imagePath: data['display_image'],
                 isSubmitted: data.isNotEmpty,
                 onTapCard: () {
                   if (!Get.isRegistered<TambahVisibilityController>()) {
                     Get.put(TambahVisibilityController());
                   }
-                  tambahActivityController.initSecondaryVisibilityItem(id);
-                  Get.to(() => TambahSecondaryVisibility(id: id,));
+                  Get.find<TambahVisibilityController>().initSecondaryVisibilityItem(id);
+                  Get.to(() => TambahSecondaryVisibility(
+                        id: id,
+                      ));
                 },
               );
             }),
@@ -268,16 +266,18 @@ class VisibilityPage extends GetView<ActivityController> {
                   .firstWhere((item) => item['id'] == id, orElse: () => {});
               return VisibilityCard(
                 isPrimary: false,
-                secondarydisplay: data['secondary_exist']?? "-",
-                typeDisplay: data['display_type']?? "-",
+                secondarydisplay: data['secondary_exist'] ?? "-",
+                typeDisplay: data['display_type'] ?? "-",
                 imagePath: data['display_image'],
                 isSubmitted: data.isNotEmpty,
                 onTapCard: () {
                   if (!Get.isRegistered<TambahVisibilityController>()) {
                     Get.put(TambahVisibilityController());
                   }
-                  tambahActivityController.initSecondaryVisibilityItem(id);
-                  Get.to(() => TambahSecondaryVisibility(id: id,));
+                  Get.find<TambahVisibilityController>().initSecondaryVisibilityItem(id);
+                  Get.to(() => TambahSecondaryVisibility(
+                        id: id,
+                      ));
                 },
               );
             }),
@@ -287,16 +287,18 @@ class VisibilityPage extends GetView<ActivityController> {
                   .firstWhere((item) => item['id'] == id, orElse: () => {});
               return VisibilityCard(
                 isPrimary: false,
-                secondarydisplay: data['secondary_exist']?? "-",
-                typeDisplay: data['display_type']?? "-",
+                secondarydisplay: data['secondary_exist'] ?? "-",
+                typeDisplay: data['display_type'] ?? "-",
                 imagePath: data['display_image'],
                 isSubmitted: data.isNotEmpty,
                 onTapCard: () {
                   if (!Get.isRegistered<TambahVisibilityController>()) {
                     Get.put(TambahVisibilityController());
                   }
-                  tambahActivityController.initSecondaryVisibilityItem(id);
-                  Get.to(() => TambahSecondaryVisibility(id: id,));
+                  Get.find<TambahVisibilityController>().initSecondaryVisibilityItem(id);
+                  Get.to(() => TambahSecondaryVisibility(
+                        id: id,
+                      ));
                 },
               );
             }),
@@ -309,10 +311,12 @@ class VisibilityPage extends GetView<ActivityController> {
 
 class VisibilityCard extends StatelessWidget {
   final bool isPrimary;
+
   ///primary
   final String? posmType;
   final String? visualType;
   final String? condition;
+
   ///secondary
   final String? secondarydisplay;
   final String? typeDisplay;
@@ -323,21 +327,22 @@ class VisibilityCard extends StatelessWidget {
 
   const VisibilityCard({
     Key? key,
-
-     this.posmType,
-     this.visualType,
-     this.condition,
-     this.secondarydisplay,
-     this.typeDisplay,
+    this.posmType,
+    this.visualType,
+    this.condition,
+    this.secondarydisplay,
+    this.typeDisplay,
     this.imagePath,
     this.isSubmitted = false,
-    this.onTapCard, required this.isPrimary, // Optional callback
+    this.onTapCard,
+    required this.isPrimary, // Optional callback
   }) : super(key: key);
 
   @override
   Widget build(BuildContext context) {
     return _buildCardWithImage();
   }
+
   Widget _buildCardWithImage() {
     return InkWell(
       onTap: onTapCard,
@@ -362,43 +367,42 @@ class VisibilityCard extends StatelessWidget {
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
                   Expanded(
-                    child:
-                    isPrimary
-                    ? Column(
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      children: [
-                        _buildInfoRow('POSM Type:', posmType!),
-                        SizedBox(height: 8),
-                        _buildInfoRow('Visual Type:', visualType!),
-                        SizedBox(height: 8),
-                        _buildInfoRow('Condition', condition!),
-                      ],
-                    )
-                        :  Column(
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      children: [
-                        _buildInfoRow('Display Secondary:', secondarydisplay!),
-                        SizedBox(height: 8),
-                        _buildInfoRow('Display Type:', typeDisplay!),
-                      ],
-                    )
-                  ),
+                      child: isPrimary
+                          ? Column(
+                              crossAxisAlignment: CrossAxisAlignment.start,
+                              children: [
+                                _buildInfoRow('POSM Type:', posmType!),
+                                SizedBox(height: 8),
+                                _buildInfoRow('Visual Type:', visualType!),
+                                SizedBox(height: 8),
+                                _buildInfoRow('Condition', condition!),
+                              ],
+                            )
+                          : Column(
+                              crossAxisAlignment: CrossAxisAlignment.start,
+                              children: [
+                                _buildInfoRow('Display Secondary:', secondarydisplay!),
+                                SizedBox(height: 8),
+                                _buildInfoRow('Display Type:', typeDisplay!),
+                              ],
+                            )),
                   SizedBox(width: 12),
                   ClipRRect(
                     borderRadius: BorderRadius.circular(8),
-                    child:
-                    imagePath != null
+                    child: imagePath != null
                         ? SizedBox(
-                        width: 80,
-                        height: 80,
-                        child: Image.file(imagePath!,fit: BoxFit.cover,))
+                            width: 80,
+                            height: 80,
+                            child: Image.file(
+                              imagePath!,
+                              fit: BoxFit.cover,
+                            ))
                         : Container(
-                      width: 80,
-                      height: 80,
-                      color: Colors.grey[200],
-                      child:
-                      Icon(Icons.image_outlined, color: Colors.grey[400]),
-                    ),
+                            width: 80,
+                            height: 80,
+                            color: Colors.grey[200],
+                            child: Icon(Icons.image_outlined, color: Colors.grey[400]),
+                          ),
                   ),
                 ],
               ),
@@ -463,12 +467,10 @@ class CollapsibleVisibilityGroup extends StatefulWidget {
   }) : super(key: key);
 
   @override
-  State<CollapsibleVisibilityGroup> createState() =>
-      _CollapsibleVisibilityGroupState();
+  State<CollapsibleVisibilityGroup> createState() => _CollapsibleVisibilityGroupState();
 }
 
-class _CollapsibleVisibilityGroupState
-    extends State<CollapsibleVisibilityGroup> {
+class _CollapsibleVisibilityGroupState extends State<CollapsibleVisibilityGroup> {
   bool isExpanded = true;
 
   @override
@@ -492,14 +494,11 @@ class _CollapsibleVisibilityGroupState
                 });
               },
               child: Padding(
-                padding:
-                const EdgeInsets.symmetric(horizontal: 12.0, vertical: 8.0),
+                padding: const EdgeInsets.symmetric(horizontal: 12.0, vertical: 8.0),
                 child: Row(
                   children: [
                     Icon(
-                      isExpanded
-                          ? Icons.keyboard_arrow_down
-                          : Icons.keyboard_arrow_right,
+                      isExpanded ? Icons.keyboard_arrow_down : Icons.keyboard_arrow_right,
                       color: Color(0xFF023B5E),
                     ),
                     SizedBox(width: 8),
