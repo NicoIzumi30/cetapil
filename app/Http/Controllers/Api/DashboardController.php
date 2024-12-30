@@ -24,7 +24,45 @@ class DashboardController extends Controller
     {
         $user = $this->getAuthUser();
         $now = Carbon::now();
-        $outlet_query = Outlet::where('user_id', $user->id)->approved();
+
+        // Set current day (Sunday becomes 7)
+        $currentDayNumber = $now->dayOfWeek;
+        $currentDayNumber = $currentDayNumber === 0 ? 7 : $currentDayNumber;
+
+        // Calculate week number (1-4)
+        $currentWeek = $now->weekOfMonth;
+        $weekNumber = $currentWeek > 4 ? $currentWeek % 4 : $currentWeek;
+
+        $outlet_query = Outlet::where('user_id', $user->id)->approved()
+            ->where(function ($query) use ($currentDayNumber, $weekNumber) {
+                // 1x1 cycle
+                $query->orWhere(function ($q) use ($currentDayNumber) {
+                    $q->where('cycle', '1x1')
+                        ->where('visit_day', $currentDayNumber);
+                });
+
+                // 1x2 cycle
+                $query->orWhere(function ($q) use ($currentDayNumber, $weekNumber) {
+                    $q->where('cycle', '1x2')
+                        ->where('visit_day', $currentDayNumber)
+                        ->where(function ($w) use ($weekNumber) {
+                            $w->orWhere('week', (string)$weekNumber);
+                            if (in_array($weekNumber, [1, 3])) {
+                                $w->orWhere('week', '1&3');
+                            }
+                            if (in_array($weekNumber, [2, 4])) {
+                                $w->orWhere('week', '2&4');
+                            }
+                        });
+                });
+
+                // 1x4 cycle
+                $query->orWhere(function ($q) use ($currentDayNumber, $weekNumber) {
+                    $q->where('cycle', '1x4')
+                        ->where('visit_day', $currentDayNumber)
+                        ->where('week', (string)$weekNumber);
+                });
+            });
 
         $total_outlet = (int) DB::table(DB::raw("({$outlet_query->toSql()}) as query"))
             ->mergeBindings($outlet_query->getQuery())
@@ -35,24 +73,11 @@ class DashboardController extends Controller
             ->whereNotNull('checked_out')
             ->count();
 
-        $week_type = "ODD";
-        $currentDayNumber = $now->dayOfWeek;
-        if ($currentDayNumber == 0) $currentDayNumber = 7;
-        if ($now->weekOfYear % 2 == 0) $week_type = "EVEN";
-
         $total_call_plan = (int) DB::table(DB::raw("({$outlet_query->toSql()}) as query"))
             ->mergeBindings($outlet_query->getQuery())
-            ->where('visit_day', $currentDayNumber)
-            ->where(function (Builder $query) use ($week_type) {
-                $query->where('cycle', '1x1')
-                    ->orWhere(function (Builder $query) use ($week_type) {
-                        $query->where('cycle', '1x2')
-                            ->where('week_type', $week_type);
-                    });
-            })
             ->count();
 
-        $current_outlet = $this->getCurrentOutlet($user, $now, $currentDayNumber, $week_type);
+        $current_outlet = $this->getCurrentOutlet($user, $now, $currentDayNumber, $weekNumber);
 
         // Add distance calculation for current outlet if check-in coordinates exist
         if ($current_outlet && isset($current_outlet['check_in_latitude']) && isset($current_outlet['check_in_longitude'])) {

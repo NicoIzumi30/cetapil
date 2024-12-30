@@ -86,7 +86,7 @@ class PowerSkuController extends Controller
             if ($data['select-input-survey-data'] === 'power-sku') {
                 $surveyQuestionCategory1 = SurveyCategory::where('title', 'Apakah POWER SKU tersedia di toko?')->first()->id;
                 $surveyQuestionCategory2 = SurveyCategory::where('title', 'Berapa harga POWER SKU di toko?')->first()->id;
-                $product = Product::find($data['power-sku'])->first();
+                $product = Product::where("id", $data['power-sku'])->first();
                 // Apakah ada Power SKU di toko?
                 $survey1 = SurveyQuestion::create([
                     'survey_category_id' => $surveyQuestionCategory1,
