@@ -14,7 +14,7 @@ use PhpOffice\PhpSpreadsheet\Style\Alignment;
 use PhpOffice\PhpSpreadsheet\Style\Border;
 use PhpOffice\PhpSpreadsheet\Style\Fill;
 
-class SellingExport implements FromQuery, WithHeadings, WithMapping, WithStyles, ShouldAutoSize
+class SurveyExport implements FromQuery, WithHeadings, WithMapping, WithStyles, ShouldAutoSize
 {
     public function query()
     {

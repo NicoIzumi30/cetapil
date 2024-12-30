@@ -374,6 +374,7 @@ class ProductController extends Controller
 
             // Ganti query yang lama dengan yang baru
             $query = SalesAvailability::with([
+                'salesActivity:id,time_availability',
                 'product:id,sku',
                 'outlet:id,name,code,tipe_outlet,TSO,city_id,channel_id,user_id,account',
                 'outlet.user:id,name',
@@ -533,7 +534,7 @@ class ProductController extends Controller
     public function av3mBulk(Request $request)
     {
         $request->validate([
-            'excel_file' => 'required|mimes:xlsx|max:10240'
+            'excel_file' => 'required|mimes:xlsx|max:5120'
         ]);
 
         try {

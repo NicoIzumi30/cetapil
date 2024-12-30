@@ -48,7 +48,7 @@ class StockOnHandExport implements FromCollection, WithHeadings, WithMapping, Wi
             'Duration',
             'Week',
             'Created At',
-            'Updated At'
+            'Ended At'
         ];
     }
 
@@ -71,10 +71,10 @@ class StockOnHandExport implements FromCollection, WithHeadings, WithMapping, Wi
                 ($row->av3m !== null) ? (string)$row->av3m : '0',
                 ($row->rekomendasi !== null) ? (string)$row->rekomendasi : '0',
                 $row->status_ideal ?? '',
-                '',
-                '',
+                gmdate('H:i:s', $row->salesActivity->time_availability),
+                $row->created_at->format('W'),
                 $row->created_at ? $row->created_at->format('Y-m-d H:i:s') : '',
-                $row->updated_at ? $row->updated_at->format('Y-m-d H:i:s') : ''
+                $row->created_at->addSeconds($row->salesActivity->time_availability) ?? ''
             ];
         } catch (\Exception $e) {
             Log::error('Error in StockOnHandExport mapping', [

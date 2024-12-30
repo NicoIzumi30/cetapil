@@ -553,7 +553,32 @@
             const selectedCycle = $(this).val();
             updateWeekOptions(selectedCycle);
         });
+        const gihCheckbox = document.querySelector('#gih-checkbox');
+            const gihChecked = document.querySelector('#gih-checked');
+            const gihUnChecked = document.querySelector('#gih-unchecked');
+            
+            if(gihCheckbox.value == 'Sudah') {
+                $('#gih-checkbox').val('Sudah');
+                gihChecked.classList.add("bg-blue-400", "!text-white");
+                gihUnChecked.classList.remove("bg-blue-400", "!text-white");
+            }else{
+                $('#gih-checkbox').val('Belum');
+                gihUnChecked.classList.add("bg-blue-400", "!text-white");
+                gihChecked.classList.remove("bg-blue-400", "!text-white");
+                gihChecked.classList.add("text-blue-400");
+            }
 
+            gihChecked.addEventListener('click', function () {
+                $('#gih-checkbox').val('Sudah');
+                gihChecked.classList.add("bg-blue-400", "!text-white");
+                gihUnChecked.classList.remove("bg-blue-400", "!text-white");
+            });
+            gihUnChecked.addEventListener('click', function () {
+                $('#gih-checkbox').val('Belum');
+                gihUnChecked.classList.add("bg-blue-400", "!text-white");
+                gihChecked.classList.remove("bg-blue-400", "!text-white");
+                gihChecked.classList.add("text-blue-400");
+            });
         // Form submission validation
         $('form').on('submit', function(e) {
             const cycle = $('#cycle').val();

@@ -22,7 +22,6 @@ class UpdateProductKnowledgeRequest extends FormRequest
     public function rules(): array
     {
         return [
-            'channel_id' => 'required|exists:channels,id',
             'file_pdf' => 'nullable|file|mimes:pdf|max:10240',
             'file_video' => 'nullable|file|max:10240|mimes:mp4,mov,ogg,qt'
         ];

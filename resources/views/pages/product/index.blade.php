@@ -1156,7 +1156,9 @@
                             },
                             success: function(response) {
                                 toast('success', response.message, 300);
-                                powerSkuTable.ajax.reload();
+                                setTimeout(() => {
+                                    window.location.reload();
+                                }, 3000); 
                             },
                             error: function(xhr) {
                                 toast('error', xhr.responseJSON.message ||
@@ -1475,7 +1477,7 @@
             const fileInput = document.getElementById('file_upload-av3m');
             const displayFileName = document.getElementById('filename-display-av3m');
             const uploadHelptext = document.getElementById('upload-helptext-av3m');
-            const maxFileSize = 2 * 1024 * 1024;
+            const maxFileSize = 5 * 1024 * 1024;
 
             // Click handler for the upload area
             uploadArea.addEventListener('click', () => {
@@ -1511,13 +1513,14 @@
                 const file = files[0];
 
                 const validTypes = [
-                    'text/csv',
-                    'application/vnd.ms-excel',
-                    'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet'
-                ];
+                        'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet',
+                        'application/wps-office.xlsx',
+                        'application/vnd.ms-excel'
+                    ];
+
 
                 if (!validTypes.includes(file.type)) {
-                    alert('Upload file gagal, Tolong Unggah Hanya file berformat .csv/xls');
+                    alert('Upload file gagal, Tolong Unggah Hanya file berformat .xlsx');
                     fileInput.value = '';
                     return;
                 }

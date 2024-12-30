@@ -475,7 +475,7 @@
             });
 
             // Inisialisasi awal
-            weekHandler($('#cycle').val());
+            // weekHandler($('#cycle').val());
             const gihCheckbox = document.querySelector('#gih-checkbox');
             const gihChecked = document.querySelector('#gih-checked');
             const gihUnChecked = document.querySelector('#gih-unchecked');

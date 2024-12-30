@@ -28,11 +28,11 @@ class ProductAV3MExcelDataJob implements ShouldQueue
 
     public function handle(): void
     {
-        collect($this->excelData)->take(3)->each(function ($chunk) {
+        collect($this->excelData)->chunk(50)->take(3)->each(function ($chunk) {
             foreach ($chunk as $key => $row) {
                 try {
-                    $outlet = getOutletByCode($row['code']);
-                    $product = getProductBySku($row['produk_sku']);
+                    $outlet = getOutletByCode($row['code_outlet']);
+                    $product = getProductBySku($row['product_sku']);
 
                     if (!$outlet || !$product) {
                         throw new Exception("Outlet or Product not found");
@@ -53,8 +53,8 @@ class ProductAV3MExcelDataJob implements ShouldQueue
                         'FILE_NAME' => $this->fileName,
                         'ROW' => $errorRow,
                         'ERROR_MESSAGE' => $e->getMessage(),
-                        'CODE_OUTLET' => $row['code'],
-                        'SKU' => $row['produk_sku'],
+                        'CODE_OUTLET' => $row['code_outlet'],
+                        'SKU' => $row['product_sku'],
                     ];
                     Log::channel('productErrorLog')->error(json_encode($data));
                 }

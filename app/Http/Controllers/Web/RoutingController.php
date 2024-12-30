@@ -73,15 +73,13 @@ class RoutingController extends Controller
         $query = Outlet::with('user');
 
         if ($request->filled('search_term')) {
-            $searchTerm = $request->search_term;
-            $query->where(function ($q) use ($searchTerm) {
-                $q->where('name', 'like', "%{$searchTerm}%")
-                    ->where('status', '!=', 'APPROVED')
-                    ->orWhereHas('user', function ($q) use ($searchTerm) {
-                        $q->where('name', 'like', "%{$searchTerm}%");
-                    });
-            });
+            $searchTerm = trim($request->search_term);
+            $query->where('name', 'like', "%{$searchTerm}%");
+            $query->orWhereHas('user', function ($q) use ($searchTerm) {
+                $q->where('name', 'like', "%{$searchTerm}%");
+            })->where('status', '!=', 'APPROVED');
         }
+        
         if ($request->filled('filter_day')) {
             $filter_day = $request->filter_day;
             if ($filter_day != 'all') {
