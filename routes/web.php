@@ -66,10 +66,14 @@ Route::middleware('auth')->group(function () {
     Route::resource('routing', RoutingController::class)->middleware('permission:menu_routing');
     // Route::delete('/routing/{id}', [RoutingController::class, 'destroy'])->name('routing.destroy');
 
+    // Download Management
+	Route::get('/download', function () {
+		return view('pages.download.index');
+	});
+
     Route::put('update-product-knowledge', [ProductKnowledgeControler::class, 'update'])->name('update-product-knowledge')->middleware('permission:menu_routing');
     Route::get('/visibility/download-activity', [VisibilityController::class, 'downloadActivityData'])
         ->name('visibility.download-activity');
-    // Visibility Management
     Route::middleware('permission:menu_visibility')->group(function () {
         Route::get('/visibility/data', [VisibilityController::class, 'getData'])->name('visibility.data');
         Route::get('visibility/activity/data', [VisibilityController::class, 'getDataActivity'])->name('visibility.activity.data');

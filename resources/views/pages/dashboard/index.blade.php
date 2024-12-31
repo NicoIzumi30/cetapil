@@ -32,9 +32,9 @@
             <x-pages.dashboard.total-card :title="'Total SMD'" :total="$user['total']" :date="$user['date']" />
         </div>
         <div class="flex flex-wrap xl:flex-nowrap gap-6 w-full mt-6">
-            <x-pages.dashboard.chart-routing />
-            <x-pages.dashboard.chart-time-activity />
-            <x-pages.dashboard.chart-product-knowledge />
+            <x-pages.dashboard.chart-avg-availability-duration />
+            <x-pages.dashboard.chart-avg-visibility-duration />
+            <x-pages.dashboard.chart-avg-survey-duration />
 
         </div>
         <div class="bg-[#1a1a1a] rounded-xl shadow-md p-4 mt-6">
