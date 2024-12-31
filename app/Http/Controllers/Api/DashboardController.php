@@ -25,23 +25,21 @@ class DashboardController extends Controller
         $user = $this->getAuthUser();
         $now = Carbon::now();
 
-        // Set current day (Sunday becomes 7)
         $currentDayNumber = $now->dayOfWeek;
         $currentDayNumber = $currentDayNumber === 0 ? 7 : $currentDayNumber;
 
-        // Calculate week number (1-4)
         $currentWeek = $now->weekOfMonth;
         $weekNumber = $currentWeek > 4 ? $currentWeek % 4 : $currentWeek;
 
-        $outlet_query = Outlet::where('user_id', $user->id)->approved()
+        $outlet_query = Outlet::where('user_id', $user->id)
+            ->whereNull('deleted_at')
+            ->approved()
             ->where(function ($query) use ($currentDayNumber, $weekNumber) {
-                // 1x1 cycle
                 $query->orWhere(function ($q) use ($currentDayNumber) {
                     $q->where('cycle', '1x1')
                         ->where('visit_day', $currentDayNumber);
                 });
 
-                // 1x2 cycle
                 $query->orWhere(function ($q) use ($currentDayNumber, $weekNumber) {
                     $q->where('cycle', '1x2')
                         ->where('visit_day', $currentDayNumber)
@@ -56,7 +54,6 @@ class DashboardController extends Controller
                         });
                 });
 
-                // 1x4 cycle
                 $query->orWhere(function ($q) use ($currentDayNumber, $weekNumber) {
                     $q->where('cycle', '1x4')
                         ->where('visit_day', $currentDayNumber)
@@ -69,6 +66,7 @@ class DashboardController extends Controller
             ->count();
 
         $total_actual_plan = (int) SalesActivity::where('user_id', $user->id)
+            ->whereNull('deleted_at')
             ->whereDate('checked_in', $now)
             ->whereNotNull('checked_out')
             ->count();
@@ -79,7 +77,6 @@ class DashboardController extends Controller
 
         $current_outlet = $this->getCurrentOutlet($user, $now, $currentDayNumber, $weekNumber);
 
-        // Add distance calculation for current outlet if check-in coordinates exist
         if ($current_outlet && isset($current_outlet['check_in_latitude']) && isset($current_outlet['check_in_longitude'])) {
             $current_outlet['distance_to_outlet'] = $this->calculateDistance(
                 $current_outlet['check_in_latitude'],
@@ -90,21 +87,28 @@ class DashboardController extends Controller
         }
 
         $power_skus = DB::table('power_skus as ps')
+            ->whereNull('ps.deleted_at')
             ->join('products as p', 'ps.product_id', '=', 'p.id')
+            ->where('p.deleted_at', null)
             ->select('p.sku', 'ps.product_id')
             ->get()
             ->map(function ($powerSku) use ($user) {
                 $total_outlets = DB::table('outlets')
                     ->where('user_id', $user->id)
+                    ->whereNull('deleted_at')
                     ->count();
 
                 $available_count = DB::table('outlets as o')
+                    ->whereNull('o.deleted_at')
                     ->join('sales_activities as sa', 'sa.outlet_id', '=', 'o.id')
+                    ->whereNull('sa.deleted_at')
                     ->join('sales_surveys as ss', 'ss.sales_activity_id', '=', 'sa.id')
+                    ->whereNull('ss.deleted_at')
                     ->join('survey_questions as sq', function ($join) use ($powerSku) {
                         $join->on('ss.survey_question_id', '=', 'sq.id')
                             ->where('sq.type', '=', 'bool')
-                            ->where('sq.product_id', '=', $powerSku->product_id);
+                            ->where('sq.product_id', '=', $powerSku->product_id)
+                            ->whereNull('sq.deleted_at');
                     })
                     ->where('o.user_id', $user->id)
                     ->where('ss.answer', '=', 'true')
@@ -124,15 +128,20 @@ class DashboardController extends Controller
             ->all();
 
         $latest_performance_update = SalesActivity::where('user_id', $user->id)
+            ->whereNull('deleted_at')
             ->whereNotNull('checked_out')
             ->latest('checked_out')
             ->first()
             ->checked_out ?? null;
 
         $latest_power_sku_update = DB::table('sales_surveys as ss')
+            ->whereNull('ss.deleted_at')
             ->join('sales_activities as sa', 'sa.id', '=', 'ss.sales_activity_id')
+            ->whereNull('sa.deleted_at')
             ->join('survey_questions as sq', 'ss.survey_question_id', '=', 'sq.id')
+            ->whereNull('sq.deleted_at')
             ->join('power_skus as ps', 'ps.product_id', '=', 'sq.product_id')
+            ->whereNull('ps.deleted_at')
             ->where('sa.user_id', $user->id)
             ->whereNotNull('sa.checked_out')
             ->latest('sa.checked_out')

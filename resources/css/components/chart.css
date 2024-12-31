@@ -79,8 +79,10 @@
 }
 
 .bar-label {
-    width: 40px;
     color: rgba(255, 255, 255, 0.9);
+	font-weight: 500;
+	margin-bottom: 8px;
+	margin-left: 12px;
 }
 
 .bar-wrapper {
@@ -113,8 +115,9 @@
 .percentage {
 	position: absolute;
 	color: #000000;
-	right: 45px;
+	right: 35px;
 	font-weight: 700;
+	top: -9px;
 }
 
 .count {

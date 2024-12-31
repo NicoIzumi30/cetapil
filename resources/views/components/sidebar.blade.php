@@ -39,6 +39,13 @@ $menus[] =  (object) [
             'path' => '/survey',
         ];
     }
+    if(auth()->user()->hasPermissionTo('menu_selling')) {
+        $menus[] = (object) [
+            'icon' => 'line-md_download.svg',
+            'title' => 'Download',
+            'path' => '/download',
+        ];
+    }
     if(auth()->user()->hasPermissionTo('menu_user')) {
         $menus[] = (object) [
             'icon' => 'mdi_account_group.svg',
