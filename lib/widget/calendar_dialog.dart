@@ -41,13 +41,22 @@ class _CustomCalendarDialogState extends State<CustomCalendarDialog> {
     setState(() => _isLoading = true);
     try {
       final response = await Api.getCalendarDashboard(_currentMonth.month, _currentMonth.year);
-      setState(() => _calendarData = response);
+      if (mounted) {
+        // Check if widget is still mounted
+        setState(() => _calendarData = response);
+      }
     } catch (e) {
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text('Error loading calendar data: $e')),
-      );
+      if (mounted) {
+        // Check if widget is still mounted before showing SnackBar
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(content: Text('Error loading calendar data: $e')),
+        );
+      }
     } finally {
-      setState(() => _isLoading = false);
+      if (mounted) {
+        // Check if widget is still mounted
+        setState(() => _isLoading = false);
+      }
     }
   }
 

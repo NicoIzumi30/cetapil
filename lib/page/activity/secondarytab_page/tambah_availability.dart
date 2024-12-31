@@ -266,7 +266,8 @@ class _CompactProductCardState extends State<CompactProductCard> {
     av3mController =
         TextEditingController(text: av3mValue?.toString() ?? '0'); // Pre-fill with AV3M value
     recommendController = TextEditingController(
-        text: (int.parse(existingValues['stock_on_inventory'].toString()) - av3mValue!).toString());
+        text: (int.parse(existingValues['stock_on_inventory'].toString()) - (av3mValue ?? 0))
+            .toString());
 
     _setupListeners();
   }
