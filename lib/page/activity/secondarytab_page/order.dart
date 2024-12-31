@@ -237,13 +237,13 @@ class _CollapsibleCategoryGroupState extends State<CollapsibleCategoryGroup> {
                       constraints: BoxConstraints(),
                       tooltip: 'Edit Category Products',
                     ),
-                    IconButton(
-                      onPressed: widget.onDelete,
-                      icon: Icon(Icons.delete, color: Colors.red, size: 20),
-                      padding: EdgeInsets.zero,
-                      constraints: BoxConstraints(),
-                      tooltip: 'Delete Category Products',
-                    ),
+                    // IconButton(
+                    //   onPressed: widget.onDelete,
+                    //   icon: Icon(Icons.delete, color: Colors.red, size: 20),
+                    //   padding: EdgeInsets.zero,
+                    //   constraints: BoxConstraints(),
+                    //   tooltip: 'Delete Category Products',
+                    // ),
                   ],
                 ),
               ),
@@ -256,7 +256,6 @@ class _CollapsibleCategoryGroupState extends State<CollapsibleCategoryGroup> {
             curve: Curves.easeInOut,
             child: Column(
               children: widget.items.map((item) {
-                print(item['harga']?.toString());
                 return OrderProductCard(
                   productName: item['sku'] ?? '',
                   jumlahController: TextEditingController(
@@ -638,236 +637,169 @@ class OrderSummaryCard extends GetView<TambahActivityController> {
 
   @override
   Widget build(BuildContext context) {
-    final formatter =
-        NumberFormat.currency(locale: 'id_ID', symbol: "Rp ", decimalDigits: 0);
-
+    final formatter = NumberFormat.currency(
+      locale: 'id_ID', 
+      symbol: "Rp ", 
+      decimalDigits: 0
+    );
 
     return Obx(() {
-      int totalQty = 0;
-      double totalPrice = 0.0;
-      var ctrl = Get.find<TambahActivityController>();
+      final ctrl = Get.find<TambahActivityController>();
+      var totalQty = 0;
+      var totalPrice = 0.0;
 
-      try {
-        if (ctrl.orderDraftItems.isNotEmpty) {
-          for (var item in ctrl.orderDraftItems) {
-            if (item != null && item['jumlah'] != null) {
-              totalQty += (item['jumlah'] as num).toInt();
-              totalPrice += (item['jumlah'] as num) * (item['harga'] as num);
-            }
-          }
+      for (final item in ctrl.orderDraftItems) {
+        if (item['jumlah'] != null && item['harga'] != null) {
+          totalQty += (item['jumlah'] as num).toInt();
+          totalPrice += (item['jumlah'] as num) * (item['harga'] as num);
         }
-      } catch (e) {
-        print('Error calculating quantity: $e');
       }
 
       return Container(
-        margin: EdgeInsets.symmetric(vertical: 8),
-        padding: EdgeInsets.all(16),
+        margin: const EdgeInsets.symmetric(vertical: 4),
+        padding: const EdgeInsets.all(12),
         decoration: BoxDecoration(
           color: Colors.white,
-          borderRadius: BorderRadius.circular(12),
+          borderRadius: BorderRadius.circular(8),
           boxShadow: [
             BoxShadow(
-              color: Colors.black.withOpacity(0.05),
-              blurRadius: 8,
-              offset: Offset(0, 2),
+              color: Colors.black.withOpacity(0.03),
+              blurRadius: 4,
+              offset: const Offset(0, 1),
             ),
           ],
         ),
-        child: Obx(() {
-          Map<String, List<Map<String, dynamic>>> groupedData = {};
-
-          for (var item in ctrl.orderDraftItems) {
-            String category = item['category'];
-            if (!groupedData.containsKey(category)) {
-              groupedData[category] = [];
-            }
-            groupedData[category]!.add(item);
-          }
-
-          List<Widget> widgets = [];
-          groupedData.forEach((category, items) {
-            widgets.add(Text(
-              category,
-              style: TextStyle(fontSize: 12, color: Color(0xFF0077BD),fontWeight: FontWeight.bold),
-            ));
-            for (var item in items) {
-              String sku = item['sku'];
-              int jumlah = item['jumlah'];
-              int harga = item['harga'];
-
-              // Calculate total price
-              int totalHarga = jumlah * harga;
-
-              if (jumlah != 0 && harga != 0) {
-                widgets.add(
-                  Row(
-                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                    children: [
-                      Row(
-                        children: [
-                          SizedBox(
-                              width: 130,
-                              child: Text("$sku",style: TextStyle(fontSize: 12) ,maxLines: 1,overflow: TextOverflow.ellipsis,)),
-                        Text("   ($jumlah)",style: TextStyle(fontSize: 12))
-                        ],
-                      ),
-                      // Text("${totalHarga.toStringAsFixed(0)}"),
-                      Text(formatter.format(totalHarga)),
-                    ],
-                  ),
-                );
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            ...ctrl.orderDraftItems.fold<Map<String, List<Map<String, dynamic>>>>(
+              {}, 
+              (map, item) {
+                final category = item['category'] as String? ?? 'Other';
+                map.putIfAbsent(category, () => []).add(item);
+                return map;
               }
-
-            }
-            widgets.add(SizedBox(height: 16)); // Add spacing between categories
-          });
-
-          return Column(
-            children: [
-              Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: widgets,
-              ),
-              // for (var entry in categoryTotals.entries)
-              //   Row(
-              //     mainAxisAlignment: MainAxisAlignment.spaceBetween,
-              //     children: [
-              //       Text(
-              //         "${entry.key} (${entry.value['totalJumlah']})",
-              //         style: TextStyle(
-              //           fontSize: 13,
-              //           fontWeight: FontWeight.bold,
-              //           color: Colors.black54,
-              //         ),
-              //       ),
-              //       Text(
-              //         entry.value['totalHarga'].toString(),
-              //         style: TextStyle(
-              //           fontSize: 16,
-              //           fontWeight: FontWeight.bold,
-              //           color: Color(0xFF0077BD),
-              //         ),
-              //       ),
-              //     ],
-              //   ),
-
-              // ...summary.entries.map((entry) {
-              //   return Padding(
-              //     padding: const EdgeInsets.symmetric(vertical: 8.0),
-              //     child: Row(
-              //       mainAxisAlignment: MainAxisAlignment.spaceBetween,
-              //       children: [
-              //         Text(
-              //           "${entry.key} (${entry.value})",
-              //           style: TextStyle(
-              //             fontSize: 13,
-              //             fontWeight: FontWeight.bold,
-              //             color: Colors.black54,
-              //           ),
-              //         ),
-              //         Text(
-              //           totals['harga'].toString(),
-              //           style: TextStyle(
-              //             fontSize: 16,
-              //             fontWeight: FontWeight.bold,
-              //             color: Color(0xFF0077BD),
-              //           ),
-              //         ),
-              //       ],
-              //     ),
-              //   );
-              // }).toList(),
-
-              //   for (var item in ctrl.orderDraftItems)
-              // if (item != null && item['jumlah'] != null) {
-              //   totalQty += (item['jumlah'] as num).toInt();
-              //   totalPrice += (item['jumlah'] as num) * (item['harga'] as num);
-              // },
-
-              // (ctrl.orderDraftItems.isNotEmpty)
-              //     ? Column(
-              //   children: [
-              //     ...groupedItems.entries.map((entry) {
-              //       final category = entry.key;
-              //       final items = entry.value;
-              //       return Row(
-              //         mainAxisAlignment: MainAxisAlignment.spaceBetween,
-              //         children: [
-              //           Text(
-              //             " $category (${items.length})",
-              //             style: TextStyle(
-              //               fontSize: 13,
-              //               fontWeight: FontWeight.bold,
-              //               color: Colors.black54,
-              //             ),
-              //           ),
-              //           Text(
-              //             category,
-              //             style: TextStyle(
-              //               fontSize: 16,
-              //               fontWeight: FontWeight.bold,
-              //               color: Color(0xFF0077BD),
-              //             ),
-              //           ),
-              //         ],
-              //       );
-              //     }).toList(),
-              //   ],
-              // )
-              //     : SizedBox(),
-
-              Divider(),
-              Row(
-                mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                children: [
-                  Column(
+            ).entries.map((entry) => Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Container(
+                  width: double.infinity,
+                  padding: const EdgeInsets.symmetric(vertical: 4),
+                  decoration: const BoxDecoration(
+                    border: Border(
+                      bottom: BorderSide(
+                        color: Color(0xFFEEEEEE),
+                        width: 1,
+                      ),
+                    ),
+                  ),
+                  child: Text(
+                    entry.key,
+                    style: const TextStyle(
+                      fontSize: 11,
+                      color: Color(0xFF0077BD),
+                      fontWeight: FontWeight.w500
+                    ),
+                  ),
+                ),
+                ...entry.value.where((item) => 
+                  (item['jumlah'] as num?)?.toInt() != 0 && 
+                  (item['harga'] as num?)?.toInt() != 0
+                ).map((item) => Container(
+                  padding: const EdgeInsets.symmetric(vertical: 4),
+                  decoration: const BoxDecoration(
+                    border: Border(
+                      bottom: BorderSide(
+                        color: Color(0xFFF5F5F5),
+                        width: 1,
+                      ),
+                    ),
+                  ),
+                  child: Row(
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
-                      Text(
-                        'Total Quantity',
-                        style: TextStyle(
-                          fontSize: 12,
-                          color: Colors.black54,
+                      // Qty column
+                      SizedBox(
+                        width: 30,
+                        child: Text(
+                          item['jumlah'].toString(),
+                          style: const TextStyle(
+                            fontSize: 11,
+                            color: Colors.black87,
+                          ),
                         ),
                       ),
-                      SizedBox(height: 4),
-                      Text(
-                        totalQty.toString(),
-                        style: TextStyle(
-                          fontSize: 16,
-                          fontWeight: FontWeight.bold,
-                          color: Color(0xFF0077BD),
+                      // Product name column
+                      Expanded(
+                        child: Text(
+                          item['sku'] ?? '',
+                          style: const TextStyle(
+                            fontSize: 11,
+                            color: Colors.black87,
+                          ),
                         ),
                       ),
-                    ],
-                  ),
-                  Column(
-                    crossAxisAlignment: CrossAxisAlignment.end,
-                    children: [
-                      Text(
-                        'Total Price',
-                        style: TextStyle(
-                          fontSize: 12,
-                          color: Colors.black54,
-                        ),
-                      ),
-                      SizedBox(height: 4),
-                      Text(
-                        formatter.format(totalPrice),
-                        style: TextStyle(
-                          fontSize: 16,
-                          fontWeight: FontWeight.bold,
-                          color: Color(0xFF0077BD),
+                      // Price column
+                      SizedBox(
+                        width: 100,
+                        child: Text(
+                          formatter.format((item['jumlah'] as num) * (item['harga'] as num)),
+                          style: const TextStyle(
+                            fontSize: 11,
+                            color: Colors.black87,
+                          ),
+                          textAlign: TextAlign.right,
                         ),
                       ),
                     ],
                   ),
-                ],
-              ),
-            ],
-          );
-        }),
+                )),
+                const SizedBox(height: 8),
+              ],
+            )),
+            Row(
+              mainAxisAlignment: MainAxisAlignment.spaceBetween,
+              children: [
+                Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    const Text(
+                      'Total Jumlah',
+                      style: TextStyle(fontSize: 12, color: Colors.black54),
+                    ),
+                    const SizedBox(height: 4),
+                    Text(
+                      totalQty.toString(),
+                      style: const TextStyle(
+                        fontSize: 16,
+                        fontWeight: FontWeight.bold,
+                        color: Color(0xFF0077BD),
+                      ),
+                    ),
+                  ],
+                ),
+                Column(
+                  crossAxisAlignment: CrossAxisAlignment.end,
+                  children: [
+                    const Text(
+                      'Total Harga',
+                      style: TextStyle(fontSize: 12, color: Colors.black54),
+                    ),
+                    const SizedBox(height: 4),
+                    Text(
+                      formatter.format(totalPrice),
+                      style: const TextStyle(
+                        fontSize: 16,
+                        fontWeight: FontWeight.bold,
+                        color: Color(0xFF0077BD),
+                      ),
+                    ),
+                  ],
+                ),
+              ],
+            ),
+          ],
+        ),
       );
     });
   }

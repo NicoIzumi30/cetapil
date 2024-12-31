@@ -4,12 +4,12 @@ import 'package:get/get.dart';
 import '../utils/colors.dart';
 
 class Alerts {
-  static showConfirmDialog(
+  static Future<bool?> showConfirmDialog(
     BuildContext context, {
     bool useGetBack = true,
     Function? onContinue,
   }) async {
-    return showDialog(
+    return showDialog<bool>(
       context: context,
       builder: (dialogContext) => Dialog(
         shape: RoundedRectangleBorder(
@@ -39,19 +39,18 @@ class Alerts {
               SizedBox(height: 24),
               LayoutBuilder(
                 builder: (context, constraints) {
-                  // Calculate adaptive padding based on available width
-                  final horizontalPadding = (constraints.maxWidth < 300) 
-                      ? 15.0  // Smaller padding for very narrow screens
-                      : (constraints.maxWidth < 400) 
-                          ? 20.0  // Medium padding for narrow screens
-                          : 30.0;  // Default padding for wider screens
+                  final horizontalPadding = (constraints.maxWidth < 300)
+                      ? 15.0
+                      : (constraints.maxWidth < 400)
+                          ? 20.0
+                          : 30.0;
 
                   return Row(
                     mainAxisAlignment: MainAxisAlignment.spaceEvenly,
                     children: [
                       Flexible(
                         child: SizedBox(
-                          width: constraints.maxWidth * 0.4, // Limit button width
+                          width: constraints.maxWidth * 0.4,
                           child: ElevatedButton(
                             style: ElevatedButton.styleFrom(
                               backgroundColor: AppColors.primary,
@@ -64,7 +63,11 @@ class Alerts {
                               ),
                             ),
                             onPressed: () {
-                              useGetBack ? Get.back() : Navigator.pop(dialogContext);
+                              if (useGetBack) {
+                                Get.back(result: false);
+                              } else {
+                                Navigator.pop(dialogContext, false);
+                              }
                             },
                             child: FittedBox(
                               fit: BoxFit.scaleDown,
@@ -76,10 +79,10 @@ class Alerts {
                           ),
                         ),
                       ),
-                      SizedBox(width: 8), // Add spacing between buttons
+                      SizedBox(width: 8),
                       Flexible(
                         child: SizedBox(
-                          width: constraints.maxWidth * 0.4, // Limit button width
+                          width: constraints.maxWidth * 0.4,
                           child: ElevatedButton(
                             style: ElevatedButton.styleFrom(
                               backgroundColor: Colors.white,
@@ -95,10 +98,10 @@ class Alerts {
                             onPressed: () {
                               onContinue?.call();
                               if (useGetBack) {
-                                Get.back();
+                                Get.back(result: true);
                                 Get.back();
                               } else {
-                                Navigator.pop(dialogContext);
+                                Navigator.pop(dialogContext, true);
                                 Navigator.pop(context);
                               }
                             },
@@ -151,10 +154,10 @@ class Alerts {
               SizedBox(height: 34),
               LayoutBuilder(
                 builder: (context, constraints) {
-                  final horizontalPadding = (constraints.maxWidth < 300) 
-                      ? 15.0 
-                      : (constraints.maxWidth < 400) 
-                          ? 20.0 
+                  final horizontalPadding = (constraints.maxWidth < 300)
+                      ? 15.0
+                      : (constraints.maxWidth < 400)
+                          ? 20.0
                           : 30.0;
 
                   return Row(

@@ -42,7 +42,12 @@ class TambahSelling extends GetView<SellingController> {
                       crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
                         EnhancedBackButton(
-                          onPressed: () => Alerts.showConfirmDialog(context),
+                          onPressed: () => Alerts.showConfirmDialog(context).then((shouldPop) {
+                            if (shouldPop == true) {
+                              
+                              controller.onReset();
+                            }
+                          }),
                           backgroundColor: Colors.white,
                           iconColor: Colors.blue,
                         ),
@@ -160,7 +165,7 @@ class TambahSelling extends GetView<SellingController> {
                                                 final skuId = item['id'].toString();
                                                 prodController.productValues[skuId] = {
                                                   'qty': item['qty'].toString(),
-                                                  'harga': item['harga'].toString(),
+                                                  'harga': item['price'].toString(),
                                                 };
                                               }
 
@@ -505,7 +510,6 @@ class _CollapsibleCategoryGroupState extends State<CollapsibleCategoryGroup> {
             curve: Curves.easeInOut,
             child: Column(
               children: widget.items.map((item) {
-                print("aaaa ${item['price']}");
                 return SumAmountProduct(
                   productName: item['sku'] ?? '',
                   qtyController: TextEditingController(
@@ -534,113 +538,177 @@ class ProductSummaryCard extends GetView<SellingController> {
   Widget build(BuildContext context) {
     final formatter = NumberFormat.currency(locale: 'id_ID', symbol: "Rp ", decimalDigits: 0);
 
-    return Container(
-      margin: EdgeInsets.symmetric(vertical: 10),
-      padding: EdgeInsets.all(16),
-      decoration: BoxDecoration(
-        color: Color(0xFFEDF8FF),
-        borderRadius: BorderRadius.circular(8),
-        border: Border.all(
-          color: Color(0xFF64B5F6),
-          width: 1,
+    return Obx(() {
+      final ctrl = Get.find<SellingController>();
+
+      var totalQty = 0;
+      var totalPrice = 0.0;
+
+      for (final item in ctrl.draftItems) {
+        if (item['qty'] != null && item['price'] != null) {
+          totalQty += (item['qty'] as num).toInt();
+          totalPrice += (item['qty'] as num) * (item['price'] as num);
+        }
+      }
+
+      return Container(
+        margin: const EdgeInsets.symmetric(vertical: 4),
+        padding: const EdgeInsets.all(12),
+        decoration: BoxDecoration(
+          color: Colors.white,
+          borderRadius: BorderRadius.circular(8),
+          boxShadow: [
+            BoxShadow(
+              color: Colors.black.withOpacity(0.03),
+              blurRadius: 4,
+              offset: const Offset(0, 1),
+            ),
+          ],
         ),
-        boxShadow: [
-          BoxShadow(
-            color: Colors.grey.withOpacity(0.1),
-            spreadRadius: 1,
-            blurRadius: 3,
-            offset: Offset(0, 2),
-          ),
-        ],
-      ),
-      child: Row(
-        mainAxisAlignment: MainAxisAlignment.spaceBetween,
-        children: [
-          Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              Text(
-                'Total Quantity',
-                style: TextStyle(
-                  fontSize: 12,
-                  color: Colors.black54,
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            ...ctrl.draftItems
+                .fold<Map<String, List<Map<String, dynamic>>>>({}, (map, item) {
+                  final category = item['category'] as String? ?? 'Other';
+                  map.putIfAbsent(category, () => []).add(item);
+                  return map;
+                })
+                .entries
+                .map((entry) => Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        Container(
+                          width: double.infinity,
+                          padding: const EdgeInsets.symmetric(vertical: 4),
+                          decoration: const BoxDecoration(
+                            border: Border(
+                              bottom: BorderSide(
+                                color: Color(0xFFEEEEEE),
+                                width: 1,
+                              ),
+                            ),
+                          ),
+                          child: Text(
+                            entry.key,
+                            style: const TextStyle(
+                                fontSize: 11,
+                                color: Color(0xFF0077BD),
+                                fontWeight: FontWeight.w500),
+                          ),
+                        ),
+                        ...entry.value
+                            .where((item) => item['qty'] != 0 && item['price'] != 0)
+                            .map((item) => Container(
+                                  padding: const EdgeInsets.symmetric(vertical: 4),
+                                  decoration: const BoxDecoration(
+                                    border: Border(
+                                      bottom: BorderSide(
+                                        color: Color(0xFFF5F5F5),
+                                        width: 1,
+                                      ),
+                                    ),
+                                  ),
+                                  child: Row(
+                                    crossAxisAlignment: CrossAxisAlignment.start,
+                                    children: [
+                                      SizedBox(
+                                        width: 30,
+                                        child: Text(
+                                          item['qty']?.toString() ?? '0',
+                                          style: const TextStyle(
+                                            fontSize: 11,
+                                            color: Colors.black87,
+                                          ),
+                                        ),
+                                      ),
+                                      Expanded(
+                                        child: Text(
+                                          item['sku'] ?? '',
+                                          style: const TextStyle(
+                                            fontSize: 11,
+                                            color: Colors.black87,
+                                          ),
+                                        ),
+                                      ),
+                                      SizedBox(
+                                        width: 100,
+                                        child: Text(
+                                          formatter
+                                              .format((item['qty'] ?? 0) * (item['price'] ?? 0)),
+                                          style: const TextStyle(
+                                            fontSize: 11,
+                                            color: Colors.black87,
+                                          ),
+                                          textAlign: TextAlign.right,
+                                        ),
+                                      ),
+                                    ],
+                                  ),
+                                )),
+                        const SizedBox(height: 8),
+                      ],
+                    )),
+            Container(
+              padding: const EdgeInsets.only(top: 8),
+              decoration: const BoxDecoration(
+                border: Border(
+                  top: BorderSide(
+                    color: Color(0xFFEEEEEE),
+                    width: 1,
+                  ),
                 ),
               ),
-              SizedBox(height: 4),
-              GetX<SellingController>(
-                builder: (ctrl) {
-                  int totalQty = 0;
-                  try {
-                    if (ctrl.draftItems.isNotEmpty) {
-                      for (var item in ctrl.draftItems) {
-                        if (item != null && item['qty'] != null) {
-                          totalQty += (item['qty'] as num).toInt();
-                        }
-                      }
-                    }
-                  } catch (e) {
-                    print('Error calculating quantity: $e');
-                  }
-                  return Text(
-                    totalQty.toString(),
-                    style: TextStyle(
-                      fontSize: 16,
-                      fontWeight: FontWeight.bold,
-                      color: Color(0xFF0077BD),
-                    ),
-                  );
-                },
+              child: Row(
+                mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                children: [
+                  Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      const Text(
+                        'Total Quantity',
+                        style: TextStyle(fontSize: 12, color: Colors.black54),
+                      ),
+                      const SizedBox(height: 4),
+                      Text(
+                        totalQty.toString(),
+                        style: const TextStyle(
+                          fontSize: 16,
+                          fontWeight: FontWeight.bold,
+                          color: Color(0xFF0077BD),
+                        ),
+                      ),
+                    ],
+                  ),
+                  Column(
+                    crossAxisAlignment: CrossAxisAlignment.end,
+                    children: [
+                      const Text(
+                        'Total Price',
+                        style: TextStyle(fontSize: 12, color: Colors.black54),
+                      ),
+                      const SizedBox(height: 4),
+                      Text(
+                        formatter.format(totalPrice),
+                        style: const TextStyle(
+                          fontSize: 16,
+                          fontWeight: FontWeight.bold,
+                          color: Color(0xFF0077BD),
+                        ),
+                      ),
+                    ],
+                  ),
+                ],
               ),
-            ],
-          ),
-          Column(
-            crossAxisAlignment: CrossAxisAlignment.end,
-            children: [
-              Text(
-                'Total Price',
-                style: TextStyle(
-                  fontSize: 12,
-                  color: Colors.black54,
-                ),
-              ),
-              SizedBox(height: 4),
-              GetX<SellingController>(
-                builder: (ctrl) {
-                  double totalPrice = 0.0;
-                  print("price ");
-                  try {
-                    if (ctrl.draftItems.isNotEmpty) {
-                      for (var item in ctrl.draftItems) {
-                        if (item != null && item['qty'] != null && item['price'] != null) {
-                          print("ssss ${item['price']}"); /// error cause is null
-                          final qty = (item['qty'] as num).toInt();
-                          final price = (item['price'] as num).toDouble();
-                          totalPrice += (qty * price).toDouble();
-                        }
-                      }
-                    }
-                  } catch (e) {
-                    print('Error calculating price: $e');
-                  }
-                  return Text(
-                    formatter.format(totalPrice),
-                    style: TextStyle(
-                      fontSize: 16,
-                      fontWeight: FontWeight.bold,
-                      color: Color(0xFF0077BD),
-                    ),
-                  );
-                },
-              ),
-            ],
-          ),
-        ],
-      ),
-    );
+            ),
+          ],
+        ),
+      );
+    });
   }
 }
 
-class SumAmountProduct extends StatelessWidget {
+class SumAmountProduct extends StatefulWidget {
   final String productName;
   final TextEditingController qtyController;
   final TextEditingController hargaController;
@@ -649,7 +717,7 @@ class SumAmountProduct extends StatelessWidget {
   final VoidCallback onDelete;
   final Map<String, dynamic> itemData;
 
-  SumAmountProduct({
+  const SumAmountProduct({
     super.key,
     required this.productName,
     required this.qtyController,
@@ -660,7 +728,42 @@ class SumAmountProduct extends StatelessWidget {
     this.isReadOnly = false,
   });
 
+  @override
+  State<SumAmountProduct> createState() => _SumAmountProductState();
+}
+
+class _SumAmountProductState extends State<SumAmountProduct> {
   final formatter = NumberFormat.currency(locale: 'id_ID', symbol: "Rp ", decimalDigits: 0);
+  double displayTotalPrice = 0.0;
+
+  @override
+  void initState() {
+    super.initState();
+    _formatHargaText();
+    _calculateTotalPrice();
+  }
+
+  void _formatHargaText() {
+    final price = widget.itemData['price'] ?? 0;
+    widget.hargaController.text = formatter.format(price);
+  }
+
+  void _calculateTotalPrice() {
+    final qty = int.tryParse(widget.qtyController.text) ?? 0;
+    final price = widget.itemData['price'] ?? 0;
+    setState(() {
+      displayTotalPrice = qty.toDouble() * price.toDouble();
+    });
+  }
+
+  @override
+  void didUpdateWidget(SumAmountProduct oldWidget) {
+    super.didUpdateWidget(oldWidget);
+    if (oldWidget.totalPrice != widget.totalPrice) {
+      _calculateTotalPrice();
+    }
+  }
+
   @override
   Widget build(BuildContext context) {
     return Container(
@@ -695,7 +798,7 @@ class SumAmountProduct extends StatelessWidget {
               ),
             ),
             child: Text(
-              productName,
+              widget.productName,
               style: TextStyle(
                 fontSize: 14,
                 fontWeight: FontWeight.bold,
@@ -736,7 +839,7 @@ class SumAmountProduct extends StatelessWidget {
                               ],
                             ),
                             child: TextField(
-                              controller: qtyController,
+                              controller: widget.qtyController,
                               keyboardType: TextInputType.number,
                               readOnly: true,
                               style: TextStyle(
@@ -781,6 +884,9 @@ class SumAmountProduct extends StatelessWidget {
                                   ),
                                 ),
                               ),
+                              onChanged: (value) {
+                                _calculateTotalPrice();
+                              },
                             ),
                           ),
                         ],
@@ -814,7 +920,7 @@ class SumAmountProduct extends StatelessWidget {
                               ],
                             ),
                             child: TextField(
-                              controller: hargaController,
+                              controller: widget.hargaController,
                               keyboardType: TextInputType.number,
                               readOnly: true,
                               style: TextStyle(
@@ -856,9 +962,6 @@ class SumAmountProduct extends StatelessWidget {
                                   ),
                                 ),
                               ),
-                              inputFormatters: [
-                                FilteringTextInputFormatter.digitsOnly,
-                              ],
                             ),
                           ),
                         ],
@@ -877,7 +980,7 @@ class SumAmountProduct extends StatelessWidget {
                       ),
                     ),
                     Text(
-                      "${formatter.format(totalPrice)}",
+                      formatter.format(displayTotalPrice),
                       style: TextStyle(
                         fontSize: 14,
                         color: Color(0xFF0077BD),
@@ -888,29 +991,6 @@ class SumAmountProduct extends StatelessWidget {
                 )
               ],
             ),
-          ),
-        ],
-      ),
-    );
-  }
-
-  Widget _buildDetailField(String label, TextEditingController controller) {
-    return Expanded(
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          Text(
-            label,
-            style: TextStyle(
-              fontSize: 12,
-              fontWeight: FontWeight.w500,
-              color: Color(0xFF666666),
-            ),
-          ),
-          SizedBox(height: 4),
-          NumberField(
-            controller: controller,
-            readOnly: isReadOnly,
           ),
         ],
       ),

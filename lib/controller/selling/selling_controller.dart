@@ -64,17 +64,22 @@ class SellingController extends GetxController {
     checkedIn.value = DateTime.now();
   }
 
+  Future<void> _setDraftDuration(Data draftData) async {
+    await startDurationTimer();
+    duration.value = draftData.duration ?? 0;
+  }
+
   void onReset() {
     duration.value = 0;
     _durationTimer?.cancel();
   }
 
-  void startDurationTimer() {
+  Future<void> startDurationTimer() async {
     duration.value = 0;
     _durationTimer?.cancel();
     _durationTimer = Timer.periodic(const Duration(seconds: 1), (timer) {
       duration.value++;
-      print("duration : ${duration.value}");
+      print("Duration: ${duration.value} seconds");
     });
   }
 
@@ -178,6 +183,7 @@ class SellingController extends GetxController {
   void loadDraftForEdit(Data draftData) {
     try {
       clearForm();
+      _setDraftDuration(draftData);
       _setDraftBasicInfo(draftData);
       _loadDraftProducts(draftData);
       _loadDraftImage(draftData);
@@ -215,7 +221,6 @@ class SellingController extends GetxController {
   }
 
   Map<String, dynamic> _createDraftItemMap(Products product, Map<String, dynamic> productData) {
-    print("pp ${product.price}");
     return {
       'id': product.id,
       'product_id': product.productId,
@@ -256,6 +261,7 @@ class SellingController extends GetxController {
       CustomAlerts.showError(Get.context!, "Gagal", e.toString());
     } finally {
       isSaving.value = false;
+      onReset();
       CustomAlerts.dismissLoading();
     }
   }
@@ -284,7 +290,8 @@ class SellingController extends GetxController {
       isDrafted: true,
       filename: outletName.value.text,
       image: sellingImage.value?.path,
-      checkedIn: checkedIn.value.toString()
+      checkedIn: checkedIn.value.toString(),
+      duration: duration.value,
     );
   }
 
@@ -381,6 +388,9 @@ class SellingController extends GetxController {
               ? "Gagal mengirim data ke server. Periksa koneksi Anda dan coba lagi."
               : e.toString());
       print('Error submitting data: $e');
+    } finally {
+      onReset();
+      CustomAlerts.dismissLoading();
     }
   }
 

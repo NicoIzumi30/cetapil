@@ -285,7 +285,7 @@ class _CompactProductCardState extends State<CompactProductCard> {
     final existingValues = controller.productValues[skuId] ??
         {
           'qty': '0',
-          'harga': widget.sku['price'].toString(),
+          'price': widget.sku['price'].toString(),
         };
 
     qtyController = TextEditingController(text: existingValues['qty']);
@@ -306,7 +306,7 @@ class _CompactProductCardState extends State<CompactProductCard> {
     void updateValues() {
       widget.onChanged({
         'qty': qtyController.text.isEmpty ? '0' : qtyController.text,
-        'harga': hargaController.text.isEmpty ? '0' : hargaController.text,
+        'price' : hargaController.text.isEmpty ? '0' : hargaController.text,
       });
     }
 
@@ -466,7 +466,7 @@ class _CompactProductCardState extends State<CompactProductCard> {
                         crossAxisAlignment: CrossAxisAlignment.start,
                         children: [
                           Text(
-                            'Harga',
+                            'Price',
                             style: TextStyle(
                               fontSize: 12,
                               color: Colors.black54,

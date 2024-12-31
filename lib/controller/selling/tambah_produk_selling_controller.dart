@@ -123,6 +123,8 @@ class TambahProdukSellingController extends GetxController {
             'qty': '0',
             'price': '0',
           };
+      String priceValue = values['price'] ?? '0';
+      priceValue = priceValue.replaceAll(RegExp(r'[^\d]'), ''); // Remove non-digits
 
       updatedItems.add({
         'id': skuId,
@@ -130,7 +132,7 @@ class TambahProdukSellingController extends GetxController {
         'category': sku['category']['name'],
         'sku': sku['sku'],
         'qty': int.tryParse(values['qty'] ?? '0') ?? 0,
-        'price': sku['harga'] ?? 0,
+        'price': int.tryParse(priceValue) ?? 0,
       });
     }
 
