@@ -392,11 +392,14 @@ class Api {
     request.fields["outlet_id"] = data["outlet_id"].toString();
     request.fields["longitude"] = data["longitude"].toString();
     request.fields["latitude"] = data["latitude"].toString();
+    request.fields["checked_in"] = data["checked_in"].toString();
+    request.fields["checked_out"] = data["checked_out"].toString();
+    request.fields["duration"] = data["duration"].toString();
 
     for (var i = 0; i < productList.length; i++) {
       request.fields["products[$i][id]"] = productList[i]["id"].toString();
       request.fields["products[$i][qty]"] = productList[i]["qty"].toString();
-      request.fields["products[$i][price]"] = productList[i]["harga"].toString();
+      request.fields["products[$i][price]"] = productList[i]["price"].toString();
     }
     request.files.add(await http.MultipartFile.fromPath(
       'image',

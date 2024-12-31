@@ -1,11 +1,13 @@
 import 'dart:io';
 
 import 'package:cetapil_mobile/controller/bottom_nav_controller.dart';
+import 'package:cetapil_mobile/page/selling/tambah_selling.dart';
 import 'package:cetapil_mobile/utils/image_upload.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:get/get_core/src/get_main.dart';
 import 'package:google_fonts/google_fonts.dart';
+import 'package:intl/intl.dart';
 import 'package:path_provider/path_provider.dart';
 
 import '../../controller/outlet/outlet_controller.dart';
@@ -33,6 +35,25 @@ class DetailSelling extends GetView<SellingController> {
       map.putIfAbsent(categoryName, () => []).add(product);
       return map;
     });
+
+    final groupedItems = <String, List<Map<String, dynamic>>>{};
+    for (var item in selling.products!) {
+      final category = item.category;
+      if (groupedItems[category!.name!] == null) {
+        groupedItems[category.name!] = [];
+      }
+      groupedItems[category.name!]!.add(item.toMap());
+    }
+
+    final formatter =
+        NumberFormat.currency(locale: 'id_ID', symbol: "Rp ", decimalDigits: 0);
+    int totalQty = 0;
+    double totalPrice = 0.0;
+    for (var data in selling.products!) {
+
+      totalQty += (data.qty as num).toInt();
+      totalPrice += (data.total as num).toDouble();
+    }
     return SafeArea(
         child: Stack(children: [
       Image.asset(
@@ -67,7 +88,11 @@ class DetailSelling extends GetView<SellingController> {
                       ),
                       UnderlineTextField.readOnly(
                         title: "Kategori Outlet",
-                        value: controller.filteredOutlets.where((element) => element.id == selling.outlet!.id).first.category,
+                        value: controller.filteredOutlets
+                            .where(
+                                (element) => element.id == selling.outlet!.id)
+                            .first
+                            .category,
                       ),
                       // Column(
                       //   children: selling.products!.map((product) {
@@ -94,39 +119,132 @@ class DetailSelling extends GetView<SellingController> {
                       //     ); // Replace with your widget
                       //   }).toList(),
                       // ),
-                      Column(
-                        children: [
-                          ...groupedByCategory.entries.map((entry) {
-                            final category = entry.key;
-                            final products = entry.value;
-
-                            return Column(
+                      // Column(
+                      //   children: [
+                      //     ...groupedByCategory.entries.map((entry) {
+                      //       final category = entry.key;
+                      //       final products = entry.value;
+                      //
+                      //       return Column(
+                      //         crossAxisAlignment: CrossAxisAlignment.start,
+                      //         children: [
+                      //           Padding(
+                      //             padding: const EdgeInsets.all(8.0),
+                      //             child: Text(
+                      //               category,
+                      //               style: TextStyle(
+                      //                 fontSize: 16,
+                      //                 fontWeight: FontWeight.bold,
+                      //               ),
+                      //             ),
+                      //           ),
+                      //           ...products.map(
+                      //             (product) => SumAmountProduct(
+                      //               productName: product.productName!,
+                      //               stockController:
+                      //                   TextEditingController(text: product.qty!.toString()),
+                      //               sellingController:
+                      //                   TextEditingController(text: "product.selling!".toString()),
+                      //               balanceController:
+                      //                   TextEditingController(text: "product.balance!".toString()),
+                      //               priceController:
+                      //                   TextEditingController(text: product.price!.toString()),
+                      //             ),
+                      //           )
+                      //         ],
+                      //       );
+                      //     }).toList(),
+                      //   ],
+                      // ),
+                      Text(
+                        "Produk",
+                        style: TextStyle(
+                            fontSize: 18,
+                            fontWeight: FontWeight.bold,
+                            color: Color(0xFF023B5E)),
+                      ),
+                      Container(
+                        margin: EdgeInsets.symmetric(vertical: 10),
+                        padding: EdgeInsets.all(16),
+                        decoration: BoxDecoration(
+                          color: Color(0xFFEDF8FF),
+                          borderRadius: BorderRadius.circular(8),
+                          border: Border.all(
+                            color: Color(0xFF64B5F6),
+                            width: 1,
+                          ),
+                          boxShadow: [
+                            BoxShadow(
+                              color: Colors.grey.withOpacity(0.1),
+                              spreadRadius: 1,
+                              blurRadius: 3,
+                              offset: Offset(0, 2),
+                            ),
+                          ],
+                        ),
+                        child: Row(
+                          mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                          children: [
+                            Column(
                               crossAxisAlignment: CrossAxisAlignment.start,
                               children: [
-                                Padding(
-                                  padding: const EdgeInsets.all(8.0),
-                                  child: Text(
-                                    category,
-                                    style: TextStyle(
-                                      fontSize: 16,
-                                      fontWeight: FontWeight.bold,
-                                    ),
+                                Text(
+                                  'Total Quantity',
+                                  style: TextStyle(
+                                    fontSize: 12,
+                                    color: Colors.black54,
                                   ),
                                 ),
-                                ...products.map(
-                                  (product) => SumAmountProduct(
-                                    productName: product.productName!,
-                                    stockController:
-                                        TextEditingController(text: product.qty!.toString()),
-                                    sellingController:
-                                        TextEditingController(text: "product.selling!".toString()),
-                                    balanceController:
-                                        TextEditingController(text: "product.balance!".toString()),
-                                    priceController:
-                                        TextEditingController(text: product.price!.toString()),
+                                SizedBox(height: 4),
+                                Text(
+                                  totalQty.toString(),
+                                  style: TextStyle(
+                                    fontSize: 16,
+                                    fontWeight: FontWeight.bold,
+                                    color: Color(0xFF0077BD),
                                   ),
                                 )
                               ],
+                            ),
+                            Column(
+                              crossAxisAlignment: CrossAxisAlignment.end,
+                              children: [
+                                Text(
+                                  'Total Price',
+                                  style: TextStyle(
+                                    fontSize: 12,
+                                    color: Colors.black54,
+                                  ),
+                                ),
+                                SizedBox(height: 4),
+                                Text(
+                                  formatter.format(totalPrice),
+                                  style: TextStyle(
+                                    fontSize: 16,
+                                    fontWeight: FontWeight.bold,
+                                    color: Color(0xFF0077BD),
+                                  ),
+                                )
+                              ],
+                            ),
+                          ],
+                        ),
+                      ),
+                      Column(
+                        children: [
+                          ...groupedItems.entries.map((entry) {
+                            final category = entry.key;
+                            final items = entry.value;
+
+                            return Padding(
+                              padding: const EdgeInsets.only(bottom: 8.0),
+                              child: CollapsibleCategoryGroup(
+                                category: category,
+                                items: items,
+                                onEdit: () async {
+
+                                },
+                              ),
                             );
                           }).toList(),
                         ],
@@ -243,7 +361,8 @@ class ClipImage extends StatelessWidget {
     );
   }
 
-  Widget _buildErrorWidget(BuildContext context, Object? error, StackTrace? stackTrace) {
+  Widget _buildErrorWidget(
+      BuildContext context, Object? error, StackTrace? stackTrace) {
     return Container(
       color: Colors.grey[200],
       child: Column(

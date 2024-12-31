@@ -172,6 +172,17 @@ class Products {
     _data["total"] = total;
     return _data;
   }
+
+  Map<String, dynamic> toMap() {
+    return {
+      'id': id,
+      'product_id': productId,
+      'category': category,
+      'sku': productName,
+      'qty': qty,
+      'price': price,
+    };
+  }
 }
 
 class Category {

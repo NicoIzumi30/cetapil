@@ -8,6 +8,7 @@ import 'package:cetapil_mobile/model/list_selling_response.dart';
 import 'package:cetapil_mobile/model/outlet.dart' as O;
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
+import 'package:intl/intl.dart';
 import 'package:uuid/uuid.dart';
 import '../../api/api.dart';
 import '../../widget/custom_alert.dart';
@@ -189,6 +190,8 @@ class SellingController extends GetxController {
     currentDraftId.value = draftData.id ?? '';
     selectedOutlet.value =
         filteredOutlets.firstWhere((outlet) => outlet.id == draftData.outlet!.id);
+    selectedOutletName.value = selectedOutlet.value!.name!;
+    selectedCategory.value = selectedOutlet.value!.category!;
   }
 
   void _loadDraftProducts(Data draftData) {
@@ -212,6 +215,7 @@ class SellingController extends GetxController {
   }
 
   Map<String, dynamic> _createDraftItemMap(Products product, Map<String, dynamic> productData) {
+    print("pp ${product.price}");
     return {
       'id': product.id,
       'product_id': product.productId,
@@ -257,7 +261,7 @@ class SellingController extends GetxController {
   }
 
   Future<void> _validateDraftData() async {
-    if (outletName.value.text.isEmpty) {
+    if (selectedOutlet.value!.name!.isEmpty) {
       throw 'Nama outlet harus diisi';
     }
     if (draftItems.isEmpty) {
@@ -280,6 +284,7 @@ class SellingController extends GetxController {
       isDrafted: true,
       filename: outletName.value.text,
       image: sellingImage.value?.path,
+      checkedIn: checkedIn.value.toString()
     );
   }
 
@@ -327,18 +332,20 @@ class SellingController extends GetxController {
       }
 
       CustomAlerts.showLoading(Get.context!, "Mengirim", "Mengirim data ke server...");
-
+      DateFormat formatter = DateFormat('yyyy-MM-dd HH:mm:ss');
       final requestData = {
         'outlet_id': selectedOutlet.value!.id,
         'longitude': _gpsController.currentPosition.value!.longitude.toString(),
         'latitude': _gpsController.currentPosition.value!.latitude.toString(),
+        'checked_in': formatter.format(checkedIn.value),
+        'checked_out': formatter.format(DateTime.now()),
+        'duration': duration.value.toString(),
         'image': sellingImage.value!.path,
       };
 
       // Convert draftItems to listProduct format if needed
       listProduct.clear();
       listProduct.addAll(draftItems);
-      print(listProduct);
 
       final response = await Api.submitSelling(requestData, listProduct);
 
@@ -432,7 +439,7 @@ class SellingController extends GetxController {
       }).toList();
 
   void clearForm() {
-    outletName.value.clear();
+    selectedOutletName.value = '';
     clearDraftItems();
     sellingImage.value = null;
     currentDraftId.value = '';

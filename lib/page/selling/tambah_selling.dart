@@ -505,15 +505,16 @@ class _CollapsibleCategoryGroupState extends State<CollapsibleCategoryGroup> {
             curve: Curves.easeInOut,
             child: Column(
               children: widget.items.map((item) {
+                print("aaaa ${item['price']}");
                 return SumAmountProduct(
                   productName: item['sku'] ?? '',
                   qtyController: TextEditingController(
                     text: item['qty'].toString(),
                   ),
                   hargaController: TextEditingController(
-                    text: formatter.format(item['harga']),
+                    text: item['price'].toString(),
                   ),
-                  totalPrice: item['qty'] * item['harga'],
+                  totalPrice: (item['qty'] * item['price']).toDouble(),
                   isReadOnly: true,
                   itemData: item,
                   onDelete: () {},
@@ -606,13 +607,15 @@ class ProductSummaryCard extends GetView<SellingController> {
               GetX<SellingController>(
                 builder: (ctrl) {
                   double totalPrice = 0.0;
+                  print("price ");
                   try {
                     if (ctrl.draftItems.isNotEmpty) {
                       for (var item in ctrl.draftItems) {
-                        if (item != null && item['qty'] != null && item['harga'] != null) {
+                        if (item != null && item['qty'] != null && item['price'] != null) {
+                          print("ssss ${item['price']}"); /// error cause is null
                           final qty = (item['qty'] as num).toInt();
-                          final price = (item['harga'] as num).toDouble();
-                          totalPrice += qty * price;
+                          final price = (item['price'] as num).toDouble();
+                          totalPrice += (qty * price).toDouble();
                         }
                       }
                     }
