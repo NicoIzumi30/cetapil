@@ -972,7 +972,28 @@ class DatabaseHelper {
     final db = await database;
 
     await db.transaction((txn) async {
-      // Insert outlet activity
+      // First, delete existing av3m products for this activity
+      await txn.delete(
+        'activity_av3m_products',
+        where: 'activity_id = ?',
+        whereArgs: [data['id']],
+      );
+
+      // Then delete existing sales activity
+      await txn.delete(
+        'sales_activities',
+        where: 'id = ?',
+        whereArgs: [data['id']],
+      );
+
+      // Delete existing outlet activity
+      await txn.delete(
+        'outlet_activities',
+        where: 'id = ?',
+        whereArgs: [data['outlet']['id']],
+      );
+
+      // Now insert outlet activity
       await txn.insert(
         'outlet_activities',
         {
