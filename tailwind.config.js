@@ -27,6 +27,9 @@ export default {
 				grey : 'hsla(0, 0%, 27%, 0.1)',
 				black : '#3C3C3C',
 				lightGrey : '#B5B5B5',
+			},
+			backgroundImage : {
+				glassmorphism : 'linear-gradient(108deg, rgba(255, 255, 255, 0.26) 0%, rgba(255, 255, 255, 0.07) 100%)'
 			}
         },
     },

@@ -12,12 +12,87 @@
     <x-slot:cardAction>
         <x-input.search wire:model.live="search" id="global-search-activity" class="border-0"
             placeholder="Cari data visibility activity"></x-input.search>
-            <x-button.info id="downloadActivityBtn">
+            <x-button.light id="downloadActivityBtn">
                 <span id="downloadBtnText">Download</span>
                 <span id="downloadBtnLoading" class="hidden">Downloading...</span>
-            </x-button.info>
+            </x-button.light>
         <x-input.datepicker id="activity-date-range" value=""></x-input.datepicker>
+		<x-button.info onclick="openModal('upload-planogram')">Upload Planogram</x-button.info>
+		<x-button.info onclick="openModal('upload-program')">Upload Program</x-button.info>
     </x-slot:cardAction>
+
+
+	<x-modal id="upload-planogram">
+		<x-slot:title>
+			Upload Planogram
+		</x-slot:title>
+		<div class="grid grid-cols-2 text-black gap-4 w-full">
+			<div class="w-full">
+				<label for="planogram_file" class="!text-black">
+					Unggah Planogram
+					<div id="planogramFileUpload" class="flex mt-2">
+						<input type="text" id="planogramFileNameDisplay" readonly disabled
+							class="form-control mt-0 border-r-none"
+							placeholder="Unggah Planogram berupa file .png, .jpg , jpeg"
+							aria-describedby="planogram file name display">
+						<div
+							class="bg-primary text-white align-middle p-3 rounded-r-md cursor-pointer -translate-x-2">
+							Browse</div>
+					</div>
+					<input type="file" id="planogram_file" name="file_pdf" class="form-control hidden"
+						accept="application/pdf" aria-label="Unggah Planogram berupa file .png, .jpg , jpeg">
+				</label>
+			</div>
+			<div>
+                <label for="channel" class="!text-black">Channel</label>
+                <select id="channel" name="channel" class=" w-full">
+                    <option value="" selected disabled>
+                        -- Pilih Channel --
+                    </option>
+                </select>
+            </div>
+		</div>
+		<x-slot:footer>
+			<x-button.info class="w-full text-xl">Konfirmasi</x-button.info>
+		</x-slot:footer>
+	</x-modal>
+
+	<x-modal id="upload-program">
+		<x-slot:title>
+			Upload Program
+		</x-slot:title>
+
+		<div class="grid grid-cols-2 gap-4 w-full">
+			<div class="w-full">
+				<label for="bannerProgram_file" class="!text-black">
+					Unggah Flyer
+					<div id="bannerProgramFileUpload" class="flex mt-2">
+						<input type="text" id="bannerProgramFileNameDisplay" readonly disabled
+							class="form-control mt-0 border-r-none"
+							placeholder="Unggah Banner Program berupa file .png, .jpg , jpeg"
+							aria-describedby="bannerProgram file name display">
+						<div
+							class="bg-primary text-white align-middle p-3 rounded-r-md cursor-pointer -translate-x-2">
+							Browse</div>
+					</div>`
+					<input type="file" id="bannerProgram_file" name="file_pdf" class="form-control hidden"
+						accept="application/pdf" aria-label="Unggah Banner Program berupa file .png, .jpg , jpeg">
+				</label>
+			</div>
+			<div>
+                <label for="region" class="!text-black">Region</label>
+                <select id="region" name="region" class=" w-full">
+                    <option value="" selected disabled>
+                        -- Pilih Region --
+                    </option>
+                </select>
+            </div>
+		</div>
+
+		<x-slot:footer>
+			<x-button.info class="w-full text-xl">Konfirmasi</x-button.info>
+		</x-slot:footer>
+	</x-modal>
 
     <table id="activity-table" class="table">
         <thead>
@@ -349,4 +424,10 @@
         });
 });
     </script>
+@endpush
+
+@push('scripts')
+<script>
+	$('#channel, #region').select2()
+</script>
 @endpush
