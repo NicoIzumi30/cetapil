@@ -6,23 +6,29 @@ use Illuminate\Foundation\Http\FormRequest;
 
 class UpdatePowerSkuRequest extends FormRequest
 {
-    /**
-     * Determine if the user is authorized to make this request.
-     */
     public function authorize(): bool
     {
         return true;
     }
 
-    /**
-     * Get the validation rules that apply to the request.
-     *
-     * @return array<string, \Illuminate\Contracts\Validation\ValidationRule|array<mixed>|string>
-     */
     public function rules(): array
     {
         return [
-            //
+            'edit-select-survey-data' => 'required|in:power-sku,harga-kompetitor',
+            'edit-product-competitor' => 'required_if:edit-select-survey-data,harga-kompetitor',
+            'edit-power-sku-category_id' => 'required_if:edit-select-survey-data,power-sku|exists:categories,id',
+            'edit-power-sku' => 'required_if:edit-select-survey-data,power-sku|exists:products,id',
+        ];
+    }
+
+    public function messages(): array
+    {
+        return [
+            'edit-select-survey-data.required' => 'Kategori survey harus dipilih',
+            'edit-select-survey-data.in' => 'Kategori survey tidak valid',
+            'edit-product-competitor.required_if' => 'Nama produk kompetitor harus diisi',
+            'edit-power-sku-category_id.required_if' => 'Kategori produk harus dipilih',
+            'edit-power-sku.required_if' => 'Power SKU harus dipilih',
         ];
     }
 }
