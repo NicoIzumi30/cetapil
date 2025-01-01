@@ -32,12 +32,13 @@ class ProductAV3MExcelDataJob implements ShouldQueue
             foreach ($chunk as $key => $row) {
                 try {
                     $outlet = getOutletByCode($row['code_outlet']);
-                    $product = getProductBySku($row['product_sku']);
+                    $product2 = getProductBySku($row['product_sku']);
+                    $product = getProductByCode($row['sku_code']);
 
-                    if (!$outlet || !$product) {
-                        throw new Exception("Outlet or Product not found");
+                    if (!$outlet) {
+                        throw new Exception("Outlet not found");
                     }
-
+                    if($product){
                     Av3m::updateOrCreate(
                         [
                             'outlet_id' => $outlet['id'],
@@ -47,6 +48,28 @@ class ProductAV3MExcelDataJob implements ShouldQueue
                             'av3m' => $row['av3m']
                         ]
                     );
+                }elseif($product2){
+                    Av3m::updateOrCreate(
+                        [
+                            'outlet_id' => $outlet['id'],
+                            'product_id' => $product2['id']
+                        ],
+                        [
+                            'av3m' => $row['av3m']
+                        ]
+                    );
+                }else{
+                    throw new Exception("Product not found");
+                }
+                    Log::info('Error in ProductAV3MExcelDataJob', [
+                        'FILE_NAME' => $this->fileName,
+                        'ROW' => $key + 1,
+                        'product_sku' => $row['product_sku'],
+                        'av3m' => $row['av3m'],
+                        'code_outlet' => $row['code_outlet'],
+                        'sku_code' => $row['sku_code']
+                    ]);
+
                 } catch (\Exception $e) {
                     $errorRow = $key + 1;
                     $data = [
@@ -55,6 +78,8 @@ class ProductAV3MExcelDataJob implements ShouldQueue
                         'ERROR_MESSAGE' => $e->getMessage(),
                         'CODE_OUTLET' => $row['code_outlet'],
                         'SKU' => $row['product_sku'],
+                        'AV3M' => $row['av3m'],
+                        'SKU_CODE' => $row['sku_code']
                     ];
                     Log::channel('productErrorLog')->error(json_encode($data));
                 }

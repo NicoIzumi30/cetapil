@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers\Web;
 
+use App\Models\SalesSurvey;
 use Illuminate\Http\Request;
 use App\Exports\SurveyExport;
 use App\Models\SalesActivity;
@@ -68,8 +69,11 @@ class SurveyController extends Controller
     }
     public function detail($id){
         $salesActivity = SalesActivity::with(['user:id,name', 'outlet:id,name,visit_day'])->find($id);
+        $surveys = SalesSurvey::with(['survey',])->where('sales_activity_id', $id)->get();
+        dd($surveys);
         return view('pages.survey.detail', [
             'salesActivity' => $salesActivity,
+            'surveys' => $surveys
         ]);
     }
 }

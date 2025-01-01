@@ -171,7 +171,7 @@ class SurveyExport implements FromQuery, WithMapping, WithStyles, ShouldAutoSize
             $activity->outlet->channel->name,
             $activity->outlet->code,
             $activity->outlet->tipe_outlet,
-            $activity->outlet->visit_day,
+            getVisitDayByNumber($activity->outlet->visit_day),
             $activity->checked_in,
             $activity->checked_out,
             $activity->time_availability + $activity->time_visibility + $activity->time_knowledge + $activity->time_survey + $activity->time_order,
