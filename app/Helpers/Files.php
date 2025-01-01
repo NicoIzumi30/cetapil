@@ -6,14 +6,19 @@ use Illuminate\Support\Facades\Http;
 use Illuminate\Support\Str;
 
 if (!function_exists('saveFile')) {
-    function saveFile(UploadedFile $file, $folderPath,$defaultPath = 'images')
+    function saveFile(UploadedFile $file, $folderPath, $defaultPath = 'images')
     {
-        
         $fileName = $file->getClientOriginalName();
         $filenameWithoutExtension = pathinfo($fileName, PATHINFO_FILENAME);
         $newFileName = Str::slug($filenameWithoutExtension, '_') . '_' . time() . '.' . $file->getClientOriginalExtension();
-        $destinationPath = '/'.$defaultPath.'/'.$folderPath;
-        Storage::disk('public')->put("$destinationPath/$newFileName", file_get_contents($file));
+        $destinationPath = '/' . $defaultPath . '/' . $folderPath;
+
+        // Move file directly instead of using file_get_contents
+        Storage::disk('public')->putFileAs(
+            $destinationPath,
+            $file,
+            $newFileName
+        );
 
         return [
             'filename' => $fileName,
@@ -23,23 +28,26 @@ if (!function_exists('saveFile')) {
 }
 
 if (!function_exists('removeFile')) {
-    function removeFile($path) {
-        if ($path !== null && Storage::disk('public')->exists($path)){
+    function removeFile($path)
+    {
+        if ($path !== null && Storage::disk('public')->exists($path)) {
             Storage::disk('public')->delete($path);
         }
     }
 }
 
 if (!function_exists('removeFolder')) {
-    function removeFolder($directory) {
-        if (Storage::disk('public')->exists($directory)){
+    function removeFolder($directory)
+    {
+        if (Storage::disk('public')->exists($directory)) {
             Storage::disk('public')->deleteDirectory($directory);
         }
     }
 }
 
 if (!function_exists('uploadImageByUrl')) {
-    function uploadImageByUrl($url, $path) {
+    function uploadImageByUrl($url, $path)
+    {
         try {
             $response = Http::get($url);
             $image = $response->body();
@@ -66,9 +74,14 @@ if (!function_exists('uploadImageByUrl')) {
             imagecopyresampled(
                 $newImage,
                 $sourceImage,
-                0, 0, 0, 0,
-                $newWidth, $newHeight,
-                $width, $height
+                0,
+                0,
+                0,
+                0,
+                $newWidth,
+                $newHeight,
+                $width,
+                $height
             );
 
             // Start output buffering
@@ -80,7 +93,7 @@ if (!function_exists('uploadImageByUrl')) {
             imagedestroy($sourceImage);
             imagedestroy($newImage);
 
-            $imageName = time().'_'.Str::random(10).'.jpg';
+            $imageName = time() . '_' . Str::random(10) . '.jpg';
             Storage::disk('public')->put($path . '/' . $imageName, $imageData);
 
             return $imageName;
@@ -95,7 +108,7 @@ if (!function_exists('updateFileKnowledge')) {
     function updateFileKnowledge(UploadedFile $file, $folderPath, $fileName)
     {
         $path = "/{$folderPath}/{$fileName}";
-        if ($path !== null && Storage::disk('public')->exists($path)){
+        if ($path !== null && Storage::disk('public')->exists($path)) {
             Storage::disk('public')->delete($path);
         }
 
