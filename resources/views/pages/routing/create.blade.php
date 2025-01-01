@@ -364,18 +364,21 @@
             $('#product_category').select2({
                 placeholder: '-- Pilih Kategori Produk --'
             });
+
             $('#product_category').on('change', function () {
                 var selectedCategories = $(this).find(':selected');
                 selectedCategories.each(function () {
                     var categoryName = $(this).data('name');
                     $('#' + categoryName).show();
                 });
+				console.log('selected', selectedCategories);
             });
 
             $('#product_category').on('select2:unselect', function (e) {
-                var unselectedCategory = e.params.data.id;
+				var unselectedCategory = e.params.data.element.getAttribute('data-name')
                 $('#' + unselectedCategory).hide();
             });
+			
             $('#outlet-categories').select2({
                 minimumResultsForSearch: Infinity
             });

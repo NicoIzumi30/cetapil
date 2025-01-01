@@ -30,6 +30,12 @@ if (!function_exists('getProductBySku')) {
         return Product::where('sku', $sku)->first();
     }
 }
+if (!function_exists('getProductByCode')) {
+    function getProductByCode($code)
+    {
+        return Product::where('code', $code)->first();
+    }
+}
 if (!function_exists('getChannelByName')) {
     function getChannelByName($name)
     {

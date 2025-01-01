@@ -2,94 +2,210 @@
 
 namespace App\Exports;
 
-use App\Models\Selling;
-use App\Models\SellingProduct;
+use App\Models\SalesActivity;
+use App\Models\SurveyCategory;
+use App\Models\SurveyQuestion;
+use PhpOffice\PhpSpreadsheet\Style\Fill;
 use Maatwebsite\Excel\Concerns\FromQuery;
-use Maatwebsite\Excel\Concerns\WithHeadings;
-use Maatwebsite\Excel\Concerns\WithMapping;
+use Maatwebsite\Excel\Concerns\WithEvents;
 use Maatwebsite\Excel\Concerns\WithStyles;
+use PhpOffice\PhpSpreadsheet\Style\Border;
+use Maatwebsite\Excel\Concerns\WithMapping;
+use Maatwebsite\Excel\Events\BeforeWriting;
+use PhpOffice\PhpSpreadsheet\Cell\Coordinate;
+use PhpOffice\PhpSpreadsheet\Style\Alignment;
 use Maatwebsite\Excel\Concerns\ShouldAutoSize;
 use PhpOffice\PhpSpreadsheet\Worksheet\Worksheet;
-use PhpOffice\PhpSpreadsheet\Style\Alignment;
-use PhpOffice\PhpSpreadsheet\Style\Border;
-use PhpOffice\PhpSpreadsheet\Style\Fill;
+use Maatwebsite\Excel\Concerns\WithCustomStartCell;
 
-class SurveyExport implements FromQuery, WithHeadings, WithMapping, WithStyles, ShouldAutoSize
+class SurveyExport implements FromQuery, WithMapping, WithStyles, ShouldAutoSize, WithCustomStartCell, WithEvents
 {
+    protected $surveyCategories;
+    protected $surveyQuestions;
+    protected $staticColumns;
+    protected $lastStaticColumn = 'O'; // Kolom sebelum data survey dimulai
+
+    public function __construct()
+    {
+        $this->surveyCategories = SurveyCategory::orderBy('id')->get();
+        $this->surveyQuestions = SurveyQuestion::orderBy('survey_category_id')->get();
+        $this->staticColumns = [
+            'Nama Sales', 'TSO', 'Outlet', 'Account', 'Channel',
+            'Kode Store', 'Tipe Outlet', 'Visit Day', 'Check In',
+            'Check Out', 'Total Visit Time', 'Week', 'Knowledge Views',
+            'Created At', 'Updated At'
+        ];
+    }
+
     public function query()
     {
-        return SellingProduct::query()->with(['product', 'sell'])->completeRelation();
+        return SalesActivity::with([
+            'user:id,name',
+            'outlet:id,name,TSO,code,account,tipe_outlet,channel_id,visit_day',
+            'outlet.channel:id,name',
+            'surveys.survey'
+        ]);
     }
 
-    public function headings(): array
+    public function startCell(): string
+    {
+        return 'A3';
+    }
+
+    protected function getColumnLetter($number)
+    {
+        return Coordinate::stringFromColumnIndex($number);
+    }
+
+    public function registerEvents(): array
     {
         return [
-            'Nama Sales',
-            'TSO',
-            'Outlet',
-            'Kode Outlet',
-            'Tipe Outlet',
-            'Account',
-            'Channel',
-            'Kota',
-            'Category',
-            'SKU Name',
-            'Qty Order',
-            'Harga',
-            'Total',
-            'Created At',
-            'Ended At',
-            'Duration',
-            'Week'
+            BeforeWriting::class => function (BeforeWriting $event) {
+                $worksheet = $event->writer->getSheetByIndex(0);
+
+                $currentCol = Coordinate::columnIndexFromString($this->lastStaticColumn);
+                $categoryColors = [
+                    'Apakah POWER SKU tersedia di toko?' => '023e8a', // Biru
+                    'Berapa harga POWER SKU di toko?' => '0077b6',   // Hijau
+                    'Berapa harga kompetitor di toko?' => '00b4d8',  // Oranye
+                ];
+
+                foreach ($this->surveyCategories as $category) {
+                    $startCol = $this->getColumnLetter(++$currentCol);
+                    $questionCount = $this->surveyQuestions->where('survey_category_id', $category->id)->count();
+
+                    if ($questionCount > 0) {
+                        $endCol = $this->getColumnLetter($currentCol + $questionCount - 1);
+                        $color = $categoryColors[$category->title] ?? '4A90E2';
+
+                        $worksheet->setCellValue($startCol . '1', $category->title);
+                        $worksheet->mergeCells($startCol . '1:' . $endCol . '1');
+
+                        $worksheet->getStyle($startCol . '1:' . $endCol . '1')->applyFromArray([
+                            'fill' => [
+                                'fillType' => Fill::FILL_SOLID,
+                                'startColor' => ['rgb' => $color],
+                            ],
+                            'alignment' => [
+                                'horizontal' => Alignment::HORIZONTAL_CENTER,
+                                'vertical' => Alignment::VERTICAL_CENTER,
+                                'wrapText' => true,
+                            ],
+                            'font' => [
+                                'bold' => true,
+                                'color' => ['rgb' => 'FFFFFF'],
+                            ],
+                        ]);
+
+                        $currentCol += $questionCount - 1;
+                    }
+                }
+                $col = 'A';
+                foreach ($this->staticColumns as $header) {
+                    $worksheet->getStyle($col . '1')->applyFromArray([
+                        'fill' => [
+                            'fillType' => Fill::FILL_SOLID,
+                            'startColor' => ['rgb' => '4A90E2'], // Biru
+                        ],
+                        'font' => [
+                            'bold' => true,
+                            'color' => ['rgb' => 'FFFFFF'], // Hitam
+                        ],
+                        'alignment' => [
+                            'horizontal' => Alignment::HORIZONTAL_CENTER,
+                            'vertical' => Alignment::VERTICAL_CENTER,
+                        ],
+                    ]);
+                    $col++;
+                }
+                // Atur warna dan font untuk baris kedua
+                $col = 'A';
+                foreach ($this->staticColumns as $header) {
+                    $worksheet->setCellValue($col . '2', $header);
+                    $worksheet->getStyle($col . '2')->applyFromArray([
+                        'fill' => [
+                            'fillType' => Fill::FILL_SOLID,
+                            'startColor' => ['rgb' => '4A90E2'], // Biru
+                        ],
+                        'font' => [
+                            'bold' => true,
+                            'color' => ['rgb' => 'FFFFFF'], // Hitam
+                        ],
+                        'alignment' => [
+                            'horizontal' => Alignment::HORIZONTAL_CENTER,
+                            'vertical' => Alignment::VERTICAL_CENTER,
+                        ],
+                    ]);
+                    $col++;
+                }
+
+                foreach ($this->surveyQuestions as $question) {
+                    $worksheet->setCellValue($col . '2', $question->question);
+                    $worksheet->getStyle($col . '2')->applyFromArray([
+                        'fill' => [
+                            'fillType' => Fill::FILL_SOLID,
+                            'startColor' => ['rgb' => '4A90E2'], // Biru
+                        ],
+                        'font' => [
+                            'bold' => true,
+                            'color' => ['rgb' => 'FFFFFF'], // Hitam
+                        ],
+                        'alignment' => [
+                            'horizontal' => Alignment::HORIZONTAL_CENTER,
+                            'vertical' => Alignment::VERTICAL_CENTER,
+                        ],
+                    ]);
+                    $col++;
+                }
+            },
         ];
     }
 
-    public function map($selling): array
+    public function map($activity): array
     {
-        return [
-            $selling->sell->user->name,
-            $selling->sell->outlet->TSO,
-            $selling->sell->outlet->name,
-            $selling->sell->outlet->code,
-            $selling->sell->outlet->tipe_outlet,
-            $selling->sell->outlet->account,
-            $selling->sell->outlet->channel->name,
-            $selling->sell->outlet->city->name,
-            $selling->product->category->name,
-            $selling->product->sku,
-            $selling->qty,
-            $selling->price,
-            $selling->total,
-            $selling->sell->created_at,
-            $selling->sell->ended_at,
-            $selling->sell->duration,
-            $selling->sell->week
+        $mappedData = [
+            $activity->user->name,
+            $activity->outlet->TSO,
+            $activity->outlet->name,
+            $activity->outlet->account,
+            $activity->outlet->channel->name,
+            $activity->outlet->code,
+            $activity->outlet->tipe_outlet,
+            getVisitDayByNumber($activity->outlet->visit_day),
+            $activity->checked_in,
+            $activity->checked_out,
+            $activity->time_availability + $activity->time_visibility + $activity->time_knowledge + $activity->time_survey + $activity->time_order,
+            $activity->created_at->format('W'),
+            $activity->views_knowledge,
+            $activity->created_at,
+            $activity->updated_at,
         ];
+
+        foreach ($this->surveyQuestions as $question) {
+            $answer = $activity->surveys
+                ->where('survey_question_id', $question->id)
+                ->first();
+                if($answer){
+                    if($answer->survey->type == 'bool'){
+                        $answer = $answer->answer == 'true' ? 'YES' : 'NO';
+                    }else{
+                        $answer = $answer->answer;
+                    }
+                }else{
+                    $answer = '-';
+                }
+            $mappedData[] = $answer;
+        }
+
+        return $mappedData;
     }
 
     public function styles(Worksheet $sheet)
     {
-        $lastColumn = 'Q'; // Last column in our dataset
+        $lastColumn = $sheet->getHighestColumn();
         $lastRow = $sheet->getHighestRow();
 
-        // Header styles
-        $sheet->getStyle("A1:{$lastColumn}1")->applyFromArray([
-            'font' => [
-                'bold' => true,
-                'color' => ['rgb' => 'FFFFFF'],
-            ],
-            'fill' => [
-                'fillType' => Fill::FILL_SOLID,
-                'startColor' => ['rgb' => '4A90E2'],
-            ],
-            'alignment' => [
-                'horizontal' => Alignment::HORIZONTAL_CENTER,
-                'vertical' => Alignment::VERTICAL_CENTER,
-            ],
-        ]);
-
-        // Data styles
-        $sheet->getStyle("A2:{$lastColumn}{$lastRow}")->applyFromArray([
+        $sheet->getStyle("A3:{$lastColumn}{$lastRow}")->applyFromArray([
             'alignment' => [
                 'vertical' => Alignment::VERTICAL_CENTER,
             ],
@@ -101,15 +217,11 @@ class SurveyExport implements FromQuery, WithHeadings, WithMapping, WithStyles, 
             ],
         ]);
 
-        // Specific column alignments
-        $sheet->getStyle("A2:A{$lastRow}")->getAlignment()->setHorizontal(Alignment::HORIZONTAL_LEFT); // Product
-        $sheet->getStyle("B2:C{$lastRow}")->getAlignment()->setHorizontal(Alignment::HORIZONTAL_LEFT); // Outlet, Sales
-        $sheet->getStyle("D2:F{$lastRow}")->getAlignment()->setHorizontal(Alignment::HORIZONTAL_CENTER); // Stock, Selling, Balance
-        $sheet->getStyle("G2:G{$lastRow}")->getAlignment()->setHorizontal(Alignment::HORIZONTAL_LEFT); // Image URL
+        $sheet->getStyle("A3:H{$lastRow}")->getAlignment()->setHorizontal(Alignment::HORIZONTAL_LEFT);
+        $sheet->getStyle("I3:{$lastColumn}{$lastRow}")->getAlignment()->setHorizontal(Alignment::HORIZONTAL_CENTER);
 
-        // Alternate row colors for better readability
-        for ($row = 2; $row <= $lastRow; $row++) {
-            if ($row % 2 == 0) {
+        for ($row = 3; $row <= $lastRow; $row++) {
+            if ($row % 2 == 1) {
                 $sheet->getStyle("A{$row}:{$lastColumn}{$row}")->applyFromArray([
                     'fill' => [
                         'fillType' => Fill::FILL_SOLID,
@@ -119,14 +231,12 @@ class SurveyExport implements FromQuery, WithHeadings, WithMapping, WithStyles, 
             }
         }
 
-        // Set row height
         $sheet->getDefaultRowDimension()->setRowHeight(25);
-
-        // Freeze panes
-        $sheet->freezePane('A2');
+        $sheet->freezePane('A3');
 
         return [
             1 => ['font' => ['bold' => true]],
+            2 => ['font' => ['bold' => true]],
         ];
     }
 }

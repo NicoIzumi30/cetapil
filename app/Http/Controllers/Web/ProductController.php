@@ -52,6 +52,7 @@ class ProductController extends Controller
             $searchTerm = $request->search_term;
             $query->where(function ($q) use ($searchTerm) {
                 $q->where('sku', 'like', "%{$searchTerm}%")
+                    ->orWhere('code', 'like', "%{$searchTerm}%")
                     ->orWhereHas('category', function ($q) use ($searchTerm) {
                         $q->where('name', 'like', "%{$searchTerm}%");
                     });
@@ -73,6 +74,7 @@ class ProductController extends Controller
                     'id' => $item->id,
                     'category' => $item->category->name,
                     'sku' => $item->sku,
+                    'code'=>$item->code,
                     'price' => number_format($item->price, 0, ',', '.'),
                     'actions' => view('pages.product.action', [
                         'productId' => $item->id,
@@ -180,6 +182,7 @@ class ProductController extends Controller
         return response()->json([
             'id' => $product->id,
             'category_id' => $product->category_id,
+            'code' => $product->code,
             'sku' => $product->sku,
             'price' => $product->price
         ]);
@@ -199,6 +202,7 @@ class ProductController extends Controller
             $product->update([
                 'category_id' => $request->category_id,
                 'sku' => $request->sku,
+                'code' => $request->code,
                 'price' => $request->price,
             ]);
 

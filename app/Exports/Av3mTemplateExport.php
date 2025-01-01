@@ -33,12 +33,14 @@ class Av3mTemplateExport implements FromCollection, WithHeadings, WithMapping, W
             'Code Outlet',
             'Nama Outlet',
             'Product SKU',
+            'SKU Code',
             'Av3m',
             '',
             '',
             '',
             '',
             'GIH SKU',
+            'Code',
             'Product Category',
             'Harga'
         ];
@@ -55,7 +57,10 @@ class Av3mTemplateExport implements FromCollection, WithHeadings, WithMapping, W
                 '',
                 '',
                 '',
+                '',
+                '',
                 $row->sku,
+                $row->code,
                 $row->category->name,
                 $row->price
             ];
@@ -75,7 +80,7 @@ class Av3mTemplateExport implements FromCollection, WithHeadings, WithMapping, W
         $lastColumn = $sheet->getHighestColumn();
 
         // Rest of your existing styling
-        $sheet->getStyle("A1:D1")->applyFromArray([
+        $sheet->getStyle("A1:E1")->applyFromArray([
             'alignment' => [
                 'horizontal' => Alignment::HORIZONTAL_CENTER,
                 'vertical' => Alignment::VERTICAL_CENTER,
@@ -87,7 +92,7 @@ class Av3mTemplateExport implements FromCollection, WithHeadings, WithMapping, W
                 ],
             ],
         ]);
-        $sheet->getStyle("H1:J{$lastRow}")->applyFromArray([
+        $sheet->getStyle("J1:M{$lastRow}")->applyFromArray([
             'alignment' => [
                 'horizontal' => Alignment::HORIZONTAL_CENTER,
                 'vertical' => Alignment::VERTICAL_CENTER,
@@ -100,7 +105,7 @@ class Av3mTemplateExport implements FromCollection, WithHeadings, WithMapping, W
             ],
         ]);
         // Additional header styling
-        $sheet->getStyle("A1:D1")->applyFromArray([
+        $sheet->getStyle("A1:E1")->applyFromArray([
             'font' => [
                 'bold' => true,
                 'color' => ['rgb' => 'FFFFFF'],

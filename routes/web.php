@@ -93,6 +93,7 @@ Route::middleware('auth')->group(function () {
     Route::prefix('survey')->name('survey.')->group(function () {
         Route::get('/', [SurveyController::class, 'index'])->name('index');
         Route::get('/data', [SurveyController::class, 'getData'])->name('data');
+        Route::get('/download', [SurveyController::class, 'downloadData'])->name('download');
         Route::get('/{id}/detail', [SurveyController::class, 'detail'])->name('detail');
 
     });

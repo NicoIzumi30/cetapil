@@ -15,26 +15,26 @@
             <tr>
                 <td class="detail-title">Nama Sales</td>
                 <td class="colon">:</td>
-                <td class="detail">Wisma 2</td>
+                <td class="detail">{{$salesActivity->user->name}}</td>
                 <td class="detail-title">Nama Outlet</td>
                 <td class="colon">:</td>
-                <td class="detail">runaskdnas</td>
+                <td class="detail">{{$salesActivity->outlet->name}}</td>
             </tr>
             <tr>
                 <td class="detail-title">Hari Kunjungan</td>
                 <td class="colon">:</td>
-                <td class="detail">d</td>
+                <td class="detail">{{getVisitDayByNumber($salesActivity->outlet->visit_day)}}</td>
                 <td class="detail-title">Views</td>
                 <td class="colon">:</td>
-                <td class="detail">d</td>
+                <td class="detail">{{$salesActivity->views_knowledge}}</td>
             </tr>
             <tr>
                 <td class="detail-title">Check In</td>
                 <td class="colon">:</td>
-                <td class="detail">d</td>
+                <td class="detail">{{$salesActivity->checked_in}}</td>
                 <td class="detail-title">Check Out</td>
                 <td class="colon">:</td>
-                <td class="detail">d</td>
+                <td class="detail">{{$salesActivity->checked_out}}</td>
             </tr>
         </tbody>
     </table>

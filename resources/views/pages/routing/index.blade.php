@@ -27,6 +27,7 @@
                 Need Approval <span class="py-1 px-2 ml-2 rounded-md bg-white text-primary">{{ $countPending }}</span>
             </x-button.light>
             <x-button.info onclick="openModal('upload-product-knowledge')">Upload Product knowledge</x-button.info>
+			<x-button.info onclick="openModal('unggah-av3m-bulk')">AV3M</x-button.info>
             <x-modal id="upload-product-knowledge">
                 <x-slot:title>Upload Product Knowledge</x-slot:title>
                 <form action="{{ route('update-product-knowledge') }}" method="POST" enctype="multipart/form-data">
@@ -75,6 +76,47 @@
         </x-slot:cardAction>
         {{-- Routing Action End --}}
 
+        {{-- Upload AV3M Bulk --}}
+        <x-modal id="unggah-av3m-bulk">
+            <div class="flex flex-col items-center w-full">
+                <div class="relative w-full mx-3">
+                    {{-- Upload Area --}}
+                    <div class="cursor-pointer w-full h-[300px] text-center grid place-items-center rounded-md border-2 border-dashed border-blue-400 bg-[#EFF9FF]rounded-lg p-4"
+                        id="upload-area-av3m">
+                        <div id="upload-helptext-av3m" class="flex flex-col items-center text-center">
+                            <svg width="30" height="63" viewBox="0 0 64 63" fill="none"
+                                xmlns="http://www.w3.org/2000/svg">
+                                <path
+                                    d="M28 43.2577C28 45.4323 29.7909 47.1952 32 47.1952C34.2091 47.1952 36 45.4323 36 43.2577V15.074L48.971 27.8423L54.6279 22.2739L32.0005 0L9.37305 22.2739L15.0299 27.8423L28 15.0749V43.2577Z"
+                                    fill="#39B5FF" />
+                                <path
+                                    d="M0 39.375H8V55.125H56V39.375H64V55.125C64 59.4742 60.4183 63 56 63H8C3.58172 63 0 59.4742 0 55.125V39.375Z"
+                                    fill="#39B5FF" />
+                            </svg>
+                            <h5 class="text-primary font-medium mt-2">Tarik atau klik disini untuk mulai unggah
+                                dokumen berformat CSV/XLS</h5>
+                            <p class="text-primary font-light text-sm">
+                                Ukuran maksimal file <strong>5MB</strong>
+                            </p>
+                        </div>
+                        <p class="hidden text-primary font-bold text-xl" id="filename-display-av3m"></p>
+                    </div>
+                    {{-- Hidden File Input --}}
+                    <input type="file" name="file_upload-av3m" id="file_upload-av3m" class="hidden">
+                </div>
+            </div>
+            <x-slot:footer>
+                <div class="flex gap-4">
+                    <x-button.light onclick="closeModal('unggah-av3m-bulk')"
+                        class="w-full border rounded-md ">Batalkan</x-button.light>
+                    <x-button.light class="w-full !text-white !bg-primary " id="importBtnAv3m">Mulai
+                        Unggah</x-button.light>
+                    <x-button.light id="downloadTemplateAv3m" class="w-full !text-white !bg-primary ">Download
+                        Template</x-button.light>
+                </div>
+            </x-slot:footer>
+        </x-modal>
+        {{-- END Upload AV3M Bulk --}}
 
         {{-- Routing Table --}}
         <table id="routing-table" class="table">
@@ -609,3 +651,81 @@
         });
     </script>
 @endpush
+
+@push('scripts')
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            const uploadArea = document.getElementById('upload-area-av3m');
+            const fileInput = document.getElementById('file_upload-av3m');
+            const displayFileName = document.getElementById('filename-display-av3m');
+            const uploadHelptext = document.getElementById('upload-helptext-av3m');
+            const maxFileSize = 5 * 1024 * 1024;
+
+            // Click handler for the upload area
+            uploadArea.addEventListener('click', () => {
+                fileInput.click();
+            });
+
+            // Drag and drop handlers
+            uploadArea.addEventListener('dragover', (e) => {
+                e.preventDefault();
+                uploadArea.classList.add('drag-over');
+            });
+
+            uploadArea.addEventListener('dragleave', (e) => {
+                e.preventDefault();
+                uploadArea.classList.remove('drag-over');
+            });
+
+            uploadArea.addEventListener('drop', (e) => {
+                e.preventDefault();
+                uploadArea.classList.remove('drag-over');
+
+                const files = e.dataTransfer.files;
+                handleFiles(files);
+            });
+
+            fileInput.addEventListener('change', (e) => {
+                handleFiles(e.target.files);
+            });
+
+            function handleFiles(files) {
+                if (files.length === 0) return;
+
+                const file = files[0];
+
+                const validTypes = [
+                        'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet',
+                        'application/wps-office.xlsx',
+                        'application/vnd.ms-excel'
+                    ];
+
+
+                if (!validTypes.includes(file.type)) {
+                    alert('Upload file gagal, Tolong Unggah Hanya file berformat .xlsx');
+                    fileInput.value = '';
+                    return;
+                }
+
+                if (file.size > maxFileSize) {
+                    alert('Upload file gagal, Ukuran file lebih dari 5 MB');
+                    fileInput.value = '';
+                    return;
+                }
+
+                if (file.size > maxFileSize && file.size > maxFileSize) {
+                    return
+                }
+
+                const reader = new FileReader();
+                reader.onload = function(e) {
+                    displayFileName.classList.remove('hidden')
+                    uploadHelptext.classList.add('hidden')
+                    displayFileName.innerText = file.name
+                };
+                reader.readAsText(file);
+            }
+        });
+    </script>
+@endpush
+

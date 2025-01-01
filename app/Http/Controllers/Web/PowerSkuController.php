@@ -4,6 +4,7 @@ namespace App\Http\Controllers\Web;
 
 use App\Http\Controllers\Controller;
 use App\Http\Requests\PowerSku\CreatePowerSkuRequest;
+use App\Http\Requests\PowerSku\UpdatePowerSkuRequest;
 use App\Models\PowerSku;
 use App\Models\Product;
 use App\Models\Category;
@@ -137,9 +138,114 @@ class PowerSkuController extends Controller
         }
     }
 
-    public function edit(PowerSku $powerSku) {}
+    public function edit($id)
+    {
+        try {
+            $surveyAvailability = SurveyAvailability::with(['product.category'])
+                ->findOrFail($id);
 
-    public function update(CreatePowerSkuRequest $request, PowerSku $powerSku) {}
+            $data = [
+                'id' => $surveyAvailability->id,
+                'category' => $surveyAvailability->category,
+                'product_name' => $surveyAvailability->product_name,
+            ];
+
+            if ($surveyAvailability->category === 'Power SKU') {
+                $product = Product::with('category')->find($surveyAvailability->product_id);
+                $data['product'] = [
+                    'id' => $product->id,
+                    'sku' => $product->sku,
+                    'category_id' => $product->category_id,
+                    'category_name' => $product->category->name
+                ];
+            }
+
+            return response()->json($data);
+        } catch (\Exception $e) {
+            return response()->json([
+                'message' => 'Gagal mengambil data: ' . $e->getMessage()
+            ], 500);
+        }
+    }
+
+    public function update(UpdatePowerSkuRequest $request, $id)
+    {
+        try {
+            $data = $request->validated();
+            $surveyAvailability = SurveyAvailability::findOrFail($id);
+
+            if ($data['edit-select-survey-data'] === 'power-sku') {
+                $surveyQuestionCategory1 = SurveyCategory::where('title', 'Apakah POWER SKU tersedia di toko?')->first()->id;
+                $surveyQuestionCategory2 = SurveyCategory::where('title', 'Berapa harga POWER SKU di toko?')->first()->id;
+                $product = Product::find($data['edit-power-sku']);
+
+                // Update or create survey questions
+                $survey1 = SurveyQuestion::updateOrCreate(
+                    ['id' => $surveyAvailability->survey_question_id],
+                    [
+                        'survey_category_id' => $surveyQuestionCategory1,
+                        'type' => "bool",
+                        'product_id' => $data['edit-power-sku'],
+                        'question' => $product->sku,
+                    ]
+                );
+
+                $survey2 = SurveyQuestion::updateOrCreate(
+                    ['id' => $surveyAvailability->survey_question_id_2],
+                    [
+                        'survey_category_id' => $surveyQuestionCategory2,
+                        'type' => "text",
+                        'product_id' => $data['edit-power-sku'],
+                        'question' => $product->sku,
+                    ]
+                );
+
+                // Update survey availability
+                $surveyAvailability->update([
+                    'category' => "Power SKU",
+                    'survey_question_id' => $survey1->id,
+                    'survey_question_id_2' => $survey2->id,
+                    'product_id' => $data['edit-power-sku'],
+                    'product_name' => $product->sku,
+                ]);
+
+                // Update power sku
+                PowerSku::updateOrCreate(
+                    ['product_id' => $surveyAvailability->product_id],
+                    ['product_id' => $data['edit-power-sku']]
+                );
+            } else if ($data['edit-select-survey-data'] === 'harga-kompetitor') {
+                $surveyQuestionCategory1 = SurveyCategory::where('title', 'Berapa harga kompetitor di toko?')->first()->id;
+
+                // Update survey question
+                $survey1 = SurveyQuestion::updateOrCreate(
+                    ['id' => $surveyAvailability->survey_question_id],
+                    [
+                        'survey_category_id' => $surveyQuestionCategory1,
+                        'type' => "text",
+                        'question' => $data['edit-product-competitor'],
+                    ]
+                );
+
+                // Update survey availability
+                $surveyAvailability->update([
+                    'category' => "Harga Kompetitif",
+                    'survey_question_id' => $survey1->id,
+                    'survey_question_id_2' => null,
+                    'product_id' => null,
+                    'product_name' => $data['edit-product-competitor'],
+                ]);
+            }
+
+            return response()->json([
+                'message' => 'Power SKU & Harga Kompetitif berhasil diperbarui'
+            ]);
+        } catch (\Exception $e) {
+            return response()->json([
+                'message' => 'Gagal memperbarui data: ' . $e->getMessage()
+            ], 500);
+        }
+    }
 
     public function destroy($id)
     {

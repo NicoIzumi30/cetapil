@@ -35,6 +35,7 @@ class ProductExport implements FromCollection, WithHeadings, WithMapping, WithSt
         $headers = [
             'Kategori Produk',
             'Produk SKU',
+            'SKU Code',
             'Harga',
         ];
 
@@ -48,6 +49,7 @@ class ProductExport implements FromCollection, WithHeadings, WithMapping, WithSt
             $row = [
                 $product->category->name ?? 'Uncategorized',
                 $product->sku,
+                $product->code,
                 'Rp ' . number_format($product->price, 0, ',', '.'),
             ];
 
@@ -64,7 +66,7 @@ class ProductExport implements FromCollection, WithHeadings, WithMapping, WithSt
 
     public function styles(Worksheet $sheet)
     {
-        $lastColumn = chr(65 + 2); // A + number of base columns + number of channels
+        $lastColumn = 'D'; // A + number of base columns + number of channels
         $lastRow = $sheet->getHighestRow();
 
         // Header styles

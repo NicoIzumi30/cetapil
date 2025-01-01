@@ -8,13 +8,13 @@
 {{-- Users --}}
 <x-card>
     <x-slot:cardTitle>
-        Sales Activity
+        Survey Activity
     </x-slot:cardTitle>
     {{-- Users Action --}}
     <x-slot:cardAction>
         <x-input.search id="global-search" class="border-0"
             placeholder="Cari data survey"></x-input.search>
-			<x-button.info>Download</x-button.info>
+			<x-button.info id="downloadBtn">Download</x-button.info>
     </x-slot:cardAction>
     {{-- Users Action End --}}
 
@@ -72,6 +72,9 @@
 @push('scripts')
     <script>
         $(document).ready(function() {
+            $('#downloadBtn').on('click', function() {
+                window.location.href = "{{ route('survey.download') }}";
+            })
             let table = $('#table_survey').DataTable({
                 processing: true,
                 serverSide: true,
