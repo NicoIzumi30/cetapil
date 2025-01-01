@@ -1,3 +1,5 @@
+import 'dart:async';
+
 import 'package:cetapil_mobile/controller/activity/knowledge_controller.dart';
 import 'package:cetapil_mobile/controller/activity/tambah_activity_controller.dart';
 import 'package:cetapil_mobile/controller/cache_controller.dart';
@@ -105,147 +107,207 @@ class KnowledgePage extends GetView<KnowledgeController> {
   }
 }
 
-class CachedVideoPlayerWidget extends StatelessWidget {
+class CachedVideoPlayerWidget extends StatefulWidget {
+  @override
+  _CachedVideoPlayerWidgetState createState() => _CachedVideoPlayerWidgetState();
+}
+
+class _CachedVideoPlayerWidgetState extends State<CachedVideoPlayerWidget> {
+  String _formatDuration(Duration duration) {
+    String twoDigits(int n) => n.toString().padLeft(2, '0');
+    String minutes = twoDigits(duration.inMinutes.remainder(60));
+    String seconds = twoDigits(duration.inSeconds.remainder(60));
+    return "$minutes:$seconds";
+  }
+
   @override
   Widget build(BuildContext context) {
-    return GetBuilder<CachedVideoController>(
-      init: KnowledgeController.cachedVideoController,
-      builder: (controller) {
-        if (!controller.isInitialized.value) {
-          return Container(
-            height: 240,
-            child: const Center(
-              child: Column(
-                mainAxisAlignment: MainAxisAlignment.center,
-                children: [
-                  CircularProgressIndicator(),
-                  SizedBox(height: 16),
-                  Text('Loading video...'),
-                ],
-              ),
-            ),
-          );
-        }
+    final videoController = KnowledgeController.cachedVideoController;
 
-        return Column(
-          children: [
-            // Video display
-            AspectRatio(
-              aspectRatio: controller.videoController.value.aspectRatio,
+    return Obx(() {
+      if (!videoController.isInitialized.value) {
+        return const _LoadingWidget();
+      }
+
+      return Column(
+        children: <Widget>[
+          Container(padding: const EdgeInsets.only(top: 20.0)),
+          const Text('With assets mp4'),
+          Container(
+            padding: const EdgeInsets.all(20),
+            child: AspectRatio(
+              aspectRatio: videoController.videoController.value.aspectRatio,
               child: Stack(
-                alignment: Alignment.center,
-                children: [
-                  VideoPlayer(controller.videoController),
-                  // Play/Pause button overlay
-                  Obx(() => AnimatedOpacity(
-                        opacity: controller.isPlaying.value ? 0.0 : 1.0,
-                        duration: Duration(milliseconds: 300),
-                        child: GestureDetector(
-                          onTap: controller.playPause,
-                          child: Container(
-                            color: Colors.black26,
-                            child: Icon(
-                              controller.isPlaying.value
-                                  ? Icons.pause_circle_outline
-                                  : Icons.play_circle_outline,
-                              size: 60,
-                              color: Colors.white,
-                            ),
-                          ),
-                        ),
-                      )),
-                ],
-              ),
-            ),
-            // Enhanced video controls
-            Container(
-              padding: const EdgeInsets.all(12),
-              color: Colors.black87,
-              child: Column(
-                children: [
-                  // Progress bar
-                  Obx(() => SliderTheme(
-                        data: SliderThemeData(
-                          thumbShape: const RoundSliderThumbShape(
-                            enabledThumbRadius: 6,
-                          ),
-                          overlayShape: const RoundSliderOverlayShape(
-                            overlayRadius: 12,
-                          ),
-                          trackHeight: 4,
-                          activeTrackColor: Colors.blue,
-                          inactiveTrackColor: Colors.grey[700],
-                          thumbColor: Colors.blue,
-                        ),
-                        child: Slider(
-                          value: controller.position.value.inMilliseconds.toDouble(),
-                          min: 0,
-                          max: controller.duration.value.inMilliseconds.toDouble(),
-                          onChanged: (value) {
-                            controller.seekTo(Duration(
-                              milliseconds: value.toInt(),
-                            ));
-                          },
-                        ),
-                      )),
-                  // Control buttons and time
-                  Row(
-                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                alignment: Alignment.bottomCenter,
+                children: <Widget>[
+                  VideoPlayer(videoController.videoController),
+                  _ControlsOverlay(controller: videoController.videoController),
+                  Column(
+                    mainAxisAlignment: MainAxisAlignment.end,
                     children: [
-                      Row(
-                        children: [
-                          IconButton(
-                            icon: Obx(() => Icon(
-                                  controller.isPlaying.value ? Icons.pause : Icons.play_arrow,
-                                  color: Colors.white,
-                                )),
-                            onPressed: controller.playPause,
-                          ),
-                          IconButton(
-                            icon: const Icon(Icons.replay_10, color: Colors.white),
-                            onPressed: () => controller.seekTo(
-                                Duration(seconds: controller.position.value.inSeconds - 10)),
-                          ),
-                          IconButton(
-                            icon: const Icon(Icons.forward_10, color: Colors.white),
-                            onPressed: () => controller.seekTo(
-                                Duration(seconds: controller.position.value.inSeconds + 10)),
-                          ),
-                        ],
-                      ),
                       Padding(
-                        padding: const EdgeInsets.only(right: 16),
+                        padding: const EdgeInsets.symmetric(horizontal: 20),
                         child: Row(
-                          mainAxisSize: MainAxisSize.min,
+                          mainAxisAlignment: MainAxisAlignment.spaceBetween,
                           children: [
-                            Obx(() => Text(
-                                  _formatDuration(controller.position.value),
-                                  style: const TextStyle(color: Colors.white),
-                                )),
-                            const Text(' / ', style: TextStyle(color: Colors.white)),
-                            Obx(() => Text(
-                                  _formatDuration(controller.duration.value),
-                                  style: const TextStyle(color: Colors.white),
-                                )),
+                            Text(_formatDuration(videoController.position.value),
+                                style: const TextStyle(color: Colors.white)),
+                            Text(_formatDuration(videoController.duration.value),
+                                style: const TextStyle(color: Colors.white)),
                           ],
                         ),
+                      ),
+                      VideoProgressIndicator(
+                        videoController.videoController,
+                        allowScrubbing: true,
+                        padding: const EdgeInsets.only(top: 5.0),
                       ),
                     ],
                   ),
                 ],
               ),
             ),
-          ],
-        );
-      },
+          ),
+        ],
+      );
+    });
+  }
+}
+
+class _ControlsOverlay extends StatelessWidget {
+  const _ControlsOverlay({required this.controller});
+
+  static const List<Duration> _exampleCaptionOffsets = <Duration>[
+    Duration(seconds: -10),
+    Duration(seconds: -3),
+    Duration(seconds: -1, milliseconds: -500),
+    Duration(milliseconds: -250),
+    Duration.zero,
+    Duration(milliseconds: 250),
+    Duration(seconds: 1, milliseconds: 500),
+    Duration(seconds: 3),
+    Duration(seconds: 10),
+  ];
+  static const List<double> _examplePlaybackRates = <double>[
+    0.25,
+    0.5,
+    1.0,
+    1.5,
+    2.0,
+    3.0,
+    5.0,
+    10.0,
+  ];
+
+  final VideoPlayerController controller;
+
+  @override
+  Widget build(BuildContext context) {
+    return Stack(
+      children: <Widget>[
+        AnimatedSwitcher(
+          duration: const Duration(milliseconds: 50),
+          reverseDuration: const Duration(milliseconds: 200),
+          child: controller.value.isPlaying
+              ? const SizedBox.shrink()
+              : const ColoredBox(
+                  color: Colors.black26,
+                  child: Center(
+                    child: Icon(
+                      Icons.play_arrow,
+                      color: Colors.white,
+                      size: 100.0,
+                      semanticLabel: 'Play',
+                    ),
+                  ),
+                ),
+        ),
+        GestureDetector(
+          onTap: () {
+            controller.value.isPlaying ? controller.pause() : controller.play();
+          },
+        ),
+        Align(
+          alignment: Alignment.topLeft,
+          child: PopupMenuButton<Duration>(
+            initialValue: controller.value.captionOffset,
+            tooltip: 'Caption Offset',
+            onSelected: (Duration delay) {
+              controller.setCaptionOffset(delay);
+            },
+            itemBuilder: (BuildContext context) {
+              return <PopupMenuItem<Duration>>[
+                for (final Duration offsetDuration in _exampleCaptionOffsets)
+                  PopupMenuItem<Duration>(
+                    value: offsetDuration,
+                    child: Text('${offsetDuration.inMilliseconds}ms'),
+                  )
+              ];
+            },
+            child: Padding(
+              padding: const EdgeInsets.symmetric(
+                // Using less vertical padding as the text is also longer
+                // horizontally, so it feels like it would need more spacing
+                // horizontally (matching the aspect ratio of the video).
+                vertical: 12,
+                horizontal: 16,
+              ),
+              child: Text('${controller.value.captionOffset.inMilliseconds}ms'),
+            ),
+          ),
+        ),
+        Align(
+          alignment: Alignment.topRight,
+          child: PopupMenuButton<double>(
+            initialValue: controller.value.playbackSpeed,
+            tooltip: 'Playback speed',
+            onSelected: (double speed) {
+              controller.setPlaybackSpeed(speed);
+            },
+            itemBuilder: (BuildContext context) {
+              return <PopupMenuItem<double>>[
+                for (final double speed in _examplePlaybackRates)
+                  PopupMenuItem<double>(
+                    value: speed,
+                    child: Text('${speed}x'),
+                  )
+              ];
+            },
+            child: Padding(
+              padding: const EdgeInsets.symmetric(
+                // Using less vertical padding as the text is also longer
+                // horizontally, so it feels like it would need more spacing
+                // horizontally (matching the aspect ratio of the video).
+                vertical: 12,
+                horizontal: 16,
+              ),
+              child: Text('${controller.value.playbackSpeed}x'),
+            ),
+          ),
+        ),
+      ],
     );
   }
+}
 
-  String _formatDuration(Duration duration) {
-    String twoDigits(int n) => n.toString().padLeft(2, '0');
-    final minutes = twoDigits(duration.inMinutes.remainder(60));
-    final seconds = twoDigits(duration.inSeconds.remainder(60));
-    return '$minutes:$seconds';
+class _LoadingWidget extends StatelessWidget {
+  const _LoadingWidget();
+
+  @override
+  Widget build(BuildContext context) {
+    return Container(
+      height: 240,
+      child: const Center(
+        child: Column(
+          mainAxisAlignment: MainAxisAlignment.center,
+          children: [
+            CircularProgressIndicator(),
+            SizedBox(height: 16),
+            Text('Loading video...'),
+          ],
+        ),
+      ),
+    );
   }
 }
 

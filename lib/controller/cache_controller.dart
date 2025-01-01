@@ -1,3 +1,4 @@
+import 'dart:async';
 import 'dart:io';
 
 import 'package:cetapil_mobile/controller/support_data_controller.dart';
@@ -73,11 +74,12 @@ class CachedPdfController extends GetxController {
 class CachedVideoController extends GetxController {
   final SupportDataController supportController = Get.find<SupportDataController>();
   late VideoPlayerController videoController;
-  var isInitialized = false.obs;
-  var isPlaying = false.obs;
-  var duration = const Duration().obs;
-  var position = const Duration().obs;
-  var urlVideo = "".obs;
+  final isInitialized = false.obs;
+  final isPlaying = false.obs;
+  final duration = const Duration().obs;
+  final position = const Duration().obs;
+  final urlVideo = "".obs;
+  Timer? _positionTimer;
 
   static const _cacheKey = 'video_cache';
   final _cacheManager = DefaultCacheManager();
@@ -90,45 +92,39 @@ class CachedVideoController extends GetxController {
 
   Future<void> initializeVideo() async {
     try {
-      urlVideo.value = supportController.getKnowledge().first['path_video'];
-      if (urlVideo.value.isEmpty) {
-        print('Video URL is empty');
-        return;
-      }
+    
+      String url = supportController.getKnowledge().first['path_video'];
+      if (url.isEmpty) return;
 
-      final url = 'https://dev-cetaphil.i-am.host/storage${urlVideo.value}';
+      urlVideo.value = 'https://dev-cetaphil.i-am.host/storage${url}';
+      if (urlVideo.value.isEmpty) return;
 
-      // Try to get from cache first
       final fileInfo = await _cacheManager.getFileFromCache(_cacheKey);
       File videoFile;
 
       if (fileInfo != null && fileInfo.file.existsSync()) {
         videoFile = fileInfo.file;
-      } else {
-        // Download and cache if not found
-        final downloadedFile = await _cacheManager.downloadFile(
-          url,
-          key: _cacheKey,
+        videoController = VideoPlayerController.file(
+          videoFile,
+          videoPlayerOptions: VideoPlayerOptions(mixWithOthers: true),
         );
+      } else {
+        final downloadedFile = await _cacheManager.downloadFile(urlVideo.value, key: _cacheKey);
         videoFile = downloadedFile.file;
+        videoController = VideoPlayerController.file(
+          videoFile,
+          videoPlayerOptions: VideoPlayerOptions(mixWithOthers: true),
+        );
       }
 
-      // Initialize video player with cached file
-      videoController = VideoPlayerController.file(videoFile)
-        ..initialize().then((_) {
-          duration.value = videoController.value.duration;
-          isInitialized.value = true;
-          update();
-        }).catchError((error) {
-          print('Video Error: $error');
-          isInitialized.value = false;
-          update();
-        });
+      await _cleanup();
+      await videoController.initialize();
+      duration.value = videoController.value.duration;
+      videoController.addListener(_videoListener);
+      _startPositionTimer();
 
-      videoController.addListener(() {
-        position.value = videoController.value.position;
-        update();
-      });
+      isInitialized.value = true;
+      update();
     } catch (e) {
       print('Error initializing video: $e');
       isInitialized.value = false;
@@ -136,25 +132,70 @@ class CachedVideoController extends GetxController {
     }
   }
 
-  void playPause() {
-    if (videoController.value.isPlaying) {
-      videoController.pause();
-      isPlaying.value = false;
-    } else {
-      videoController.play();
-      isPlaying.value = true;
+  void _videoListener() {
+    if (!isInitialized.value) return;
+    final playing = videoController.value.isPlaying;
+    if (playing != isPlaying.value) {
+      isPlaying.value = playing;
+    }
+    position.value = videoController.value.position;
+    if (duration.value != videoController.value.duration) {
+      duration.value = videoController.value.duration;
     }
     update();
   }
 
+  void _startPositionTimer() {
+    _positionTimer?.cancel();
+    _positionTimer = Timer.periodic(const Duration(milliseconds: 200), (timer) {
+      if (isInitialized.value && !videoController.value.isCompleted) {
+        position.value = videoController.value.position;
+        update();
+      }
+    });
+  }
+
+  void playPause() {
+    if (!isInitialized.value) return;
+    if (videoController.value.isPlaying) {
+      videoController.pause();
+    } else {
+      videoController.play();
+    }
+    isPlaying.value = videoController.value.isPlaying;
+    update();
+  }
+
   void seekTo(Duration position) {
+    if (!isInitialized.value) return;
     videoController.seekTo(position);
+    this.position.value = position;
+    update();
+  }
+
+  void pauseVideo() {
+    if (isInitialized.value && videoController.value.isPlaying) {
+      videoController.pause();
+      isPlaying.value = false;
+      update();
+    }
+  }
+
+  Future<void> _cleanup() async {
+    _positionTimer?.cancel();
+    if (isInitialized.value) {
+      videoController.removeListener(_videoListener);
+      await videoController.pause();
+      await videoController.dispose();
+      isInitialized.value = false;
+      isPlaying.value = false;
+    }
   }
 
   @override
   void onClose() {
-    videoController.dispose();
-    _cacheManager.emptyCache(); // Optional: clear cache when controller is disposed
+    _cleanup();
+    _cacheManager.emptyCache();
     super.onClose();
   }
 }

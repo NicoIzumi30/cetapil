@@ -145,6 +145,7 @@ class SupportDataController extends GetxController {
 
       // Load Form Outlet
       formOutlet.value = await outletDB.getAllForms();
+
     } catch (e) {
       print("Error loading local data: $e");
     } finally {

@@ -5,6 +5,7 @@ import 'package:cetapil_mobile/controller/activity/activity_controller.dart';
 import 'package:cetapil_mobile/controller/activity/tambah_availibility_controller.dart';
 import 'package:cetapil_mobile/controller/activity/tambah_order_controller.dart';
 import 'package:cetapil_mobile/controller/activity/tambah_visibility_controller.dart';
+import 'package:cetapil_mobile/controller/cache_controller.dart';
 import 'package:cetapil_mobile/controller/support_data_controller.dart';
 import 'package:cetapil_mobile/model/survey_question_response.dart';
 import 'package:flutter/material.dart';
@@ -636,8 +637,12 @@ class TambahActivityController extends GetxController {
   }
 
   // Tab management methods
-  void changeTab(int index) {
+   void changeTab(int index) {
     selectedTab.value = index;
+    if (selectedTab.value != 2 && index != 2) { // If leaving Knowledge tab
+      Get.delete<CachedVideoController>();
+      Get.delete<CachedPdfController>();
+    }
     if (selectedTab.value == 2) {
       checkAvailabilityForSurvey(knowledge: true);
     }

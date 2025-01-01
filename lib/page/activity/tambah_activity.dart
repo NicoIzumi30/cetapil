@@ -22,8 +22,7 @@ class TambahActivity extends GetView<TambahActivityController> {
     return WillPopScope(
       onWillPop: () async {
         final shouldPop = await Alerts.showConfirmDialog(context);
-        if (shouldPop == true) {
-          // Clean up cached controllers when leaving the activity
+        if (shouldPop == true && controller.selectedTab.value == 2) {
           Get.delete<CachedVideoController>();
           Get.delete<CachedPdfController>();
         }

@@ -122,10 +122,8 @@ class SupportDatabaseHelper {
     await db.execute('''
     CREATE TABLE knowledge(
       id TEXT PRIMARY KEY,
-        channel_id TEXT,
-        path_pdf TEXT,
-        path_video TEXT,
-        FOREIGN KEY (channel_id) REFERENCES knowledge_channel (id)
+      path_pdf TEXT,
+      path_video TEXT
     )
     ''');
 
@@ -287,41 +285,14 @@ class SupportDatabaseHelper {
   ///Knowledge
   Future<void> insertKnowledge(Knowledge.Data knowledge) async {
     final db = await database;
-    await db.transaction((txn) async {
-      await txn.insert(
-          'knowledge_channel', {'id': knowledge.channel!.id, 'name': knowledge.channel!.name},
-          conflictAlgorithm: ConflictAlgorithm.replace);
-
-      await txn.insert(
-          'knowledge',
-          {
-            'id': knowledge.id,
-            'channel_id': knowledge.channel!.id,
-            'path_pdf': knowledge.pathPdf,
-            'path_video': knowledge.pathVideo
-          },
-          conflictAlgorithm: ConflictAlgorithm.replace);
-    });
+    await db.insert('knowledge',
+        {'id': knowledge.id, 'path_pdf': knowledge.pathPdf, 'path_video': knowledge.pathVideo},
+        conflictAlgorithm: ConflictAlgorithm.replace);
   }
 
   Future<List<Map<String, dynamic>>> getAllKnowledge() async {
     final db = await database;
-    final List<Map<String, dynamic>> knowledges = await db.query('knowledge');
-    final List<Map<String, dynamic>> result = [];
-
-    for (var knowledge in knowledges) {
-      final channel = await db
-          .query('knowledge_channel', where: 'id = ?', whereArgs: [knowledge['channel_id']]);
-
-      result.add({
-        'id': knowledge['id'],
-        'path_pdf': knowledge['path_pdf'],
-        'path_video': knowledge['path_video'],
-        'knowledge_channel': channel.first
-      });
-    }
-
-    return result;
+    return await db.query('knowledge');
   }
 
   Future<void> insertSurveyQuestion(Survey.SurveyQuestion question) async {

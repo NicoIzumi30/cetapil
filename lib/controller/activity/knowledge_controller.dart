@@ -1,5 +1,6 @@
 import 'package:cetapil_mobile/controller/activity/tambah_activity_controller.dart';
 import 'package:cetapil_mobile/controller/cache_controller.dart';
+import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 
 import '../support_data_controller.dart';
@@ -10,30 +11,38 @@ class KnowledgeController extends GetxController {
   final activityController = Get.find<TambahActivityController>();
   final videoPath = Rxn<String>();
   final pdfPath = Rxn<String>();
-  
-  // Create static instances of controllers to persist them
-  static final cachedVideoController = Get.put(CachedVideoController(), permanent: true);
-  static final cachedPdfController = Get.put(CachedPdfController(), permanent: true);
+
+  // Change to lazy-put to ensure proper lifecycle management
+  static CachedVideoController get cachedVideoController {
+    if (!Get.isRegistered<CachedVideoController>()) {
+      Get.put(CachedVideoController(), permanent: false);
+    }
+    return Get.find<CachedVideoController>();
+  }
+
+  static CachedPdfController get cachedPdfController {
+    if (!Get.isRegistered<CachedPdfController>()) {
+      Get.put(CachedPdfController(), permanent: false);
+    }
+    return Get.find<CachedPdfController>();
+  }
 
   @override
   void onInit() {
     super.onInit();
     initPaths();
+    ever(activityController.selectedTab, (tab) {
+      if (tab != 2) {
+        // 2 is Knowledge tab index
+        cachedVideoController.pauseVideo();
+      }
+    });
   }
 
   void initPaths() {
     try {
-      final channel = activityController.detailOutlet.value?.channel?.name;
-      if (channel != null) {
-        final filteredData = supportDataController.knowledge
-            .where((item) => item['knowledge_channel']['name'] == channel)
-            .toList();
-
-        if (filteredData.isNotEmpty) {
-          videoPath.value = filteredData.first['path_video'];
-          pdfPath.value = filteredData.first['path_pdf'];
-        }
-      }
+      pdfPath.value = supportDataController.knowledge.first['path_pdf'];
+      videoPath.value = supportDataController.knowledge.first['path_video'];
     } catch (e) {
       print('Error initializing paths: $e');
     }
@@ -41,7 +50,10 @@ class KnowledgeController extends GetxController {
 
   @override
   void onClose() {
-    // Don't delete controllers here since we want to persist them
+    if (Get.isRegistered<CachedVideoController>()) {
+      final controller = Get.find<CachedVideoController>();
+      controller.pauseVideo();
+    }
     super.onClose();
   }
 }
