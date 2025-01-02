@@ -8,8 +8,6 @@ import 'package:flutter_cache_manager/flutter_cache_manager.dart';
 import 'package:get/get.dart';
 import 'package:video_player/video_player.dart';
 import 'package:path_provider/path_provider.dart';
-import 'package:flutter_ffmpeg/flutter_ffmpeg.dart';
-import 'package:flutter_ffmpeg/media_information.dart';
 import 'package:chewie/chewie.dart';
 
 class CachedPdfController extends GetxController {
@@ -109,76 +107,75 @@ class _VideoScaffoldState extends State<VideoScaffold> {
 
 class CachedVideoController extends GetxController {
   final SupportDataController supportController = Get.find<SupportDataController>();
+  final _cacheManager = DefaultCacheManager();
+  static const _cacheKey = 'video_cache';
+
   late VideoPlayerController videoController;
   ChewieController? chewieController;
+
   final isInitialized = false.obs;
   final isPlaying = false.obs;
   final duration = const Duration().obs;
   final position = const Duration().obs;
   final urlVideo = "".obs;
   final showControls = false.obs;
+  final isLoading = false.obs;
+  final hasError = false.obs;
+  final errorMessage = ''.obs;
+
   Timer? _positionTimer;
   Timer? _hideControlsTimer;
   File? _cachedVideoFile;
 
-  static const _cacheKey = 'video_cache';
-  final _cacheManager = DefaultCacheManager();
-
   @override
   void onInit() {
     super.onInit();
+    _initVideoController();
+  }
+
+  void _initVideoController() {
+    videoController = VideoPlayerController.network('');
     initializeVideo();
   }
 
   Future<File> _getCachedVideo(String url) async {
     try {
-      // Try to get file from cache first
       final cachedFile = await _cacheManager.getFileFromCache(_cacheKey);
       if (cachedFile != null && await cachedFile.file.exists()) {
-        print('Using cached video file');
         return cachedFile.file;
       }
 
-      // If not in cache, download and cache it
-      print('Downloading and caching video file');
-      final downloadedFile = await _cacheManager.downloadFile(
-        url,
-        key: _cacheKey,
-      );
+      final downloadedFile = await _cacheManager.downloadFile(url, key: _cacheKey);
       return downloadedFile.file;
     } catch (e) {
-      print('Error caching video: $e');
-      // If caching fails, return a direct download
-      final fallbackFile = await _cacheManager.downloadFile(
-        url,
-        key: _cacheKey,
-      );
+      final fallbackFile = await _cacheManager.downloadFile(url, key: _cacheKey);
       return fallbackFile.file;
     }
   }
 
   Future<void> initializeVideo() async {
     try {
-      String url = supportController.getKnowledge().first['path_video'];
-      if (url.isEmpty) return;
+      isLoading.value = true;
+      hasError.value = false;
 
-      final fullUrl = 'https://dev-cetaphil.i-am.host/storage${url}';
+      final url = supportController.getKnowledge().first['path_video'];
+      if (url.isEmpty) {
+        throw Exception('Video URL is empty');
+      }
 
-      // Check if URL has changed
+      final fullUrl = 'https://dev-cetaphil.i-am.host/storage$url';
+
       if (urlVideo.value != fullUrl) {
-        // Clear the cache if URL is different
         await _cacheManager.removeFile(_cacheKey);
-        print('Cache cleared due to URL change');
       }
 
       urlVideo.value = fullUrl;
-
       await _cleanup();
 
       try {
         _cachedVideoFile = await _getCachedVideo(fullUrl);
+        await videoController.dispose();
 
-        // Initialize video controller with cached file
         videoController = VideoPlayerController.file(
           _cachedVideoFile!,
           videoPlayerOptions: VideoPlayerOptions(
@@ -189,8 +186,7 @@ class CachedVideoController extends GetxController {
 
         await videoController.initialize();
       } catch (e) {
-        print('Video initialization error: $e');
-        // Fallback to network URL if file access fails
+        await videoController.dispose();
         videoController = VideoPlayerController.networkUrl(
           Uri.parse(fullUrl),
           videoPlayerOptions: VideoPlayerOptions(
@@ -202,59 +198,43 @@ class CachedVideoController extends GetxController {
       }
 
       if (videoController.value.isInitialized) {
-        chewieController?.dispose();
-        chewieController = ChewieController(
-          videoPlayerController: videoController,
-          autoPlay: false,
-          looping: false,
-          aspectRatio: 16 / 9,
-          allowMuting: true,
-          allowPlaybackSpeedChanging: true,
-          showControls: true,
-          placeholder: const Center(child: CircularProgressIndicator()),
-          customControls: _buildCustomControls(),
-          deviceOrientationsOnEnterFullScreen: [
-            DeviceOrientation.landscapeLeft,
-            DeviceOrientation.landscapeRight,
-          ],
-          deviceOrientationsAfterFullScreen: [
-            DeviceOrientation.portraitUp,
-          ],
-          routePageBuilder: (BuildContext context, Animation<double> animation,
-              Animation<double> secondAnimation, ChewieControllerProvider provider) {
-            return AnimatedBuilder(
-              animation: animation,
-              builder: (BuildContext context, Widget? child) {
-                return GestureDetector(
-                  onTap: () => toggleControls(),
-                  child: VideoScaffold(
-                    child: Scaffold(
-                      resizeToAvoidBottomInset: false,
-                      body: Container(
-                        alignment: Alignment.center,
-                        color: Colors.black,
-                        child: provider,
-                      ),
-                    ),
-                  ),
-                );
-              },
-            );
-          },
-        );
-
-        duration.value = videoController.value.duration;
-        videoController.addListener(_videoListener);
-        _startPositionTimer();
-
+        await _setupChewieController();
         isInitialized.value = true;
-        update();
       }
     } catch (e) {
-      print('Error in initializeVideo: $e');
+      hasError.value = true;
+      errorMessage.value = e.toString();
       isInitialized.value = false;
+    } finally {
+      isLoading.value = false;
       update();
     }
+  }
+
+  Future<void> _setupChewieController() async {
+    chewieController?.dispose();
+    chewieController = ChewieController(
+      videoPlayerController: videoController,
+      autoPlay: false,
+      looping: false,
+      aspectRatio: 16 / 9,
+      allowMuting: true,
+      allowPlaybackSpeedChanging: true,
+      showControls: true,
+      placeholder: const Center(child: CircularProgressIndicator()),
+      customControls: _buildCustomControls(),
+      deviceOrientationsOnEnterFullScreen: [
+        DeviceOrientation.landscapeLeft,
+        DeviceOrientation.landscapeRight,
+      ],
+      deviceOrientationsAfterFullScreen: [
+        DeviceOrientation.portraitUp,
+      ],
+    );
+
+    duration.value = videoController.value.duration;
+    videoController.addListener(_videoListener);
+    _startPositionTimer();
   }
 
   void toggleControls() {

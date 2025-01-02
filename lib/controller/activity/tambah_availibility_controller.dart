@@ -76,7 +76,7 @@ class TambahAvailabilityController extends GetxController {
         }
 
         savedProductValues[categoryId]![item['id'].toString()] = {
-          'availability_toggle': item['availability_exist'].toString(),
+          'availability_exist': item['availability_exist'].toString(),
           'stock_on_hand': item['stock_on_hand'].toString(),
           'stock_on_inventory': item['stock_on_inventory'].toString(),
           'av3m': item['av3m'].toString(),
@@ -109,7 +109,7 @@ class TambahAvailabilityController extends GetxController {
             for (var item in matchingDraftItems) {
               final skuId = item['id'].toString();
               productValues[skuId] = {
-                'availability_toggle': item['availability_toggle'].toString(),
+                'availability_exist': item['availability_exist'].toString(),
                 'stock_on_hand': item['stock_on_hand'].toString(),
                 'stock_on_inventory': item['stock_on_inventory'].toString(),
                 'av3m': item['av3m'].toString(),
@@ -129,7 +129,7 @@ class TambahAvailabilityController extends GetxController {
               for (var product in products) {
                 final skuId = product['id'].toString();
                 productValues[skuId] = {
-                  'availability_toggle': 'false',
+                  'availability_exist': 'false',
                   'stock_on_hand': '0',
                   'stock_on_inventory': '0',
                   'av3m': '0',
@@ -159,7 +159,7 @@ class TambahAvailabilityController extends GetxController {
       final skuId = sku['id'].toString();
       final values = productValues[skuId] ??
           {
-            'availability_toggle': 'false',
+            'availability_exist': 'false',
             'stock_on_hand': '0',
             'stock_on_inventory': '0',
             'av3m': '0',
@@ -171,7 +171,7 @@ class TambahAvailabilityController extends GetxController {
         'product_id': sku['id'],
         'category': sku['category']['name'],
         'sku': sku['sku'],
-        'availability_toggle': bool.tryParse(values['availability_toggle'] ?? 'false') ?? false,
+        'availability_exist': bool.tryParse(values['availability_exist'] ?? 'false') ?? false,
         'stock_on_hand': int.tryParse(values['stock_on_hand'] ?? '0') ?? 0,
         'stock_on_inventory': int.tryParse(values['stock_on_inventory'] ?? '0') ?? 0,
         'av3m': int.tryParse(values['av3m'] ?? '0') ?? 0,

@@ -110,7 +110,7 @@ class AvailabilityPage extends GetView<TambahActivityController> {
                       for (var item in items) {
                         final skuId = item['id'].toString();
                         prodController.productValues[skuId] = {
-                          'availability_toggle': item['availability_toggle'].toString(),
+                          'availability_exist': item['availability_exist'].toString(),
                           'stock_on_hand': item['stock_on_hand'].toString(),
                           'stock_on_inventory': item['stock_on_inventory'].toString(),
                           'av3m': item['av3m'].toString(),
@@ -324,7 +324,7 @@ class _CollapsibleCategoryGroupState extends State<CollapsibleCategoryGroup> {
                 return SumAmountProduct(
                   productName: item['sku'] ?? '',
                   availabilityYesNoController: TextEditingController(
-                    text: item['availability_toggle'].toString() == "true" ? "Ada" : "Tidak",
+                    text: item['availability_exist'].toString() == "true" ? "Ada" : "Tidak",
                   ),
                   stockOnHandController: TextEditingController(
                     text: item['stock_on_hand'].toString(),

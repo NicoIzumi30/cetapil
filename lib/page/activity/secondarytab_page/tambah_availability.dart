@@ -251,14 +251,14 @@ class _CompactProductCardState extends State<CompactProductCard> {
 
     final existingValues = controller.productValues[skuId] ??
         {
-          'availability_toggle': "false",
+          'availability_exist': "false",
           'stock_on_hand': '0',
           'stock_on_inventory': '0',
           'av3m': av3mValue?.toString() ?? '0', // Use AV3M from database
           'recommend': (0 - av3mValue!).toString(),
         };
 
-    toggleAvailabilityYesNo = existingValues['availability_toggle'] == "true"
+    toggleAvailabilityYesNo = existingValues['availability_exist'] == "true"
         ? ValueNotifier(true)
         : ValueNotifier(false);
     stockOnHandController = TextEditingController(text: existingValues['stock_on_hand']);
@@ -279,7 +279,7 @@ class _CompactProductCardState extends State<CompactProductCard> {
           ? true
           : false;
       widget.onChanged({
-        'availability_toggle': toggleAvailabilityYesNo.value ? 'true' : 'false',
+        'availability_exist': toggleAvailabilityYesNo.value ? 'true' : 'false',
         'stock_on_hand': stockOnHandController.text.isEmpty ? '0' : stockOnHandController.text,
         'stock_on_inventory':
             stockOnInventoryController.text.isEmpty ? '0' : stockOnInventoryController.text,

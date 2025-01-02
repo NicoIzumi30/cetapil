@@ -21,7 +21,6 @@ import '../../utils/colors.dart';
 import '../outlet/detail_outlet.dart';
 
 class ActivityPage extends GetView<ActivityController> {
-
   @override
   Widget build(BuildContext context) {
     return SafeArea(
@@ -57,8 +56,7 @@ class ActivityPage extends GetView<ActivityController> {
                           : ListView.builder(
                               itemCount: controller.filteredActivities.length,
                               itemBuilder: (context, index) {
-                                final activity =
-                                    controller.filteredActivities[index];
+                                final activity = controller.filteredActivities[index];
                                 return ActivityCard(
                                   activity: activity,
                                   statusDraft: activity.status!,
@@ -83,6 +81,10 @@ class ActivityPage extends GetView<ActivityController> {
                                     if (!Get.isRegistered<KnowledgeController>()) {
                                       Get.lazyPut(() => KnowledgeController());
                                     }
+                                    if (!Get.isRegistered<TambahActivityController>()) {
+                                      print("Initializing TambahActivityController");
+                                      Get.lazyPut(() => TambahActivityController());
+                                    }
                                     if (activity.status! == "SUBMITTED") {
                                       if (!Get.isRegistered<DetailActivityController>()) {
                                         Get.lazyPut(() => DetailActivityController());
@@ -94,36 +96,26 @@ class ActivityPage extends GetView<ActivityController> {
                                       detailActivityController.setDetailOutlet(activity);
                                       Get.to(() => DetailActivity(activity.id!));
                                     } else if (activity.status! == "DRAFTED") {
-                                      if (!Get.isRegistered<TambahActivityController>()) {
-                                        Get.lazyPut(() => TambahActivityController());
-                                      }
                                       final dbActivity = ActivityDatabaseHelper.instance;
-                                      final tambahActivityController = Get.find<TambahActivityController>();
-                                      var fetchedData = await dbActivity.getDetailSalesActivity(activity.id!);
+                                      final tambahActivityController =
+                                          Get.find<TambahActivityController>();
+                                      var fetchedData =
+                                          await dbActivity.getDetailSalesActivity(activity.id!);
                                       tambahActivityController.selectedTab.value = 0;
                                       tambahActivityController.detailDraft.assignAll(fetchedData!);
-                                      tambahActivityController.startTabTimer();
                                       tambahActivityController.setDetailOutlet(activity);
-                                      tambahActivityController.initDetailDraftAvailability();
-                                      tambahActivityController.initDetailDraftVisibility();
-                                      // tambahActivityController.initDetailDraftOrder();
+                                      tambahActivityController.initializeData();
                                       Get.to(() => TambahActivity());
-                                    }
-                                    else{
-                                      if (!Get.isRegistered<TambahActivityController>()) {
-                                        Get.lazyPut(()=>TambahActivityController());
-                                      }
+                                    } else {
                                       final tambahActivityController =
                                           Get.find<TambahActivityController>();
                                       final outlet_id = activity.outlet!.id;
                                       tambahActivityController.selectedTab.value = 0;
-                                      tambahActivityController.startTabTimer();
-                                      tambahActivityController.clearAllDraftItems();
                                       tambahActivityController.setOutletId(outlet_id!);
                                       tambahActivityController.setDetailOutlet(activity);
+                                      tambahActivityController.firstInitializeData();
                                       Get.to(() => TambahActivity());
                                     }
-
                                   },
                                 );
                               },
@@ -136,8 +128,6 @@ class ActivityPage extends GetView<ActivityController> {
       ),
     );
   }
-
-
 
   Widget _buildEmptyState() {
     return ListView(
@@ -198,13 +188,11 @@ class ActivityCard extends StatelessWidget {
       margin: const EdgeInsets.only(bottom: 16),
       decoration: BoxDecoration(
           borderRadius: BorderRadius.circular(10),
-          gradient: LinearGradient(
-              begin: Alignment.topCenter,
-              end: Alignment.bottomCenter,
-              colors: [
-                Color(0xFFFFFFFF),
-                Color(0x80FFFFFF),
-              ])),
+          gradient:
+              LinearGradient(begin: Alignment.topCenter, end: Alignment.bottomCenter, colors: [
+            Color(0xFFFFFFFF),
+            Color(0x80FFFFFF),
+          ])),
       child: Padding(
         padding: const EdgeInsets.all(16),
         child: Column(
@@ -248,9 +236,7 @@ class ActivityCard extends StatelessWidget {
                 Container(
                   padding: EdgeInsets.symmetric(vertical: 7, horizontal: 15),
                   decoration: BoxDecoration(
-                    color: statusDraft == "DRAFTED"
-                        ? Colors.white
-                        : AppColors.primary,
+                    color: statusDraft == "DRAFTED" ? Colors.white : AppColors.primary,
                     borderRadius: BorderRadius.circular(4),
                   ),
                   child: Text(
@@ -258,32 +244,26 @@ class ActivityCard extends StatelessWidget {
                     style: TextStyle(
                         fontSize: 12,
                         fontWeight: FontWeight.bold,
-                        color: statusDraft == "DRAFTED"
-                            ? Colors.blue
-                            : Colors.white),
+                        color: statusDraft == "DRAFTED" ? Colors.blue : Colors.white),
                   ),
                 ),
                 Row(
                   children: [
                     Container(
-                      padding:
-                          EdgeInsets.symmetric(vertical: 7, horizontal: 15),
+                      padding: EdgeInsets.symmetric(vertical: 7, horizontal: 15),
                       decoration: BoxDecoration(
-                          color:
-                          statusDraft == "SUBMITTED" ? AppColors.primary : Colors.white,
+                          color: statusDraft == "SUBMITTED" ? AppColors.primary : Colors.white,
                           borderRadius: BorderRadius.circular(4),
                           gradient: LinearGradient(
                               begin: Alignment.topCenter,
                               end: Alignment.bottomCenter,
-                              colors:  statusDraft == "SUBMITTED"
+                              colors: statusDraft == "SUBMITTED"
                                   ? [Color(0X905FF95F), Color(0X501BE86E)]
                                   : [Color(0X9039B5FF), Color(0X5039B5FF)])),
                       child: Text(
-                          statusDraft == "SUBMITTED" ? "Check-Out" : "Check-In",
+                        statusDraft == "SUBMITTED" ? "Check-Out" : "Check-In",
                         style: TextStyle(
-                            fontSize: 12,
-                            fontWeight: FontWeight.bold,
-                            color: AppColors.primary),
+                            fontSize: 12, fontWeight: FontWeight.bold, color: AppColors.primary),
                       ),
                     ),
                     SizedBox(
@@ -296,8 +276,7 @@ class ActivityCard extends StatelessWidget {
 
                         // padding: EdgeInsets.symmetric(vertical: 5, horizontal: 13),
                         minimumSize: const Size(80, 30),
-                        shape: RoundedRectangleBorder(
-                            borderRadius: BorderRadius.circular(4)),
+                        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(4)),
                       ),
                       child: const Text(
                         'Lihat',

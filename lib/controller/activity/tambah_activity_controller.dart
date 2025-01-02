@@ -98,8 +98,9 @@ class TambahActivityController extends GetxController {
   final orderTime = 0.obs;
   Timer? _timer;
 
-  bool disableSecondaryTab(int indexTab){
-    bool areAllControllersNotEmpty = priceControllers.values.any((controller) => controller.text.isNotEmpty);
+  bool disableSecondaryTab(int indexTab) {
+    bool areAllControllersNotEmpty =
+        priceControllers.values.any((controller) => controller.text.isNotEmpty);
     if (indexTab == 0) {
       return true;
     }
@@ -114,7 +115,8 @@ class TambahActivityController extends GetxController {
       }
     }
     if (indexTab == 3) {
-      if (knowledgeTime.value >= 180) { /// minimal duration 3 menit
+      if (knowledgeTime.value >= 180) {
+        /// minimal duration 3 menit
         return true;
       }
     }
@@ -204,29 +206,89 @@ class TambahActivityController extends GetxController {
     }
   }
 
+  void initDetailDraftSurvey() {
+    if (detailDraft.isEmpty) return;
+
+    final surveyItems = detailDraft['surveyItems'] as List;
+    final surveys = supportController.getSurvey();
+
+    for (var item in surveyItems) {
+      final id = item['survey_id'].toString();
+      // Handle text controllers
+      if (item['answer'] != null) {
+        if (!priceControllers.containsKey(id)) {
+          priceControllers[id] = TextEditingController();
+        }
+        priceControllers[id]?.text = item['answer'].toString();
+      }
+
+      // Handle switch states
+      if (!switchStates.containsKey(id)) {
+        switchStates[id] = false.obs;
+      }
+      switchStates[id]?.value = item['answer'].toString().toLowerCase() == 'true';
+    }
+
+    // Set recommendation group
+    final recommendationGroup = surveys.firstWhereOrNull((g) => g['name'] == "Recommndation");
+    if (recommendationGroup != null && recommendationGroup['surveys']?.length >= 2) {
+      final detailingCountId = recommendationGroup['surveys'][1]['id'].toString();
+      final savedCount =
+          surveyItems.firstWhereOrNull((item) => item['survey_id'].toString() == detailingCountId);
+      if (savedCount != null) {
+        priceControllers[detailingCountId]?.text = savedCount['answer'];
+      }
+    }
+
+    priceControllers.refresh();
+    update();
+  }
+
+  void _initializeSavedDraft() {
+    initDetailDraftAvailability();
+    initDetailDraftVisibility();
+    initDetailDraftOrder();
+    initDetailDraftSurvey();
+  }
+
   @override
   void onInit() {
     super.onInit();
+    print("TambahActivityController onInit");
+    print("Detail Draft: ${detailDraft}");
+    super.onInit();
+    initializeData();
+  }
+
+  initializeData() {
     initDraftTimers();
-    // Start the timer
-    _initializeSurveyControllers(); // Add this
+    initializeControllers();
+    initDetailDraftSurvey();
     startTabTimer();
     checkAvailabilityForSurvey();
   }
 
-  void _initializeSurveyControllers() {
-    final surveys = supportController.getSurvey();
-    for (var group in surveys) {
-      for (var survey in group['surveys']) {
-        if (survey['type'] == 'text') {
-          final id = survey['id'];
-          if (!priceControllers.containsKey(id)) {
-            priceControllers[id] = TextEditingController();
-          }
+  firstInitializeData() {
+    startTabTimer();
+    initializeControllers();
+    clearAllDraftItems();
+  }
+
+  void initializeControllers() {
+    final supportController = Get.find<SupportDataController>();
+    final questionGroups = supportController.getSurvey();
+
+    for (var group in questionGroups) {
+      for (var survey in (group['surveys'] as List<dynamic>? ?? [])) {
+        final id = survey['id']?.toString() ?? '';
+        if (survey['type'] == 'text' && !priceControllers.containsKey(id)) {
+          priceControllers[id] = TextEditingController();
+        }
+        if (survey['type'] == 'bool' && !switchStates.containsKey(id)) {
+          switchStates[id] = true.obs;
         }
       }
     }
-    priceControllers.refresh();
   }
 
   // Also update submitApiActivity to use the same logic
@@ -338,7 +400,7 @@ class TambahActivityController extends GetxController {
             final switchState = switchStates[id];
             surveyList.add({
               'survey_question_id': id,
-              'answer': (switchState?.value ?? false).toString(),
+              'answer': (switchState?.value ?? true).toString(),
             });
           }
         }
@@ -482,17 +544,15 @@ class TambahActivityController extends GetxController {
       final priceGroup =
           surveys.firstWhereOrNull((g) => g['title'] == "Berapa harga POWER SKU di toko?");
 
-      // Only proceed if availabilityGroup is not null
       if (availabilityGroup != null && availabilityGroup['surveys'] != null) {
         for (var survey in availabilityGroup['surveys']) {
           final id = survey['id'];
           final productId = survey['product_id'];
 
-          bool isAvailable = availabilityDraftItems.any((item) {
-            return item['product_id'] == productId &&
-                item['availability_toggle'] != 'true' &&
-                (int.parse(item['stock_on_inventory'].toString()) > 0);
-          });
+          bool isAvailable = availabilityDraftItems.any((item) =>
+              item['product_id'] == productId &&
+              item['availability_exist'] != 'true' &&
+              (int.parse(item['stock_on_inventory'].toString()) > 0));
 
           toggleSwitch(id, isAvailable);
 
@@ -500,11 +560,13 @@ class TambahActivityController extends GetxController {
             try {
               final priceSurvey =
                   priceGroup['surveys'].firstWhere((s) => s['product_id'] == productId);
-
               final priceId = priceSurvey['id'];
-              if (priceControllers.containsKey(priceId)) {
-                priceControllers[priceId]?.text = '0';
-              }
+              // Schedule text update for next frame
+              Future.microtask(() {
+                if (priceControllers.containsKey(priceId)) {
+                  priceControllers[priceId]?.text = '0';
+                }
+              });
             } catch (e) {
               print('No matching price survey found for product $productId');
             }
@@ -513,23 +575,26 @@ class TambahActivityController extends GetxController {
       }
     }
 
-    // Use firstWhereOrNull for recommendation group as well
-    final recommendationGroup = surveys.firstWhereOrNull((g) => g['name'] == "Recommndation");
+    if (knowledge) {
+      final recommendationGroup = surveys.firstWhereOrNull((g) => g['name'] == "Recommndation");
 
-    // Only proceed if recommendationGroup is not null and has surveys
-    if (recommendationGroup != null &&
-        recommendationGroup['surveys'] != null &&
-        recommendationGroup['surveys'].length >= 2) {
-      final detailingSurveyId = recommendationGroup['surveys'][0]['id']; // bool question
-      final detailingCountId = recommendationGroup['surveys'][1]['id']; // text question
+      if (recommendationGroup != null &&
+          recommendationGroup['surveys'] != null &&
+          recommendationGroup['surveys'].length >= 2) {
+        final detailingSurveyId = recommendationGroup['surveys'][0]['id'];
+        final detailingCountId = recommendationGroup['surveys'][1]['id'];
 
-      if (knowledgeTime.value > 0) {
-        // Enable survey if knowledge time exists
-        toggleSwitch(detailingSurveyId, true);
+        if (knowledgeTime.value > 0) {
+          toggleSwitch(detailingSurveyId, true);
 
-        if (priceControllers.containsKey(detailingCountId)) {
-          final currentCount = int.tryParse(priceControllers[detailingCountId]?.text ?? '0') ?? 0;
-          priceControllers[detailingCountId]?.text = (currentCount + 1).toString();
+          // Schedule text update for next frame
+          Future.microtask(() {
+            if (priceControllers.containsKey(detailingCountId)) {
+              final currentCount =
+                  int.tryParse(priceControllers[detailingCountId]?.text ?? '0') ?? 0;
+              priceControllers[detailingCountId]?.text = (currentCount + 1).toString();
+            }
+          });
         }
       }
     }
@@ -668,9 +733,9 @@ class TambahActivityController extends GetxController {
 
   bool getSwitchValue(String id) {
     if (!switchStates.containsKey(id)) {
-      switchStates[id] = false.obs;
+      switchStates[id] = true.obs;
     }
-    return switchStates[id]?.value ?? false;
+    return switchStates[id]?.value ?? true;
   }
 
   // Tab management methods
@@ -780,10 +845,15 @@ class TambahActivityController extends GetxController {
 
     // Clear survey fields
     for (var controller in priceControllers.values) {
-      controller.clear();
+      controller.dispose();
     }
+    priceControllers.clear();
+
+    // Rest of the code remains same
+    availabilityDraftItems.clear();
+
     for (var switchState in switchStates.values) {
-      switchState.value = false;
+      switchState.value = true;
     }
 
     // Reset all timers to 0
@@ -803,14 +873,19 @@ class TambahActivityController extends GetxController {
 
   @override
   void onClose() {
-    for (var controller in priceControllers.values) {
-      controller.dispose();
-    }
-    priceControllers.clear();
+    // for (var controller in priceControllers.values) {
+    //   controller.dispose();
+    // }
+    // priceControllers.clear();
+
     for (var controllerMap in productControllers.values) {
       for (var controller in controllerMap.values) {
         controller.dispose();
       }
+    }
+
+    for (var controller in priceControllers.values) {
+      controller.dispose();
     }
 
     if (Get.isRegistered<TambahAvailabilityController>()) {
@@ -823,7 +898,16 @@ class TambahActivityController extends GetxController {
       Get.delete<TambahOrderController>();
     }
     _timer?.cancel(); // Cancel timer when controller is disposed
+    clearAllDraftItems();
     super.onClose();
+  }
+
+  @override
+  void dispose() {
+    if (Get.isRegistered<TambahActivityController>()) {
+      Get.delete<TambahActivityController>();
+    }
+    super.dispose();
   }
 
   String getFormattedTime(int seconds) {

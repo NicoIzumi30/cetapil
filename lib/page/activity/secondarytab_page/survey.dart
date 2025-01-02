@@ -7,10 +7,31 @@ import 'package:flutter/services.dart';
 import 'package:get/get.dart';
 import '../../../controller/support_data_controller.dart';
 import '../../../utils/price_formatter.dart';
+
 class SurveyPage extends GetView<TambahActivityController> {
   final SupportDataController supportController = Get.find<SupportDataController>();
 
-  SurveyPage({super.key});
+  SurveyPage({super.key}) {
+    // Initialize controllers in constructor
+    // WidgetsBinding.instance.addPostFrameCallback((_) {
+    //   initializeControllers();
+    // });
+  }
+
+  void initializeControllers() {
+    final questionGroups = supportController.getSurvey();
+    for (var group in questionGroups) {
+      for (var survey in (group['surveys'] as List<dynamic>? ?? [])) {
+        final id = survey['id']?.toString() ?? '';
+        if (survey['type'] == 'text' && !controller.priceControllers.containsKey(id)) {
+          controller.priceControllers[id] = TextEditingController();
+        }
+        if (survey['type'] == 'bool' && !controller.switchStates.containsKey(id)) {
+          controller.switchStates[id] = true.obs;
+        }
+      }
+    }
+  }
 
   Widget _buildSectionTitle(Map<String, dynamic> questionGroup) {
     if (questionGroup['title'] != null) {
@@ -54,19 +75,10 @@ class SurveyPage extends GetView<TambahActivityController> {
   }
 
   List<Widget> buildSurveyQuestions(Map<String, dynamic> questionGroup) {
-    return (questionGroup['surveys'] as List<dynamic>? ?? []).map((survey) {
+    var question = (questionGroup['surveys'] as List<dynamic>? ?? []).map((survey) {
       final id = survey['id']?.toString() ?? '';
-      
-      // Initialize controller if it doesn't exist
-      if (survey['type'] == 'text' && !controller.priceControllers.containsKey(id)) {
-        controller.priceControllers[id] = TextEditingController();
-      }
 
       if (survey['type'] == 'bool') {
-        if (!controller.switchStates.containsKey(id)) {
-          controller.switchStates[id] = true.obs;
-        }
-        
         if (questionGroup['title'] == "Apakah POWER SKU tersedia di toko?") {
           return BooleanQuestion(
             title: survey['question'] ?? '',
@@ -82,11 +94,10 @@ class SurveyPage extends GetView<TambahActivityController> {
         );
       } else if (survey['type'] == 'text') {
         final textController = controller.priceControllers[id];
-        if (textController == null) {
-          return const SizedBox.shrink();
-        }
+        if (textController == null) return const SizedBox.shrink();
 
-        if (survey['question'] == 'Berapa kali di Kuartal ini pernah dijalankan product detailing di toko ini?') {
+        if (survey['question'] ==
+            'Berapa kali di Kuartal ini pernah dijalankan product detailing di toko ini?') {
           return TextQuestion(
             title: survey['question'] ?? '',
             controller: textController,
@@ -100,15 +111,21 @@ class SurveyPage extends GetView<TambahActivityController> {
       }
       return const SizedBox.shrink();
     }).toList();
+    print(question);
+    return question;
   }
 
   @override
   Widget build(BuildContext context) {
+    // Run the initialization after the first frame is built
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      initializeControllers();
+    });
     return Obx(() {
       var questionGroup = <Map<String, dynamic>>[];
       if (controller.detailDraft.isNotEmpty) {
         final data = controller.detailDraft['surveyItems'];
-        
+
         questionGroup = supportController.getSurvey().map((entry) {
           var surveys = entry['surveys'] as List;
           var filteredSurveys = surveys.where((survey) {

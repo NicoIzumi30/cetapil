@@ -466,7 +466,7 @@ class Api {
           checkStatus(availabilityList[i]["recommend"].toString());
       request.fields["availability[$i][rekomendasi]"] = availabilityList[i]["recommend"].toString();
       request.fields["availability[$i][availability]"] =
-          availabilityList[i]["availability_toggle"] == "true" ? "Y" : "N";
+          availabilityList[i]["availability_exist"] == "true" ? "Y" : "N";
     }
 
     ///Visibility Section
