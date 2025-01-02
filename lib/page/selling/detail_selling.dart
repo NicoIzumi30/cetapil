@@ -29,16 +29,13 @@ class DetailSelling extends GetView<SellingController> {
 
   @override
   Widget build(BuildContext context) {
-    final groupedByCategory =
-        selling.products!.fold<Map<String, List<Products>>>({}, (map, product) {
-      final categoryName = product.category?.name ?? '';
-      map.putIfAbsent(categoryName, () => []).add(product);
-      return map;
-    });
-
+    int totalQty = 0;
+    double totalPrice = 0.0;
     final groupedItems = <String, List<Map<String, dynamic>>>{};
     for (var item in selling.products!) {
       final category = item.category;
+      totalQty += (item.qty as num).toInt();
+      totalPrice += (item.total as num).toDouble();
       if (groupedItems[category!.name!] == null) {
         groupedItems[category.name!] = [];
       }
@@ -47,13 +44,12 @@ class DetailSelling extends GetView<SellingController> {
 
     final formatter =
         NumberFormat.currency(locale: 'id_ID', symbol: "Rp ", decimalDigits: 0);
-    int totalQty = 0;
-    double totalPrice = 0.0;
-    for (var data in selling.products!) {
 
-      totalQty += (data.qty as num).toInt();
-      totalPrice += (data.total as num).toDouble();
-    }
+    // for (var data in selling.products!) {
+    //
+    //   totalQty += (data.qty as num).toInt();
+    //   totalPrice += (data.total as num).toDouble();
+    // }
     return SafeArea(
         child: Stack(children: [
       Image.asset(
@@ -182,50 +178,139 @@ class DetailSelling extends GetView<SellingController> {
                             ),
                           ],
                         ),
-                        child: Row(
-                          mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                        child: Column(
                           children: [
-                            Column(
+                            ...selling.products!.fold<Map<String, List<Map<String, dynamic>>>>({}, (map, item) {
+                              final category = item.category!.name as String? ?? 'Other';
+                              map.putIfAbsent(category, () => []).add(item.toMap());
+                              return map;
+                            })
+                                .entries
+                                .map((entry) => Column(
                               crossAxisAlignment: CrossAxisAlignment.start,
                               children: [
-                                Text(
-                                  'Total Quantity',
-                                  style: TextStyle(
-                                    fontSize: 12,
-                                    color: Colors.black54,
+                                Container(
+                                  width: double.infinity,
+                                  padding: const EdgeInsets.symmetric(vertical: 4),
+                                  decoration: const BoxDecoration(
+                                    border: Border(
+                                      bottom: BorderSide(
+                                        color: Color(0xFFEEEEEE),
+                                        width: 1,
+                                      ),
+                                    ),
+                                  ),
+                                  child: Text(
+                                    entry.key,
+                                    style: const TextStyle(
+                                        fontSize: 11,
+                                        color: Color(0xFF0077BD),
+                                        fontWeight: FontWeight.w500),
                                   ),
                                 ),
-                                SizedBox(height: 4),
-                                Text(
-                                  totalQty.toString(),
-                                  style: TextStyle(
-                                    fontSize: 16,
-                                    fontWeight: FontWeight.bold,
-                                    color: Color(0xFF0077BD),
+                                ...entry.value
+                                    .where((item) => item['qty'] != 0 && item['price'] != 0)
+                                    .map((item) => Container(
+                                  padding: const EdgeInsets.symmetric(vertical: 4),
+                                  decoration: const BoxDecoration(
+                                    border: Border(
+                                      bottom: BorderSide(
+                                        color: Color(0xFFF5F5F5),
+                                        width: 1,
+                                      ),
+                                    ),
                                   ),
-                                )
+                                  child: Row(
+                                    crossAxisAlignment: CrossAxisAlignment.start,
+                                    children: [
+                                      SizedBox(
+                                        width: 30,
+                                        child: Text(
+                                          item['qty']?.toString() ?? '0',
+                                          style: const TextStyle(
+                                            fontSize: 11,
+                                            color: Colors.black87,
+                                          ),
+                                        ),
+                                      ),
+                                      Expanded(
+                                        child: Text(
+                                          item['sku'] ?? '',
+                                          style: const TextStyle(
+                                            fontSize: 11,
+                                            color: Colors.black87,
+                                          ),
+                                        ),
+                                      ),
+                                      SizedBox(
+                                        width: 100,
+                                        child: Text(
+                                          formatter
+                                              .format((item['qty'] ?? 0) * (item['price'] ?? 0)),
+                                          style: const TextStyle(
+                                            fontSize: 11,
+                                            color: Colors.black87,
+                                          ),
+                                          textAlign: TextAlign.right,
+                                        ),
+                                      ),
+                                    ],
+                                  ),
+                                )),
+                                const SizedBox(height: 8),
                               ],
-                            ),
-                            Column(
-                              crossAxisAlignment: CrossAxisAlignment.end,
-                              children: [
-                                Text(
-                                  'Total Price',
-                                  style: TextStyle(
-                                    fontSize: 12,
-                                    color: Colors.black54,
+                            )),
+                            Container(
+                              padding: const EdgeInsets.only(top: 8),
+                              decoration: const BoxDecoration(
+                                border: Border(
+                                  top: BorderSide(
+                                    color: Color(0xFFEEEEEE),
+                                    width: 1,
                                   ),
                                 ),
-                                SizedBox(height: 4),
-                                Text(
-                                  formatter.format(totalPrice),
-                                  style: TextStyle(
-                                    fontSize: 16,
-                                    fontWeight: FontWeight.bold,
-                                    color: Color(0xFF0077BD),
+                              ),
+                              child: Row(
+                                mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                                children: [
+                                  Column(
+                                    crossAxisAlignment: CrossAxisAlignment.start,
+                                    children: [
+                                      const Text(
+                                        'Total Quantity',
+                                        style: TextStyle(fontSize: 12, color: Colors.black54),
+                                      ),
+                                      const SizedBox(height: 4),
+                                      Text(
+                                        totalQty.toString(),
+                                        style: const TextStyle(
+                                          fontSize: 16,
+                                          fontWeight: FontWeight.bold,
+                                          color: Color(0xFF0077BD),
+                                        ),
+                                      ),
+                                    ],
                                   ),
-                                )
-                              ],
+                                  Column(
+                                    crossAxisAlignment: CrossAxisAlignment.end,
+                                    children: [
+                                      const Text(
+                                        'Total Price',
+                                        style: TextStyle(fontSize: 12, color: Colors.black54),
+                                      ),
+                                      const SizedBox(height: 4),
+                                      Text(
+                                        formatter.format(totalPrice),
+                                        style: const TextStyle(
+                                          fontSize: 16,
+                                          fontWeight: FontWeight.bold,
+                                          color: Color(0xFF0077BD),
+                                        ),
+                                      ),
+                                    ],
+                                  ),
+                                ],
+                              ),
                             ),
                           ],
                         ),
@@ -241,9 +326,7 @@ class DetailSelling extends GetView<SellingController> {
                               child: CollapsibleCategoryGroup(
                                 category: category,
                                 items: items,
-                                onEdit: () async {
-
-                                },
+                                isEdit: false,
                               ),
                             );
                           }).toList(),

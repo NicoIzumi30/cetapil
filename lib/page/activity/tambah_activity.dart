@@ -30,103 +30,108 @@ class TambahActivity extends GetView<TambahActivityController> {
       },
       child: SafeArea(
           child: Stack(children: [
-        Image.asset(
-          'assets/background.png',
-          fit: BoxFit.cover,
-          width: double.infinity,
-          height: double.infinity,
-        ),
-        Padding(
-            padding: const EdgeInsets.fromLTRB(15, 30, 15, 10),
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                EnhancedBackButton(
-                  onPressed: () {
-                    Alerts.showConfirmDialog(
-                      context,
-                      onContinue: () async {
-                        Get.back();
-                        final controller = Get.find<TambahActivityController>();
-                        controller.clearAllDraftItems();
-                        controller.onClose();
+            Image.asset(
+              'assets/background.png',
+              fit: BoxFit.cover,
+              width: double.infinity,
+              height: double.infinity,
+            ),
+            Padding(
+                padding: const EdgeInsets.fromLTRB(15, 30, 15, 10),
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    EnhancedBackButton(
+                      onPressed: () {
+                        Alerts.showConfirmDialog(
+                          context,
+                          onContinue: () async {
+                            Get.back();
+                            final controller = Get.find<
+                                TambahActivityController>();
+                            controller.clearAllDraftItems();
+                            controller.onClose();
+                          },
+                        );
                       },
-                    );
-                  },
-                  backgroundColor: Colors.white,
-                  iconColor: Colors.blue,
-                ),
-                SizedBox(
-                  height: 20,
-                ),
-                UnderlineTextField.readOnly(
-                  title: "Nama Outlet",
-                  value:
-                      detailDraft.isNotEmpty ? detailDraft['name'] : detailApi.value!.outlet!.name,
-                ),
-                UnderlineTextField.readOnly(
-                  title: "Kategori Outlet",
-                  value: detailDraft.isNotEmpty
-                      ? detailDraft['category']
-                      : detailApi.value!.outlet!.name,
-                ),
-                Obx(() {
-                  return SecondaryTabbar(
-                      selectedIndex: controller.selectedTab.value,
-                      onTabChanged: controller.changeTab);
-                }),
-                SizedBox(
-                  height: 10,
-                ),
-                Expanded(
-                  child: SingleChildScrollView(
-                    child: Obx(() {
-                      switch (controller.selectedTab.value) {
-                        case 0:
-                          return AvailabilityPage();
-                        case 1:
-                          return VisibilityPage();
-                        case 2:
-                          return KnowledgePage();
-                        case 3:
-                          return SurveyPage();
-                        default:
-                          return OrderPage();
-                      }
-                    }),
-                  ),
-                ),
-                SizedBox(
-                  height: 3,
-                ),
-                Container(
-                  width: double.infinity,
-                  decoration: BoxDecoration(
-                      color: Colors.white.withOpacity(0.3),
-                      borderRadius: BorderRadius.circular(10)),
-                  child: Padding(
-                    padding: const EdgeInsets.symmetric(horizontal: 15, vertical: 10),
-                    child: Row(
-                      children: [
-                        _buildButton(
-                          false,
-                          "Simpan Draft",
-                          () => controller.saveDraftActivity(),
-                        ),
-                        SizedBox(width: 10),
-                        _buildButton(
-                          true,
-                          "Kirim",
-                          () => controller.submitApiActivity(),
-                          // controller.submitOutlet(),
-                        ),
-                      ],
+                      backgroundColor: Colors.white,
+                      iconColor: Colors.blue,
                     ),
-                  ),
-                ),
-              ],
-            ))
-      ])),
+                    SizedBox(
+                      height: 20,
+                    ),
+                    UnderlineTextField.readOnly(
+                      title: "Nama Outlet",
+                      value:
+                      detailDraft.isNotEmpty ? detailDraft['name'] : detailApi
+                          .value!.outlet!.name,
+                    ),
+                    UnderlineTextField.readOnly(
+                      title: "Kategori Outlet",
+                      value: detailDraft.isNotEmpty
+                          ? detailDraft['category']
+                          : detailApi.value!.outlet!.name,
+                    ),
+                    Obx(() {
+                      return SecondaryTabbar(
+                        selectedIndex: controller.selectedTab.value,
+                        onTabChanged: controller.changeTab,
+                        controller: controller,
+                      );
+                    }),
+                    SizedBox(
+                      height: 10,
+                    ),
+                    Expanded(
+                      child: SingleChildScrollView(
+                        child: Obx(() {
+                          switch (controller.selectedTab.value) {
+                            case 0:
+                              return AvailabilityPage();
+                            case 1:
+                              return VisibilityPage();
+                            case 2:
+                              return KnowledgePage();
+                            case 3:
+                              return SurveyPage();
+                            default:
+                              return OrderPage();
+                          }
+                        }),
+                      ),
+                    ),
+                    SizedBox(
+                      height: 3,
+                    ),
+                    Container(
+                      width: double.infinity,
+                      decoration: BoxDecoration(
+                          color: Colors.white.withOpacity(0.3),
+                          borderRadius: BorderRadius.circular(10)),
+                      child: Padding(
+                        padding: const EdgeInsets.symmetric(
+                            horizontal: 15, vertical: 10),
+                        child: Row(
+                          children: [
+                            _buildButton(
+                              false,
+                              "Simpan Draft",
+                                  () => controller.saveDraftActivity(),
+                            ),
+                            SizedBox(width: 10),
+                            _buildButton(
+                              true,
+                              "Kirim",
+                                  () => controller.submitApiActivity(),
+                              // controller.submitOutlet(),
+                            ),
+                          ],
+                        ),
+                      ),
+                    ),
+                  ],
+                ))
+          ])),
     );
   }
 
@@ -137,7 +142,8 @@ class TambahActivity extends GetView<TambahActivityController> {
           backgroundColor: isSubmit ? AppColors.primary : Colors.white,
           shape: RoundedRectangleBorder(
             borderRadius: BorderRadius.circular(10),
-            side: isSubmit ? BorderSide.none : BorderSide(color: AppColors.primary),
+            side: isSubmit ? BorderSide.none : BorderSide(
+                color: AppColors.primary),
           ),
         ),
         onPressed: onTap,
@@ -156,11 +162,12 @@ class TambahActivity extends GetView<TambahActivityController> {
 class SecondaryTabbar extends StatelessWidget {
   final int selectedIndex;
   final Function(int) onTabChanged;
+  final TambahActivityController? controller;
 
   SecondaryTabbar({
     Key? key,
     required this.selectedIndex,
-    required this.onTabChanged,
+    required this.onTabChanged, this.controller,
   }) : super(key: key);
 
   @override
@@ -173,37 +180,40 @@ class SecondaryTabbar extends StatelessWidget {
       ),
       child: ClipRRect(
         borderRadius: BorderRadius.circular(10),
-        child: Row(
-          children: [
-            buildTab(0, "Availability", false),
-            buildTab(1, "Visibility", false),
-            buildTab(2, "Knowledge", false),
-            buildTab(3, "Survey", false),
-            buildTab(4, "Order", false),
-          ],
-        ),
+        child: Obx(() {
+          return Row(
+            children: [
+              buildTab(0, "Availability", controller!.disableSecondaryTab(0)),
+              buildTab(1, "Visibility", controller!.disableSecondaryTab(1)),
+              buildTab(2, "Knowledge", controller!.disableSecondaryTab(2)),
+              buildTab(3, "Survey", controller!.disableSecondaryTab(3)),
+              buildTab(4, "Order", controller!.disableSecondaryTab(4)),
+            ],
+          );
+        }),
       ),
     );
   }
 
-  Widget buildTab(int index, String label, bool isDisable) {
+  Widget buildTab(int index, String label, bool isEnable) {
     return Expanded(
       child: GestureDetector(
         onTap: () {
-          (isDisable != true) ? onTabChanged(index) : null;
+          isEnable ? onTabChanged(index) : null;
         },
         child: Container(
           decoration: BoxDecoration(
-              color: (isDisable == true)
+              color: !isEnable
                   ? Colors.grey
                   : (selectedIndex == index)
-                      ? Colors.blue
-                      : Colors.white),
+                  ? Colors.blue
+                  : Colors.white),
           child: Center(
             child: Text(
               label,
               style: TextStyle(
-                  fontSize: 11, color: selectedIndex == index ? Colors.white : Colors.blue),
+                  fontSize: 11,
+                  color: !isEnable ? Colors.white : (selectedIndex == index) ? Colors.white : Colors.blue),
             ),
           ),
         ),

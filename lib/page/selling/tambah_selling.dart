@@ -138,6 +138,7 @@ class TambahSelling extends GetView<SellingController> {
                                           child: CollapsibleCategoryGroup(
                                             category: category,
                                             items: items,
+                                            isEdit: true,
                                             onEdit: () async {
                                               // Get the controller
                                               if (!Get.isRegistered<
@@ -424,13 +425,14 @@ class TambahSelling extends GetView<SellingController> {
 class CollapsibleCategoryGroup extends StatefulWidget {
   final String category;
   final List<Map<String, dynamic>> items;
-  final VoidCallback onEdit;
+  final VoidCallback? onEdit;
+  final bool isEdit;
 
   const CollapsibleCategoryGroup({
     Key? key,
     required this.category,
     required this.items,
-    required this.onEdit,
+    this.onEdit, required this.isEdit,
   }) : super(key: key);
 
   @override
@@ -491,13 +493,15 @@ class _CollapsibleCategoryGroupState extends State<CollapsibleCategoryGroup> {
                         ],
                       ),
                     ),
-                    IconButton(
+                    widget.isEdit
+                    ? IconButton(
                       onPressed: widget.onEdit,
                       icon: Icon(Icons.edit_outlined, color: Colors.blue, size: 20),
                       padding: EdgeInsets.zero,
                       constraints: BoxConstraints(),
                       tooltip: 'Edit Category Products',
-                    ),
+                    )
+                        : SizedBox()
                   ],
                 ),
               ),
