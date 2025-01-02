@@ -48,6 +48,8 @@ class KnowledgeController extends GetxController {
     }
   }
 
+
+
   @override
   void onClose() {
     if (Get.isRegistered<CachedVideoController>()) {

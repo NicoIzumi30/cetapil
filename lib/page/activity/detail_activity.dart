@@ -161,7 +161,9 @@ class DetailActivity extends GetView<DetailActivityController> {
         Obx(() {
           return SecondaryTabbar(
               selectedIndex: controller.selectedTab.value,
-              onTabChanged: controller.changeTab);
+              onTabChanged: controller.changeTab,
+
+          );
         }),
         SizedBox(
           height: 15,

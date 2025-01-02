@@ -20,6 +20,7 @@ import '../../widget/custom_alert.dart';
 
 class TambahActivityController extends GetxController {
   late ActivityController activityController = Get.find<ActivityController>();
+
   late TambahAvailabilityController tambahAvailabilityController =
       Get.find<TambahAvailabilityController>();
   late TambahVisibilityController tambahVisibilityController =
@@ -61,7 +62,6 @@ class TambahActivityController extends GetxController {
   // Consolidated draft items for all sections
   final RxList<Map<String, dynamic>> availabilityDraftItems = <Map<String, dynamic>>[].obs;
   final RxList<Map<String, dynamic>> orderDraftItems = <Map<String, dynamic>>[].obs;
-  // final visibilityDraftItems = <Map<String, dynamic>>[].obs;
 
   final visibilityPrimaryDraftItems = <Map<String, dynamic>>[].obs;
   final visibilitySecondaryDraftItems = <Map<String, dynamic>>[].obs;
@@ -98,8 +98,34 @@ class TambahActivityController extends GetxController {
   final orderTime = 0.obs;
   Timer? _timer;
 
-  // final groupedItemsAvailability = <String, List<Map<String, dynamic>>>{};
-  //
+  bool disableSecondaryTab(int indexTab){
+    bool areAllControllersNotEmpty = priceControllers.values.any((controller) => controller.text.isNotEmpty);
+    if (indexTab == 0) {
+      return true;
+    }
+    if (indexTab == 1) {
+      if (availabilityDraftItems.isNotEmpty) {
+        return true;
+      }
+    }
+    if (indexTab == 2) {
+      if (visibilityPrimaryDraftItems.length >= 3 && visibilitySecondaryDraftItems.length >= 3) {
+        return true;
+      }
+    }
+    if (indexTab == 3) {
+      if (knowledgeTime.value >= 180) { /// minimal duration 3 menit
+        return true;
+      }
+    }
+    if (indexTab == 4) {
+      if (areAllControllersNotEmpty) {
+        return true;
+      }
+    }
+    return false;
+  }
+
   initDetailDraftAvailability() {
     if (detailDraft.isNotEmpty) {
       for (var data in detailDraft["availabilityItems"]) {
