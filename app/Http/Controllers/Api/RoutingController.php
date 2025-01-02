@@ -26,57 +26,65 @@ class RoutingController extends Controller
 {
     use HasAuthUser, OutletTrait;
     public function index(Request $request)
-{
-    Carbon::setLocale('id');
-    $currentWeek = Carbon::now()->weekOfMonth;
-    $currentDay = Carbon::now()->dayOfWeek;
-    $currentDay = $currentDay === 0 ? '7' : (string) $currentDay;
-    $weekNumber = $currentWeek > 4 ? $currentWeek % 4 : $currentWeek;
-    $user = $this->getAuthUser();
+    {
+        Carbon::setLocale('id');
+        $now = Carbon::now('Asia/Jakarta');
 
-    $outlets = Outlet::query()
-        ->approved()
-        ->where('user_id', $user->id)
-        ->where(function ($query) use ($currentDay, $weekNumber) {
-            // 1x1 cycle with NULL week
-            $query->orWhere(function ($q) use ($currentDay) {
-                $q->where('cycle', '1x1')
-                    ->where('visit_day', $currentDay);
-            });
+        $currentWeek = $now->weekOfMonth;
+        $currentDay = $now->dayOfWeek;
+        $currentDay = $currentDay === 0 ? '7' : (string) $currentDay;
+        $weekNumber = $currentWeek > 4 ? $currentWeek % 4 : $currentWeek;
+        $user = $this->getAuthUser();
 
-            // 1x2 cycle (unchanged)
-            $query->orWhere(function ($q) use ($currentDay, $weekNumber) {
-                $q->where('cycle', '1x2')
-                    ->where('visit_day', $currentDay)
-                    ->where(function ($w) use ($weekNumber) {
-                        $w->orWhere('week', (string)$weekNumber);
-                        if (in_array($weekNumber, [1, 3])) {
-                            $w->orWhere('week', '1&3');
-                        }
-                        if (in_array($weekNumber, [2, 4])) {
-                            $w->orWhere('week', '2&4');
-                        }
+        $outlets = Outlet::query()
+            ->approved()
+            ->where('user_id', $user->id)
+            ->where(function ($query) use ($currentDay, $weekNumber, $user, $now) {
+                $query->where(function ($q) use ($currentDay, $weekNumber) {
+                    // 1x1 cycle
+                    $q->orWhere(function ($inner) use ($currentDay) {
+                        $inner->where('cycle', '1x1')
+                            ->where('visit_day', $currentDay);
                     });
-            });
 
-            // 1x4 cycle (unchanged)
-            $query->orWhere(function ($q) use ($currentDay, $weekNumber) {
-                $q->where([
-                    ['cycle', '1x4'],
-                    ['visit_day', $currentDay],
-                    ['week', (string)$weekNumber]
-                ]);
-            });
-        })
-        ->with(['salesActivities' => function ($query) use ($user) {
-            $query->where('user_id', $user->id)
-                ->whereDate('checked_in', Carbon::today())
-                ->select('id', 'outlet_id', 'checked_in', 'checked_out', 'status');
-        }]);
+                    // 1x2 cycle
+                    $q->orWhere(function ($inner) use ($currentDay, $weekNumber) {
+                        $inner->where('cycle', '1x2')
+                            ->where('visit_day', $currentDay)
+                            ->where(function ($w) use ($weekNumber) {
+                                $w->orWhere('week', (string)$weekNumber);
+                                if (in_array($weekNumber, [1, 3])) {
+                                    $w->orWhere('week', '1&3');
+                                }
+                                if (in_array($weekNumber, [2, 4])) {
+                                    $w->orWhere('week', '2&4');
+                                }
+                            });
+                    });
 
-    $result = $outlets->get();
-    return new RoutingCollection($result);
-}
+                    // 1x4 cycle
+                    $q->orWhere(function ($inner) use ($currentDay, $weekNumber) {
+                        $inner->where([
+                            ['cycle', '1x4'],
+                            ['visit_day', $currentDay],
+                            ['week', (string)$weekNumber]
+                        ]);
+                    });
+                })
+                    ->orWhereHas('salesActivities', function ($q) use ($user, $now) {
+                        $q->where('user_id', $user->id)
+                            ->whereDate('checked_in', $now->toDateString());
+                    });
+            })
+            ->with(['salesActivities' => function ($query) use ($user, $now) {
+                $query->where('user_id', $user->id)
+                    ->whereDate('checked_in', $now->toDateString())
+                    ->select('id', 'outlet_id', 'checked_in', 'checked_out', 'status');
+            }]);
+
+        $result = $outlets->get();
+        return new RoutingCollection($result);
+    }
 
     public function checkIn(CheckInRequest $request)
     {
