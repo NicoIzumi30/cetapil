@@ -19,6 +19,7 @@ use App\Http\Controllers\Web\RoutingRequestControler;
 use App\Http\Controllers\Web\SalesActivityController;
 use App\Http\Controllers\Web\ProductKnowledgeControler;
 use App\Http\Controllers\Web\PowerSkuController;
+use App\Http\Controllers\Web\DownloadController;
 
 // Guest Routes
 Route::middleware('guest')->group(function () {
@@ -143,6 +144,13 @@ Route::middleware('auth')->group(function () {
         });
 
     });
+
+    Route::get('/download', [DownloadController::class, 'index'])->name('download.index');
+    Route::get('/download/product', [DownloadController::class, 'downloadProduct'])
+        ->name('download.product');
+
+        Route::get('/download/routing', [DownloadController::class, 'downloadRouting'])
+        ->name('download.routing');
 
     Route::resource('products', ProductController::class)->middleware('permission:menu_product');
     // Logout

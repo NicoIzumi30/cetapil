@@ -11,4 +11,9 @@ class Province extends Model
     use HasFactory, HasUuids;
 
     protected $guarded = [];
+
+    public function city()
+    {
+        return $this->belongsTo(City::class);
+    }
 }
