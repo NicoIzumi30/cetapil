@@ -92,33 +92,26 @@ class CachedVideoController extends GetxController {
 
   Future<void> initializeVideo() async {
     try {
-    
       String url = supportController.getKnowledge().first['path_video'];
       if (url.isEmpty) return;
 
-      urlVideo.value = 'https://dev-cetaphil.i-am.host/storage${url}';
-      if (urlVideo.value.isEmpty) return;
-
-      final fileInfo = await _cacheManager.getFileFromCache(_cacheKey);
-      File videoFile;
-
-      if (fileInfo != null && fileInfo.file.existsSync()) {
-        videoFile = fileInfo.file;
-        videoController = VideoPlayerController.file(
-          videoFile,
-          videoPlayerOptions: VideoPlayerOptions(mixWithOthers: true),
-        );
-      } else {
-        final downloadedFile = await _cacheManager.downloadFile(urlVideo.value, key: _cacheKey);
-        videoFile = downloadedFile.file;
-        videoController = VideoPlayerController.file(
-          videoFile,
-          videoPlayerOptions: VideoPlayerOptions(mixWithOthers: true),
-        );
-      }
+      final fullUrl = 'https://dev-cetaphil.i-am.host/storage${url}';
+      urlVideo.value = fullUrl;
 
       await _cleanup();
+
+      videoController = VideoPlayerController.networkUrl(
+        Uri.parse(fullUrl),
+        videoPlayerOptions: VideoPlayerOptions(mixWithOthers: true),
+      );
+
+      // Initialize first to check if video is playable
       await videoController.initialize();
+
+      // Cache after confirming video is valid
+      await _cacheManager.downloadFile(fullUrl, key: _cacheKey, force: true // Ensure fresh download
+          );
+
       duration.value = videoController.value.duration;
       videoController.addListener(_videoListener);
       _startPositionTimer();
