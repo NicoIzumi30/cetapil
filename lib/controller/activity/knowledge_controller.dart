@@ -11,11 +11,11 @@ class KnowledgeController extends GetxController {
   final activityController = Get.find<TambahActivityController>();
   final videoPath = Rxn<String>();
   final pdfPath = Rxn<String>();
+  late CachedVideoController _cachedVideoController;
 
-  // Change to lazy-put to ensure proper lifecycle management
   static CachedVideoController get cachedVideoController {
     if (!Get.isRegistered<CachedVideoController>()) {
-      Get.put(CachedVideoController(), permanent: false);
+      Get.put(CachedVideoController());
     }
     return Get.find<CachedVideoController>();
   }
@@ -30,11 +30,15 @@ class KnowledgeController extends GetxController {
   @override
   void onInit() {
     super.onInit();
+    _cachedVideoController = Get.put(CachedVideoController());
+    
     initPaths();
     ever(activityController.selectedTab, (tab) {
       if (tab != 2) {
-        // 2 is Knowledge tab index
-        cachedVideoController.pauseVideo();
+        // Use the correct method - pause() instead of pauseVideo()
+        if (_cachedVideoController.videoController.value.isPlaying) {
+          _cachedVideoController.videoController.pause();
+        }
       }
     });
   }
@@ -51,8 +55,9 @@ class KnowledgeController extends GetxController {
   @override
   void onClose() {
     if (Get.isRegistered<CachedVideoController>()) {
-      final controller = Get.find<CachedVideoController>();
-      controller.pauseVideo();
+      if (_cachedVideoController.videoController.value.isPlaying) {
+        _cachedVideoController.videoController.pause();
+      }
     }
     super.onClose();
   }

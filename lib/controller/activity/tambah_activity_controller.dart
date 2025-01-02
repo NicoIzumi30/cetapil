@@ -396,7 +396,6 @@ class TambahActivityController extends GetxController {
       surveyTime.value = 0;
       orderTime.value = 0;
     }
-
   }
 
   void startTabTimer() {
@@ -450,50 +449,62 @@ class TambahActivityController extends GetxController {
 
   void checkAvailabilityForSurvey({bool knowledge = false}) {
     final surveys = supportController.getSurvey();
+
     if (!knowledge) {
       final availabilityGroup =
-          surveys.firstWhere((g) => g['title'] == "Apakah POWER SKU tersedia di toko?");
-      final priceGroup = surveys.firstWhere((g) => g['title'] == "Berapa harga POWER SKU di toko?");
+          surveys.firstWhereOrNull((g) => g['title'] == "Apakah POWER SKU tersedia di toko?");
+      final priceGroup =
+          surveys.firstWhereOrNull((g) => g['title'] == "Berapa harga POWER SKU di toko?");
 
-      for (var survey in availabilityGroup['surveys']) {
-        final id = survey['id'];
-        final productId = survey['product_id'];
+      // Only proceed if availabilityGroup is not null
+      if (availabilityGroup != null && availabilityGroup['surveys'] != null) {
+        for (var survey in availabilityGroup['surveys']) {
+          final id = survey['id'];
+          final productId = survey['product_id'];
 
-        bool isAvailable = availabilityDraftItems.any((item) {
-          return item['product_id'] == productId &&
-              item['availability_toggle'] != 'true' &&
-              (int.parse(item['stock_on_inventory'].toString()) > 0);
-        });
+          bool isAvailable = availabilityDraftItems.any((item) {
+            return item['product_id'] == productId &&
+                item['availability_toggle'] != 'true' &&
+                (int.parse(item['stock_on_inventory'].toString()) > 0);
+          });
 
-        toggleSwitch(id, isAvailable);
+          toggleSwitch(id, isAvailable);
 
-        if (isAvailable) {
-          try {
-            final priceSurvey =
-                priceGroup['surveys'].firstWhere((s) => s['product_id'] == productId);
+          if (isAvailable && priceGroup != null && priceGroup['surveys'] != null) {
+            try {
+              final priceSurvey =
+                  priceGroup['surveys'].firstWhere((s) => s['product_id'] == productId);
 
-            final priceId = priceSurvey['id'];
-            if (priceControllers.containsKey(priceId)) {
-              priceControllers[priceId]?.text = '0';
+              final priceId = priceSurvey['id'];
+              if (priceControllers.containsKey(priceId)) {
+                priceControllers[priceId]?.text = '0';
+              }
+            } catch (e) {
+              print('No matching price survey found for product $productId');
             }
-          } catch (e) {
-            print('No matching price survey found for product $productId');
           }
         }
       }
     }
 
-    final recommendationGroup = surveys.firstWhere((g) => g['name'] == "Recommndation");
-    final detailingSurveyId = recommendationGroup['surveys'][0]['id']; // bool question
-    final detailingCountId = recommendationGroup['surveys'][1]['id']; // text question
+    // Use firstWhereOrNull for recommendation group as well
+    final recommendationGroup = surveys.firstWhereOrNull((g) => g['name'] == "Recommndation");
 
-    if (knowledgeTime.value > 0) {
-      // Enable survey if knowledge time exists
-      toggleSwitch(detailingSurveyId, true);
+    // Only proceed if recommendationGroup is not null and has surveys
+    if (recommendationGroup != null &&
+        recommendationGroup['surveys'] != null &&
+        recommendationGroup['surveys'].length >= 2) {
+      final detailingSurveyId = recommendationGroup['surveys'][0]['id']; // bool question
+      final detailingCountId = recommendationGroup['surveys'][1]['id']; // text question
 
-      if (priceControllers.containsKey(detailingCountId)) {
-        final currentCount = int.tryParse(priceControllers[detailingCountId]?.text ?? '0') ?? 0;
-        priceControllers[detailingCountId]?.text = (currentCount + 1).toString();
+      if (knowledgeTime.value > 0) {
+        // Enable survey if knowledge time exists
+        toggleSwitch(detailingSurveyId, true);
+
+        if (priceControllers.containsKey(detailingCountId)) {
+          final currentCount = int.tryParse(priceControllers[detailingCountId]?.text ?? '0') ?? 0;
+          priceControllers[detailingCountId]?.text = (currentCount + 1).toString();
+        }
       }
     }
   }
@@ -637,9 +648,10 @@ class TambahActivityController extends GetxController {
   }
 
   // Tab management methods
-   void changeTab(int index) {
+  void changeTab(int index) {
     selectedTab.value = index;
-    if (selectedTab.value != 2 && index != 2) { // If leaving Knowledge tab
+    if (selectedTab.value != 2 && index != 2) {
+      // If leaving Knowledge tab
       Get.delete<CachedVideoController>();
       Get.delete<CachedPdfController>();
     }

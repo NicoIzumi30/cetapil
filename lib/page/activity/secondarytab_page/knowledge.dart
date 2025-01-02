@@ -4,6 +4,7 @@ import 'package:cetapil_mobile/controller/activity/knowledge_controller.dart';
 import 'package:cetapil_mobile/controller/activity/tambah_activity_controller.dart';
 import 'package:cetapil_mobile/controller/cache_controller.dart';
 import 'package:cetapil_mobile/controller/support_data_controller.dart';
+import 'package:chewie/chewie.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:flutter_pdfview/flutter_pdfview.dart';
@@ -107,186 +108,30 @@ class KnowledgePage extends GetView<KnowledgeController> {
   }
 }
 
-class CachedVideoPlayerWidget extends StatefulWidget {
-  @override
-  _CachedVideoPlayerWidgetState createState() => _CachedVideoPlayerWidgetState();
-}
-
-class _CachedVideoPlayerWidgetState extends State<CachedVideoPlayerWidget> {
-  String _formatDuration(Duration duration) {
-    String twoDigits(int n) => n.toString().padLeft(2, '0');
-    String minutes = twoDigits(duration.inMinutes.remainder(60));
-    String seconds = twoDigits(duration.inSeconds.remainder(60));
-    return "$minutes:$seconds";
-  }
-
+class CachedVideoPlayerWidget extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
-    final videoController = KnowledgeController.cachedVideoController;
-
     return Obx(() {
-      if (!videoController.isInitialized.value) {
+      if (!KnowledgeController.cachedVideoController.isInitialized.value) {
         return const _LoadingWidget();
       }
 
-      return Column(
-        children: <Widget>[
-          Container(padding: const EdgeInsets.only(top: 20.0)),
-          const Text('With assets mp4'),
-          Container(
-            padding: const EdgeInsets.all(20),
-            child: AspectRatio(
-              aspectRatio: videoController.videoController.value.aspectRatio,
-              child: Stack(
-                alignment: Alignment.bottomCenter,
-                children: <Widget>[
-                  VideoPlayer(videoController.videoController),
-                  _ControlsOverlay(controller: videoController.videoController),
-                  Column(
-                    mainAxisAlignment: MainAxisAlignment.end,
-                    children: [
-                      Padding(
-                        padding: const EdgeInsets.symmetric(horizontal: 20),
-                        child: Row(
-                          mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                          children: [
-                            Text(_formatDuration(videoController.position.value),
-                                style: const TextStyle(color: Colors.white)),
-                            Text(_formatDuration(videoController.duration.value),
-                                style: const TextStyle(color: Colors.white)),
-                          ],
-                        ),
-                      ),
-                      VideoProgressIndicator(
-                        videoController.videoController,
-                        allowScrubbing: true,
-                        padding: const EdgeInsets.only(top: 5.0),
-                      ),
-                    ],
-                  ),
-                ],
-              ),
+      return Container(
+        margin: EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+        child: AspectRatio(
+          aspectRatio: 16 / 9,
+          child: ClipRRect(
+            borderRadius: BorderRadius.circular(8),
+            child: GestureDetector(
+              onTap: () => KnowledgeController.cachedVideoController.toggleControls(),
+              child: KnowledgeController.cachedVideoController.chewieController != null
+                  ? Chewie(controller: KnowledgeController.cachedVideoController.chewieController!)
+                  : const Center(child: CircularProgressIndicator()),
             ),
           ),
-        ],
+        ),
       );
     });
-  }
-}
-
-class _ControlsOverlay extends StatelessWidget {
-  const _ControlsOverlay({required this.controller});
-
-  static const List<Duration> _exampleCaptionOffsets = <Duration>[
-    Duration(seconds: -10),
-    Duration(seconds: -3),
-    Duration(seconds: -1, milliseconds: -500),
-    Duration(milliseconds: -250),
-    Duration.zero,
-    Duration(milliseconds: 250),
-    Duration(seconds: 1, milliseconds: 500),
-    Duration(seconds: 3),
-    Duration(seconds: 10),
-  ];
-  static const List<double> _examplePlaybackRates = <double>[
-    0.25,
-    0.5,
-    1.0,
-    1.5,
-    2.0,
-    3.0,
-    5.0,
-    10.0,
-  ];
-
-  final VideoPlayerController controller;
-
-  @override
-  Widget build(BuildContext context) {
-    return Stack(
-      children: <Widget>[
-        AnimatedSwitcher(
-          duration: const Duration(milliseconds: 50),
-          reverseDuration: const Duration(milliseconds: 200),
-          child: controller.value.isPlaying
-              ? const SizedBox.shrink()
-              : const ColoredBox(
-                  color: Colors.black26,
-                  child: Center(
-                    child: Icon(
-                      Icons.play_arrow,
-                      color: Colors.white,
-                      size: 100.0,
-                      semanticLabel: 'Play',
-                    ),
-                  ),
-                ),
-        ),
-        GestureDetector(
-          onTap: () {
-            controller.value.isPlaying ? controller.pause() : controller.play();
-          },
-        ),
-        Align(
-          alignment: Alignment.topLeft,
-          child: PopupMenuButton<Duration>(
-            initialValue: controller.value.captionOffset,
-            tooltip: 'Caption Offset',
-            onSelected: (Duration delay) {
-              controller.setCaptionOffset(delay);
-            },
-            itemBuilder: (BuildContext context) {
-              return <PopupMenuItem<Duration>>[
-                for (final Duration offsetDuration in _exampleCaptionOffsets)
-                  PopupMenuItem<Duration>(
-                    value: offsetDuration,
-                    child: Text('${offsetDuration.inMilliseconds}ms'),
-                  )
-              ];
-            },
-            child: Padding(
-              padding: const EdgeInsets.symmetric(
-                // Using less vertical padding as the text is also longer
-                // horizontally, so it feels like it would need more spacing
-                // horizontally (matching the aspect ratio of the video).
-                vertical: 12,
-                horizontal: 16,
-              ),
-              child: Text('${controller.value.captionOffset.inMilliseconds}ms'),
-            ),
-          ),
-        ),
-        Align(
-          alignment: Alignment.topRight,
-          child: PopupMenuButton<double>(
-            initialValue: controller.value.playbackSpeed,
-            tooltip: 'Playback speed',
-            onSelected: (double speed) {
-              controller.setPlaybackSpeed(speed);
-            },
-            itemBuilder: (BuildContext context) {
-              return <PopupMenuItem<double>>[
-                for (final double speed in _examplePlaybackRates)
-                  PopupMenuItem<double>(
-                    value: speed,
-                    child: Text('${speed}x'),
-                  )
-              ];
-            },
-            child: Padding(
-              padding: const EdgeInsets.symmetric(
-                // Using less vertical padding as the text is also longer
-                // horizontally, so it feels like it would need more spacing
-                // horizontally (matching the aspect ratio of the video).
-                vertical: 12,
-                horizontal: 16,
-              ),
-              child: Text('${controller.value.playbackSpeed}x'),
-            ),
-          ),
-        ),
-      ],
-    );
   }
 }
 

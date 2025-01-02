@@ -3,10 +3,14 @@ import 'dart:io';
 
 import 'package:cetapil_mobile/controller/support_data_controller.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:flutter_cache_manager/flutter_cache_manager.dart';
 import 'package:get/get.dart';
 import 'package:video_player/video_player.dart';
 import 'package:path_provider/path_provider.dart';
+import 'package:flutter_ffmpeg/flutter_ffmpeg.dart';
+import 'package:flutter_ffmpeg/media_information.dart';
+import 'package:chewie/chewie.dart';
 
 class CachedPdfController extends GetxController {
   final SupportDataController supportController = Get.find<SupportDataController>();
@@ -71,15 +75,51 @@ class CachedPdfController extends GetxController {
   }
 }
 
+class VideoScaffold extends StatefulWidget {
+  const VideoScaffold({
+    Key? key,
+    required this.child,
+  }) : super(key: key);
+
+  final Widget child;
+
+  @override
+  State<VideoScaffold> createState() => _VideoScaffoldState();
+}
+
+class _VideoScaffoldState extends State<VideoScaffold> {
+  @override
+  void initState() {
+    super.initState();
+    SystemChrome.setEnabledSystemUIMode(SystemUiMode.immersive);
+  }
+
+  @override
+  void dispose() {
+    SystemChrome.setEnabledSystemUIMode(SystemUiMode.manual,
+        overlays: [SystemUiOverlay.top, SystemUiOverlay.bottom]);
+    super.dispose();
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return widget.child;
+  }
+}
+
 class CachedVideoController extends GetxController {
   final SupportDataController supportController = Get.find<SupportDataController>();
   late VideoPlayerController videoController;
+  ChewieController? chewieController;
   final isInitialized = false.obs;
   final isPlaying = false.obs;
   final duration = const Duration().obs;
   final position = const Duration().obs;
   final urlVideo = "".obs;
+  final showControls = false.obs;
   Timer? _positionTimer;
+  Timer? _hideControlsTimer;
+  File? _cachedVideoFile;
 
   static const _cacheKey = 'video_cache';
   final _cacheManager = DefaultCacheManager();
@@ -90,51 +130,236 @@ class CachedVideoController extends GetxController {
     initializeVideo();
   }
 
+  Future<File> _getCachedVideo(String url) async {
+    try {
+      // Try to get file from cache first
+      final cachedFile = await _cacheManager.getFileFromCache(_cacheKey);
+      if (cachedFile != null && await cachedFile.file.exists()) {
+        print('Using cached video file');
+        return cachedFile.file;
+      }
+
+      // If not in cache, download and cache it
+      print('Downloading and caching video file');
+      final downloadedFile = await _cacheManager.downloadFile(
+        url,
+        key: _cacheKey,
+      );
+      return downloadedFile.file;
+    } catch (e) {
+      print('Error caching video: $e');
+      // If caching fails, return a direct download
+      final fallbackFile = await _cacheManager.downloadFile(
+        url,
+        key: _cacheKey,
+      );
+      return fallbackFile.file;
+    }
+  }
+
   Future<void> initializeVideo() async {
     try {
       String url = supportController.getKnowledge().first['path_video'];
       if (url.isEmpty) return;
 
       final fullUrl = 'https://dev-cetaphil.i-am.host/storage${url}';
+
+      // Check if URL has changed
+      if (urlVideo.value != fullUrl) {
+        // Clear the cache if URL is different
+        await _cacheManager.removeFile(_cacheKey);
+        print('Cache cleared due to URL change');
+      }
+
       urlVideo.value = fullUrl;
 
       await _cleanup();
 
-      videoController = VideoPlayerController.networkUrl(
-        Uri.parse(fullUrl),
-        videoPlayerOptions: VideoPlayerOptions(mixWithOthers: true),
-      );
+      try {
+        _cachedVideoFile = await _getCachedVideo(fullUrl);
 
-      // Initialize first to check if video is playable
-      await videoController.initialize();
+        // Initialize video controller with cached file
+        videoController = VideoPlayerController.file(
+          _cachedVideoFile!,
+          videoPlayerOptions: VideoPlayerOptions(
+            mixWithOthers: true,
+            allowBackgroundPlayback: false,
+          ),
+        );
 
-      // Cache after confirming video is valid
-      await _cacheManager.downloadFile(fullUrl, key: _cacheKey, force: true // Ensure fresh download
-          );
+        await videoController.initialize();
+      } catch (e) {
+        print('Video initialization error: $e');
+        // Fallback to network URL if file access fails
+        videoController = VideoPlayerController.networkUrl(
+          Uri.parse(fullUrl),
+          videoPlayerOptions: VideoPlayerOptions(
+            mixWithOthers: true,
+            allowBackgroundPlayback: false,
+          ),
+        );
+        await videoController.initialize();
+      }
 
-      duration.value = videoController.value.duration;
-      videoController.addListener(_videoListener);
-      _startPositionTimer();
+      if (videoController.value.isInitialized) {
+        chewieController?.dispose();
+        chewieController = ChewieController(
+          videoPlayerController: videoController,
+          autoPlay: false,
+          looping: false,
+          aspectRatio: 16 / 9,
+          allowMuting: true,
+          allowPlaybackSpeedChanging: true,
+          showControls: true,
+          placeholder: const Center(child: CircularProgressIndicator()),
+          customControls: _buildCustomControls(),
+          deviceOrientationsOnEnterFullScreen: [
+            DeviceOrientation.landscapeLeft,
+            DeviceOrientation.landscapeRight,
+          ],
+          deviceOrientationsAfterFullScreen: [
+            DeviceOrientation.portraitUp,
+          ],
+          routePageBuilder: (BuildContext context, Animation<double> animation,
+              Animation<double> secondAnimation, ChewieControllerProvider provider) {
+            return AnimatedBuilder(
+              animation: animation,
+              builder: (BuildContext context, Widget? child) {
+                return GestureDetector(
+                  onTap: () => toggleControls(),
+                  child: VideoScaffold(
+                    child: Scaffold(
+                      resizeToAvoidBottomInset: false,
+                      body: Container(
+                        alignment: Alignment.center,
+                        color: Colors.black,
+                        child: provider,
+                      ),
+                    ),
+                  ),
+                );
+              },
+            );
+          },
+        );
 
-      isInitialized.value = true;
-      update();
+        duration.value = videoController.value.duration;
+        videoController.addListener(_videoListener);
+        _startPositionTimer();
+
+        isInitialized.value = true;
+        update();
+      }
     } catch (e) {
-      print('Error initializing video: $e');
+      print('Error in initializeVideo: $e');
       isInitialized.value = false;
       update();
     }
   }
 
+  void toggleControls() {
+    showControls.value = !showControls.value;
+    _hideControlsTimer?.cancel();
+
+    if (showControls.value) {
+      _hideControlsTimer = Timer(const Duration(seconds: 3), () {
+        showControls.value = false;
+      });
+    }
+  }
+
+  String _formatDuration(Duration duration) {
+    String twoDigits(int n) => n.toString().padLeft(2, '0');
+    String minutes = twoDigits(duration.inMinutes.remainder(60));
+    String seconds = twoDigits(duration.inSeconds.remainder(60));
+    return "$minutes:$seconds";
+  }
+
+  Widget _buildCustomControls() {
+    return Obx(() => showControls.value
+        ? Container(
+            color: Colors.black26,
+            child: Stack(
+              children: [
+                Center(
+                  child: IconButton(
+                    iconSize: 32,
+                    icon: Icon(
+                      videoController.value.isPlaying ? Icons.pause : Icons.play_arrow,
+                      color: Colors.white,
+                    ),
+                    onPressed: playPause,
+                  ),
+                ),
+                Positioned(
+                  left: 0,
+                  right: 0,
+                  bottom: 0,
+                  child: Container(
+                    padding: EdgeInsets.symmetric(horizontal: 10),
+                    height: 40,
+                    child: Row(
+                      children: [
+                        Text(
+                          _formatDuration(position.value),
+                          style: TextStyle(color: Colors.white, fontSize: 12),
+                        ),
+                        Expanded(
+                          child: Container(
+                            margin: EdgeInsets.symmetric(horizontal: 10),
+                            child: VideoProgressIndicator(
+                              videoController,
+                              allowScrubbing: true,
+                              colors: VideoProgressColors(
+                                playedColor: Colors.blue,
+                                bufferedColor: Colors.grey.shade500,
+                                backgroundColor: Colors.grey.shade300,
+                              ),
+                            ),
+                          ),
+                        ),
+                        Text(
+                          _formatDuration(duration.value),
+                          style: TextStyle(color: Colors.white, fontSize: 12),
+                        ),
+                        IconButton(
+                          iconSize: 20,
+                          icon: Icon(
+                            videoController.value.volume > 0 ? Icons.volume_up : Icons.volume_off,
+                            color: Colors.white,
+                          ),
+                          onPressed: () {
+                            if (videoController.value.volume > 0) {
+                              videoController.setVolume(0);
+                            } else {
+                              videoController.setVolume(1.0);
+                            }
+                          },
+                        ),
+                        IconButton(
+                          iconSize: 20,
+                          icon: Icon(
+                            Icons.fullscreen,
+                            color: Colors.white,
+                          ),
+                          onPressed: () {
+                            chewieController?.toggleFullScreen();
+                          },
+                        ),
+                      ],
+                    ),
+                  ),
+                ),
+              ],
+            ),
+          )
+        : const SizedBox.shrink());
+  }
+
   void _videoListener() {
     if (!isInitialized.value) return;
-    final playing = videoController.value.isPlaying;
-    if (playing != isPlaying.value) {
-      isPlaying.value = playing;
-    }
+    isPlaying.value = videoController.value.isPlaying;
     position.value = videoController.value.position;
-    if (duration.value != videoController.value.duration) {
-      duration.value = videoController.value.duration;
-    }
     update();
   }
 
@@ -155,7 +380,6 @@ class CachedVideoController extends GetxController {
     } else {
       videoController.play();
     }
-    isPlaying.value = videoController.value.isPlaying;
     update();
   }
 
@@ -166,19 +390,11 @@ class CachedVideoController extends GetxController {
     update();
   }
 
-  void pauseVideo() {
-    if (isInitialized.value && videoController.value.isPlaying) {
-      videoController.pause();
-      isPlaying.value = false;
-      update();
-    }
-  }
-
   Future<void> _cleanup() async {
     _positionTimer?.cancel();
+    _hideControlsTimer?.cancel();
     if (isInitialized.value) {
-      videoController.removeListener(_videoListener);
-      await videoController.pause();
+      chewieController?.dispose();
       await videoController.dispose();
       isInitialized.value = false;
       isPlaying.value = false;
@@ -188,7 +404,7 @@ class CachedVideoController extends GetxController {
   @override
   void onClose() {
     _cleanup();
-    _cacheManager.emptyCache();
+    // Don't clear cache on close to keep the video for offline use
     super.onClose();
   }
 }
