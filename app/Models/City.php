@@ -12,4 +12,10 @@ class City extends Model
     use HasFactory, HasUuids ,SoftDeletes;
 
     protected $guarded = [];
+
+    public function province()
+    {
+        return $this->belongsTo(Province::class, 'province_code', 'code');
+    }
+
 }

@@ -2,8 +2,8 @@
 
 namespace App\Exports;
 
-use App\Models\Outlet;
 use App\Models\Channel;
+use App\Models\Outlet;
 use Maatwebsite\Excel\Concerns\FromCollection;
 use Maatwebsite\Excel\Concerns\WithHeadings;
 use Maatwebsite\Excel\Concerns\WithMapping;
@@ -14,21 +14,40 @@ use PhpOffice\PhpSpreadsheet\Style\Alignment;
 use PhpOffice\PhpSpreadsheet\Style\Border;
 use PhpOffice\PhpSpreadsheet\Style\Fill;
 use Illuminate\Support\Facades\Log;
-use PhpOffice\PhpSpreadsheet\Cell\Coordinate;
 
 class OutletExport implements FromCollection, WithHeadings, WithMapping, WithStyles, ShouldAutoSize
 {
     protected $channels;
-    protected $minimumWidth = 10; // Lebar minimum kolom dalam karakter
-    protected $maximumWidth = 50; // Lebar maksimum kolom dalam karakter
+    protected $startDate;
+    protected $endDate;
+    protected $region;
+    protected $minimumWidth = 10;
+    protected $maximumWidth = 50;
 
-    public function __construct()
+    public function __construct($startDate = null, $endDate = null, $region = null)
     {
+        $this->startDate = $startDate;
+        $this->endDate = $endDate;
+        $this->region = $region;
     }
 
     public function collection()
     {
-        return Outlet::with(['user','city','channel_name'])->get();
+        $query = Outlet::with(['user', 'city.province', 'channel_name']);
+
+        // Apply province filter if provided
+        if ($this->region && $this->region !== 'all') {
+            $query->whereHas('city', function($q) {
+                $q->where('province_code', $this->region);
+            });
+        }
+
+        // Apply date filter if provided
+        if ($this->startDate && $this->endDate) {
+            $query->whereBetween('created_at', [$this->startDate, $this->endDate]);
+        }
+
+        return $query->get();
     }
 
     public function headings(): array
