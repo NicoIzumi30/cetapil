@@ -268,11 +268,29 @@ class SalesActivityController extends Controller
                     'has_secondary_display' => $item['has_secondary_display'] ?? null
                 ];
 
-                // Handle display photo upload
+                // Handle photo uploads
                 if (isset($item['display_photo']) && $item['display_photo'] instanceof UploadedFile) {
                     $photo = $item['display_photo'];
-                    $media = saveFile($photo, "visibility-entries/{$activity->id}");
+                    $path = $item['category'] === 'COMPETITOR' ?
+                        "visibility-entries/{$activity->id}/competitor" :
+                        "visibility-entries/{$activity->id}";
+                    $media = saveFile($photo, $path);
                     $visibilityData['display_photo'] = $media['path'];
+                }
+
+                // Handle competitor specific data
+                if ($item['category'] === 'COMPETITOR') {
+                    $visibilityData['competitor_brand_name'] = $item['competitor_brand_name'] ?? null;
+                    $visibilityData['competitor_promo_mechanism'] = $item['competitor_promo_mechanism'] ?? null;
+                    $visibilityData['competitor_promo_start'] = $item['competitor_promo_start'] ?? null;
+                    $visibilityData['competitor_promo_end'] = $item['competitor_promo_end'] ?? null;
+
+                    // Handle second photo only for competitor
+                    if (isset($item['display_photo_2']) && $item['display_photo_2'] instanceof UploadedFile) {
+                        $displayPhoto2 = $item['display_photo_2'];
+                        $mediaPhoto2 = saveFile($displayPhoto2, "visibility-entries/{$activity->id}/competitor");
+                        $visibilityData['display_photo_2'] = $mediaPhoto2['path'];
+                    }
                 }
 
                 SalesVisibility::create($visibilityData);
