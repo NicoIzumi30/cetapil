@@ -10,4 +10,6 @@ use Illuminate\Database\Eloquent\Factories\HasFactory;
 class Program extends Model
 {
     use HasFactory, HasUuids, SoftDeletes;
+
+    protected $fillable = ['province_code','filename','path'];
 }

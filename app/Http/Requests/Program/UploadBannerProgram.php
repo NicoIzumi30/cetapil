@@ -1,11 +1,12 @@
 <?php
 
-namespace App\Http\Requests\Planogram;
+namespace App\Http\Requests\Program;
 
 use Illuminate\Foundation\Http\FormRequest;
 use Illuminate\Contracts\Validation\Validator;
 use Illuminate\Http\Exceptions\HttpResponseException;
-class UpdatePlanogramRequest extends FormRequest
+
+class UploadBannerProgram extends FormRequest
 {
     /**
      * Determine if the user is authorized to make this request.
@@ -23,8 +24,8 @@ class UpdatePlanogramRequest extends FormRequest
     public function rules(): array
     {
         return [
-            'channel' => 'required|exists:channels,id',
-            'planogram_file' => 'required|file|max:2048|mimes:png,jpg,jpeg',
+            'province_code' => 'required|exists:provinces,code',
+            'program_file' => 'required|file|max:2048|mimes:png,jpg,jpeg',
         ];
     }
     protected function failedValidation(Validator $validator)

@@ -66,7 +66,7 @@
 
         <div class="grid grid-cols-2 gap-4 w-full">
             <div class="w-full">
-                <label for="bannerProgram_file" class="!text-black">
+                <label for="program_file" class="!text-black">
                     Unggah Banner Program
                     <div id="bannerProgramFileUpload" class="flex mt-2">
                         <input type="text" id="bannerProgramFileNameDisplay" readonly disabled
@@ -76,7 +76,7 @@
                         <div class="bg-primary text-white align-middle p-3 rounded-r-md cursor-pointer -translate-x-2">
                             Browse</div>
                     </div>`
-                    <input type="file" id="bannerProgram_file" name="bannerProgram_file" class="form-control hidden"
+                    <input type="file" id="program_file" name="program_file" class="form-control hidden"
                         accept="image/png, image/jpeg" aria-label="Unggah Banner Program berupa file .png, .jpg , jpeg">
                 </label>
             </div>
@@ -94,7 +94,7 @@
         </div>
 
         <x-slot:footer>
-            <x-button.info class="w-full text-xl">Konfirmasi</x-button.info>
+            <x-button.info class="w-full text-xl" id="updateBtnProgram">Konfirmasi</x-button.info>
         </x-slot:footer>
     </x-modal>
 
@@ -148,19 +148,6 @@
         $(document).ready(function () {
             $("#activity-date-range").flatpickr({
                 mode: "range"
-            });
-            const form = $('#posmImageForm');
-            const submitBtn = $('#submitPosmBtn');
-            const btnText = $('#submitBtnText');
-            const loadingText = $('#submitBtnLoading');
-
-            let searchTimer;
-            $('#global-search').on('input', function () {
-                clearTimeout(searchTimer);
-                searchTimer = setTimeout(() => table.ajax.reload(null, false), 500);
-            });
-            $('#posm-filter').on('change', function () {
-                table.ajax.reload(null, false)
             });
 
             let tableActivity = $('#activity-table').DataTable({
@@ -239,100 +226,10 @@
                 clearTimeout(searchTimerSales);
                 searchTimerSales = setTimeout(() => tableActivity.ajax.reload(null, false), 500);
             });
-
-
             $('#activity-date-range').on('change', function () {
                 tableActivity.ajax.reload(null, false);
             });
-
-
-            $(document).on('click', '#visibility-table .delete-btn', function (e) {
-                e.preventDefault();
-                const url = $(this).attr('href');
-                const name = $(this).data('name');
-                deleteData(url, name);
-            });
-
-            // Function untuk memuat gambar yang ada
-            function loadExistingImages() {
-                $.ajax({
-                    url: "{{ route('posm.get-images') }}",
-                    type: 'GET',
-                    success: function (response) {
-                        if (response.status === 'success' && response.data) {
-                            response.data.forEach(function (item) {
-                                const input = $(`#${item.input_name}`);
-                                const inputContainer = input.closest('.image-input-container');
-
-                                // Update preview container
-                                inputContainer.find('.preview-container').html(`
-                                        <div class="relative">
-                                            <img src="${item.image_url}" class="h-20 w-20 object-cover rounded" />
-                                            <button type="button" 
-                                                    onclick="removeImage(this)"
-                                                    class="absolute -top-2 -right-2 bg-white rounded-full p-1 shadow-md">
-                                                <svg xmlns="http://www.w3.org/2000/svg" 
-                                                     class="h-4 w-4 text-red-500" 
-                                                     viewBox="0 0 20 20" 
-                                                     fill="currentColor">
-                                                    <path fill-rule="evenodd" 
-                                                          d="M4.293 4.293a1 1 0 011.414 0L10 8.586l4.293-4.293a1 1 0 111.414 1.414L11.414 10l4.293 4.293a1 1 0 01-1.414 1.414L10 11.414l-4.293 4.293a1 1 0 01-1.414-1.414L8.586 10 4.293 5.707a1 1 0 010-1.414z" 
-                                                          clip-rule="evenodd" />
-                                                </svg>
-                                            </button>
-                                        </div>
-                                    `);
-                            });
-                        }
-                    }
-                });
-            }
-
-            // Load gambar saat modal dibuka
-            $(document).on('click', '[onclick="openModal(\'update-photo\')"]', function () {
-                loadExistingImages();
-            });
-
-            // Handle form submission
-            submitBtn.on('click', function (e) {
-                e.preventDefault();
-
-                btnText.addClass('hidden');
-                loadingText.removeClass('hidden');
-                submitBtn.prop('disabled', true);
-
-                const formData = new FormData(form[0]);
-
-                $.ajax({
-                    url: "{{ route('posm.update-image') }}",
-                    type: 'POST',
-                    data: formData,
-                    processData: false,
-                    contentType: false,
-                    headers: {
-                        'X-CSRF-TOKEN': $('meta[name="csrf-token"]').attr('content')
-                    },
-                    success: function (response) {
-                        if (response.status === 'success') {
-                            toast('success', response.message);
-                            setTimeout(() => {
-                                closeModal('update-photo');
-                                window.location.reload();
-                            }, 1500);
-                        }
-                    },
-                    error: function (xhr) {
-                        toast('error', xhr.responseJSON?.message || 'Terjadi kesalahan saat mengupload gambar');
-                    },
-                    complete: function () {
-                        btnText.removeClass('hidden');
-                        loadingText.addClass('hidden');
-                        submitBtn.prop('disabled', false);
-                    }
-                });
-            });
-
-            // Handle file input change for preview
+       // Handle file input change for preview
             $('input[type="file"]').on('change', function () {
                 const file = this.files[0];
                 if (file) {
@@ -369,19 +266,12 @@
             });
         });
 
-        // Function to remove image preview
-        function removeImage(button) {
-            const container = $(button).closest('.image-input-container');
-            container.find('input[type="file"]').val('');
-            container.find('.preview-container').empty();
-        }
+
 
         $('#downloadActivityBtn').click(function (e) {
             e.preventDefault();
-
             // Get the current date filter
             const dateFilter = $('#activity-date-range').val();
-
             // Show loading state
             const $btn = $(this);
             const $btnText = $btn.find('#downloadBtnText');
@@ -494,12 +384,75 @@
                 });
             }
         });
+
+        $('#updateBtnProgram').click(function (e) {
+            e.preventDefault();
+            const max_program_size = 2 * 1024 * 1024; 
+            const formData = new FormData();
+            const programFile = $('#program_file')[0].files[0];
+
+            // Fungsi untuk menampilkan toast
+            function showToast(type, message) {
+                toast(type, message, 200);
+            }
+
+            // Validasi PDF
+            if (programFile) {
+                if (programFile.size > max_program_size) {
+                    showToast('error', 'Ukuran file program tidak boleh lebih dari 2MB');
+                    return;
+                }
+                const region = $('#region').val();
+                formData.append('province_code', region);
+                formData.append('program_file', programFile);
+            }else {
+                showToast('error', 'File planogram tidak boleh kosong');
+                return;
+            }
+
+        proceedWithUpload();
+
+
+            function proceedWithUpload() {
+                formData.append('_method', 'PUT');
+                $.ajax({
+                    url: '{{ route('upload-program') }}',
+                    type: 'POST',
+                    data: formData,
+                    contentType: false,
+                    processData: false,
+                    cache: false,
+                    beforeSend: function () {
+                        $('#updateBtnPlanogram').prop('disabled', true);
+                        $('#updateBtnPlanogram').html('Uploading...');
+                    },
+                    success: function (response) {
+                        if (response.status === 'success') {
+                            closeModal('upload-planogram');
+                            showToast('success', response.message);
+                            setTimeout(() => {
+                                window.location.reload();
+                            }, 2000);
+                        }
+                    },
+                    error: function (xhr) {
+                        showToast('error', 'Terjadi kesalahan saat upload');
+                        console.error(xhr.responseText);
+                    },
+                    complete: function () {
+                        $('#updateBtnPlanogram').prop('disabled', false);
+                        $('#updateBtnPlanogram').html('Update');
+                    }
+                });
+            }
+        });
+
          </script>
 @endpush
 
 @push('scripts')
     <script>
-        document.getElementById('bannerProgram_file').addEventListener('change', function(e) {
+        document.getElementById('program_file').addEventListener('change', function(e) {
             const fileName = e.target.files[0] ? e.target.files[0].name : 'No file selected';
             document.getElementById('bannerProgramFileNameDisplay').value = fileName;
         });
