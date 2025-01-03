@@ -70,6 +70,21 @@ class TambahVisibilityController extends GetxController {
     }
   }
 
+  initKompetitorVisibilityItem(String id) {
+    clearKompetitorForm();
+    var data =
+    activityController.visibilityKompetitorDraftItems.firstWhere((item) => item['id'] == id, orElse: () => {});
+    if (data.isEmpty) {
+      return;
+    } else {
+      brandName.value.text = data['brand_name'];
+      promoMechanism.value.text = data['promo_mechanism'];
+      promoPeriode.value.text = data['promo_periode'];
+      programImages1.value = data['program_image1'];
+      programImages2.value = data['program_image2'];
+    }
+  }
+
   void updateImage(File? file) {
     visibilityImages.value = file;
     // activityController.updateVisibilityImage(file);
@@ -172,9 +187,28 @@ class TambahVisibilityController extends GetxController {
   final Rx<File?> displayImages = Rx<File?>(null);
   final isdisplayImageUploading = false.obs;
 
+  /// KOMPETITOR VISIBILITY
+  final Rx<TextEditingController> brandName = TextEditingController().obs;
+  final Rx<TextEditingController> promoMechanism = TextEditingController().obs;
+  final Rx<TextEditingController> promoPeriode = TextEditingController().obs;
+  final Rx<DateTimeRange?> selectedDateRange = Rx<DateTimeRange?>(null);
+  final Rx<File?> programImages1 = Rx<File?>(null);
+  final Rx<File?> programImages2 = Rx<File?>(null);
+  final isprogramImages1 = false.obs;
+  final isprogramImages2 = false.obs;
+
   void updatedisplayImage(File? file) {
     displayImages.value = file;
     // activityController.updateVisibilitySecondaryImage(file);
+    update();
+  }
+
+  void updatekompetitorImage(File? file,String title) {
+    if (title == "Foto Program Kompetitor 1") {
+    programImages1.value = file;
+    }  else{
+      programImages2.value = file;
+    }
     update();
   }
 
@@ -235,6 +269,74 @@ class TambahVisibilityController extends GetxController {
     tipeDisplay.value.clear();
     displayImages.value = null;
     isdisplayImageUploading.value = false;
+  }
+
+  bool validateKompetitorForm() {
+    List<String> missingFields = [];
+    if (brandName.value.text.isEmpty) {
+      missingFields.add('Nama Brand');
+    }
+    if (promoMechanism.value.text.isEmpty) {
+      missingFields.add('Mekanisme Promo');
+    }
+    // if (selectedDateRange.value == null) {
+    //   missingFields.add('Promo Periode');
+    // }
+    if (programImages1.value == null) {
+      missingFields.add('Foto Program 1');
+    }
+    if (programImages2.value == null) {
+      missingFields.add('Foto Program 2');
+    }
+
+    if (missingFields.isNotEmpty) {
+      Get.dialog(
+        AlertDialog(
+          title: Text('Required Fields'),
+          content: Text('Please fill in the following fields:\n\n${missingFields.join('\n')}'),
+          actions: [
+            TextButton(
+              onPressed: () => Get.back(),
+              child: Text('OK'),
+            ),
+          ],
+        ),
+      );
+      return false;
+    }
+
+    return true;
+  }
+
+  void saveKompetitorVisibility(String id) {
+    if (!validateKompetitorForm()) return;
+    var id_part = id.split('-');
+
+    /// (kompetitor , 1)
+    final data = {
+      'id': id,
+      'position': id_part[1],
+      'brand_name': brandName.value.text,
+      'promo_mechanism': promoMechanism.value.text,
+      'promo_periode': selectedDateRange.value.toString(),
+      'program_image1': programImages1.value,
+      'program_image2': programImages2.value,
+    };
+
+    activityController.addKompetitorVisibilityItem(data);
+    clearKompetitorForm();
+    Get.back();
+  }
+
+  void clearKompetitorForm() {
+    brandName.value.clear();
+    promoMechanism.value.clear();
+    promoPeriode.value.clear();
+    selectedDateRange.value = null;
+    programImages1.value = null;
+    programImages2.value = null;
+    isprogramImages1.value = false;
+    isprogramImages2.value = false;
   }
 
   @override

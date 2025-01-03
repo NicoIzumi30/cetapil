@@ -208,7 +208,7 @@ class _CompactProductCardState extends State<CompactProductCard> {
   String checkStatus(String number) {
     int num = int.parse(number);
     if (num < 0) {
-      return "MINUS";
+      return "ORDER";
     } else if (num > 0) {
       return "OVER";
     } else {
@@ -220,8 +220,8 @@ class _CompactProductCardState extends State<CompactProductCard> {
     switch (value) {
       case "OVER":
         return Color(0xffff7171);
-      case "MINUS":
-        return Color(0xfff2c665);
+      case "ORDER":
+        return Color(0xff52c667);
       case "IDEAL":
         return Color(0xff0177be);
       default:
@@ -411,7 +411,7 @@ class _CompactProductCardState extends State<CompactProductCard> {
                 Row(
                   crossAxisAlignment: CrossAxisAlignment.center,
                   children: [
-                    Expanded(child: _buildInputField('Stock On Hand', stockOnHandController)),
+                    Expanded(child: _buildInputField('Stock On Save', stockOnHandController)),
                     SizedBox(width: 8),
                     Expanded(
                         child:

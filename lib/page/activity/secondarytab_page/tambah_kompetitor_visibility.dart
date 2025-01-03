@@ -11,28 +11,17 @@ import '../../../utils/image_upload.dart';
 import '../../../widget/back_button.dart';
 import '../../../widget/custom_switch.dart';
 import '../../../widget/text_field.dart';
-import '../secondarytab_detail_page/survey.dart';
+import '../../../widget/textfield_daterange_picker.dart';
 
 const String BASE_URL = 'https://dev-cetaphil.i-am.host/storage/';
 
-class TambahSecondaryVisibility extends GetView<TambahVisibilityController> {
+class TambahKompetitorVisibility extends GetView<TambahVisibilityController> {
   final String id;
-  TambahSecondaryVisibility({
+  TambahKompetitorVisibility({
     super.key, required this.id,
   });
   final supportController = Get.find<SupportDataController>();
 
-  String? _getImageUrl(String? imagePath) {
-    if (imagePath == null || imagePath.isEmpty) return null;
-
-    if (imagePath.startsWith('data:image') || imagePath.startsWith('/9j/')) {
-      return null;
-    }
-
-    String path =
-        imagePath.startsWith('/') ? imagePath.substring(1) : imagePath;
-    return '$BASE_URL$path';
-  }
 
   @override
   Widget build(BuildContext context) {
@@ -69,20 +58,17 @@ class TambahSecondaryVisibility extends GetView<TambahVisibilityController> {
                         Expanded(
                           child: ListView(
                             children: [
-                              buildSecondaryYesNo(),
-                              Text(
-                                "jika tidak ada isi dengan data palsu *",
-                                style: TextStyle(
-                                    fontStyle: FontStyle.italic, fontSize: 9),
-                              ),
-                              Divider(
-                                color: Colors.black12,
+                              ModernTextField(
+                                title: "Nama Brand *",
+                                controller: controller.brandName.value,
                               ),
                               ModernTextField(
-                                title: "Tipe Display *",
-                                controller: controller.tipeDisplay.value,
+                                title: "Mekanisme Promo *",
+                                controller: controller.promoMechanism.value,
                               ),
-                              _buildImageUploader(context, "Foto Display *"),
+                              DateRangePickerField(title: "Promo Periode",selectedDateRange: controller.selectedDateRange.value ),
+                              _buildImageUploader(context, "Foto Program Kompetitor 1"),
+                              _buildImageUploader(context, "Foto Program Kompetitor 2"),
                             ],
                           ),
                         )
@@ -108,7 +94,7 @@ class TambahSecondaryVisibility extends GetView<TambahVisibilityController> {
                             side: BorderSide(color: AppColors.primary),
                           ),
                         ),
-                        onPressed: () => controller.saveSecondaryVisibility(id),
+                        onPressed: () => controller.saveKompetitorVisibility(id),
                         child: Text(
                           "Simpan Visibility",
                           style: TextStyle(
@@ -128,27 +114,6 @@ class TambahSecondaryVisibility extends GetView<TambahVisibilityController> {
     );
   }
 
-  Row buildSecondaryYesNo() {
-    return Row(
-      children: [
-        Expanded(
-          child: Text(
-            "Apakah ada Secondary Display ?",
-            style: const TextStyle(fontSize: 12, fontWeight: FontWeight.bold),
-          ),
-        ),
-        const SizedBox(width: 10),
-        Obx(() => CustomSegmentedSwitch(
-              value: controller.toggleSecondaryYesNo.value,
-              onChanged: (value) {
-                controller.toggleSecondaryYesNo.toggle();
-              },
-              activeColor: Colors.blue,
-              inactiveColor: Colors.white,
-            )),
-      ],
-    );
-  }
 
   Widget _buildImageUploader(BuildContext context, String title) {
     return Column(
@@ -160,20 +125,20 @@ class TambahSecondaryVisibility extends GetView<TambahVisibilityController> {
         ),
         SizedBox(height: 10),
         Obx(() {
-          final image = controller.displayImages.value;
-          final isUploading = controller.isdisplayImageUploading.value;
+          final image = title == "Foto Program Kompetitor 1" ? controller.programImages1.value : controller.programImages2.value;
+          final isUploading = title == "Foto Program Kompetitor 1" ? controller.isprogramImages1.value : controller.isprogramImages2.value;
 
           return GestureDetector(
             onTap: isUploading
                 ? null
                 : () async {
-                    final File? result =
-                        await ImageUploadUtils.showImageSourceSelection(context,
-                            currentImage: image);
-                    if (result != null) {
-                      controller.updatedisplayImage(result);
-                    }
-                  },
+              final File? result =
+              await ImageUploadUtils.showImageSourceSelection(context,
+                  currentImage: image);
+              if (result != null) {
+                controller.updatekompetitorImage(result,title);
+              }
+            },
             child: Container(
               width: double.infinity,
               height: 150,
@@ -184,54 +149,54 @@ class TambahSecondaryVisibility extends GetView<TambahVisibilityController> {
                 borderRadius: BorderRadius.circular(8),
                 image: image != null
                     ? DecorationImage(
-                        image: FileImage(image),
-                        fit: BoxFit.cover,
-                      )
+                  image: FileImage(image),
+                  fit: BoxFit.cover,
+                )
                     : null,
               ),
               child: isUploading
                   ? Center(child: CircularProgressIndicator())
                   : image == null
-                      ? Column(
-                          mainAxisAlignment: MainAxisAlignment.center,
-                          children: [
-                            Icon(Icons.camera_alt, color: Colors.black),
-                            Text(
-                              "Klik disini untuk ambil foto dengan kamera",
-                              style: TextStyle(
-                                fontSize: 8,
-                                fontWeight: FontWeight.bold,
-                                color: Colors.blue,
-                              ),
-                            ),
-                            Text(
-                              "Kualitas foto harus jelas dan tidak blur",
-                              style: TextStyle(fontSize: 7, color: Colors.blue),
-                            ),
-                          ],
-                        )
-                      : Stack(
-                          alignment: Alignment.topRight,
-                          children: [
-                            Positioned(
-                              right: 4,
-                              top: 4,
-                              child: GestureDetector(
-                                onTap: () =>
-                                    controller.updatedisplayImage(null),
-                                child: Container(
-                                  padding: EdgeInsets.all(4),
-                                  decoration: BoxDecoration(
-                                    color: Colors.white.withOpacity(0.8),
-                                    shape: BoxShape.circle,
-                                  ),
-                                  child: Icon(Icons.close,
-                                      size: 16, color: Colors.red),
-                                ),
-                              ),
-                            ),
-                          ],
+                  ? Column(
+                mainAxisAlignment: MainAxisAlignment.center,
+                children: [
+                  Icon(Icons.camera_alt, color: Colors.black),
+                  Text(
+                    "Klik disini untuk ambil foto dengan kamera",
+                    style: TextStyle(
+                      fontSize: 8,
+                      fontWeight: FontWeight.bold,
+                      color: Colors.blue,
+                    ),
+                  ),
+                  Text(
+                    "Kualitas foto harus jelas dan tidak blur",
+                    style: TextStyle(fontSize: 7, color: Colors.blue),
+                  ),
+                ],
+              )
+                  : Stack(
+                alignment: Alignment.topRight,
+                children: [
+                  Positioned(
+                    right: 4,
+                    top: 4,
+                    child: GestureDetector(
+                      onTap: () =>
+                          controller.updatedisplayImage(null),
+                      child: Container(
+                        padding: EdgeInsets.all(4),
+                        decoration: BoxDecoration(
+                          color: Colors.white.withOpacity(0.8),
+                          shape: BoxShape.circle,
                         ),
+                        child: Icon(Icons.close,
+                            size: 16, color: Colors.red),
+                      ),
+                    ),
+                  ),
+                ],
+              ),
             ),
           );
         }),

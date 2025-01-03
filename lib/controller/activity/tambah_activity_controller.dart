@@ -65,6 +65,7 @@ class TambahActivityController extends GetxController {
 
   final visibilityPrimaryDraftItems = <Map<String, dynamic>>[].obs;
   final visibilitySecondaryDraftItems = <Map<String, dynamic>>[].obs;
+  final visibilityKompetitorDraftItems = <Map<String, dynamic>>[].obs;
 
   // Survey related fields
   final RxMap<String, TextEditingController> priceControllers =
@@ -642,6 +643,20 @@ class TambahActivityController extends GetxController {
       visibilitySecondaryDraftItems.add(item);
     }
     visibilitySecondaryDraftItems.refresh();
+  }
+
+  void addKompetitorVisibilityItem(Map<String, dynamic> item) {
+    final existingIndex =
+    visibilityKompetitorDraftItems.indexWhere((existing) => existing['id'] == item['id']);
+
+    if (existingIndex != -1) {
+      // Update existing item
+      visibilityKompetitorDraftItems[existingIndex] = item;
+    } else {
+      // Add new item
+      visibilityKompetitorDraftItems.add(item);
+    }
+    visibilityKompetitorDraftItems.refresh();
   }
 
   // void updateVisibilityImage(File? file) {

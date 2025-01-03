@@ -3,6 +3,7 @@ import 'dart:io';
 
 import 'package:cetapil_mobile/controller/activity/tambah_activity_controller.dart';
 import 'package:cetapil_mobile/controller/activity/tambah_visibility_controller.dart';
+import 'package:cetapil_mobile/page/activity/secondarytab_page/tambah_kompetitor_visibility.dart';
 import 'package:cetapil_mobile/page/activity/secondarytab_page/tambah_primary_visibility.dart';
 import 'package:cetapil_mobile/controller/activity/activity_controller.dart';
 import 'package:cetapil_mobile/controller/support_data_controller.dart';
@@ -304,6 +305,58 @@ class VisibilityPage extends GetView<ActivityController> {
             }),
           ],
         ),
+        SizedBox(height: 16),
+        Text(
+          'Kompetitor',
+          style: TextStyle(
+            fontSize: 18,
+            fontWeight: FontWeight.bold,
+            color: Colors.black87,
+          ),
+        ),
+        Obx(() {
+          var id = "kompetitor-1";
+          var data = tambahActivityController.visibilityKompetitorDraftItems
+              .firstWhere((item) => item['id'] == id, orElse: () => {});
+          return KompetitorCard(
+            brandName: data['brand_name'] ?? "-",
+            promoMechanism: data['promo_mechanism'] ?? "-",
+            promoPeriode: data['promo_periode'] ?? "-",
+            imagePath: data['program_image1'],
+            isSubmitted: data.isNotEmpty,
+            onTapCard: () {
+              if (!Get.isRegistered<TambahVisibilityController>()) {
+                Get.put(TambahVisibilityController());
+              }
+              Get.find<TambahVisibilityController>().initKompetitorVisibilityItem(id);
+              Get.to(() => TambahKompetitorVisibility(
+                id: id,
+              ));
+            },
+          );
+        }),
+        Obx(() {
+          var id = "kompetitor-2";
+          var data = tambahActivityController.visibilityKompetitorDraftItems
+              .firstWhere((item) => item['id'] == id, orElse: () => {});
+          return KompetitorCard(
+            brandName: data['brand_name'] ?? "-",
+            promoMechanism: data['promo_mechanism'] ?? "-",
+            promoPeriode: data['promo_periode'] ?? "-",
+            imagePath: data['program_image1'],
+            isSubmitted: data.isNotEmpty,
+            onTapCard: () {
+              if (!Get.isRegistered<TambahVisibilityController>()) {
+                Get.put(TambahVisibilityController());
+              }
+              Get.find<TambahVisibilityController>().initKompetitorVisibilityItem(id);
+              Get.to(() => TambahKompetitorVisibility(
+                id: id,
+              ));
+            },
+          );
+        }),
+        SizedBox(height: 16),
       ],
     );
   }
@@ -403,6 +456,136 @@ class VisibilityCard extends StatelessWidget {
                             color: Colors.grey[200],
                             child: Icon(Icons.image_outlined, color: Colors.grey[400]),
                           ),
+                  ),
+                ],
+              ),
+            ),
+            if (isSubmitted)
+              Positioned(
+                top: -4,
+                right: -4,
+                child: Container(
+                  padding: EdgeInsets.all(4),
+                  decoration: BoxDecoration(
+                    color: Colors.blue,
+                    shape: BoxShape.circle,
+                  ),
+                  child: Icon(
+                    Icons.check,
+                    color: Colors.white,
+                    size: 12,
+                  ),
+                ),
+              ),
+          ],
+        ),
+      ),
+    );
+  }
+
+  Widget _buildInfoRow(String label, String value) {
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        Text(
+          label,
+          style: TextStyle(
+            fontSize: 12,
+            color: Colors.grey[600],
+            fontWeight: FontWeight.w400,
+          ),
+        ),
+        SizedBox(height: 2),
+        Text(
+          value,
+          style: TextStyle(
+            fontSize: 14,
+            color: Colors.black87,
+            fontWeight: FontWeight.w500,
+          ),
+        ),
+      ],
+    );
+  }
+}
+
+class KompetitorCard extends StatelessWidget {
+  final String brandName;
+  final String promoMechanism;
+  final String promoPeriode;
+
+
+  final File? imagePath;
+  final bool isSubmitted;
+  final VoidCallback onTapCard; // Added this parameter
+
+  const KompetitorCard({
+    Key? key,
+    this.isSubmitted = false,
+    required this.brandName,
+    required this.promoMechanism,
+    required this.promoPeriode,
+     this.imagePath,
+    required this.onTapCard, // Optional callback
+  }) : super(key: key);
+
+  @override
+  Widget build(BuildContext context) {
+    return _buildCardWithImage();
+  }
+
+  Widget _buildCardWithImage() {
+    return InkWell(
+      onTap: onTapCard,
+      child: Container(
+        margin: EdgeInsets.symmetric(vertical: 8, horizontal: 5),
+        decoration: BoxDecoration(
+          color: Colors.white.withOpacity(0.9),
+          borderRadius: BorderRadius.circular(12),
+          boxShadow: [
+            BoxShadow(
+              color: Colors.black.withOpacity(0.03),
+              blurRadius: 4,
+              offset: Offset(0, 2),
+            ),
+          ],
+        ),
+        child: Stack(
+          children: [
+            Padding(
+              padding: EdgeInsets.all(16),
+              child: Row(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Expanded(
+                      child:Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          _buildInfoRow('Nama Brand', brandName),
+                          SizedBox(height: 8),
+                          _buildInfoRow('Mekanisme Promo:', promoMechanism),
+                          SizedBox(height: 8),
+                          _buildInfoRow('Periode Promo', promoPeriode),
+                        ],
+                      )
+                         ),
+                  SizedBox(width: 12),
+                  ClipRRect(
+                    borderRadius: BorderRadius.circular(8),
+                    child: imagePath != null
+                        ? SizedBox(
+                        width: 80,
+                        height: 80,
+                        child: Image.file(
+                          imagePath!,
+                          fit: BoxFit.cover,
+                        ))
+                        : Container(
+                      width: 80,
+                      height: 80,
+                      color: Colors.grey[200],
+                      child: Icon(Icons.image_outlined, color: Colors.grey[400]),
+                    ),
                   ),
                 ],
               ),
