@@ -106,4 +106,25 @@ class DashboardController extends Controller
 
         return $dataStock;
     }
+    public function avg_availability(){
+        return json_encode([
+            'time_avg'=> '03:00:00',
+            'time_gt'=> '05m:30s',
+            'time_mt'=> '10m:30s',
+        ]);
+    } 
+    public function avg_visibility(){
+        return json_encode([
+            'time_avg'=> '01:40:12',
+            'time_gt'=> '04m:30s',
+            'time_mt'=> '01m:30s',
+        ]);
+    } 
+    public function avg_survey(){
+        return json_encode([
+            'time_avg'=> '00:10:12',
+            'time_gt'=> '09m:30s',
+            'time_mt'=> '08m:30s',
+        ]);
+    } 
 }

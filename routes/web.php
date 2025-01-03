@@ -1,25 +1,26 @@
 <?php
 
-use App\Http\Controllers\Web\SurveyController;
 use App\Models\Visibility;
 use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\Web\PosmController;
 use App\Http\Controllers\Web\UserController;
 use App\Http\Controllers\Web\OutletControler;
 use App\Http\Controllers\Auth\LoginController;
+use App\Http\Controllers\Web\SurveyController;
 use App\Http\Controllers\Web\VisualController;
 use App\Http\Controllers\Auth\LogoutController;
 use App\Http\Controllers\Web\ProductController;
+use App\Http\Controllers\Web\ProfileController;
 use App\Http\Controllers\Web\RoutingController;
 use App\Http\Controllers\Web\SellingController;
+use App\Http\Controllers\Web\DownloadController;
+use App\Http\Controllers\Web\PowerSkuController;
 use App\Http\Controllers\Web\DashboardController;
+use App\Http\Controllers\Web\PlanogramController;
 use App\Http\Controllers\Web\VisibilityController;
-use App\Http\Controllers\Web\ProfileController;
 use App\Http\Controllers\Web\RoutingRequestControler;
 use App\Http\Controllers\Web\SalesActivityController;
 use App\Http\Controllers\Web\ProductKnowledgeControler;
-use App\Http\Controllers\Web\PowerSkuController;
-use App\Http\Controllers\Web\DownloadController;
 
 // Guest Routes
 Route::middleware('guest')->group(function () {
@@ -31,7 +32,10 @@ Route::middleware('guest')->group(function () {
 Route::middleware('auth')->group(function () {
     // Dashboard
     Route::get('/', [DashboardController::class, 'index'])->name('dashboard');
-    Route::get('/getRouting', [DashboardController::class, 'getRoutingPercentage'])->name('getRoutingPercentage');
+    Route::get('/get-avg-availability', [DashboardController::class, 'avg_availability'])->name('avg_availability');
+    Route::get('/get-avg-visibility', [DashboardController::class, 'avg_visibility'])->name('avg_visibility');
+    Route::get('/get-avg-survey', [DashboardController::class, 'avg_survey'])->name('avg_survey');
+
 
     //profile
     Route::get('/profile', [ProfileController::class, 'index'])->name('profile');
@@ -58,8 +62,8 @@ Route::middleware('auth')->group(function () {
 
 
     Route::get('/routing/download-sales-activity', [RoutingController::class, 'downloadSalesActivityExcel'])
-    ->name('routing.download-sales-activity')
-    ->middleware('permission:menu_routing');
+        ->name('routing.download-sales-activity')
+        ->middleware('permission:menu_routing');
 
     Route::post('/routing/bulk', [RoutingController::class, 'bulk'])->name('routing.bulk')->middleware('permission:menu_routing');
     Route::get('routing/generate-excel', [RoutingController::class, 'downloadExcel'])->name('routing.generae-excel')->middleware('permission:menu_routing');
@@ -68,9 +72,9 @@ Route::middleware('auth')->group(function () {
     // Route::delete('/routing/{id}', [RoutingController::class, 'destroy'])->name('routing.destroy');
 
     // Download Management
-	Route::get('/download', function () {
-		return view('pages.download.index');
-	});
+    Route::get('/download', function () {
+        return view('pages.download.index');
+    });
 
     Route::put('update-product-knowledge', [ProductKnowledgeControler::class, 'update'])->name('update-product-knowledge')->middleware('permission:menu_routing');
     Route::get('/visibility/download-activity', [VisibilityController::class, 'downloadActivityData'])
@@ -79,6 +83,7 @@ Route::middleware('auth')->group(function () {
         Route::get('/visibility/data', [VisibilityController::class, 'getData'])->name('visibility.data');
         Route::get('visibility/activity/data', [VisibilityController::class, 'getDataActivity'])->name('visibility.activity.data');
         Route::get('visibility/activity/{id}/detail', [VisibilityController::class, 'detail_activity'])->name('visibility.activity.detail');
+        Route::put('/upload-planogram', [PlanogramController::class, 'uploadPlanogram'])->name('upload-planogram');
         Route::resource('visibility', VisibilityController::class);
         Route::get('posm/get-images', [PosmController::class, 'getImages'])
             ->name('posm.get-images');
@@ -129,15 +134,15 @@ Route::middleware('auth')->group(function () {
         Route::get('/download-stock-on-hand', [ProductController::class, 'downloadStockOnHand'])
             ->name('download-stock-on-hand');
         Route::get('/get-products-by-category/{category}', [ProductController::class, 'getProductsByCategory'])
-        ->name('get-products-by-category');
-        Route::prefix('power-skus')->name('power-skus.')->group(function() {
+            ->name('get-products-by-category');
+        Route::prefix('power-skus')->name('power-skus.')->group(function () {
             Route::get('/data', [PowerSkuController::class, 'data'])->name('data');
             Route::post('/', [PowerSkuController::class, 'store'])->name('store');
             Route::get('/{powerSku}/edit', [PowerSkuController::class, 'edit'])->name('edit');
             Route::put('/{powerSku}', [PowerSkuController::class, 'update'])->name('update');
             Route::delete('/{id}', [PowerSkuController::class, 'destroy'])->name('destroy');
         });
-        Route::prefix('av3ms')->name('av3ms.')->group(function() {
+        Route::prefix('av3ms')->name('av3ms.')->group(function () {
             Route::post('/bulk', [ProductController::class, 'av3mBulk'])->name('bulk');
             Route::get('/download', [ProductController::class, 'downloadAv3m'])->name('download');
             Route::get('/template', [ProductController::class, 'templateAv3m'])->name('template');
@@ -149,12 +154,11 @@ Route::middleware('auth')->group(function () {
     Route::get('/download/product', [DownloadController::class, 'downloadProduct'])
         ->name('download.product');
 
-        Route::get('/download/routing', [DownloadController::class, 'downloadRouting'])
+    Route::get('/download/routing', [DownloadController::class, 'downloadRouting'])
         ->name('download.routing');
 
     Route::resource('products', ProductController::class)->middleware('permission:menu_product');
     // Logout
-
     Route::get('/logout', LogoutController::class)->name('logout');
     // Unauthorized Access
     Route::get('/unauthorized', function () {

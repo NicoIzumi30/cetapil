@@ -1,7 +1,7 @@
 @extends('layouts.main')
 
 @section('banner-content')
-<x-banner-content :title="'Routing'" />
+<x-banner-content :title="'Survey'" />
 @endsection
 
 @section('dashboard-content')

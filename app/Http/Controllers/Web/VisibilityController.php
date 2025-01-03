@@ -2,25 +2,27 @@
 
 namespace App\Http\Controllers\Web;
 
-use App\Http\Controllers\Controller;
-use App\Http\Requests\Visibility\CreateVisibilityRequest;
-use App\Http\Requests\Visibility\UpdateVisibilityRequest;
+use App\Models\Province;
+use Carbon\Carbon;
 use App\Models\City;
-use App\Models\Category;
+use App\Models\Outlet;
+use App\Models\Channel;
 use App\Models\Product;
-use App\Models\SalesActivity;
-use App\Models\SalesVisibility;
-use App\Models\VisualType;
+use App\Models\Category;
 use App\Models\PosmType;
 use App\Models\PosmImage;
 use App\Models\Visibility;
-use App\Models\Outlet;
+use App\Models\VisualType;
+use Illuminate\Http\Request;
+use App\Models\SalesActivity;
+use App\Models\SalesVisibility;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Log;
-use Illuminate\Http\Request;
-use Carbon\Carbon;
-use App\Exports\VisibilityActivityExport;
+use App\Http\Controllers\Controller;
 use Maatwebsite\Excel\Facades\Excel;
+use App\Exports\VisibilityActivityExport;
+use App\Http\Requests\Visibility\CreateVisibilityRequest;
+use App\Http\Requests\Visibility\UpdateVisibilityRequest;
 
 class VisibilityController extends Controller
 {
@@ -29,36 +31,9 @@ class VisibilityController extends Controller
      */
     public function index(Request $request)
     {
-        $posmTypes = PosmType::orderBy('name')->get();
-
-        $posmImages = PosmImage::with('posmType')
-            ->get()
-            ->map(function ($image) {
-                return [
-                    'posm_type' => $image->posmType->name,
-                    'image_url' => asset('storage/' . str_replace('public/', '', $image->path))
-                ];
-            })
-            ->collect();
-
-        $visibilitiesQuery = Visibility::with([
-            'outlet.user',
-            'product',
-            'visualType',
-            'posmType'  // Add this relation
-        ])
-            ->whereHas('outlet.user', function ($query) {
-                $query->role('sales');
-            });
-
-        // Apply POSM type filter if selected
-        if ($request->filled('posm_type_id')) {
-            $visibilitiesQuery->where('posm_type_id', $request->posm_type_id);
-        }
-
-        $visibilities = $visibilitiesQuery->latest()->get();
-
-        return view("pages.visibility.index", compact('posmTypes', 'visibilities', 'posmImages'));
+        $channels = Channel::all();
+        $provinces = Province::all();
+        return view("pages.visibility.index",compact('channels','provinces') );
     }
 
     public function getData(Request $request)
