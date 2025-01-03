@@ -213,7 +213,7 @@
 
             {{-- Availability Action --}}
             <x-slot:cardAction>
-                <x-button.light id="downloadBtnStockOnHand">
+                <x-button.light id="downloadAvailabilityBtn">
                     <span id="downloadBtnText">Download</span>
                     <span id="downloadBtnLoading" class="hidden">Downloading...</span>
                 </x-button.light>
@@ -297,7 +297,7 @@
                         </th>
                         <th scope="col" class="text-center">
                             <a class="table-head">
-                                {{ __('Stock On Hand (Pcs)') }}
+                                {{ __('Stock On Shelf (Pcs)') }}
                                 <x-icons.sort />
                             </a>
                         </th>
@@ -625,7 +625,7 @@
                     emptyTable: "Tidak ada data yang tersedia"
                 },
                 ajax: {
-                    url: "{{ route('products.data-stock-on-hand') }}",
+                    url: "{{ route('products.data-availability') }}",
                     type: 'GET',
                     data: function(d) {
                         d.date = $('#stock-date-range').val() == 'Date Range' ? '' : $(
@@ -989,7 +989,7 @@
             }
         });
 
-        $('#downloadBtnStockOnHand').click(function(e) {
+        $('#downloadAvailabilityBtn').click(function(e) {
             e.preventDefault();
 
             // Get current filter values
@@ -1009,7 +1009,7 @@
             $btn.prop('disabled', true);
 
             // Gunakan fetch untuk download
-            fetch('/products/download-stock-on-hand?' + new URLSearchParams(filters), {
+            fetch('/products/download-availability?' + new URLSearchParams(filters), {
                     method: 'GET',
                 })
                 .then(response => {
@@ -1021,7 +1021,7 @@
                     const url = window.URL.createObjectURL(blob);
                     const a = document.createElement('a');
                     a.href = url;
-                    a.download = 'stock_on_hand_' + new Date().toISOString().slice(0, 19).replace(/[:]/g, '-') +
+                    a.download = 'availability_data' + new Date().toISOString().slice(0, 19).replace(/[:]/g, '-') +
                         '.xlsx';
                     document.body.appendChild(a);
                     a.click();
