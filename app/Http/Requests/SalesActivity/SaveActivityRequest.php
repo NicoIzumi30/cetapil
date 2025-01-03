@@ -48,19 +48,25 @@ class SaveActivityRequest extends FormRequest
             'availability.*.rekomendasi' => 'required|integer',
             'availability.*.availability' => 'required|in:Y,N',
 
-            // Visibility Entries
             'visibility' => ['required', 'array', new ValidateVisibilityEntries],
             'visibility.*' => 'required|array',
-            'visibility.*.category' => 'required|in:CORE,BABY',
-            'visibility.*.type' => 'required|in:PRIMARY,SECONDARY',
+            'visibility.*.category' => 'required|in:CORE,BABY,COMPETITOR',
+            'visibility.*.type' => 'required|in:PRIMARY,SECONDARY,COMPETITOR',
             'visibility.*.position' => 'required|integer|min:1|max:3',
             'visibility.*.posm_type_id' => 'required_if:type,PRIMARY|exists:posm_types,id',
-            'visibility.*.visual_type' => 'required|string|max:255',
+            'visibility.*.visual_type' => 'required_unless:visibility.*.category,COMPETITOR|string|max:255|nullable',
             'visibility.*.condition' => 'required_if:type,PRIMARY|in:GOOD,BAD',
             'visibility.*.display_photo' => 'required|image|mimes:jpeg,png,jpg',
+            'visibility.*.display_photo_2' => 'required_if:category,COMPETITOR|nullable|image|mimes:jpeg,png,jpg',
             'visibility.*.shelf_width' => 'required_if:type,PRIMARY|integer|nullable',
-            'visibility.*.shelving' => 'required_if:type,PRIMARY|string|max:255|nullable',
+            'visibility.*.shelving' => 'required_if:type,PRIMARY|integer|nullable',
             'visibility.*.has_secondary_display' => 'required_if:type,SECONDARY|in:Y,N',
+
+            // Add competitor specific fields
+            'visibility.*.competitor_brand_name' => 'required_if:category,COMPETITOR|nullable|string',
+            'visibility.*.competitor_promo_mechanism' => 'required_if:category,COMPETITOR|nullable|string',
+            'visibility.*.competitor_promo_start' => 'required_if:category,COMPETITOR|nullable|date',
+            'visibility.*.competitor_promo_end' => 'required_if:category,COMPETITOR|nullable|date',
 
             // Sales Survey
             'survey' => 'required|array',

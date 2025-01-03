@@ -38,6 +38,9 @@ class DetailSalesActivityResource extends JsonResource
                     'core' => $this->formatVisibilities('CORE', 'SECONDARY'),
                     'baby' => $this->formatVisibilities('BABY', 'SECONDARY'),
                 ],
+                'competitor' => [
+                    'competitor' => $this->formatVisibilities('COMPETITOR', 'COMPETITOR'),
+                ],
             ],
             'availabilities' => SalesAvailabilityResource::collection($this->whenLoaded('availabilities')),
             'surveys' => SalesSurveyResource::collection($this->whenLoaded('surveys')),
@@ -90,6 +93,13 @@ class VisibilityEntryResource extends JsonResource
             'shelving' => $this->shelving,
             'has_secondary_display' => $this->has_secondary_display,
             'display_photo' => $this->display_photo,
+            'display_photo_2' => $this->when($this->category === 'COMPETITOR', $this->display_photo_2),
+
+            // Competitor specific fields
+            'competitor_brand_name' => $this->when($this->category === 'COMPETITOR', $this->competitor_brand_name),
+            'competitor_promo_mechanism' => $this->when($this->category === 'COMPETITOR', $this->competitor_promo_mechanism),
+            'competitor_promo_start' => $this->when($this->category === 'COMPETITOR', $this->competitor_promo_start),
+            'competitor_promo_end' => $this->when($this->category === 'COMPETITOR', $this->competitor_promo_end),
         ];
     }
 }

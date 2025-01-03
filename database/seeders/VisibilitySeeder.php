@@ -24,15 +24,17 @@ class VisibilitySeeder extends Seeder
         Schema::enableForeignKeyConstraints();
 
         $posm_types = [
-            'Backwall',
+            'Backwall / Wall Id',
             'Standee',
-            'Glorifier',
-            'COC'
+            'COC',
+            'End Gondola',
+            'Rak Regular',
         ];
         $visual_types = [
-            'We do skin, you do you',
-            'New soothing foam wash',
-            'Bright Healty Radiance'
+            '15 Ceremide',
+            'Andien',
+            'BHR',
+            'Others',
         ];
 
         foreach ($posm_types as $posm) {
