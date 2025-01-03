@@ -32,7 +32,10 @@ Route::middleware('guest')->group(function () {
 Route::middleware('auth')->group(function () {
     // Dashboard
     Route::get('/', [DashboardController::class, 'index'])->name('dashboard');
-    Route::get('/getRouting', [DashboardController::class, 'getRoutingPercentage'])->name('getRoutingPercentage');
+    Route::get('/get-avg-availability', [DashboardController::class, 'avg_availability'])->name('avg_availability');
+    Route::get('/get-avg-visibility', [DashboardController::class, 'avg_visibility'])->name('avg_visibility');
+    Route::get('/get-avg-survey', [DashboardController::class, 'avg_survey'])->name('avg_survey');
+
 
     //profile
     Route::get('/profile', [ProfileController::class, 'index'])->name('profile');
