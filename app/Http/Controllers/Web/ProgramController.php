@@ -35,7 +35,7 @@ class ProgramController extends Controller
                 ]);
                 
             }else{
-                $media = saveFile($file, "planogram/{$request->channel}");
+                $media = saveFile($file, "program/{$request->province_code}");
                 Program::create([
                     "province_code" => $request->province_code,
                     "filename" => $media['filename'],
@@ -49,10 +49,10 @@ class ProgramController extends Controller
             }
         } catch (\Exception $e) {
             DB::rollBack();
-            Log::error('Error updating planogram: ' . $e->getMessage());
+            Log::error('Error updating program: ' . $e->getMessage());
             return response()->json([
                 'status' => 'error',
-                'message' => 'Gagal mengupdate planogram: ' . $e->getMessage()
+                'message' => 'Gagal mengupdate program: ' . $e->getMessage()
             ], 500);
         }
     }

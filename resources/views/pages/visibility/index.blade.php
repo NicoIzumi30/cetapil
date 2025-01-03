@@ -406,7 +406,7 @@
                 formData.append('province_code', region);
                 formData.append('program_file', programFile);
             }else {
-                showToast('error', 'File planogram tidak boleh kosong');
+                showToast('error', 'File program tidak boleh kosong');
                 return;
             }
 
@@ -423,12 +423,12 @@
                     processData: false,
                     cache: false,
                     beforeSend: function () {
-                        $('#updateBtnPlanogram').prop('disabled', true);
-                        $('#updateBtnPlanogram').html('Uploading...');
+                        $('#updateBtnProgram').prop('disabled', true);
+                        $('#updateBtnProgram').html('Uploading...');
                     },
                     success: function (response) {
                         if (response.status === 'success') {
-                            closeModal('upload-planogram');
+                            closeModal('upload-program');
                             showToast('success', response.message);
                             setTimeout(() => {
                                 window.location.reload();
@@ -440,8 +440,8 @@
                         console.error(xhr.responseText);
                     },
                     complete: function () {
-                        $('#updateBtnPlanogram').prop('disabled', false);
-                        $('#updateBtnPlanogram').html('Update');
+                        $('#updateBtnProgram').prop('disabled', false);
+                        $('#updateBtnProgram').html('Update');
                     }
                 });
             }
