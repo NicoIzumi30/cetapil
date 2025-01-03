@@ -73,13 +73,13 @@ class SalesActivityExport implements FromCollection, WithHeadings, WithMapping, 
                 $row->checked_in ? Carbon::parse($row->checked_in)->format('Y-m-d H:i:s') : 'N/A',
                 $row->checked_out ? Carbon::parse($row->checked_out)->format('Y-m-d H:i:s') : 'N/A',
                 $row->views_knowledge ?? '0',
-                $row->status ?? 'N/A',
-                $row->radius_status ?? 'N/A',
-                (string)$row->time_availability ?? '0',
-                (string)$row->time_visibility ?? '0',
-                (string)$row->time_knowledge ?? '0',
-                (string)$row->time_survey ?? '0',
-                (string)$row->time_order ?? '0'
+                $row->status ?? '',
+                $row->radius_status ?? '',
+                $row->time_availability ?? '0',
+                $row->time_visibility ?? '0',
+                $row->time_knowledge ?? '0',
+                $row->time_survey ?? '0',
+                $row->time_order ?? '0'
             ];
         } catch (\Exception $e) {
             Log::error('Error mapping row:', [
@@ -90,8 +90,8 @@ class SalesActivityExport implements FromCollection, WithHeadings, WithMapping, 
 
             // Return default values if mapping fails
             return [
-                'N/A', 'N/A', 'N/A', 'N/A', 'N/A', '0', 
-                'N/A', 'N/A', '0', '0', '0', '0', '0'
+                '', '', '', '', '', '', 
+                '', '', '', '', '', '', ''
             ];
         }
     }
