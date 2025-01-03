@@ -441,7 +441,7 @@
                     },
                     complete: function () {
                         $('#updateBtnProgram').prop('disabled', false);
-                        $('#updateBtnProgram').html('Update');
+                        $('#updateBtnProgram').html('Konfirmasi');
                     }
                 });
             }
