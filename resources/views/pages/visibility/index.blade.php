@@ -67,7 +67,7 @@
         <div class="grid grid-cols-2 gap-4 w-full">
             <div class="w-full">
                 <label for="bannerProgram_file" class="!text-black">
-                    Unggah Flyer
+                    Unggah Banner Program
                     <div id="bannerProgramFileUpload" class="flex mt-2">
                         <input type="text" id="bannerProgramFileNameDisplay" readonly disabled
                             class="form-control mt-0 border-r-none"
@@ -76,8 +76,8 @@
                         <div class="bg-primary text-white align-middle p-3 rounded-r-md cursor-pointer -translate-x-2">
                             Browse</div>
                     </div>`
-                    <input type="file" id="bannerProgram_file" name="file_pdf" class="form-control hidden"
-                        accept="application/pdf" aria-label="Unggah Banner Program berupa file .png, .jpg , jpeg">
+                    <input type="file" id="bannerProgram_file" name="bannerProgram_file" class="form-control hidden"
+                        accept="image/png, image/jpeg" aria-label="Unggah Banner Program berupa file .png, .jpg , jpeg">
                 </label>
             </div>
             <div>
@@ -495,4 +495,17 @@
             }
         });
          </script>
+@endpush
+
+@push('scripts')
+    <script>
+        document.getElementById('bannerProgram_file').addEventListener('change', function(e) {
+            const fileName = e.target.files[0] ? e.target.files[0].name : 'No file selected';
+            document.getElementById('bannerProgramFileNameDisplay').value = fileName;
+        });
+        document.getElementById('planogram_file').addEventListener('change', function(e) {
+            const fileName = e.target.files[0] ? e.target.files[0].name : 'No file selected';
+            document.getElementById('planogramFileNameDisplay').value = fileName;
+        });
+    </script>
 @endpush

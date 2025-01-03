@@ -24,10 +24,10 @@
                         aria-describedby="name" />
                 </div>
                 <div>
-                    <label for="routing-region">Filter By Region : </label>
-                    <select id="routing-region" name="routing-region" class="w-full">
+                    <label for="routing-week">Filter By Week : </label>
+                    <select id="routing-week" name="routing-week" class="w-full">
                         <option value="" selected disabled>
-                            -- Pilih Province --
+                            -- Pilih Week --
                         </option>
                         @foreach($provinces as $province)
                             <option value="{{ $province->id }}">{{ $province->name }}</option>
@@ -327,11 +327,12 @@ $(document).ready(function() {
     // Initialize select2 untuk semua select di halaman download
     const downloadMenus = ["routing", "visibility", "activity", "survey", "selling", "availability"];
     downloadMenus.forEach(menu => {
-        $(`#${menu}-region`).select2();
+		$(`#${menu}-region`).select2();
         $(`#${menu}-start-date, #${menu}-end-date`).flatpickr({
             dateFormat: "Y-m-d" 
         });
     });
+	$('#routing-week').select2();
 
     // Handle routing download
     $('[data-routing-download]').click(function(e) {
