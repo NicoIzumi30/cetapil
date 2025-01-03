@@ -12,7 +12,7 @@ use PhpOffice\PhpSpreadsheet\Style\Alignment;
 use PhpOffice\PhpSpreadsheet\Style\Border;
 use PhpOffice\PhpSpreadsheet\Style\Fill;
 use Carbon\Carbon;
-
+use PhpOffice\PhpSpreadsheet\Cell\DataType;
 class VisibilityActivityExport implements FromCollection, WithHeadings, WithMapping, WithStyles, ShouldAutoSize
 {
     protected $data;
@@ -104,16 +104,17 @@ class VisibilityActivityExport implements FromCollection, WithHeadings, WithMapp
                     ->where('category', $category)
                     ->where('position', $position)
                     ->first();
-
+        
                 // Append data for this category and position
                 $data[] = @$visibility->posmType->name ?: '-';
                 $data[] = @$visibility->visual_type ?: '-';
                 $data[] = @$visibility->condition ?: '-';
-                $data[] = !empty($visibility->display_photo) ? "https://dev-cetaphil.i-am.host/storage/" . $visibility->display_photo : '-';
+                $data[] = !empty($visibility->display_photo) ? config('app.storage_url') . $visibility->display_photo : '-';
                 $data[] = @$visibility->shelf_width ?: '-';
                 $data[] = @$visibility->shelving ?: '-';
             }
         }
+        
         foreach ($categories as $category) {
             for ($position = 1; $position <= 2; $position++) {
                 // Find the first matching record for the category and position
@@ -122,11 +123,11 @@ class VisibilityActivityExport implements FromCollection, WithHeadings, WithMapp
                     ->where('category', $category)
                     ->where('position', $position)
                     ->first();
-
+        
                 // Append data for this category and position
                 $data[] = @$visibility->visual_type ?: '-';
                 $data[] = @$visibility->has_secondary_display ? 'Yes' : 'No';
-                $data[] = !empty($visibility->display_photo) ? "https://dev-cetaphil.i-am.host/storage/" . $visibility->display_photo : '-';
+                $data[] = !empty($visibility->display_photo) ? config('app.storage_url') . $visibility->display_photo : '-';
             }
         }
         $data[] = $row->created_at->format('Y-m-d H:i:s'); // Created At
@@ -207,7 +208,24 @@ class VisibilityActivityExport implements FromCollection, WithHeadings, WithMapp
                 'startColor' => ['rgb' => '4A90E2'],
             ],
         ]);
-
+        $lastRow = $sheet->getHighestRow();
+        $photoCols = ['J', 'P', 'V','AB','AH','AN','AS','AV','AY','BB']; // Sesuaikan dengan kolom foto Anda
+        
+        foreach ($photoCols as $col) {
+            for ($row = 2; $row <= $lastRow; $row++) {
+                $cell = $sheet->getCell($col . $row);
+                if ($cell->getValue() !== '-') {
+                    $sheet->getCell($col . $row)->setDataType(DataType::TYPE_STRING);
+                    $sheet->getCell($col . $row)->getHyperlink()->setUrl($cell->getValue());
+                    $sheet->getStyle($col . $row)->applyFromArray([
+                        'font' => [
+                            'underline' => true,
+                            'color' => ['rgb' => '800080'] // Kode warna ungu, bisa disesuaikan
+                        ]
+                    ]);
+                }
+            }
+        }
         // Set row height
         $sheet->getDefaultRowDimension()->setRowHeight(25);
 
