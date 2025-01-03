@@ -30,6 +30,16 @@ if (!function_exists('getProductBySku')) {
         return Product::where('sku', $sku)->first();
     }
 }
+if (!function_exists('getProvinceCodeByCityName')) {
+    function getProvinceCodeByCityName($name)
+    {
+        $city = City::where('name', $name)->first();
+        if(empty($city)){
+            return null;
+        }
+        return $city->province_code;
+    }
+}
 if (!function_exists('getProductByCode')) {
     function getProductByCode($code)
     {

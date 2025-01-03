@@ -161,7 +161,7 @@ class DashboardController extends Controller
             HTTPCode::HTTP_OK,
             [
                 'city' => $user->city,
-                'region' => $user->region,
+                'region' => getProvinceCodeByCityName($user->city),
                 'role' => 'Sales',
                 'total_outlet' => $total_outlet,
                 'total_actual_plan' => $total_actual_plan,
