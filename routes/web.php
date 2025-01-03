@@ -1,5 +1,6 @@
 <?php
 
+use App\Http\Controllers\Web\ProgramController;
 use App\Models\Visibility;
 use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\Web\PosmController;
@@ -84,6 +85,7 @@ Route::middleware('auth')->group(function () {
         Route::get('visibility/activity/data', [VisibilityController::class, 'getDataActivity'])->name('visibility.activity.data');
         Route::get('visibility/activity/{id}/detail', [VisibilityController::class, 'detail_activity'])->name('visibility.activity.detail');
         Route::put('/upload-planogram', [PlanogramController::class, 'uploadPlanogram'])->name('upload-planogram');
+        Route::put('/upload-program', [ProgramController::class, 'upload'])->name('upload-program');
         Route::resource('visibility', VisibilityController::class);
         Route::get('posm/get-images', [PosmController::class, 'getImages'])
             ->name('posm.get-images');
@@ -149,14 +151,16 @@ Route::middleware('auth')->group(function () {
         });
 
     });
+    Route::prefix('download')->name('download.')->group(function () {
 
-    Route::get('/download', [DownloadController::class, 'index'])->name('download.index');
-    Route::get('/download/product', [DownloadController::class, 'downloadProduct'])
-        ->name('download.product');
+    Route::get('/', [DownloadController::class, 'index'])->name('index');
+    Route::get('/product', [DownloadController::class, 'downloadProduct'])
+        ->name('product');
 
-    Route::get('/download/routing', [DownloadController::class, 'downloadRouting'])
-        ->name('download.routing');
-
+    Route::get('/routing', [DownloadController::class, 'downloadRouting'])
+        ->name('routing');
+    Route::get('/activity', [DownloadController::class, 'downloadActivity'])->name('activity');
+    });
     Route::resource('products', ProductController::class)->middleware('permission:menu_product');
     // Logout
     Route::get('/logout', LogoutController::class)->name('logout');
