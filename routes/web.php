@@ -151,16 +151,16 @@ Route::middleware('auth')->group(function () {
         });
 
     });
+
     Route::prefix('download')->name('download.')->group(function () {
-
-    Route::get('/', [DownloadController::class, 'index'])->name('index');
-    Route::get('/product', [DownloadController::class, 'downloadProduct'])
-        ->name('product');
-
-    Route::get('/routing', [DownloadController::class, 'downloadRouting'])
-        ->name('routing');
-    Route::get('/activity', [DownloadController::class, 'downloadActivity'])->name('activity');
+        Route::get('/', [DownloadController::class, 'index'])->name('index');
+        Route::get('/product', [DownloadController::class, 'downloadProduct'])->name('product');
+        Route::get('/routing', [DownloadController::class, 'downloadRouting'])->name('routing');
+        Route::get('/activity', [DownloadController::class, 'downloadActivity'])->name('activity');
+        Route::get('/selling', [DownloadController::class, 'downloadSelling'])->name('selling'); 
+        Route::get('/pengguna', [DownloadController::class, 'downloadPengguna'])->name('pengguna');
     });
+
     Route::resource('products', ProductController::class)->middleware('permission:menu_product');
     // Logout
     Route::get('/logout', LogoutController::class)->name('logout');

@@ -7,12 +7,14 @@ use App\Models\City;
 use App\Models\Product;
 use App\Models\Province;
 use Illuminate\Http\Request;
-use App\Exports\OutletExport;
 use App\Models\SalesActivity;
 use App\Exports\ProductExport;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Log;
 use App\Exports\SalesActivityExport;
+use App\Exports\RoutingDownloadExport;
+use App\Exports\SellingDownloadExport;
+use App\Exports\PenggunaDownloadExport;
 use App\Http\Controllers\Controller;
 use Maatwebsite\Excel\Facades\Excel;
 
@@ -22,6 +24,7 @@ class DownloadController extends Controller
     {
         $provinces = Province::orderBy('name')->get();
         $cities = City::orderBy('name')->get();
+        
         return view('pages.download.index', compact('provinces', 'cities'));
     }
 
@@ -40,21 +43,25 @@ class DownloadController extends Controller
         }
     }
 
-    public function downloadRouting(Request $request)
-    {
+    public function downloadRouting(Request $request) {
         try {
-            $dates = explode(' to ', $request->routing_date);
-            $startDate = isset($dates[0]) ? trim($dates[0]) : null;
-            $endDate = isset($dates[1]) ? trim($dates[1]) : null;
-            
+            $filename = 'routing_' . now()->format('Y-m-d_His') . '.xlsx';
             return Excel::download(
-                new OutletExport($startDate, $endDate, $request->routing_region),
-                'routing_' . date('Y-m-d_His') . '.xlsx'
+                new RoutingDownloadExport(
+                    $request->routing_week,
+                    $request->routing_region
+                ),
+                $filename,
+                \Maatwebsite\Excel\Excel::XLSX
             );
         } catch (\Exception $e) {
+            Log::error('Routing Download Error:', [
+                'message' => $e->getMessage(),
+                'trace' => $e->getTraceAsString()
+            ]);
             return response()->json([
-                'message' => 'Gagal mengunduh data routing',
-                'error' => $e->getMessage()
+                'status' => 'error',
+                'message' => 'Gagal mengunduh data routing: ' . $e->getMessage()
             ], 500);
         }
     }
@@ -98,4 +105,48 @@ class DownloadController extends Controller
             ], 500);
         }
     } 
+
+    public function downloadSelling(Request $request) {
+        try {
+            if ($request->filled('selling_date')) {
+                $dates = explode(' to ', $request->selling_date);
+                $startDate = isset($dates[0]) ? Carbon::parse(trim($dates[0])) : null;
+                $endDate = isset($dates[1]) ? Carbon::parse(trim($dates[1])) : null;
+            }
+    
+            return Excel::download(
+                new SellingDownloadExport($startDate, $endDate, $request->selling_region),
+                'selling_' . now()->format('Y-m-d_His') . '.xlsx'
+            );
+        } catch (\Exception $e) {
+            Log::error('Selling Download Error:', [
+                'message' => $e->getMessage(),
+                'trace' => $e->getTraceAsString()
+            ]);
+            return response()->json([
+                'status' => 'error', 
+                'message' => 'Gagal mengunduh data penjualan'
+            ], 500);
+        }
+    }
+
+    public function downloadPengguna()
+    {
+        try {
+            return Excel::download(
+                new PenggunaDownloadExport(),
+                'users_' . now()->format('Y-m-d_His') . '.xlsx',
+                \Maatwebsite\Excel\Excel::XLSX
+            );
+        } catch (\Exception $e) {
+            Log::error('User Download Error:', [
+                'message' => $e->getMessage(),
+                'trace' => $e->getTraceAsString()
+            ]);
+            return response()->json([
+                'status' => 'error',
+                'message' => 'Gagal mengunduh data pengguna'
+            ], 500);
+        }
+    }
 }

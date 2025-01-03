@@ -12,8 +12,9 @@ class Province extends Model
 
     protected $guarded = [];
 
-    public function city()
+    // Province.php
+    public function cities() // Changed from city() to cities()
     {
-        return $this->belongsTo(City::class);
+        return $this->hasMany(City::class, 'province_code', 'code');
     }
 }
