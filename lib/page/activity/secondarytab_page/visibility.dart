@@ -330,8 +330,8 @@ class VisibilityPage extends GetView<ActivityController> {
               }
               Get.find<TambahVisibilityController>().initKompetitorVisibilityItem(id);
               Get.to(() => TambahKompetitorVisibility(
-                id: id,
-              ));
+                    id: id,
+                  ));
             },
           );
         }),
@@ -351,8 +351,8 @@ class VisibilityPage extends GetView<ActivityController> {
               }
               Get.find<TambahVisibilityController>().initKompetitorVisibilityItem(id);
               Get.to(() => TambahKompetitorVisibility(
-                id: id,
-              ));
+                    id: id,
+                  ));
             },
           );
         }),
@@ -514,7 +514,6 @@ class KompetitorCard extends StatelessWidget {
   final String promoMechanism;
   final String promoPeriode;
 
-
   final File? imagePath;
   final bool isSubmitted;
   final VoidCallback onTapCard; // Added this parameter
@@ -525,7 +524,7 @@ class KompetitorCard extends StatelessWidget {
     required this.brandName,
     required this.promoMechanism,
     required this.promoPeriode,
-     this.imagePath,
+    this.imagePath,
     required this.onTapCard, // Optional callback
   }) : super(key: key);
 
@@ -558,34 +557,33 @@ class KompetitorCard extends StatelessWidget {
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
                   Expanded(
-                      child:Column(
-                        crossAxisAlignment: CrossAxisAlignment.start,
-                        children: [
-                          _buildInfoRow('Nama Brand', brandName),
-                          SizedBox(height: 8),
-                          _buildInfoRow('Mekanisme Promo:', promoMechanism),
-                          SizedBox(height: 8),
-                          _buildInfoRow('Periode Promo', promoPeriode),
-                        ],
-                      )
-                         ),
+                      child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      _buildInfoRow('Nama Brand', brandName),
+                      SizedBox(height: 8),
+                      _buildInfoRow('Mekanisme Promo:', promoMechanism),
+                      SizedBox(height: 8),
+                      _buildInfoRow('Periode Promo', promoPeriode),
+                    ],
+                  )),
                   SizedBox(width: 12),
                   ClipRRect(
                     borderRadius: BorderRadius.circular(8),
                     child: imagePath != null
                         ? SizedBox(
-                        width: 80,
-                        height: 80,
-                        child: Image.file(
-                          imagePath!,
-                          fit: BoxFit.cover,
-                        ))
+                            width: 80,
+                            height: 80,
+                            child: Image.file(
+                              imagePath!,
+                              fit: BoxFit.cover,
+                            ))
                         : Container(
-                      width: 80,
-                      height: 80,
-                      color: Colors.grey[200],
-                      child: Icon(Icons.image_outlined, color: Colors.grey[400]),
-                    ),
+                            width: 80,
+                            height: 80,
+                            color: Colors.grey[200],
+                            child: Icon(Icons.image_outlined, color: Colors.grey[400]),
+                          ),
                   ),
                 ],
               ),
@@ -654,7 +652,7 @@ class CollapsibleVisibilityGroup extends StatefulWidget {
 }
 
 class _CollapsibleVisibilityGroupState extends State<CollapsibleVisibilityGroup> {
-  bool isExpanded = true;
+  bool isExpanded = false;
 
   @override
   Widget build(BuildContext context) {
