@@ -187,6 +187,7 @@ class TambahPrimaryVisibility extends GetView<TambahVisibilityController> {
                               ModernTextField(
                                 title: "Shelving",
                                 controller: controller.shelving.value,
+                                keyboardType: TextInputType.number,
                               ),
                               _buildImageUploader(context, "Foto Visibility"),
                             ],
