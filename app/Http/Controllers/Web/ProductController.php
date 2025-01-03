@@ -85,7 +85,7 @@ class ProductController extends Controller
             })
         ]);
     }
-    public function getDataStockOnHand(Request $request)
+    public function getDataAvailability(Request $request)
     {
         $query = SalesAvailability::with(['product:id,sku', 'outlet:id,name']);
         if ($request->filled('date')) {
@@ -371,7 +371,7 @@ class ProductController extends Controller
     }
 
 
-    public function downloadStockOnHand(Request $request)
+    public function downloadAvailability(Request $request)
     {
         try {
             DB::enableQueryLog();
@@ -413,7 +413,7 @@ class ProductController extends Controller
             $data = $query->get();
 
             // Log untuk debugging
-            Log::info('Stock On Hand Export Data', [
+            Log::info('Availability Export Data', [
                 'filters' => $request->all(),
                 'query' => DB::getQueryLog(),
                 'record_count' => $data->count()
@@ -421,11 +421,11 @@ class ProductController extends Controller
 
             return Excel::download(
                 new StockOnHandExport($data),
-                'stock_on_hand_' . now()->format('Y-m-d_His') . '.xlsx',
+                'availability_data_' . now()->format('Y-m-d_His') . '.xlsx',
                 \Maatwebsite\Excel\Excel::XLSX
             );
         } catch (\Exception $e) {
-            Log::error('Stock On Hand Export Error', [
+            Log::error('Availability Export Error', [
                 'message' => $e->getMessage(),
                 'trace' => $e->getTraceAsString(),
                 'filters' => $request->all()
@@ -443,25 +443,7 @@ class ProductController extends Controller
         try {
             DB::enableQueryLog();
 
-            $data = DB::table('outlets')
-                ->crossJoin('products')
-                ->leftJoin('av3ms', function ($join) {
-                    $join->on('outlets.id', '=', 'av3ms.outlet_id')
-                        ->on('products.id', '=', 'av3ms.product_id');
-                })
-                ->select([
-                    'outlets.code',
-                    'outlets.name as outlet_name',
-                    'products.sku as product_sku',
-                    'av3ms.updated_at as last_update',
-                    'av3ms.av3m as av3m',
-                ])
-                ->where('outlets.status', 'APPROVED')
-                ->where('outlets.deleted_at', null)
-                ->where('products.deleted_at', null)
-                ->orderBy('outlets.code', 'asc')
-                ->orderBy('products.sku', 'asc')
-                ->get();
+            $data = Av3m::with('product:id,sku,code as product_code', 'outlet:id,name,code as outlet_code')->get();
 
             // Log untuk debugging
             Log::info('Av3m Export Data', [

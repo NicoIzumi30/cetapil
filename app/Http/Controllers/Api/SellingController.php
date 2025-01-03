@@ -45,14 +45,16 @@ class SellingController extends Controller
 
         foreach ($request->products as $product) {
             $prod = Product::find($product['id']);
-            SellingProduct::create([
-                'selling_id' => $selling->id,
-                'product_id' => $prod->id,
-                'product_name' => $prod->sku,
-                'qty' => $product['qty'],
-                'price' => $product['price'],
-                'total' => $product['qty'] * $product['price']
-            ]);
+            if($product['qty'] > 0) {
+                SellingProduct::create([
+                    'selling_id' => $selling->id,
+                    'product_id' => $prod->id,
+                    'product_name' => $prod->sku,
+                    'qty' => $product['qty'],
+                    'price' => $product['price'],
+                    'total' => $product['qty'] * $product['price']
+                ]);
+            }
         }
 
         return $this->successResponse(SellingConstants::CREATE, Response::HTTP_OK);

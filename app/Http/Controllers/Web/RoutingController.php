@@ -540,8 +540,6 @@ class RoutingController extends Controller
     {
         try {
             DB::enableQueryLog();
-
-            // Start query with proper eager loading
             $query = SalesActivity::with([
                 'outlet' => function ($q) {
                     $q->select('id', 'name', 'visit_day', 'city_id');
@@ -549,18 +547,17 @@ class RoutingController extends Controller
                 'user' => function ($q) {
                     $q->select('id', 'name');
                 }
-            ])
-                ->whereNull('deleted_at'); // Make sure to only get non-deleted records
+            ]); // Make sure to only get non-deleted records
 
             // Apply day filter
-            if ($request->filled('filter_day_sales') && $request->filter_day_sales != 'all') {
-                $query->whereHas('outlet', function ($q) use ($request) {
+            if ($request->filled('filter_day_sales') && $request->filter_day_sales != 'all' && $request->filter_day_sales != 'null') {
+                $query->whereHas('outlet', callback: function ($q) use ($request) {
                     $q->where('visit_day', $request->filter_day_sales);
                 });
             }
 
             // Apply area filter
-            if ($request->filled('filter_area') && $request->filter_area != 'all') {
+            if ($request->filled('filter_area') && $request->filter_area != 'all' && $request->filter_area != 'null') {
                 $query->whereHas('outlet', function ($q) use ($request) {
                     $q->where('city_id', $request->filter_area);
                 });
@@ -601,7 +598,6 @@ class RoutingController extends Controller
 
             // Get data
             $data = $query->get();
-
             // Log retrieved data
             Log::info('Downloaded Data:', [
                 'count' => $data->count(),

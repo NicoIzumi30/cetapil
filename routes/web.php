@@ -132,9 +132,9 @@ Route::middleware('auth')->group(function () {
         Route::get('/generate-excel', [ProductController::class, 'downloadExcel'])
             ->name('generate-excel');
         Route::get('/data', [ProductController::class, 'getData'])->name('data');
-        Route::get('/data-stock-on-hand', [ProductController::class, 'getDataStockOnHand'])->name('data-stock-on-hand');
-        Route::get('/download-stock-on-hand', [ProductController::class, 'downloadStockOnHand'])
-            ->name('download-stock-on-hand');
+        Route::get('/data-availability', [ProductController::class, 'getDataAvailability'])->name('data-availability');
+        Route::get('/download-availability', [ProductController::class, 'downloadAvailability'])
+            ->name('download-availability');
         Route::get('/get-products-by-category/{category}', [ProductController::class, 'getProductsByCategory'])
             ->name('get-products-by-category');
         Route::prefix('power-skus')->name('power-skus.')->group(function () {
