@@ -18,7 +18,7 @@ class SellingExport implements FromQuery, WithHeadings, WithMapping, WithStyles,
 {
     public function query()
     {
-        return SellingProduct::query()->with(['product', 'sell'])->completeRelation();
+        return SellingProduct::query()->where('qty', '>', 0)->with(['product', 'sell'])->completeRelation();
     }
 
     public function headings(): array
