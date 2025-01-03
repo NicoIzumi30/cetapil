@@ -264,6 +264,7 @@ class TambahActivityController extends GetxController {
     initDraftTimers();
     initializeControllers();
     initDetailDraftSurvey();
+    _initializeSavedDraft();
     startTabTimer();
     checkAvailabilityForSurvey();
   }
