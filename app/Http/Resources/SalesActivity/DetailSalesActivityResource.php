@@ -38,6 +38,9 @@ class DetailSalesActivityResource extends JsonResource
                     'core' => $this->formatVisibilities('CORE', 'SECONDARY'),
                     'baby' => $this->formatVisibilities('BABY', 'SECONDARY'),
                 ],
+                'competitor' => [
+                    'competitor' => $this->formatVisibilities('COMPETITOR', 'COMPETITOR'),
+                ],
             ],
             'availabilities' => SalesAvailabilityResource::collection($this->whenLoaded('availabilities')),
             'surveys' => SalesSurveyResource::collection($this->whenLoaded('surveys')),
