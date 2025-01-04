@@ -21,9 +21,8 @@ class DashboardDatabaseHelper {
 
       return await openDatabase(
         path,
-        version: 4, // Increased version for location fields
+        version: 1,
         onCreate: _createDB,
-        onUpgrade: _onUpgrade,
       );
     } catch (e) {
       print('Error initializing dashboard database: $e');
@@ -31,116 +30,71 @@ class DashboardDatabaseHelper {
     }
   }
 
-  Future _onUpgrade(Database db, int oldVersion, int newVersion) async {
-    if (oldVersion < 2) {
-      await db.execute('''
-        CREATE TABLE power_skus (
-          id INTEGER PRIMARY KEY AUTOINCREMENT,
-          dashboard_id INTEGER,
-          sku TEXT,
-          total_outlets INTEGER,
-          available_count INTEGER,
-          availability_percentage INTEGER,
-          FOREIGN KEY (dashboard_id) REFERENCES dashboard_data (id)
-        )
-      ''');
-    }
-    
-    if (oldVersion < 3) {
-      await db.execute('''
-        ALTER TABLE dashboard_data 
-        ADD COLUMN last_performance_update TEXT
-      ''');
-      
-      await db.execute('''
-        ALTER TABLE dashboard_data 
-        ADD COLUMN last_power_sku_update TEXT
-      ''');
-    }
-
-    if (oldVersion < 4) {
-      // Add location fields to current_outlets table
-      await db.execute('''
-        ALTER TABLE current_outlets 
-        ADD COLUMN outlet_latitude TEXT
-      ''');
-      await db.execute('''
-        ALTER TABLE current_outlets 
-        ADD COLUMN outlet_longitude TEXT
-      ''');
-      await db.execute('''
-        ALTER TABLE current_outlets 
-        ADD COLUMN check_in_latitude TEXT
-      ''');
-      await db.execute('''
-        ALTER TABLE current_outlets 
-        ADD COLUMN check_in_longitude TEXT
-      ''');
-      await db.execute('''
-        ALTER TABLE current_outlets 
-        ADD COLUMN radius TEXT
-      ''');
-      await db.execute('''
-        ALTER TABLE current_outlets 
-        ADD COLUMN distance_to_outlet REAL
-      ''');
-    }
-  }
-
   Future _createDB(Database db, int version) async {
     await db.execute('''
-      CREATE TABLE current_outlets (
-        id INTEGER PRIMARY KEY AUTOINCREMENT,
-        outlet_id TEXT,
-        sales_activity_id TEXT,
-        name TEXT,
-        checked_in TEXT,
-        checked_out TEXT,
-        outlet_latitude TEXT,
-        outlet_longitude TEXT,
-        check_in_latitude TEXT,
-        check_in_longitude TEXT,
-        radius TEXT,
-        distance_to_outlet REAL
-      )
-    ''');
+    CREATE TABLE current_outlets (
+      id INTEGER PRIMARY KEY AUTOINCREMENT,
+      outlet_id TEXT,
+      sales_activity_id TEXT,
+      name TEXT,
+      checked_in TEXT,
+      checked_out TEXT,
+      outlet_latitude TEXT,
+      outlet_longitude TEXT,
+      check_in_latitude TEXT,
+      check_in_longitude TEXT,
+      radius TEXT,
+      distance_to_outlet REAL
+    )
+  ''');
 
     await db.execute('''
-      CREATE TABLE dashboard_data (
-        id INTEGER PRIMARY KEY AUTOINCREMENT,
-        status TEXT,
-        message TEXT,
-        city TEXT,
-        region TEXT,
-        role TEXT,
-        total_outlet INTEGER,
-        total_actual_plan INTEGER,
-        total_call_plan INTEGER,
-        plan_percentage INTEGER,
-        last_performance_update TEXT,
-        last_power_sku_update TEXT,
-        current_outlet_id INTEGER,
-        created_at DATETIME DEFAULT CURRENT_TIMESTAMP,
-        FOREIGN KEY (current_outlet_id) REFERENCES current_outlets (id)
-      )
-    ''');
+    CREATE TABLE dashboard_data (
+      id INTEGER PRIMARY KEY AUTOINCREMENT,
+      status TEXT,
+      message TEXT,
+      city TEXT,
+      region TEXT,
+      role TEXT,
+      total_outlet INTEGER,
+      total_actual_plan INTEGER,
+      total_call_plan INTEGER,
+      plan_percentage INTEGER,
+      last_performance_update TEXT,
+      last_power_sku_update TEXT,
+      current_outlet_id INTEGER,
+      created_at DATETIME DEFAULT CURRENT_TIMESTAMP,
+      FOREIGN KEY (current_outlet_id) REFERENCES current_outlets (id)
+    )
+  ''');
 
     await db.execute('''
-      CREATE TABLE power_skus (
-        id INTEGER PRIMARY KEY AUTOINCREMENT,
-        dashboard_id INTEGER,
-        sku TEXT,
-        total_outlets INTEGER,
-        available_count INTEGER,
-        availability_percentage INTEGER,
-        FOREIGN KEY (dashboard_id) REFERENCES dashboard_data (id)
-      )
-    ''');
+    CREATE TABLE power_skus (
+      id INTEGER PRIMARY KEY AUTOINCREMENT,
+      dashboard_id INTEGER,
+      sku TEXT,
+      total_outlets INTEGER,
+      available_count INTEGER,
+      availability_percentage INTEGER,
+      FOREIGN KEY (dashboard_id) REFERENCES dashboard_data (id)
+    )
+  ''');
+
+    await db.execute('''
+    CREATE TABLE programs (
+      id INTEGER PRIMARY KEY AUTOINCREMENT,
+      dashboard_id INTEGER,
+      province_code TEXT,
+      filename TEXT,
+      path TEXT,
+      FOREIGN KEY (dashboard_id) REFERENCES dashboard_data (id)
+    )
+  ''');
   }
 
   Future<void> saveDashboard(Dashboard dashboard) async {
     final db = await database;
-    
+
     await db.transaction((txn) async {
       try {
         // Insert current outlet if exists
@@ -201,6 +155,21 @@ class DashboardDatabaseHelper {
             );
           }
         }
+
+        if (dashboard.data?.programs != null) {
+          for (var program in dashboard.data!.programs!) {
+            await txn.insert(
+              'programs',
+              {
+                'dashboard_id': dashboardId,
+                'province_code': program.provinceCode,
+                'filename': program.filename,
+                'path': program.path,
+              },
+              conflictAlgorithm: ConflictAlgorithm.replace,
+            );
+          }
+        }
       } catch (e) {
         print('Error saving dashboard data: $e');
         rethrow;
@@ -210,7 +179,7 @@ class DashboardDatabaseHelper {
 
   Future<Dashboard?> getLatestDashboard() async {
     final db = await database;
-    
+
     try {
       final results = await db.rawQuery('''
         SELECT 
@@ -235,7 +204,7 @@ class DashboardDatabaseHelper {
       if (results.isEmpty) return null;
 
       final row = results.first;
-      
+
       // Get power SKUs for this dashboard
       final powerSkusResults = await db.query(
         'power_skus',
@@ -243,27 +212,31 @@ class DashboardDatabaseHelper {
         whereArgs: [row['id']],
       );
 
-      final powerSkus = powerSkusResults.map((skuRow) => PowerSkus(
-        sku: skuRow['sku'] as String?,
-        totalOutlets: skuRow['total_outlets'] as int?,
-        availableCount: skuRow['available_count'] as int?,
-        availabilityPercentage: skuRow['availability_percentage'] as int?,
-      )).toList();
+      final powerSkus = powerSkusResults
+          .map((skuRow) => PowerSkus(
+                sku: skuRow['sku'] as String?,
+                totalOutlets: skuRow['total_outlets'] as int?,
+                availableCount: skuRow['available_count'] as int?,
+                availabilityPercentage: skuRow['availability_percentage'] as int?,
+              ))
+          .toList();
 
       // Construct CurrentOutlet with location data
-      final currentOutlet = row['outlet_id'] != null ? CurrentOutlet(
-        outletId: row['outlet_id'],
-        salesActivityId: row['sales_activity_id'],
-        name: row['outlet_name'] as String?,
-        checkedIn: row['checked_in'],
-        checkedOut: row['checked_out'],
-        outletLatitude: row['outlet_latitude'] as String?,
-        outletLongitude: row['outlet_longitude'] as String?,
-        checkInLatitude: row['check_in_latitude'] as String?,
-        checkInLongitude: row['check_in_longitude'] as String?,
-        radius: row['radius'] as String?,
-        distanceToOutlet: row['distance_to_outlet'] as double?,
-      ) : null;
+      final currentOutlet = row['outlet_id'] != null
+          ? CurrentOutlet(
+              outletId: row['outlet_id'],
+              salesActivityId: row['sales_activity_id'],
+              name: row['outlet_name'] as String?,
+              checkedIn: row['checked_in'],
+              checkedOut: row['checked_out'],
+              outletLatitude: row['outlet_latitude'] as String?,
+              outletLongitude: row['outlet_longitude'] as String?,
+              checkInLatitude: row['check_in_latitude'] as String?,
+              checkInLongitude: row['check_in_longitude'] as String?,
+              radius: row['radius'] as String?,
+              distanceToOutlet: row['distance_to_outlet'] as double?,
+            )
+          : null;
 
       // Construct Data
       final data = Data(

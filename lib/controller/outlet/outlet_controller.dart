@@ -41,6 +41,7 @@ class OutletController extends GetxController {
   final RxList<Outlet> outlets = <Outlet>[].obs;
   final RxBool isLoading = false.obs;
   final RxBool isSyncing = false.obs;
+  final RxString outletId = ''.obs;
   final RxString searchQuery = ''.obs;
   final RxString selectedCategory = 'MT'.obs;
   final RxString cityId = ''.obs;
@@ -201,9 +202,7 @@ class OutletController extends GetxController {
     try {
       final localOutlets = await _db.getAllOutlets();
 
-      final Map<String, Outlet> apiOutletMap = {
-        for (var outlet in apiOutlets) outlet.id!: outlet
-      };
+      final Map<String, Outlet> apiOutletMap = {for (var outlet in apiOutlets) outlet.id!: outlet};
       final Map<String, Outlet> localOutletMap = {
         for (var outlet in localOutlets) outlet.id!: outlet
       };
@@ -240,11 +239,12 @@ class OutletController extends GetxController {
   }
 
   // SECTION: Submit Operations
-  Future<void> submitApiOutlet() async {
+  Future<bool> submitApiOutlet() async {
     try {
       final String? currentOutletId = Get.arguments?['id'];
       final bool isEditing = currentOutletId != null;
 
+      // Validation first
       await _validateSubmission();
 
       CustomAlerts.showLoading(Get.context!, "Mengirim", "Mengirim data ke server...");
@@ -264,8 +264,10 @@ class OutletController extends GetxController {
       }
 
       _handleSubmissionSuccess();
+      return true; // Return true on success
     } catch (e) {
       _handleSubmissionError(e);
+      return false; // Return false on any error
     } finally {
       CustomAlerts.dismissLoading();
     }
@@ -346,25 +348,27 @@ class OutletController extends GetxController {
         error.toString().contains('Exception:')
             ? "Gagal mengirim data ke server. Periksa koneksi Anda dan coba lagi."
             : error.toString());
-    print('Error submitting outlet: $error');
   }
 
   // SECTION: Draft Operations
-  Future<void> saveDraftOutlet() async {
+  Future<bool> saveDraftOutlet() async {
     try {
       await _validateDraft();
 
       CustomAlerts.showLoading(Get.context!, "Menyimpan", "Menyimpan data ke draft...");
 
-      final String? currentOutletId = Get.arguments?['id'];
+      final String? currentOutletId = outletId.value;
+      print("currentOutletId $currentOutletId");
       final bool isEditing = currentOutletId != null;
 
       await _processDraftImages();
       final data = _prepareDraftData(currentOutletId, isEditing);
       await _saveDraftToDatabase(data, isEditing);
       await _handleDraftSaveSuccess(isEditing);
+      return true; // Return true on any error
     } catch (e) {
       _handleDraftSaveError(e);
+      return false; // Return false on any error
     } finally {
       CustomAlerts.dismissLoading();
     }
@@ -462,6 +466,7 @@ class OutletController extends GetxController {
   Future<void> setDraftValue(Outlet outlet) async {
     try {
       // Basic info
+      outletId.value = outlet.id ?? "";
       salesName.value.text = outlet.user?.name ?? "";
       outletName.value.text = outlet.name ?? "";
       selectedCategory.value = outlet.category ?? "MT";
@@ -498,7 +503,7 @@ class OutletController extends GetxController {
       _loadDraftForms(outlet);
 
       update();
-      Get.to(() => TambahOutlet(), arguments: {'id': outlet.id});
+      Get.to(() => TambahOutlet());
     } catch (e) {
       CustomAlerts.showError(Get.context!, "Gagal", "Gagal memuat draft: $e");
     }

@@ -48,12 +48,7 @@ class DashboardController extends GetxController {
   final RxString outletDistance = "-".obs;
 
   // Carousel data
-  final List<String> imageUrls = [
-    'assets/carousel1.png',
-    'assets/carousel1.png',
-    'assets/carousel1.png',
-    'assets/carousel1.png',
-  ];
+  final RxList<Programs> programUrls = <Programs>[].obs;
 
   @override
   void onInit() {
@@ -67,6 +62,21 @@ class DashboardController extends GetxController {
     updateDate();
     await initializeDashboard();
     await getUserData();
+  }
+
+  // Add this method to load programs from SQLite
+  Future<void> loadProgramUrls() async {
+    try {
+      final dashboardData = await _dbHelper.getLatestDashboard();
+      if (dashboardData?.data?.programs != null) {
+        programUrls.value = dashboardData!.data!.programs!;
+        print('Loaded ${programUrls.length} programs'); // Debug log
+      } else {
+        print('No programs found in dashboard data'); // Debug log
+      }
+    } catch (e) {
+      print('Error loading program URLs: $e');
+    }
   }
 
   Future<void> getUserData() async {
@@ -142,6 +152,11 @@ class DashboardController extends GetxController {
       if (localData != null) {
         dashboard.value = localData;
         _updateCurrentOutletInfo(localData);
+        // Add this to load programs from local data
+        if (localData.data?.programs != null) {
+          programUrls.value = localData.data!.programs!;
+          print('Initialize: Loaded ${programUrls.length} programs'); // Debug log
+        }
       }
 
       await fetchDashboardData();
@@ -175,6 +190,8 @@ class DashboardController extends GetxController {
     }
   }
 
+  // Update fetchDashboardData to also refresh programs
+
   Future<void> fetchDashboardData() async {
     try {
       isLoading.value = true;
@@ -191,6 +208,11 @@ class DashboardController extends GetxController {
       await _dbHelper.saveDashboard(response);
       dashboard.value = response;
       _updateCurrentOutletInfo(response);
+
+      // Update programs directly from response
+      if (response.data?.programs != null) {
+        programUrls.value = response.data!.programs!;
+      }
     } catch (e) {
       error.value = 'Failed to fetch dashboard data: $e';
       print('Error fetching dashboard data: $e');

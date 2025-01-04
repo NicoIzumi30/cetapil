@@ -105,8 +105,8 @@ class DetailOutlet extends GetView<OutletController> {
                               ],
                             ),
                             MapPreviewWidget(
-                              latitude: double.tryParse(outlet.latitude!) ?? 0,
-                              longitude: double.tryParse(outlet.longitude!) ?? 0,
+                              latitude: outlet.latitude != null && outlet.latitude!.isNotEmpty ? double.tryParse(outlet.latitude!) ?? 0 : 0,
+                              longitude: outlet.longitude != null && outlet.longitude!.isNotEmpty ? double.tryParse(outlet.longitude!) ?? 0 : 0,
                               zoom: 14.0,
                               height: 250,
                               borderRadius: 10,

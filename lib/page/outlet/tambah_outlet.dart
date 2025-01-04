@@ -2,6 +2,7 @@ import 'dart:io';
 import 'dart:ui';
 import 'package:cetapil_mobile/page/outlet/detail_outlet.dart';
 import 'package:cetapil_mobile/utils/image_upload.dart';
+import 'package:cetapil_mobile/widget/FormActionButton.dart';
 import 'package:cetapil_mobile/widget/back_button.dart';
 import 'package:cetapil_mobile/widget/category_dropdown.dart';
 import 'package:cetapil_mobile/widget/channel_dropdown.dart';
@@ -29,179 +30,156 @@ class TambahOutlet extends GetView<OutletController> {
         final shouldPop = await Alerts.showConfirmDialog(context);
         return shouldPop ?? false;
       },
-      child: SafeArea(
-        child: Stack(
-          children: [
-            Image.asset(
-              'assets/background.png',
-              fit: BoxFit.cover,
-              width: double.infinity,
-              height: double.infinity,
-            ),
-            Column(
-              children: [
-                Expanded(
-                  child: Padding(
-                    padding: const EdgeInsets.fromLTRB(15, 30, 15, 5),
-                    child: Column(
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      children: [
-                        EnhancedBackButton(
-                          onPressed: () => Alerts.showConfirmDialog(context),
-                          backgroundColor: Colors.white,
-                          iconColor: Colors.blue,
-                        ),
-                        SizedBox(height: 20),
-                        Obx(() {
-                          return Expanded(
-                            child: SingleChildScrollView(
-                              child: Column(
-                                crossAxisAlignment: CrossAxisAlignment.start,
-                                children: [
-                                  Text("Tambah Outlet", style: AppTextStyle.titlePage),
-                                  SizedBox(height: 20),
-                                  // Your existing form fields here
-                                  // ModernTextField(
-                                  //   title: "Nama Sales",
-                                  //   controller: controller.salesName.value,
-                                  // ),
-                                  UnderlineTextField.readOnly(
-                                    title: "Nama Sales",
-                                    value: username,
-                                  ),
-                                  ModernTextField(
-                                    title: "Nama Outlet",
-                                    controller: controller.outletName.value,
-                                  ),
-                                  CityDropdown(
-                                    title: "Kabupaten/Kota",
-                                    controller: controller,
-                                  ),
-                                  ChannelDropdown(
-                                    title: "Channel Outlet",
-                                    controller: controller,
-                                  ),
-                                  CategoryDropdown<OutletController>(
-                                    title: "Kategori Outlet",
-                                    controller: controller,
-                                    selectedCategoryGetter: (controller) =>
-                                        controller.selectedCategory,
-                                    categoriesGetter: (controller) => controller.categories,
-                                  ),
-                                  ModernTextField(
-                                    title: "Alamat Outlet",
-                                    controller: controller.outletAddress.value,
-                                    maxlines: 4,
-                                  ),
-                                  // Location fields
-                                  Row(
-                                    children: [
-                                      Expanded(
-                                        child: ModernTextField(
-                                          enable: false,
-                                          title: "Longitude",
-                                          controller: controller.gpsController.longController.value,
-                                        ),
-                                      ),
-                                      SizedBox(width: 10),
-                                      Expanded(
-                                        child: ModernTextField(
-                                          enable: false,
-                                          title: "Latitude",
-                                          controller: controller.gpsController.latController.value,
-                                        ),
-                                      ),
-                                    ],
-                                  ),
-                                  // Map preview
-                                  if (controller.gpsController.latController.value.text.isNotEmpty)
-                                    MapPreviewWidget(
-                                      latitude: double.parse(
-                                          controller.gpsController.latController.value.text),
-                                      longitude: double.parse(
-                                          controller.gpsController.longController.value.text),
-                                      zoom: 14.0,
-                                      height: 250,
-                                      borderRadius: 10,
-                                    ),
-                                  SizedBox(height: 20),
-                                  // Image upload section
-                                  Text(
-                                    "Foto Outlet",
-                                    style: TextStyle(fontSize: 15, fontWeight: FontWeight.w700),
-                                  ),
-                                  SizedBox(height: 10),
-                                  Row(
-                                    crossAxisAlignment: CrossAxisAlignment.start,
-                                    children: [
-                                      _buildImageUploader(
-                                        context,
-                                        "Foto Tampak Depan Outlet",
-                                        0,
-                                        controller,
-                                      ),
-                                      SizedBox(width: 8),
-                                      _buildImageUploader(
-                                        context,
-                                        "Foto Banner/Neon Box Outlet",
-                                        1,
-                                        controller,
-                                      ),
-                                      SizedBox(width: 8),
-                                      _buildImageUploader(
-                                        context,
-                                        "Foto Patokan Jalan Outlet",
-                                        2,
-                                        controller,
-                                      ),
-                                    ],
-                                  ),
-                                  SizedBox(height: 20),
-                                  // Survey form section
-                                  Text("Formulir Survey Outlet", style: AppTextStyle.titlePage),
-                                  SizedBox(height: 20),
-                                  _buildSurveyForm(),
-                                ],
-                              ),
-                            ),
-                          );
-                        }),
-                      ],
-                    ),
-                  ),
-                ),
-                // Bottom buttons
-                Padding(
-                  padding: const EdgeInsets.fromLTRB(15, 0, 15, 15),
-                  child: Container(
-                    width: double.infinity,
-                    decoration: BoxDecoration(
-                        color: Colors.white.withOpacity(0.3),
-                        borderRadius: BorderRadius.circular(10)),
+      child: Scaffold(
+        resizeToAvoidBottomInset: true,
+        body: SafeArea(
+          child: Stack(
+            fit: StackFit.expand, // Added to ensure Stack fills available space
+            children: [
+              Image.asset(
+                'assets/background.png',
+                fit: BoxFit.cover,
+                width: double.infinity,
+                height: double.infinity,
+              ),
+              // Main content wrapped in a single ScrollView
+              CustomScrollView(
+                slivers: [
+                  SliverToBoxAdapter(
                     child: Padding(
-                      padding: const EdgeInsets.symmetric(horizontal: 15, vertical: 10),
-                      child: Row(
+                      padding: const EdgeInsets.fromLTRB(15, 30, 15, 5),
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
                         children: [
-                          _buildButton(
-                            false,
-                            "Simpan Draft",
-                            () => controller.saveDraftOutlet(),
+                          EnhancedBackButton(
+                            onPressed: () => Alerts.showConfirmDialog(context),
+                            backgroundColor: Colors.white,
+                            iconColor: Colors.blue,
                           ),
-                          SizedBox(width: 10),
-                          _buildButton(
-                            true,
-                            "Kirim",
-                            () => controller.submitApiOutlet(),
-                            // controller.submitOutlet(),
-                          ),
+                          SizedBox(height: 20),
+                          Text("Tambah Outlet", style: AppTextStyle.titlePage),
+                          SizedBox(height: 20),
                         ],
                       ),
                     ),
                   ),
-                ),
-              ],
-            ),
-          ],
+                  // Form content in SliverPadding
+                  SliverPadding(
+                    padding: const EdgeInsets.symmetric(horizontal: 15),
+                    sliver: SliverToBoxAdapter(
+                      child: Obx(() => Column(
+                            crossAxisAlignment: CrossAxisAlignment.start,
+                            children: [
+                              UnderlineTextField.readOnly(
+                                title: "Nama Sales",
+                                value: username,
+                              ),
+                              ModernTextField(
+                                title: "Nama Outlet",
+                                controller: controller.outletName.value,
+                              ),
+                              CityDropdown(
+                                title: "Kabupaten/Kota",
+                                controller: controller,
+                              ),
+                              ChannelDropdown(
+                                title: "Channel Outlet",
+                                controller: controller,
+                              ),
+                              CategoryDropdown<OutletController>(
+                                title: "Kategori Outlet",
+                                controller: controller,
+                                selectedCategoryGetter: (controller) => controller.selectedCategory,
+                                categoriesGetter: (controller) => controller.categories,
+                              ),
+                              ModernTextField(
+                                title: "Alamat Outlet",
+                                controller: controller.outletAddress.value,
+                                maxlines: 4,
+                              ),
+                              // Location fields
+                              Row(
+                                children: [
+                                  Expanded(
+                                    child: ModernTextField(
+                                      enable: false,
+                                      title: "Longitude",
+                                      controller: controller.gpsController.longController.value,
+                                    ),
+                                  ),
+                                  SizedBox(width: 10),
+                                  Expanded(
+                                    child: ModernTextField(
+                                      enable: false,
+                                      title: "Latitude",
+                                      controller: controller.gpsController.latController.value,
+                                    ),
+                                  ),
+                                ],
+                              ),
+                              // Map preview
+                              if (controller.gpsController.latController.value.text.isNotEmpty)
+                                MapPreviewWidget(
+                                  latitude: double.parse(
+                                      controller.gpsController.latController.value.text),
+                                  longitude: double.parse(
+                                      controller.gpsController.longController.value.text),
+                                  zoom: 14.0,
+                                  height: 250,
+                                  borderRadius: 10,
+                                ),
+                              SizedBox(height: 20),
+                              // Image upload section
+                              Text(
+                                "Foto Outlet",
+                                style: TextStyle(fontSize: 15, fontWeight: FontWeight.w700),
+                              ),
+                              SizedBox(height: 10),
+                              Row(
+                                crossAxisAlignment: CrossAxisAlignment.start,
+                                children: [
+                                  _buildImageUploader(
+                                    context,
+                                    "Foto Tampak Depan Outlet",
+                                    0,
+                                    controller,
+                                  ),
+                                  SizedBox(width: 8),
+                                  _buildImageUploader(
+                                    context,
+                                    "Foto Banner/Neon Box Outlet",
+                                    1,
+                                    controller,
+                                  ),
+                                  SizedBox(width: 8),
+                                  _buildImageUploader(
+                                    context,
+                                    "Foto Patokan Jalan Outlet",
+                                    2,
+                                    controller,
+                                  ),
+                                ],
+                              ),
+                              SizedBox(height: 20),
+                              // Survey form section
+                              Text("Formulir Survey Outlet", style: AppTextStyle.titlePage),
+                              SizedBox(height: 20),
+                              _buildSurveyForm(),
+                              // Add bottom padding to ensure content isn't covered by the bottom buttons
+                              SizedBox(height: 80),
+                            ],
+                          )),
+                    ),
+                  ),
+                ],
+              ),
+              // Bottom buttons positioned at the bottom
+              FormActionButtons(
+                onSaveDraft: controller.saveDraftOutlet,
+                onSubmit: controller.submitApiOutlet,
+              ),
+            ],
+          ),
         ),
       ),
     );

@@ -1,3 +1,4 @@
+import 'package:cached_network_image/cached_network_image.dart';
 import 'package:carousel_slider/carousel_slider.dart';
 import 'package:cetapil_mobile/controller/dashboard/dashboard_controller.dart';
 import 'package:cetapil_mobile/model/dashboard.dart';
@@ -8,6 +9,7 @@ import 'package:get/get.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:intl/intl.dart';
 import 'package:smooth_page_indicator/smooth_page_indicator.dart';
+import 'package:flutter_cache_manager/flutter_cache_manager.dart';
 
 import '../../widget/progress_indicator.dart';
 
@@ -150,35 +152,70 @@ class DashboardPage extends GetView<DashboardController> {
                     ],
                   ),
                 ),
-                CarouselSlider.builder(
-                  carouselController: _carouselController,
-                  itemCount: controller.imageUrls.length,
-                  itemBuilder: (context, index, realIndex) {
-                    return Padding(
-                      padding: const EdgeInsets.symmetric(horizontal: 5),
-                      child: Image.asset(controller.imageUrls[index]),
+                Container(
+                  margin: const EdgeInsets.symmetric(vertical: 15),
+                  child: Obx(() {
+                    print(controller.programUrls.length);
+                    if (controller.programUrls.isEmpty) {
+                      return const SizedBox.shrink();
+                    }
+
+                    return Column(
+                      children: [
+                        CarouselSlider.builder(
+                          carouselController: _carouselController,
+                          itemCount: controller.programUrls.length,
+                          itemBuilder: (context, index, realIndex) {
+                            final program = controller.programUrls[index];
+                            final imageUrl =
+                                'https://dev-cetaphil.i-am.host/storage${program.path ?? ''}';
+
+                            return Padding(
+                              padding: const EdgeInsets.symmetric(horizontal: 5),
+                              child: CachedNetworkImage(
+                                imageUrl: imageUrl,
+                                fit: BoxFit.cover,
+                                
+                                placeholder: (context, url) => const Center(
+                                  child: CircularProgressIndicator(),
+                                ),
+                                errorWidget: (context, url, error) => Container(
+                                  color: Colors.grey[200],
+                                  child: const Icon(
+                                    Icons.error_outline,
+                                    color: Colors.red,
+                                    size: 40,
+                                  ),
+                                ),
+                                cacheManager: DefaultCacheManager(),
+                                cacheKey: program.filename,
+                              ),
+                            );
+                          },
+                          options: CarouselOptions(
+                            viewportFraction: 1,
+                            enlargeCenterPage: false,
+                            autoPlay: true,
+                            autoPlayInterval: const Duration(seconds: 3),
+                            onPageChanged: (index, reason) {
+                              controller.currentIndex.value = index;
+                            },
+                          ),
+                        ),
+                        Container(
+                          margin: const EdgeInsets.only(top: 10),
+                          child: Center(
+                            child: AnimatedSmoothIndicator(
+                              activeIndex: controller.currentIndex.value,
+                              count: controller.programUrls.length,
+                              effect: WormEffect(dotHeight: 10, dotWidth: 10),
+                            ),
+                          ),
+                        ),
+                      ],
                     );
-                  },
-                  options: CarouselOptions(
-                    // aspectRatio: 3 / 2,
-                    viewportFraction: 1,
-                    enlargeCenterPage: false,
-                    autoPlay: true,
-                    autoPlayInterval: const Duration(seconds: 3),
-                    onPageChanged: (index, reason) {
-                      controller.currentIndex.value = index;
-                    },
-                  ),
+                  }),
                 ),
-                Obx(() {
-                  return Center(
-                    child: AnimatedSmoothIndicator(
-                      activeIndex: controller.currentIndex.value,
-                      count: controller.imageUrls.length,
-                      effect: WormEffect(dotHeight: 10, dotWidth: 10),
-                    ),
-                  );
-                }),
                 Stack(
                   alignment: Alignment(1, 1),
                   children: [

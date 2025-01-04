@@ -177,7 +177,7 @@ class RoutingController extends GetxController {
   }
 
   // SECTION: Check-in Operations
-  Future<void> submitCheckin(String outletId) async {
+  Future<bool> submitCheckin(String outletId) async {
     try {
       // Check if GPS is enabled
       if (!_gpsController.isGPSEnabled.value) {
@@ -230,8 +230,6 @@ class RoutingController extends GetxController {
           position.longitude,
         );
 
-        Get.back();
-
         await _clearExistingData();
         final responses = await _fetchRoutingData();
         await _processRoutingData(responses);
@@ -249,6 +247,7 @@ class RoutingController extends GetxController {
           CustomAlerts.dismissLoading();
         }
       }
+      return true;
     } catch (e) {
       // Ensure loading is dismissed before showing error
       if (Get.context != null && Get.context!.mounted) {
@@ -256,6 +255,7 @@ class RoutingController extends GetxController {
       }
       _handleError('You still have an activity that has not checked out yet');
       // _handleError('Gagal melakukan check in: $e');
+      return false;
     }
   }
 
