@@ -4,6 +4,7 @@ import 'package:cetapil_mobile/controller/login_controller.dart';
 import 'package:cetapil_mobile/controller/outlet/outlet_controller.dart';
 import 'package:cetapil_mobile/model/outlet.dart';
 import 'package:cetapil_mobile/utils/image_upload.dart';
+import 'package:cetapil_mobile/widget/dialog.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_svg/svg.dart';
 import 'package:get/get.dart';
@@ -25,6 +26,20 @@ class DetailOutlet extends GetView<OutletController> {
   final storage = GetStorage();
   final Outlet outlet;
   final bool isCheckin;
+
+  Future<void> _handleCheckIn(BuildContext context, Future<bool> Function() onCheckIn) async {
+    final result = await Alerts.showSubmitCheckInDialog(
+      context,
+      useGetBack: true,
+    );
+
+    if (result == true) {
+      final success = await onCheckIn();
+      if (success) {
+        Get.back();
+      }
+    }
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -105,8 +120,12 @@ class DetailOutlet extends GetView<OutletController> {
                               ],
                             ),
                             MapPreviewWidget(
-                              latitude: outlet.latitude != null && outlet.latitude!.isNotEmpty ? double.tryParse(outlet.latitude!) ?? 0 : 0,
-                              longitude: outlet.longitude != null && outlet.longitude!.isNotEmpty ? double.tryParse(outlet.longitude!) ?? 0 : 0,
+                              latitude: outlet.latitude != null && outlet.latitude!.isNotEmpty
+                                  ? double.tryParse(outlet.latitude!) ?? 0
+                                  : 0,
+                              longitude: outlet.longitude != null && outlet.longitude!.isNotEmpty
+                                  ? double.tryParse(outlet.longitude!) ?? 0
+                                  : 0,
                               zoom: 14.0,
                               height: 250,
                               borderRadius: 10,
@@ -210,24 +229,21 @@ class DetailOutlet extends GetView<OutletController> {
             Obx(() {
               print(routingController.isRoutingActive(outlet.id!));
               return (isCheckin && !routingController.isRoutingActive(outlet.id!))
-                  ? Padding(
-                      padding: const EdgeInsets.fromLTRB(15, 0, 15, 15),
+                  ? Align(
+                      alignment: Alignment.bottomCenter,
                       child: Container(
-                        width: double.infinity,
-                        decoration: BoxDecoration(
-                            color: Colors.white.withOpacity(0.3),
-                            borderRadius: BorderRadius.circular(10)),
-                        child: Padding(
-                          padding: const EdgeInsets.symmetric(horizontal: 15, vertical: 10),
-                          child: Row(
-                            children: [
-                              _buildButton(
-                                true,
-                                "Check-in",
-                                () => routingController.submitCheckin(outlet.id!),
-                              ),
-                            ],
-                          ),
+                        color: Colors.white.withOpacity(0.3),
+                        padding: const EdgeInsets.symmetric(horizontal: 15, vertical: 10),
+                        margin: const EdgeInsets.only(bottom: 15),
+                        child: Row(
+                          children: [
+                            _buildButton(
+                              true,
+                              "Check-in",
+                              () => _handleCheckIn(
+                                  context, () => routingController.submitCheckin(outlet.id!)),
+                            ),
+                          ],
                         ),
                       ),
                     )
