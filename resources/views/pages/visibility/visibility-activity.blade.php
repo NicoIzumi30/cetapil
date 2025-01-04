@@ -110,8 +110,12 @@
                                     <p class="font-bold text-sm mb-6 text-white">Periode Promo : <span
                                     class="font-normal">{{ $item->competitor_promo_start .' - '. $item->competitor_promo_end ?? '' }}</span></p>
                             <div>
-                                <h2 class="font-bold text-sm text-white mb-4">Foto Program</h2>
-                                <img class="w-[500px] h-[500px] object-cover rounded-lg" src="{{ config('app.storage_url') . $item->display_photo_2 }}"
+                                <h2 class="font-bold text-sm text-white mb-4">Foto Program 1</h2>
+                                <img class="w-[500px] h-[500px] object-cover rounded-lg" src="{{ config('app.storage_url') . $item->display_photo }}"
+                                    alt="Foto Display">
+                                <h2 class="font-bold text-sm text-white mb-4">Foto Program 2</h2>
+
+                                    <img class="w-[500px] h-[500px] object-cover rounded-lg" src="{{ config('app.storage_url') . $item->display_photo_2 }}"
                                     alt="Foto Display">
                             </div>
                         </div>
