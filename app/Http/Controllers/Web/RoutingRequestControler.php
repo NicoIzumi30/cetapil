@@ -6,6 +6,7 @@ use App\Models\Outlet;
 use App\Models\OutletForm;
 use Illuminate\Http\Request;
 use App\Http\Controllers\Controller;
+use Illuminate\Validation\ValidationException;
 
 class RoutingRequestControler extends Controller
 {
@@ -16,11 +17,11 @@ class RoutingRequestControler extends Controller
     public function getData(Request $request)
     {
         $query = Outlet::with('user:id,name')
-        ->whereIn('status', ['PENDING', 'REJECTED'])
-        ->orderBy('created_at', 'desc');
+            ->whereIn('status', ['PENDING', 'REJECTED'])
+            ->orderBy('created_at', 'desc');
         $totalRecords = Outlet::count(); // Total semua records
         $filteredRecords = (clone $query)->count();
-    
+
         $result = $query->skip($request->start)
             ->take($request->length)
             ->get();
@@ -48,30 +49,43 @@ class RoutingRequestControler extends Controller
     public function edit($id)
     {
         $outlet = Outlet::with('user')->where('id', $id)->first();
-        $outletForms = OutletForm::with(['answers' => function($query) use ($id) {
+        $outletForms = OutletForm::with(['answers' => function ($query) use ($id) {
             $query->where('outlet_id', $id);
         }])->get();
-        return view('pages.routing.detail-request', compact('outlet','outletForms'));
+        return view('pages.routing.detail-request', compact('outlet', 'outletForms'));
     }
     public function approve(Request $request, string $id)
     {
         try {
+            $request->validate([
+                'outlet_code' => 'required|string',
+                'outlet_type' => 'required|string',
+            ]);
+
             $outlet = Outlet::findOrFail($id);
-            $outlet->status = 'APPROVED';
-            $outlet->save();
+            $outlet->update([
+                'code' => $request->outlet_code,
+                'tipe_outlet' => $request->outlet_type,
+                'status' => 'APPROVED',
+            ]);
+
             return response()->json([
                 'status' => 'success',
-                'message' => 'Outlet berhasil disetujui'
+                'message' => 'Outlet berhasil disetujui',
             ]);
+        } catch (ValidationException $e) {
+            return response()->json([
+                'status' => 'error',
+                'message' => 'Harap isi kode outlet dan tipe outlet',
+                'errors' => $e->errors(),
+            ], 422);
         } catch (\Exception $e) {
             return response()->json([
                 'status' => 'error',
-                'message' => 'Outlet gagal disetujui'
+                'message' => 'Outlet gagal disetujui',
             ], 500);
         }
-        
     }
-
     public function reject(Request $request, string $id)
     {
         try {
