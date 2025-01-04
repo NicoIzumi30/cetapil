@@ -72,12 +72,38 @@
     @if($outlet->status == 'PENDING')
     <div class="w-full flex gap-6 mt-16">
         <x-button.light class="w-full" id="rejectBtn">Reject</x-button.light>
-        <x-button.info class="w-full" id="approveBtn">Approve</x-button.info>
+        <x-button.info class="w-full" onclick="openModal('approve-modal')">Approve</x-button.info>
     </div>
     @elseif($outlet->status == 'REJECTED')
     <div class="w-full flex gap-6 mt-16"></div>
         <x-button.light class="w-full" id="rejected" disabled>Rejected</x-button.light>
     @endif
+
+	<x-modal id="approve-modal">
+		<x-slot:title>Approve Request NOO</x-slot:title>
+		<div class="grid grd-cols-2 gap-4">
+			<div>
+                <label for="outlet-code" class="!text-black">Kode Outlet</label>
+                <input id="outlet-code" class="form-control @error('outlet-code') is-invalid @enderror" value="{{ old('outlet-code') }}" type="text" name="outlet-code"
+                    placeholder="Masukan nama outlet" aria-describedby="name" />
+                @if ($errors->has('outlet-code'))
+                    <span id="outlet-code-error" class="text-sm text-red-600 mt-1">{{ $errors->first('outlet-code') }}</span>
+                @endif
+            </div>
+			<div>
+                <label for="outlet-type" class="!text-black">Tipe Outlet</label>
+                <input id="outlet-type" class="form-control @error('outlet-type') is-invalid @enderror" value="{{ old('outlet-type') }}" type="text" name="outlet-type"
+                    placeholder="Masukan nama outlet" aria-describedby="name" />
+                @if ($errors->has('outlet-type'))
+                    <span id="outlet-type-error" class="text-sm text-red-600 mt-1">{{ $errors->first('outlet-type') }}</span>
+                @endif
+            </div>
+		</div>
+		<x-slot:footer>
+			<x-button.info class="w-full" id="approveBtn">Approve</x-button.info>
+		</x-slot:footer>
+
+	</x-modal>
 </x-card>
 @endsection
 
