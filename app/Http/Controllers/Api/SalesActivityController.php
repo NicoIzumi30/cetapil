@@ -25,6 +25,7 @@ use App\Models\Category;
 use App\Models\Channel;
 use App\Models\City;
 use App\Models\Outlet;
+use App\Models\Planogram;
 use App\Models\PosmType;
 use App\Models\Product;
 use Illuminate\Support\Arr;
@@ -357,6 +358,22 @@ class SalesActivityController extends Controller
             return response()->json([
                 'status' => 'ERROR',
                 'message' => 'Failed to fetch activity: ' . $e->getMessage()
+            ], Response::HTTP_INTERNAL_SERVER_ERROR);
+        }
+    }
+    public function getPlanogram()
+    {
+        try {
+            $planogram = Planogram::with('channel')->get();
+            return response()->json([
+                'status' => 'SUCCESS',
+                'message' => 'Get the Planogram list successfully.',
+                'data' => $planogram
+            ], Response::HTTP_OK);
+        } catch (\Exception $e) {
+            return response()->json([
+                'status' => 'ERROR',
+                'message' => 'Failed to fetch planogram: ' . $e->getMessage()
             ], Response::HTTP_INTERNAL_SERVER_ERROR);
         }
     }
