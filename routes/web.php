@@ -159,6 +159,7 @@ Route::middleware('auth')->group(function () {
         Route::get('/activity', [DownloadController::class, 'downloadActivity'])->name('activity');
         Route::get('/visibility', [DownloadController::class, 'downloadvisibility'])->name('visibility');
     Route::get('/availability', [DownloadController::class, 'downloadavailability'])->name('availability');
+        Route::get('/city', [DownloadController::class, 'downloadcity'])->name('city');
         Route::get('/survey', [DownloadController::class, 'downloadsurvey'])->name('survey');
         Route::get('/selling', [DownloadController::class, 'downloadSelling'])->name('selling'); 
         Route::get('/pengguna', [DownloadController::class, 'downloadPengguna'])->name('pengguna');

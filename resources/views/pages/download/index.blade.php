@@ -255,6 +255,16 @@
             <span id="downloadBtnLoading" class="hidden">Downloading...</span>
         </x-button.info>
     </x-pages.download.download-card>
+    <x-pages.download.download-card iconName="fluent_box_20_filled">
+        <x-slot:cardTitle>
+            Kota
+        </x-slot:cardTitle>
+
+        <x-button.info class="w-full" data-kota-download>
+            <span id="downloadBtnText">Download</span>
+            <span id="downloadBtnLoading" class="hidden">Downloading...</span>
+        </x-button.info>
+    </x-pages.download.download-card>
 </div>
 @endsection
 
@@ -341,7 +351,9 @@
         setupDownloadButton('[data-av3m-download]', {
             fetchUrl: '{{ route('download.av3m') }}',
         });
-
+        setupDownloadButton('[data-kota-download]', {
+            fetchUrl: '{{ route('download.city') }}',
+        });
         // Download untuk Pengguna
         setupDownloadButton('[data-pengguna-download]', {
             fetchUrl: '{{ route('download.pengguna') }}',
