@@ -159,6 +159,7 @@ Route::middleware('auth')->group(function () {
         Route::get('/activity', [DownloadController::class, 'downloadActivity'])->name('activity');
         Route::get('/selling', [DownloadController::class, 'downloadSelling'])->name('selling'); 
         Route::get('/pengguna', [DownloadController::class, 'downloadPengguna'])->name('pengguna');
+        Route::get('/av3m', [DownloadController::class, 'downloadAv3m'])->name('av3m');
     });
 
     Route::resource('products', ProductController::class)->middleware('permission:menu_product');

@@ -33,6 +33,7 @@ class Av3mExport implements FromCollection, WithHeadings, WithMapping, WithStyle
             'Kode Outlet',
             'Nama Outlet',
             'Product SKU',
+            'SKU Code',
             'Av3m',
             'Last Updated'
         ];
@@ -42,11 +43,12 @@ class Av3mExport implements FromCollection, WithHeadings, WithMapping, WithStyle
     {
         try {
             return [
-                $row->code ?? '',
-                $row->outlet_name ?? '',
-                $row->product_sku ?? '',
+                $row->outlet->code ?? '',
+                $row->outlet->name ?? '',
+                $row->product->sku ?? '',
+                $row->product->code ?? '',
                 $row->av3m ?? '0',
-                $row->last_update ?? '',
+                $row->updated_at ?? '',
             ];
         } catch (\Exception $e) {
             Log::error('Error in Av3mExport mapping', [

@@ -3,20 +3,22 @@
 namespace App\Http\Controllers\Web;
 
 use Carbon\Carbon;
+use App\Models\Av3m;
 use App\Models\City;
 use App\Models\Product;
 use App\Models\Province;
+use App\Exports\Av3mExport;
 use Illuminate\Http\Request;
 use App\Models\SalesActivity;
 use App\Exports\ProductExport;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Log;
 use App\Exports\SalesActivityExport;
+use App\Http\Controllers\Controller;
+use Maatwebsite\Excel\Facades\Excel;
 use App\Exports\RoutingDownloadExport;
 use App\Exports\SellingDownloadExport;
 use App\Exports\PenggunaDownloadExport;
-use App\Http\Controllers\Controller;
-use Maatwebsite\Excel\Facades\Excel;
 
 class DownloadController extends Controller
 {
@@ -146,6 +148,33 @@ class DownloadController extends Controller
             return response()->json([
                 'status' => 'error',
                 'message' => 'Gagal mengunduh data pengguna'
+            ], 500);
+        }
+    }
+    public function downloadAv3m()
+    {
+        try {
+            $data = Av3m::with(['product' => function($query) {
+                $query->select('id', 'sku', 'code');
+            }, 'outlet' => function($query) {
+                $query->select('id', 'name', 'code');
+            }])
+            ->has('product')
+            ->has('outlet')
+            ->get();
+            return Excel::download(
+                new Av3mExport($data),
+                'av3m_data_' . now()->format('Y-m-d_His') . '.xlsx',
+                \Maatwebsite\Excel\Excel::XLSX
+            );
+        } catch (\Exception $e) {
+            Log::error('Av3m Download Error:', [
+                'message' => $e->getMessage(),
+                'trace' => $e->getTraceAsString()
+            ]);
+            return response()->json([
+                'status' => 'error',
+                'message' => 'Gagal mengunduh data av3m: ' . $e->getMessage()
             ], 500);
         }
     }
