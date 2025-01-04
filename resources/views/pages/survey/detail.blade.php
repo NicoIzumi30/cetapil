@@ -134,3 +134,14 @@
     </x-section-card>
 </x-card>
 @endsection
+
+@push('styles')
+    <style>
+        .survey-category-title {
+            font-weight: 700;
+            font-size: 1.25rem;
+            color: #efefef;
+            margin-bottom: 1.5rem;
+        }
+    </style>
+@endpush
