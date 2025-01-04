@@ -42,16 +42,11 @@
             <x-slot:title>
                 Formulir Survey
             </x-slot:title>
-           
 			<div class="grid gap-6">
-				@foreach ($salesSurvey as $survey)
+				@foreach ($outletForms as $forms)
 					<x-pages.routing.outlet-detail>
-						<x-slot:title>{{ $survey->survey->question }}</x-slot:title>
-						@if ($survey->survey->type == 'bool')
-							<x-slot:value>{{ $survey->answer == 'true' ? 'Ada' : 'Tidak' }}</x-slot:value>
-						@else
-							<x-slot:value>{{ $survey->answer }}</x-slot:value>
-						@endif
+						<x-slot:title>{{ $forms->outletForm->question }}</x-slot:title>
+							<x-slot:value>{{ $forms->answer }}</x-slot:value>
 					</x-pages.routing.outlet-detail>
 				@endforeach
 			</div>

@@ -2,7 +2,9 @@
 
 namespace App\Http\Controllers\Web;
 
+use App\Models\OutletFormAnswer;
 use Carbon\Carbon;
+use App\Models\OutletForm;
 use App\Models\SalesSurvey;
 use Illuminate\Http\Request;
 use App\Models\SalesActivity;
@@ -90,10 +92,11 @@ class SalesActivityController extends Controller
     }
     public function detail($id){
         $salesActivity = SalesActivity::with(['user:id,name', 'outlet:id,name,visit_day'])->find($id);
-        $salesSurvey = SalesSurvey::with('survey')->where('sales_activity_id', $id)->get();
+        $outletId = $salesActivity->outlet_id;
+        $outletForms = OutletFormAnswer::with('outletForm')->where('outlet_id', $outletId)->get();
         return view('pages.routing.sales-activity', [
             'salesActivity' => $salesActivity,
-            'salesSurvey' => $salesSurvey
+            'outletForms' => $outletForms
         ]);
     } 
 }
