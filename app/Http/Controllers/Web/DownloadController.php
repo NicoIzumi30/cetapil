@@ -156,6 +156,7 @@ class DownloadController extends Controller
                     });
                 });
             }
+            $query->where('sales_activities.status', 'SUBMITTED');
             // Get data
             $data = $query->get();
             // Generate filename with timestamp

@@ -13,6 +13,7 @@ use PhpOffice\PhpSpreadsheet\Style\Border;
 use PhpOffice\PhpSpreadsheet\Style\Fill;
 use Carbon\Carbon;
 use PhpOffice\PhpSpreadsheet\Cell\DataType;
+
 class VisibilityActivityExport implements FromCollection, WithHeadings, WithMapping, WithStyles, ShouldAutoSize
 {
     protected $data;
@@ -84,6 +85,16 @@ class VisibilityActivityExport implements FromCollection, WithHeadings, WithMapp
             'Tipe Display Secondary Baby 2',
             'Apakah Ada Secondary Display',
             'Foto Secondary Baby 2',
+            'Nama Brand Competitor 1',
+            'Mekanisme Promo Competitor 1',
+            'Periode Promo Competitor 1',
+            'Foto Program Competitor 1',
+            'Foto Program Competitor 1',
+            'Nama Brand Competitor 2',
+            'Mekanisme Promo Competitor 2',
+            'Periode Promo Competitor 2',
+            'Foto Program Competitor 2',
+            'Foto Program Competitor 2',
             'Created At',
             'Ended At',
             'Duration',
@@ -104,7 +115,7 @@ class VisibilityActivityExport implements FromCollection, WithHeadings, WithMapp
                     ->where('category', $category)
                     ->where('position', $position)
                     ->first();
-        
+
                 // Append data for this category and position
                 $data[] = @$visibility->posmType->name ?: '-';
                 $data[] = @$visibility->visual_type ?: '-';
@@ -114,7 +125,7 @@ class VisibilityActivityExport implements FromCollection, WithHeadings, WithMapp
                 $data[] = @$visibility->shelving ?: '-';
             }
         }
-        
+
         foreach ($categories as $category) {
             for ($position = 1; $position <= 2; $position++) {
                 // Find the first matching record for the category and position
@@ -123,12 +134,28 @@ class VisibilityActivityExport implements FromCollection, WithHeadings, WithMapp
                     ->where('category', $category)
                     ->where('position', $position)
                     ->first();
-        
+
                 // Append data for this category and position
                 $data[] = @$visibility->visual_type ?: '-';
                 $data[] = @$visibility->has_secondary_display ? 'Yes' : 'No';
                 $data[] = !empty($visibility->display_photo) ? config('app.storage_url') . $visibility->display_photo : '-';
             }
+        }
+
+        for ($position = 1; $position <= 2; $position++) {
+            // Find the first matching record for the category and position
+            $visibility = $row->salesVisibilities
+                ->where('type', 'COMPETITOR')
+                ->where('category', 'COMPETITOR')
+                ->where('position', $position)
+                ->first();
+
+            // Append data for this category and position
+            $data[] = @$visibility->competitor_brand_name ?: '-';
+            $data[] = @$visibility->competitor_promo_mechanism ?: '-';
+            $data[] = @$visibility->competitor_promo_start . "-" . @$visibility->competitor_promo_end ?: '-';
+            $data[] = !empty($visibility->display_photo) ? config('app.storage_url') . $visibility->display_photo : '-';
+            $data[] = !empty($visibility->display_photo) ? config('app.storage_url') . $visibility->display_photo_2 : '-';
         }
         $data[] = $row->created_at->format('Y-m-d H:i:s'); // Created At
 
@@ -209,8 +236,8 @@ class VisibilityActivityExport implements FromCollection, WithHeadings, WithMapp
             ],
         ]);
         $lastRow = $sheet->getHighestRow();
-        $photoCols = ['J', 'P', 'V','AB','AH','AN','AS','AV','AY','BB']; // Sesuaikan dengan kolom foto Anda
-        
+        $photoCols = ['J', 'P', 'V', 'AB', 'AH', 'AN', 'AS', 'AV', 'AY', 'BB']; // Sesuaikan dengan kolom foto Anda
+
         foreach ($photoCols as $col) {
             for ($row = 2; $row <= $lastRow; $row++) {
                 $cell = $sheet->getCell($col . $row);

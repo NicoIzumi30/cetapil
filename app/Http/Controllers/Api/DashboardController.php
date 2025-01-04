@@ -156,12 +156,21 @@ class DashboardController extends Controller
             Carbon::parse($latest_power_sku_update)->format('d F Y') :
             $now->format('d F Y');
 
+        $provinceCode = getProvinceCodeByCityName($user->city);
+
+        // Get programs for the province
+        $programs = DB::table('programs')
+            ->whereNull('deleted_at')
+            ->where('province_code', $provinceCode)
+            ->select('id', 'province_code', 'filename', 'path')
+            ->get();
+
         return $this->successResponse(
             DashboardConstants::GET_MOBILE_DASH,
             HTTPCode::HTTP_OK,
             [
                 'city' => $user->city,
-                'region' => getProvinceCodeByCityName($user->city),
+                'region' => $user->city,
                 'role' => 'Sales',
                 'total_outlet' => $total_outlet,
                 'total_actual_plan' => $total_actual_plan,
@@ -171,7 +180,8 @@ class DashboardController extends Controller
                 'current_outlet' => $current_outlet,
                 'power_skus' => $power_skus,
                 'last_performance_update' => $performance_update,
-                'last_power_sku_update' => $power_sku_update
+                'last_power_sku_update' => $power_sku_update,
+                'programs' => $programs  // Add programs to the response
             ]
         );
     }
