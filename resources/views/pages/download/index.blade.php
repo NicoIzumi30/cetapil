@@ -145,17 +145,11 @@
             </x-button.info>
         </x-pages.download.download-card>
 
-<<<<<<< Updated upstream
-    <x-pages.download.download-card iconName="mingcute_to-do-fill">
-        <x-slot:cardTitle>
-            Survey
-        </x-slot:cardTitle>
-=======
+
         <x-pages.download.download-card iconName="material-symbols_map_search_rounded">
             <x-slot:cardTitle>
                 Availability
             </x-slot:cardTitle>
->>>>>>> Stashed changes
 
             <div class="mb-6">
                 <div>
@@ -185,17 +179,11 @@
             </x-button.info>
         </x-pages.download.download-card>
 
-<<<<<<< Updated upstream
-    <x-pages.download.download-card iconName="fluent_shifts-availability-20-filled">
-        <x-slot:cardTitle>
-            Availability
-        </x-slot:cardTitle>
-=======
+
         <x-pages.download.download-card iconName="fluent_clipboard">
             <x-slot:cardTitle>
                 Activity
             </x-slot:cardTitle>
->>>>>>> Stashed changes
 
             <div class="mb-6">
                 <div>
@@ -264,103 +252,13 @@
                 Program
             </x-slot:cardTitle>
 
-<<<<<<< Updated upstream
-    <x-pages.download.download-card iconName="fluent_clipboard">
-        <x-slot:cardTitle>
-            Activity
-        </x-slot:cardTitle>
 
-        <div class="mb-6">
-            <div>
-                <label for="activity-start-date">Tanggal Mulai:</label>
-                <input id="activity-start-date" class="form-control" type="text" name="activity-start-date"
-                    placeholder="DD/MM/YYYY" aria-describedby="name" />
-            </div>
-            <div>
-                <label for="activity-end-date">Tanggal Selesai:</label>
-                <input id="activity-end-date" class="form-control" type="text" name="activity-end-date"
-                    placeholder="DD/MM/YYYY" aria-describedby="name" />
-            </div>
-            <div>
-                <label for="activity-region">Filter By Region : </label>
-                <select id="activity-region" name="activity-region" class="w-full">
-                    <option value="all" selected>
-                        Semua
-                    </option>
-                    @foreach ($provinces as $province)
-                        <option value="{{ $province->code }}">{{ $province->name }}</option>
-                    @endforeach
-                </select>
-            </div>
-        </div>
-
-        <x-button.info class="w-full" data-activity-download>
-            <span id="downloadBtnText">Download</span>
-            <span id="downloadBtnLoading" class="hidden">Downloading...</span>
-        </x-button.info>
-    </x-pages.download.download-card>
-
-    <x-pages.download.download-card iconName="fluent_box_20_filled">
-        <x-slot:cardTitle>
-            Produk
-        </x-slot:cardTitle>
-
-        <x-button.info class="w-full" data-product-download>
-            <span id="downloadBtnText">Download</span>
-            <span id="downloadBtnLoading" class="hidden">Downloading...</span>
-        </x-button.info>
-    </x-pages.download.download-card>
-
-    <x-pages.download.download-card iconName="mdi_account_group">
-        <x-slot:cardTitle>
-            Pengguna
-        </x-slot:cardTitle>
-
-        <x-button.info class="w-full" data-pengguna-download>
-            <span id="downloadBtnText">Download</span>
-            <span id="downloadBtnLoading" class="hidden">Downloading...</span>
-        </x-button.info>
-    </x-pages.download.download-card>
-
-    <x-pages.download.download-card iconName="uis_chart">
-        <x-slot:cardTitle>
-            AV3M
-        </x-slot:cardTitle>
-
-        <x-button.info class="w-full" data-av3m-download>
-            <span id="downloadBtnText">Download</span>
-            <span id="downloadBtnLoading" class="hidden">Downloading...</span>
-        </x-button.info>
-    </x-pages.download.download-card>
-    <x-pages.download.download-card iconName="mingcute_target-fill">
-        <x-slot:cardTitle>
-            Program
-        </x-slot:cardTitle>
-
-        <x-button.info class="w-full" data-program-download>
-            <span id="downloadBtnText">Download</span>
-            <span id="downloadBtnLoading" class="hidden">Downloading...</span>
-        </x-button.info>
-    </x-pages.download.download-card>
-    <x-pages.download.download-card iconName="fluent_box_20_filled">
-        <x-slot:cardTitle>
-            Kota
-        </x-slot:cardTitle>
-
-        <x-button.info class="w-full" data-kota-download>
-            <span id="downloadBtnText">Download</span>
-            <span id="downloadBtnLoading" class="hidden">Downloading...</span>
-        </x-button.info>
-    </x-pages.download.download-card>
-</div>
-=======
             <x-button.info class="w-full" data-program-download>
                 <span id="downloadBtnText">Download</span>
                 <span id="downloadBtnLoading" class="hidden">Downloading...</span>
             </x-button.info>
         </x-pages.download.download-card>
     </div>
->>>>>>> Stashed changes
 @endsection
 
 
@@ -470,15 +368,6 @@ $(document).ready(function () {
             timer: duration,
             timerProgressBar: true
         });
-<<<<<<< Updated upstream
-        setupDownloadButton('[data-kota-download]', {
-            fetchUrl: '{{ route('download.city') }}',
-        });
-        // Download untuk Pengguna
-        setupDownloadButton('[data-pengguna-download]', {
-            fetchUrl: '{{ route('download.pengguna') }}',
-        });
-=======
     }
 
     // Simple downloads (no filters)
@@ -488,7 +377,6 @@ $(document).ready(function () {
         { selector: '[data-av3m-download]', url: '{{ route("download.av3m") }}' },
         { selector: '[data-pengguna-download]', url: '{{ route("download.pengguna") }}' }
     ];
->>>>>>> Stashed changes
 
     simpleDownloads.forEach(download => {
         setupDownloadButton(download.selector, {
