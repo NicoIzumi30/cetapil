@@ -246,7 +246,7 @@ class SellingController extends GetxController {
   }
 
   // SECTION: Save and Submit Operations
-  Future<void> saveDraftSelling() async {
+  Future<bool> saveDraftSelling() async {
     try {
       isSaving.value = true;
       await _validateDraftData();
@@ -257,8 +257,10 @@ class SellingController extends GetxController {
       await _saveDraftToDatabase(data);
 
       _handleDraftSaveSuccess();
+      return true;
     } catch (e) {
       CustomAlerts.showError(Get.context!, "Gagal", e.toString());
+      return false;
     } finally {
       isSaving.value = false;
       onReset();
@@ -311,12 +313,11 @@ class SellingController extends GetxController {
         isUpdating
             ? "Anda baru memperbarui Draft. Silahkan periksa status Draft pada aplikasi."
             : "Anda baru menyimpan Draft. Silahkan periksa status Draft pada aplikasi.");
-    Get.back();
     loadInitialData();
     clearForm();
   }
 
-  Future<void> submitApiSelling() async {
+  Future<bool> submitApiSelling() async {
     try {
       // Store the draft ID early
       final draftIdToDelete = currentDraftId.value;
@@ -371,7 +372,6 @@ class SellingController extends GetxController {
 
       // Clear form and navigate back
       clearForm();
-      Get.back();
 
       // Show success message
       CustomAlerts.showSuccess(Get.context!, "Data Berhasil Disimpan",
@@ -379,6 +379,7 @@ class SellingController extends GetxController {
 
       // Refresh data to reflect changes
       await loadInitialData();
+      return true;
     } catch (e) {
       CustomAlerts.dismissLoading();
       CustomAlerts.showError(
@@ -388,6 +389,7 @@ class SellingController extends GetxController {
               ? "Gagal mengirim data ke server. Periksa koneksi Anda dan coba lagi."
               : e.toString());
       print('Error submitting data: $e');
+      return false;
     } finally {
       onReset();
       CustomAlerts.dismissLoading();

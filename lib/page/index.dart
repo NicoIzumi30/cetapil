@@ -11,9 +11,16 @@ import 'activity/activity.dart';
 import 'dashboard/dashboard.dart';
 import 'outlet/outlet.dart';
 
-class MainPage extends GetView<BottomNavController>{
+class MainPage extends GetView<BottomNavController> {
   // final BottomNavController controller = Get.find<BottomNavController>();
   final LoginController loginController = Get.find<LoginController>();
+
+  final permissionPages = {
+    'menu_outlet': OutletPage(),
+    'menu_routing': RoutingPage(),
+    'menu_activity': ActivityPage(),
+    'menu_selling': SellingPage(),
+  };
 
   @override
   Widget build(BuildContext context) {
@@ -37,19 +44,25 @@ class MainPage extends GetView<BottomNavController>{
           requiresGPS: true,
           body: SafeArea(
             child: Obx(() {
-              switch (controller.selectedIndex.value) {
-                case 0:
-                  return DashboardPage();
-                case 1:
-                  return RoutingPage();
-                case 2:
-                  return OutletPage();
-                case 3:
-                  return ActivityPage();
-                case 4:
-                  return SellingPage();
-                default:
-                  return DashboardPage();
+              final permissions = Get.find<LoginController>().currentUser.value!.permissions!;
+
+              if (permissions.isNotEmpty) {
+                switch (controller.selectedIndex.value) {
+                  case 0:
+                    return DashboardPage(); // Fixed tab
+                  case 1:
+                    return permissionPages[permissions[0].name] ?? DashboardPage();
+                  case 2:
+                    return permissionPages[permissions[1].name] ?? DashboardPage();
+                  case 3:
+                    return permissionPages[permissions[2].name] ?? DashboardPage();
+                  case 4:
+                    return permissionPages[permissions[3].name] ?? DashboardPage();
+                  default:
+                    return DashboardPage();
+                }
+              } else {
+                return DashboardPage();
               }
             }),
           ),

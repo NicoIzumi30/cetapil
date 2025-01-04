@@ -81,6 +81,7 @@ class DashboardController extends GetxController {
 
   Future<void> getUserData() async {
     try {
+      Get.find<LoginController>().checkAuthStatus();
       final user = _loginController.currentUser.value;
       if (user != null) {
         username.value = user.name ?? "";
