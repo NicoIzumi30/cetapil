@@ -70,7 +70,6 @@
                 dom: 'rt<"bottom-container"<"bottom-left"l><"bottom-right"p>>',
                 language: {
                     lengthMenu: "Menampilkan _MENU_ dari _TOTAL_ data",
-                    processing: "Memuat data...",
                     paginate: {
                         previous: '<',
                         next: '>',
