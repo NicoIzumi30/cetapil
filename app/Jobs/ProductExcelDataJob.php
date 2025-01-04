@@ -1,4 +1,4 @@
-<?php 
+<?php
 namespace App\Jobs;
 
 use Exception;
@@ -31,10 +31,10 @@ class ProductExcelDataJob implements ShouldQueue
             foreach ($chunk as $key => $row) {
                 try {
                     $product = getProductBySku($row['produk_sku']);
-                    if (!$product) {
-                        if ($row['kategori_produk']) { 
-                            $category = getCategoryByName($row['kategori_produk']);
-                            if ($category) {
+                    if ($row['kategori_produk']) {
+                        $category = getCategoryByName($row['kategori_produk']);
+                        if ($category) {
+                            if (!$product) {
                                 $product = Product::create([
                                     'category_id' => $category['id'],
                                     'sku' => $row['produk_sku'],
@@ -42,12 +42,20 @@ class ProductExcelDataJob implements ShouldQueue
                                     'price' => $row['harga'] ?? 0,
                                 ]);
                             } else {
-                                throw new Exception("Category not found: " . $row['kategori_produk']);
+                                $product->update([
+                                    'category_id' => $category['id'],
+                                    'sku' => $row['produk_sku'],
+                                    'code' => $row['sku_code'],
+                                    'price' => $row['harga'] ?? 0,
+                                ]);
+
                             }
+                        } else {
+                            throw new Exception("Category not found: " . $row['kategori_produk']);
                         }
                     }
 
-            
+
                 } catch (\Exception $e) {
                     $errorRow = $key + 1;
                     $data = [
