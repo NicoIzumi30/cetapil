@@ -37,7 +37,6 @@ Route::middleware('auth')->group(function () {
     Route::get('/get-avg-visibility', [DashboardController::class, 'avg_visibility'])->name('avg_visibility');
     Route::get('/get-avg-survey', [DashboardController::class, 'avg_survey'])->name('avg_survey');
 
-
     //profile
     Route::get('/profile', [ProfileController::class, 'index'])->name('profile');
 
@@ -52,7 +51,7 @@ Route::middleware('auth')->group(function () {
         Route::get('/', [RoutingRequestControler::class, 'index'])->name('index');
         Route::get('/data', [RoutingRequestControler::class, 'getData'])->name('data');
         Route::get('/{id}/edit', [RoutingRequestControler::class, 'edit'])->name('edit');
-        Route::put('/{id}/approve', [RoutingRequestControler::class, 'approve'])->name('approve');
+        Route::post('/routing/request/approve/{id}', [RoutingRequestControler::class, 'approve'])->name('routing.request.approve');
         Route::put('/{id}/reject', [RoutingRequestControler::class, 'reject'])->name('reject');
         Route::delete('/delete/', [RoutingRequestControler::class, 'destroy'])->name('delete');
     });
@@ -149,7 +148,6 @@ Route::middleware('auth')->group(function () {
             Route::get('/download', [ProductController::class, 'downloadAv3m'])->name('download');
             Route::get('/template', [ProductController::class, 'templateAv3m'])->name('template');
         });
-
     });
 
     Route::prefix('download')->name('download.')->group(function () {
