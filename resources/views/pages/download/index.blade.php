@@ -62,20 +62,20 @@
             <div>
                 <label for="visibility-region">Filter By Region : </label>
                 <select id="visibility-region" name="visibility-region" class="w-full">
-                    <option value="" selected disabled>
-                        -- Pilih Region --
+                    <option value="all" selected>
+                       Semua Regional
                     </option>
-                    <option value="MT">
-                        MT
-                    </option>
-                    <option value="GT">
-                        GT
-                    </option>
+                    @foreach($provinces as $province)
+                        <option value="{{ $province->code }}">{{ $province->name }}</option>
+                    @endforeach
                 </select>
             </div>
         </div>
 
-        <x-button.info class="w-full">Download</x-button.info>
+        <x-button.info class="w-full" data-visibility-download>
+            <span id="downloadBtnText">Download</span>
+            <span id="downloadBtnLoading" class="hidden">Downloading...</span>
+        </x-button.info>
     </x-pages.download.download-card>
 
     <x-pages.download.download-card iconName="fluent_box_20_filled">
@@ -131,20 +131,18 @@
             <div>
                 <label for="survey-region">Filter By Region : </label>
                 <select id="survey-region" name="survey-region" class="w-full">
-                    <option value="" selected disabled>
-                        -- Pilih Region --
-                    </option>
-                    <option value="MT">
-                        MT
-                    </option>
-                    <option value="GT">
-                        GT
-                    </option>
+                <option value="all">Semua Regional</option>
+                    @foreach($provinces as $province)
+                        <option value="{{ $province->code }}">{{ $province->name }}</option>
+                    @endforeach
                 </select>
             </div>
         </div>
 
-        <x-button.info class="w-full">Download</x-button.info>
+        <x-button.info class="w-full" data-survey-download>
+            <span id="downloadBtnText">Download</span>
+            <span id="downloadBtnLoading" class="hidden">Downloading...</span>
+        </x-button.info>
     </x-pages.download.download-card>
 
     <x-pages.download.download-card iconName="material-symbols_map_search_rounded">
@@ -166,20 +164,18 @@
             <div>
                 <label for="availability-region">Filter By Region : </label>
                 <select id="availability-region" name="availability-region" class="w-full">
-                    <option value="" selected disabled>
-                        -- Pilih Region --
-                    </option>
-                    <option value="MT">
-                        MT
-                    </option>
-                    <option value="GT">
-                        GT
-                    </option>
+                <option value="all">Semua Regional</option>
+                    @foreach($provinces as $province)
+                        <option value="{{ $province->code }}">{{ $province->name }}</option>
+                    @endforeach
                 </select>
             </div>
         </div>
 
-        <x-button.info class="w-full">Download</x-button.info>
+        <x-button.info class="w-full" data-availability-download>
+            <span id="downloadBtnText">Download</span>
+            <span id="downloadBtnLoading" class="hidden">Downloading...</span>
+        </x-button.info>
     </x-pages.download.download-card>
 
     <x-pages.download.download-card iconName="fluent_clipboard">
@@ -245,6 +241,16 @@
         </x-slot:cardTitle>
 
         <x-button.info class="w-full" data-av3m-download>
+            <span id="downloadBtnText">Download</span>
+            <span id="downloadBtnLoading" class="hidden">Downloading...</span>
+        </x-button.info>
+    </x-pages.download.download-card>
+    <x-pages.download.download-card iconName="fluent_box_20_filled">
+        <x-slot:cardTitle>
+            Program
+        </x-slot:cardTitle>
+
+        <x-button.info class="w-full" data-program-download>
             <span id="downloadBtnText">Download</span>
             <span id="downloadBtnLoading" class="hidden">Downloading...</span>
         </x-button.info>
@@ -328,7 +334,9 @@
         setupDownloadButton('[data-product-download]', {
             fetchUrl: '{{ route('download.product') }}',
         });
-
+        setupDownloadButton('[data-program-download]', {
+            fetchUrl: '{{ route('download.program') }}',
+        });
         // Download untuk AV3M
         setupDownloadButton('[data-av3m-download]', {
             fetchUrl: '{{ route('download.av3m') }}',
@@ -355,7 +363,51 @@
             },
             useForm: false,
         });
+        setupDownloadButton('[data-visibility-download]', {
+            fetchUrl: '{{ route('download.visibility') }}',
+            getQueryParams: function () {
+                const startDate = $('#visibility-start-date').val();
+                const endDate = $('#visibility-end-date').val();
+                const visibilityDate = startDate && endDate ? `${startDate} to ${endDate}` : '';
+                const visibilityRegion = $('#visibility-region').val();
 
+                return {
+                    visibility_date: visibilityDate,
+                    visibility_region: visibilityRegion,
+                };
+            },
+            useForm: false,
+        });
+        setupDownloadButton('[data-survey-download]', {
+            fetchUrl: '{{ route('download.survey') }}',
+            getQueryParams: function () {
+                const startDate = $('#survey-start-date').val();
+                const endDate = $('#survey-end-date').val();
+                const surveyDate = startDate && endDate ? `${startDate} to ${endDate}` : '';
+                const surveyRegion = $('#survey-region').val();
+
+                return {
+                    survey_date: surveyDate,
+                    survey_region: surveyRegion,
+                };
+            },
+            useForm: false,
+        });
+        setupDownloadButton('[data-availability-download]', {
+            fetchUrl: '{{ route('download.availability') }}',
+            getQueryParams: function () {
+                const startDate = $('#availability-start-date').val();
+                const endDate = $('#availability-end-date').val();
+                const availabilityDate = startDate && endDate ? `${startDate} to ${endDate}` : '';
+                const availabilityRegion = $('#availability-region').val();
+
+                return {
+                    availability_date: availabilityDate,
+                    availability_region: availabilityRegion,
+                };
+            },
+            useForm: false,
+        });
         // Download untuk Routing
         setupDownloadButton('[data-routing-download]', {
             fetchUrl: '{{ route('download.routing') }}',

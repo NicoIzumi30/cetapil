@@ -11,5 +11,10 @@ class Program extends Model
 {
     use HasFactory, HasUuids, SoftDeletes;
 
-    protected $fillable = ['province_code','filename','path'];
+    protected $fillable = ['province_code', 'filename', 'path'];
+
+    public function province()
+    {
+        return $this->belongsTo(Province::class, 'province_code', 'code');
+    }
 }
