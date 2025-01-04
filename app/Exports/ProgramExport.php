@@ -35,7 +35,7 @@ class ProgramExport implements FromCollection, WithHeadings, WithMapping, WithSt
         $headers = [
             'Regional',
             'Program',
-            'Created At'
+            'Last Updated'
         ];
 
         return $headers;
@@ -48,7 +48,7 @@ class ProgramExport implements FromCollection, WithHeadings, WithMapping, WithSt
             $row = [
                 $program->province->name ?? '',
                 $program->path ? config('app.storage_url') . $program->path : '-',
-                $program->created_at
+                $program->updated_at
             ];
             return $row;
         } catch (\Exception $e) {
