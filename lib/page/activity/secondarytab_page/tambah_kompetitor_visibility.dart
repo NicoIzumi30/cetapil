@@ -66,7 +66,7 @@ class TambahKompetitorVisibility extends GetView<TambahVisibilityController> {
                                 title: "Mekanisme Promo *",
                                 controller: controller.promoMechanism.value,
                               ),
-                              DateRangePickerField(title: "Promo Periode",selectedDateRange: controller.selectedDateRange.value ),
+                              DateRangePickerField(title: "Promo Periode",controller: controller ),
                               _buildImageUploader(context, "Foto Program Kompetitor 1"),
                               _buildImageUploader(context, "Foto Program Kompetitor 2"),
                             ],

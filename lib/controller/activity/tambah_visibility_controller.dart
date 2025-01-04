@@ -1,6 +1,7 @@
 import 'dart:io';
 import 'package:get/get.dart';
 import 'package:flutter/material.dart';
+import 'package:intl/intl.dart';
 import '../../controller/activity/tambah_activity_controller.dart';
 import '../../controller/support_data_controller.dart';
 
@@ -79,7 +80,11 @@ class TambahVisibilityController extends GetxController {
     } else {
       brandName.value.text = data['brand_name'];
       promoMechanism.value.text = data['promo_mechanism'];
-      promoPeriode.value.text = data['promo_periode'];
+      selectedDateRange.value = DateTimeRange(
+        start: DateTime.parse(data['promo_periode_start']),
+        end: DateTime.parse(data['promo_periode_end']),
+      );
+
       programImages1.value = data['program_image1'];
       programImages2.value = data['program_image2'];
     }
@@ -313,15 +318,21 @@ class TambahVisibilityController extends GetxController {
     var id_part = id.split('-');
 
     /// (kompetitor , 1)
+    String formattedStart =
+    DateFormat('yyyy-MM-dd').format(selectedDateRange.value!.start);
+    String formattedEnd =
+    DateFormat('yyyy-MM-dd').format(selectedDateRange.value!.start);
     final data = {
       'id': id,
       'position': id_part[1],
       'brand_name': brandName.value.text,
       'promo_mechanism': promoMechanism.value.text,
-      'promo_periode': selectedDateRange.value.toString(),
+      'promo_periode_start': formattedStart,
+      'promo_periode_end': formattedEnd,
       'program_image1': programImages1.value,
       'program_image2': programImages2.value,
     };
+    print(selectedDateRange.value);
 
     activityController.addKompetitorVisibilityItem(data);
     clearKompetitorForm();

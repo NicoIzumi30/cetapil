@@ -321,7 +321,7 @@ class VisibilityPage extends GetView<ActivityController> {
           return KompetitorCard(
             brandName: data['brand_name'] ?? "-",
             promoMechanism: data['promo_mechanism'] ?? "-",
-            promoPeriode: data['promo_periode'] ?? "-",
+            promoPeriode: data['promo_periode_start'] != null ? "${data['promo_periode_start']} - ${data['promo_periode_end']}" : "-",
             imagePath: data['program_image1'],
             isSubmitted: data.isNotEmpty,
             onTapCard: () {
@@ -342,7 +342,7 @@ class VisibilityPage extends GetView<ActivityController> {
           return KompetitorCard(
             brandName: data['brand_name'] ?? "-",
             promoMechanism: data['promo_mechanism'] ?? "-",
-            promoPeriode: data['promo_periode'] ?? "-",
+            promoPeriode: data['promo_periode_start'] != null ? "${data['promo_periode_start']} - ${data['promo_periode_end']}" : "-",
             imagePath: data['program_image1'],
             isSubmitted: data.isNotEmpty,
             onTapCard: () {

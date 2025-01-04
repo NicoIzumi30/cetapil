@@ -411,7 +411,7 @@ class _CompactProductCardState extends State<CompactProductCard> {
                 Row(
                   crossAxisAlignment: CrossAxisAlignment.center,
                   children: [
-                    Expanded(child: _buildInputField('Stock On Save', stockOnHandController)),
+                    Expanded(child: _buildInputField('Stock On Shelf', stockOnHandController)),
                     SizedBox(width: 8),
                     Expanded(
                         child:

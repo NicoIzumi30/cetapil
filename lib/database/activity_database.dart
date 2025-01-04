@@ -95,6 +95,22 @@ class ActivityDatabaseHelper {
       )
     ''');
 
+    await db.execute('''
+      CREATE TABLE visibility_kompetitor (
+        id TEXT PRIMARY KEY,
+        sales_activity_id TEXT,
+        category TEXT,
+        position TEXT,
+        brand_name TEXT,
+        promo_mechanism TEXT,
+        promo_periode_start TEXT,
+        promo_periode_end TEXT,
+        program_image1 TEXT,
+        program_image2 TEXT,
+        FOREIGN KEY (sales_activity_id) REFERENCES sales_activity (id)
+      )
+    ''');
+
     // Survey items table
     await db.execute('''
       CREATE TABLE survey (
@@ -136,6 +152,7 @@ class ActivityDatabaseHelper {
     List<Map<String, dynamic>>? availabilityItems,
     List<Map<String, dynamic>>? visibilityPrimaryItems,
     List<Map<String, dynamic>>? visibilitySecondaryItems,
+    List<Map<String, dynamic>>? visibilityKompetitorItems,
     List<Map<String, dynamic>>? surveyItems,
     List<Map<String, dynamic>>? orderItems,
   }) async {
@@ -207,6 +224,23 @@ class ActivityDatabaseHelper {
             'secondary_exist': item['secondary_exist'].toString(),
             'display_type': item['display_type'].toString(),
             'display_image': item['display_image'].path,
+          });
+        }
+      }
+
+      if (visibilityKompetitorItems != null) {
+        for (var item in visibilityKompetitorItems) {
+          await txn.insert('visibility_kompetitor', {
+            'id': uuid.v4(),
+            'sales_activity_id': data['sales_activity_id'],
+            'category': item['category'].toString(),
+            'position': item['position'].toString(),
+            'brand_name': item['brand_name'].toString(),
+            'promo_mechanism': item['promo_mechanism'].toString(),
+            'promo_periode_start': item['promo_periode_start'].toString(),
+            'promo_periode_end': item['promo_periode_end'].toString(),
+            'program_image1': item['program_image1'].path,
+            'program_image2': item['program_image2'].path,
           });
         }
       }

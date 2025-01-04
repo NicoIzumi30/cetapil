@@ -424,6 +424,7 @@ class Api {
     List<Map<String, dynamic>> availabilityList,
     List<Map<String, dynamic>> visibilityPrimaryList,
     List<Map<String, dynamic>> visibilitySecondaryList,
+    List<Map<String, dynamic>> visibilityKompetitorList,
     List<Map<String, dynamic>> surveyList,
     List<Map<String, dynamic>> orderList,
   ) async {
@@ -506,6 +507,22 @@ class Api {
       request.files.add(await http.MultipartFile.fromPath(
         'visibility[${i + 6}][display_photo]',
         visibilitySecondaryList[i]['display_image'].path,
+      ));
+    }
+
+    for (var i = 0; i < visibilityKompetitorList.length; i++) {
+      request.fields["visibility[${i + 10}][category]"] = "COMPETITOR";
+      request.fields["visibility[${i + 10}][type]"] = "COMPETITOR";
+      request.fields["visibility[${i + 10}][position]"] = visibilityKompetitorList[i]['position'].toString();
+      request.fields["visibility[${i + 10}][competitor_brand_name]"] = visibilityKompetitorList[i]['brand_name'].toString().toUpperCase();
+      request.fields["visibility[${i + 10}][competitor_promo_mechanism]"] = visibilityKompetitorList[i]['promo_mechanism'].toString();
+      request.fields["visibility[${i + 10}][competitor_promo_start]"] = visibilityKompetitorList[i]['promo_periode_start'].toString();
+      request.fields["visibility[${i + 10}][competitor_promo_end]"] = visibilityKompetitorList[i]['promo_periode_end'].toString();
+      request.files.add(await http.MultipartFile.fromPath(
+        'visibility[${i + 10}][display_photo]', visibilityKompetitorList[i]['program_image1'].path,
+      ));
+      request.files.add(await http.MultipartFile.fromPath(
+        'visibility[${i + 10}][display_photo_2]', visibilityKompetitorList[i]['program_image2'].path,
       ));
     }
 

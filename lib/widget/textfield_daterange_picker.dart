@@ -1,13 +1,16 @@
 import 'package:flutter/material.dart';
+import 'package:intl/intl.dart';
+
+import '../controller/activity/tambah_visibility_controller.dart';
 
 class DateRangePickerField extends StatefulWidget {
   final String title;
+  late TambahVisibilityController controller;
   // final TextEditingController controller;
-  late DateTimeRange? selectedDateRange;
   DateRangePickerField({
     Key? key,
     // required this.controller,
-    required this.title, this.selectedDateRange,
+    required this.title, required this.controller,
   }) : super(key: key);
   @override
   _DateRangePickerFieldState createState() => _DateRangePickerFieldState();
@@ -21,7 +24,7 @@ class _DateRangePickerFieldState extends State<DateRangePickerField> {
       context: context,
       firstDate: DateTime(2000),
       lastDate: DateTime(2100),
-      initialDateRange: widget.selectedDateRange ?? DateTimeRange(
+      initialDateRange: widget.controller.selectedDateRange.value ?? DateTimeRange(
         start: DateTime.now(),
         end: DateTime.now().add(Duration(days: 7)),
       ),
@@ -29,10 +32,10 @@ class _DateRangePickerFieldState extends State<DateRangePickerField> {
 
     if (picked != null) {
       setState(() {
-        widget.selectedDateRange = picked;
-        print(widget.selectedDateRange);
+        widget.controller.selectedDateRange.value = picked;
+        print(widget.controller.selectedDateRange.value);
         _controller.text =
-            '${picked.start.toString().split(' ')[0]} - ${picked.end.toString().split(' ')[0]}';
+            '${widget.controller.selectedDateRange.value!.start.toString().split(' ')[0]} - ${widget.controller.selectedDateRange.value!.end.toString().split(' ')[0]}';
       });
     }
   }
@@ -120,8 +123,9 @@ class _DateRangePickerFieldState extends State<DateRangePickerField> {
   @override
   void initState() {
     _controller = TextEditingController();
-    if (widget.selectedDateRange != null) {
-      _controller.text = widget.selectedDateRange.toString();
+    if (widget.controller.selectedDateRange.value != null) {
+      _controller.text =  '${DateFormat('yyyy-MM-dd').format(widget.controller.selectedDateRange.value!.start)} - ${DateFormat('yyyy-MM-dd').format(widget.controller.selectedDateRange.value!.end)}';
+      // _controller.text = widget.controller.selectedDateRange.value.toString();
     }
 
     super.initState();

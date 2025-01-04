@@ -344,6 +344,7 @@ class TambahActivityController extends GetxController {
         availabilityDraftItems,
         visibilityPrimaryDraftItems,
         visibilitySecondaryDraftItems,
+        visibilityKompetitorDraftItems,
         surveyList,
         orderDraftItems,
       );
@@ -442,6 +443,7 @@ class TambahActivityController extends GetxController {
           availabilityItems: availabilityDraftItems,
           visibilityPrimaryItems: visibilityPrimaryDraftItems,
           visibilitySecondaryItems: visibilitySecondaryDraftItems,
+          visibilityKompetitorItems: visibilityKompetitorDraftItems,
           surveyItems: surveyList,
           orderItems: orderDraftItems,
         );
@@ -838,6 +840,7 @@ class TambahActivityController extends GetxController {
     orderDraftItems.clear();
     visibilityPrimaryDraftItems.clear();
     visibilitySecondaryDraftItems.clear();
+    visibilityKompetitorDraftItems.clear();
 
     // Clear Data Detail Draft
 

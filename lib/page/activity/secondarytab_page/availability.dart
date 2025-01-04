@@ -365,7 +365,7 @@ class SumAmountProduct extends StatelessWidget {
   String checkStatus(String number) {
     int num = int.parse(number);
     if (num < 0) {
-      return "MINUS";
+      return "ORDER";
     } else if (num > 0) {
       return "OVER";
     } else {
@@ -373,17 +373,16 @@ class SumAmountProduct extends StatelessWidget {
     }
   }
 
-  statusColor(String value){
-    switch(value) {
+  statusColor(String value) {
+    switch (value) {
       case "OVER":
         return Color(0xffff7171);
-      case "MINUS":
-        return Color(0xfff2c665);
+      case "ORDER":
+        return Color(0xff52c667);
       case "IDEAL":
         return Color(0xff0177be);
       default:
     }
-
   }
 
   const SumAmountProduct({
@@ -465,7 +464,7 @@ class SumAmountProduct extends StatelessWidget {
                 ),
                 Row(
                   children: [
-                    _buildDetailField("Stock On Hand", stockOnHandController),
+                    _buildDetailField("Stock On Shelf", stockOnHandController),
                     SizedBox(width: 12),
                     _buildDetailField("Stock On Inventory", stockOnInventoryController),
                     SizedBox(width: 12),
