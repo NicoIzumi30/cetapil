@@ -5,6 +5,8 @@ import '../model/list_knowledge_response.dart' as Knowledge;
 import '../model/survey_question_response.dart' as Survey;
 import '../model/list_posm_response.dart' as Posm;
 import '../model/list_visual_response.dart' as Visual;
+import '../model/list_planogram_response.dart' as Planogram;
+
 import 'package:sqflite/sqflite.dart';
 import 'package:path/path.dart';
 import 'dart:io';
@@ -57,6 +59,7 @@ class SupportDatabaseHelper {
       await txn.delete('survey_questions');
       await txn.delete('posm_types');
       await txn.delete('visual_types');
+      await txn.delete('planograms');
     });
   }
 
@@ -169,6 +172,14 @@ class SupportDatabaseHelper {
       name TEXT NOT NULL
     )
     ''');
+
+    await db.execute('''
+      CREATE TABLE planograms(
+        channel_id TEXT,
+        path TEXT,
+        FOREIGN KEY (channel_id) REFERENCES channel (id)
+      )
+    ''');
   }
 
   Future<void> insertProduct(SKU.Data product) async {
@@ -190,25 +201,6 @@ class SupportDatabaseHelper {
         },
         conflictAlgorithm: ConflictAlgorithm.replace,
       );
-
-      // if (product.channelAv3M is Map) {
-      //   await txn.delete(
-      //     'product_channels',
-      //     where: 'product_id = ?',
-      //     whereArgs: [product.id],
-      //   );
-      //
-      //   (product.channelAv3M as Map<String, dynamic>).forEach((key, value) {
-      //     txn.insert(
-      //       'product_channels',
-      //       {
-      //         'product_id': product.id,
-      //         'channel_name': key,
-      //         'value': value,
-      //       },
-      //     );
-      //   });
-      // }
     });
   }
 
@@ -378,5 +370,59 @@ class SupportDatabaseHelper {
   Future<List<Map<String, dynamic>>> getAllVisualTypes() async {
     final db = await database;
     return await db.query('visual_types');
+  }
+
+  Future<void> insertOrUpdatePlanogram(Planogram.Data planogram) async {
+    final db = await database;
+    await db.transaction((txn) async {
+      await txn.insert(
+        'planograms',
+        {
+          'channel_id': planogram.channelId,
+          'path': planogram.path,
+        },
+        conflictAlgorithm: ConflictAlgorithm.replace,
+      );
+    });
+  }
+
+  Future<List<Map<String, dynamic>>> getPlanogramByChannel(String channelId) async {
+    final db = await database;
+    print("Starting database query for channelId: $channelId");
+
+    try {
+      // First check if the channel exists
+      final channelExists = await db.query(
+        'channel',
+        where: 'id = ?',
+        whereArgs: [channelId],
+      );
+      print("Channel exists: ${channelExists.isNotEmpty}");
+
+      // Then get planograms
+      final List<Map<String, dynamic>> results = await db.query(
+        'planograms',
+        where: 'channel_id = ?',
+        whereArgs: [channelId],
+      );
+      print("Raw query results: $results");
+
+      final mappedResults = results
+          .map((row) => {
+                'path': row['path'],
+              })
+          .toList();
+      print("Mapped results: $mappedResults");
+
+      return mappedResults;
+    } catch (e) {
+      print("Database error: $e");
+      rethrow;
+    }
+  }
+
+  Future<List<Map<String, dynamic>>> getAllPlanograms() async {
+    final db = await database;
+    return await db.query('planograms', columns: ['channel_id', 'path']);
   }
 }

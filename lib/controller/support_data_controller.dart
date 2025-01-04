@@ -26,6 +26,7 @@ class SupportDataController extends GetxController {
   var knowledge = <Map<String, dynamic>>[].obs;
   var posmTypes = <Map<String, dynamic>>[].obs;
   var visualTypes = <Map<String, dynamic>>[].obs;
+  var planograms = <Map<String, dynamic>>[].obs;
 
   static const String LAST_FETCH_DATE_KEY = 'last_fetch_date';
 
@@ -87,10 +88,10 @@ class SupportDataController extends GetxController {
         initQuestionSurvey(),
         initPosmTypeData(),
         initVisualTypeData(),
+        initPlanogramData(), // Add this line
       ]);
       await loadLocalData();
 
-      // Update last fetch date
       final today = DateTime.now().toString().split(' ')[0];
       storage.write(LAST_FETCH_DATE_KEY, today);
     } catch (e) {
@@ -122,30 +123,18 @@ class SupportDataController extends GetxController {
     try {
       isLoading.value = true;
 
-      // Load products with their categories
+      // Existing load operations...
       products.value = await supportDB.getAllProducts();
-
-      // Load categories
       categories.value = await supportDB.getAllCategories();
-
-      // Load channels
       channels.value = await supportDB.getAllChannel();
-
-      // Load Knowledge
       knowledge.value = await supportDB.getAllKnowledge();
-
-      // Load Survey Question
       survey.value = await supportDB.getAllSurveyQuestions();
-
-      // Load POSM types
       posmTypes.value = await supportDB.getAllPosmTypes();
-
-      // Load Visual types
       visualTypes.value = await supportDB.getAllVisualTypes();
-
-      // Load Form Outlet
       formOutlet.value = await outletDB.getAllForms();
 
+      // Load all planograms
+      planograms.value = await supportDB.getAllPlanograms();
     } catch (e) {
       print("Error loading local data: $e");
     } finally {
@@ -181,8 +170,8 @@ class SupportDataController extends GetxController {
         initPosmTypeData(),
         initVisualTypeData(),
         initFormOutlet(),
+        initPlanogramData(), // Add this line
       ]);
-      // Reload local data after updating SQLite
       await loadLocalData();
     } catch (e) {
       print("Error initializing data: $e");
@@ -317,6 +306,33 @@ class SupportDataController extends GetxController {
     }
   }
 
+  Future<void> initPlanogramData() async {
+    try {
+      final responsePlanogram = await Api.getPlanogramList();
+      if (responsePlanogram.status == "OK") {
+        for (final planogram in responsePlanogram.data ?? []) {
+          await supportDB.insertOrUpdatePlanogram(planogram);
+        }
+      } else {
+        print("Planogram error = ${responsePlanogram.message}");
+      }
+    } catch (e) {
+      print("Planogram error = $e");
+    }
+  }
+
+  Future<List<Map<String, dynamic>>> getPlanogramsByChannel(String channelId) async {
+    try {
+      print("Getting planogram for channelId: $channelId");
+      final results = await supportDB.getPlanogramByChannel(channelId);
+      print("Planogram results: $results");
+      return results;
+    } catch (e) {
+      print("Error getting planograms for channel: $e");
+      return [];
+    }
+  }
+
   // Helper methods to access data
   List<Map<String, dynamic>> getProducts() => products;
   List<Map<String, dynamic>> getCategories() => categories;
@@ -326,4 +342,5 @@ class SupportDataController extends GetxController {
   List<Map<String, dynamic>> getPosmTypes() => posmTypes;
   List<Map<String, dynamic>> getVisualTypes() => visualTypes;
   List<Map<String, dynamic>> getFormOutlet() => formOutlet;
+  List<Map<String, dynamic>> getPlanograms() => planograms;
 }

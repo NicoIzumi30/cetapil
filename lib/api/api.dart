@@ -7,6 +7,7 @@ import 'package:cetapil_mobile/model/list_activity_response.dart';
 import 'package:cetapil_mobile/model/list_category_response.dart';
 import 'package:cetapil_mobile/model/list_channel_response.dart';
 import 'package:cetapil_mobile/model/list_knowledge_response.dart';
+import 'package:cetapil_mobile/model/list_planogram_response.dart';
 import 'package:cetapil_mobile/model/list_posm_response.dart';
 import 'package:cetapil_mobile/model/list_product_sku_response.dart';
 import 'package:cetapil_mobile/model/list_routing_response.dart';
@@ -598,5 +599,21 @@ class Api {
     }
     print(response.statusCode);
     throw "Gagal request data Calendar : \n${response.body}";
+  }
+  static Future<ListPlanogramResponse> getPlanogramList() async {
+    var url = "$baseUrl/api/activity/planogram";
+    var token = await storage.read('token');
+    var response = await http.get(
+      Uri.parse(url),
+      headers: {
+        'Content-type': 'application/json',
+        'Authorization': 'Bearer $token',
+      },
+    );
+    if (response.statusCode == 200) {
+      return ListPlanogramResponse.fromJson(jsonDecode(response.body));
+    }
+    print(response.statusCode);
+    throw "Gagal request data Planogram : \n${response.body}";
   }
 }
