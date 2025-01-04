@@ -236,7 +236,7 @@ class VisibilityActivityExport implements FromCollection, WithHeadings, WithMapp
             ],
         ]);
         $lastRow = $sheet->getHighestRow();
-        $photoCols = ['J', 'P', 'V', 'AB', 'AH', 'AN', 'AS', 'AV', 'AY', 'BB']; // Sesuaikan dengan kolom foto Anda
+        $photoCols = ['J', 'P', 'V', 'AB', 'AH', 'AN', 'AS', 'AV', 'AY', 'BB','BF','BG','BK','BL']; // Sesuaikan dengan kolom foto Anda
 
         foreach ($photoCols as $col) {
             for ($row = 2; $row <= $lastRow; $row++) {

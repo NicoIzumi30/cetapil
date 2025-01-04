@@ -65,7 +65,7 @@ class SurveyController extends Controller
                 'outlet:id,name,TSO,code,account,tipe_outlet,channel_id,visit_day',
                 'outlet.channel:id,name',
                 'surveys.survey'
-            ])->get();
+            ])->where('status','SUBMITTED')->get();
             $filename = 'market_survey_' . date('Y-m-d_His') . '.xlsx';
             return Excel::download(new SurveyExport($data), $filename);
         } catch (\Exception $e) {

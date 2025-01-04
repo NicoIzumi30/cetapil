@@ -347,7 +347,7 @@ class VisibilityController extends Controller
                 'salesVisibilities',
                 'salesVisibilities.posmType', // Load the posm_type relationship
             ]);
-
+            $query->where('status', 'SUBMITTED');
             // Apply date filter
             if ($request->filled('date') && $request->date !== 'Date Range') {
                 $dateParam = $request->date;

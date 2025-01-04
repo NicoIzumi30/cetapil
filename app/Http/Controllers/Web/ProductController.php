@@ -385,6 +385,7 @@ class ProductController extends Controller
                 'outlet.city:id,name',
                 'outlet.channel:id,name'
             ]);
+            $query->where('status', 'SUBMITTED');
 
             // Sisanya tetap sama
             if ($request->filled('filter_date') && $request->filter_date !== 'Date Range') {
