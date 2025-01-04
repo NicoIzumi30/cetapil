@@ -14,19 +14,23 @@ use Maatwebsite\Excel\Concerns\WithMapping;
 use Maatwebsite\Excel\Events\BeforeWriting;
 use PhpOffice\PhpSpreadsheet\Cell\Coordinate;
 use PhpOffice\PhpSpreadsheet\Style\Alignment;
+use Maatwebsite\Excel\Concerns\FromCollection;
 use Maatwebsite\Excel\Concerns\ShouldAutoSize;
 use PhpOffice\PhpSpreadsheet\Worksheet\Worksheet;
 use Maatwebsite\Excel\Concerns\WithCustomStartCell;
 
-class SurveyExport implements FromQuery, WithMapping, WithStyles, ShouldAutoSize, WithCustomStartCell, WithEvents
+class SurveyExport implements FromCollection, WithMapping, WithStyles, ShouldAutoSize, WithCustomStartCell, WithEvents
 {
     protected $surveyCategories;
     protected $surveyQuestions;
     protected $staticColumns;
+    protected $data;
+
     protected $lastStaticColumn = 'O'; // Kolom sebelum data survey dimulai
 
-    public function __construct()
+    public function __construct($data)
     {
+        $this->data = $data;
         $this->surveyCategories = SurveyCategory::orderBy('id')->get();
         $this->surveyQuestions = SurveyQuestion::orderBy('survey_category_id')->get();
         $this->staticColumns = [
@@ -37,16 +41,14 @@ class SurveyExport implements FromQuery, WithMapping, WithStyles, ShouldAutoSize
         ];
     }
 
-    public function query()
+    // public function query()
+    // {
+    //     return $this->data;
+    // }
+    public function collection()
     {
-        return SalesActivity::with([
-            'user:id,name',
-            'outlet:id,name,TSO,code,account,tipe_outlet,channel_id,visit_day',
-            'outlet.channel:id,name',
-            'surveys.survey'
-        ]);
+        return collect($this->data);
     }
-
     public function startCell(): string
     {
         return 'A3';

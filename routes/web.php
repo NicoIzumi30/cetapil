@@ -157,8 +157,12 @@ Route::middleware('auth')->group(function () {
         Route::get('/product', [DownloadController::class, 'downloadProduct'])->name('product');
         Route::get('/routing', [DownloadController::class, 'downloadRouting'])->name('routing');
         Route::get('/activity', [DownloadController::class, 'downloadActivity'])->name('activity');
+        Route::get('/visibility', [DownloadController::class, 'downloadvisibility'])->name('visibility');
+    Route::get('/availability', [DownloadController::class, 'downloadavailability'])->name('availability');
+        Route::get('/survey', [DownloadController::class, 'downloadsurvey'])->name('survey');
         Route::get('/selling', [DownloadController::class, 'downloadSelling'])->name('selling'); 
         Route::get('/pengguna', [DownloadController::class, 'downloadPengguna'])->name('pengguna');
+    Route::get('/program', [DownloadController::class, 'downloadprogram'])->name('program');
         Route::get('/av3m', [DownloadController::class, 'downloadAv3m'])->name('av3m');
     });
 
