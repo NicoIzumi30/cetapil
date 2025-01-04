@@ -367,6 +367,7 @@ class SalesActivityController extends Controller
             $planogram = Planogram::with('channel')->get();
             return response()->json([
                 'status' => 'SUCCESS',
+                'message' => 'Get the Planogram list successfully.',
                 'data' => $planogram
             ], Response::HTTP_OK);
         } catch (\Exception $e) {
