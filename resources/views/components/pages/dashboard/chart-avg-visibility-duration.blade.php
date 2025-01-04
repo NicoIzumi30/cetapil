@@ -16,12 +16,12 @@
 
         <div class="legend">
             <div class="legend-item">
-                <span>56%</span>
+                <span>hh:mm:ss</span>
             </div>
         </div>
 
 		<div class="bar-chart">
-			<div class="bar-label">Chain Pharmacy</div>
+			<div class="bar-label">MT</div>
             <div class="bar-row">
                 <div class="bar-wrapper">
                     <div class="bar" style="width: 100%"></div>
@@ -30,31 +30,13 @@
                     <div class="percentage">100%</div>
                 </div>
             </div>
-			<div class="bar-label">Minimarket</div>
+			<div class="bar-label">GT</div>
             <div class="bar-row">
                 <div class="bar-wrapper">
                     <div class="bar" style="width: 54%"></div>
                 </div>
                 <div class="bar-value">
 					<div class="percentage">100%</div>
-                </div>
-            </div>
-			<div class="bar-label">HFS/GT</div>
-            <div class="bar-row">
-                <div class="bar-wrapper">
-                    <div class="bar" style="width: 65%"></div>
-                </div>
-                <div class="bar-value relative">
-					<div class="percentage ">65%</div>
-                </div>
-            </div>
-			<div class="bar-label">HSM(Hyper Supermarket)</div>
-            <div class="bar-row">
-                <div class="bar-wrapper">
-                    <div class="bar" style="width: 65%"></div>
-                </div>
-                <div class="bar-value relative">
-					<div class="percentage ">65%</div>
                 </div>
             </div>
         </div>
