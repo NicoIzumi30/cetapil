@@ -85,17 +85,18 @@
             <form action="{{ route('routing.request.approve', ['id' => $outlet->id]) }}" method="POST">
                 @csrf
                 @method('PUT')
+                <div class="gap-4">
+                    <label for="outlet-code" class="!text-black">Kode Outlet</label>
+                    <input id="outlet-code" class="form-control @error('outlet-code') is-invalid @enderror"
+                        value="{{ old('outlet-code', $outlet->outlet_code) }}" type="text" name="outlet-code"
+                        placeholder="Masukan nama outlet" aria-describedby="name" />
+                    @if ($errors->has('outlet-code'))
+                        <span id="outlet-code-error"
+                            class="text-sm text-red-600 mt-1">{{ $errors->first('outlet-code') }}</span>
+                    @endif
+                </div>
                 <div class="grid grid-cols-2 gap-4">
-                    <div>
-                        <label for="outlet-code" class="!text-black">Kode Outlet</label>
-                        <input id="outlet-code" class="form-control @error('outlet-code') is-invalid @enderror"
-                            value="{{ old('outlet-code', $outlet->outlet_code) }}" type="text" name="outlet-code"
-                            placeholder="Masukan nama outlet" aria-describedby="name" />
-                        @if ($errors->has('outlet-code'))
-                            <span id="outlet-code-error"
-                                class="text-sm text-red-600 mt-1">{{ $errors->first('outlet-code') }}</span>
-                        @endif
-                    </div>
+
                     <div>
                         <label for="outlet-type" class="!text-black">Tipe Outlet</label>
                         <input id="outlet-type" class="form-control @error('outlet-type') is-invalid @enderror"
@@ -104,6 +105,46 @@
                         @if ($errors->has('outlet-type'))
                             <span id="outlet-type-error"
                                 class="text-sm text-red-600 mt-1">{{ $errors->first('outlet-type') }}</span>
+                        @endif
+                    </div>
+                    <div>
+                        <label for="account-type" class="!text-black">Tipe Akun</label>
+                        <input id="account-type" class="form-control @error('account-type') is-invalid @enderror"
+                            value="{{ old('account-type', $outlet->account_type) }}" type="text" name="account-type"
+                            placeholder="Masukan tipe akun" aria-describedby="name" />
+                        @if ($errors->has('account-type'))
+                            <span id="account-type-error"
+                                class="text-sm text-red-600 mt-1">{{ $errors->first('account-type') }}</span>
+                        @endif
+                    </div>
+                    <div>
+                        <label for="cycle" class="!text-black">Cycle</label>
+                        <select id="cycle" name="cycle" class=" w-full">
+                            <option value="" selected disabled>
+                                -- Pilih cycle --
+                            </option>
+                            @foreach ($cycles as $cycle)
+                                <option value="{{$cycle}}" {{ old('cycle') == $cycle ? 'selected' : ''}}>{{$cycle}}</option>
+                            @endforeach
+                        </select>
+                        @if ($errors->has('cycle'))
+                            <span id="cycle-error" class="text-sm text-red-600 mt-1">{{ $errors->first('cycle') }}</span>
+                        @endif
+                    </div>
+                    <div>
+                        <label for="week" class="!text-black">Week</label>
+                        <select id="week" name="week" class="w-full">
+                            <option value="" selected disabled>-- Pilih Week --</option>
+                            @if(old('cycle') && isset($weekOptions[old('cycle')]))
+                                @foreach($weekOptions[old('cycle')] as $week)
+                                    <option value="{{ $week['value'] }}" {{ old('week') == $week['value'] ? 'selected' : '' }}>
+                                        {{ $week['name'] }}
+                                    </option>
+                                @endforeach
+                            @endif
+                        </select>
+                        @if ($errors->has('week'))
+                            <span id="week-error" class="text-sm text-red-600 mt-1">{{ $errors->first('week') }}</span>
                         @endif
                     </div>
                 </div>
@@ -118,6 +159,99 @@
 
 @push('scripts')
     <script>
+
+$(document).ready(function() {
+    const weekOptions = {
+        '1x4': [
+            {name: 'Week 1', value: '1'},
+            {name: 'Week 2', value: '2'},
+            {name: 'Week 3', value: '3'},
+            {name: 'Week 4', value: '4'}
+        ],
+        '1x2': [
+            {name: 'Week 1 & 3', value: '13'},
+            {name: 'Week 2 & 4', value: '24'}
+        ]
+    };
+
+    // Initialize select2
+    $('#cycle').select2();
+    $('#week').select2();
+    
+    // Initially hide the week container
+    $('[for="week"]').parent().hide();
+
+    function updateWeekOptions(cycle) {
+        const weekContainer = $('[for="week"]').parent();
+        const weekSelect = $('#week');
+        
+        // Clear and destroy select2
+        if (weekSelect.data('select2')) {
+            weekSelect.select2('destroy');
+        }
+        weekSelect.empty();
+        
+        // Hide week field for 1x1 cycle or when no cycle is selected
+        if (!cycle || cycle === '1x1') {
+            weekContainer.hide();
+            weekSelect.prop('required', false);
+            return;
+        }
+        
+        // Show week field and update options for 1x2 and 1x4
+        if (cycle === '1x2' || cycle === '1x4') {
+            weekContainer.show();
+            weekSelect.prop('required', true);
+            
+            // Add default option
+            weekSelect.append(`<option value="" selected disabled>-- Pilih Week --</option>`);
+            
+            // Add week options based on cycle
+            const options = weekOptions[cycle];
+            options.forEach(option => {
+                weekSelect.append(new Option(option.name, option.value));
+            });
+        }
+
+        // Reinitialize select2
+        weekSelect.select2({
+            minimumResultsForSearch: Infinity,
+            placeholder: "-- Pilih Week --",
+            width: '100%'
+        });
+    }
+
+    // Handle cycle change
+    $('#cycle').on('change', function() {
+        const selectedCycle = $(this).val();
+        updateWeekOptions(selectedCycle);
+    });
+
+    // Initialize with current value if exists
+    const initialCycle = $('#cycle').val();
+    if (initialCycle) {
+        updateWeekOptions(initialCycle);
+        
+        // Set initial week value if exists
+        const initialWeek = "{{ old('week') }}";
+        if (initialWeek) {
+            $('#week').val(initialWeek).trigger('change');
+        }
+    }
+
+    // Form validation
+    $('form').on('submit', function(e) {
+        const cycle = $('#cycle').val();
+        const week = $('#week').val();
+        
+        if ((cycle === '1x2' || cycle === '1x4') && !week) {
+            e.preventDefault();
+            alert('Mohon pilih Week terlebih dahulu');
+            return false;
+        }
+    });
+});
+        $('#week, #cycle').select2();
         $(document).ready(function() {
             const lat = parseFloat($('#latitude').text());
             const lng = parseFloat($('#longitude').text());
@@ -153,6 +287,9 @@
     const outletId = "{{ $outlet->id }}";
     const outletCode = $('#outlet-code').val();
     const outletType = $('#outlet-type').val();
+    const accountType = $('#account-type').val();
+    const cycle = $('#cycle').val();
+    const week = $('#week').val();
     const $approveBtn = $(this);
     const originalText = $approveBtn.text();
 
@@ -191,7 +328,10 @@
         dataType: 'json',
         data: JSON.stringify({
             outlet_code: outletCode,
-            outlet_type: outletType
+            outlet_type: outletType,
+            account_type: accountType,
+            cycle: cycle,
+            week: week
         }),
         success: function(response) {
             if (response.status === 'success') {

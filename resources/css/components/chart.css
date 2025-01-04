@@ -76,6 +76,7 @@
     align-items: center;
     margin-bottom: 8px;
     font-size: 14px;
+	position: relative;
 }
 
 .bar-label {
@@ -105,7 +106,6 @@
 }
 
 .bar-value {
-	position: relative;
     display: flex;
     flex-direction: column;
     align-items: flex-end;
@@ -115,9 +115,9 @@
 .percentage {
 	position: absolute;
 	color: #000000;
-	right: 35px;
+	left: 24px;
 	font-weight: 700;
-	top: -9px;
+	top: 0px;
 }
 
 .count {

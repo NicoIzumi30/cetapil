@@ -20,23 +20,44 @@
             </div>
         </div>
 
-        <div class="bar-chart">
-			<div class="bar-label">MT</div>
+		<div class="bar-chart">
+            <div class="bar-label">Chain Pharmacy</div>
             <div class="bar-row">
                 <div class="bar-wrapper">
                     <div class="bar" style="width: 100%"></div>
                 </div>
                 <div class="bar-value">
-                    <div class="percentage">100%</div>
+                    <div class="percentage">54 m</div>
                 </div>
             </div>
-			<div class="bar-label">GT</div>
+
+            <div class="bar-label">Minimarket</div>
             <div class="bar-row">
                 <div class="bar-wrapper">
                     <div class="bar" style="width: 54%"></div>
                 </div>
                 <div class="bar-value">
-					<div class="percentage">100%</div>
+                    <div class="percentage">15 m 22 s</div>
+                </div>
+            </div>
+
+            <div class="bar-label">HFS/GT</div>
+            <div class="bar-row">
+                <div class="bar-wrapper">
+                    <div class="bar" style="width: 54%"></div>
+                </div>
+                <div class="bar-value">
+                    <div class="percentage">21 m 15 s</div>
+                </div>
+            </div>
+
+            <div class="bar-label">HSM (Hyper Suparmarket)</div>
+            <div class="bar-row">
+                <div class="bar-wrapper">
+                    <div class="bar" style="width: 54%"></div>
+                </div>
+                <div class="bar-value">
+                    <div class="percentage">45 m 25 s</div>
                 </div>
             </div>
         </div>
@@ -45,6 +66,7 @@
 
 
 <script>
+
     const canvas = document.getElementById('productdonutChart');
     const ctx = canvas.getContext('2d');
 
@@ -57,11 +79,19 @@
     const data = [{
             value: 45,
             color: '#48CAE4'
-        }, // Light blue
+        }, 
         {
-            value: 55,
+            value: 15,
             color: '#0095ff'
-        }, // Dark blue
+        }, 
+        {
+            value: 15,
+            color: '#2D40AB'
+        }, 
+        {
+            value: 25,
+            color: '#145C81'
+		}
     ];
 
     const centerX = 80;
