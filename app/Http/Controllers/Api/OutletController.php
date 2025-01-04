@@ -92,7 +92,10 @@ class OutletController extends Controller
                 Response::HTTP_UNAUTHORIZED
             );
         }
+        $now = Carbon::now('Asia/Jakarta');
 
+        $currentDay = $now->dayOfWeek;
+        $currentDay = $currentDay === 0 ? '7' : (string) $currentDay;
         DB::beginTransaction();
         try {
             // Create outlet - include channel_id in the data
@@ -100,6 +103,7 @@ class OutletController extends Controller
             $outlet = new Outlet($data);
             $outlet->user_id = $this->getAuthUserId();
             $outlet->status = 'PENDING';
+            $outlet->visit_day = $currentDay;
             $outlet->cycle = $data['cycle'] ?? '1x1';  // Set default if not provided
 
             // Handle city
