@@ -209,7 +209,7 @@ class DashboardController extends Controller
         }
     }
 
-    private function getCurrentOutlet($user, $now, $currentDayNumber, $week_type)
+    private function getCurrentOutlet($user, $now, $currentDayNumber, $week)
     {
         $current_outlet = SalesActivity::completeRelation()
             ->where('user_id', $user->id)
@@ -221,11 +221,11 @@ class DashboardController extends Controller
         if (!$current_outlet) {
             $current_outlet = Outlet::where('user_id', $user->id)
                 ->where('visit_day', $currentDayNumber)
-                ->where(function ($query) use ($week_type) {
+                ->where(function ($query) use ($week) {
                     $query->where('cycle', '1x1')
-                        ->orWhere(function ($query) use ($week_type) {
+                        ->orWhere(function ($query) use ($week) {
                             $query->where('cycle', '1x2')
-                                ->where('week_type', $week_type);
+                                ->where('week', $week);
                         });
                 })
                 ->where(function ($builder) use ($now) {

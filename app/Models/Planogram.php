@@ -11,5 +11,8 @@ class Planogram extends Model
 {
     use HasFactory, HasUuids, SoftDeletes;
     protected $guarded = ['id'];
-    
+    public function channel()
+    {
+        return $this->belongsTo(Channel::class, 'channel_id');
+    }
 }
