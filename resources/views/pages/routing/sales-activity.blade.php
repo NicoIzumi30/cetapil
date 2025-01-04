@@ -42,97 +42,19 @@
             <x-slot:title>
                 Formulir Survey
             </x-slot:title>
-            <div class="grid gap-6 items-start">
-
-                <div class="bg-glassmorphism p-4 rounded-lg">
-                    <h2 class="survey-category-title">Apakah Power SKU Tersedia Ditoko?</h2>
-                    <div class="grid gap-4">
-                        @foreach ($salesSurvey as $survey)
-                            <x-pages.routing.outlet-detail>
-                                <x-slot:title>{{ $survey->survey->question }}</x-slot:title>
-                                @if ($survey->survey->type == 'bool')
-                                    <x-slot:value>{{ $survey->answer == 'true' ? 'Ada' : 'Tidak' }}</x-slot:value>
-                                @else
-                                    <x-slot:value>{{ $survey->answer }}</x-slot:value>
-                                @endif
-                            </x-pages.routing.outlet-detail>
-                        @endforeach
-                    </div>
-                </div>
-
-                <div class="bg-glassmorphism p-4 rounded-lg">
-                    <h2 class="survey-category-title">Berapa Harga Power SKU Ditoko?</h2>
-					<div class="grid gap-4">
-                        <x-pages.routing.outlet-detail>
-                            <x-slot:title>Cethapil Cleanser500 ML ru </x-slot:title>
-                            <x-slot:value>Rp.500.000</x-slot:value>
-                        </x-pages.routing.outlet-detail>
-                        <x-pages.routing.outlet-detail>
-                            <x-slot:title>Cethapil Cleanser500 ML ru </x-slot:title>
-                            <x-slot:value>Rp.500.000</x-slot:value>
-                        </x-pages.routing.outlet-detail>
-                        <x-pages.routing.outlet-detail>
-                            <x-slot:title>Cethapil Cleanser500 ML ru </x-slot:title>
-                            <x-slot:value>Rp.500.000</x-slot:value>
-                        </x-pages.routing.outlet-detail>
-                    </div>
-                </div>
-				
-                <div class="bg-glassmorphism p-4 rounded-lg">
-                    <h2 class="survey-category-title">Berapa Harga Kompetitor Ditoko?</h2>
-					<div class="grid gap-4">
-                        <x-pages.routing.outlet-detail>
-                            <x-slot:title>Cethapil Cleanser500 ML ru </x-slot:title>
-                            <x-slot:value>Rp.500.000</x-slot:value>
-                        </x-pages.routing.outlet-detail>
-                        <x-pages.routing.outlet-detail>
-                            <x-slot:title>Cethapil Cleanser500 ML ru </x-slot:title>
-                            <x-slot:value>Rp.500.000</x-slot:value>
-                        </x-pages.routing.outlet-detail>
-                        <x-pages.routing.outlet-detail>
-                            <x-slot:title>Cethapil Cleanser500 ML ru </x-slot:title>
-                            <x-slot:value>Rp.500.000</x-slot:value>
-                        </x-pages.routing.outlet-detail>
-                    </div>
-                </div>
-
-                <div class="bg-glassmorphism p-4 rounded-lg">
-                    <h2 class="survey-category-title">Survey Visibility</h2>
-					<div class="grid gap-4">
-                        <x-pages.routing.outlet-detail>
-                            <x-slot:title>Cethapil Cleanser500 ML ru </x-slot:title>
-                            <x-slot:value>Rp.500.000</x-slot:value>
-                        </x-pages.routing.outlet-detail>
-                        <x-pages.routing.outlet-detail>
-                            <x-slot:title>Cethapil Cleanser500 ML ru </x-slot:title>
-                            <x-slot:value>Rp.500.000</x-slot:value>
-                        </x-pages.routing.outlet-detail>
-                        <x-pages.routing.outlet-detail>
-                            <x-slot:title>Cethapil Cleanser500 ML ru </x-slot:title>
-                            <x-slot:value>Rp.500.000</x-slot:value>
-                        </x-pages.routing.outlet-detail>
-                    </div>
-                </div>
-
-                <div class="bg-glassmorphism p-4 rounded-lg">
-                    <h2 class="survey-category-title">Survey Recommendation</h2>
-					<div class="grid gap-4">
-                        <x-pages.routing.outlet-detail>
-                            <x-slot:title>Cethapil Cleanser500 ML ru </x-slot:title>
-                            <x-slot:value>Rp.500.000</x-slot:value>
-                        </x-pages.routing.outlet-detail>
-                        <x-pages.routing.outlet-detail>
-                            <x-slot:title>Cethapil Cleanser500 ML ru </x-slot:title>
-                            <x-slot:value>Rp.500.000</x-slot:value>
-                        </x-pages.routing.outlet-detail>
-                        <x-pages.routing.outlet-detail>
-                            <x-slot:title>Cethapil Cleanser500 ML ru </x-slot:title>
-                            <x-slot:value>Rp.500.000</x-slot:value>
-                        </x-pages.routing.outlet-detail>
-                    </div>
-                </div>
-            </div>
-
+           
+			<div class="grid gap-6">
+				@foreach ($salesSurvey as $survey)
+					<x-pages.routing.outlet-detail>
+						<x-slot:title>{{ $survey->survey->question }}</x-slot:title>
+						@if ($survey->survey->type == 'bool')
+							<x-slot:value>{{ $survey->answer == 'true' ? 'Ada' : 'Tidak' }}</x-slot:value>
+						@else
+							<x-slot:value>{{ $survey->answer }}</x-slot:value>
+						@endif
+					</x-pages.routing.outlet-detail>
+				@endforeach
+			</div>
 
         </x-section-card>
     </x-card>

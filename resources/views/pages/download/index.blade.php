@@ -112,7 +112,7 @@
         </x-button.info>
     </x-pages.download.download-card>
 
-    <x-pages.download.download-card iconName="fluent_clipboard">
+    <x-pages.download.download-card iconName="mingcute_to-do-fill">
         <x-slot:cardTitle>
             Survey
         </x-slot:cardTitle>
@@ -145,7 +145,7 @@
         </x-button.info>
     </x-pages.download.download-card>
 
-    <x-pages.download.download-card iconName="material-symbols_map_search_rounded">
+    <x-pages.download.download-card iconName="fluent_shifts-availability-20-filled">
         <x-slot:cardTitle>
             Availability
         </x-slot:cardTitle>
@@ -235,7 +235,7 @@
         </x-button.info>
     </x-pages.download.download-card>
 
-    <x-pages.download.download-card iconName="fluent_box_20_filled">
+    <x-pages.download.download-card iconName="uis_chart">
         <x-slot:cardTitle>
             AV3M
         </x-slot:cardTitle>
@@ -245,7 +245,7 @@
             <span id="downloadBtnLoading" class="hidden">Downloading...</span>
         </x-button.info>
     </x-pages.download.download-card>
-    <x-pages.download.download-card iconName="fluent_box_20_filled">
+    <x-pages.download.download-card iconName="mingcute_target-fill">
         <x-slot:cardTitle>
             Program
         </x-slot:cardTitle>
