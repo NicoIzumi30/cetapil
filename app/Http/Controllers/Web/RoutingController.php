@@ -103,7 +103,7 @@ class RoutingController extends Controller
                     'id' => $item->id,
                     'sales' => $item->user->name,
                     'outlet' => $item->name,
-                    'area' => $item->longitude . ', ' . $item->latitude,
+                    'area' => $item->longitude ? $item->longitude . ', ' . $item->latitude :'',
                     'visit_day' => getVisitDayByNumber($item->visit_day),
                     'actions' => view('pages.routing.action', [
                         'item' => $item,
@@ -548,7 +548,7 @@ class RoutingController extends Controller
                     $q->select('id', 'name');
                 }
             ]); // Make sure to only get non-deleted records
-
+            $query->where('status', 'SUBMITTED');
             // Apply day filter
             if ($request->filled('filter_day_sales') && $request->filter_day_sales != 'all' && $request->filter_day_sales != 'null') {
                 $query->whereHas('outlet', callback: function ($q) use ($request) {

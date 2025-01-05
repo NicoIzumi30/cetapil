@@ -111,9 +111,23 @@ class RoutingController extends Controller
             $outlet->latitude,
             $outlet->longitude
         );
-
+        if($outlet->latitude == null || $outlet->longitude == null){
+            $radius = 0;
+            $radius_status = 'ONSITE';
+        }else{
+            $radius = $this->calculateDistance(
+                $data['latitude'],
+                $data['longitude'],
+                $outlet->latitude,
+                $outlet->longitude
+            );
+            $radius_status = $this->determineRadiusStatus($radius);
+        }
+        $outlet->update([
+            'latitude' => $data['latitude'],
+            'longitude' => $data['longitude']
+        ]);
         // Determine radius status
-        $radius_status = $this->determineRadiusStatus($radius);
 
         $activity = SalesActivity::whereDate('checked_in', $now)
             ->where([

@@ -1,13 +1,16 @@
 <div class="w-full chart-bg p-6 rounded-lg">
     
         <div class="text-center text-xl text-white font-bold mb-6">AVG Survey Duration</div>
-        <div class="filters flex justify-center flex-wrap  w-full">
+        <div class="filters flex justify-center flex-wrap w-full">
             <x-input.datepicker id="product-date-range" />
             <x-select.light>
-                <x-slot:title>Filter Outlet</x-slot:title>
-            </x-select.light>
-            <x-select.light>
-                <x-slot:title>Filter Date</x-slot:title>
+            <x-slot:title>Filter Date</x-slot:title>
+            @php
+                $days = getAllDay();
+            @endphp
+            @foreach ($days as $key => $value)
+                <option value="{{ $value }}">{{ $key }}</option>
+            @endforeach
             </x-select.light>
         </div>
 
@@ -19,45 +22,48 @@
 
         <div class="legend">
             <div class="legend-item">
-                <span>45%</span>
+				<span>hh:mm:ss</span>
             </div>
         </div>
 
-        <div class="bar-chart">
-			<div class="bar-label">Chain Pharmacy</div>
+		<div class="bar-chart">
+            <div class="bar-label">Chain Pharmacy</div>
             <div class="bar-row">
                 <div class="bar-wrapper">
                     <div class="bar" style="width: 100%"></div>
                 </div>
                 <div class="bar-value">
-                    <div class="percentage">100%</div>
+                    <div class="percentage">54 m</div>
                 </div>
             </div>
-			<div class="bar-label">Minimarket</div>
+
+            <div class="bar-label">Minimarket</div>
             <div class="bar-row">
                 <div class="bar-wrapper">
                     <div class="bar" style="width: 54%"></div>
                 </div>
                 <div class="bar-value">
-					<div class="percentage">100%</div>
+                    <div class="percentage">15 m 22 s</div>
                 </div>
             </div>
-			<div class="bar-label">HFS/GT</div>
+
+            <div class="bar-label">HFS/GT</div>
             <div class="bar-row">
                 <div class="bar-wrapper">
-                    <div class="bar" style="width: 65%"></div>
+                    <div class="bar" style="width: 54%"></div>
                 </div>
-                <div class="bar-value relative">
-					<div class="percentage ">65%</div>
+                <div class="bar-value">
+                    <div class="percentage">21 m 15 s</div>
                 </div>
             </div>
-			<div class="bar-label">HSM(Hyper Supermarket)</div>
+
+            <div class="bar-label">HSM (Hyper Suparmarket)</div>
             <div class="bar-row">
                 <div class="bar-wrapper">
-                    <div class="bar" style="width: 65%"></div>
+                    <div class="bar" style="width: 54%"></div>
                 </div>
-                <div class="bar-value relative">
-					<div class="percentage ">65%</div>
+                <div class="bar-value">
+                    <div class="percentage">45 m 25 s</div>
                 </div>
             </div>
         </div>
@@ -66,6 +72,7 @@
 
 
 <script>
+
     const canvas = document.getElementById('productdonutChart');
     const ctx = canvas.getContext('2d');
 
@@ -78,11 +85,19 @@
     const data = [{
             value: 45,
             color: '#48CAE4'
-        }, // Light blue
+        }, 
         {
-            value: 55,
+            value: 15,
             color: '#0095ff'
-        }, // Dark blue
+        }, 
+        {
+            value: 15,
+            color: '#2D40AB'
+        }, 
+        {
+            value: 25,
+            color: '#145C81'
+		}
     ];
 
     const centerX = 80;

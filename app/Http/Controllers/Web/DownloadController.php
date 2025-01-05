@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers\Web;
 
+use App\Exports\CityExport;
 use App\Exports\ProgramExport;
 use App\Exports\StockOnHandExport;
 use Carbon\Carbon;
@@ -63,6 +64,20 @@ class DownloadController extends Controller
             ], 500);
         }
     }
+    public function downloadCity()
+    {
+        try {
+            return Excel::download(
+                new CityExport(),
+                'Kota_' . date('Y-m-d_His') . '.xlsx'
+            );
+        } catch (\Exception $e) {
+            return response()->json([
+                'message' => 'Gagal mengunduh data kota',
+                'error' => $e->getMessage()
+            ], 500);
+        }
+    }
     public function downloadRouting(Request $request)
     {
         try {
@@ -108,6 +123,8 @@ class DownloadController extends Controller
                     });
                 });
             }
+            $query->where('status', 'SUBMITTED');
+
             // Get data
             $data = $query->get();
             // Generate filename with timestamp
@@ -156,7 +173,7 @@ class DownloadController extends Controller
                     });
                 });
             }
-            $query->where('sales_activities.status', 'SUBMITTED');
+            $query->where('status', 'SUBMITTED');
             // Get data
             $data = $query->get();
             // Generate filename with timestamp
