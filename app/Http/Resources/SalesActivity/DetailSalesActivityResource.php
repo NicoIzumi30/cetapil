@@ -40,15 +40,15 @@ class DetailSalesActivityResource extends JsonResource
     }
 
     private function formatVisibilities($type)
-{
-    return $this->salesVisibilities
-        ->where('type', $type)
-        ->sortBy('position')
-        ->values()
-        ->map(function ($visibility) {
-            return new VisibilityEntryResource($visibility);
-        });
-}
+    {
+        return $this->salesVisibilities
+            ->where('type', $type)
+            ->sortBy('position')
+            ->values()
+            ->map(function ($visibility) {
+                return new VisibilityEntryResource($visibility);
+            });
+    }
 }
 
 class SalesOrderResource extends JsonResource
@@ -106,6 +106,9 @@ class SalesAvailabilityResource extends JsonResource
             'id' => $this->id,
             'sales_activity_id' => $this->sales_activity_id,
             'product_id' => $this->product_id,
+            'category' => $this->product->category->name,
+            'sku' => $this->product->sku,
+            'price' => $this->product->price,
             'stock_on_hand' => $this->stock_on_hand,
             'stock_inventory' => $this->stock_inventory,
             'av3m' => $this->av3m,
