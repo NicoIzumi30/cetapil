@@ -423,7 +423,7 @@ class DashboardPage extends GetView<DashboardController> {
                             height: 10,
                           ),
                           Text(
-                            "*Performance index dihitung berdasarkan target call vs aktual \n call user yang telah dilakukan dalam 1 Bulan",
+                            "*Performance index dihitung berdasarkan target call vs aktual \n call user yang telah dilakukan dalam 1 Hari",
                             style: TextStyle(fontSize: 8),
                           ),
                         ],
@@ -494,9 +494,7 @@ class PowerSkuSection extends StatelessWidget {
               if (powerSkus != null && powerSkus!.isNotEmpty)
                 ...powerSkus!.map((sku) => PowerSkuItem(
                       skuName: sku.sku ?? '',
-                      progress: sku.availabilityPercentage != null
-                          ? sku.availabilityPercentage! / 100
-                          : 0.0,
+                      progress: (sku.availabilityPercentage ?? 0)/100,
                     )),
               if (powerSkus == null || powerSkus!.isEmpty)
                 Center(

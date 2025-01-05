@@ -130,7 +130,7 @@ class PowerSkus {
   String? sku;
   int? totalOutlets;
   int? availableCount;
-  int? availabilityPercentage;
+  double? availabilityPercentage;
 
   PowerSkus({this.sku, this.totalOutlets, this.availableCount, this.availabilityPercentage});
 
@@ -144,8 +144,8 @@ class PowerSkus {
     if (json["available_count"] is int) {
       availableCount = json["available_count"];
     }
-    if (json["availability_percentage"] is int) {
-      availabilityPercentage = json["availability_percentage"];
+    if (json["availability_percentage"] is num) {
+      availabilityPercentage = (json["availability_percentage"] as num).toDouble();
     }
   }
 

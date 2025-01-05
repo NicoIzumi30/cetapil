@@ -82,8 +82,8 @@ class DashboardDatabaseHelper {
       dashboard_id INTEGER,
       sku TEXT,
       total_outlets INTEGER,
-      available_count INTEGER,
-      availability_percentage INTEGER,
+      available_count INTEGER, 
+      availability_percentage REAL,
       FOREIGN KEY (dashboard_id) REFERENCES dashboard_data (id)
     )
   ''');
@@ -225,7 +225,7 @@ class DashboardDatabaseHelper {
                 sku: skuRow['sku'] as String?,
                 totalOutlets: skuRow['total_outlets'] as int?,
                 availableCount: skuRow['available_count'] as int?,
-                availabilityPercentage: skuRow['availability_percentage'] as int?,
+                availabilityPercentage: (skuRow['availability_percentage'] as num?)?.toDouble(),
               ))
           .toList();
 
