@@ -16,7 +16,7 @@ class DetailActivityController extends GetxController {
 
   setDetailOutlet(Activity.Data data) {
     detailOutlet.value = data;
-    print(detailOutlet.value);
+    print("detail : ${detailOutlet.value!.id}");
   }
 
   final Map<String, TextEditingController> priceControllers = {};

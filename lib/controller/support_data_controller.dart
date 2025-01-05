@@ -322,6 +322,7 @@ class SupportDataController extends GetxController {
   }
 
   Future<List<Map<String, dynamic>>> getPlanogramsByChannel(String channelId) async {
+    print(channelId);
     try {
       print("Getting planogram for channelId: $channelId");
       final results = await supportDB.getPlanogramByChannel(channelId);

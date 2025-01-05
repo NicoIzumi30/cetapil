@@ -62,13 +62,6 @@ class ActivityPage extends GetView<ActivityController> {
                                   statusDraft: activity.status!,
                                   statusCheckin: true,
                                   ontap: () async {
-                                    // Get.delete<TambahActivityController>();
-                                    // if (!Get.isRegistered<TambahActivityController>()) {
-                                    //   Get.lazyPut(()=>TambahActivityController());
-                                    // }
-                                    // if (!Get.isRegistered<DetailActivityController>()) {
-                                    //   Get.lazyPut(()=>DetailActivityController());
-                                    // }
                                     if (!Get.isRegistered<TambahAvailabilityController>()) {
                                       Get.lazyPut(() => TambahAvailabilityController());
                                     }

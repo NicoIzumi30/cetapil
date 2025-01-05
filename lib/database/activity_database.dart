@@ -104,7 +104,7 @@ class ActivityDatabaseHelper {
     ''');
 
     await db.execute('''
-      CREATE TABLE visibility_kompetitor (
+      CREATE TABLE visibility_kompetitor(
         id TEXT PRIMARY KEY,
         sales_activity_id TEXT,
         category TEXT,

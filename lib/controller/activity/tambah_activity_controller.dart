@@ -119,7 +119,7 @@ class TambahActivityController extends GetxController {
     }
     if (indexTab == 3) {
       if (availabilityDraftItems.isNotEmpty) {
-        if (visibilityPrimaryDraftItems.length >= 3 && visibilitySecondaryDraftItems.length >= 3) {
+        if (visibilityPrimaryDraftItems.length == 6 && visibilitySecondaryDraftItems.length == 4 && visibilityKompetitorDraftItems.length == 2) {
           if (knowledgeTime.value >= 10) {
             /// minimal duration 3 menit
             return true;
@@ -898,9 +898,10 @@ class TambahActivityController extends GetxController {
     }
 
     // Clear survey fields
-    for (var controller in priceControllers.values) {
-      controller.dispose();
-    }
+    // for (var controller in priceControllers.values) {
+    //   controller.dispose();
+    // }
+
     priceControllers.clear();
 
     // Rest of the code remains same

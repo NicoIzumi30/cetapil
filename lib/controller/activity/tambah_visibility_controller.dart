@@ -334,62 +334,61 @@ class TambahVisibilityController extends GetxController {
       'program_image2': programImages2.value,
     };
 
-    try {
-      final db = await dbHelper.database;
-      final salesActivityId = activityController.detailOutlet.value!.id;
-      if (salesActivityId == null) {
-        throw Exception('Sales Activity ID is not available');
-      }
+    // try {
+    //   final db = await dbHelper.database;
+    //   final salesActivityId = activityController.detailOutlet.value!.id;
+    //   if (salesActivityId == null) {
+    //     throw Exception('Sales Activity ID is not available');
+    //   }
+    //
+    //   await db.transaction((txn) async {
+    //     // Check if a draft already exists
+    //     final existingDraft = await txn.query(
+    //       'visibility_kompetitor',
+    //       where: 'id = ? AND sales_activity_id = ?',
+    //       whereArgs: [id, salesActivityId],
+    //     );
+    //
+    //     if (existingDraft.isEmpty) {
+    //       // Insert new draft
+    //       await txn.insert('visibility_kompetitor', {
+    //         'id': id,
+    //         'sales_activity_id': salesActivityId,
+    //         'category': id_part[1].toUpperCase(),
+    //         'position': id_part[2],
+    //         'brand_name': brandName.value.text,
+    //         'promo_mechanism': promoMechanism.value.text,
+    //         'promo_periode_start': formattedStart,
+    //         'promo_periode_end': formattedEnd,
+    //         'program_image1': programImages1.value?.path,
+    //         'program_image2': programImages2.value?.path,
+    //       });
+    //     } else {
+    //       // Update existing draft
+    //       await txn.update(
+    //         'visibility_kompetitor',
+    //         {
+    //           'category': id_part[1].toUpperCase(),
+    //           'position': id_part[2],
+    //           'brand_name': brandName.value.text,
+    //           'promo_mechanism': promoMechanism.value.text,
+    //           'promo_periode_start': formattedStart,
+    //           'promo_periode_end': formattedEnd,
+    //           'program_image1': programImages1.value?.path,
+    //           'program_image2': programImages2.value?.path,
+    //         },
+    //         where: 'id = ? AND sales_activity_id = ?',
+    //         whereArgs: [id, salesActivityId],
+    //       );
+    //     }
+    //   });
 
-      await db.transaction((txn) async {
-        // Check if a draft already exists
-        final existingDraft = await txn.query(
-          'visibility_kompetitor',
-          where: 'id = ? AND sales_activity_id = ?',
-          whereArgs: [id, salesActivityId],
-        );
-
-        if (existingDraft.isEmpty) {
-          // Insert new draft
-          await txn.insert('visibility_kompetitor', {
-            'id': id,
-            'sales_activity_id': salesActivityId,
-            'category': id_part[1].toUpperCase(),
-            'position': id_part[2],
-            'brand_name': brandName.value.text,
-            'promo_mechanism': promoMechanism.value.text,
-            'promo_periode_start': formattedStart,
-            'promo_periode_end': formattedEnd,
-            'program_image1': programImages1.value?.path,
-            'program_image2': programImages2.value?.path,
-          });
-        } else {
-          // Update existing draft
-          await txn.update(
-            'visibility_kompetitor',
-            {
-              'category': id_part[1].toUpperCase(),
-              'position': id_part[2],
-              'brand_name': brandName.value.text,
-              'promo_mechanism': promoMechanism.value.text,
-              'promo_periode_start': formattedStart,
-              'promo_periode_end': formattedEnd,
-              'program_image1': programImages1.value?.path,
-              'program_image2': programImages2.value?.path,
-            },
-            where: 'id = ? AND sales_activity_id = ?',
-            whereArgs: [id, salesActivityId],
-          );
-        }
-      });
-
-      // Update the UI state
       activityController.addKompetitorVisibilityItem(data);
       clearKompetitorForm();
       Get.back();
-    } catch (e) {
-      print('Error saving draft: $e');
-    }
+    // } catch (e) {
+    //   print('Error saving draft: $e');
+    // }
   }
 
   Future<void> loadKompetitorDraft(String id) async {

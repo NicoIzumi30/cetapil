@@ -79,7 +79,7 @@ class DetailVisibilitySecondary extends GetView<TambahVisibilityController> {
                                     style: const TextStyle(fontSize: 12, fontWeight: FontWeight.bold),
                                   ),
                                   CustomSegmentedSwitch(
-                                    value: data['secondary_exist'],
+                                    value: data['secondary_exist'] == "Y" ? true : false,
                                     enable: false,
                                     onChanged: (bool){},/// Asesoris (soalnya dikejar deadline)
                                     activeColor: Colors.blue,
@@ -124,8 +124,8 @@ class ClipImage extends StatelessWidget {
   });
 
   String _sanitizeUrl(String url) {
-    print("https://dev-cetaphil.i-am.host${url}");
-    return "https://dev-cetaphil.i-am.host${url}";
+    print("https://dev-cetaphil.i-am.host/storage${url}");
+    return "https://dev-cetaphil.i-am.host/storage${url}";
   }
 
   @override

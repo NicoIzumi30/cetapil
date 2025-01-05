@@ -143,7 +143,8 @@ class TambahPrimaryVisibility extends GetView<TambahVisibilityController> {
                                               .activityController.detailOutlet.value!.channel!.id ??
                                           ''),
                                       builder: (context, snapshot) {
-                                        print(snapshot.data);
+                                        print(controller
+                                            .activityController.detailOutlet.value!.channel!.id);
                                         if (snapshot.connectionState == ConnectionState.waiting) {
                                           return Container(
                                             color: Colors.grey[200],

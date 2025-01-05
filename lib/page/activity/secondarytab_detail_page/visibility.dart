@@ -3,15 +3,12 @@ import 'dart:io';
 
 import 'package:cetapil_mobile/controller/activity/detail_activity_controller.dart';
 import 'package:cetapil_mobile/controller/support_data_controller.dart';
-import 'package:cetapil_mobile/model/list_activity_response.dart' as Activity;
-import 'package:cached_network_image/cached_network_image.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 
-import '../secondarytab_page/tambah_kompetitor_visibility.dart';
-import '../secondarytab_page/tambah_primary_visibility.dart';
-import '../secondarytab_page/tambah_secondary_visibility.dart';
+import '../../../controller/activity/tambah_visibility_controller.dart';
 import '../secondarytab_page/visibility.dart';
+import 'detail_item_visibility/detail_visibility_kompetitor.dart';
 import 'detail_item_visibility/detail_visibility_primary.dart';
 import 'detail_item_visibility/detail_visibility_secondary.dart';
 
@@ -23,6 +20,7 @@ class DetailVisibilityPage extends GetView<DetailActivityController> {
   @override
   Widget build(BuildContext context) {
     return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
       children: [
         Text(
           'Primary',
@@ -48,6 +46,9 @@ class DetailVisibilityPage extends GetView<DetailActivityController> {
                 imagePath: data['image_visibility'],
                 isSubmitted: data.isNotEmpty,
                 onTapCard: () {
+                  if (!Get.isRegistered<TambahVisibilityController>()) {
+                    Get.put(TambahVisibilityController());
+                  }
                   Get.to(() => DetailVisibilityPrimary(
                     data: data
                   ));
@@ -66,6 +67,9 @@ class DetailVisibilityPage extends GetView<DetailActivityController> {
                 imagePath: data['image_visibility'],
                 isSubmitted: data.isNotEmpty,
                 onTapCard: () {
+                  if (!Get.isRegistered<TambahVisibilityController>()) {
+                    Get.put(TambahVisibilityController());
+                  }
                   Get.to(() => DetailVisibilityPrimary(
                       data: data
                   ));
@@ -84,6 +88,9 @@ class DetailVisibilityPage extends GetView<DetailActivityController> {
                 imagePath: data['image_visibility'],
                 isSubmitted: data.isNotEmpty,
                 onTapCard: () {
+                  if (!Get.isRegistered<TambahVisibilityController>()) {
+                    Get.put(TambahVisibilityController());
+                  }
                   Get.to(() => DetailVisibilityPrimary(
                       data: data
                   ));
@@ -108,6 +115,9 @@ class DetailVisibilityPage extends GetView<DetailActivityController> {
                 imagePath: data['image_visibility'],
                 isSubmitted: data.isNotEmpty,
                 onTapCard: () {
+                  if (!Get.isRegistered<TambahVisibilityController>()) {
+                    Get.put(TambahVisibilityController());
+                  }
                   Get.to(() => DetailVisibilityPrimary(
                       data: data
                   ));
@@ -126,6 +136,9 @@ class DetailVisibilityPage extends GetView<DetailActivityController> {
                 imagePath: data['image_visibility'],
                 isSubmitted: data.isNotEmpty,
                 onTapCard: () {
+                  if (!Get.isRegistered<TambahVisibilityController>()) {
+                    Get.put(TambahVisibilityController());
+                  }
                   Get.to(() => DetailVisibilityPrimary(
                     data: data,
                   ));
@@ -144,6 +157,9 @@ class DetailVisibilityPage extends GetView<DetailActivityController> {
                 imagePath: data['image_visibility'],
                 isSubmitted: data.isNotEmpty,
                 onTapCard: () {
+                  if (!Get.isRegistered<TambahVisibilityController>()) {
+                    Get.put(TambahVisibilityController());
+                  }
                   Get.to(() => DetailVisibilityPrimary(
                     data: data,
                   ));
@@ -265,7 +281,7 @@ class DetailVisibilityPage extends GetView<DetailActivityController> {
             imagePath: data['program_image1'],
             isSubmitted: data.isNotEmpty,
             onTapCard: () {
-              Get.to(() => DetailVisibilitySecondary(
+              Get.to(() => DetailVisibilityKompetitor(
                 data: data,
               ));
             },
@@ -282,7 +298,7 @@ class DetailVisibilityPage extends GetView<DetailActivityController> {
             imagePath: data['program_image1'],
             isSubmitted: data.isNotEmpty,
             onTapCard: () {
-              Get.to(() => DetailVisibilitySecondary(
+              Get.to(() => DetailVisibilityKompetitor(
                 data: data,
               ));
             },
@@ -306,7 +322,7 @@ class VisibilityCard extends StatelessWidget {
   final String? secondarydisplay;
   final String? typeDisplay;
 
-  final File? imagePath;
+  final String? imagePath;
   final bool isSubmitted;
   final VoidCallback? onTapCard; // Added this parameter
 
@@ -322,6 +338,11 @@ class VisibilityCard extends StatelessWidget {
     this.onTapCard,
     required this.isPrimary, // Optional callback
   }) : super(key: key);
+
+  String _sanitizeUrl(String url) {
+    print("https://dev-cetaphil.i-am.host/storage${url}");
+    return "https://dev-cetaphil.i-am.host/storage${url}";
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -378,8 +399,141 @@ class VisibilityCard extends StatelessWidget {
                         ? SizedBox(
                         width: 80,
                         height: 80,
-                        child: Image.file(
-                          imagePath!,
+                        child: Image.network(
+                          _sanitizeUrl(imagePath!),
+                          fit: BoxFit.cover,
+                        ))
+                        : Container(
+                      width: 80,
+                      height: 80,
+                      color: Colors.grey[200],
+                      child: Icon(Icons.image_outlined, color: Colors.grey[400]),
+                    ),
+                  ),
+                ],
+              ),
+            ),
+            if (isSubmitted)
+              Positioned(
+                top: -4,
+                right: -4,
+                child: Container(
+                  padding: EdgeInsets.all(4),
+                  decoration: BoxDecoration(
+                    color: Colors.blue,
+                    shape: BoxShape.circle,
+                  ),
+                  child: Icon(
+                    Icons.check,
+                    color: Colors.white,
+                    size: 12,
+                  ),
+                ),
+              ),
+          ],
+        ),
+      ),
+    );
+  }
+
+  Widget _buildInfoRow(String label, String value) {
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        Text(
+          label,
+          style: TextStyle(
+            fontSize: 12,
+            color: Colors.grey[600],
+            fontWeight: FontWeight.w400,
+          ),
+        ),
+        SizedBox(height: 2),
+        Text(
+          value,
+          style: TextStyle(
+            fontSize: 14,
+            color: Colors.black87,
+            fontWeight: FontWeight.w500,
+          ),
+        ),
+      ],
+    );
+  }
+}
+
+class KompetitorCard extends StatelessWidget {
+  final String brandName;
+  final String promoMechanism;
+  final String promoPeriode;
+
+  final String? imagePath;
+  final bool isSubmitted;
+  final VoidCallback onTapCard; // Added this parameter
+
+  const KompetitorCard({
+    Key? key,
+    this.isSubmitted = false,
+    required this.brandName,
+    required this.promoMechanism,
+    required this.promoPeriode,
+    this.imagePath,
+    required this.onTapCard, // Optional callback
+  }) : super(key: key);
+
+  String _sanitizeUrl(String url) {
+    print("https://dev-cetaphil.i-am.host/storage${url}");
+    return "https://dev-cetaphil.i-am.host/storage${url}";
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return _buildCardWithImage();
+  }
+
+  Widget _buildCardWithImage() {
+    return InkWell(
+      onTap: onTapCard,
+      child: Container(
+        margin: EdgeInsets.symmetric(vertical: 8, horizontal: 5),
+        decoration: BoxDecoration(
+          color: Colors.white.withOpacity(0.9),
+          borderRadius: BorderRadius.circular(12),
+          boxShadow: [
+            BoxShadow(
+              color: Colors.black.withOpacity(0.03),
+              blurRadius: 4,
+              offset: Offset(0, 2),
+            ),
+          ],
+        ),
+        child: Stack(
+          children: [
+            Padding(
+              padding: EdgeInsets.all(16),
+              child: Row(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Expanded(
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          _buildInfoRow('Nama Brand', brandName),
+                          SizedBox(height: 8),
+                          _buildInfoRow('Mekanisme Promo:', promoMechanism),
+                          SizedBox(height: 8),
+                          _buildInfoRow('Periode Promo', promoPeriode),
+                        ],
+                      )),
+                  SizedBox(width: 12),
+                  ClipRRect(
+                    borderRadius: BorderRadius.circular(8),
+                    child: imagePath != null
+                        ? SizedBox(
+                        width: 80,
+                        height: 80,
+                        child: Image.network(
+                          _sanitizeUrl(imagePath!),
                           fit: BoxFit.cover,
                         ))
                         : Container(

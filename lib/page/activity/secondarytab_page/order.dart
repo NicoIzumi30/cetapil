@@ -633,7 +633,7 @@ class OrderSummaryCard extends GetView<TambahActivityController> {
       for (final item in ctrl.orderDraftItems) {
         if (item['jumlah'] != null && item['harga'] != null) {
           totalQty += int.parse(item['jumlah']);
-          totalPrice += double.tryParse(item['jumlah'])! * double.tryParse(item['harga'])! ?? 0;
+          totalPrice += int.tryParse(item['jumlah'])! * int.tryParse(item['harga'])! ?? 0;
         }
       }
 
