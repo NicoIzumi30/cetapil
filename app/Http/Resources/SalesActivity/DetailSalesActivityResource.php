@@ -59,6 +59,9 @@ class SalesOrderResource extends JsonResource
             'id' => $this->id,
             'sales_activity_id' => $this->sales_activity_id,
             'product_id' => $this->product_id,
+            'category' => $this->product->category->name,
+            'sku' => $this->product->sku,
+            'price' => $this->product->price,
             'total_items' => $this->total_items,
             'subtotal' => $this->subtotal,
         ];
