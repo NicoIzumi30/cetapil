@@ -71,7 +71,7 @@ class TambahPrimaryVisibility extends GetView<TambahVisibilityController> {
                           child: ListView(
                             children: [
                               CustomDropdown(
-                                hint: "-- Pilih POSM Type --",
+                                hint: "-- Pilih Jenis Display --",
                                 value: controller.posmTypeId.value.isEmpty
                                     ? null
                                     : controller.posmTypeId.value,
@@ -91,7 +91,7 @@ class TambahPrimaryVisibility extends GetView<TambahVisibilityController> {
                               ),
                               Obx(() {
                                 return CustomDropdown(
-                                  hint: "-- Pilih Visual Type --",
+                                  hint: "-- Pilih Jenis Visual --",
                                   value: controller.visualTypeId.value.isEmpty
                                       ? null
                                       : controller.visualTypeId.value,

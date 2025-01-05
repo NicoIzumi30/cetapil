@@ -53,8 +53,8 @@ class DetailVisibilityPage extends GetView<DetailActivityController> {
                   .firstWhereOrNull((visual) => visual['id'] == visibility['visual_type_id']);
               return VisibilityCard(
                 visibility: visibility,
-                posmTypeName: posmType?['name'] ?? 'Unknown POSM Type',
-                visualTypeName: visualType?['name'] ?? 'Unknown Visual Type',
+                posmTypeName: posmType?['name'] ?? 'Unknown Jenis Display',
+                visualTypeName: visualType?['name'] ?? 'Unknown Jenis Visual',
                 onTapCard: () {
                   final itemData = {
                     'posm_type_name': posmType!['name'],
@@ -248,7 +248,7 @@ class VisibilityCard extends StatelessWidget {
                       children: [
                         _buildInfoRow("Jenis Display", posmTypeName),
                         SizedBox(height: 8),
-                        _buildInfoRow("Visual Type", visualTypeName),
+                        _buildInfoRow("Jenis Visual", visualTypeName),
                       ],
                     ),
                   ),

@@ -424,9 +424,9 @@ class VisibilityCard extends StatelessWidget {
                           ? Column(
                               crossAxisAlignment: CrossAxisAlignment.start,
                               children: [
-                                _buildInfoRow('POSM Type:', posmType!),
+                                _buildInfoRow('Jenis Display:', posmType!),
                                 SizedBox(height: 8),
-                                _buildInfoRow('Visual Type:', visualType!),
+                                _buildInfoRow('Jenis Visual:', visualType!),
                                 SizedBox(height: 8),
                                 _buildInfoRow('Condition', condition!),
                               ],
