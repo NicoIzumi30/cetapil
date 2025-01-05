@@ -30,34 +30,25 @@ class DetailSalesActivityResource extends JsonResource
             ),
             'orders' => SalesOrderResource::collection($this->whenLoaded('orders')),
             'visibilities' => [
-                'primary' => [
-                    'core' => $this->formatVisibilities('CORE', 'PRIMARY'),
-                    'baby' => $this->formatVisibilities('BABY', 'PRIMARY'),
-                ],
-                'secondary' => [
-                    'core' => $this->formatVisibilities('CORE', 'SECONDARY'),
-                    'baby' => $this->formatVisibilities('BABY', 'SECONDARY'),
-                ],
-                'competitor' => [
-                    'competitor' => $this->formatVisibilities('COMPETITOR', 'COMPETITOR'),
-                ],
+                'primary' => $this->formatVisibilities('PRIMARY'),
+                'secondary' => $this->formatVisibilities('SECONDARY'),
+                'competitor' => $this->formatVisibilities('COMPETITOR'),
             ],
             'availabilities' => SalesAvailabilityResource::collection($this->whenLoaded('availabilities')),
             'surveys' => SalesSurveyResource::collection($this->whenLoaded('surveys')),
         ];
     }
 
-    private function formatVisibilities($category, $type)
-    {
-        return $this->salesVisibilities
-            ->where('category', $category)
-            ->where('type', $type)
-            ->sortBy('position')
-            ->values()
-            ->map(function ($visibility) {
-                return new VisibilityEntryResource($visibility);
-            });
-    }
+    private function formatVisibilities($type)
+{
+    return $this->salesVisibilities
+        ->where('type', $type)
+        ->sortBy('position')
+        ->values()
+        ->map(function ($visibility) {
+            return new VisibilityEntryResource($visibility);
+        });
+}
 }
 
 class SalesOrderResource extends JsonResource
