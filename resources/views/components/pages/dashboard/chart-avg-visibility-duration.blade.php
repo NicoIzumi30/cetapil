@@ -3,7 +3,13 @@
 		<div class="filters flex-wrap md:flex-nowrap flex justify-center">
             <x-input.datepicker id="time-activity-date-range" />
             <x-select.light>
-                <x-slot:title>Filter Date</x-slot:title>
+            <x-slot:title>Filter Date</x-slot:title>
+            @php
+                $days = getAllDay();
+            @endphp
+            @foreach ($days as $key => $value)
+                <option value="{{ $value }}">{{ $key }}</option>
+            @endforeach
             </x-select.light>
         </div>
 

@@ -106,25 +106,69 @@ class DashboardController extends Controller
 
         return $dataStock;
     }
-    public function avg_availability(){
-        return json_encode([
-            'time_avg'=> '03:00:00',
-            'time_gt'=> '05m:30s',
-            'time_mt'=> '10m:30s',
-        ]);
-    } 
-    public function avg_visibility(){
-        return json_encode([
-            'time_avg'=> '01:40:12',
-            'time_gt'=> '04m:30s',
-            'time_mt'=> '01m:30s',
-        ]);
-    } 
-    public function avg_survey(){
-        return json_encode([
-            'time_avg'=> '00:10:12',
-            'time_gt'=> '09m:30s',
-            'time_mt'=> '08m:30s',
-        ]);
-    } 
+    private function getAverageMetrics($timeField, Request $request)
+{
+    // Base query
+    $baseQuery = SalesActivity::where('status', 'SUBMITTED');
+
+    // Apply date filter if exists
+    if ($request->date) {
+        $dates = explode(' to ', $request->date);
+        $startDate = trim($dates[0] ?? '');
+        $endDate = trim($dates[1] ?? '');
+        $baseQuery->whereBetween('updated_at', [$startDate, $endDate]);
+    }
+
+    // Get GT and MT averages menggunakan array associative
+    $averages = collect(['GT', 'MT'])->mapWithKeys(function($category) use ($baseQuery, $request, $timeField) {
+        return [$category => $baseQuery->clone()
+            ->whereHas('outlet', function ($q) use ($category, $request) {
+                $q->where('category', $category);
+                if ($request->visit_day) {
+                    $q->where('visit_day', $request->visit_day);
+                }
+            })
+            ->avg($timeField) ?? 0];
+    });
+
+    // Calculate metrics
+    $avg_gt = $averages['GT'];
+    $avg_mt = $averages['MT'];
+    $avg_all = ($avg_gt + $avg_mt) / 2;
+    $total = $avg_gt + $avg_mt;
+    $max_progres = max($avg_gt, $avg_mt);
+
+    // Calculate percentages
+    return [
+        'avg_gt' => $this->formatToMinutesSeconds($avg_gt),
+        'avg_mt' => $this->formatToMinutesSeconds($avg_mt),
+        'avg_all' => gmdate('H:i:s', $avg_all),
+        'gt_contribution' => $total > 0 ? number_format(($avg_gt / $total * 100), 2) : 0,
+        'mt_contribution' => $total > 0 ? number_format(($avg_mt / $total * 100), 2) : 0,
+        'progres_gt' => $max_progres > 0 ? number_format(($avg_gt / $max_progres * 100), 2) : 0,
+        'progres_mt' => $max_progres > 0 ? number_format(($avg_mt / $max_progres * 100), 2) : 0
+    ];
+}
+
+    private function formatToMinutesSeconds($seconds)
+    {
+        $minutes = floor($seconds / 60);
+        $remainingSeconds = floor($seconds % 60);
+        return $minutes . 'm ' . $remainingSeconds . 's';
+    }
+
+    public function avg_availability(Request $request)
+    {
+        return json_encode($this->getAverageMetrics('time_availability', $request));
+    }
+
+    public function avg_visibility(Request $request)
+    {
+        return json_encode($this->getAverageMetrics('time_visibility', $request));
+    }
+
+    public function avg_survey(Request $request)
+    {
+        return json_encode($this->getAverageMetrics('time_survey', $request));
+    }
 }

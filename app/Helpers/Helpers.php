@@ -111,6 +111,22 @@ if (!function_exists('getVisitDayByDay')) {
         ;
     }
 }
+if (!function_exists('getAllDay')) {
+    function getAllDay()
+    {
+        $day = [
+            'SENIN' => '1',
+            'SELASA' => '2',
+            'RABU' => '3',
+            'KAMIS' => '4',
+            'JUMAT' => '5',
+            'SABTU' => '6',
+            'MINGGU' => '7',
+        ];
+
+        return $day;
+    }
+}
 if (!function_exists('getVisitDayByNumber')) {
     function getVisitDayByNumber($numberDay)
     {

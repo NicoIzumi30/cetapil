@@ -5,6 +5,12 @@
         <x-input.datepicker id="routing-date-range" />
         <x-select.light>
             <x-slot:title>Filter Date</x-slot:title>
+            @php
+                $days = getAllDay();
+            @endphp
+            @foreach ($days as $key => $value)
+                <option value="{{ $value }}">{{ $key }}</option>
+            @endforeach
         </x-select.light>
     </div>
 
@@ -25,7 +31,7 @@
             <div class="bar-label">Chain Pharmacy</div>
             <div class="bar-row">
                 <div class="bar-wrapper">
-                    <div class="bar" style="width: 100%"></div>
+                    <div class="bar" style="width: 78.58%"></div>
                 </div>
                 <div class="bar-value">
                     <div class="percentage">54 m</div>
