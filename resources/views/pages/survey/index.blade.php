@@ -85,15 +85,12 @@
                 lengthMenu: [10, 20, 30, 40, 50],
                 dom: 'rt<"bottom-container"<"bottom-left"l><"bottom-right"p>>',
                 language: {
-                    lengthMenu: "Menampilkan _MENU_ dari _TOTAL_ data",
+                    lengthMenu: "Menampilkan _MENU_ ",
                     paginate: {
                         previous: '<',
                         next: '>',
                         last: 'Terakhir',
                     },
-                    info: "Menampilkan _START_ sampai _END_ dari _TOTAL_ data",
-                    infoEmpty: "Menampilkan 0 sampai 0 dari 0 data",
-                    emptyTable: "Tidak ada data yang tersedia"
                 },
                 ajax: {
                     url: "{{ route('survey.data') }}",
@@ -101,9 +98,14 @@
                         d.search_term = $('#global-search').val();
                     },
                     dataSrc: function (json) {
-                        $('.dataTables_length select').closest('.dataTables_length')
-                            .find('label')
-                            .html(` <select>${$('.dataTables_length select').html()}</select> dari ${json.recordsFiltered} data`);
+                        const $labelElement = $('label[for="dt-length-0"]');
+                        $labelElement.find('span').remove();
+                        const recordInfo = `dari ${json.recordsFiltered} data`;
+                        const $span = $('<span>').text(recordInfo).css({
+                            color: 'white',
+                            marginLeft: '5px',
+                        });
+                        $labelElement.append($span);
                         return json.data;
                     }
                 },

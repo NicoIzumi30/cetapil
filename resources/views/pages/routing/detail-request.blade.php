@@ -89,7 +89,7 @@
                     <label for="outlet-code" class="!text-black">Kode Outlet</label>
                     <input id="outlet-code" class="form-control @error('outlet-code') is-invalid @enderror"
                         value="{{ old('outlet-code', $outlet->outlet_code) }}" type="text" name="outlet-code"
-                        placeholder="Masukan nama outlet" aria-describedby="name" />
+                        placeholder="Masukan kode outlet" aria-describedby="name" />
                     @if ($errors->has('outlet-code'))
                         <span id="outlet-code-error"
                             class="text-sm text-red-600 mt-1">{{ $errors->first('outlet-code') }}</span>
@@ -101,7 +101,7 @@
                         <label for="outlet-type" class="!text-black">Tipe Outlet</label>
                         <input id="outlet-type" class="form-control @error('outlet-type') is-invalid @enderror"
                             value="{{ old('outlet-type', $outlet->outlet_type) }}" type="text" name="outlet-type"
-                            placeholder="Masukan nama outlet" aria-describedby="name" />
+                            placeholder="Masukan tipe outlet" aria-describedby="name" />
                         @if ($errors->has('outlet-type'))
                             <span id="outlet-type-error"
                                 class="text-sm text-red-600 mt-1">{{ $errors->first('outlet-type') }}</span>

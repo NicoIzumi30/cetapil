@@ -51,7 +51,7 @@ Route::middleware('auth')->group(function () {
         Route::get('/', [RoutingRequestControler::class, 'index'])->name('index');
         Route::get('/data', [RoutingRequestControler::class, 'getData'])->name('data');
         Route::get('/{id}/edit', [RoutingRequestControler::class, 'edit'])->name('edit');
-        Route::post('/routing/request/approve/{id}', [RoutingRequestControler::class, 'approve'])->name('routing.request.approve');
+        Route::put('{id}/approve/', [RoutingRequestControler::class, 'approve'])->name('approve');
         Route::put('/{id}/reject', [RoutingRequestControler::class, 'reject'])->name('reject');
         Route::delete('/delete/', [RoutingRequestControler::class, 'destroy'])->name('delete');
     });

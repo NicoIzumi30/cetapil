@@ -69,25 +69,27 @@
                 lengthMenu: [10, 20, 30, 40, 50],
                 dom: 'rt<"bottom-container"<"bottom-left"l><"bottom-right"p>>',
                 language: {
-                    lengthMenu: "Menampilkan _MENU_ dari _TOTAL_ data",
+                    lengthMenu: "Menampilkan _MENU_ ",
                     paginate: {
                         previous: '<',
                         next: '>',
                         last: 'Terakhir',
                     },
-                    info: "Menampilkan _START_ sampai _END_ dari _TOTAL_ data",
-                    infoEmpty: "Menampilkan 0 sampai 0 dari 0 data",
-                    emptyTable: "Tidak ada data yang tersedia"
+
                 },
                 ajax: {
                     url: "{{ route('routing.request.data') }}",
                     dataSrc: function (json) {
-                        $('.dt-length select').closest('.dt-length')
-                            .find('label')
-                            .html(`Menampilkan <select  name="request-table_length" aria-controls="request-table" class="dt-input" id="dt-length-0">${$('.dt-length select').html()}</select> dari ${json.recordsFiltered} data`);
-                            console.log(json.data);
-                        return json.data;
-                    }
+                    const $labelElement = $('label[for="dt-length-0"]');
+                    $labelElement.find('span').remove();
+                    const recordInfo = `dari ${json.recordsFiltered} data`;
+                    const $span = $('<span>').text(recordInfo).css({
+                        color: 'white',
+                        marginLeft: '5px',
+                    });
+                    $labelElement.append($span);
+                    return json.data;
+                }
                 },
                 columns: [
                     { data: 'outlet', name: 'name', className: 'table-data' },
