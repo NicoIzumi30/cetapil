@@ -3,9 +3,7 @@
 namespace Database\Seeders;
 
 use App\Models\PosmType;
-use App\Models\Visibility;
 use App\Models\VisualType;
-use Illuminate\Database\Console\Seeds\WithoutModelEvents;
 use Illuminate\Database\Seeder;
 use Illuminate\Support\Facades\Schema;
 
@@ -18,7 +16,6 @@ class VisibilitySeeder extends Seeder
     {
         // TRUNCATE the posm_types and visual_types table, comment this code if doesn't needed
         Schema::disableForeignKeyConstraints();
-        Visibility::truncate();
         PosmType::truncate();
         VisualType::truncate();
         Schema::enableForeignKeyConstraints();
