@@ -73,12 +73,23 @@ class SurveyController extends Controller
             return response()->json(['error' => 'Failed to download data'], 500);
         }
     }
-    public function detail($id){
+    public function detail($id)
+    {
         $salesActivity = SalesActivity::with(['user:id,name', 'outlet:id,name,visit_day'])->find($id);
-        $surveys = SalesSurvey::with(['survey',])->where('sales_activity_id', $id)->get();
+        
+        // Fetch surveys with related survey question and its category
+        $surveys = SalesSurvey::with(['survey.category'])
+            ->where('sales_activity_id', $id)
+            ->get();
+    
+        // Group surveys by category name
+        $groupedSurveys = $surveys->groupBy(function($item) {
+            return $item->survey->category->name ?? 'Uncategorized';
+        });
+    
         return view('pages.survey.detail', [
             'salesActivity' => $salesActivity,
-            'surveys' => $surveys
+            'groupedSurveys' => $groupedSurveys
         ]);
     }
 }
