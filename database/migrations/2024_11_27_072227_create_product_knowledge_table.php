@@ -13,7 +13,6 @@ return new class extends Migration
     {
         Schema::create('product_knowledge', function (Blueprint $table) {
             $table->uuid('id')->primary()->unique();
-            $table->foreignUuid('channel_id')->references('id')->on('channels');
             $table->string('filename_pdf')->nullable();
             $table->string('path_pdf')->nullable();
             $table->string('filename_video')->nullable();

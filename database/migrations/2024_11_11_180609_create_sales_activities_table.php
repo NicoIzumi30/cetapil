@@ -17,6 +17,10 @@ return new class extends Migration
             $table->foreignUuid('user_id')->references('id')->on('users');
             $table->timestamp('checked_in')->nullable();
             $table->timestamp('checked_out')->nullable();
+            $table->decimal('latitude', 10, 8)->nullable();
+            $table->decimal('longitude', 11, 8)->nullable();
+            $table->decimal('radius', 10, 2)->nullable()->comment('Distance from outlet in meters');
+            $table->enum('radius_status', ['ONSITE', 'OFFSITE'])->nullable();
             $table->integer('views_knowledge')->default(0);
             $table->integer('time_availability')->default(0);
             $table->integer('time_visibility')->default(0);

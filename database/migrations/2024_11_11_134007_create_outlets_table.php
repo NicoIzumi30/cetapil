@@ -17,8 +17,12 @@ return new class extends Migration {
                 ->references('id')
                 ->on('users');  // Opsional
             $table->foreignUuid('city_id')->references('id')->on('cities');
-            $table->string('code')->nullable();
+            $table->foreignUuid('channel_id')->nullable()->references('id')->on('channels');
+            $table->dropColumn('channel');
+            $table->string('code')->nullable()->unique();
             $table->string('name');
+            $table->text('tipe_outlet')->nullable();
+            $table->text('account')->nullable();
             $table->string('category');
             $table->string('distributor')->nullable();
             $table->string('channel')->nullable();
@@ -30,7 +34,7 @@ return new class extends Migration {
             $table->text('address')->nullable();
             $table->enum('status', ['APPROVED', 'PENDING', 'REJECTED'])->default('PENDING');
             $table->enum('cycle', ['1x1', '1x2', '1x4'])->default('1x1');
-            $table->enum('week', ['1', '2', '3', '4','1&3','2&4'])->nullable();
+            $table->enum('week', ['1', '2', '3', '4', '1&3', '2&4'])->nullable();
             $table->timestamps();
             $table->softDeletes();
         });
