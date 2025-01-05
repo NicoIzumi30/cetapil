@@ -91,10 +91,10 @@ class DetailSurveyPage extends GetView<DetailActivityController> {
 
         var filteredSurveys = surveys
             .where((survey) {
-          return controller.surveyItems.any((d) => d['survey_question_id'] == survey['id']);
+          return controller.surveyDetailItems.any((d) => d['survey_question_id'] == survey['id']);
         })
             .map((survey) {
-          var matchingItem = controller.surveyItems.firstWhere(
+          var matchingItem = controller.surveyDetailItems.firstWhere(
                   (d) => d['survey_question_id'] == survey['id']
           );
           return {

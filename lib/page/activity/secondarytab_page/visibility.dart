@@ -306,6 +306,8 @@ class VisibilityPage extends GetView<ActivityController> {
           ],
         ),
         SizedBox(height: 16),
+
+        // === Kompetitor Visibility ===
         Text(
           'Kompetitor',
           style: TextStyle(
@@ -315,7 +317,7 @@ class VisibilityPage extends GetView<ActivityController> {
           ),
         ),
         Obx(() {
-          var id = "kompetitor-1";
+          var id = "kompetitor-kompetitor-1";
           var data = tambahActivityController.visibilityKompetitorDraftItems
               .firstWhere((item) => item['id'] == id, orElse: () => {});
           return KompetitorCard(
@@ -336,7 +338,7 @@ class VisibilityPage extends GetView<ActivityController> {
           );
         }),
         Obx(() {
-          var id = "kompetitor-2";
+          var id = "kompetitor-kompetitor-2";
           var data = tambahActivityController.visibilityKompetitorDraftItems
               .firstWhere((item) => item['id'] == id, orElse: () => {});
           return KompetitorCard(

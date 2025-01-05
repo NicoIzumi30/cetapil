@@ -33,8 +33,13 @@ class DetailActivityController extends GetxController {
     }
   }
 
-  final availabilitItems = <Map<String, dynamic>>[].obs;
-  final orderItems = <Map<String, dynamic>>[].obs;
-  final visibilityItems = <Map<String, dynamic>>[].obs;
-  final surveyItems = <Map<String, dynamic>>[].obs;
+  /// ITEM DETAIL ACTIVITY
+  final availabilityDetailItems = <Map<String, dynamic>>[].obs;
+  final visibilityPrimaryDetailItems = <Map<String, dynamic>>[].obs;
+  final visibilitySecondaryDetailItems = <Map<String, dynamic>>[].obs;
+  final visibilityKompetitorDetailItems = <Map<String, dynamic>>[].obs;
+  final surveyDetailItems = <Map<String, dynamic>>[].obs;
+  final orderDetailItems = <Map<String, dynamic>>[].obs;
+
+
 }

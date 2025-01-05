@@ -2,17 +2,18 @@ import 'dart:convert';
 import 'dart:io';
 
 import 'package:cetapil_mobile/controller/activity/detail_activity_controller.dart';
-import 'package:cetapil_mobile/controller/activity/tambah_activity_controller.dart';
-import 'package:cetapil_mobile/controller/activity/tambah_visibility_controller.dart';
-import 'package:cetapil_mobile/page/activity/secondarytab_page/tambah_primary_visibility.dart';
-import 'package:cetapil_mobile/controller/activity/activity_controller.dart';
 import 'package:cetapil_mobile/controller/support_data_controller.dart';
 import 'package:cetapil_mobile/model/list_activity_response.dart' as Activity;
 import 'package:cached_network_image/cached_network_image.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 
-import 'detail_item_visibility.dart';
+import '../secondarytab_page/tambah_kompetitor_visibility.dart';
+import '../secondarytab_page/tambah_primary_visibility.dart';
+import '../secondarytab_page/tambah_secondary_visibility.dart';
+import '../secondarytab_page/visibility.dart';
+import 'detail_item_visibility/detail_visibility_primary.dart';
+import 'detail_item_visibility/detail_visibility_secondary.dart';
 
 const String BASE_URL = 'https://dev-cetaphil.i-am.host/storage';
 
@@ -23,260 +24,395 @@ class DetailVisibilityPage extends GetView<DetailActivityController> {
   Widget build(BuildContext context) {
     return Column(
       children: [
-        Obx(() {
-          // final allVisibilities = detailActivityController.detailOutlet.value!.visibilities ?? [];
-          final allVisibilities = controller.visibilityItems;
-
-          if (allVisibilities.isEmpty) {
-            return Center(
-              child: Padding(
-                padding: const EdgeInsets.all(16.0),
-                child: Text(
-                  'No visibility data available',
-                  style: TextStyle(fontSize: 16),
-                ),
-              ),
-            );
-          }
-
-          return ListView.builder(
-            shrinkWrap: true,
-            physics: NeverScrollableScrollPhysics(),
-            itemCount: allVisibilities.length,
-            itemBuilder: (context, index) {
-              final visibility = allVisibilities[index];
-              final posmType = supportController
-                  .getPosmTypes()
-                  .firstWhereOrNull((posm) => posm['id'] == visibility['posm_type_id']);
-              final visualType = supportController
-                  .getVisualTypes()
-                  .firstWhereOrNull((visual) => visual['id'] == visibility['visual_type_id']);
+        Text(
+          'Primary',
+          style: TextStyle(
+            fontSize: 18,
+            fontWeight: FontWeight.bold,
+            color: Colors.black87,
+          ),
+        ),
+        SizedBox(height: 16),
+        CollapsibleVisibilityGroup(
+          title: 'Core',
+          items: [
+            Obx(() {
+              var id = "primary-core-1";
+              var data = controller.visibilityPrimaryDetailItems
+                  .firstWhere((item) => item['id'] == id, orElse: () => {});
               return VisibilityCard(
-                visibility: visibility,
-                posmTypeName: posmType?['name'] ?? 'Unknown Jenis Display',
-                visualTypeName: visualType?['name'] ?? 'Unknown Jenis Visual',
+                isPrimary: true,
+                posmType: data['posm_type_name'] ?? "-",
+                visualType: data['visual_type_name'] ?? "-",
+                condition: data['condition'] ?? "-",
+                imagePath: data['image_visibility'],
+                isSubmitted: data.isNotEmpty,
                 onTapCard: () {
-                  final itemData = {
-                    'posm_type_name': posmType!['name'],
-                    'visual_type_name': visualType!['name'],
-                    'condition': visibility['condition'],
-                    'planogram': visibility['planogram'],
-                    'image1': visibility['image1'],
-                    'image2': visibility['image2'],
-                  };
-
-                  Get.to(() => DetailItemVisibility(itemData));
+                  Get.to(() => DetailVisibilityPrimary(
+                    data: data
+                  ));
                 },
               );
+            }),
+            Obx(() {
+              var id = "primary-core-2";
+              var data = controller.visibilityPrimaryDetailItems
+                  .firstWhere((item) => item['id'] == id, orElse: () => {});
+              return VisibilityCard(
+                isPrimary: true,
+                posmType: data['posm_type_name'] ?? "-",
+                visualType: data['visual_type_name'] ?? "-",
+                condition: data['condition'] ?? "-",
+                imagePath: data['image_visibility'],
+                isSubmitted: data.isNotEmpty,
+                onTapCard: () {
+                  Get.to(() => DetailVisibilityPrimary(
+                      data: data
+                  ));
+                },
+              );
+            }),
+            Obx(() {
+              var id = "primary-core-3";
+              var data = controller.visibilityPrimaryDetailItems
+                  .firstWhere((item) => item['id'] == id, orElse: () => {});
+              return VisibilityCard(
+                isPrimary: true,
+                posmType: data['posm_type_name'] ?? "-",
+                visualType: data['visual_type_name'] ?? "-",
+                condition: data['condition'] ?? "-",
+                imagePath: data['image_visibility'],
+                isSubmitted: data.isNotEmpty,
+                onTapCard: () {
+                  Get.to(() => DetailVisibilityPrimary(
+                      data: data
+                  ));
+                },
+              );
+            }),
+          ],
+        ),
+        SizedBox(height: 8),
+        CollapsibleVisibilityGroup(
+          title: 'Baby',
+          items: [
+            Obx(() {
+              var id = "primary-baby-1";
+              var data = controller.visibilityPrimaryDetailItems
+                  .firstWhere((item) => item['id'] == id, orElse: () => {});
+              return VisibilityCard(
+                isPrimary: true,
+                posmType: data['posm_type_name'] ?? "-",
+                visualType: data['visual_type_name'] ?? "-",
+                condition: data['condition'] ?? "-",
+                imagePath: data['image_visibility'],
+                isSubmitted: data.isNotEmpty,
+                onTapCard: () {
+                  Get.to(() => DetailVisibilityPrimary(
+                      data: data
+                  ));
+                },
+              );
+            }),
+            Obx(() {
+              var id = "primary-baby-2";
+              var data = controller.visibilityPrimaryDetailItems
+                  .firstWhere((item) => item['id'] == id, orElse: () => {});
+              return VisibilityCard(
+                isPrimary: true,
+                posmType: data['posm_type_name'] ?? "-",
+                visualType: data['visual_type_name'] ?? "-",
+                condition: data['condition'] ?? "-",
+                imagePath: data['image_visibility'],
+                isSubmitted: data.isNotEmpty,
+                onTapCard: () {
+                  Get.to(() => DetailVisibilityPrimary(
+                    data: data,
+                  ));
+                },
+              );
+            }),
+            Obx(() {
+              var id = "primary-baby-3";
+              var data = controller.visibilityPrimaryDetailItems
+                  .firstWhere((item) => item['id'] == id, orElse: () => {});
+              return VisibilityCard(
+                isPrimary: true,
+                posmType: data['posm_type_name'] ?? "-",
+                visualType: data['visual_type_name'] ?? "-",
+                condition: data['condition'] ?? "-",
+                imagePath: data['image_visibility'],
+                isSubmitted: data.isNotEmpty,
+                onTapCard: () {
+                  Get.to(() => DetailVisibilityPrimary(
+                    data: data,
+                  ));
+                },
+              );
+            }),
+          ],
+        ),
+        SizedBox(height: 16),
+
+        // === Secondary Visibility ===
+        Text(
+          'Secondary',
+          style: TextStyle(
+            fontSize: 18,
+            fontWeight: FontWeight.bold,
+            color: Colors.black87,
+          ),
+        ),
+        SizedBox(height: 16),
+        CollapsibleVisibilityGroup(
+          title: 'Core',
+          items: [
+            Obx(() {
+              var id = "secondary-core-1";
+              var data = controller.visibilitySecondaryDetailItems
+                  .firstWhere((item) => item['id'] == id, orElse: () => {});
+              return VisibilityCard(
+                isPrimary: false,
+                secondarydisplay: data['secondary_exist'] ?? "-",
+                typeDisplay: data['display_type'] ?? "-",
+                imagePath: data['display_image'],
+                isSubmitted: data.isNotEmpty,
+                onTapCard: () {
+                  Get.to(() => DetailVisibilitySecondary(
+                    data: data,
+                  ));
+                },
+              );
+            }),
+            Obx(() {
+              var id = "secondary-core-2";
+              var data = controller.visibilitySecondaryDetailItems
+                  .firstWhere((item) => item['id'] == id, orElse: () => {});
+              return VisibilityCard(
+                isPrimary: false,
+                secondarydisplay: data['secondary_exist'] ?? "-",
+                typeDisplay: data['display_type'] ?? "-",
+                imagePath: data['display_image'],
+                isSubmitted: data.isNotEmpty,
+                onTapCard: () {
+                  Get.to(() => DetailVisibilitySecondary(
+                    data: data,
+                  ));
+                },
+              );
+            }),
+          ],
+        ),
+        SizedBox(height: 8),
+        CollapsibleVisibilityGroup(
+          title: 'Baby',
+          items: [
+            Obx(() {
+              var id = "secondary-baby-1";
+              var data = controller.visibilitySecondaryDetailItems
+                  .firstWhere((item) => item['id'] == id, orElse: () => {});
+              return VisibilityCard(
+                isPrimary: false,
+                secondarydisplay: data['secondary_exist'] ?? "-",
+                typeDisplay: data['display_type'] ?? "-",
+                imagePath: data['display_image'],
+                isSubmitted: data.isNotEmpty,
+                onTapCard: () {
+                  Get.to(() => DetailVisibilitySecondary(
+                    data: data,
+                  ));
+                },
+              );
+            }),
+            Obx(() {
+              var id = "secondary-baby-2";
+              var data = controller.visibilitySecondaryDetailItems
+                  .firstWhere((item) => item['id'] == id, orElse: () => {});
+              return VisibilityCard(
+                isPrimary: false,
+                secondarydisplay: data['secondary_exist'] ?? "-",
+                typeDisplay: data['display_type'] ?? "-",
+                imagePath: data['display_image'],
+                isSubmitted: data.isNotEmpty,
+                onTapCard: () {
+                  Get.to(() => DetailVisibilitySecondary(
+                    data: data,
+                  ));
+                },
+              );
+            }),
+          ],
+        ),
+        SizedBox(height: 16),
+
+        // === Kompetitor Visibility ===
+        Text(
+          'Kompetitor',
+          style: TextStyle(
+            fontSize: 18,
+            fontWeight: FontWeight.bold,
+            color: Colors.black87,
+          ),
+        ),
+        Obx(() {
+          var id = "kompetitor-kompetitor-1";
+          var data = controller.visibilityKompetitorDetailItems
+              .firstWhere((item) => item['id'] == id, orElse: () => {});
+          return KompetitorCard(
+            brandName: data['brand_name'] ?? "-",
+            promoMechanism: data['promo_mechanism'] ?? "-",
+            promoPeriode: data['promo_periode_start'] != null ? "${data['promo_periode_start']} - ${data['promo_periode_end']}" : "-",
+            imagePath: data['program_image1'],
+            isSubmitted: data.isNotEmpty,
+            onTapCard: () {
+              Get.to(() => DetailVisibilitySecondary(
+                data: data,
+              ));
             },
           );
         }),
+        Obx(() {
+          var id = "kompetitor-kompetitor-2";
+          var data = controller.visibilityKompetitorDetailItems
+              .firstWhere((item) => item['id'] == id, orElse: () => {});
+          return KompetitorCard(
+            brandName: data['brand_name'] ?? "-",
+            promoMechanism: data['promo_mechanism'] ?? "-",
+            promoPeriode: data['promo_periode_start'] != null ? "${data['promo_periode_start']} - ${data['promo_periode_end']}" : "-",
+            imagePath: data['program_image1'],
+            isSubmitted: data.isNotEmpty,
+            onTapCard: () {
+              Get.to(() => DetailVisibilitySecondary(
+                data: data,
+              ));
+            },
+          );
+        }),
+        SizedBox(height: 16),
       ],
     );
   }
 }
 
 class VisibilityCard extends StatelessWidget {
-  final Map<String, dynamic> visibility;
-  final String posmTypeName;
-  final String visualTypeName;
-  final VoidCallback onTapCard;
+  final bool isPrimary;
+
+  ///primary
+  final String? posmType;
+  final String? visualType;
+  final String? condition;
+
+  ///secondary
+  final String? secondarydisplay;
+  final String? typeDisplay;
+
+  final File? imagePath;
+  final bool isSubmitted;
+  final VoidCallback? onTapCard; // Added this parameter
 
   const VisibilityCard({
     Key? key,
-    required this.visibility,
-    required this.posmTypeName,
-    required this.visualTypeName,
-    required this.onTapCard,
+    this.posmType,
+    this.visualType,
+    this.condition,
+    this.secondarydisplay,
+    this.typeDisplay,
+    this.imagePath,
+    this.isSubmitted = false,
+    this.onTapCard,
+    required this.isPrimary, // Optional callback
   }) : super(key: key);
-
-  String? _getImageUrl(String? imagePath) {
-    if (imagePath == null || imagePath.isEmpty) return null;
-    if (imagePath.startsWith('data:image') || imagePath.startsWith('/9j/')) {
-      return null;
-    }
-    String path = imagePath.startsWith('/') ? imagePath.substring(1) : imagePath;
-    return '$BASE_URL/$path';
-  }
-
-  Widget _buildImage() {
-    final detailActivityController = Get.find<DetailActivityController>();
-
-    // Check for draft image first
-    final draftItem = detailActivityController.visibilityItems
-        .firstWhereOrNull((draft) => draft['id'] == visibility['id']);
-
-    print("$BASE_URL${draftItem!['image1']}");
-    if (draftItem != null && draftItem['image1'] != null) {
-      // Show draft image1 if available
-      return ClipRRect(
-        borderRadius: BorderRadius.circular(10),
-        child: Image.network(
-          "$BASE_URL${draftItem!['image1']}",
-          width: 120,
-          height: 120,
-          fit: BoxFit.cover,
-          errorBuilder: (context, error, stackTrace) => Container(
-            width: 120,
-            height: 120,
-            color: Colors.grey[200],
-            child: Icon(Icons.error),
-          ),
-        ),
-      );
-    }
-
-    // Fall back to original image logic
-    if (visibility['planogram'] == null) {
-      return Container(
-        width: 120,
-        height: 120,
-        decoration: BoxDecoration(
-          borderRadius: BorderRadius.circular(10),
-          color: Colors.grey[200],
-        ),
-        child: Icon(Icons.image_not_supported, color: Colors.grey),
-      );
-    }
-
-    final imageUrl = _getImageUrl(visibility['planogram']);
-
-    print(imageUrl != null);
-    if (imageUrl != null) {
-      return ClipRRect(
-        borderRadius: BorderRadius.circular(10),
-        child: CachedNetworkImage(
-          imageUrl: imageUrl,
-          width: 120,
-          height: 120,
-          fit: BoxFit.cover,
-          placeholder: (context, url) => Container(
-            color: Colors.grey[200],
-            child: Center(child: CircularProgressIndicator()),
-          ),
-          errorWidget: (context, url, error) => Container(
-            color: Colors.grey[200],
-            child: Icon(Icons.error),
-          ),
-        ),
-      );
-    } else if (visibility['planogram'].startsWith('data:image') || visibility['planogram'].startsWith('/9j/')) {
-      try {
-        return ClipRRect(
-          borderRadius: BorderRadius.circular(10),
-          child: Image.memory(
-            base64Decode(visibility['planogram']!.split(',').last),
-            width: 120,
-            height: 120,
-            fit: BoxFit.cover,
-            errorBuilder: (context, error, stackTrace) => Container(
-              width: 120,
-              height: 120,
-              color: Colors.grey[200],
-              child: Icon(Icons.error),
-            ),
-          ),
-        );
-      } catch (e) {
-        print('Error loading base64 image: $e');
-        return Container(
-          width: 120,
-          height: 120,
-          color: Colors.grey[200],
-          child: Icon(Icons.error),
-        );
-      }
-    }
-
-    return Container(
-      width: 120,
-      height: 120,
-      decoration: BoxDecoration(
-        borderRadius: BorderRadius.circular(10),
-        color: Colors.grey[200],
-      ),
-      child: Icon(Icons.image_not_supported, color: Colors.grey),
-    );
-  }
 
   @override
   Widget build(BuildContext context) {
-    final detailActivityController = Get.find<DetailActivityController>();
+    return _buildCardWithImage();
+  }
 
-    return Obx(() {
-      // Check if this visibility exists in draft items
-      final hasDraft =
-      detailActivityController.visibilityItems.any((draft) => draft['id'] == visibility['id']);
-
-      return InkWell(
-        onTap: onTapCard,
-        child: Container(
-          margin: const EdgeInsets.only(bottom: 16),
-          padding: const EdgeInsets.all(16),
-          decoration: BoxDecoration(
-            borderRadius: BorderRadius.circular(10),
-            gradient: LinearGradient(
-              begin: Alignment.topCenter,
-              end: Alignment.bottomCenter,
-              colors: [
-                Color(0xFFFFFFFF),
-                Color(0x80FFFFFF),
-              ],
+  Widget _buildCardWithImage() {
+    return InkWell(
+      onTap: onTapCard,
+      child: Container(
+        margin: EdgeInsets.symmetric(vertical: 8, horizontal: 5),
+        decoration: BoxDecoration(
+          color: Colors.white.withOpacity(0.9),
+          borderRadius: BorderRadius.circular(12),
+          boxShadow: [
+            BoxShadow(
+              color: Colors.black.withOpacity(0.03),
+              blurRadius: 4,
+              offset: Offset(0, 2),
             ),
-            border: Border.all(
-              color: hasDraft ? Colors.blue : Colors.grey.withOpacity(0.2),
-              width: hasDraft ? 2 : 1,
-            ),
-            boxShadow: [
-              BoxShadow(
-                color: Colors.grey.withOpacity(0.1),
-                spreadRadius: 1,
-                blurRadius: 2,
-                offset: Offset(0, 1),
-              ),
-            ],
-          ),
-          child: Stack(
-            children: [
-              Row(
+          ],
+        ),
+        child: Stack(
+          children: [
+            Padding(
+              padding: EdgeInsets.all(16),
+              child: Row(
                 crossAxisAlignment: CrossAxisAlignment.start,
-                mainAxisAlignment: MainAxisAlignment.spaceBetween,
                 children: [
                   Expanded(
-                    child: Column(
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      children: [
-                        _buildInfoRow("Jenis Display", posmTypeName),
-                        SizedBox(height: 8),
-                        _buildInfoRow("Jenis Visual", visualTypeName),
-                      ],
+                      child: isPrimary
+                          ? Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          _buildInfoRow('Jenis Display:', posmType!),
+                          SizedBox(height: 8),
+                          _buildInfoRow('Jenis Visual:', visualType!),
+                          SizedBox(height: 8),
+                          _buildInfoRow('Condition', condition!),
+                        ],
+                      )
+                          : Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          _buildInfoRow('Display Secondary:', secondarydisplay!),
+                          SizedBox(height: 8),
+                          _buildInfoRow('Display Type:', typeDisplay!),
+                        ],
+                      )),
+                  SizedBox(width: 12),
+                  ClipRRect(
+                    borderRadius: BorderRadius.circular(8),
+                    child: imagePath != null
+                        ? SizedBox(
+                        width: 80,
+                        height: 80,
+                        child: Image.file(
+                          imagePath!,
+                          fit: BoxFit.cover,
+                        ))
+                        : Container(
+                      width: 80,
+                      height: 80,
+                      color: Colors.grey[200],
+                      child: Icon(Icons.image_outlined, color: Colors.grey[400]),
                     ),
                   ),
-                  _buildImage(),
                 ],
               ),
-              if (hasDraft)
-                Positioned(
-                  top: -8,
-                  right: -8,
-                  child: Container(
-                    padding: EdgeInsets.all(4),
-                    decoration: BoxDecoration(
-                      color: Colors.blue,
-                      shape: BoxShape.circle,
-                    ),
-                    child: Icon(
-                      Icons.check,
-                      color: Colors.white,
-                      size: 16,
-                    ),
+            ),
+            if (isSubmitted)
+              Positioned(
+                top: -4,
+                right: -4,
+                child: Container(
+                  padding: EdgeInsets.all(4),
+                  decoration: BoxDecoration(
+                    color: Colors.blue,
+                    shape: BoxShape.circle,
+                  ),
+                  child: Icon(
+                    Icons.check,
+                    color: Colors.white,
+                    size: 12,
                   ),
                 ),
-            ],
-          ),
+              ),
+          ],
         ),
-      );
-    });
+      ),
+    );
   }
 
   Widget _buildInfoRow(String label, String value) {
@@ -284,17 +420,19 @@ class VisibilityCard extends StatelessWidget {
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
         Text(
-          "$label:",
+          label,
           style: TextStyle(
-            fontSize: 13,
-            fontWeight: FontWeight.bold,
+            fontSize: 12,
             color: Colors.grey[600],
+            fontWeight: FontWeight.w400,
           ),
         ),
+        SizedBox(height: 2),
         Text(
           value,
           style: TextStyle(
-            fontSize: 13,
+            fontSize: 14,
+            color: Colors.black87,
             fontWeight: FontWeight.w500,
           ),
         ),

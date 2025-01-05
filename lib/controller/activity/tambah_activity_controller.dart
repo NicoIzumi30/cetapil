@@ -60,12 +60,14 @@ class TambahActivityController extends GetxController {
   final errorMessageOrder = ''.obs;
 
   // Consolidated draft items for all sections
-  final RxList<Map<String, dynamic>> availabilityDraftItems = <Map<String, dynamic>>[].obs;
-  final RxList<Map<String, dynamic>> orderDraftItems = <Map<String, dynamic>>[].obs;
-
+  /// ITEM TAMBAH ACTIVITY
+  final availabilityDraftItems = <Map<String, dynamic>>[].obs;
   final visibilityPrimaryDraftItems = <Map<String, dynamic>>[].obs;
   final visibilitySecondaryDraftItems = <Map<String, dynamic>>[].obs;
   final visibilityKompetitorDraftItems = <Map<String, dynamic>>[].obs;
+  final orderDraftItems = <Map<String, dynamic>>[].obs;
+
+
 
   // Survey related fields
   final RxMap<String, TextEditingController> priceControllers =

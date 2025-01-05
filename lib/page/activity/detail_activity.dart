@@ -65,16 +65,16 @@ class DetailActivity extends GetView<DetailActivityController> {
                     if (snapshot.connectionState == ConnectionState.waiting) {
                       return Center(child: CircularProgressIndicator());
                     }
-                
+
                     if (snapshot.hasError) {
                       return Center(child: Text('Error: ${snapshot.error}'));
                     }
-                
+
                     if (snapshot.hasData) {
                       final data = snapshot.data!;
                       return buildDetailPage(data);
                     }
-                
+
                     return Center(child: Text('No data available'));
                   },
                 ),
@@ -92,55 +92,76 @@ class DetailActivity extends GetView<DetailActivityController> {
     final allVisibilities = [];
 
     /// AVAILABILITY SECTION
-    detailActivityController.availabilitItems.value = snapshot.data?.availabilities?.map((item) => {
+    detailActivityController.availabilityDetailItems.value = snapshot.data?.availabilities?.map((item) => {
       'id': item.id,
-      'sku': tambahAvailabilityController.getSkuByDataApi(item.productId!)!['sku'],
+      'product_id': item.productId!,
       'category': tambahAvailabilityController.getSkuByDataApi(item.productId!)!['category']['name'],
-      'stock': item.availabilityStock,
-      'av3m': item.averageStock,
-      'recommend': item.idealStock,
+      'sku': tambahAvailabilityController.getSkuByDataApi(item.productId!)!['sku'],
+      'availability_exist': item.availability == "Y" ? true : false,
+      'stock_on_hand': item.stockOnHand,
+      'stock_on_inventory': item.stockInventory,
+      'av3m': item.av3m,
+      'recommend': item.rekomendasi,
     }).toList() ?? [];
     // tambahAvailabilityController.clearForm();
 
-
     ///VISIBILITY SECTION
-    if (snapshot.data!.visibilities!.isNotEmpty) {
-      for(var dataApi in allVisibilities) {
-        for (var item in snapshot.data!.visibilities!) {
-          final posmType = supportController
-              .getPosmTypes()
-              .firstWhereOrNull((posm) => posm['id'] == dataApi.posmTypeId);
-          final visualType = supportController
-              .getVisualTypes()
-              .firstWhereOrNull((visual) =>
-          visual['id'] == dataApi.visualTypeId);
-          final newItem = {
-            'id': item.id,
-            'posm_type_id': dataApi.posmTypeId,
-            'posm_type_name': posmType!['name'],
-            'visual_type_id': dataApi.visualTypeId,
-            'visual_type_name': visualType!['name'],
-            'condition': item.condition,
-            'planogram': dataApi.image,
-            'image1': item.path1,
-            'image2': item.path2,
-          };
-          detailActivityController.visibilityItems.add(newItem);
-        }
-      }
-    }
+    detailActivityController.visibilityPrimaryDetailItems.addAll(snapshot.data?.visibilities?.primary?.core?.map((item) => {
+      'id': "primary-${item.category!.toLowerCase()}-${item.position}",
+      'category': item.category,
+      'position': item.position,
+      'posm_type_id': item.posmType.id,
+      'posm_type_name': item.posmType.name,
+      'visual_type_id': item.visualType, /// GANTI JADI VISUALTYPE ID
+      'visual_type_name': item.visualType,
+      'condition': item.condition,
+      'shelf_width': item.shelfWidth,
+      'shelving': item.shelving,
+      'image_visibility': item.displayPhoto,
+    }).toList() ?? []);
+
+    detailActivityController.visibilitySecondaryDetailItems.addAll(snapshot.data?.visibilities?.secondary?.core?.map((item) => {
+      'id': "primary-${item.category!.toLowerCase()}-${item.position}",
+      'category': item.category,
+      'position': item.position,
+      'posm_type_id': item.posmType.id,
+      'posm_type_name': item.posmType.name,
+      'visual_type_id': item.visualType, /// GANTI JADI VISUALTYPE ID
+      'visual_type_name': item.visualType,
+      'condition': item.condition,
+      'shelf_width': item.shelfWidth,
+      'shelving': item.shelving,
+      'image_visibility': item.displayPhoto,
+    }).toList() ?? []);
+
+    detailActivityController.visibilityPrimaryDetailItems.addAll(snapshot.data?.visibilities?.primary?.core?.map((item) => {
+      'id': "primary-${item.category!.toLowerCase()}-${item.position}",
+      'category': item.category,
+      'position': item.position,
+      'posm_type_id': item.posmType.id,
+      'posm_type_name': item.posmType.name,
+      'visual_type_id': item.visualType, /// GANTI JADI VISUALTYPE ID
+      'visual_type_name': item.visualType,
+      'condition': item.condition,
+      'shelf_width': item.shelfWidth,
+      'shelving': item.shelving,
+      'image_visibility': item.displayPhoto,
+    }).toList() ?? []);
 
     ///ORDER SECTION
-    detailActivityController.orderItems.value = snapshot.data?.orders?.map((item) => {
+    detailActivityController.orderDetailItems.value = snapshot.data?.orders?.map((item) => {
       'id': item.id,
-      'sku': tambahAvailabilityController.getSkuByDataApi(item.productId!)!['sku'],
+      'product_id': item.productId!,
       'category': tambahAvailabilityController.getSkuByDataApi(item.productId!)!['category']['name'],
+      'sku': tambahAvailabilityController.getSkuByDataApi(item.productId!)!['sku'],
       'jumlah': item.totalItems,
       'harga': item.subtotal,
     }).toList() ?? [];
     // tambahAvailabilityController.clearForm();
 
-    detailActivityController.surveyItems.value = snapshot.data?.surveys?.map((item) => {
+
+    ///SURVEY SECTION
+    detailActivityController.surveyDetailItems.value = snapshot.data?.surveys?.map((item) => {
       "id" : item.id,
       "sales_activity_id": item.salesActivityId,
       "survey_question_id": item.surveyQuestionId,

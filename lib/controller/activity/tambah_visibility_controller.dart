@@ -316,15 +316,13 @@ class TambahVisibilityController extends GetxController {
   void saveKompetitorVisibility(String id) {
     if (!validateKompetitorForm()) return;
     var id_part = id.split('-');
-
-    /// (kompetitor , 1)
-    String formattedStart =
-    DateFormat('yyyy-MM-dd').format(selectedDateRange.value!.start);
-    String formattedEnd =
-    DateFormat('yyyy-MM-dd').format(selectedDateRange.value!.start);
+    /// (kompetitor , kompetitor, 1)
+    String formattedStart = DateFormat('yyyy-MM-dd').format(selectedDateRange.value!.start);
+    String formattedEnd = DateFormat('yyyy-MM-dd').format(selectedDateRange.value!.start);
     final data = {
       'id': id,
-      'position': id_part[1],
+      'category': id_part[1].toUpperCase(),
+      'position': id_part[2],
       'brand_name': brandName.value.text,
       'promo_mechanism': promoMechanism.value.text,
       'promo_periode_start': formattedStart,
@@ -332,8 +330,6 @@ class TambahVisibilityController extends GetxController {
       'program_image1': programImages1.value,
       'program_image2': programImages2.value,
     };
-    print(selectedDateRange.value);
-
     activityController.addKompetitorVisibilityItem(data);
     clearKompetitorForm();
     Get.back();

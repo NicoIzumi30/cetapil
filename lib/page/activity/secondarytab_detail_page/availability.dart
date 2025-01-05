@@ -5,6 +5,7 @@ import 'package:flutter/services.dart';
 import 'package:get/get.dart';
 
 import '../../../controller/activity/tambah_availibility_controller.dart';
+import '../../selling/tambah_selling.dart';
 
 class DetailAvailabilityPage extends GetView<DetailActivityController> {
   @override
@@ -14,62 +15,34 @@ class DetailAvailabilityPage extends GetView<DetailActivityController> {
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
         Obx(() {
-          final groupedItemsAvailability = <String, List<Map<String, dynamic>>>{};
-
-          for (var item in controller.availabilitItems) {
+          final groupedItems = <String, List<Map<String, dynamic>>>{};
+          for (var item in controller.availabilityDetailItems) {
             final category = item['category'];
-            if (groupedItemsAvailability[category] == null) {
-              groupedItemsAvailability[category] = [];
+            if (groupedItems[category] == null) {
+              groupedItems[category] = [];
             }
-            groupedItemsAvailability[category]!.add(item);
+            groupedItems[category]!.add(item);
           }
 
           return Column(
             children: [
-              ...groupedItemsAvailability.entries.map((entry) {
+              ...groupedItems.entries.map((entry) {
                 final category = entry.key;
                 final items = entry.value;
 
-                return Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    Padding(
-                      padding: const EdgeInsets.symmetric(vertical: 8.0),
-                      child: Text(
-                        category,
-                        style: TextStyle(
-                          fontSize: 14,
-                          fontWeight: FontWeight.bold,
-                          color: Color(0xFF023B5E),
-                        ),
-                      ),
-                    ),
-                    ...items.map((item) {
-                      return SumAmountProduct(
-                        productName: item['sku'] ?? '',
-                        stockController:
-                            TextEditingController(text: item['stock']?.toString() ?? ''),
-                        AV3MController: TextEditingController(text: item['av3m']?.toString() ?? ''),
-                        recommendController:
-                            TextEditingController(text: item['recommend']?.toString() ?? ''),
-                        isReadOnly: true,
-                        itemData: {
-                          'id': item['id'],
-                          'sku': item['sku'],
-                          'category': category,
-                          'stock': item['stock'],
-                          'av3m': item['av3m'],
-                          'recommend': item['recommend']
-                        },
-                      );
-                    }).toList(),
-                    SizedBox(height: 10),
-                  ],
+                return Padding(
+                  padding: const EdgeInsets.only(bottom: 8.0),
+                  child: CollapsibleCategoryGroup(
+                    category: category,
+                    items: items,
+                    isEdit: false,
+                  ),
                 );
               }).toList(),
             ],
           );
         }),
+        SizedBox(height: 20),
       ],
     );
   }
