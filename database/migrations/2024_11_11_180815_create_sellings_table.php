@@ -13,7 +13,12 @@ return new class extends Migration
     {
         Schema::create('sellings', function (Blueprint $table) {
             $table->uuid('id')->primary()->unique();
+            $table->foreignUuid('outlet_id')->references('id')->on('outlets');
             $table->foreignUuid('user_id')->references('id')->on('users');
+            $table->timestamp('checked_in')->nullable();
+            $table->timestamp('checked_out')->nullable();
+            $table->integer('duration')->nullable()
+                ->comment('Duration of the selling activity in seconds');
             $table->string('outlet_name');
             $table->string('longitude');
             $table->string('latitude');

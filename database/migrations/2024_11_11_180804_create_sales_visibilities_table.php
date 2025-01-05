@@ -15,16 +15,21 @@ return new class extends Migration
         Schema::create('sales_visibilities', function (Blueprint $table) {
             $table->uuid('id')->primary();
             $table->uuid('sales_activity_id');
-            $table->enum('category', ['CORE', 'BABY']);
-            $table->enum('type', ['PRIMARY', 'SECONDARY']);
+            $table->enum('category', ['CORE', 'BABY','COMPETITOR']);
+            $table->enum('type', ['PRIMARY', 'SECONDARY','COMPETITOR']);
             $table->integer('position'); // 1, 2, 3 etc.
             $table->uuid('posm_type_id')->nullable();
             $table->string('visual_type')->nullable();
             $table->enum('condition', ['GOOD', 'BAD'])->nullable();
-            $table->string('display_photo')->nullable();
+            $table->string('competitor_brand_name')->nullable();
+            $table->text('competitor_promo_mechanism')->nullable();
+            $table->date('competitor_promo_start')->nullable();
+            $table->date('competitor_promo_end')->nullable();
             $table->integer('shelf_width')->nullable();
             $table->string('shelving')->nullable();
             $table->enum('has_secondary_display', ['Y', 'N'])->nullable();
+            $table->string('display_photo')->nullable();
+            $table->string('display_photo_2')->nullable();
             $table->timestamps();
             $table->softDeletes();
 

@@ -17,7 +17,7 @@ return new class extends Migration
             $table->foreignUuid('survey_question_id')->references('id')->on('survey_questions');
             $table->foreignUuid('survey_question_id_2')->references('id')->on('survey_questions')->nullable();
             $table->foreignUuid('product_id')->references('id')->on('products');
-            $table->string("produk_name")->nullable();;
+            $table->string("product_name")->nullable();
             $table->timestamps();
             $table->softDeletes();
         });

@@ -13,13 +13,17 @@ return new class extends Migration
     {
         Schema::create('sales_availabilities', function (Blueprint $table) {
             $table->uuid('id')->primary()->unique();
+            $table->foreignUuid('sales_activity_id')->references('id')->on('sales_activities');
             $table->foreignUuid('outlet_id')->references('id')->on('outlets');
             $table->foreignUuid('product_id')->references('id')->on('products');
-            $table->integer('availability_stock')->default(0);
-            $table->integer('average_stock')->default(0);
-            $table->integer('ideal_stock')->default(0);
-            $table->boolean('status')->default(1);
-            $table->enum('detail', ['IDEAL', 'MINUS', 'OVER']);
+            $table->integer('stock_on_hand')->default(0);
+            $table->integer('stock_inventory')->default(0);
+            $table->integer('av3m')->default(0);
+
+            $table->enum('status', ['IDEAL', 'MINUS', 'OVER'])->nullable();
+            $table->integer('rekomendasi')->nullable(); // Can be minus
+            $table->enum('availability', ['Y', 'N'])->default('N');
+
             $table->timestamps();
             $table->softDeletes();
         });

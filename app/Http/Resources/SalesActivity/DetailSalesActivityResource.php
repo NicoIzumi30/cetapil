@@ -30,27 +30,18 @@ class DetailSalesActivityResource extends JsonResource
             ),
             'orders' => SalesOrderResource::collection($this->whenLoaded('orders')),
             'visibilities' => [
-                'primary' => [
-                    'core' => $this->formatVisibilities('CORE', 'PRIMARY'),
-                    'baby' => $this->formatVisibilities('BABY', 'PRIMARY'),
-                ],
-                'secondary' => [
-                    'core' => $this->formatVisibilities('CORE', 'SECONDARY'),
-                    'baby' => $this->formatVisibilities('BABY', 'SECONDARY'),
-                ],
-                'competitor' => [
-                    'competitor' => $this->formatVisibilities('COMPETITOR', 'COMPETITOR'),
-                ],
+                'primary' => $this->formatVisibilities('PRIMARY'),
+                'secondary' => $this->formatVisibilities('SECONDARY'),
+                'competitor' => $this->formatVisibilities('COMPETITOR'),
             ],
             'availabilities' => SalesAvailabilityResource::collection($this->whenLoaded('availabilities')),
             'surveys' => SalesSurveyResource::collection($this->whenLoaded('surveys')),
         ];
     }
 
-    private function formatVisibilities($category, $type)
+    private function formatVisibilities($type)
     {
         return $this->salesVisibilities
-            ->where('category', $category)
             ->where('type', $type)
             ->sortBy('position')
             ->values()
@@ -68,6 +59,9 @@ class SalesOrderResource extends JsonResource
             'id' => $this->id,
             'sales_activity_id' => $this->sales_activity_id,
             'product_id' => $this->product_id,
+            'category' => $this->product->category->name,
+            'sku' => $this->product->sku,
+            'price' => $this->product->price,
             'total_items' => $this->total_items,
             'subtotal' => $this->subtotal,
         ];
@@ -112,6 +106,9 @@ class SalesAvailabilityResource extends JsonResource
             'id' => $this->id,
             'sales_activity_id' => $this->sales_activity_id,
             'product_id' => $this->product_id,
+            'category' => $this->product->category->name,
+            'sku' => $this->product->sku,
+            'price' => $this->product->price,
             'stock_on_hand' => $this->stock_on_hand,
             'stock_inventory' => $this->stock_inventory,
             'av3m' => $this->av3m,

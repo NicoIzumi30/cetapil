@@ -15,7 +15,6 @@ return new class extends Migration
             $table->uuid('id')->primary()->unique();
             $table->foreignUuid('outlet_id')->references('id')->on('outlets');
             $table->foreignUuid('product_id')->references('id')->on('products');
-            $table->integer('av3m');
             $table->timestamps();
         });
     }

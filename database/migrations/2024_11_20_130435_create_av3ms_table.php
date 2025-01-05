@@ -13,7 +13,8 @@ return new class extends Migration
     {
         Schema::create('av3ms', function (Blueprint $table) {
             $table->uuid('id')->primary()->unique();
-            $table->foreignUuid('channel_id')->references('id')->on('channels');
+            $table->foreignUuid('outlet_id')->references('id')->on('outlets')
+                ->onDelete('cascade');
             $table->foreignUuid('product_id')->references('id')->on('products');
             $table->integer('av3m');
             $table->timestamps();

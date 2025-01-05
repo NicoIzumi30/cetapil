@@ -61,8 +61,9 @@ class DashboardController extends Controller
                 });
             });
 
-        $total_outlet = (int) DB::table(DB::raw("({$outlet_query->toSql()}) as query"))
-            ->mergeBindings($outlet_query->getQuery())
+        $total_outlet = Outlet::where('user_id', $user->id)
+            ->whereNull('deleted_at')
+            ->approved()
             ->count();
 
         $total_actual_plan = (int) SalesActivity::where('user_id', $user->id)
