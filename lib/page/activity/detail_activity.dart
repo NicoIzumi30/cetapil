@@ -106,47 +106,47 @@ class DetailActivity extends GetView<DetailActivityController> {
     // tambahAvailabilityController.clearForm();
 
     ///VISIBILITY SECTION
-    detailActivityController.visibilityPrimaryDetailItems.addAll(snapshot.data?.visibilities?.primary?.core?.map((item) => {
-      'id': "primary-${item.category!.toLowerCase()}-${item.position}",
-      'category': item.category,
-      'position': item.position,
-      'posm_type_id': item.posmType.id,
-      'posm_type_name': item.posmType.name,
-      'visual_type_id': item.visualType, /// GANTI JADI VISUALTYPE ID
-      'visual_type_name': item.visualType,
-      'condition': item.condition,
-      'shelf_width': item.shelfWidth,
-      'shelving': item.shelving,
-      'image_visibility': item.displayPhoto,
-    }).toList() ?? []);
+    // detailActivityController.visibilityPrimaryDetailItems.addAll(snapshot.data?.visibilities?.primary?.core?.map((item) => {
+    //   'id': "primary-${item.category!.toLowerCase()}-${item.position}",
+    //   'category': item.category,
+    //   'position': item.position,
+    //   'posm_type_id': item.posmType.id,
+    //   'posm_type_name': item.posmType.name,
+    //   'visual_type_id': item.visualType, /// GANTI JADI VISUALTYPE ID
+    //   'visual_type_name': item.visualType,
+    //   'condition': item.condition,
+    //   'shelf_width': item.shelfWidth,
+    //   'shelving': item.shelving,
+    //   'image_visibility': item.displayPhoto,
+    // }).toList() ?? []);
 
-    detailActivityController.visibilitySecondaryDetailItems.addAll(snapshot.data?.visibilities?.secondary?.core?.map((item) => {
-      'id': "primary-${item.category!.toLowerCase()}-${item.position}",
-      'category': item.category,
-      'position': item.position,
-      'posm_type_id': item.posmType.id,
-      'posm_type_name': item.posmType.name,
-      'visual_type_id': item.visualType, /// GANTI JADI VISUALTYPE ID
-      'visual_type_name': item.visualType,
-      'condition': item.condition,
-      'shelf_width': item.shelfWidth,
-      'shelving': item.shelving,
-      'image_visibility': item.displayPhoto,
-    }).toList() ?? []);
+    // detailActivityController.visibilitySecondaryDetailItems.addAll(snapshot.data?.visibilities?.secondary?.core?.map((item) => {
+    //   'id': "primary-${item.category!.toLowerCase()}-${item.position}",
+    //   'category': item.category,
+    //   'position': item.position,
+    //   'posm_type_id': item.posmType.id,
+    //   'posm_type_name': item.posmType.name,
+    //   'visual_type_id': item.visualType, /// GANTI JADI VISUALTYPE ID
+    //   'visual_type_name': item.visualType,
+    //   'condition': item.condition,
+    //   'shelf_width': item.shelfWidth,
+    //   'shelving': item.shelving,
+    //   'image_visibility': item.displayPhoto,
+    // }).toList() ?? []);
 
-    detailActivityController.visibilityPrimaryDetailItems.addAll(snapshot.data?.visibilities?.primary?.core?.map((item) => {
-      'id': "primary-${item.category!.toLowerCase()}-${item.position}",
-      'category': item.category,
-      'position': item.position,
-      'posm_type_id': item.posmType.id,
-      'posm_type_name': item.posmType.name,
-      'visual_type_id': item.visualType, /// GANTI JADI VISUALTYPE ID
-      'visual_type_name': item.visualType,
-      'condition': item.condition,
-      'shelf_width': item.shelfWidth,
-      'shelving': item.shelving,
-      'image_visibility': item.displayPhoto,
-    }).toList() ?? []);
+    // detailActivityController.visibilityPrimaryDetailItems.addAll(snapshot.data?.visibilities?.primary?.core?.map((item) => {
+    //   'id': "primary-${item.category!.toLowerCase()}-${item.position}",
+    //   'category': item.category,
+    //   'position': item.position,
+    //   'posm_type_id': item.posmType.id,
+    //   'posm_type_name': item.posmType.name,
+    //   'visual_type_id': item.visualType, /// GANTI JADI VISUALTYPE ID
+    //   'visual_type_name': item.visualType,
+    //   'condition': item.condition,
+    //   'shelf_width': item.shelfWidth,
+    //   'shelving': item.shelving,
+    //   'image_visibility': item.displayPhoto,
+    // }).toList() ?? []);
 
     ///ORDER SECTION
     detailActivityController.orderDetailItems.value = snapshot.data?.orders?.map((item) => {

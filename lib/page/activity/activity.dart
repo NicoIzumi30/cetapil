@@ -93,8 +93,10 @@ class ActivityPage extends GetView<ActivityController> {
                                           Get.find<DetailActivityController>();
                                       detailActivityController.selectedTab.value = 0;
                                       detailActivityController.visibilityPrimaryDetailItems.clear();
-                                      detailActivityController.visibilitySecondaryDetailItems.clear();
-                                      detailActivityController.visibilityKompetitorDetailItems.clear();
+                                      detailActivityController.visibilitySecondaryDetailItems
+                                          .clear();
+                                      detailActivityController.visibilityKompetitorDetailItems
+                                          .clear();
                                       detailActivityController.setDetailOutlet(activity);
                                       Get.to(() => DetailActivity(activity.id!));
                                     } else if (activity.status! == "DRAFTED") {

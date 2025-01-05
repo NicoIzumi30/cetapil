@@ -111,7 +111,6 @@ class SurveyPage extends GetView<TambahActivityController> {
       }
       return const SizedBox.shrink();
     }).toList();
-    print(question);
     return question;
   }
 

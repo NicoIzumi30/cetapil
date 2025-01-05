@@ -67,8 +67,6 @@ class TambahActivityController extends GetxController {
   final visibilityKompetitorDraftItems = <Map<String, dynamic>>[].obs;
   final orderDraftItems = <Map<String, dynamic>>[].obs;
 
-
-
   // Survey related fields
   final RxMap<String, TextEditingController> priceControllers =
       RxMap<String, TextEditingController>();
@@ -113,19 +111,32 @@ class TambahActivityController extends GetxController {
       }
     }
     if (indexTab == 2) {
-      if (visibilityPrimaryDraftItems.length >= 3 && visibilitySecondaryDraftItems.length >= 3) {
-        return true;
+      if (availabilityDraftItems.isNotEmpty) {
+        if (visibilityPrimaryDraftItems.length >= 3 && visibilitySecondaryDraftItems.length >= 3) {
+          return true;
+        }
       }
     }
     if (indexTab == 3) {
-      if (knowledgeTime.value >= 180) {
-        /// minimal duration 3 menit
-        return true;
+      if (availabilityDraftItems.isNotEmpty) {
+        if (visibilityPrimaryDraftItems.length >= 3 && visibilitySecondaryDraftItems.length >= 3) {
+          if (knowledgeTime.value >= 10) {
+            /// minimal duration 3 menit
+            return true;
+          }
+        }
       }
     }
     if (indexTab == 4) {
-      if (areAllControllersNotEmpty) {
-        return true;
+      if (availabilityDraftItems.isNotEmpty) {
+        if (visibilityPrimaryDraftItems.length >= 3 && visibilitySecondaryDraftItems.length >= 3) {
+          if (knowledgeTime.value >= 10) {
+            /// minimal duration 3 menit
+            if (areAllControllersNotEmpty) {
+              return true;
+            }
+          }
+        }
       }
     }
     return false;
@@ -152,7 +163,6 @@ class TambahActivityController extends GetxController {
   }
 
   initDetailDraftOrder() {
-    print(detailDraft.isNotEmpty);
     if (detailDraft.isNotEmpty) {
       for (var data in detailDraft["orderItems"]) {
         final item = tambahAvailabilityController.getSkuByDataApi(data['product_id']);
@@ -169,9 +179,10 @@ class TambahActivityController extends GetxController {
     }
   }
 
-  initDetailDraftVisibility() {
+  void initDetailDraftVisibility() {
     final visibilityPrimaryDraft = detailDraft["visibilityPrimaryItems"];
     final visibilitySecondaryDraft = detailDraft["visibilitySecondaryItems"];
+    final visibilityKompetitorDraft = detailDraft["visibilityKompetitorItems"];
 
     if (visibilityPrimaryDraft != null) {
       for (var data in visibilityPrimaryDraft) {
@@ -205,6 +216,26 @@ class TambahActivityController extends GetxController {
         };
         addSecondaryVisibilityItem(newItem);
         tambahVisibilityController.clearSecondaryForm();
+      }
+    }
+
+    if (visibilityKompetitorDraft != null) {
+      for (var data in visibilityKompetitorDraft) {
+        print("Data Kompetitor: $data");
+        final newItem = {
+          'id': 'kompetitor-${data["category"].toString().toLowerCase()}-${data["position"]}',
+          'category': data['category'],
+          'position': data['position'],
+          'brand_name': data['brand_name'],
+          'promo_mechanism': data['promo_mechanism'],
+          'promo_periode_start': data['promo_periode_start'],
+          'promo_periode_end': data['promo_periode_end'],
+          'program_image1': data['program_image1'] != null ? File(data['program_image1']) : null,
+          'program_image2': data['program_image2'] != null ? File(data['program_image2']) : null,
+        };
+        print("New Item: $newItem");
+        addKompetitorVisibilityItem(newItem);
+        tambahVisibilityController.clearKompetitorForm();
       }
     }
   }
@@ -301,15 +332,15 @@ class TambahActivityController extends GetxController {
       EasyLoading.show(status: 'Submit Data...');
 
       Map<String, dynamic> data = {
-        'sales_activity_id': detailOutlet.value!.id,
-        'outlet_id': detailOutlet.value!.outlet!.id,
+        'sales_activity_id': detailOutlet.value?.id?.toString() ?? '',
+        'outlet_id': detailOutlet.value?.outlet?.id?.toString() ?? '',
         'views_knowledge': knowledgeTime.toString(),
         'time_availability': availabilityTime.value.toString(),
         'time_visibility': visibilityTime.value.toString(),
         'time_knowledge': knowledgeTime.value.toString(),
         'time_survey': surveyTime.value.toString(),
         'time_order': orderTime.value.toString(),
-        'current_time': DateTime.now().toIso8601String(),
+        'current_time': detailDraft['checked_out'],
       };
 
       // Use the same logic as saveDraftActivity to ensure all fields are included
@@ -318,13 +349,14 @@ class TambahActivityController extends GetxController {
 
       for (var group in allSurveys) {
         for (var survey in group['surveys']) {
-          final id = survey['id'].toString();
+          final id = survey['id']?.toString() ?? '';
+          if (id.isEmpty) continue; // Skip if ID is empty
 
           if (survey['type'] == 'text') {
             final controller = priceControllers[id];
             surveyList.add({
               'survey_question_id': id,
-              'answer': (controller?.text.isEmpty ?? true) ? "0" : controller!.text,
+              'answer': (controller?.text?.isEmpty ?? true) ? "0" : controller!.text,
             });
           } else if (survey['type'] == 'bool') {
             final switchState = switchStates[id];
@@ -367,13 +399,10 @@ class TambahActivityController extends GetxController {
       Get.back();
       CustomAlerts.showSuccess(Get.context!, "Data Berhasil Disimpan",
           "Anda baru menyimpan Data. Silahkan periksa status Outlet pada aplikasi.");
-    } catch (e) {
+    } catch (e, stackTrace) {
       print('Error submit data: $e');
-      Get.snackbar(
-        'Error',
-        'Failed to submit data: $e',
-        snackPosition: SnackPosition.BOTTOM,
-      );
+      print('Stack trace: $stackTrace');
+      CustomAlerts.showError(Get.context!, "Gagal Mengirim Data", "Failed to submit data: $e");
     } finally {
       EasyLoading.dismiss();
     }
@@ -433,9 +462,9 @@ class TambahActivityController extends GetxController {
         await db.updateSalesActivity(
           data: data,
           availabilityItems: availabilityDraftItems,
-          // visibilityItems: visibilityDraftItems,
           visibilityPrimaryItems: visibilityPrimaryDraftItems,
           visibilitySecondaryItems: visibilitySecondaryDraftItems,
+          visibilityKompetitorItems: visibilityKompetitorDraftItems,
           surveyItems: surveyList,
           orderItems: orderDraftItems,
         );
@@ -452,7 +481,7 @@ class TambahActivityController extends GetxController {
       }
 
       _timer?.cancel();
-      activityController.initGetActivity();
+      activityController.initGetActivity(draftRefresh: true);
       EasyLoading.dismiss();
       Get.back();
 
@@ -556,8 +585,8 @@ class TambahActivityController extends GetxController {
           final productId = survey['product_id'];
 
           bool isAvailable = availabilityDraftItems.any((item) =>
-              item['product_id'] == productId &&
-              item['availability_exist'] != 'true' &&
+              item['id'] == productId &&
+              item['availability_exist'] == 'true' &&
               (int.parse(item['stock_on_inventory'].toString()) > 0));
 
           toggleSwitch(id, isAvailable);
@@ -567,10 +596,13 @@ class TambahActivityController extends GetxController {
               final priceSurvey =
                   priceGroup['surveys'].firstWhere((s) => s['product_id'] == productId);
               final priceId = priceSurvey['id'];
+              final detail = detailDraft['surveyItems']
+                  .where((element) => element['survey_id'] == priceId)
+                  .toList();
               // Schedule text update for next frame
               Future.microtask(() {
                 if (priceControllers.containsKey(priceId)) {
-                  priceControllers[priceId]?.text = '0';
+                  priceControllers[priceId]?.text = detail.isNotEmpty ? detail[0]['answer'] : '0';
                 }
               });
             } catch (e) {
@@ -597,7 +629,7 @@ class TambahActivityController extends GetxController {
           Future.microtask(() {
             if (priceControllers.containsKey(detailingCountId)) {
               final currentCount =
-                  int.tryParse(priceControllers[detailingCountId]?.text ?? '0') ?? 0;
+                  int.tryParse(priceControllers[detailingCountId]?.text ?? '1') ?? 1;
               priceControllers[detailingCountId]?.text = (currentCount + 1).toString();
             }
           });
@@ -652,7 +684,7 @@ class TambahActivityController extends GetxController {
 
   void addKompetitorVisibilityItem(Map<String, dynamic> item) {
     final existingIndex =
-    visibilityKompetitorDraftItems.indexWhere((existing) => existing['id'] == item['id']);
+        visibilityKompetitorDraftItems.indexWhere((existing) => existing['id'] == item['id']);
 
     if (existingIndex != -1) {
       // Update existing item
@@ -752,6 +784,7 @@ class TambahActivityController extends GetxController {
   }
 
   bool getSwitchValue(String id) {
+    print("ID: $id ${switchStates[id]?.value}");
     if (!switchStates.containsKey(id)) {
       switchStates[id] = true.obs;
     }

@@ -513,16 +513,23 @@ class Api {
     for (var i = 0; i < visibilityKompetitorList.length; i++) {
       request.fields["visibility[${i + 10}][category]"] = "COMPETITOR";
       request.fields["visibility[${i + 10}][type]"] = "COMPETITOR";
-      request.fields["visibility[${i + 10}][position]"] = visibilityKompetitorList[i]['position'].toString();
-      request.fields["visibility[${i + 10}][competitor_brand_name]"] = visibilityKompetitorList[i]['brand_name'].toString().toUpperCase();
-      request.fields["visibility[${i + 10}][competitor_promo_mechanism]"] = visibilityKompetitorList[i]['promo_mechanism'].toString();
-      request.fields["visibility[${i + 10}][competitor_promo_start]"] = visibilityKompetitorList[i]['promo_periode_start'].toString();
-      request.fields["visibility[${i + 10}][competitor_promo_end]"] = visibilityKompetitorList[i]['promo_periode_end'].toString();
+      request.fields["visibility[${i + 10}][position]"] =
+          visibilityKompetitorList[i]['position'].toString();
+      request.fields["visibility[${i + 10}][competitor_brand_name]"] =
+          visibilityKompetitorList[i]['brand_name'].toString().toUpperCase();
+      request.fields["visibility[${i + 10}][competitor_promo_mechanism]"] =
+          visibilityKompetitorList[i]['promo_mechanism'].toString();
+      request.fields["visibility[${i + 10}][competitor_promo_start]"] =
+          visibilityKompetitorList[i]['promo_periode_start'].toString();
+      request.fields["visibility[${i + 10}][competitor_promo_end]"] =
+          visibilityKompetitorList[i]['promo_periode_end'].toString();
       request.files.add(await http.MultipartFile.fromPath(
-        'visibility[${i + 10}][display_photo]', visibilityKompetitorList[i]['program_image1'].path,
+        'visibility[${i + 10}][display_photo]',
+        visibilityKompetitorList[i]['program_image1'].path,
       ));
       request.files.add(await http.MultipartFile.fromPath(
-        'visibility[${i + 10}][display_photo_2]', visibilityKompetitorList[i]['program_image2'].path,
+        'visibility[${i + 10}][display_photo_2]',
+        visibilityKompetitorList[i]['program_image2'].path,
       ));
     }
 
@@ -535,9 +542,9 @@ class Api {
 
     ///Order Section
     for (var i = 0; i < orderList.length; i++) {
-      request.fields["order[$i][product_id]"] = orderList[i]["id"].toString();
-      request.fields["order[$i][total_items]"] = orderList[i]["jumlah"].toString();
-      request.fields["order[$i][subtotal]"] = orderList[i]["harga"].toString();
+      request.fields["order[$i][product_id]"] = orderList[i]["id"]?.toString() ?? '0';
+      request.fields["order[$i][total_items]"] = orderList[i]["jumlah"]?.toString() ?? '0';
+      request.fields["order[$i][subtotal]"] = orderList[i]["harga"]?.toString() ?? '0';
     }
 
     var response = await request.send();
@@ -617,6 +624,7 @@ class Api {
     print(response.statusCode);
     throw "Gagal request data Calendar : \n${response.body}";
   }
+
   static Future<ListPlanogramResponse> getPlanogramList() async {
     var url = "$baseUrl/api/activity/planogram";
     var token = await storage.read('token');

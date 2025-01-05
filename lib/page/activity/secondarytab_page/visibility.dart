@@ -216,7 +216,6 @@ class VisibilityPage extends GetView<ActivityController> {
               var id = "secondary-core-1";
               var data = tambahActivityController.visibilitySecondaryDraftItems
                   .firstWhere((item) => item['id'] == id, orElse: () => {});
-              print("secondary = ${tambahActivityController.visibilitySecondaryDraftItems}");
               return VisibilityCard(
                 isPrimary: false,
                 secondarydisplay: data['secondary_exist'] ?? "-",

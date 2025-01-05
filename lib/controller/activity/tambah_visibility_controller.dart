@@ -1,4 +1,5 @@
 import 'dart:io';
+import 'package:cetapil_mobile/database/activity_database.dart';
 import 'package:get/get.dart';
 import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
@@ -7,6 +8,7 @@ import '../../controller/support_data_controller.dart';
 
 class TambahVisibilityController extends GetxController {
   late TambahActivityController activityController = Get.find<TambahActivityController>();
+  final ActivityDatabaseHelper dbHelper = ActivityDatabaseHelper.instance;
   final supportDataController = Get.find<SupportDataController>();
 
   final posmType = ''.obs;
@@ -29,7 +31,8 @@ class TambahVisibilityController extends GetxController {
 
   initPrimaryVisibilityItem(String id) {
     clearPrimaryForm();
-    var data = activityController.visibilityPrimaryDraftItems.firstWhere((item) => item['id'] == id, orElse: () => {});
+    var data = activityController.visibilityPrimaryDraftItems
+        .firstWhere((item) => item['id'] == id, orElse: () => {});
     if (data.isEmpty) {
       print("posmTypeId.value");
       return;
@@ -59,13 +62,12 @@ class TambahVisibilityController extends GetxController {
 
   initSecondaryVisibilityItem(String id) {
     clearSecondaryForm();
-    var data =
-        activityController.visibilitySecondaryDraftItems.firstWhere((item) => item['id'] == id, orElse: () => {});
+    var data = activityController.visibilitySecondaryDraftItems
+        .firstWhere((item) => item['id'] == id, orElse: () => {});
     if (data.isEmpty) {
       return;
     } else {
-      toggleSecondaryYesNo.value =
-          data['secondary_exist'] == "true" ? true : false;
+      toggleSecondaryYesNo.value = data['secondary_exist'] == "true" ? true : false;
       tipeDisplay.value.text = data['display_type'];
       displayImages.value = data['display_image'];
     }
@@ -73,8 +75,8 @@ class TambahVisibilityController extends GetxController {
 
   initKompetitorVisibilityItem(String id) {
     clearKompetitorForm();
-    var data =
-    activityController.visibilityKompetitorDraftItems.firstWhere((item) => item['id'] == id, orElse: () => {});
+    var data = activityController.visibilityKompetitorDraftItems
+        .firstWhere((item) => item['id'] == id, orElse: () => {});
     if (data.isEmpty) {
       return;
     } else {
@@ -208,10 +210,10 @@ class TambahVisibilityController extends GetxController {
     update();
   }
 
-  void updatekompetitorImage(File? file,String title) {
+  void updatekompetitorImage(File? file, String title) {
     if (title == "Foto Program Kompetitor 1") {
-    programImages1.value = file;
-    }  else{
+      programImages1.value = file;
+    } else {
       programImages2.value = file;
     }
     update();
@@ -313,12 +315,13 @@ class TambahVisibilityController extends GetxController {
     return true;
   }
 
-  void saveKompetitorVisibility(String id) {
+  Future<void> saveKompetitorVisibility(String id) async {
     if (!validateKompetitorForm()) return;
+
     var id_part = id.split('-');
-    /// (kompetitor , kompetitor, 1)
     String formattedStart = DateFormat('yyyy-MM-dd').format(selectedDateRange.value!.start);
-    String formattedEnd = DateFormat('yyyy-MM-dd').format(selectedDateRange.value!.start);
+    String formattedEnd = DateFormat('yyyy-MM-dd').format(selectedDateRange.value!.end);
+
     final data = {
       'id': id,
       'category': id_part[1].toUpperCase(),
@@ -330,9 +333,140 @@ class TambahVisibilityController extends GetxController {
       'program_image1': programImages1.value,
       'program_image2': programImages2.value,
     };
-    activityController.addKompetitorVisibilityItem(data);
-    clearKompetitorForm();
-    Get.back();
+
+    try {
+      final db = await dbHelper.database;
+      final salesActivityId = activityController.detailOutlet.value!.id;
+      if (salesActivityId == null) {
+        throw Exception('Sales Activity ID is not available');
+      }
+
+      await db.transaction((txn) async {
+        // Check if a draft already exists
+        final existingDraft = await txn.query(
+          'visibility_kompetitor',
+          where: 'id = ? AND sales_activity_id = ?',
+          whereArgs: [id, salesActivityId],
+        );
+
+        if (existingDraft.isEmpty) {
+          // Insert new draft
+          await txn.insert('visibility_kompetitor', {
+            'id': id,
+            'sales_activity_id': salesActivityId,
+            'category': id_part[1].toUpperCase(),
+            'position': id_part[2],
+            'brand_name': brandName.value.text,
+            'promo_mechanism': promoMechanism.value.text,
+            'promo_periode_start': formattedStart,
+            'promo_periode_end': formattedEnd,
+            'program_image1': programImages1.value?.path,
+            'program_image2': programImages2.value?.path,
+          });
+        } else {
+          // Update existing draft
+          await txn.update(
+            'visibility_kompetitor',
+            {
+              'category': id_part[1].toUpperCase(),
+              'position': id_part[2],
+              'brand_name': brandName.value.text,
+              'promo_mechanism': promoMechanism.value.text,
+              'promo_periode_start': formattedStart,
+              'promo_periode_end': formattedEnd,
+              'program_image1': programImages1.value?.path,
+              'program_image2': programImages2.value?.path,
+            },
+            where: 'id = ? AND sales_activity_id = ?',
+            whereArgs: [id, salesActivityId],
+          );
+        }
+      });
+
+      // Update the UI state
+      activityController.addKompetitorVisibilityItem(data);
+      clearKompetitorForm();
+      Get.back();
+    } catch (e) {
+      print('Error saving draft: $e');
+    }
+  }
+
+  Future<void> loadKompetitorDraft(String id) async {
+    try {
+      final db = await dbHelper.database;
+      final salesActivityId = activityController.detailOutlet.value!.id;
+      if (salesActivityId == null) {
+        throw Exception('Sales Activity ID is not available');
+      }
+
+      final results = await db.query(
+        'visibility_kompetitor',
+        where: 'id = ? AND sales_activity_id = ?',
+        whereArgs: [id, salesActivityId],
+        limit: 1,
+      );
+
+      if (results.isNotEmpty) {
+        final draft = results.first;
+        brandName.value.text = draft['brand_name'] as String? ?? '';
+        promoMechanism.value.text = draft['promo_mechanism'] as String? ?? '';
+
+        if (draft['promo_periode_start'] != null && draft['promo_periode_end'] != null) {
+          selectedDateRange.value = DateTimeRange(
+            start: DateTime.parse(draft['promo_periode_start'] as String),
+            end: DateTime.parse(draft['promo_periode_end'] as String),
+          );
+        }
+
+        if (draft['program_image1'] != null) {
+          programImages1.value = File(draft['program_image1'] as String);
+        }
+        if (draft['program_image2'] != null) {
+          programImages2.value = File(draft['program_image2'] as String);
+        }
+      }
+    } catch (e) {
+      print('Error loading draft: $e');
+      Get.snackbar(
+        'Error',
+        'Failed to load draft',
+        snackPosition: SnackPosition.BOTTOM,
+      );
+    }
+  }
+
+  Future<void> deleteKompetitorDraft(String id) async {
+    try {
+      final db = await dbHelper.database;
+      final salesActivityId = activityController.detailOutlet.value!.id;
+      if (salesActivityId == null) {
+        throw Exception('Sales Activity ID is not available');
+      }
+
+      await db.delete(
+        'visibility_kompetitor',
+        where: 'id = ? AND sales_activity_id = ?',
+        whereArgs: [id, salesActivityId],
+      );
+
+      // Update UI state
+      activityController.visibilityKompetitorDraftItems.removeWhere((item) => item['id'] == id);
+      clearKompetitorForm();
+
+      Get.snackbar(
+        'Success',
+        'Draft deleted successfully',
+        snackPosition: SnackPosition.BOTTOM,
+      );
+    } catch (e) {
+      print('Error deleting draft: $e');
+      Get.snackbar(
+        'Error',
+        'Failed to delete draft',
+        snackPosition: SnackPosition.BOTTOM,
+      );
+    }
   }
 
   void clearKompetitorForm() {

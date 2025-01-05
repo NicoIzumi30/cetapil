@@ -43,237 +43,241 @@ class TambahPrimaryVisibility extends GetView<TambahVisibilityController> {
         final shouldPop = await Alerts.showConfirmDialog(context);
         return shouldPop ?? false;
       },
-      child: SafeArea(
-        child: Stack(
-          children: [
-            Image.asset(
-              'assets/background.png',
-              fit: BoxFit.cover,
-              width: double.infinity,
-              height: double.infinity,
-            ),
-            Column(
-              children: [
-                Expanded(
-                  child: Padding(
-                    padding: const EdgeInsets.fromLTRB(15, 30, 15, 10),
-                    child: Column(
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      children: [
-                        EnhancedBackButton(
-                          onPressed: () => Alerts.showConfirmDialog(context, useGetBack: false),
-                          backgroundColor: Colors.white,
-                          iconColor: Colors.blue,
-                          useGetBack: false,
-                        ),
-                        SizedBox(height: 20),
-                        Expanded(
-                          child: ListView(
-                            children: [
-                              CustomDropdown(
-                                hint: "-- Pilih Jenis Display --",
-                                value: controller.posmTypeId.value.isEmpty
-                                    ? null
-                                    : controller.posmTypeId.value,
-                                items: supportController.getPosmTypes().map((item) {
-                                  return DropdownMenuItem<String>(
-                                    value: item['id'],
-                                    child: Text(item['name']),
-                                  );
-                                }).toList(),
-                                onChanged: (value) {
-                                  controller.posmTypeId.value = value!;
-                                  controller.posmType.value = supportController
-                                      .getPosmTypes()
-                                      .firstWhere((element) => element['id'] == value)['name'];
-                                },
-                                title: "Jenis Display",
-                              ),
-                              Obx(() {
-                                return CustomDropdown(
-                                  hint: "-- Pilih Jenis Visual --",
-                                  value: controller.visualTypeId.value.isEmpty
+      child: Scaffold(
+        resizeToAvoidBottomInset: true,
+        body: SafeArea(
+          child: Stack(
+            fit: StackFit.expand, // Added to ensure Stack fills available space
+            children: [
+              Image.asset(
+                'assets/background.png',
+                fit: BoxFit.cover,
+                width: double.infinity,
+                height: double.infinity,
+              ),
+              Column(
+                children: [
+                  Expanded(
+                    child: Padding(
+                      padding: const EdgeInsets.fromLTRB(15, 30, 15, 10),
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          EnhancedBackButton(
+                            onPressed: () => Alerts.showConfirmDialog(context, useGetBack: false),
+                            backgroundColor: Colors.white,
+                            iconColor: Colors.blue,
+                            useGetBack: false,
+                          ),
+                          SizedBox(height: 20),
+                          Expanded(
+                            child: ListView(
+                              children: [
+                                CustomDropdown(
+                                  hint: "-- Pilih Jenis Display --",
+                                  value: controller.posmTypeId.value.isEmpty
                                       ? null
-                                      : controller.visualTypeId.value,
-                                  items: supportController.getVisualTypes().map((item) {
+                                      : controller.posmTypeId.value,
+                                  items: supportController.getPosmTypes().map((item) {
                                     return DropdownMenuItem<String>(
                                       value: item['id'],
                                       child: Text(item['name']),
                                     );
                                   }).toList(),
                                   onChanged: (value) {
-                                    controller.visualTypeId.value = value!;
-                                    controller.visualType.value = supportController
-                                        .getVisualTypes()
+                                    controller.posmTypeId.value = value!;
+                                    controller.posmType.value = supportController
+                                        .getPosmTypes()
                                         .firstWhere((element) => element['id'] == value)['name'];
-                                    print(controller.visualType.value);
-                                    if (controller.visualType.value == "Others") {
-                                      controller.isOtherVisual.value = true;
-                                    } else {
-                                      controller.isOtherVisual.value = false;
-                                    }
                                   },
-                                  title: "Jenis Visual",
-                                );
-                              }),
-                              Obx(() {
-                                return Visibility(
-                                  visible: controller.isOtherVisual.value,
-                                  child: ModernTextField(
-                                    title: "Others Visual",
-                                    controller: controller.otherVisualController.value,
-                                  ),
-                                );
-                              }),
-                              Text(
-                                "Planogram",
-                                style: TextStyle(fontSize: 13, fontWeight: FontWeight.w700),
-                              ),
-                              SizedBox(height: 10),
-                              Container(
-                                width: double.infinity,
-                                height: 200,
-                                child: ClipRRect(
-                                  borderRadius: BorderRadius.circular(10),
-                                  child: FutureBuilder<List<Map<String, dynamic>>>(
-                                    future: supportController.getPlanogramsByChannel(controller
-                                            .activityController.detailOutlet.value!.channel!.id ??
-                                        ''),
-                                    builder: (context, snapshot) {
-                                      print(snapshot.data);
-                                      if (snapshot.connectionState == ConnectionState.waiting) {
-                                        return Container(
-                                          color: Colors.grey[200],
-                                          child: Center(child: CircularProgressIndicator()),
-                                        );
-                                      }
-
-                                      if (snapshot.hasError ||
-                                          !snapshot.hasData ||
-                                          snapshot.data!.isEmpty) {
-                                        return Container(
-                                          color: Colors.grey[200],
-                                          child: Center(
-                                            child: Text(
-                                              "No planogram available for this channel",
-                                              style: TextStyle(color: Colors.grey[600]),
-                                            ),
-                                          ),
-                                        );
-                                      }
-
-                                      final planogram = snapshot.data!.first;
-                                      final planogramPath = planogram['path'];
-
-                                      if (planogramPath != null && planogramPath.isNotEmpty) {
-                                        final imageUrl = '$BASE_URL$planogramPath';
-                                        return GestureDetector(
-                                          onTap: () {
-                                            Navigator.of(context).push(
-                                              MaterialPageRoute(
-                                                builder: (_) =>
-                                                    FullScreenImageViewer(imageUrl: imageUrl),
-                                              ),
-                                            );
-                                          },
-                                          child: Hero(
-                                            tag: 'planogram_image',
-                                            child: CachedNetworkImage(
-                                              imageUrl: imageUrl,
-                                              fit: BoxFit.cover,
-                                              placeholder: (context, url) => Container(
-                                                color: Colors.grey[200],
-                                                child: Center(child: CircularProgressIndicator()),
-                                              ),
-                                              errorWidget: (context, url, error) => Container(
-                                                color: Colors.grey[200],
-                                                child: Icon(Icons.error),
-                                              ),
-                                            ),
-                                          ),
-                                        );
+                                  title: "Jenis Display",
+                                ),
+                                Obx(() {
+                                  return CustomDropdown(
+                                    hint: "-- Pilih Jenis Visual --",
+                                    value: controller.visualTypeId.value.isEmpty
+                                        ? null
+                                        : controller.visualTypeId.value,
+                                    items: supportController.getVisualTypes().map((item) {
+                                      return DropdownMenuItem<String>(
+                                        value: item['id'],
+                                        child: Text(item['name']),
+                                      );
+                                    }).toList(),
+                                    onChanged: (value) {
+                                      controller.visualTypeId.value = value!;
+                                      controller.visualType.value = supportController
+                                          .getVisualTypes()
+                                          .firstWhere((element) => element['id'] == value)['name'];
+                                      print(controller.visualType.value);
+                                      if (controller.visualType.value == "Others") {
+                                        controller.isOtherVisual.value = true;
                                       } else {
-                                        return Container(
-                                          color: Colors.grey[200],
-                                          child: Center(
-                                            child: Text(
-                                              "Invalid planogram image",
-                                              style: TextStyle(color: Colors.grey[600]),
-                                            ),
-                                          ),
-                                        );
+                                        controller.isOtherVisual.value = false;
                                       }
                                     },
+                                    title: "Jenis Visual",
+                                  );
+                                }),
+                                Obx(() {
+                                  return Visibility(
+                                    visible: controller.isOtherVisual.value,
+                                    child: ModernTextField(
+                                      title: "Others Visual",
+                                      controller: controller.otherVisualController.value,
+                                    ),
+                                  );
+                                }),
+                                Text(
+                                  "Planogram",
+                                  style: TextStyle(fontSize: 13, fontWeight: FontWeight.w700),
+                                ),
+                                SizedBox(height: 10),
+                                Container(
+                                  width: double.infinity,
+                                  height: 200,
+                                  child: ClipRRect(
+                                    borderRadius: BorderRadius.circular(10),
+                                    child: FutureBuilder<List<Map<String, dynamic>>>(
+                                      future: supportController.getPlanogramsByChannel(controller
+                                              .activityController.detailOutlet.value!.channel!.id ??
+                                          ''),
+                                      builder: (context, snapshot) {
+                                        print(snapshot.data);
+                                        if (snapshot.connectionState == ConnectionState.waiting) {
+                                          return Container(
+                                            color: Colors.grey[200],
+                                            child: Center(child: CircularProgressIndicator()),
+                                          );
+                                        }
+
+                                        if (snapshot.hasError ||
+                                            !snapshot.hasData ||
+                                            snapshot.data!.isEmpty) {
+                                          return Container(
+                                            color: Colors.grey[200],
+                                            child: Center(
+                                              child: Text(
+                                                "No planogram available for this channel",
+                                                style: TextStyle(color: Colors.grey[600]),
+                                              ),
+                                            ),
+                                          );
+                                        }
+
+                                        final planogram = snapshot.data!.first;
+                                        final planogramPath = planogram['path'];
+
+                                        if (planogramPath != null && planogramPath.isNotEmpty) {
+                                          final imageUrl = '$BASE_URL$planogramPath';
+                                          return GestureDetector(
+                                            onTap: () {
+                                              Navigator.of(context).push(
+                                                MaterialPageRoute(
+                                                  builder: (_) =>
+                                                      FullScreenImageViewer(imageUrl: imageUrl),
+                                                ),
+                                              );
+                                            },
+                                            child: Hero(
+                                              tag: 'planogram_image',
+                                              child: CachedNetworkImage(
+                                                imageUrl: imageUrl,
+                                                fit: BoxFit.cover,
+                                                placeholder: (context, url) => Container(
+                                                  color: Colors.grey[200],
+                                                  child: Center(child: CircularProgressIndicator()),
+                                                ),
+                                                errorWidget: (context, url, error) => Container(
+                                                  color: Colors.grey[200],
+                                                  child: Icon(Icons.error),
+                                                ),
+                                              ),
+                                            ),
+                                          );
+                                        } else {
+                                          return Container(
+                                            color: Colors.grey[200],
+                                            child: Center(
+                                              child: Text(
+                                                "Invalid planogram image",
+                                                style: TextStyle(color: Colors.grey[600]),
+                                              ),
+                                            ),
+                                          );
+                                        }
+                                      },
+                                    ),
                                   ),
                                 ),
-                              ),
-                              SizedBox(height: 15),
-                              CustomDropdown(
-                                  hint: "-- Pilih Condition --",
-                                  value: controller.selectedCondition.value.isEmpty
-                                      ? null
-                                      : controller.selectedCondition.value,
-                                  items: ["Good", "Bad"].map((item) {
-                                    return DropdownMenuItem<String>(
-                                      value: item,
-                                      child: Text(item),
-                                    );
-                                  }).toList(),
-                                  onChanged: (value) {
-                                    controller.selectedCondition.value = value!;
-                                  },
-                                  title: "Condition"),
-                              ModernTextField(
-                                title: "Lebar Rak (cm)",
-                                keyboardType: TextInputType.number,
-                                inputFormatters: [FilteringTextInputFormatter.digitsOnly],
-                                controller: controller.lebarRak.value,
-                              ),
-                              ModernTextField(
-                                title: "Shelving",
-                                controller: controller.shelving.value,
-                                keyboardType: TextInputType.number,
-                              ),
-                              _buildImageUploader(context, "Foto Visibility"),
-                            ],
-                          ),
-                        )
-                      ],
+                                SizedBox(height: 15),
+                                CustomDropdown(
+                                    hint: "-- Pilih Condition --",
+                                    value: controller.selectedCondition.value.isEmpty
+                                        ? null
+                                        : controller.selectedCondition.value,
+                                    items: ["Good", "Bad"].map((item) {
+                                      return DropdownMenuItem<String>(
+                                        value: item,
+                                        child: Text(item),
+                                      );
+                                    }).toList(),
+                                    onChanged: (value) {
+                                      controller.selectedCondition.value = value!;
+                                    },
+                                    title: "Condition"),
+                                ModernTextField(
+                                  title: "Lebar Rak (cm)",
+                                  keyboardType: TextInputType.number,
+                                  inputFormatters: [FilteringTextInputFormatter.digitsOnly],
+                                  controller: controller.lebarRak.value,
+                                ),
+                                ModernTextField(
+                                  title: "Shelving",
+                                  controller: controller.shelving.value,
+                                  keyboardType: TextInputType.number,
+                                ),
+                                _buildImageUploader(context, "Foto Visibility"),
+                              ],
+                            ),
+                          )
+                        ],
+                      ),
                     ),
                   ),
-                ),
-                Padding(
-                  padding: const EdgeInsets.fromLTRB(15, 0, 15, 15),
-                  child: Container(
-                    width: double.infinity,
-                    decoration: BoxDecoration(
-                        color: Colors.white.withOpacity(0.3),
-                        borderRadius: BorderRadius.circular(10)),
-                    child: Padding(
-                      padding: const EdgeInsets.symmetric(horizontal: 15, vertical: 10),
-                      child: ElevatedButton(
-                        style: ElevatedButton.styleFrom(
-                          backgroundColor: AppColors.primary,
-                          shape: RoundedRectangleBorder(
-                            borderRadius: BorderRadius.circular(10),
-                            side: BorderSide(color: AppColors.primary),
+                  Padding(
+                    padding: const EdgeInsets.fromLTRB(15, 0, 15, 15),
+                    child: Container(
+                      width: double.infinity,
+                      decoration: BoxDecoration(
+                          color: Colors.white.withOpacity(0.3),
+                          borderRadius: BorderRadius.circular(10)),
+                      child: Padding(
+                        padding: const EdgeInsets.symmetric(horizontal: 15, vertical: 10),
+                        child: ElevatedButton(
+                          style: ElevatedButton.styleFrom(
+                            backgroundColor: AppColors.primary,
+                            shape: RoundedRectangleBorder(
+                              borderRadius: BorderRadius.circular(10),
+                              side: BorderSide(color: AppColors.primary),
+                            ),
                           ),
-                        ),
-                        onPressed: () => controller.savePrimaryVisibility(id),
-                        child: Text(
-                          "Simpan Visibility",
-                          style: TextStyle(
-                            color: Colors.white,
-                            fontWeight: FontWeight.bold,
+                          onPressed: () => controller.savePrimaryVisibility(id),
+                          child: Text(
+                            "Simpan Visibility",
+                            style: TextStyle(
+                              color: Colors.white,
+                              fontWeight: FontWeight.bold,
+                            ),
                           ),
                         ),
                       ),
                     ),
                   ),
-                ),
-              ],
-            ),
-          ],
+                ],
+              ),
+            ],
+          ),
         ),
       ),
     );

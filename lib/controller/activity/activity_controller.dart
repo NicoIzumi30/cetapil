@@ -43,82 +43,82 @@ class ActivityController extends GetxController {
     }
   }
 
-  Future<void> initGetActivity() async {
+  Future<void> initGetActivity({draftRefresh = false}) async {
     try {
-      await db.deleteAllActivity();
       activity.clear();
 
       CustomAlerts.showLoading(Get.context!, "Processing", "Mengambil data aktivitas...");
-      
+
       // Refresh support data first
-      await supportController.refreshData();
+      if (draftRefresh == false) {
+        await supportController.refreshData();
 
-      final response = await Api.getActivityList();
-      if (response.status == "OK" && response.data != null && response.data!.isNotEmpty) {
-        for (var result in response.data!) {
-          Map<String, dynamic> data = {
-            'id': result.id,
-            'user': result.user != null
-                ? {
-                    'id': result.user!.id,
-                    'name': result.user!.name,
-                  }
-                : null,
-            'channel': result.channel != null
-                ? {
-                    'id': result.channel!.id,
-                    'name': result.channel!.name,
-                  }
-                : null,
-            'checked_in': result.checkedIn,
-            'checked_out': result.checkedOut,
-            'views_knowledge': result.viewsKnowledge,
-            'time_availability': result.timeAvailability,
-            'time_visibility': result.timeVisibility,
-            'time_knowledge': result.timeKnowledge,
-            'time_survey': result.timeSurvey,
-            'time_order': result.timeOrder,
-            'status': result.status,
-          };
-
-          if (result.outlet != null) {
-            data['outlet'] = {
-              'id': result.outlet!.id,
-              'name': result.outlet!.name,
-              'category': result.outlet!.category,
-              'city_id': result.outlet!.cityId,
-              'longitude': result.outlet!.longitude,
-              'latitude': result.outlet!.latitude,
-              'visit_day': result.outlet!.visitDay,
+        final response = await Api.getActivityList();
+        if (response.status == "OK" && response.data != null && response.data!.isNotEmpty) {
+          await db.deleteAllActivity();
+          for (var result in response.data!) {
+            Map<String, dynamic> data = {
+              'id': result.id,
+              'user': result.user != null
+                  ? {
+                      'id': result.user!.id,
+                      'name': result.user!.name,
+                    }
+                  : null,
+              'channel': result.channel != null
+                  ? {
+                      'id': result.channel!.id,
+                      'name': result.channel!.name,
+                    }
+                  : null,
+              'checked_in': result.checkedIn,
+              'checked_out': result.checkedOut,
+              'views_knowledge': result.viewsKnowledge,
+              'time_availability': result.timeAvailability,
+              'time_visibility': result.timeVisibility,
+              'time_knowledge': result.timeKnowledge,
+              'time_survey': result.timeSurvey,
+              'time_order': result.timeOrder,
+              'status': result.status,
             };
+
+            if (result.outlet != null) {
+              data['outlet'] = {
+                'id': result.outlet!.id,
+                'name': result.outlet!.name,
+                'category': result.outlet!.category,
+                'city_id': result.outlet!.cityId,
+                'longitude': result.outlet!.longitude,
+                'latitude': result.outlet!.latitude,
+                'visit_day': result.outlet!.visitDay,
+              };
+            }
+
+            if (result.av3mProducts != null && result.av3mProducts!.isNotEmpty) {
+              data['av3m_products'] = result.av3mProducts!
+                  .map((product) => {
+                        'product_id': product.productId,
+                        'av3m': product.av3M,
+                      })
+                  .toList();
+            }
+
+            await db.insertActivity(data);
           }
-
-          if (result.av3mProducts != null && result.av3mProducts!.isNotEmpty) {
-            data['av3m_products'] = result.av3mProducts!
-                .map((product) => {
-                      'product_id': product.productId,
-                      'av3m': product.av3M,
-                    })
-                .toList();
-          }
-
-          await db.insertActivity(data);
+          CustomAlerts.dismissLoading();
+          CustomAlerts.showSuccess(Get.context!, "Berhasil", "Data aktivitas berhasil diperbarui");
         }
-
-        // Get local draft IDs if you're still handling drafts
-        final localDraftIds = await dbActivity.getDraftActivityIds();
-        // Update any activities that have local drafts
-        for (String id in localDraftIds) {
-          await db.updateSalesActivityStatus(id);
-        }
-
-        // Reload all activities
-        final results = await db.getSalesActivities();
-        activity.addAll(results);
-
-        CustomAlerts.dismissLoading();
-        CustomAlerts.showSuccess(Get.context!, "Berhasil", "Data aktivitas berhasil diperbarui");
       }
+      // Get local draft IDs if you're still handling drafts
+      final localDraftIds = await dbActivity.getDraftActivityIds();
+      // Update any activities that have local drafts
+      for (String id in localDraftIds) {
+        await db.updateSalesActivityStatus(id);
+      }
+
+      // Reload all activities
+      final results = await db.getSalesActivities();
+      activity.addAll(results);
     } catch (e) {
       print('Error saving Activity: $e');
       CustomAlerts.dismissLoading();

@@ -18,7 +18,8 @@ const String BASE_URL = 'https://dev-cetaphil.i-am.host/storage/';
 class TambahSecondaryVisibility extends GetView<TambahVisibilityController> {
   final String id;
   TambahSecondaryVisibility({
-    super.key, required this.id,
+    super.key,
+    required this.id,
   });
   final supportController = Get.find<SupportDataController>();
 
@@ -29,8 +30,7 @@ class TambahSecondaryVisibility extends GetView<TambahVisibilityController> {
       return null;
     }
 
-    String path =
-        imagePath.startsWith('/') ? imagePath.substring(1) : imagePath;
+    String path = imagePath.startsWith('/') ? imagePath.substring(1) : imagePath;
     return '$BASE_URL$path';
   }
 
@@ -41,88 +41,89 @@ class TambahSecondaryVisibility extends GetView<TambahVisibilityController> {
         final shouldPop = await Alerts.showConfirmDialog(context);
         return shouldPop ?? false;
       },
-      child: SafeArea(
-        child: Stack(
-          children: [
-            Image.asset(
-              'assets/background.png',
-              fit: BoxFit.cover,
-              width: double.infinity,
-              height: double.infinity,
-            ),
-            Column(
-              children: [
-                Expanded(
-                  child: Padding(
-                    padding: const EdgeInsets.fromLTRB(15, 30, 15, 10),
-                    child: Column(
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      children: [
-                        EnhancedBackButton(
-                          onPressed: () => Alerts.showConfirmDialog(context,
-                              useGetBack: false),
-                          backgroundColor: Colors.white,
-                          iconColor: Colors.blue,
-                          useGetBack: false,
-                        ),
-                        SizedBox(height: 20),
-                        Expanded(
-                          child: ListView(
-                            children: [
-                              buildSecondaryYesNo(),
-                              Text(
-                                "jika tidak ada isi dengan data palsu *",
-                                style: TextStyle(
-                                    fontStyle: FontStyle.italic, fontSize: 9),
-                              ),
-                              Divider(
-                                color: Colors.black12,
-                              ),
-                              ModernTextField(
-                                title: "Tipe Display *",
-                                controller: controller.tipeDisplay.value,
-                              ),
-                              _buildImageUploader(context, "Foto Display *"),
-                            ],
+      child: Scaffold(
+        resizeToAvoidBottomInset: true,
+        body: SafeArea(
+          child: Stack(
+            fit: StackFit.expand, // Added to ensure Stack fills available space
+            children: [
+              Image.asset(
+                'assets/background.png',
+                fit: BoxFit.cover,
+                width: double.infinity,
+                height: double.infinity,
+              ),
+              Column(
+                children: [
+                  Expanded(
+                    child: Padding(
+                      padding: const EdgeInsets.fromLTRB(15, 30, 15, 10),
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          EnhancedBackButton(
+                            onPressed: () => Alerts.showConfirmDialog(context, useGetBack: false),
+                            backgroundColor: Colors.white,
+                            iconColor: Colors.blue,
+                            useGetBack: false,
                           ),
-                        )
-                      ],
+                          SizedBox(height: 20),
+                          Expanded(
+                            child: ListView(
+                              children: [
+                                buildSecondaryYesNo(),
+                                Text(
+                                  "jika tidak ada isi dengan data palsu *",
+                                  style: TextStyle(fontStyle: FontStyle.italic, fontSize: 9),
+                                ),
+                                Divider(
+                                  color: Colors.black12,
+                                ),
+                                ModernTextField(
+                                  title: "Tipe Display *",
+                                  controller: controller.tipeDisplay.value,
+                                ),
+                                _buildImageUploader(context, "Foto Display *"),
+                              ],
+                            ),
+                          )
+                        ],
+                      ),
                     ),
                   ),
-                ),
-                Padding(
-                  padding: const EdgeInsets.fromLTRB(15, 0, 15, 15),
-                  child: Container(
-                    width: double.infinity,
-                    decoration: BoxDecoration(
-                        color: Colors.white.withOpacity(0.3),
-                        borderRadius: BorderRadius.circular(10)),
-                    child: Padding(
-                      padding: const EdgeInsets.symmetric(
-                          horizontal: 15, vertical: 10),
-                      child: ElevatedButton(
-                        style: ElevatedButton.styleFrom(
-                          backgroundColor: AppColors.primary,
-                          shape: RoundedRectangleBorder(
-                            borderRadius: BorderRadius.circular(10),
-                            side: BorderSide(color: AppColors.primary),
+                  Padding(
+                    padding: const EdgeInsets.fromLTRB(15, 0, 15, 15),
+                    child: Container(
+                      width: double.infinity,
+                      decoration: BoxDecoration(
+                          color: Colors.white.withOpacity(0.3),
+                          borderRadius: BorderRadius.circular(10)),
+                      child: Padding(
+                        padding: const EdgeInsets.symmetric(horizontal: 15, vertical: 10),
+                        child: ElevatedButton(
+                          style: ElevatedButton.styleFrom(
+                            backgroundColor: AppColors.primary,
+                            shape: RoundedRectangleBorder(
+                              borderRadius: BorderRadius.circular(10),
+                              side: BorderSide(color: AppColors.primary),
+                            ),
                           ),
-                        ),
-                        onPressed: () => controller.saveSecondaryVisibility(id),
-                        child: Text(
-                          "Simpan Visibility",
-                          style: TextStyle(
-                            color: Colors.white,
-                            fontWeight: FontWeight.bold,
+                          onPressed: () => controller.saveSecondaryVisibility(id),
+                          child: Text(
+                            "Simpan Visibility",
+                            style: TextStyle(
+                              color: Colors.white,
+                              fontWeight: FontWeight.bold,
+                            ),
                           ),
                         ),
                       ),
                     ),
                   ),
-                ),
-              ],
-            ),
-          ],
+                ],
+              ),
+            ],
+          ),
         ),
       ),
     );
@@ -167,9 +168,8 @@ class TambahSecondaryVisibility extends GetView<TambahVisibilityController> {
             onTap: isUploading
                 ? null
                 : () async {
-                    final File? result =
-                        await ImageUploadUtils.showImageSourceSelection(context,
-                            currentImage: image);
+                    final File? result = await ImageUploadUtils.showImageSourceSelection(context,
+                        currentImage: image);
                     if (result != null) {
                       controller.updatedisplayImage(result);
                     }
@@ -217,16 +217,14 @@ class TambahSecondaryVisibility extends GetView<TambahVisibilityController> {
                               right: 4,
                               top: 4,
                               child: GestureDetector(
-                                onTap: () =>
-                                    controller.updatedisplayImage(null),
+                                onTap: () => controller.updatedisplayImage(null),
                                 child: Container(
                                   padding: EdgeInsets.all(4),
                                   decoration: BoxDecoration(
                                     color: Colors.white.withOpacity(0.8),
                                     shape: BoxShape.circle,
                                   ),
-                                  child: Icon(Icons.close,
-                                      size: 16, color: Colors.red),
+                                  child: Icon(Icons.close, size: 16, color: Colors.red),
                                 ),
                               ),
                             ),

@@ -26,7 +26,7 @@ class ActivityDatabaseHelper {
     );
   }
 
-   Future<void> close() async {
+  Future<void> close() async {
     final db = _database;
     if (db != null && db.isOpen) {
       await db.close();
@@ -313,6 +313,12 @@ class ActivityDatabaseHelper {
         whereArgs: [salesActivityId],
       );
 
+      final List<Map<String, dynamic>> visibility_kompetitor = await db.query(
+        'visibility_kompetitor',
+        where: 'sales_activity_id = ?',
+        whereArgs: [salesActivityId],
+      );
+
       final List<Map<String, dynamic>> survey = await db.query(
         'survey',
         where: 'sales_activity_id = ?',
@@ -331,6 +337,7 @@ class ActivityDatabaseHelper {
         'availabilityItems': availability,
         'visibilityPrimaryItems': visibility_primary,
         'visibilitySecondaryItems': visibility_secondary,
+        'visibilityKompetitorItems': visibility_kompetitor, // Fixed the kompetitor reference
         'surveyItems': survey,
         'orderItems': orders,
       };
@@ -359,6 +366,7 @@ class ActivityDatabaseHelper {
     List<Map<String, dynamic>>? availabilityItems,
     List<Map<String, dynamic>>? visibilityPrimaryItems,
     List<Map<String, dynamic>>? visibilitySecondaryItems,
+    List<Map<String, dynamic>>? visibilityKompetitorItems,
     List<Map<String, dynamic>>? surveyItems,
     List<Map<String, dynamic>>? orderItems,
   }) async {
@@ -390,13 +398,11 @@ class ActivityDatabaseHelper {
 
       // Update availability items
       if (availabilityItems != null) {
-        // Delete existing items
         await txn.delete(
           'availability',
           where: 'sales_activity_id = ?',
           whereArgs: [data['sales_activity_id']],
         );
-        // Insert new items
         for (var item in availabilityItems) {
           await txn.insert('availability', {
             'id': uuid.v4(),
@@ -410,7 +416,8 @@ class ActivityDatabaseHelper {
           });
         }
       }
-      // Update visibility items
+
+      // Update visibility primary items
       if (visibilityPrimaryItems != null) {
         await txn.delete(
           'visibility_primary',
@@ -435,6 +442,7 @@ class ActivityDatabaseHelper {
         }
       }
 
+      // Update visibility secondary items
       if (visibilitySecondaryItems != null) {
         await txn.delete(
           'visibility_secondary',
@@ -450,6 +458,29 @@ class ActivityDatabaseHelper {
             'secondary_exist': item['secondary_exist'].toString(),
             'display_type': item['display_type'].toString(),
             'display_image': item['display_image'].path,
+          });
+        }
+      }
+
+      // Update visibility kompetitor items
+      if (visibilityKompetitorItems != null) {
+        await txn.delete(
+          'visibility_kompetitor',
+          where: 'sales_activity_id = ?',
+          whereArgs: [data['sales_activity_id']],
+        );
+        for (var item in visibilityKompetitorItems) {
+          await txn.insert('visibility_kompetitor', {
+            'id': uuid.v4(),
+            'sales_activity_id': data['sales_activity_id'],
+            'category': item['category'].toString(),
+            'position': item['position'].toString(),
+            'brand_name': item['brand_name'].toString(),
+            'promo_mechanism': item['promo_mechanism'].toString(),
+            'promo_periode_start': item['promo_periode_start'].toString(),
+            'promo_periode_end': item['promo_periode_end'].toString(),
+            'program_image1': item['program_image1']?.path,
+            'program_image2': item['program_image2']?.path,
           });
         }
       }
@@ -470,6 +501,7 @@ class ActivityDatabaseHelper {
           });
         }
       }
+
       // Update order items
       if (orderItems != null) {
         await txn.delete(
@@ -495,13 +527,129 @@ class ActivityDatabaseHelper {
   Future<void> deleteSalesActivity(String id) async {
     final db = await database;
     await db.transaction((txn) async {
-      // Delete related records first
+      // Delete related records from all tables
       await txn.delete('availability', where: 'sales_activity_id = ?', whereArgs: [id]);
-      await txn.delete('visibility', where: 'sales_activity_id = ?', whereArgs: [id]);
+      await txn.delete('visibility_primary', where: 'sales_activity_id = ?', whereArgs: [id]);
+      await txn.delete('visibility_secondary', where: 'sales_activity_id = ?', whereArgs: [id]);
+      await txn.delete('visibility_kompetitor', where: 'sales_activity_id = ?', whereArgs: [id]);
       await txn.delete('survey', where: 'sales_activity_id = ?', whereArgs: [id]);
       await txn.delete('orders', where: 'sales_activity_id = ?', whereArgs: [id]);
-      // Delete main record
+
+      // Finally delete the main record
       await txn.delete('sales_activity', where: 'id = ?', whereArgs: [id]);
+    });
+  }
+
+  Future<void> saveVisibilityKompetitorDraft({
+    required String salesActivityId,
+    required Map<String, dynamic> item,
+  }) async {
+    final db = await database;
+
+    await db.transaction((txn) async {
+      // Check if the item already exists
+      final existing = await txn.query(
+        'visibility_kompetitor',
+        where: 'id = ? AND sales_activity_id = ?',
+        whereArgs: [item['id'], salesActivityId],
+      );
+
+      if (existing.isEmpty) {
+        // Insert new record
+        await txn.insert('visibility_kompetitor', {
+          'id': item['id'],
+          'sales_activity_id': salesActivityId,
+          'category': item['category'].toString(),
+          'position': item['position'].toString(),
+          'brand_name': item['brand_name'].toString(),
+          'promo_mechanism': item['promo_mechanism'].toString(),
+          'promo_periode_start': item['promo_periode_start'].toString(),
+          'promo_periode_end': item['promo_periode_end'].toString(),
+          'program_image1': item['program_image1']?.path,
+          'program_image2': item['program_image2']?.path,
+        });
+      } else {
+        // Update existing record
+        await txn.update(
+          'visibility_kompetitor',
+          {
+            'category': item['category'].toString(),
+            'position': item['position'].toString(),
+            'brand_name': item['brand_name'].toString(),
+            'promo_mechanism': item['promo_mechanism'].toString(),
+            'promo_periode_start': item['promo_periode_start'].toString(),
+            'promo_periode_end': item['promo_periode_end'].toString(),
+            'program_image1': item['program_image1']?.path,
+            'program_image2': item['program_image2']?.path,
+          },
+          where: 'id = ? AND sales_activity_id = ?',
+          whereArgs: [item['id'], salesActivityId],
+        );
+      }
+    });
+  }
+
+  Future<List<Map<String, dynamic>>> getVisibilityKompetitorDrafts(String salesActivityId) async {
+    final db = await database;
+    return await db.query(
+      'visibility_kompetitor',
+      where: 'sales_activity_id = ?',
+      whereArgs: [salesActivityId],
+    );
+  }
+
+  Future<Map<String, dynamic>?> getVisibilityKompetitorDraft(
+      String id, String salesActivityId) async {
+    final db = await database;
+    final results = await db.query(
+      'visibility_kompetitor',
+      where: 'id = ? AND sales_activity_id = ?',
+      whereArgs: [id, salesActivityId],
+      limit: 1,
+    );
+
+    if (results.isEmpty) return null;
+    return results.first;
+  }
+
+  Future<void> deleteVisibilityKompetitorDraft(String id, String salesActivityId) async {
+    final db = await database;
+    await db.delete(
+      'visibility_kompetitor',
+      where: 'id = ? AND sales_activity_id = ?',
+      whereArgs: [id, salesActivityId],
+    );
+  }
+
+  Future<void> updateVisibilityKompetitorDrafts({
+    required String salesActivityId,
+    required List<Map<String, dynamic>> items,
+  }) async {
+    final db = await database;
+
+    await db.transaction((txn) async {
+      // Delete existing items
+      await txn.delete(
+        'visibility_kompetitor',
+        where: 'sales_activity_id = ?',
+        whereArgs: [salesActivityId],
+      );
+
+      // Insert new items
+      for (var item in items) {
+        await txn.insert('visibility_kompetitor', {
+          'id': item['id'],
+          'sales_activity_id': salesActivityId,
+          'category': item['category'].toString(),
+          'position': item['position'].toString(),
+          'brand_name': item['brand_name'].toString(),
+          'promo_mechanism': item['promo_mechanism'].toString(),
+          'promo_periode_start': item['promo_periode_start'].toString(),
+          'promo_periode_end': item['promo_periode_end'].toString(),
+          'program_image1': item['program_image1']?.path,
+          'program_image2': item['program_image2']?.path,
+        });
+      }
     });
   }
 }
