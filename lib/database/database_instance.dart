@@ -32,6 +32,14 @@ class DatabaseHelper {
     );
   }
 
+  Future<void> close() async {
+    final db = _database;
+    if (db != null && db.isOpen) {
+      await db.close();
+      _database = null;
+    }
+  }
+
   Future _createDB(Database db, int version) async {
     ///Tabel OUTLET
     await db.execute('''

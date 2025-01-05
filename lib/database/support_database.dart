@@ -68,9 +68,10 @@ class SupportDatabaseHelper {
     await db.delete(tableName);
   }
 
-  Future<void> close() async {
-    if (_database != null) {
-      await _database!.close();
+ Future<void> close() async {
+    final db = _database;
+    if (db != null && db.isOpen) {
+      await db.close();
       _database = null;
     }
   }

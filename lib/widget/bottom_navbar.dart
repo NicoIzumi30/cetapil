@@ -31,25 +31,37 @@ class CustomBottomNavigationBar extends GetView<BottomNavController> {
       ),
       child: LayoutBuilder(
         builder: (context, constraints) {
-          final permissions = Get.find<LoginController>().currentUser.value!.permissions!;
-          final itemWidth = constraints.maxWidth / (permissions.length + 1);
-
           return Obx(() {
-            final permissions = Get.find<LoginController>().currentUser.value!.permissions!;
+            final loginController = Get.find<LoginController>();
+            final user = loginController.currentUser.value;
+            final permissions = user?.permissions ?? [];
+
+            // Calculate item width including the home button (+1)
+            final itemWidth = constraints.maxWidth / (permissions.length + 1);
+
             return Row(
               mainAxisAlignment: MainAxisAlignment.spaceAround,
               children: [
+                // Home is always shown
                 _buildNavItem(0, 'Home', Color(0xFF39B5FF), "assets/icon/Vector.svg", itemWidth),
-                if (permissions.any((p) => p.name!.trim().toLowerCase() == 'menu_outlet'))
+
+                // Outlet
+                if (permissions.any((p) => p.name?.trim().toLowerCase() == 'menu_outlet'))
                   _buildNavItem(
                       1, 'Outlet', Color(0xFF39B5FF), "assets/icon/Vector2.svg", itemWidth),
-                if (permissions.any((p) => p.name!.trim().toLowerCase() == 'menu_routing'))
+
+                // Routing
+                if (permissions.any((p) => p.name?.trim().toLowerCase() == 'menu_routing'))
                   _buildNavItem(
                       2, 'Routing', Color(0xFF39B5FF), "assets/icon/Vector1.svg", itemWidth),
-                if (permissions.any((p) => p.name!.trim().toLowerCase() == 'menu_activity'))
+
+                // Activity
+                if (permissions.any((p) => p.name?.trim().toLowerCase() == 'menu_activity'))
                   _buildNavItem(
                       3, 'Activity', Color(0xFF39B5FF), "assets/icon/Vector3.svg", itemWidth),
-                if (permissions.any((p) => p.name!.trim().toLowerCase() == 'menu_selling'))
+
+                // Selling
+                if (permissions.any((p) => p.name?.trim().toLowerCase() == 'menu_selling'))
                   _buildNavItem(
                       4, 'Selling', Color(0xFF39B5FF), "assets/icon/Vector4.svg", itemWidth),
               ],

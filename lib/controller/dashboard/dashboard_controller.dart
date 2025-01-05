@@ -50,10 +50,22 @@ class DashboardController extends GetxController {
   // Carousel data
   final RxList<Programs> programUrls = <Programs>[].obs;
 
+  final RxBool _isDisposed = false.obs;
+
   @override
   void onInit() {
     super.onInit();
     _initialize();
+  }
+
+  @override
+  void onClose() {
+    cancelOperations();
+    super.onClose();
+  }
+
+  void cancelOperations() {
+    _isDisposed.value = true;
   }
 
   void _initialize() async {
@@ -194,6 +206,7 @@ class DashboardController extends GetxController {
   // Update fetchDashboardData to also refresh programs
 
   Future<void> fetchDashboardData() async {
+    if (_isDisposed.value) return;
     try {
       isLoading.value = true;
       error.value = null;
@@ -218,6 +231,10 @@ class DashboardController extends GetxController {
       error.value = 'Failed to fetch dashboard data: $e';
       print('Error fetching dashboard data: $e');
 
+      if (!_isDisposed.value) {
+        print('Error fetching dashboard data: $e');
+      }
+
       if (e.toString().contains('Sesi anda telah berakhir')) {
         await _loginController.handleSessionExpired();
       }
@@ -238,6 +255,7 @@ class DashboardController extends GetxController {
   }
 
   Future<void> onRefresh() async {
+    if (_isDisposed.value) return;
     try {
       await fetchDashboardData();
     } catch (e) {

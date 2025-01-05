@@ -41,32 +41,45 @@ class MainPage extends GetView<BottomNavController> {
         return true;
       },
       child: GPSAwareScaffold(
-          requiresGPS: true,
-          body: SafeArea(
-            child: Obx(() {
-              final permissions = Get.find<LoginController>().currentUser.value!.permissions!;
+        requiresGPS: true,
+        body: SafeArea(
+          child: Obx(() {
+            final loginController = Get.find<LoginController>();
+            final user = loginController.currentUser.value;
+            final permissions = user?.permissions;
 
-              if (permissions.isNotEmpty) {
-                switch (controller.selectedIndex.value) {
-                  case 0:
-                    return DashboardPage(); // Fixed tab
-                  case 1:
-                    return permissionPages[permissions[0].name] ?? DashboardPage();
-                  case 2:
-                    return permissionPages[permissions[1].name] ?? DashboardPage();
-                  case 3:
-                    return permissionPages[permissions[2].name] ?? DashboardPage();
-                  case 4:
-                    return permissionPages[permissions[3].name] ?? DashboardPage();
-                  default:
-                    return DashboardPage();
-                }
-              } else {
+            // If no user or permissions, show dashboard
+            if (user == null || permissions == null || permissions.isEmpty) {
+              return DashboardPage();
+            }
+
+            // Determine which page to show based on selected index
+            switch (controller.selectedIndex.value) {
+              case 0:
+                return DashboardPage(); // Fixed tab
+              case 1:
+                return permissions.length > 0
+                    ? (permissionPages[permissions[0].name] ?? DashboardPage())
+                    : DashboardPage();
+              case 2:
+                return permissions.length > 1
+                    ? (permissionPages[permissions[1].name] ?? DashboardPage())
+                    : DashboardPage();
+              case 3:
+                return permissions.length > 2
+                    ? (permissionPages[permissions[2].name] ?? DashboardPage())
+                    : DashboardPage();
+              case 4:
+                return permissions.length > 3
+                    ? (permissionPages[permissions[3].name] ?? DashboardPage())
+                    : DashboardPage();
+              default:
                 return DashboardPage();
-              }
-            }),
-          ),
-          bottomNavigationBar: CustomBottomNavigationBar()),
+            }
+          }),
+        ),
+        bottomNavigationBar: CustomBottomNavigationBar(),
+      ),
     );
   }
 

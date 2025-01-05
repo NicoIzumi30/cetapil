@@ -87,7 +87,7 @@ class TambahPrimaryVisibility extends GetView<TambahVisibilityController> {
                                       .getPosmTypes()
                                       .firstWhere((element) => element['id'] == value)['name'];
                                 },
-                                title: "Jenis POSM",
+                                title: "Jenis Display",
                               ),
                               Obx(() {
                                 return CustomDropdown(

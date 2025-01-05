@@ -13,8 +13,15 @@ import 'package:cetapil_mobile/controller/selling/selling_controller.dart';
 import 'package:cetapil_mobile/controller/selling/tambah_produk_selling_controller.dart';
 import 'package:cetapil_mobile/controller/support_data_controller.dart';
 import 'package:cetapil_mobile/controller/video_controller/video_controller.dart';
+import 'package:cetapil_mobile/database/activity_database.dart';
+import 'package:cetapil_mobile/database/dashboard.dart';
+import 'package:cetapil_mobile/database/database_instance.dart';
+import 'package:cetapil_mobile/database/selling_database.dart';
+import 'package:cetapil_mobile/database/support_database.dart';
 import 'package:get/get.dart';
 import 'package:get_storage/get_storage.dart';
+import 'package:path/path.dart';
+import 'package:sqflite/sqflite.dart';
 import '../widget/custom_alert.dart';
 import '../api/api.dart';
 import '../model/login_response.dart' as LoginModel;
@@ -131,18 +138,33 @@ class LoginController extends GetxController {
 
   Future<void> logout() async {
     try {
-      // Cleanup auth-dependent controllers
-      cleanupAuthControllers();
+      isLoading.value = true;
 
-      // Clear storage
+      // 1. Stop any ongoing dashboard fetches first
+      if (Get.isRegistered<DashboardController>()) {
+        final dashboardController = Get.find<DashboardController>();
+        // Cancel any ongoing operations
+        dashboardController.cancelOperations();
+      }
+
+      // 2. Clear storage and user data before cleaning up controllers
+      // This ensures no more API calls can be made
       await _storage.erase();
       currentUser.value = null;
 
-      // Navigate to login
+      // 3. Cleanup auth-dependent controllers
+      cleanupAuthControllers();
+
+      // 4. Clear all databases
+      await _cleanupAllDatabases();
+
+      // 5. Navigate to login
       Get.offAll(() => LoginPage());
     } catch (e) {
       print('Logout error: $e');
       CustomAlerts.showError(Get.context!, "Error", "Failed to logout properly: ${e.toString()}");
+    } finally {
+      isLoading.value = false;
     }
   }
 
@@ -176,6 +198,9 @@ class LoginController extends GetxController {
       await _storage.write('longitude', userData.longitude);
       await _storage.write('latitude', userData.latitude);
 
+      // Ensure permissions are properly initialized
+      currentUser.value = userData;
+
       if (userData.roles != null) {
         final roles = userData.roles!.map((role) => {'id': role.id, 'name': role.name}).toList();
         await _storage.write('roles', roles);
@@ -189,6 +214,16 @@ class LoginController extends GetxController {
       }
     } catch (e) {
       print('Error updating user data: $e');
+      // Initialize with empty permissions if there's an error
+      currentUser.value = AuthUserData(
+          id: userData.id,
+          email: userData.email,
+          name: userData.name,
+          phoneNumber: userData.phoneNumber,
+          longitude: userData.longitude,
+          latitude: userData.latitude,
+          roles: [],
+          permissions: []);
       throw 'Failed to update user data';
     }
   }
@@ -230,7 +265,6 @@ class LoginController extends GetxController {
 
   Future<void> initializeAuthRequiredControllers() async {
     // Main controllers
-    Get.lazyPut(() => DashboardController(), fenix: true);
     Get.lazyPut(() => BottomNavController(), fenix: true);
     Get.lazyPut(() => OutletController(), fenix: true);
     Get.lazyPut(() => ActivityController(), fenix: true);
@@ -254,7 +288,6 @@ class LoginController extends GetxController {
   void cleanupAuthControllers() {
     // Main controllers
     Get.delete<DashboardController>(force: true);
-    Get.delete<BottomNavController>(force: true);
     Get.delete<OutletController>(force: true);
     Get.delete<ActivityController>(force: true);
     Get.delete<RoutingController>(force: true);
@@ -272,6 +305,86 @@ class LoginController extends GetxController {
     // Routing and Selling controllers
     Get.delete<TambahRoutingController>(force: true);
     Get.delete<TambahProdukSellingController>(force: true);
+  }
+
+  Future<void> _cleanupAllDatabases() async {
+    try {
+      // Clear Support Database
+      try {
+        final supportDb = SupportDatabaseHelper.instance;
+        await supportDb.clearAllTables();
+        await supportDb.close();
+
+        final dbPath = await getDatabasesPath();
+        final supportDbPath = join(dbPath, 'data_support.db');
+        if (await databaseExists(supportDbPath)) {
+          await deleteDatabase(supportDbPath);
+        }
+      } catch (e) {
+        print('Error clearing support database: $e');
+      }
+
+      // Clear Selling Database
+      try {
+        final sellingDb = SellingDatabaseHelper.instance;
+        await sellingDb.close();
+
+        final dbPath = await getDatabasesPath();
+        final sellingDbPath = join(dbPath, 'selling_database.db');
+        if (await databaseExists(sellingDbPath)) {
+          await deleteDatabase(sellingDbPath);
+        }
+      } catch (e) {
+        print('Error clearing selling database: $e');
+      }
+
+      // Clear Dashboard Database
+      try {
+        final dashboardDb = DashboardDatabaseHelper.instance;
+        await dashboardDb.clearDashboard();
+        await dashboardDb.close();
+
+        final dbPath = await getDatabasesPath();
+        final dashboardDbPath = join(dbPath, 'dashboard.db');
+        if (await databaseExists(dashboardDbPath)) {
+          await deleteDatabase(dashboardDbPath);
+        }
+      } catch (e) {
+        print('Error clearing dashboard database: $e');
+      }
+
+      // Clear Activity Database
+      try {
+        final activityDb = ActivityDatabaseHelper.instance;
+        await activityDb.close();
+
+        final dbPath = await getDatabasesPath();
+        final activityDbPath = join(dbPath, 'sales_activity.db');
+        if (await databaseExists(activityDbPath)) {
+          await deleteDatabase(activityDbPath);
+        }
+      } catch (e) {
+        print('Error clearing activity database: $e');
+      }
+
+      // Clear Main Database (outlets, routing, etc)
+      try {
+        final mainDb = DatabaseHelper.instance;
+        await mainDb.close();
+
+        final dbPath = await getDatabasesPath();
+        final mainDbPath = join(dbPath, 'outlet_database.db');
+        if (await databaseExists(mainDbPath)) {
+          await deleteDatabase(mainDbPath);
+        }
+      } catch (e) {
+        print('Error clearing main database: $e');
+      }
+
+      print('All databases cleared successfully');
+    } catch (e) {
+      print('Error in database cleanup: $e');
+    }
   }
 
   String? get userToken => _storage.read('token');

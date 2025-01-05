@@ -82,7 +82,7 @@ class SellingDatabaseHelper {
       await db.execute('ALTER TABLE selling_data ADD COLUMN checked_in TEXT');
       await db.execute('ALTER TABLE selling_data ADD COLUMN checked_out TEXT');
       await db.execute('ALTER TABLE selling_data ADD COLUMN duration INTEGER DEFAULT 0');
-      
+
       // Update products table to include more fields
       await db.execute('ALTER TABLE products ADD COLUMN category_id TEXT');
       await db.execute('ALTER TABLE products ADD COLUMN category_name TEXT');
@@ -131,8 +131,7 @@ class SellingDatabaseHelper {
       'duration': sellingData.duration,
     };
 
-    await db.insert('selling_data', sellingMap, 
-      conflictAlgorithm: ConflictAlgorithm.replace);
+    await db.insert('selling_data', sellingMap, conflictAlgorithm: ConflictAlgorithm.replace);
 
     // Insert associated products
     if (sellingData.products != null) {
@@ -149,8 +148,7 @@ class SellingDatabaseHelper {
           'total': product.total,
         };
 
-        await db.insert('products', productMap, 
-          conflictAlgorithm: ConflictAlgorithm.replace);
+        await db.insert('products', productMap, conflictAlgorithm: ConflictAlgorithm.replace);
       }
     }
 
@@ -181,10 +179,8 @@ class SellingDatabaseHelper {
       );
 
       // Get associated products
-      final productMaps = await db.query('products', 
-        where: 'selling_id = ?', 
-        whereArgs: [sellingMap['id']]
-      );
+      final productMaps =
+          await db.query('products', where: 'selling_id = ?', whereArgs: [sellingMap['id']]);
       final products = productMaps.map((map) {
         return Products(
           id: map['id'] as String?,
@@ -242,8 +238,11 @@ class SellingDatabaseHelper {
   }
 
   // Close database
-  Future close() async {
-    final db = await database;
-    db.close();
+  Future<void> close() async {
+    final db = _database;
+    if (db != null && db.isOpen) {
+      await db.close();
+      _database = null;
+    }
   }
 }

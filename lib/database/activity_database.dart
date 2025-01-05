@@ -26,6 +26,14 @@ class ActivityDatabaseHelper {
     );
   }
 
+   Future<void> close() async {
+    final db = _database;
+    if (db != null && db.isOpen) {
+      await db.close();
+      _database = null;
+    }
+  }
+
   Future<void> _onCreate(Database db, int version) async {
     // Main sales activity table
     await db.execute('''
