@@ -102,44 +102,44 @@ class TambahActivityController extends GetxController {
   bool disableSecondaryTab(int indexTab) {
     bool areAllControllersNotEmpty =
         priceControllers.values.any((controller) => controller.text.isNotEmpty);
-    if (indexTab == 0) {
-      return true;
-    }
-    if (indexTab == 1) {
-      if (availabilityDraftItems.isNotEmpty) {
-        return true;
-      }
-    }
-    if (indexTab == 2) {
-      if (availabilityDraftItems.isNotEmpty) {
-        if (visibilityPrimaryDraftItems.length >= 3 && visibilitySecondaryDraftItems.length >= 3) {
-          return true;
-        }
-      }
-    }
-    if (indexTab == 3) {
-      // if (availabilityDraftItems.isNotEmpty) {
-      //   if (visibilityPrimaryDraftItems.length == 6 && visibilitySecondaryDraftItems.length == 4 && visibilityKompetitorDraftItems.length == 2) {
-      //     if (knowledgeTime.value >= 10) {
-      /// minimal duration 3 menit
-      return true;
-      //     }
-      //   }
-      // }
-    }
-    if (indexTab == 4) {
-      if (availabilityDraftItems.isNotEmpty) {
-        if (visibilityPrimaryDraftItems.length >= 3 && visibilitySecondaryDraftItems.length >= 3) {
-          if (knowledgeTime.value >= 10) {
-            /// minimal duration 3 menit
-            if (areAllControllersNotEmpty) {
-              return true;
-            }
-          }
-        }
-      }
-    }
-    return false;
+    // if (indexTab == 0) {
+    //   return true;
+    // }
+    // if (indexTab == 1) {
+    //   if (availabilityDraftItems.isNotEmpty) {
+    //     return true;
+    //   }
+    // }
+    // if (indexTab == 2) {
+    //   if (availabilityDraftItems.isNotEmpty) {
+    //     if (visibilityPrimaryDraftItems.length >= 3 && visibilitySecondaryDraftItems.length >= 3) {
+    //       return true;
+    //     }
+    //   }
+    // }
+    // if (indexTab == 3) {
+    //   if (availabilityDraftItems.isNotEmpty) {
+    //     if (visibilityPrimaryDraftItems.length == 6 && visibilitySecondaryDraftItems.length == 4 && visibilityKompetitorDraftItems.length == 2) {
+    //       if (knowledgeTime.value >= 10) {
+    //         /// minimal duration 3 menit
+    //         return true;
+    //       }
+    //     }
+    //   }
+    // }
+    // if (indexTab == 4) {
+    //   if (availabilityDraftItems.isNotEmpty) {
+    //     if (visibilityPrimaryDraftItems.length >= 3 && visibilitySecondaryDraftItems.length >= 3) {
+    //       if (knowledgeTime.value >= 10) {
+    //         /// minimal duration 3 menit
+    //         if (areAllControllersNotEmpty) {
+    //           return true;
+    //         }
+    //       }
+    //     }
+    //   }
+    // }
+    return true;
   }
 
   initDetailDraftAvailability() {
@@ -340,7 +340,7 @@ class TambahActivityController extends GetxController {
         'time_knowledge': knowledgeTime.value.toString(),
         'time_survey': surveyTime.value.toString(),
         'time_order': orderTime.value.toString(),
-        'current_time': detailDraft['checked_out'],
+        'current_time': detailDraft['checked_out'] ?? DateTime.now().toIso8601String(),
       };
 
       // Use the same logic as saveDraftActivity to ensure all fields are included
@@ -371,6 +371,7 @@ class TambahActivityController extends GetxController {
       /// Filter when data stock on hand and inventory in availability 0
       availabilityDraftItems
           .removeWhere((item) => item['stock_on_hand'] == 0 && item['stock_on_inventory'] == 0);
+
       orderDraftItems.removeWhere((item) => item['jumlah'] == 0);
 
       final response = await Api.submitActivity(

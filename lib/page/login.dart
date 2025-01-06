@@ -34,7 +34,7 @@ class LoginPage extends GetView<LoginController> {
                   Column(
                     children: [
                       Image.asset(
-                        'assets/vector.png',
+                        'assets/vector2.png',
                         width: double.infinity,
                       ),
                       Padding(
@@ -42,9 +42,9 @@ class LoginPage extends GetView<LoginController> {
                         child: Column(
                           children: [
                             Text(
-                              "Selamat Datang di Aplikasi !",
+                              "Selamat datang di Aplikasi SMD",
                               style: GoogleFonts.poppins(
-                                  fontSize: 20,
+                                  fontSize: 18,
                                   color: Color(0xFF054F7B),
                                   fontWeight: FontWeight.bold),
                             ),
@@ -78,8 +78,8 @@ class LoginPage extends GetView<LoginController> {
                               hintText: 'Masukan Email',
                               inputType: TextInputType.emailAddress,
                               prefixIcon: Icon(
-                                Icons.person_outline,
-                                color: Colors.blue,
+                                Icons.email_outlined,
+                                color: Color(0xFF054F7B),
                                 // size: 22,
                               ),
                             ),
@@ -91,7 +91,7 @@ class LoginPage extends GetView<LoginController> {
                                   obscureText: !_isPasswordVisible.value, // Changed this line
                                   prefixIcon: Icon(
                                     Icons.lock_outline,
-                                    color: Colors.blue,
+                                    color: Color(0xFF054F7B),
                                   ),
                                   suffixIcon: IconButton(
                                     icon: Icon(
@@ -114,13 +114,21 @@ class LoginPage extends GetView<LoginController> {
                                 : SizedBox.shrink()),
                             SizedBox(height: 10),
                             Obx(() {
-                              return SizedBox(
+                              return Container(
                                 width: double.infinity,
                                 height: 45,
+                                decoration: BoxDecoration(
+                                  gradient: LinearGradient(
+                                    colors: [
+                                      Color(0x340077BD),
+                                  Color(0xA00077BD),
+                                      Color(0xFF0077BD),],
+                                    begin: Alignment.topCenter,
+                                    end: Alignment.bottomCenter,
+                                  ),
+                                  borderRadius: BorderRadius.circular(13), // Match the button shape
+                                ),
                                 child: ElevatedButton(
-                                  // onPressed: (){
-                                  //   Get.offAll(() => MainPage());
-                                  // },
                                   onPressed: controller.isLoading.value
                                       ? null
                                       : () => controller.login(
@@ -128,21 +136,21 @@ class LoginPage extends GetView<LoginController> {
                                             passwordController.text,
                                           ),
                                   style: ElevatedButton.styleFrom(
-                                    backgroundColor: Colors.white,
+                                    backgroundColor: Colors.transparent,
                                     // Button color
                                     shape: RoundedRectangleBorder(
                                       borderRadius: BorderRadius.circular(13), // Rounded corners
                                     ),
                                     elevation: 5,
                                     // Shadow depth
-                                    shadowColor: Colors.black, // Shadow color
+                                    shadowColor: Colors.transparent, // Shadow color
                                   ),
                                   child: controller.isLoading.value
                                       ? CircularProgressIndicator(color: Colors.white)
                                       : Text(
                                           'Masuk',
                                           style: TextStyle(
-                                            color: Colors.blue[900], // Text color
+                                            color: Colors.white, // Text color
                                             fontSize: 18,
                                             fontWeight: FontWeight.bold, // Bold text
                                           ),
@@ -160,7 +168,7 @@ class LoginPage extends GetView<LoginController> {
                   ),
                   Text(
                     "Designed by IGNICE - 2024 All Rights Reserved",
-                    style: TextStyle(fontSize: 9),
+                    style: TextStyle(fontSize: 9,color: Color(0xFF054F7B),fontWeight: FontWeight.bold),
                   )
                 ],
               ),
