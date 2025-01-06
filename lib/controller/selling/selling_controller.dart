@@ -55,11 +55,11 @@ class SellingController extends GetxController {
   @override
   void onInit() {
     super.onInit();
-    _initialize();
+    initialize();
   }
 
   void onOpen() {
-    _initialize();
+    initialize();
     startDurationTimer();
     checkedIn.value = DateTime.now();
   }
@@ -104,7 +104,7 @@ class SellingController extends GetxController {
     isImageUploading.value = value;
   }
 
-  void _initialize() async {
+  void initialize() async {
     await loadInitialData();
     await checkAndRequestGPS();
   }
