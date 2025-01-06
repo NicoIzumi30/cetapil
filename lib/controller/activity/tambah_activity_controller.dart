@@ -102,43 +102,43 @@ class TambahActivityController extends GetxController {
   bool disableSecondaryTab(int indexTab) {
     bool areAllControllersNotEmpty =
         priceControllers.values.any((controller) => controller.text.isNotEmpty);
-    // if (indexTab == 0) {
-    //   return true;
-    // }
-    // if (indexTab == 1) {
-    //   if (availabilityDraftItems.isNotEmpty) {
-    //     return true;
-    //   }
-    // }
-    // if (indexTab == 2) {
-    //   if (availabilityDraftItems.isNotEmpty) {
-    //     if (visibilityPrimaryDraftItems.length >= 3 && visibilitySecondaryDraftItems.length >= 3) {
-    //       return true;
-    //     }
-    //   }
-    // }
-    // if (indexTab == 3) {
-    //   if (availabilityDraftItems.isNotEmpty) {
-    //     if (visibilityPrimaryDraftItems.length == 6 && visibilitySecondaryDraftItems.length == 4 && visibilityKompetitorDraftItems.length == 2) {
-    //       if (knowledgeTime.value >= 10) {
-    //         /// minimal duration 3 menit
-    //         return true;
-    //       }
-    //     }
-    //   }
-    // }
-    // if (indexTab == 4) {
-    //   if (availabilityDraftItems.isNotEmpty) {
-    //     if (visibilityPrimaryDraftItems.length >= 3 && visibilitySecondaryDraftItems.length >= 3) {
-    //       if (knowledgeTime.value >= 10) {
-    //         /// minimal duration 3 menit
-    //         if (areAllControllersNotEmpty) {
-    //           return true;
-    //         }
-    //       }
-    //     }
-    //   }
-    // }
+    if (indexTab == 0) {
+      return true;
+    }
+    if (indexTab == 1) {
+      if (availabilityDraftItems.isNotEmpty) {
+        return true;
+      }
+    }
+    if (indexTab == 2) {
+      if (availabilityDraftItems.isNotEmpty) {
+        if (visibilityPrimaryDraftItems.length >= 3 && visibilitySecondaryDraftItems.length >= 3) {
+          return true;
+        }
+      }
+    }
+    if (indexTab == 3) {
+      if (availabilityDraftItems.isNotEmpty) {
+        if (visibilityPrimaryDraftItems.length == 6 && visibilitySecondaryDraftItems.length == 4 && visibilityKompetitorDraftItems.length == 2) {
+          if (knowledgeTime.value >= 180) {
+            /// minimal duration 3 menit
+            return true;
+          }
+        }
+      }
+    }
+    if (indexTab == 4) {
+      if (availabilityDraftItems.isNotEmpty) {
+        if (visibilityPrimaryDraftItems.length >= 3 && visibilitySecondaryDraftItems.length >= 3) {
+          if (knowledgeTime.value >= 180) {
+            /// minimal duration 3 menit
+            if (areAllControllersNotEmpty) {
+              return true;
+            }
+          }
+        }
+      }
+    }
     return true;
   }
 
@@ -785,7 +785,6 @@ class TambahActivityController extends GetxController {
   }
 
   bool getSwitchValue(String id) {
-    print("ID: $id ${switchStates[id]?.value}");
     if (!switchStates.containsKey(id)) {
       switchStates[id] = true.obs;
     }
@@ -802,6 +801,9 @@ class TambahActivityController extends GetxController {
     }
     if (selectedTab.value == 2) {
       checkAvailabilityForSurvey(knowledge: true);
+    }
+    if (selectedTab.value == 3) {
+      initializeControllers();
     }
     update();
   }

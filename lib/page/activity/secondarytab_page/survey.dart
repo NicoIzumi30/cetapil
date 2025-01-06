@@ -12,26 +12,11 @@ class SurveyPage extends GetView<TambahActivityController> {
   final SupportDataController supportController = Get.find<SupportDataController>();
 
   SurveyPage({super.key}) {
-    // Initialize controllers in constructor
-    // WidgetsBinding.instance.addPostFrameCallback((_) {
-    //   initializeControllers();
-    // });
+    // Initialize controllers immediately in constructor
+    // initializeControllers();
   }
 
-  void initializeControllers() {
-    final questionGroups = supportController.getSurvey();
-    for (var group in questionGroups) {
-      for (var survey in (group['surveys'] as List<dynamic>? ?? [])) {
-        final id = survey['id']?.toString() ?? '';
-        if (survey['type'] == 'text' && !controller.priceControllers.containsKey(id)) {
-          controller.priceControllers[id] = TextEditingController();
-        }
-        if (survey['type'] == 'bool' && !controller.switchStates.containsKey(id)) {
-          controller.switchStates[id] = true.obs;
-        }
-      }
-    }
-  }
+ 
 
   Widget _buildSectionTitle(Map<String, dynamic> questionGroup) {
     if (questionGroup['title'] != null) {
@@ -75,8 +60,16 @@ class SurveyPage extends GetView<TambahActivityController> {
   }
 
   List<Widget> buildSurveyQuestions(Map<String, dynamic> questionGroup) {
-    var question = (questionGroup['surveys'] as List<dynamic>? ?? []).map((survey) {
+    return (questionGroup['surveys'] as List<dynamic>? ?? []).map((survey) {
       final id = survey['id']?.toString() ?? '';
+
+      // Ensure controller exists before building widget
+      if (survey['type'] == 'text' && !controller.priceControllers.containsKey(id)) {
+        controller.priceControllers[id] = TextEditingController();
+      }
+      if (survey['type'] == 'bool' && !controller.switchStates.containsKey(id)) {
+        controller.switchStates[id] = true.obs;
+      }
 
       if (survey['type'] == 'bool') {
         if (questionGroup['title'] == "Apakah POWER SKU tersedia di toko?") {
@@ -94,7 +87,11 @@ class SurveyPage extends GetView<TambahActivityController> {
         );
       } else if (survey['type'] == 'text') {
         final textController = controller.priceControllers[id];
-        if (textController == null) return const SizedBox.shrink();
+        // Add null check with initialization
+        if (textController == null) {
+          controller.priceControllers[id] = TextEditingController();
+          return const SizedBox.shrink();
+        }
 
         if (survey['question'] ==
             'Berapa kali di Kuartal ini pernah dijalankan product detailing di toko ini?') {
@@ -111,15 +108,13 @@ class SurveyPage extends GetView<TambahActivityController> {
       }
       return const SizedBox.shrink();
     }).toList();
-    return question;
   }
 
   @override
   Widget build(BuildContext context) {
     // Run the initialization after the first frame is built
-    WidgetsBinding.instance.addPostFrameCallback((_) {
-      initializeControllers();
-    });
+    // WidgetsBinding.instance.addPostFrameCallback((_) {
+    // });
     return Obx(() {
       var questionGroup = <Map<String, dynamic>>[];
       if (controller.detailDraft.isNotEmpty) {
