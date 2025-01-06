@@ -10,11 +10,11 @@
 }
 
 .login-input-container {
-	@apply w-full border-2 border-primary bg-white flex items-center px-2 rounded-md;
+	@apply w-full border-2 border-primary bg-white flex items-center px-4 py-2 rounded-md;
 }
 
 input {
-	@apply text-sm p-3 w-full md:text-2xl;
+	@apply text-sm p-6 w-full md:text-2xl;
 }
 
 .input {
@@ -26,11 +26,11 @@ input {
 }
 
 .form-title {
-	@apply md:text-3xl text-xl font-bold text-lightBlue text-center;
+	@apply md:text-3xl text-xl font-bold text-lightBlue text-center capitalize;
 }
 
 .form-description {
-	@apply md:text-sm text-[12px] text-lightBlue text-center mt-4;
+	@apply md:text-xl text-[12px] text-lightBlue text-center mt-4;
 }
 
 .form-description>span {
@@ -48,7 +48,7 @@ input {
 }
 
 .login-layout {
-	@apply grid md:grid-cols-2 md:gap-4 md:p-8 md:h-screen;
+	@apply grid md:grid-cols-2 gap-0 md:p-8 md:h-screen;
 }
 
 .bg-accent {
@@ -68,7 +68,7 @@ input {
 }
 
 .hero-image {
-	@apply w-full relative bottom-0 left-0 md:absolute h-full object-contain;
+	@apply w-full relative md:-bottom-8 md:left-12 md:absolute h-full object-contain;
 }
 
 .hero-content {

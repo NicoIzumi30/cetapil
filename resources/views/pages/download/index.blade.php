@@ -7,77 +7,6 @@
 @section('dashboard-content')
     {{-- Download --}}
     <div class="grid grid-cols-2 p-6 gap-6">
-        <x-pages.download.download-card iconName="solar_routing_2_bold">
-            <x-slot:cardTitle>
-                Routing
-            </x-slot:cardTitle>
-            <div class="mb-6">
-                <div>
-                    <label for="routing-week">Filter By Week : </label>
-                    <select id="routing-week" name="routing-week" class="w-full">
-                        <option value="" selected disabled>-- Pilih Week --</option>
-                        <option value="all">Semua Week</option>
-                        <option value="1">Week 1</option>
-                        <option value="2">Week 2</option>
-                        <option value="3">Week 3</option>
-                        <option value="4">Week 4</option>
-                        <option value="1&3">Week 1 & 3</option>
-                        <option value="2&4">Week 2 & 4</option>
-                    </select>
-                </div>
-                <div>
-                    <label for="routing-region">Filter By Regional: </label>
-                    <select id="routing-region" name="routing-region" class="w-full">
-                        <option value="" selected disabled>-- Pilih Regional --</option>
-                        <option value="all">Semua Regional</option>
-                        @foreach ($provinces as $province)
-                            <option value="{{ $province->id }}">{{ $province->name }}</option>
-                        @endforeach
-                    </select>
-                </div>
-            </div>
-
-            <x-button.info class="w-full" data-routing-download>
-                <span id="downloadBtnText">Download</span>
-                <span id="downloadBtnLoading" class="hidden">Downloading...</span>
-            </x-button.info>
-        </x-pages.download.download-card>
-
-        <x-pages.download.download-card iconName="material-symbols_map_search_rounded">
-            <x-slot:cardTitle>
-                Visibility
-            </x-slot:cardTitle>
-
-            <div class="mb-6">
-                <div>
-                    <label for="visibility-start-date">Tanggal Mulai:</label>
-                    <input id="visibility-start-date" class="form-control" type="text" name="visibility-end-date"
-                        placeholder="DD/MM/YYYY" aria-describedby="name" />
-                </div>
-                <div>
-                    <label for="visibility-end-date">Tanggal Selesai:</label>
-                    <input id="visibility-end-date" class="form-control" type="text" name="visibility-end-date"
-                        placeholder="DD/MM/YYYY" aria-describedby="name" />
-                </div>
-                <div>
-                    <label for="visibility-region">Filter By Region : </label>
-                    <select id="visibility-region" name="visibility-region" class="w-full">
-                        <option value="all" selected>
-                            Semua Regional
-                        </option>
-                        @foreach ($provinces as $province)
-                            <option value="{{ $province->code }}">{{ $province->name }}</option>
-                        @endforeach
-                    </select>
-                </div>
-            </div>
-
-            <x-button.info class="w-full" data-visibility-download>
-                <span id="downloadBtnText">Download</span>
-                <span id="downloadBtnLoading" class="hidden">Downloading...</span>
-            </x-button.info>
-        </x-pages.download.download-card>
-
         <x-pages.download.download-card iconName="fluent_box_20_filled">
             <x-slot:cardTitle>
                 Penjualan
@@ -145,7 +74,6 @@
             </x-button.info>
         </x-pages.download.download-card>
 
-
         <x-pages.download.download-card iconName="material-symbols_map_search_rounded">
             <x-slot:cardTitle>
                 Availability
@@ -178,7 +106,6 @@
                 <span id="downloadBtnLoading" class="hidden">Downloading...</span>
             </x-button.info>
         </x-pages.download.download-card>
-
 
         <x-pages.download.download-card iconName="fluent_clipboard">
             <x-slot:cardTitle>
@@ -247,18 +174,31 @@
                 <span id="downloadBtnLoading" class="hidden">Downloading...</span>
             </x-button.info>
         </x-pages.download.download-card>
-        <x-pages.download.download-card iconName="fluent_box_20_filled">
-            <x-slot:cardTitle>
-                Program
-            </x-slot:cardTitle>
 
 
-            <x-button.info class="w-full" data-program-download>
-                <span id="downloadBtnText">Download</span>
-                <span id="downloadBtnLoading" class="hidden">Downloading...</span>
-            </x-button.info>
-        </x-pages.download.download-card>
-    </div>
+    <x-pages.download.download-card iconName="mingcute_target-fill">
+        <x-slot:cardTitle>
+            Program
+        </x-slot:cardTitle>
+
+        <x-button.info class="w-full" data-program-download>
+            <span id="downloadBtnText">Download</span>
+            <span id="downloadBtnLoading" class="hidden">Downloading...</span>
+        </x-button.info>
+    </x-pages.download.download-card>
+	
+    <x-pages.download.download-card iconName="fluent_box_20_filled">
+        <x-slot:cardTitle>
+            Kota
+        </x-slot:cardTitle>
+
+        <x-button.info class="w-full" data-kota-download>
+            <span id="downloadBtnText">Download</span>
+            <span id="downloadBtnLoading" class="hidden">Downloading...</span>
+        </x-button.info>
+    </x-pages.download.download-card>
+
+</div>
 @endsection
 
 
@@ -367,6 +307,13 @@ $(document).ready(function () {
             showConfirmButton: false,
             timer: duration,
             timerProgressBar: true
+        });
+        setupDownloadButton('[data-kota-download]', {
+            fetchUrl: '{{ route('download.city') }}',
+        });
+        // Download untuk Pengguna
+        setupDownloadButton('[data-pengguna-download]', {
+            fetchUrl: '{{ route('download.pengguna') }}',
         });
     }
 
