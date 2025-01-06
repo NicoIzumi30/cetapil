@@ -3,6 +3,7 @@ import 'package:cetapil_mobile/controller/activity/tambah_visibility_controller.
 import 'package:flutter/material.dart';
 import 'package:flutter_svg/svg.dart';
 import 'package:get/get.dart';
+import 'package:package_info_plus/package_info_plus.dart';
 
 import '../controller/connectivity_controller.dart';
 import '../controller/gps_controller.dart';
@@ -10,7 +11,6 @@ import '../controller/login_controller.dart';
 import '../widget/logo_animation.dart';
 import 'index.dart';
 import 'login.dart';
-
 
 class SplashScreen extends StatefulWidget {
   const SplashScreen({super.key});
@@ -21,11 +21,22 @@ class SplashScreen extends StatefulWidget {
 
 class _SplashScreenState extends State<SplashScreen> {
   final loginController = Get.find<LoginController>();
+  String version = '';
+
   @override
   void initState() {
     super.initState();
     _navigateToNextScreen();
+    _getVersion();
   }
+
+  Future<void> _getVersion() async {
+    PackageInfo packageInfo = await PackageInfo.fromPlatform();
+    setState(() {
+      version = "${packageInfo.version}+${packageInfo.buildNumber}";
+    });
+  }
+
   Future<void> _navigateToNextScreen() async {
     bool isLoggedIn = await loginController.isLoggedIn();
     Future.delayed(const Duration(seconds: 3), () {
@@ -34,7 +45,7 @@ class _SplashScreenState extends State<SplashScreen> {
 
       // Get.put(SupportDataController(), permanent: true);
       Get.offAll(
-            () => isLoggedIn ? MainPage() : LoginPage(),
+        () => isLoggedIn ? MainPage() : LoginPage(),
       );
     });
   }
@@ -90,6 +101,14 @@ class _SplashScreenState extends State<SplashScreen> {
                       ],
                     ),
                   ),
+                  Text(
+                    'Version $version',
+                    style: const TextStyle(
+                      fontSize: 12,
+                      color: Colors.black54,
+                    ),
+                  ),
+                  const SizedBox(height: 8),
                   const Padding(
                     padding: EdgeInsets.all(16.0),
                     child: Text(

@@ -6,6 +6,7 @@ import 'package:flutter_svg/svg.dart';
 import 'package:get/get.dart';
 import 'package:get/get_core/src/get_main.dart';
 import 'package:google_fonts/google_fonts.dart';
+import 'package:package_info_plus/package_info_plus.dart';
 
 import '../../controller/dashboard/dashboard_controller.dart';
 import '../../widget/back_button.dart';
@@ -17,9 +18,21 @@ class SettingProfile extends GetView<DashboardController> {
   final DashboardController dashboardController = Get.find<DashboardController>();
   final TextEditingController _controller =
       TextEditingController(text: "Andromeda Phytagoras Silalahi");
+  final RxString appVersion = ''.obs;
+
+  void getVersion() async {
+    try {
+      PackageInfo packageInfo = await PackageInfo.fromPlatform();
+      appVersion.value = "${packageInfo.version}+${packageInfo.buildNumber}";
+    } catch (e) {
+      print("Error getting version: $e");
+      appVersion.value = "Version not available";
+    }
+  }
 
   @override
   Widget build(BuildContext context) {
+    getVersion();
     return SafeArea(
         child: Stack(
       children: [
@@ -35,19 +48,13 @@ class SettingProfile extends GetView<DashboardController> {
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
               EnhancedBackButton(
-                onPressed: () {
-                  Navigator.of(context).pop();
-                },
+                onPressed: () => Navigator.of(context).pop(),
                 backgroundColor: Colors.white,
                 iconColor: Colors.blue,
               ),
-              SizedBox(
-                height: 20,
-              ),
+              const SizedBox(height: 20),
               Text("Profile Pengguna", style: AppTextStyle.titlePage),
-              SizedBox(
-                height: 20,
-              ),
+              const SizedBox(height: 20),
               ModernTextField(
                 enable: false,
                 title: "Nama Pengguna",
@@ -63,40 +70,33 @@ class SettingProfile extends GetView<DashboardController> {
                 title: "Jabatan Pengguna",
                 controller: TextEditingController(text: dashboardController.role.value),
               ),
-              SizedBox(
-                height: 15,
-              ),
+              const SizedBox(height: 15),
               Text("Area Domisili Pengguna", style: AppTextStyle.titlePage),
-              SizedBox(
-                height: 15,
-              ),
+              const SizedBox(height: 15),
               ModernTextField(
                 title: "Longitudes & Latitudes",
                 controller: TextEditingController(text: dashboardController.longLat.value),
                 enable: false,
               ),
-              SizedBox(
-                height: 15,
+              const SizedBox(height: 15),
+              ButtonPrimary(
+                  tipeButton: "danger",
+                  ontap: () => Alerts.showLogOutDialog(context),
+                  title: "Keluar Akun"),
+              const SizedBox(height: 10),
+              const Spacer(),
+              Center(
+                child: Obx(() => Text(
+                      'Version ${appVersion.value}',
+                      style: const TextStyle(
+                        fontFamily: 'PlusJakartaSans',
+                        color: Colors.black,
+                        fontSize: 12,
+                        fontWeight: FontWeight.w400,
+                      ),
+                    )),
               ),
-              // Text("Keamanan Akun", style: AppTextStyle.titlePage),
-              // SizedBox(
-              //   height: 15,
-              // ),
-              // PasswordFieldWithButton(
-              //   controller: _controller,
-              //   onButtonPressed: () {
-              //     Get.to(
-              //       SettingPassword()
-              //     );
-              //   },
-              // ),
-              // SizedBox(
-              //   height: 15,
-              // ),
-             ButtonPrimary(
-                 tipeButton: "danger",
-                 ontap: ()=>Alerts.showLogOutDialog(context),
-                 title: "Keluar Akun")
+              const SizedBox(height: 10),
             ],
           ),
         )
@@ -104,4 +104,3 @@ class SettingProfile extends GetView<DashboardController> {
     ));
   }
 }
-

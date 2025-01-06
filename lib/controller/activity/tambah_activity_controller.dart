@@ -100,8 +100,8 @@ class TambahActivityController extends GetxController {
   Timer? _timer;
 
   bool disableSecondaryTab(int indexTab) {
-    bool areAllControllersNotEmpty =
-        priceControllers.values.any((controller) => controller.text.isNotEmpty);
+    bool areAllControllersNotEmpty = priceControllers.values
+        .any((controller) => controller.text.isNotEmpty && controller.text != "");
     if (indexTab == 0) {
       return true;
     }
@@ -112,15 +112,19 @@ class TambahActivityController extends GetxController {
     }
     if (indexTab == 2) {
       if (availabilityDraftItems.isNotEmpty) {
-        if (visibilityPrimaryDraftItems.length >= 3 && visibilitySecondaryDraftItems.length >= 3) {
+        if (visibilityPrimaryDraftItems.length >= 6 &&
+            visibilitySecondaryDraftItems.length >= 4 &&
+            visibilityKompetitorDraftItems.length >= 2) {
           return true;
         }
       }
     }
     if (indexTab == 3) {
       if (availabilityDraftItems.isNotEmpty) {
-        if (visibilityPrimaryDraftItems.length == 6 && visibilitySecondaryDraftItems.length == 4 && visibilityKompetitorDraftItems.length == 2) {
-          if (knowledgeTime.value >= 180) {
+        if (visibilityPrimaryDraftItems.length == 6 &&
+            visibilitySecondaryDraftItems.length == 4 &&
+            visibilityKompetitorDraftItems.length == 2) {
+          if (knowledgeTime.value >= 10) {
             /// minimal duration 3 menit
             return true;
           }
@@ -129,8 +133,10 @@ class TambahActivityController extends GetxController {
     }
     if (indexTab == 4) {
       if (availabilityDraftItems.isNotEmpty) {
-        if (visibilityPrimaryDraftItems.length >= 3 && visibilitySecondaryDraftItems.length >= 3) {
-          if (knowledgeTime.value >= 180) {
+        if (visibilityPrimaryDraftItems.length == 6 &&
+            visibilitySecondaryDraftItems.length == 4 &&
+            visibilityKompetitorDraftItems.length == 2) {
+          if (knowledgeTime.value >= 10) {
             /// minimal duration 3 menit
             if (areAllControllersNotEmpty) {
               return true;
@@ -256,11 +262,12 @@ class TambahActivityController extends GetxController {
         priceControllers[id]?.text = item['answer'].toString();
       }
 
+      // print("ID : $id - Answer: ${item['answer'] == 'false'}");
       // Handle switch states
       if (!switchStates.containsKey(id)) {
         switchStates[id] = false.obs;
       }
-      switchStates[id]?.value = item['answer'].toString().toLowerCase() == 'true';
+      switchStates[id]?.value = item['answer'].toString() == 'true';
     }
 
     // Set recommendation group
@@ -297,10 +304,10 @@ class TambahActivityController extends GetxController {
   initializeData() {
     initDraftTimers();
     initializeControllers();
+    checkAvailabilityForSurvey();
     initDetailDraftSurvey();
     _initializeSavedDraft();
     startTabTimer();
-    checkAvailabilityForSurvey();
   }
 
   firstInitializeData() {
