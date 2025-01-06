@@ -8,7 +8,6 @@ import 'package:flutter_cache_manager/flutter_cache_manager.dart';
 import 'package:get/get.dart';
 import 'package:video_player/video_player.dart';
 import 'package:path_provider/path_provider.dart';
-import 'package:chewie/chewie.dart';
 
 class CachedPdfController extends GetxController {
   final SupportDataController supportController = Get.find<SupportDataController>();
@@ -111,8 +110,8 @@ class CachedVideoController extends GetxController {
   static const _cacheKey = 'video_cache';
 
   late VideoPlayerController videoController;
-  ChewieController? chewieController;
 
+  // Observable states
   final isInitialized = false.obs;
   final isPlaying = false.obs;
   final duration = const Duration().obs;
@@ -122,7 +121,9 @@ class CachedVideoController extends GetxController {
   final isLoading = false.obs;
   final hasError = false.obs;
   final errorMessage = ''.obs;
+  final isFullscreen = false.obs;
 
+  // Private variables
   Timer? _positionTimer;
   Timer? _hideControlsTimer;
   File? _cachedVideoFile;
@@ -140,14 +141,17 @@ class CachedVideoController extends GetxController {
 
   Future<File> _getCachedVideo(String url) async {
     try {
+      // Try to get from cache first
       final cachedFile = await _cacheManager.getFileFromCache(_cacheKey);
       if (cachedFile != null && await cachedFile.file.exists()) {
         return cachedFile.file;
       }
 
+      // Download if not in cache
       final downloadedFile = await _cacheManager.downloadFile(url, key: _cacheKey);
       return downloadedFile.file;
     } catch (e) {
+      // Fallback to direct download if cache fails
       final fallbackFile = await _cacheManager.downloadFile(url, key: _cacheKey);
       return fallbackFile.file;
     }
@@ -165,6 +169,7 @@ class CachedVideoController extends GetxController {
 
       final fullUrl = 'https://dev-cetaphil.i-am.host/storage$url';
 
+      // Reset cache if URL changed
       if (urlVideo.value != fullUrl) {
         await _cacheManager.removeFile(_cacheKey);
       }
@@ -173,32 +178,22 @@ class CachedVideoController extends GetxController {
       await _cleanup();
 
       try {
+        // Try to load from cache first
         _cachedVideoFile = await _getCachedVideo(fullUrl);
         await videoController.dispose();
-
-        videoController = VideoPlayerController.file(
-          _cachedVideoFile!,
-          videoPlayerOptions: VideoPlayerOptions(
-            mixWithOthers: true,
-            allowBackgroundPlayback: false,
-          ),
-        );
-
+        videoController = VideoPlayerController.file(_cachedVideoFile!);
         await videoController.initialize();
       } catch (e) {
+        // Fallback to network URL if cache fails
         await videoController.dispose();
-        videoController = VideoPlayerController.networkUrl(
-          Uri.parse(fullUrl),
-          videoPlayerOptions: VideoPlayerOptions(
-            mixWithOthers: true,
-            allowBackgroundPlayback: false,
-          ),
-        );
+        videoController = VideoPlayerController.networkUrl(Uri.parse(fullUrl));
         await videoController.initialize();
       }
 
       if (videoController.value.isInitialized) {
-        await _setupChewieController();
+        duration.value = videoController.value.duration;
+        videoController.addListener(_videoListener);
+        _startPositionTimer();
         isInitialized.value = true;
       }
     } catch (e) {
@@ -211,135 +206,31 @@ class CachedVideoController extends GetxController {
     }
   }
 
-  Future<void> _setupChewieController() async {
-    chewieController?.dispose();
-    chewieController = ChewieController(
-      videoPlayerController: videoController,
-      autoPlay: false,
-      looping: false,
-      aspectRatio: 16 / 9,
-      allowMuting: true,
-      allowPlaybackSpeedChanging: true,
-      showControls: true,
-      placeholder: const Center(child: CircularProgressIndicator()),
-      customControls: _buildCustomControls(),
-      deviceOrientationsOnEnterFullScreen: [
-        DeviceOrientation.landscapeLeft,
-        DeviceOrientation.landscapeRight,
-      ],
-      deviceOrientationsAfterFullScreen: [
-        DeviceOrientation.portraitUp,
-      ],
-    );
-
-    duration.value = videoController.value.duration;
-    videoController.addListener(_videoListener);
-    _startPositionTimer();
-  }
-
   void toggleControls() {
     showControls.value = !showControls.value;
     _hideControlsTimer?.cancel();
 
-    if (showControls.value) {
+    if (showControls.value && isPlaying.value) {
       _hideControlsTimer = Timer(const Duration(seconds: 3), () {
         showControls.value = false;
       });
     }
   }
 
-  String _formatDuration(Duration duration) {
-    String twoDigits(int n) => n.toString().padLeft(2, '0');
-    String minutes = twoDigits(duration.inMinutes.remainder(60));
-    String seconds = twoDigits(duration.inSeconds.remainder(60));
-    return "$minutes:$seconds";
-  }
-
-  Widget _buildCustomControls() {
-    return Obx(() => showControls.value
-        ? Container(
-            color: Colors.black26,
-            child: Stack(
-              children: [
-                Center(
-                  child: IconButton(
-                    iconSize: 32,
-                    icon: Icon(
-                      videoController.value.isPlaying ? Icons.pause : Icons.play_arrow,
-                      color: Colors.white,
-                    ),
-                    onPressed: playPause,
-                  ),
-                ),
-                Positioned(
-                  left: 0,
-                  right: 0,
-                  bottom: 0,
-                  child: Container(
-                    padding: EdgeInsets.symmetric(horizontal: 10),
-                    height: 40,
-                    child: Row(
-                      children: [
-                        Text(
-                          _formatDuration(position.value),
-                          style: TextStyle(color: Colors.white, fontSize: 12),
-                        ),
-                        Expanded(
-                          child: Container(
-                            margin: EdgeInsets.symmetric(horizontal: 10),
-                            child: VideoProgressIndicator(
-                              videoController,
-                              allowScrubbing: true,
-                              colors: VideoProgressColors(
-                                playedColor: Colors.blue,
-                                bufferedColor: Colors.grey.shade500,
-                                backgroundColor: Colors.grey.shade300,
-                              ),
-                            ),
-                          ),
-                        ),
-                        Text(
-                          _formatDuration(duration.value),
-                          style: TextStyle(color: Colors.white, fontSize: 12),
-                        ),
-                        IconButton(
-                          iconSize: 20,
-                          icon: Icon(
-                            videoController.value.volume > 0 ? Icons.volume_up : Icons.volume_off,
-                            color: Colors.white,
-                          ),
-                          onPressed: () {
-                            if (videoController.value.volume > 0) {
-                              videoController.setVolume(0);
-                            } else {
-                              videoController.setVolume(1.0);
-                            }
-                          },
-                        ),
-                        IconButton(
-                          iconSize: 20,
-                          icon: Icon(
-                            Icons.fullscreen,
-                            color: Colors.white,
-                          ),
-                          onPressed: () {
-                            chewieController?.toggleFullScreen();
-                          },
-                        ),
-                      ],
-                    ),
-                  ),
-                ),
-              ],
-            ),
-          )
-        : const SizedBox.shrink());
-  }
-
   void _videoListener() {
     if (!isInitialized.value) return;
+    
     isPlaying.value = videoController.value.isPlaying;
     position.value = videoController.value.position;
+    
+    // Auto-hide controls when playing
+    if (isPlaying.value && showControls.value) {
+      _hideControlsTimer?.cancel();
+      _hideControlsTimer = Timer(const Duration(seconds: 3), () {
+        showControls.value = false;
+      });
+    }
+    
     update();
   }
 
@@ -355,10 +246,19 @@ class CachedVideoController extends GetxController {
 
   void playPause() {
     if (!isInitialized.value) return;
+    
     if (videoController.value.isPlaying) {
       videoController.pause();
+      showControls.value = true;
+      _hideControlsTimer?.cancel();
     } else {
       videoController.play();
+      if (showControls.value) {
+        _hideControlsTimer?.cancel();
+        _hideControlsTimer = Timer(const Duration(seconds: 3), () {
+          showControls.value = false;
+        });
+      }
     }
     update();
   }
@@ -370,11 +270,26 @@ class CachedVideoController extends GetxController {
     update();
   }
 
+  void toggleFullscreen() {
+    isFullscreen.value = !isFullscreen.value;
+    if (isFullscreen.value) {
+      SystemChrome.setPreferredOrientations([
+        DeviceOrientation.landscapeLeft,
+        DeviceOrientation.landscapeRight,
+      ]);
+    } else {
+      SystemChrome.setPreferredOrientations([
+        DeviceOrientation.portraitUp,
+        DeviceOrientation.portraitDown,
+      ]);
+    }
+    update();
+  }
+
   Future<void> _cleanup() async {
     _positionTimer?.cancel();
     _hideControlsTimer?.cancel();
     if (isInitialized.value) {
-      chewieController?.dispose();
       await videoController.dispose();
       isInitialized.value = false;
       isPlaying.value = false;
@@ -384,7 +299,6 @@ class CachedVideoController extends GetxController {
   @override
   void onClose() {
     _cleanup();
-    // Don't clear cache on close to keep the video for offline use
     super.onClose();
   }
 }
