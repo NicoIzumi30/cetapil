@@ -139,7 +139,7 @@ class TambahActivityController extends GetxController {
         }
       }
     }
-    return true;
+    return false;
   }
 
   initDetailDraftAvailability() {
