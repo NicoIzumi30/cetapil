@@ -124,7 +124,7 @@ class TambahActivityController extends GetxController {
         if (visibilityPrimaryDraftItems.length == 6 &&
             visibilitySecondaryDraftItems.length == 4 &&
             visibilityKompetitorDraftItems.length == 2) {
-          if (knowledgeTime.value >= 10) {
+          if (knowledgeTime.value >= 180) {
             /// minimal duration 3 menit
             return true;
           }
@@ -136,7 +136,7 @@ class TambahActivityController extends GetxController {
         if (visibilityPrimaryDraftItems.length == 6 &&
             visibilitySecondaryDraftItems.length == 4 &&
             visibilityKompetitorDraftItems.length == 2) {
-          if (knowledgeTime.value >= 10) {
+          if (knowledgeTime.value >= 180) {
             /// minimal duration 3 menit
             if (areAllControllersNotEmpty) {
               return true;
