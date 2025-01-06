@@ -5,8 +5,6 @@ import 'package:flutter/services.dart';
 import 'package:get/get.dart';
 import 'package:intl/intl.dart';
 
-import '../../../controller/activity/tambah_availibility_controller.dart';
-
 class DetailOrderPage extends GetView<DetailActivityController> {
   @override
   Widget build(BuildContext context) {
@@ -14,9 +12,26 @@ class DetailOrderPage extends GetView<DetailActivityController> {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
+        SizedBox(height: 10),
+        OrderSummaryCard(),
         Obx(() {
+          // if (controller.orderDetailItems.isEmpty) {
+          //   return Padding(
+          //     padding: const EdgeInsets.symmetric(vertical: 20.0),
+          //     child: Center(
+          //       child: Text(
+          //         "Belum ada produk yang ditambahkan",
+          //         style: TextStyle(
+          //           color: Colors.grey[600],
+          //           fontSize: 14,
+          //         ),
+          //       ),
+          //     ),
+          //   );
+          // }
+
           final groupedItems = <String, List<Map<String, dynamic>>>{};
-          for (var item in controller.availabilityDetailItems) {
+          for (var item in controller.orderDetailItems) {
             final category = item['category'];
             if (groupedItems[category] == null) {
               groupedItems[category] = [];
@@ -35,13 +50,13 @@ class DetailOrderPage extends GetView<DetailActivityController> {
                   child: CollapsibleCategoryGroup(
                     category: category,
                     items: items,
-                    isEdit: false,
                   ),
                 );
               }).toList(),
             ],
           );
         }),
+        SizedBox(height: 20),
         SizedBox(height: 20),
       ],
     );
@@ -51,14 +66,11 @@ class DetailOrderPage extends GetView<DetailActivityController> {
 class CollapsibleCategoryGroup extends StatefulWidget {
   final String category;
   final List<Map<String, dynamic>> items;
-  final VoidCallback? onEdit;
-  final bool isEdit;
 
   const CollapsibleCategoryGroup({
     Key? key,
     required this.category,
     required this.items,
-    this.onEdit, required this.isEdit,
   }) : super(key: key);
 
   @override
@@ -67,7 +79,6 @@ class CollapsibleCategoryGroup extends StatefulWidget {
 
 class _CollapsibleCategoryGroupState extends State<CollapsibleCategoryGroup> {
   bool isExpanded = false;
-  final formatter = NumberFormat.currency(locale: 'id_ID', symbol: "Rp ", decimalDigits: 0);
 
   @override
   Widget build(BuildContext context) {
@@ -131,23 +142,10 @@ class _CollapsibleCategoryGroupState extends State<CollapsibleCategoryGroup> {
             curve: Curves.easeInOut,
             child: Column(
               children: widget.items.map((item) {
-                return SumAmountProduct(
+                return OrderProductCard(
                   productName: item['sku'] ?? '',
-                  availabilityYesNoController: TextEditingController(
-                    text: item['availability_exist'].toString() == "true" ? "Ada" : "Tidak",
-                  ),
-                  stockOnHandController: TextEditingController(
-                    text: item['stock_on_hand'].toString(),
-                  ),
-                  stockOnInventoryController: TextEditingController(
-                    text: item['stock_on_inventory'].toString(),
-                  ),
-                  av3mController: TextEditingController(
-                    text: item['av3m'].toString(),
-                  ),
-                  recommendController: TextEditingController(
-                    text: item['recommend'].toString(),
-                  ),
+                  jumlahController: TextEditingController(text: item['jumlah']?.toString() ?? ''),
+                  hargaController: TextEditingController(text: item['harga']?.toString() ?? ''),
                   isReadOnly: true,
                   itemData: item,
                 );
@@ -159,54 +157,26 @@ class _CollapsibleCategoryGroupState extends State<CollapsibleCategoryGroup> {
   }
 }
 
-class SumAmountProduct extends StatelessWidget {
+class OrderProductCard extends StatelessWidget {
   final String productName;
-  final TextEditingController availabilityYesNoController;
-  final TextEditingController stockOnHandController;
-  final TextEditingController stockOnInventoryController;
-  final TextEditingController av3mController;
-  final TextEditingController recommendController;
-  // final TextEditingController priceController;
+  final TextEditingController jumlahController;
+  final TextEditingController hargaController;
   final bool isReadOnly;
   final Map<String, dynamic> itemData;
 
-  String checkStatus(String number) {
-    int num = int.parse(number);
-    if (num < 0) {
-      return "ORDER";
-    } else if (num > 0) {
-      return "OVER";
-    } else {
-      return "IDEAL";
-    }
-  }
-
-  statusColor(String value) {
-    switch (value) {
-      case "OVER":
-        return Color(0xffff7171);
-      case "ORDER":
-        return Color(0xff52c667);
-      case "IDEAL":
-        return Color(0xff0177be);
-      default:
-    }
-  }
-
-  const SumAmountProduct({
+  const OrderProductCard({
     super.key,
     required this.productName,
-    required this.stockOnHandController,
-    required this.av3mController,
-    required this.recommendController,
+    required this.jumlahController,
+    required this.hargaController,
     required this.itemData,
-    this.isReadOnly = false, required this.availabilityYesNoController, required this.stockOnInventoryController,
+    this.isReadOnly = false,
   });
 
   @override
   Widget build(BuildContext context) {
     return Container(
-      margin: EdgeInsets.only(bottom: 16, top: 8, right: 8,left: 8),
+      margin: EdgeInsets.only(bottom: 16, top: 8, right: 8, left: 8),
       decoration: BoxDecoration(
         color: Colors.white,
         borderRadius: BorderRadius.circular(12),
@@ -247,44 +217,42 @@ class SumAmountProduct extends StatelessWidget {
             ),
           ),
           Padding(
-            padding: EdgeInsets.symmetric(horizontal: 16, vertical: 5),
+            padding: EdgeInsets.all(16),
             child: Column(
               children: [
                 Row(
-                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
                   children: [
                     Expanded(
-                        flex: 3,
-                        child: Text("Availability",style: TextStyle(
-                          fontSize: 13,
-                          fontWeight: FontWeight.w500,
-                          color: Color(0xFF666666),
-                        ),)),
+                      flex: 2,
+                      child: _buildJumlahField(),
+                    ),
+                    SizedBox(width: 12),
                     Expanded(
-                      flex: 1,
-                      child: NumberField(
-                        controller: availabilityYesNoController,
-                        readOnly: isReadOnly,
-                      ),
+                      flex: 5,
+                      child: _buildHargaField(),
                     ),
                   ],
                 ),
                 Row(
+                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
                   children: [
-                    _buildDetailField("Stock On Shelf", stockOnHandController),
-                    SizedBox(width: 12),
-                    _buildDetailField("Stock On Inventory", stockOnInventoryController),
-                    SizedBox(width: 12),
-                    _buildDetailField("Av3m", av3mController),
+                    Text(
+                      "Total Harga",
+                      style: TextStyle(
+                        fontSize: 14,
+                        color: Color(0xFF0077BD),
+                      ),
+                    ),
+                    Text(
+                      "Rp ${_calculateTotal()}",
+                      style: TextStyle(
+                        fontSize: 14,
+                        color: Color(0xFF0077BD),
+                        fontWeight: FontWeight.w500,
+                      ),
+                    ),
                   ],
-                ),
-                Row(
-                  children: [
-                    _buildDetailField("Recommend", recommendController),
-                    SizedBox(width: 12),
-                    _buildDetailStatus("Status", checkStatus(recommendController.text)),
-                  ],
-                ),
+                )
               ],
             ),
           ),
@@ -293,116 +261,176 @@ class SumAmountProduct extends StatelessWidget {
     );
   }
 
-  Widget _buildDetailField(String label, TextEditingController controller) {
-    return Expanded(
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          Text(
-            label,
-            style: TextStyle(
-              fontSize: 10,
-              fontWeight: FontWeight.w500,
-              color: Color(0xFF666666),
-            ),
+  String _calculateTotal() {
+    final jumlah = int.tryParse(jumlahController.text.replaceAll(RegExp(r'[^\d]'), '')) ?? 0;
+    final harga = int.tryParse(hargaController.text.replaceAll(RegExp(r'[^\d]'), '')) ?? 0;
+    final total = jumlah * harga;
+
+    return total
+        .toString()
+        .replaceAllMapped(RegExp(r'(\d{1,3})(?=(\d{3})+(?!\d))'), (Match m) => '${m[1]}.');
+  }
+
+  Widget _buildJumlahField() {
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        Text(
+          "Jumlah",
+          style: TextStyle(
+            fontSize: 12,
+            fontWeight: FontWeight.w500,
+            color: Color(0xFF666666),
           ),
-          SizedBox(height: 4),
-          NumberField(
-            controller: controller,
-            readOnly: isReadOnly,
-          ),
-        ],
-      ),
+        ),
+        SizedBox(height: 4),
+        NumberField(
+          controller: jumlahController,
+          readOnly: isReadOnly,
+          isSmall: true,
+        ),
+      ],
     );
   }
 
-  Widget _buildDetailStatus(String label, String value) {
-    return Expanded(
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          Text(
-            label,
-            style: TextStyle(
-              fontSize: 10,
-              fontWeight: FontWeight.w500,
-              color: Color(0xFF666666),
-            ),
+  Widget _buildHargaField() {
+    String formattedValue = '';
+    if (hargaController.text.isNotEmpty) {
+      final number = int.tryParse(hargaController.text.replaceAll(RegExp(r'[^\d]'), '')) ?? 0;
+      formattedValue =
+      'Rp ${number.toString().replaceAllMapped(RegExp(r'(\d{1,3})(?=(\d{3})+(?!\d))'), (Match m) => '${m[1]}.')}';
+
+      // Update controller with formatted value if it's not already formatted
+      if (hargaController.text != formattedValue) {
+        hargaController.text = formattedValue;
+      }
+    }
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        Text(
+          "Harga",
+          style: TextStyle(
+            fontSize: 12,
+            fontWeight: FontWeight.w500,
+            color: Color(0xFF666666),
           ),
-          SizedBox(height: 4),
-          Container(
-            margin: EdgeInsets.only(bottom: 10, top: 5),
-            decoration: BoxDecoration(
-              borderRadius: BorderRadius.circular(12),
-              boxShadow: [
-                BoxShadow(
-                  color: Colors.grey.withOpacity(0.1),
-                  spreadRadius: 1,
-                  blurRadius: 3,
-                  offset: const Offset(0, 2),
-                ),
-              ],
-            ),
-            child: TextFormField(
-              controller: TextEditingController(text: value),
-              keyboardType: TextInputType.number,
-              readOnly: true,
-              style: TextStyle(
-                fontSize: 14,
-                color: Colors.white,
-              ),
-              textAlign: TextAlign.center,
-              decoration: InputDecoration(
-                hintStyle: TextStyle(
-                  color: Colors.grey[400],
-                  fontSize: 14,
-                ),
-                contentPadding: const EdgeInsets.symmetric(
-                  horizontal: 3,
-                  vertical: 3,
-                ),
-                border: OutlineInputBorder(
-                  borderRadius: BorderRadius.circular(8),
-                  borderSide: BorderSide(
-                    color: statusColor(value),
-                    width: 1,
-                  ),
-                ),
-                filled: true,
-                fillColor: statusColor(value),
-                focusedBorder: OutlineInputBorder(
-                  borderRadius: BorderRadius.circular(8),
-                  borderSide: BorderSide(
-                    color: statusColor(value),
-                    width: 1,
-                  ),
-                ),
-                enabledBorder: OutlineInputBorder(
-                  borderRadius: BorderRadius.circular(8),
-                  borderSide:  BorderSide(
-                    color: statusColor(value),
-                    width: 1,
-                  ),
-                ),
-              ),
-            ),
-          )
-        ],
-      ),
+        ),
+        SizedBox(height: 4),
+        PriceField(
+          controller: hargaController,
+          readOnly: isReadOnly,
+        ),
+      ],
     );
   }
-
 }
 
 class NumberField extends StatelessWidget {
   final TextEditingController controller;
   final bool readOnly;
+  final bool isSmall;
 
   const NumberField({
     super.key,
     required this.controller,
     this.readOnly = false,
+    this.isSmall = false,
   });
+
+  @override
+  Widget build(BuildContext context) {
+    return Container(
+      margin: EdgeInsets.only(bottom: 10, top: 5),
+      width: isSmall ? 100 : null,
+      decoration: BoxDecoration(
+        borderRadius: BorderRadius.circular(12),
+        boxShadow: [
+          BoxShadow(
+            color: Colors.grey.withOpacity(0.1),
+            spreadRadius: 1,
+            blurRadius: 3,
+            offset: const Offset(0, 2),
+          ),
+        ],
+      ),
+      child: TextFormField(
+        controller: controller,
+        keyboardType: TextInputType.number,
+        readOnly: readOnly,
+        style: const TextStyle(
+          fontSize: 14,
+          color: Color(0xFF0077BD),
+        ),
+        textAlign: TextAlign.center,
+        inputFormatters: [
+          FilteringTextInputFormatter.digitsOnly,
+        ],
+        decoration: InputDecoration(
+          hintStyle: TextStyle(
+            color: Colors.grey[400],
+            fontSize: 14,
+          ),
+          contentPadding: const EdgeInsets.symmetric(
+            horizontal: 3,
+            vertical: 3,
+          ),
+          border: OutlineInputBorder(
+            borderRadius: BorderRadius.circular(8),
+            borderSide: const BorderSide(
+              color: Color(0xFF64B5F6),
+              width: 2,
+            ),
+          ),
+          filled: true,
+          fillColor: readOnly ? Colors.grey[200] : const Color(0xFFE8F3FF),
+          focusedBorder: OutlineInputBorder(
+            borderRadius: BorderRadius.circular(8),
+            borderSide: const BorderSide(
+              color: Color(0xFF64B5F6),
+              width: 1,
+            ),
+          ),
+          enabledBorder: OutlineInputBorder(
+            borderRadius: BorderRadius.circular(8),
+            borderSide: const BorderSide(
+              color: Color(0xFF64B5F6),
+              width: 1,
+            ),
+          ),
+        ),
+      ),
+    );
+  }
+}
+
+class PriceField extends StatefulWidget {
+  final TextEditingController controller;
+  final bool readOnly;
+
+  const PriceField({
+    super.key,
+    required this.controller,
+    this.readOnly = false,
+  });
+
+  @override
+  State<PriceField> createState() => _PriceFieldState();
+}
+
+class _PriceFieldState extends State<PriceField> {
+  String _formatCurrency(String value) {
+    if (value.isEmpty) return '';
+    final number = int.parse(value.replaceAll(RegExp(r'[^\d]'), ''));
+    final formatted = number
+        .toString()
+        .replaceAllMapped(RegExp(r'(\d{1,3})(?=(\d{3})+(?!\d))'), (Match m) => '${m[1]}.');
+    return 'Rp $formatted';
+  }
+
+  String _removeCurrencyFormat(String value) {
+    return value.replaceAll(RegExp(r'[^\d]'), '');
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -420,40 +448,245 @@ class NumberField extends StatelessWidget {
         ],
       ),
       child: TextFormField(
-        controller: controller,
+        controller: widget.controller,
         keyboardType: TextInputType.number,
-        readOnly: readOnly,
-        style: TextStyle(
-          fontSize: 14,
-          color: readOnly ? Colors.grey : Color(0xFF0077BD),
+        readOnly: widget.readOnly,
+        style: const TextStyle(
+          fontSize: 16,
+          fontWeight: FontWeight.w500,
+          color: Color(0xFF0077BD),
         ),
-        textAlign: TextAlign.center,
-        inputFormatters: [
-          FilteringTextInputFormatter.allow(RegExp(r'^\d*\.?\d*$')),
-        ],
+        textAlign: TextAlign.left,
+        onChanged: (value) {
+          final raw = _removeCurrencyFormat(value);
+          if (raw.isNotEmpty) {
+            final formatted = _formatCurrency(raw);
+            widget.controller.value = TextEditingValue(
+              text: formatted,
+              selection: TextSelection.collapsed(offset: formatted.length),
+            );
+          }
+        },
         decoration: InputDecoration(
-          contentPadding: EdgeInsets.symmetric(
-            horizontal: 3,
-            vertical: 3,
+          prefixText: '',
+          prefixStyle: TextStyle(
+            fontSize: 16,
+            fontWeight: FontWeight.w500,
+            color: Color(0xFF0077BD),
+          ),
+          hintStyle: TextStyle(
+            color: Colors.grey[400],
+            fontSize: 14,
+          ),
+          contentPadding: const EdgeInsets.symmetric(
+            horizontal: 12,
+            vertical: 12,
           ),
           border: OutlineInputBorder(
             borderRadius: BorderRadius.circular(8),
-            borderSide: BorderSide(
+            borderSide: const BorderSide(
               color: Color(0xFF64B5F6),
               width: 2,
             ),
           ),
           filled: true,
-          fillColor: readOnly ? Colors.grey[100] : Color(0xFFE8F3FF),
+          fillColor: widget.readOnly ? Colors.grey[200] : const Color(0xFFE8F3FF),
+          focusedBorder: OutlineInputBorder(
+            borderRadius: BorderRadius.circular(8),
+            borderSide: const BorderSide(
+              color: Color(0xFF64B5F6),
+              width: 1,
+            ),
+          ),
           enabledBorder: OutlineInputBorder(
             borderRadius: BorderRadius.circular(8),
-            borderSide: BorderSide(
-              color: readOnly ? Colors.grey[300]! : Color(0xFF64B5F6),
+            borderSide: const BorderSide(
+              color: Color(0xFF64B5F6),
               width: 1,
             ),
           ),
         ),
       ),
     );
+  }
+}
+
+class OrderSummaryCard extends GetView<DetailActivityController> {
+  const OrderSummaryCard({Key? key}) : super(key: key);
+
+  @override
+  Widget build(BuildContext context) {
+    final formatter = NumberFormat.currency(locale: 'id_ID', symbol: "Rp ", decimalDigits: 0);
+
+    return Obx(() {
+      final ctrl = Get.find<DetailActivityController>();
+      var totalQty = 0;
+      var totalPrice = 0.0;
+
+      for (final item in ctrl.orderDetailItems) {
+        if (item['jumlah'] != null && item['harga'] != null) {
+          totalQty += int.parse(item['jumlah'].toString());
+          int quantity = int.tryParse(item['jumlah'].toString()) ?? 0;
+          int price = int.tryParse(item['harga'].toString()) ?? 0;
+          totalPrice += quantity * price;
+        }
+      }
+
+      return Container(
+        margin: const EdgeInsets.symmetric(vertical: 4),
+        padding: const EdgeInsets.all(12),
+        decoration: BoxDecoration(
+          color: Colors.white,
+          borderRadius: BorderRadius.circular(8),
+          boxShadow: [
+            BoxShadow(
+              color: Colors.black.withOpacity(0.03),
+              blurRadius: 4,
+              offset: const Offset(0, 1),
+            ),
+          ],
+        ),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            ...ctrl.orderDetailItems
+                .fold<Map<String, List<Map<String, dynamic>>>>({}, (map, item) {
+              final category = item['category'] as String? ?? 'Other';
+              map.putIfAbsent(category, () => []).add(item);
+              return map;
+            })
+                .entries
+                .map((entry) => Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Container(
+                  width: double.infinity,
+                  padding: const EdgeInsets.symmetric(vertical: 4),
+                  decoration: const BoxDecoration(
+                    border: Border(
+                      bottom: BorderSide(
+                        color: Color(0xFFEEEEEE),
+                        width: 1,
+                      ),
+                    ),
+                  ),
+                  child: Text(
+                    entry.key,
+                    style: const TextStyle(
+                        fontSize: 11,
+                        color: Color(0xFF0077BD),
+                        fontWeight: FontWeight.w500),
+                  ),
+                ),
+                ...entry.value.where((item) {
+                  var qty = (item['jumlah'] is String)
+                      ? double.tryParse(item['jumlah'])
+                      : item['jumlah']?.toDouble();
+                  var price = (item['harga'] is String)
+                      ? double.tryParse(item['harga'])
+                      : item['harga']?.toDouble();
+                  return qty?.toInt() != 0 && price?.toInt() != 0;
+                }).map((item) => Container(
+                  padding: const EdgeInsets.symmetric(vertical: 4),
+                  decoration: const BoxDecoration(
+                    border: Border(
+                      bottom: BorderSide(
+                        color: Color(0xFFF5F5F5),
+                        width: 1,
+                      ),
+                    ),
+                  ),
+                  child: Row(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      // Qty column
+                      SizedBox(
+                        width: 30,
+                        child: Text(
+                          item['jumlah'].toString(),
+                          style: const TextStyle(
+                            fontSize: 11,
+                            color: Colors.black87,
+                          ),
+                        ),
+                      ),
+                      // Product name column
+                      Expanded(
+                        child: Text(
+                          item['sku'] ?? '',
+                          style: const TextStyle(
+                            fontSize: 11,
+                            color: Colors.black87,
+                          ),
+                        ),
+                      ),
+                      // Price column
+                      SizedBox(
+                        width: 100,
+                        child: Text(
+                          formatter.format(((item['jumlah'] is String)
+                              ? double.tryParse(item['jumlah']) ?? 0
+                              : (item['jumlah']?.toDouble() ?? 0)) *
+                              ((item['harga'] is String)
+                                  ? double.tryParse(item['harga']) ?? 0
+                                  : (item['harga']?.toDouble() ?? 0))),
+                          style: const TextStyle(
+                            fontSize: 11,
+                            color: Colors.black87,
+                          ),
+                          textAlign: TextAlign.right,
+                        ),
+                      ),
+                    ],
+                  ),
+                )),
+                const SizedBox(height: 8),
+              ],
+            )),
+            Row(
+              mainAxisAlignment: MainAxisAlignment.spaceBetween,
+              children: [
+                Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    const Text(
+                      'Total Jumlah',
+                      style: TextStyle(fontSize: 12, color: Colors.black54),
+                    ),
+                    const SizedBox(height: 4),
+                    Text(
+                      totalQty.toString(),
+                      style: const TextStyle(
+                        fontSize: 16,
+                        fontWeight: FontWeight.bold,
+                        color: Color(0xFF0077BD),
+                      ),
+                    ),
+                  ],
+                ),
+                Column(
+                  crossAxisAlignment: CrossAxisAlignment.end,
+                  children: [
+                    const Text(
+                      'Total Harga',
+                      style: TextStyle(fontSize: 12, color: Colors.black54),
+                    ),
+                    const SizedBox(height: 4),
+                    Text(
+                      formatter.format(totalPrice),
+                      style: const TextStyle(
+                        fontSize: 16,
+                        fontWeight: FontWeight.bold,
+                        color: Color(0xFF0077BD),
+                      ),
+                    ),
+                  ],
+                ),
+              ],
+            ),
+          ],
+        ),
+      );
+    });
   }
 }
