@@ -54,6 +54,9 @@ class LoginController extends GetxController {
       final token = await _storage.read('token');
       if (token == null) return;
 
+      // Add check and reset databases
+      await checkAndResetDatabases();
+
       final authResponse = await _api.checkAuth();
 
       if (authResponse.status == "OK" && authResponse.data != null) {
@@ -64,12 +67,91 @@ class LoginController extends GetxController {
       }
     } catch (e) {
       print('Auth check error: $e');
-      // Check if the error response indicates session expiration
       if (e.toString().contains('Sesi anda telah berakhir')) {
         await handleSessionExpired();
       } else {
         await logout();
       }
+    }
+  }
+
+  Future<void> resetControllersState() async {
+    try {
+      // Reset OutletController state
+      if (Get.isRegistered<OutletController>()) {
+        final outletController = Get.find<OutletController>();
+        outletController.outlets.clear();
+        outletController.filteredOutlets.clear();
+        // Reset other state variables as needed
+      }
+
+      // Reset ActivityController state
+      if (Get.isRegistered<ActivityController>()) {
+        final activityController = Get.find<ActivityController>();
+        activityController.activity.clear();
+        await activityController.loadLocalData();
+        // Reset other state variables
+      }
+
+      // Reset RoutingController state
+      if (Get.isRegistered<RoutingController>()) {
+        final routingController = Get.find<RoutingController>();
+        routingController.routing.clear();
+        await routingController.loadLocalData();
+        // Reset other state variables
+      }
+
+      // Reset SellingController state
+      if (Get.isRegistered<SellingController>()) {
+        final sellingController = Get.find<SellingController>();
+        sellingController.sellingData.clear();
+        sellingController.initialize();
+        // Reset other state variables
+      }
+
+      // Reset SupportDataController state
+      if (Get.isRegistered<SupportDataController>()) {
+        final supportController = Get.find<SupportDataController>();
+        supportController.survey.clear();
+        supportController.formOutlet.clear();
+        supportController.products.clear();
+        supportController.categories.clear();
+        supportController.channels.clear();
+        supportController.knowledge.clear();
+        supportController.posmTypes.clear();
+        supportController.visualTypes.clear();
+        supportController.planograms.clear();
+        supportController.checkAndFetchData();
+      }
+
+      print('All controller states reset successfully');
+    } catch (e) {
+      print('Error resetting controller states: $e');
+    }
+  }
+
+// Then update your checkAndResetDatabases method:
+  Future<void> checkAndResetDatabases() async {
+    try {
+      final lastResetDate = _storage.read('last_db_reset_date');
+      final currentDate = DateTime.now().toLocal();
+      final today =
+          DateTime(currentDate.year, currentDate.month, currentDate.day).toIso8601String();
+
+      if (lastResetDate == null || lastResetDate != today) {
+        print('Resetting databases for new day: $today');
+
+        // 1. Reset controller states
+        await resetControllersState();
+
+        // 2. Clean up all databases
+        await _clearAllDatabasesData();
+
+        // 3. Update the reset date
+        await _storage.write('last_db_reset_date', today);
+      }
+    } catch (e) {
+      print('Error checking/resetting databases: $e');
     }
   }
 
@@ -110,12 +192,18 @@ class LoginController extends GetxController {
       loginResponse.value = response;
 
       if (response.status == true && response.data != null) {
+        final currentDate = DateTime.now().toLocal();
+        final today =
+            DateTime(currentDate.year, currentDate.month, currentDate.day).toIso8601String();
+        await _storage.write('last_db_reset_date', today);
+
         await _saveInitialLoginData(response.data!);
 
         // Validate and get complete user data
         final authResponse = await _api.checkAuth();
         if (authResponse.status == "OK" && authResponse.data != null) {
           currentUser.value = authResponse.data;
+
           await _updateStoredUserData(authResponse.data!);
           Get.offAll(() => MainPage(), transition: Transition.fade);
         } else {
@@ -264,47 +352,221 @@ class LoginController extends GetxController {
   }
 
   Future<void> initializeAuthRequiredControllers() async {
-    // Main controllers
-    Get.lazyPut(() => BottomNavController(), fenix: true);
-    Get.lazyPut(() => OutletController(), fenix: true);
-    Get.lazyPut(() => ActivityController(), fenix: true);
-    Get.lazyPut(() => RoutingController(), fenix: true);
-    Get.lazyPut(() => SellingController(), fenix: true);
-    Get.lazyPut(() => VideoController(), fenix: true);
-    Get.lazyPut(() => PdfController(), fenix: true);
-    Get.lazyPut(() => SupportDataController(), fenix: true);
+    try {
+      // First initialize main controllers
+      Get.put(BottomNavController(), permanent: true);
+      Get.put(OutletController(), permanent: true);
+      Get.put(ActivityController(), permanent: true);
+      Get.put(RoutingController(), permanent: true);
+      Get.put(SellingController(), permanent: true);
+      Get.put(VideoController(), permanent: true);
+      Get.put(PdfController(), permanent: true);
+      Get.put(SupportDataController(), permanent: true);
 
-    // Activity related controllers
-    Get.lazyPut(() => TambahActivityController(), fenix: true);
-    Get.lazyPut(() => TambahAvailabilityController(), fenix: true);
-    Get.lazyPut(() => TambahVisibilityController(), fenix: true);
-    Get.lazyPut(() => TambahOrderController(), fenix: true);
+      // Then initialize dependent controllers
+      await Future.delayed(
+          Duration(milliseconds: 100)); // Brief delay to ensure main controllers are ready
 
-    // Routing and Selling controllers
-    Get.lazyPut(() => TambahRoutingController(), fenix: true);
-    Get.lazyPut(() => TambahProdukSellingController(), fenix: true);
+      Get.put(TambahActivityController(), permanent: true);
+      Get.put(TambahAvailabilityController(), permanent: true);
+      Get.put(TambahVisibilityController(), permanent: true);
+      Get.put(TambahOrderController(), permanent: true);
+      Get.put(TambahRoutingController(), permanent: true);
+      Get.put(TambahProdukSellingController(), permanent: true);
+
+      print('All controllers initialized successfully');
+    } catch (e) {
+      print('Error initializing controllers: $e');
+      throw e;
+    }
   }
 
   void cleanupAuthControllers() {
-    // Main controllers
-    Get.delete<DashboardController>(force: true);
-    Get.delete<OutletController>(force: true);
-    Get.delete<ActivityController>(force: true);
-    Get.delete<RoutingController>(force: true);
-    Get.delete<SellingController>(force: true);
-    Get.delete<VideoController>(force: true);
-    Get.delete<PdfController>(force: true);
-    Get.delete<SupportDataController>(force: true);
+    try {
+      // First, clean up dependent controllers (those that might depend on other controllers)
+      final dependentControllers = [
+        TambahActivityController,
+        TambahAvailabilityController,
+        TambahVisibilityController,
+        TambahOrderController,
+        TambahRoutingController,
+        TambahProdukSellingController,
+      ];
 
-    // Activity related controllers
-    Get.delete<TambahActivityController>(force: true);
-    Get.delete<TambahAvailabilityController>(force: true);
-    Get.delete<TambahVisibilityController>(force: true);
-    Get.delete<TambahOrderController>(force: true);
+      // Then clean up main controllers
+      final mainControllers = [
+        ActivityController,
+        RoutingController,
+        SellingController,
+        OutletController,
+        VideoController,
+        PdfController,
+        SupportDataController,
+        DashboardController,
+        BottomNavController,
+      ];
 
-    // Routing and Selling controllers
-    Get.delete<TambahRoutingController>(force: true);
-    Get.delete<TambahProdukSellingController>(force: true);
+      // Clean up dependent controllers first
+      for (var controllerType in dependentControllers) {
+        try {
+          if (Get.isRegistered<dynamic>(tag: controllerType.toString())) {
+            Get.delete(tag: controllerType.toString(), force: true);
+          }
+        } catch (e) {
+          print('Error cleaning up ${controllerType.toString()}: $e');
+        }
+      }
+
+      // Then clean up main controllers
+      for (var controllerType in mainControllers) {
+        try {
+          if (Get.isRegistered<dynamic>(tag: controllerType.toString())) {
+            Get.delete(tag: controllerType.toString(), force: true);
+          }
+        } catch (e) {
+          print('Error cleaning up ${controllerType.toString()}: $e');
+        }
+      }
+
+      print('All controllers cleaned up successfully');
+    } catch (e) {
+      print('Error during controller cleanup: $e');
+    }
+  }
+
+  Future<void> _initializeAllDatabases() async {
+    try {
+      // Initialize support database
+      try {
+        final supportDb = await SupportDatabaseHelper.instance.database;
+        // Load initial data if needed
+        await supportDb.execute('SELECT 1'); // Test query to ensure database is ready
+        print('Support database initialized');
+      } catch (e) {
+        print('Error initializing support database: $e');
+      }
+
+      // Initialize selling database
+      try {
+        final sellingDb = await SellingDatabaseHelper.instance.database;
+        await sellingDb.execute('SELECT 1');
+        print('Selling database initialized');
+      } catch (e) {
+        print('Error initializing selling database: $e');
+      }
+
+      // Initialize dashboard database
+      try {
+        final dashboardDb = await DashboardDatabaseHelper.instance.database;
+        await dashboardDb.execute('SELECT 1');
+        print('Dashboard database initialized');
+      } catch (e) {
+        print('Error initializing dashboard database: $e');
+      }
+
+      // Initialize activity database
+      try {
+        final activityDb = await ActivityDatabaseHelper.instance.database;
+        await activityDb.execute('SELECT 1');
+        print('Activity database initialized');
+      } catch (e) {
+        print('Error initializing activity database: $e');
+      }
+
+      // Initialize main database
+      try {
+        final mainDb = await DatabaseHelper.instance.database;
+        await mainDb.execute('SELECT 1');
+        print('Main database initialized');
+      } catch (e) {
+        print('Error initializing main database: $e');
+      }
+
+      print('All databases initialized successfully');
+
+      // Wait a brief moment to ensure all databases are ready
+      await Future.delayed(Duration(milliseconds: 500));
+    } catch (e) {
+      print('Error in database initialization: $e');
+    }
+  }
+
+  Future<void> _clearAllDatabasesData() async {
+    try {
+      // Clear Support Database tables
+      try {
+        final supportDb = SupportDatabaseHelper.instance;
+        await supportDb.clearAllTables();
+        print('Support database tables cleared');
+      } catch (e) {
+        print('Error clearing support database tables: $e');
+      }
+
+      // Clear Selling Database tables
+      try {
+        final sellingDb = await SellingDatabaseHelper.instance.database;
+        await sellingDb.transaction((txn) async {
+          await txn.delete('products');
+          await txn.delete('selling_data');
+          await txn.delete('users');
+        });
+        print('Selling database tables cleared');
+      } catch (e) {
+        print('Error clearing selling database tables: $e');
+      }
+
+      // Clear Dashboard Database tables
+      try {
+        final dashboardDb = DashboardDatabaseHelper.instance;
+        await dashboardDb.clearDashboard(); // Using existing method
+        print('Dashboard database tables cleared');
+      } catch (e) {
+        print('Error clearing dashboard database tables: $e');
+      }
+
+      // Clear Activity Database tables
+      try {
+        final activityDb = await ActivityDatabaseHelper.instance.database;
+        await activityDb.transaction((txn) async {
+          await txn.delete('sales_activity');
+          await txn.delete('availability');
+          await txn.delete('visibility_primary');
+          await txn.delete('visibility_secondary');
+          await txn.delete('visibility_kompetitor');
+          await txn.delete('survey');
+          await txn.delete('orders');
+        });
+        print('Activity database tables cleared');
+      } catch (e) {
+        print('Error clearing activity database tables: $e');
+      }
+
+      // Clear Main Database tables (outlets, routing, etc)
+      try {
+        final mainDb = await DatabaseHelper.instance.database;
+        await mainDb.transaction((txn) async {
+          await txn.delete('outlets');
+          await txn.delete('outlet_images');
+          await txn.delete('outlet_forms');
+          await txn.delete('outlet_form_answers');
+          await txn.delete('routing');
+          await txn.delete('routing_images');
+          await txn.delete('routing_form_answers');
+          await txn.delete('routing_activities');
+          await txn.delete('outlet_activities');
+          await txn.delete('sales_activities');
+          await txn.delete('activity_av3m_products');
+          await txn.delete('activity_visibilities');
+        });
+        print('Main database tables cleared');
+      } catch (e) {
+        print('Error clearing main database tables: $e');
+      }
+
+      print('All database tables cleared successfully');
+    } catch (e) {
+      print('Error in database tables cleanup: $e');
+    }
   }
 
   Future<void> _cleanupAllDatabases() async {
