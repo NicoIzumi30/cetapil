@@ -16,19 +16,14 @@ import '../../widget/progress_indicator.dart';
 
 class DashboardPage extends GetView<DashboardController> {
   final CarouselSliderController _carouselController = CarouselSliderController();
-  DashboardPage() {
-    final loginController = Get.find<LoginController>();
-    // Ensure controller is initialized
-    if (loginController.currentUser.value != null) {
-      if (!Get.isRegistered<DashboardController>()) {
-        Get.put(DashboardController());
-      }
-    }
-  }
+  DashboardPage() {}
 
   @override
   Widget build(BuildContext context) {
     return GetBuilder<LoginController>(builder: (loginController) {
+      if (!Get.isRegistered<DashboardController>()) {
+        Get.put(DashboardController(), permanent: true);
+      }
       // Only proceed if user is logged in
       if (loginController.currentUser.value == null) {
         return Container(); // Or a loading widget
@@ -494,7 +489,7 @@ class PowerSkuSection extends StatelessWidget {
               if (powerSkus != null && powerSkus!.isNotEmpty)
                 ...powerSkus!.map((sku) => PowerSkuItem(
                       skuName: sku.sku ?? '',
-                      progress: (sku.availabilityPercentage ?? 0)/100,
+                      progress: (sku.availabilityPercentage ?? 0) / 100,
                     )),
               if (powerSkus == null || powerSkus!.isEmpty)
                 Center(

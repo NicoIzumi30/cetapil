@@ -136,7 +136,7 @@ class SupportDataController extends GetxController {
       // Load all planograms
       planograms.value = await supportDB.getAllPlanograms();
     } catch (e) {
-      print("Error loading local data: $e");
+      print("Error loading local data Support: $e");
     } finally {
       isLoading.value = false;
     }

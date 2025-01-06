@@ -16,8 +16,10 @@ class LoginPage extends GetView<LoginController> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
+      resizeToAvoidBottomInset: true,
         body: SafeArea(
       child: Stack(
+        fit: StackFit.expand,
         children: [
           Image.asset(
             'assets/background.png',

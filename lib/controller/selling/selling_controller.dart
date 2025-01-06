@@ -460,7 +460,6 @@ class SellingController extends GetxController {
   @override
   void onClose() {
     outletName.value.dispose();
-    print("asdadasdadasd");
     _durationTimer?.cancel();
     super.onClose();
   }

@@ -28,7 +28,6 @@ class PdfController extends GetxController {
     try {
       isLoading.value = true;
       urlPdf.value = supportController.getKnowledge().first['path_pdf'];
-      print('Pdf URL: ${urlPdf.value}');
 
       if (urlPdf.value.isEmpty) {
         print('Pdf URL is empty');
@@ -52,13 +51,7 @@ class PdfController extends GetxController {
 
     }catch (e) {
       isLoading.value = false;
-      Get.snackbar(
-        'Error',
-        'Error loading PDF: $e',
-        snackPosition: SnackPosition.BOTTOM,
-        backgroundColor: Colors.red,
-        colorText: Colors.white,
-      );
+      print('Error PDF: $e');
     }
   }
 }

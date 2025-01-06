@@ -7,84 +7,98 @@ import '../support_data_controller.dart';
 // Custom Video Player Controller
 class VideoController extends GetxController {
   final SupportDataController supportController = Get.find<SupportDataController>();
-  late VideoPlayerController videoController;
+  VideoPlayerController? videoController;
   var isInitialized = false.obs;
   var isPlaying = false.obs;
   var duration = const Duration().obs;
   var position = const Duration().obs;
   var urlVideo = "".obs;
+  var hasError = false.obs;
 
   @override
   void onInit() {
     super.onInit();
     try {
-      urlVideo.value = supportController.getKnowledge().first['path_video'];
-      print('Video URL: ${urlVideo.value}'); // Add this line to check URL
-
-      if (urlVideo.value.isEmpty) {
-        print('Video URL is empty');
+      // Try to get the video URL safely
+      final knowledgeList = supportController.getKnowledge();
+      if (knowledgeList.isEmpty) {
+        print('No knowledge data available');
+        hasError.value = true;
         return;
       }
 
-      // Make sure URL starts with http:// or https://
-      // if (!urlVideo.value.startsWith('http://') && !urlVideo.value.startsWith('https://')) {
-      //   urlVideo.value = 'https://dev-cetaphil.i-am.host${urlVideo.value}';
-      // }
+      urlVideo.value = knowledgeList.first['path_video'] ?? '';
+      print('Video URL: ${urlVideo.value}');
+
+      if (urlVideo.value.isEmpty) {
+        print('Video URL is empty');
+        hasError.value = true;
+        return;
+      }
+
       urlVideo.value = 'https://dev-cetaphil.i-am.host/storage${urlVideo.value}';
 
       final uri = Uri.parse(urlVideo.value);
       if (!uri.isAbsolute) {
         print('Invalid video URL format');
+        hasError.value = true;
         return;
       }
+
       initializeVideo();
     } catch (e) {
       print('Error initializing video: $e');
+      hasError.value = true;
     }
   }
 
   void initializeVideo() {
-    videoController = VideoPlayerController.network(
-      urlVideo.value,
-    )..initialize().then((_) {
-      duration.value = videoController.value.duration;
-      isInitialized.value = true;
-      update();
-    }).catchError((error) {
-      print('Video Error: $error');
-      isInitialized.value = false;
-      // Handle error - maybe show a message to user
-      update();
-    });
+    try {
+      videoController = VideoPlayerController.network(urlVideo.value)
+        ..initialize().then((_) {
+          duration.value = videoController?.value.duration ?? Duration.zero;
+          isInitialized.value = true;
+          update();
+        }).catchError((error) {
+          print('Video Error: $error');
+          isInitialized.value = false;
+          hasError.value = true;
+          update();
+        });
 
-    videoController.addListener(() {
-      position.value = videoController.value.position;
-      update();
-    });
+      videoController?.addListener(() {
+        position.value = videoController?.value.position ?? Duration.zero;
+        update();
+      });
+    } catch (e) {
+      print('Error in initializeVideo: $e');
+      hasError.value = true;
+    }
   }
 
   void playPause() {
-    if (videoController.value.isPlaying) {
-      videoController.pause();
+    if (videoController == null) return;
+
+    if (videoController!.value.isPlaying) {
+      videoController!.pause();
       isPlaying.value = false;
     } else {
-      videoController.play();
+      videoController!.play();
       isPlaying.value = true;
     }
     update();
   }
 
   void seekTo(Duration position) {
-    videoController.seekTo(position);
+    videoController?.seekTo(position);
   }
 
   @override
   void onClose() {
-    videoController.dispose();
+    videoController?.dispose();
     super.onClose();
   }
 }
-
 
 class CustomVideoPlayer extends StatelessWidget {
   const CustomVideoPlayer({Key? key}) : super(key: key);
@@ -94,7 +108,13 @@ class CustomVideoPlayer extends StatelessWidget {
     return GetBuilder<VideoController>(
       init: VideoController(),
       builder: (controller) {
-        if (!controller.isInitialized.value) {
+        if (controller.hasError.value) {
+          return const Center(
+            child: Text('No video available or error loading video.'),
+          );
+        }
+
+        if (!controller.isInitialized.value || controller.videoController == null) {
           return const Center(
             child: Column(
               mainAxisAlignment: MainAxisAlignment.center,
@@ -105,9 +125,9 @@ class CustomVideoPlayer extends StatelessWidget {
               ],
             ),
           );
-        }
+        } 
 
-        if (controller.videoController.value.hasError) {
+        if (controller.videoController!.value.hasError) {
           return const Center(
             child: Text('Error loading video. Please try again later.'),
           );
@@ -117,25 +137,23 @@ class CustomVideoPlayer extends StatelessWidget {
           children: [
             // Video display
             AspectRatio(
-              aspectRatio: controller.videoController.value.aspectRatio,
+              aspectRatio: controller.videoController!.value.aspectRatio,
               child: Stack(
                 alignment: Alignment.center,
                 children: [
-                  VideoPlayer(controller.videoController),
+                  VideoPlayer(controller.videoController!),
                   // Play/Pause button overlay
                   Obx(() => GestureDetector(
-                    onTap: controller.playPause,
-                    child: Container(
-                      color: Colors.black26,
-                      child: Icon(
-                        controller.isPlaying.value
-                            ? Icons.pause
-                            : Icons.play_arrow,
-                        size: 60,
-                        color: Colors.white,
-                      ),
-                    ),
-                  )),
+                        onTap: controller.playPause,
+                        child: Container(
+                          color: Colors.black26,
+                          child: Icon(
+                            controller.isPlaying.value ? Icons.pause : Icons.play_arrow,
+                            size: 60,
+                            color: Colors.white,
+                          ),
+                        ),
+                      )),
                 ],
               ),
             ),
@@ -146,26 +164,26 @@ class CustomVideoPlayer extends StatelessWidget {
                 children: [
                   // Progress bar
                   Obx(() => SliderTheme(
-                    data: SliderThemeData(
-                      thumbShape: const RoundSliderThumbShape(
-                        enabledThumbRadius: 6,
-                      ),
-                      overlayShape: const RoundSliderOverlayShape(
-                        overlayRadius: 12,
-                      ),
-                      trackHeight: 4,
-                    ),
-                    child: Slider(
-                      value: controller.position.value.inMilliseconds.toDouble(),
-                      min: 0,
-                      max: controller.duration.value.inMilliseconds.toDouble(),
-                      onChanged: (value) {
-                        controller.seekTo(Duration(
-                          milliseconds: value.toInt(),
-                        ));
-                      },
-                    ),
-                  )),
+                        data: SliderThemeData(
+                          thumbShape: const RoundSliderThumbShape(
+                            enabledThumbRadius: 6,
+                          ),
+                          overlayShape: const RoundSliderOverlayShape(
+                            overlayRadius: 12,
+                          ),
+                          trackHeight: 4,
+                        ),
+                        child: Slider(
+                          value: controller.position.value.inMilliseconds.toDouble(),
+                          min: 0,
+                          max: controller.duration.value.inMilliseconds.toDouble(),
+                          onChanged: (value) {
+                            controller.seekTo(Duration(
+                              milliseconds: value.toInt(),
+                            ));
+                          },
+                        ),
+                      )),
                   // Time display
                   Padding(
                     padding: const EdgeInsets.symmetric(horizontal: 16),
@@ -173,13 +191,13 @@ class CustomVideoPlayer extends StatelessWidget {
                       mainAxisAlignment: MainAxisAlignment.spaceBetween,
                       children: [
                         Obx(() => Text(
-                          _formatDuration(controller.position.value),
-                          style: const TextStyle(color: Colors.grey),
-                        )),
+                              _formatDuration(controller.position.value),
+                              style: const TextStyle(color: Colors.grey),
+                            )),
                         Obx(() => Text(
-                          _formatDuration(controller.duration.value),
-                          style: const TextStyle(color: Colors.grey),
-                        )),
+                              _formatDuration(controller.duration.value),
+                              style: const TextStyle(color: Colors.grey),
+                            )),
                       ],
                     ),
                   ),
@@ -197,8 +215,6 @@ class CustomVideoPlayer extends StatelessWidget {
     final hours = twoDigits(duration.inHours);
     final minutes = twoDigits(duration.inMinutes.remainder(60));
     final seconds = twoDigits(duration.inSeconds.remainder(60));
-    return duration.inHours > 0
-        ? '$hours:$minutes:$seconds'
-        : '$minutes:$seconds';
+    return duration.inHours > 0 ? '$hours:$minutes:$seconds' : '$minutes:$seconds';
   }
 }

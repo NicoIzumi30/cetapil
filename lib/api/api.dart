@@ -46,14 +46,16 @@ class Api {
 
       if (response.statusCode == 200) {
         return LoginResponse.fromJson(json.decode(response.body));
+      } else if (response.statusCode == 401) {
+        throw 'Email atau password salah';
       } else {
         if (response.statusCode >= 500) {
-          throw Exception('Server Error');
+          throw 'Server Error';
         }
-        throw Exception('Failed to login: ${response.statusCode} ${response.reasonPhrase}');
+        throw 'Failed to login: ${response.statusCode} ${response.reasonPhrase}';
       }
     } catch (e) {
-      throw Exception('Failed to login: $e');
+      throw 'Failed to login: $e';
     }
   }
 

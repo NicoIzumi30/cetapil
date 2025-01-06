@@ -7,8 +7,15 @@ import 'package:get/get_state_manager/src/simple/get_view.dart';
 import '../controller/bottom_nav_controller.dart';
 
 class CustomBottomNavigationBar extends GetView<BottomNavController> {
+  CustomBottomNavigationBar() {
+    // Check and initialize BottomNavController if not registered
+    if (!Get.isRegistered<BottomNavController>()) {
+      Get.put(BottomNavController(), permanent: true);
+    }
+  }
   @override
   Widget build(BuildContext context) {
+    final bottomNavController = Get.find<BottomNavController>();
     // Get screen width to make responsive calculations
     final screenWidth = MediaQuery.of(context).size.width;
 
@@ -43,27 +50,27 @@ class CustomBottomNavigationBar extends GetView<BottomNavController> {
               mainAxisAlignment: MainAxisAlignment.spaceAround,
               children: [
                 // Home is always shown
-                _buildNavItem(0, 'Home', Color(0xFF39B5FF), "assets/icon/Vector.svg", itemWidth),
+                _buildNavItem(0, 'Home', Color(0xFF39B5FF), "assets/icon/Vector.svg", itemWidth,bottomNavController),
 
                 // Outlet
                 if (permissions.any((p) => p.name?.trim().toLowerCase() == 'menu_outlet'))
                   _buildNavItem(
-                      1, 'Outlet', Color(0xFF39B5FF), "assets/icon/Vector2.svg", itemWidth),
+                      1, 'Outlet', Color(0xFF39B5FF), "assets/icon/Vector2.svg", itemWidth,bottomNavController),
 
                 // Routing
                 if (permissions.any((p) => p.name?.trim().toLowerCase() == 'menu_routing'))
                   _buildNavItem(
-                      2, 'Routing', Color(0xFF39B5FF), "assets/icon/Vector1.svg", itemWidth),
+                      2, 'Routing', Color(0xFF39B5FF), "assets/icon/Vector1.svg", itemWidth,bottomNavController),
 
                 // Activity
                 if (permissions.any((p) => p.name?.trim().toLowerCase() == 'menu_activity'))
                   _buildNavItem(
-                      3, 'Activity', Color(0xFF39B5FF), "assets/icon/Vector3.svg", itemWidth),
+                      3, 'Activity', Color(0xFF39B5FF), "assets/icon/Vector3.svg", itemWidth,bottomNavController),
 
                 // Selling
                 if (permissions.any((p) => p.name?.trim().toLowerCase() == 'menu_selling'))
                   _buildNavItem(
-                      4, 'Selling', Color(0xFF39B5FF), "assets/icon/Vector4.svg", itemWidth),
+                      4, 'Selling', Color(0xFF39B5FF), "assets/icon/Vector4.svg", itemWidth,bottomNavController),
               ],
             );
           });
@@ -72,16 +79,16 @@ class CustomBottomNavigationBar extends GetView<BottomNavController> {
     );
   }
 
-  Widget _buildNavItem(int index, String label, Color color, String pathIcon, double itemWidth) {
+  Widget _buildNavItem(int index, String label, Color color, String pathIcon, double itemWidth, BottomNavController navController) {
     return Obx(() {
       return TweenAnimationBuilder<double>(
-        tween: Tween<double>(begin: 0, end: controller.selectedIndex.value == index ? -8 : 0),
+        tween: Tween<double>(begin: 0, end: navController.selectedIndex.value == index ? -8 : 0),
         duration: const Duration(milliseconds: 200),
         builder: (context, value, child) {
           return Transform.translate(
             offset: Offset(0, value),
             child: GestureDetector(
-              onTap: () => controller.changeIndex(index),
+              onTap: () => navController.changeIndex(index),
               behavior: HitTestBehavior.opaque,
               child: SizedBox(
                 width: itemWidth,
@@ -92,8 +99,8 @@ class CustomBottomNavigationBar extends GetView<BottomNavController> {
                       padding: const EdgeInsets.all(6),
                       decoration: BoxDecoration(
                         borderRadius: BorderRadius.circular(12),
-                        color: controller.selectedIndex.value == index ? color : Colors.transparent,
-                        boxShadow: controller.selectedIndex.value == index
+                        color: navController.selectedIndex.value == index ? color : Colors.transparent,
+                        boxShadow: navController.selectedIndex.value == index
                             ? [
                                 BoxShadow(
                                   color: color.withOpacity(0.3),
@@ -106,14 +113,14 @@ class CustomBottomNavigationBar extends GetView<BottomNavController> {
                       ),
                       child: SvgPicture.asset(
                         pathIcon,
-                        color: controller.selectedIndex.value == index
+                        color: navController.selectedIndex.value == index
                             ? Colors.white
                             : const Color(0xFF054F7B),
-                        height: controller.selectedIndex.value == index ? 24 : 20,
+                        height: navController .selectedIndex.value == index ? 24 : 20,
                         fit: BoxFit.contain,
                       ),
                     ),
-                    if (controller.selectedIndex.value != index) ...[
+                    if (navController.selectedIndex.value != index) ...[
                       const SizedBox(height: 4),
                       FittedBox(
                         fit: BoxFit.scaleDown,

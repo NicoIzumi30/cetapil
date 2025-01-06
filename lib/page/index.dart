@@ -15,6 +15,13 @@ class MainPage extends GetView<BottomNavController> {
   // final BottomNavController controller = Get.find<BottomNavController>();
   final LoginController loginController = Get.find<LoginController>();
 
+  MainPage() {
+    // Ensure BottomNavController is initialized
+    if (!Get.isRegistered<BottomNavController>()) {
+      Get.put(BottomNavController(), permanent: true);
+    }
+  }
+
   final permissionPages = {
     'menu_outlet': OutletPage(),
     'menu_routing': RoutingPage(),
@@ -24,13 +31,14 @@ class MainPage extends GetView<BottomNavController> {
 
   @override
   Widget build(BuildContext context) {
+    final bottomNavController = Get.find<BottomNavController>();
     return WillPopScope(
       onWillPop: () async {
         bool isLoggedIn = await loginController.isLoggedIn();
         if (isLoggedIn) {
-          if (controller.selectedIndex.value != 2) {
+          if (bottomNavController.selectedIndex.value != 2) {
             // If not on home page, navigate to home
-            controller.changeIndex(2);
+            bottomNavController.changeIndex(2);
             return false;
           } else {
             // If on home page, show exit confirmation dialog
@@ -54,7 +62,7 @@ class MainPage extends GetView<BottomNavController> {
             }
 
             // Determine which page to show based on selected index
-            switch (controller.selectedIndex.value) {
+            switch (bottomNavController.selectedIndex.value) {
               case 0:
                 return DashboardPage(); // Fixed tab
               case 1:

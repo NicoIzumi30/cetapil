@@ -69,8 +69,6 @@ class LoginController extends GetxController {
       print('Auth check error: $e');
       if (e.toString().contains('Sesi anda telah berakhir')) {
         await handleSessionExpired();
-      } else {
-        await logout();
       }
     }
   }
@@ -203,17 +201,18 @@ class LoginController extends GetxController {
         final authResponse = await _api.checkAuth();
         if (authResponse.status == "OK" && authResponse.data != null) {
           currentUser.value = authResponse.data;
-
           await _updateStoredUserData(authResponse.data!);
+
+          // Initialize controllers after successful login
+          await initializeAuthRequiredControllers();
+          // Add delay to ensure everything is ready
+          await Future.delayed(Duration(milliseconds: 500));
+
+          // Navigate only once after everything is ready
           Get.offAll(() => MainPage(), transition: Transition.fade);
         } else {
           throw 'Failed to validate user authentication';
         }
-
-        // Initialize controllers after successful login
-        await initializeAuthRequiredControllers();
-
-        Get.offAll(() => MainPage(), transition: Transition.fade);
       } else {
         throw response.message ?? 'An error occurred';
       }
@@ -266,7 +265,6 @@ class LoginController extends GetxController {
       errorMsg = error.toString();
     }
     errorMessage.value = errorMsg;
-    print('Login error: $errorMsg');
   }
 
   Future<void> _saveInitialLoginData(LoginModel.Data userData) async {
@@ -353,26 +351,40 @@ class LoginController extends GetxController {
 
   Future<void> initializeAuthRequiredControllers() async {
     try {
-      // First initialize main controllers
-      Get.put(BottomNavController(), permanent: true);
-      Get.put(OutletController(), permanent: true);
-      Get.put(ActivityController(), permanent: true);
-      Get.put(RoutingController(), permanent: true);
-      Get.put(SellingController(), permanent: true);
-      Get.put(VideoController(), permanent: true);
-      Get.put(PdfController(), permanent: true);
-      Get.put(SupportDataController(), permanent: true);
+      // Helper function to safely init controller
+      void initController<T>(T Function() create) {
+        try {
+          // First try to remove any existing instance
+          if (Get.isRegistered<T>()) {
+            Get.delete<T>(force: true); // Force removal even if permanent
+          }
+          // Then create new instance
+          Get.put<T>(create(), permanent: true);
+        } catch (e) {
+          print('Error initializing ${T.toString()}: $e');
+          // Create new instance even if removal failed
+          Get.put<T>(create(), permanent: true);
+        }
+      }
 
-      // Then initialize dependent controllers
-      await Future.delayed(
-          Duration(milliseconds: 100)); // Brief delay to ensure main controllers are ready
-
-      Get.put(TambahActivityController(), permanent: true);
-      Get.put(TambahAvailabilityController(), permanent: true);
-      Get.put(TambahVisibilityController(), permanent: true);
-      Get.put(TambahOrderController(), permanent: true);
-      Get.put(TambahRoutingController(), permanent: true);
-      Get.put(TambahProdukSellingController(), permanent: true);
+      // Initialize core controllers first
+      initController(() => SupportDataController());
+      initController(() => DashboardController());
+      initController(() => OutletController());
+      initController(() => RoutingController());
+      initController(() => ActivityController());
+      initController(() => SellingController());
+      initController(() => BottomNavController());
+      // Initialize main feature controllers
+      initController(() => VideoController());
+      initController(() => PdfController());
+      // Initialize dependent controllers last
+      initController(() => TambahActivityController());
+      initController(() => TambahAvailabilityController());
+      initController(() => TambahVisibilityController());
+      initController(() => TambahOrderController());
+      initController(() => TambahRoutingController());
+      initController(() => TambahProdukSellingController());
 
       print('All controllers initialized successfully');
     } catch (e) {
@@ -383,49 +395,53 @@ class LoginController extends GetxController {
 
   void cleanupAuthControllers() {
     try {
-      // First, clean up dependent controllers (those that might depend on other controllers)
-      final dependentControllers = [
-        TambahActivityController,
-        TambahAvailabilityController,
-        TambahVisibilityController,
-        TambahOrderController,
-        TambahRoutingController,
-        TambahProdukSellingController,
-      ];
-
-      // Then clean up main controllers
-      final mainControllers = [
-        ActivityController,
-        RoutingController,
-        SellingController,
-        OutletController,
-        VideoController,
-        PdfController,
-        SupportDataController,
-        DashboardController,
-        BottomNavController,
-      ];
-
       // Clean up dependent controllers first
-      for (var controllerType in dependentControllers) {
-        try {
-          if (Get.isRegistered<dynamic>(tag: controllerType.toString())) {
-            Get.delete(tag: controllerType.toString(), force: true);
-          }
-        } catch (e) {
-          print('Error cleaning up ${controllerType.toString()}: $e');
-        }
+      if (Get.isRegistered<TambahActivityController>()) {
+        Get.delete<TambahActivityController>(force: true);
+      }
+      if (Get.isRegistered<TambahAvailabilityController>()) {
+        Get.delete<TambahAvailabilityController>(force: true);
+      }
+      if (Get.isRegistered<TambahVisibilityController>()) {
+        Get.delete<TambahVisibilityController>(force: true);
+      }
+      if (Get.isRegistered<TambahOrderController>()) {
+        Get.delete<TambahOrderController>(force: true);
+      }
+      if (Get.isRegistered<TambahRoutingController>()) {
+        Get.delete<TambahRoutingController>(force: true);
+      }
+      if (Get.isRegistered<TambahProdukSellingController>()) {
+        Get.delete<TambahProdukSellingController>(force: true);
       }
 
-      // Then clean up main controllers
-      for (var controllerType in mainControllers) {
-        try {
-          if (Get.isRegistered<dynamic>(tag: controllerType.toString())) {
-            Get.delete(tag: controllerType.toString(), force: true);
-          }
-        } catch (e) {
-          print('Error cleaning up ${controllerType.toString()}: $e');
-        }
+      // Clean up main controllers
+      if (Get.isRegistered<ActivityController>()) {
+        Get.delete<ActivityController>(force: true);
+      }
+      if (Get.isRegistered<RoutingController>()) {
+        Get.delete<RoutingController>(force: true);
+      }
+      if (Get.isRegistered<SellingController>()) {
+        Get.delete<SellingController>(force: true);
+      }
+      if (Get.isRegistered<OutletController>()) {
+        Get.delete<OutletController>(force: true);
+      }
+      if (Get.isRegistered<VideoController>()) {
+        Get.delete<VideoController>(force: true);
+      }
+      if (Get.isRegistered<PdfController>()) {
+        Get.delete<PdfController>(force: true);
+      }
+      if (Get.isRegistered<SupportDataController>()) {
+        Get.delete<SupportDataController>(force: true);
+      }
+      if (Get.isRegistered<DashboardController>()) {
+        Get.delete<DashboardController>(force: true);
+      }
+      if (Get.isRegistered<BottomNavController>()) {
+        Get.delete<BottomNavController>(force: true);
       }
 
       print('All controllers cleaned up successfully');
