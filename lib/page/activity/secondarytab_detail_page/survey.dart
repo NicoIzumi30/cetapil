@@ -5,6 +5,7 @@ import 'package:cetapil_mobile/widget/custom_switch.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:get/get.dart';
+import 'package:intl/intl.dart';
 import '../../../controller/activity/detail_activity_controller.dart';
 import '../../../controller/support_data_controller.dart';
 import '../../../utils/price_formatter.dart';
@@ -68,9 +69,25 @@ class DetailSurveyPage extends GetView<DetailActivityController> {
           controller: controller,
         );
       } else if (survey['type'] == 'text') {
+        print("survey['answer'] : ${survey['answer']}");
+        if (survey['question'] ==
+            'Berapa kali di Kuartal ini pernah dijalankan product detailing di toko ini?') {
+          return TextQuestion(
+            title: survey['question'] ?? '',
+            controller: TextEditingController(text: survey['answer'] ?? '0'),
+            enable: false,
+          );
+        }
         return PriceQuestion(
           title: survey['question'] ?? '',
-          controller:  TextEditingController(text: survey['answer']),
+          controller: TextEditingController(
+              text: survey['answer'] != null
+                  ? NumberFormat.currency(
+                      locale: 'id_ID',
+                      symbol: '',
+                      decimalDigits: 0,
+                    ).format(double.tryParse(survey['answer'].toString()) ?? 0)
+                  : '0'),
         );
       }
       return const SizedBox.shrink();
@@ -82,27 +99,19 @@ class DetailSurveyPage extends GetView<DetailActivityController> {
     return Obx(() {
       var questionGroup = <Map<String, dynamic>>[];
 
-
       questionGroup = supportController.getSurvey().map((entry) {
         var surveys = entry['surveys'] as List;
         // var filteredSurveys = surveys.where((survey) {
         //   return controller.surveyItems.any((d) => d['survey_question_id'] == survey['id']);
         // }).toList();
 
-        var filteredSurveys = surveys
-            .where((survey) {
+        var filteredSurveys = surveys.where((survey) {
           return controller.surveyDetailItems.any((d) => d['survey_question_id'] == survey['id']);
-        })
-            .map((survey) {
-          var matchingItem = controller.surveyDetailItems.firstWhere(
-                  (d) => d['survey_question_id'] == survey['id']
-          );
-          return {
-            ...survey,
-            'answer': matchingItem['answer']
-          };
-        })
-            .toList();
+        }).map((survey) {
+          var matchingItem = controller.surveyDetailItems
+              .firstWhere((d) => d['survey_question_id'] == survey['id']);
+          return {...survey, 'answer': matchingItem['answer']};
+        }).toList();
 
         // print(filteredSurveys);
 
@@ -116,28 +125,24 @@ class DetailSurveyPage extends GetView<DetailActivityController> {
 
       // questionGroup = supportController.getSurvey();
 
-
-
       return ListView.builder(
-      shrinkWrap: true,
-      physics: const NeverScrollableScrollPhysics(),
-      itemCount: questionGroup.length,
-      itemBuilder: (context, index) {
-        // print(questionGroup[5]);
-        return Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            _buildSectionTitle(questionGroup[index]),
-            ...buildSurveyQuestions(questionGroup[index]),
-            const SizedBox(height: 20),
-          ],
-        );
-      },
-    );
-  });
+        shrinkWrap: true,
+        physics: const NeverScrollableScrollPhysics(),
+        itemCount: questionGroup.length,
+        itemBuilder: (context, index) {
+          // print(questionGroup[5]);
+          return Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              _buildSectionTitle(questionGroup[index]),
+              ...buildSurveyQuestions(questionGroup[index]),
+              const SizedBox(height: 20),
+            ],
+          );
+        },
+      );
+    });
   }
-
-
 }
 
 class BooleanQuestion extends StatelessWidget {
@@ -150,7 +155,8 @@ class BooleanQuestion extends StatelessWidget {
     super.key,
     required this.title,
     required this.surveyId,
-    required this.controller, required this.answer,
+    required this.controller,
+    required this.answer,
   });
 
   @override
@@ -166,7 +172,7 @@ class BooleanQuestion extends StatelessWidget {
               ),
             ),
             const SizedBox(width: 10),
-           CustomSegmentedSwitch(
+            CustomSegmentedSwitch(
               value: answer.toLowerCase() == 'true',
               onChanged: (value) {
                 // controller.toggleSwitch(surveyId, value);
@@ -245,6 +251,66 @@ class PriceQuestion extends StatelessWidget {
                   floatingLabelBehavior: FloatingLabelBehavior.always,
                   alignLabelWithHint: true,
                   hintText: "Masukan Harga",
+                  hintStyle: TextStyle(fontSize: 12, color: Colors.grey[400]),
+                  filled: true,
+                  fillColor: Colors.white,
+                  border: OutlineInputBorder(
+                    borderRadius: BorderRadius.circular(8),
+                    borderSide: BorderSide.none,
+                  ),
+                ),
+                textAlign: TextAlign.right, // Align numbers to the right
+                textAlignVertical: TextAlignVertical.center,
+              ),
+            )
+          ],
+        ),
+        const SizedBox(height: 10)
+      ],
+    );
+  }
+}
+
+class TextQuestion extends StatelessWidget {
+  final String title;
+  final TextEditingController controller;
+  final bool enable;
+
+  const TextQuestion({
+    super.key,
+    required this.title,
+    required this.controller,
+    this.enable = true,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    return Column(
+      children: [
+        Row(
+          children: [
+            Expanded(
+              child: Text(
+                title,
+                style: const TextStyle(fontSize: 12),
+              ),
+            ),
+            const SizedBox(width: 10),
+            SizedBox(
+              height: 40,
+              width: 140,
+              child: TextFormField(
+                controller: controller,
+                style: const TextStyle(
+                  fontSize: 14,
+                  color: Color(0xFF0077BD),
+                ),
+                enabled: enable,
+                onChanged: (_) => Get.find<TambahActivityController>().priceControllers.refresh(),
+                decoration: InputDecoration(
+                  floatingLabelBehavior: FloatingLabelBehavior.always,
+                  alignLabelWithHint: true,
+                  hintText: "",
                   hintStyle: TextStyle(fontSize: 12, color: Colors.grey[400]),
                   filled: true,
                   fillColor: Colors.white,

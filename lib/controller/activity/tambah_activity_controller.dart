@@ -362,7 +362,7 @@ class TambahActivityController extends GetxController {
             final switchState = switchStates[id];
             surveyList.add({
               'survey_question_id': id,
-              'answer': (switchState?.value ?? false).toString(),
+              'answer': (switchState?.value != null ? !switchState!.value : false).toString(),
             });
           }
         }

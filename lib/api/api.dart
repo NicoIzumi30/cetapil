@@ -458,7 +458,7 @@ class Api {
 
     /// Availability Section
     for (var i = 0; i < availabilityList.length; i++) {
-      request.fields["availability[$i][product_id]"] = availabilityList[i]["product_id"].toString();
+      request.fields["availability[$i][product_id]"] = availabilityList[i]["id"].toString();
       request.fields["availability[$i][stock_on_hand]"] =
           availabilityList[i]["stock_on_hand"].toString();
       request.fields["availability[$i][stock_inventory]"] =

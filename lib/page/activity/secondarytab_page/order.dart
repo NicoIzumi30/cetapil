@@ -632,8 +632,10 @@ class OrderSummaryCard extends GetView<TambahActivityController> {
 
       for (final item in ctrl.orderDraftItems) {
         if (item['jumlah'] != null && item['harga'] != null) {
-          totalQty += int.parse(item['jumlah']);
-          totalPrice += int.tryParse(item['jumlah'])! * int.tryParse(item['harga'])! ?? 0;
+          totalQty += int.parse(item['jumlah'].toString());
+          int quantity = int.tryParse(item['jumlah'].toString()) ?? 0;
+          int price = int.tryParse(item['harga'].toString()) ?? 0;
+          totalPrice += quantity * price;
         }
       }
 
@@ -683,60 +685,68 @@ class OrderSummaryCard extends GetView<TambahActivityController> {
                                 fontWeight: FontWeight.w500),
                           ),
                         ),
-                        ...entry.value
-                            .where((item) =>
-                                double.tryParse(item['jumlah'])?.toInt() != 0 &&
-                                double.tryParse(item['harga'])?.toInt() != 0)
-                            .map((item) => Container(
-                                  padding: const EdgeInsets.symmetric(vertical: 4),
-                                  decoration: const BoxDecoration(
-                                    border: Border(
-                                      bottom: BorderSide(
-                                        color: Color(0xFFF5F5F5),
-                                        width: 1,
+                        ...entry.value.where((item) {
+                          var qty = (item['jumlah'] is String)
+                              ? double.tryParse(item['jumlah'])
+                              : item['jumlah']?.toDouble();
+                          var price = (item['harga'] is String)
+                              ? double.tryParse(item['harga'])
+                              : item['harga']?.toDouble();
+                          return qty?.toInt() != 0 && price?.toInt() != 0;
+                        }).map((item) => Container(
+                              padding: const EdgeInsets.symmetric(vertical: 4),
+                              decoration: const BoxDecoration(
+                                border: Border(
+                                  bottom: BorderSide(
+                                    color: Color(0xFFF5F5F5),
+                                    width: 1,
+                                  ),
+                                ),
+                              ),
+                              child: Row(
+                                crossAxisAlignment: CrossAxisAlignment.start,
+                                children: [
+                                  // Qty column
+                                  SizedBox(
+                                    width: 30,
+                                    child: Text(
+                                      item['jumlah'].toString(),
+                                      style: const TextStyle(
+                                        fontSize: 11,
+                                        color: Colors.black87,
                                       ),
                                     ),
                                   ),
-                                  child: Row(
-                                    crossAxisAlignment: CrossAxisAlignment.start,
-                                    children: [
-                                      // Qty column
-                                      SizedBox(
-                                        width: 30,
-                                        child: Text(
-                                          item['jumlah'].toString(),
-                                          style: const TextStyle(
-                                            fontSize: 11,
-                                            color: Colors.black87,
-                                          ),
-                                        ),
+                                  // Product name column
+                                  Expanded(
+                                    child: Text(
+                                      item['sku'] ?? '',
+                                      style: const TextStyle(
+                                        fontSize: 11,
+                                        color: Colors.black87,
                                       ),
-                                      // Product name column
-                                      Expanded(
-                                        child: Text(
-                                          item['sku'] ?? '',
-                                          style: const TextStyle(
-                                            fontSize: 11,
-                                            color: Colors.black87,
-                                          ),
-                                        ),
-                                      ),
-                                      // Price column
-                                      SizedBox(
-                                        width: 100,
-                                        child: Text(
-                                          formatter.format((double.tryParse(item['jumlah']) ?? 0) *
-                                              (double.tryParse(item['harga']) ?? 0)),
-                                          style: const TextStyle(
-                                            fontSize: 11,
-                                            color: Colors.black87,
-                                          ),
-                                          textAlign: TextAlign.right,
-                                        ),
-                                      ),
-                                    ],
+                                    ),
                                   ),
-                                )),
+                                  // Price column
+                                  SizedBox(
+                                    width: 100,
+                                    child: Text(
+                                      formatter.format(((item['jumlah'] is String)
+                                              ? double.tryParse(item['jumlah']) ?? 0
+                                              : (item['jumlah']?.toDouble() ?? 0)) *
+                                          ((item['harga'] is String)
+                                              ? double.tryParse(item['harga']) ?? 0
+                                              : (item['harga']?.toDouble() ?? 0))),
+                                      style: const TextStyle(
+                                        fontSize: 11,
+                                        color: Colors.black87,
+                                      ),
+                                      textAlign: TextAlign.right,
+                                    ),
+                                  ),
+                                ],
+                              ),
+                            )),
                         const SizedBox(height: 8),
                       ],
                     )),
