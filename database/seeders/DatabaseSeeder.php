@@ -31,12 +31,12 @@ class DatabaseSeeder extends Seeder
         ChannelSeeder::class,
         PowerSkuSeeder::class
     ]);
-        $this->call([
-            OutletSeeder::class,
-            SalesActivitySeeder::class,
-            SalesAvailabilitySeeder::class,
-            SalesSurveySeeder::class,
-            SalesVisibilitySeeder::class,
-        ]);
+        // $this->call([
+        //     OutletSeeder::class,
+        //     SalesActivitySeeder::class,
+        //     SalesAvailabilitySeeder::class,
+        //     SalesSurveySeeder::class,
+        //     SalesVisibilitySeeder::class,
+        // ]);
     }
 }
