@@ -100,7 +100,7 @@ class SellingDownloadExport implements FromQuery, WithHeadings, WithMapping, Wit
                 $selling->sell->checked_in ? Carbon::parse($selling->sell->checked_in)->format('Y-m-d H:i:s') : 'N/A',
                 $selling->sell->checked_out ? Carbon::parse($selling->sell->checked_out)->format('Y-m-d H:i:s') : 'N/A',
                 $selling->sell->duration ?? 'N/A',
-                $selling->sell->week ?? 'N/A'
+                $selling->created_at ? $selling->created_at->format('W') : '-',
             ];
         } catch (\Exception $e) {
             Log::error('Error mapping selling:', [

@@ -63,7 +63,7 @@ class SellingExport implements FromQuery, WithHeadings, WithMapping, WithStyles,
             $selling->sell->checked_in,
             $selling->sell->checked_out,
             $selling->sell->duration,
-            $selling->sell->week
+            $selling->created_at->format('W'),
         ];
     }
 
