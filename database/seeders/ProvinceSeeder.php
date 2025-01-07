@@ -52,7 +52,7 @@ class ProvinceSeeder extends Seeder
     {
         $now = Carbon::now();
         $file = public_path().'/assets/csv/provinces.csv';
-        $header = ['code', 'name', 'lat', 'long'];
+        $header = ['code', 'name', 'lat', 'long','maps_code'];
         $data = $this->csvToArray($file, $header);
         $data = array_map(function ($arr) use ($now) {
             $arr['meta'] = json_encode(['lat' => $arr['lat'], 'long' => $arr['long']]);
