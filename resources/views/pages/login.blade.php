@@ -35,9 +35,9 @@
         {{-- Form Container --}}
         <div class="form-container">
             <h3 class="form-title">
-                Selamat Datang di <span class="text-primary">Dashboard!</span>
+				Selamat datang di Dashboard SMD
             </h3>
-            <p class="form-description">Silahkan Masukkan <span>Email</span>dan <span>Kata Sandi</span> untuk
+            <p class="form-description">Silahkan Masukkan <span> Email</span> dan <span>Kata Sandi</span> untuk
                 melanjutkan</p>
             <form class="login-form" action="{{ route('login') }}" method="POST">
                 @csrf
