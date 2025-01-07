@@ -12,7 +12,7 @@
     </x-slot:cardTitle>
     {{-- Routing Action --}}
     <x-slot:cardAction>
-        <x-input.search id="global-search" class="border-0" placeholder="Cari data sales"></x-input.search>
+        <x-input.search id="global-search" class="border-0" placeholder="Cari data routing"></x-input.search>
         <x-select.light :title="'Filter Hari'" id="filter_day" name="day">
             <option value="all">Semua</option>
             @foreach ($waktuKunjungan as $hari)
@@ -93,6 +93,12 @@
                 </th>
                 <th scope="col" class="text-center">
                     <a class="table-head">
+                        {{ __('Kode Outlet') }}
+                        <x-icons.sort />
+                    </a>
+                </th>
+                <th scope="col" class="text-center">
+                    <a class="table-head">
                         {{ __('Area Outlet') }}
                         <x-icons.sort />
                     </a>
@@ -100,6 +106,12 @@
                 <th scope="col" class="text-center">
                     <a class="table-head">
                         {{ __('Hari Kunjungan') }}
+                        <x-icons.sort />
+                    </a>
+                </th>
+                <th scope="col" class="text-center">
+                    <a class="table-head">
+                        {{ __('Week') }}
                         <x-icons.sort />
                     </a>
                 </th>
@@ -252,6 +264,10 @@
                 data: 'outlet',
                 name: 'name',
                 className: 'table-data'
+            },{
+                data: 'code',
+                name: 'code',
+                className: 'table-data'
             }, {
                 data: 'area',
                 name: 'area',
@@ -259,6 +275,10 @@
             }, {
                 data: 'visit_day',
                 name: 'visit_day',
+                className: 'table-data'
+            },{
+                data: 'visit_week',
+                name: 'visit_week',
                 className: 'table-data'
             },
             {

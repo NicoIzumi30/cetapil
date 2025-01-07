@@ -22,7 +22,7 @@ class RoutingDownloadExport implements FromCollection, WithHeadings, WithMapping
 
     public function __construct($week = null, $region = null)
     {
-        $query = Outlet::with(['city.province', 'user', 'channel_name'])
+        $query = Outlet::with(['city.province', 'user', 'channel'])
             ->where('status', 'APPROVED')
             ->whereNull('deleted_at');
 
@@ -33,12 +33,9 @@ class RoutingDownloadExport implements FromCollection, WithHeadings, WithMapping
         }
 
         if ($week && $week !== 'all') {
-            if (strpos($week, '&') !== false) {
-                $weeks = explode('&', $week);
-                $query->whereIn('week', $weeks);
-            } else {
-                $query->where('week', $week);
-            }
+            $query->whereHas('outletRoutings', function($q) use ($week) {
+                $q->where('week', $week);
+            });
         }
 
         $this->data = $query->get();
@@ -56,10 +53,9 @@ class RoutingDownloadExport implements FromCollection, WithHeadings, WithMapping
                 $outlet->name,
                 $outlet->user->name ?? 'N/A',
                 $outlet->category,
-                getVisitDayByNumber($outlet->visit_day),
-                $outlet->cycle,
-                $outlet->week,
-                $outlet->channel_name->name ?? '',
+                getVisitDays($outlet->id),
+                getWeeks($outlet->id),
+                $outlet->channel->name ?? '',
                 $outlet->account,
                 $outlet->distributor,
                 $outlet->TSO,
@@ -85,7 +81,6 @@ class RoutingDownloadExport implements FromCollection, WithHeadings, WithMapping
             'Nama Sales',
             'Kategori Outlet',
             'Hari Kunjungan',
-            'Cycle',
             'Week',
             'Channel',
             'Account',

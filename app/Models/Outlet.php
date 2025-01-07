@@ -36,7 +36,9 @@ class Outlet extends Model
     {
         return $this->belongsTo(Outlet::class);
     }
-
+    public function outletRoutings(){
+        return $this->hasMany(OutletRouting::class);
+    } 
     public function user()
     {
         return $this->belongsTo(User::class)->withTrashed();

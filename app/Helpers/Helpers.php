@@ -1,15 +1,17 @@
 <?php
 
-use App\Models\Category;
-use App\Models\Channel;
+use App\Models\Av3m;
 use App\Models\City;
-use App\Models\Outlet;
-use App\Models\OutletForm;
-use App\Models\PosmType;
-use App\Models\Product;
 use App\Models\User;
+use App\Models\Outlet;
+use App\Models\Channel;
+use App\Models\Product;
+use App\Models\Category;
+use App\Models\PosmType;
+use App\Models\OutletForm;
 use App\Models\VisualType;
 use Illuminate\Support\Arr;
+use App\Models\OutletRouting;
 
 if (!function_exists('getOutletByName')) {
     function getOutletByName($name)
@@ -34,16 +36,20 @@ if (!function_exists('getProvinceCodeByCityName')) {
     function getProvinceCodeByCityName($name)
     {
         $city = City::where('name', $name)->first();
-        if(empty($city)){
+        if (empty($city)) {
             return null;
         }
         return $city->province_code;
     }
 }
-if (!function_exists('getProductByCode')) {
-    function getProductByCode($code)
+if (!function_exists('getAv3m')) {
+    function getAv3m($outletId,$productId)
     {
-        return Product::where('code', $code)->first();
+        $av3m = Av3m::select('av3m')->where('outlet_id', $outletId)->where('product_id', $productId)->first();
+        if (empty($av3m)) {
+            return '0';
+        }
+        return $av3m->av3m;
     }
 }
 if (!function_exists('getChannelByName')) {
@@ -143,6 +149,32 @@ if (!function_exists('getVisitDayByNumber')) {
         return Arr::get($day, $numberDay) ?? 'Minggu';
     }
 }
+if (!function_exists('getVisitDays')) {
+    function getVisitDays($outletId)
+    {
+        $query = OutletRouting::where('outlet_id', $outletId)
+            ->orderBy('visit_day')
+            ->groupBy('visit_day')
+            ->pluck('visit_day')
+            ->map(fn($value) => getVisitDayByNumber($value))
+            ->implode(', ');
+
+        return $query;
+
+    }
+}
+if (!function_exists('getWeeks')) {
+    function getWeeks($outletId)
+    {
+        $query = OutletRouting::where('outlet_id', $outletId)
+            ->orderBy('week')
+            ->groupBy('week')
+            ->pluck('week')
+            ->implode(', ');
+        return $query;
+
+    }
+}
 if (!function_exists('updatePhotoVisibility')) {
     function updatePhotoVisibility($request, $img, $data)
     {
@@ -173,7 +205,7 @@ if (!function_exists('getStatusBadge')) {
     }
 }
 if (!function_exists('spanColor')) {
-    function spanColor($value,$color)
+    function spanColor($value, $color)
     {
         return '<span class="text-' . $color . '-400">' .
             e($value) .
