@@ -254,10 +254,12 @@ class OutletController extends GetxController {
   // SECTION: Submit Operations
   Future<bool> submitApiOutlet() async {
     try {
-      final String? currentOutletId = Get.arguments?['id'];
-      final bool isEditing = currentOutletId != null;
+      // final String? currentOutletId = Get.arguments?['id'];
+      final bool isEditing = outletId.value != "";
+      final String currentOutletId = outletId.value == "" ? _uuid.v4() : outletId.value;
+      // final bool isEditing = outletId.value != "";
+      print("currentOutletId Draft : $currentOutletId");
 
-      // Validation first
       await _validateSubmission();
 
       CustomAlerts.showLoading(Get.context!, "Mengirim", "Mengirim data ke server...");
@@ -272,7 +274,7 @@ class OutletController extends GetxController {
         throw response.message ?? 'Gagal mengirim data ke server';
       }
 
-      if (isEditing && currentOutletId != null) {
+      if (isEditing && currentOutletId != "") {
         await _db.deleteOutlet(currentOutletId);
       }
 
@@ -370,12 +372,12 @@ class OutletController extends GetxController {
 
       CustomAlerts.showLoading(Get.context!, "Menyimpan", "Menyimpan data ke draft...");
 
-      final String? currentOutletId = outletId.value;
+      final bool isEditing = outletId.value != "";
+      final String currentOutletId = outletId.value == "" ? _uuid.v4() : outletId.value;
       print("currentOutletId $currentOutletId");
-      final bool isEditing = currentOutletId != null;
 
       await _processDraftImages();
-      final data = _prepareDraftData(currentOutletId, isEditing);
+      final data = _prepareDraftData(currentOutletId!, isEditing);
       await _saveDraftToDatabase(data, isEditing);
       await _handleDraftSaveSuccess(isEditing);
       return true; // Return true on any error
@@ -414,7 +416,7 @@ class OutletController extends GetxController {
     }
   }
 
-  Map<String, dynamic> _prepareDraftData(String? currentOutletId, bool isEditing) {
+  Map<String, dynamic> _prepareDraftData(String currentOutletId, bool isEditing) {
     return {
       'id': isEditing ? currentOutletId : _uuid.v4(),
       'salesName': salesName.value.text,
@@ -479,7 +481,7 @@ class OutletController extends GetxController {
   Future<void> setDraftValue(Outlet outlet) async {
     try {
       // Basic info
-      outletId.value = outlet.id ?? "";
+      outletId.value = outlet.id!;
       salesName.value.text = outlet.user?.name ?? "";
       outletName.value.text = outlet.name ?? "";
       selectedCategory.value = outlet.category ?? "MT";

@@ -48,7 +48,7 @@ class OutletPage extends GetView<OutletController> {
                           controller.setListOutletPage(1);
                         },
                         title: "Outlet",
-                        tipeButton: controller.listOutletPage == 1 ? "primary" : "info",
+                        tipeButton: controller.listOutletPage.value == 1 ? "primary" : "info",
                         // width: MediaQuery.of(context).size.width * 0.45,
                       ),
                     ),
@@ -59,7 +59,7 @@ class OutletPage extends GetView<OutletController> {
                           controller.setListOutletPage(2);
                         },
                         title: "Approval",
-                        tipeButton: controller.listOutletPage == 2 ? "primary" : "info",
+                        tipeButton: controller.listOutletPage.value == 2 ? "primary" : "info",
                         // width: MediaQuery.of(context).size.width * 0.45,
                       ),
                     ),
@@ -299,9 +299,16 @@ class OutletCard extends StatelessWidget {
                     children: [
                       ElevatedButton(
                         onPressed: () {
-                          outlet.dataSource != "DRAFT"
-                              ? Get.to(() => DetailOutlet(outlet: outlet, isCheckin: false))
-                              : outletController.setDraftValue(outlet);
+                          if (outlet.dataSource != "DRAFT") {
+                            outletController.outletId.value = outlet.id!;
+                            Get.to(() => DetailOutlet(outlet: outlet, isCheckin: false));
+                          }  else{
+                            outletController.setDraftValue(outlet);
+                          }
+
+                          // outlet.dataSource != "DRAFT"
+                          //     ? Get.to(() => DetailOutlet(outlet: outlet, isCheckin: false))
+                          //     : outletController.setDraftValue(outlet);
                         },
                         style: ElevatedButton.styleFrom(
                           backgroundColor: Colors.blue,

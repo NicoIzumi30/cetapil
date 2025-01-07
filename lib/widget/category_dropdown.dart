@@ -130,11 +130,13 @@ class _CategoryDropdownState<T> extends State<CategoryDropdown<T>> {
                           ),
                           selected: widget.selectedCategoryGetter(widget.controller!).value == item,
                           onTap: () {
-                            widget.selectedCategoryGetter(widget.controller!).value = item;
-                            if (widget.onChanged != null) {
-                              widget.onChanged!(item);
-                            }
-                            _closeDropdown();
+                            setState(() {
+                              widget.selectedCategoryGetter(widget.controller!).value = item;
+                              if (widget.onChanged != null) {
+                                widget.onChanged!(item);
+                              }
+                              _closeDropdown();
+                            });
                           },
                         );
                       },
