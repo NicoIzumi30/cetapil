@@ -4,13 +4,16 @@ class Assets {
 
   static const String assetsBackground = 'assets/background.png';
   static const String assetsCarousel1 = 'assets/carousel1.png';
+  static const String assetsIcon = 'assets/icon.png';
   static const String assetsIconSettingAccount = 'assets/icon/setting_account.svg';
   static const String assetsLogo = 'assets/logo.svg';
   static const String assetsLogo2 = 'assets/logo2.png';
   static const String assetsVector = 'assets/vector.png';
+  static const String assetsVector2 = 'assets/vector2.png';
   static const String assetsVectorCalendar = 'assets/vector_calendar.png';
   static const String cetaphilMobileAssetsBackground = 'assets/background.svg';
   static const String cetaphilMobileAssetsCarousel1 = 'assets/carousel1.svg';
+  static const String cetaphilMobileAssetsIcon = 'assets/icon.png';
   static const String cetaphilMobileAssetsLogo = 'assets/logo.svg';
   static const String cetaphilMobileAssetsVectorCalendar = 'assets/vector_calendar.svg';
   static const String fontsPlusJakartaSansBold = 'assets/fonts/PlusJakartaSans-Bold.ttf';
@@ -19,10 +22,10 @@ class Assets {
   static const String fontsPlusJakartaSansSemiBold = 'assets/fonts/PlusJakartaSans-SemiBold.ttf';
   static const String iconSettingAccount = 'assets/icon/setting_account.png';
   static const String iconVector = 'assets/icon/Vector.svg';
-  static const String iconVector1 = 'assets/icon/Vector (1).svg';
-  static const String iconVector2 = 'assets/icon/Vector (2).svg';
-  static const String iconVector3 = 'assets/icon/Vector (3).svg';
-  static const String iconVector4 = 'assets/icon/Vector (4).svg';
-  static const String iconVector5 = 'assets/icon/Vector (5).svg';
+  static const String iconVector1 = 'assets/icon/Vector1.svg';
+  static const String iconVector2 = 'assets/icon/Vector2.svg';
+  static const String iconVector3 = 'assets/icon/Vector3.svg';
+  static const String iconVector4 = 'assets/icon/Vector4.svg';
+  static const String iconVector5 = 'assets/icon/Vector5.svg';
 
 }
