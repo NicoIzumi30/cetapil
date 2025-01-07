@@ -2,9 +2,13 @@
 
 namespace App\Providers;
 
-use Illuminate\Support\ServiceProvider;
-use Illuminate\Pagination\Paginator;
+use App\Models\SalesVisibility;
+use App\Models\SalesAvailability;
 use App\Services\FileUploadService;
+use Illuminate\Pagination\Paginator;
+use Illuminate\Support\ServiceProvider;
+use App\Observers\SalesVisibilityObserver;
+use App\Observers\SalesAvailabilityObserver;
 
 
 class AppServiceProvider extends ServiceProvider
@@ -26,5 +30,7 @@ class AppServiceProvider extends ServiceProvider
     {
         //
 		Paginator::useTailwind();
+        SalesAvailability::observe(SalesAvailabilityObserver::class);
+        SalesVisibility::observe(SalesVisibilityObserver::class);
     }
 }

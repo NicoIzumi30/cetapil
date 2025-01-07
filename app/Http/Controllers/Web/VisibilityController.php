@@ -88,24 +88,25 @@ class VisibilityController extends Controller
             })
         ]);
     }
-    public function getDataActivity(Request $request)
-    {
-        $query = SalesVisibility::with(['salesActivity.outlet', 'salesActivity.outlet.channel', 'salesActivity.user'])
-            ->orderBy('created_at', 'desc');
+    public function getDataActivity(Request $request) {
 
+        $query = SalesActivity::with(['user:id,name', 'outlet:id,name,visit_day,tipe_outlet,code,channel_id','outlet.channel:id,name'])->orderBy('created_at', 'desc');
+    
         if ($request->filled('search_term')) {
             $searchTerm = $request->search_term;
-            $query->whereHas('salesActivity.outlet', function ($q) use ($searchTerm) {
-                $q->where('name', 'like', "%{$searchTerm}%");
-                $q->orWhere('code', 'like', "%{$searchTerm}%");
-                $q->orWhere('tipe_outlet', 'like', "%{$searchTerm}%");
-            })->orWhereHas('salesActivity.user', function ($q) use ($searchTerm) {
-                $q->where('name', 'like', "%{$searchTerm}%");
+            $query->where(function ($q) use ($searchTerm) {
+                $q->WhereHas('outlet', function ($q) use ($searchTerm) {
+                    $q->where('name', 'like', "%{$searchTerm}%");
+                })->orWhereHas('user', function ($q) use ($searchTerm) {
+                    $q->where('name', 'like', "%{$searchTerm}%");
+                });
             });
         }
+    
+        // Date filter
         if ($request->filled('date')) {
             $dateParam = $request->date;
-
+            
             if (str_contains($dateParam, ' to ')) {
                 [$startDate, $endDate] = explode(' to ', $dateParam);
                 $query->whereBetween('created_at', [
@@ -116,38 +117,133 @@ class VisibilityController extends Controller
                 $query->whereDate('created_at', Carbon::parse($dateParam));
             }
         }
+    
         $filteredRecords = (clone $query)->count();
-
-        // Use MAX for ordering and selecting grouped columns
-        $query->selectRaw('sales_activity_id, MAX(id) AS id, MAX(created_at) AS created_at')
-            ->groupBy('sales_activity_id')
-            ->orderBy('created_at', 'desc');
-
+    
         $result = $query->skip($request->start)
             ->take($request->length)
             ->get();
         return response()->json([
             'draw' => intval($request->draw),
-            'recordsTotal' => $result->count(),
-            'recordsFiltered' => $result->count(),
+            'recordsTotal' => $filteredRecords,
+            'recordsFiltered' => $filteredRecords,
             'data' => $result->map(function ($item) {
-                $salesVisibility = SalesVisibility::find($item->id);
                 return [
-                    'id' => $salesVisibility->id,
-                    'outlet' => $salesVisibility->salesActivity->outlet->name,
-                    'sales' => $salesVisibility->salesActivity->user->name,
-                    'code' => $salesVisibility->salesActivity->outlet->code,
-                    'type' => $salesVisibility->salesActivity->outlet->tipe_outlet,
-                    'condition' => $salesVisibility->condition,
-                    'channel' => $salesVisibility->salesActivity->outlet->channel->name,
+                    'id' => $item->id,
+                    'outlet' => $item->outlet->name,
+                    'sales' => $item->user->name,
+                    'code' => $item->outlet->code,
+                    'type' => $item->outlet->tipe_outlet,
+                    'channel' => $item->outlet->channel->name,
                     'actions' => view('pages.visibility.action_activity', [
-                        'activityId' => $salesVisibility->salesActivity->id
+                        'activityId' => $item->id
                     ])->render()
                 ];
             })
         ]);
-    }
+    } 
 
+    // public function getDataActivity(Request $request)
+    // {
+    //     try {
+    //         // 1. Create a subquery to get the latest record for each sales_activity_id
+    //         $latestRecords = DB::table('sales_visibilities')
+    //             ->select('sales_activity_id', DB::raw('MAX(id) as max_id'))
+    //             ->whereNull('deleted_at')
+    //             ->groupBy('sales_activity_id');
+    
+    //         // 2. Main query using join with the subquery
+    //         $query = SalesVisibility::select('sales_visibilities.*')
+    //             ->joinSub($latestRecords, 'latest_records', function ($join) {
+    //                 $join->on('sales_visibilities.id', '=', 'latest_records.max_id');
+    //             })
+    //             ->with([
+    //                 'salesActivity' => function ($q) {
+    //                     $q->select('id', 'user_id', 'outlet_id');
+    //                 },
+    //                 'salesActivity.outlet' => function ($q) {
+    //                     $q->select('id', 'name', 'code', 'tipe_outlet', 'channel_id');
+    //                 },
+    //                 'salesActivity.outlet.channel' => function ($q) {
+    //                     $q->select('id', 'name');
+    //                 },
+    //                 'salesActivity.user' => function ($q) {
+    //                     $q->select('id', 'name');
+    //                 }
+    //             ]);
+    
+    //         // 3. Apply search filter if exists
+    //         if ($request->filled('search_term')) {
+    //             $searchTerm = $request->search_term;
+    //             $query->where(function ($query) use ($searchTerm) {
+    //                 $query->whereHas('salesActivity.outlet', function ($q) use ($searchTerm) {
+    //                     $q->where(function ($subQ) use ($searchTerm) {
+    //                         $subQ->where('name', 'like', "%{$searchTerm}%")
+    //                             ->orWhere('code', 'like', "%{$searchTerm}%")
+    //                             ->orWhere('tipe_outlet', 'like', "%{$searchTerm}%");
+    //                     });
+    //                 })->orWhereHas('salesActivity.user', function ($q) use ($searchTerm) {
+    //                     $q->where('name', 'like', "%{$searchTerm}%");
+    //                 });
+    //             });
+    //         }
+    
+    //         // 4. Apply date filter if exists
+    //         if ($request->filled('date')) {
+    //             $dateParam = $request->date;
+    //             if (str_contains($dateParam, ' to ')) {
+    //                 [$startDate, $endDate] = explode(' to ', $dateParam);
+    //                 $query->whereBetween('sales_visibilities.created_at', [
+    //                     Carbon::parse($startDate)->startOfDay(),
+    //                     Carbon::parse($endDate)->endOfDay()
+    //                 ]);
+    //             } else {
+    //                 $query->whereDate('sales_visibilities.created_at', Carbon::parse($dateParam));
+    //             }
+    //         }
+    
+    //         // 5. Count total filtered records
+    //         $filteredRecords = $query->count();
+    
+    //         // 6. Get paginated results
+    //         $result = $query->orderBy('sales_visibilities.created_at', 'desc')
+    //             ->skip($request->start)
+    //             ->take($request->length)
+    //             ->get();
+    
+    //         // 7. Transform data with chunking for memory efficiency
+    //         $transformedData = collect();
+    //         foreach ($result->chunk(100) as $chunk) {
+    //             $transformedData = $transformedData->concat($chunk->map(function ($item) {
+    //                 return [
+    //                     'id' => $item->id,
+    //                     'outlet' => $item->salesActivity->outlet->name,
+    //                     'sales' => $item->salesActivity->user->name,
+    //                     'code' => $item->salesActivity->outlet->code,
+    //                     'type' => $item->salesActivity->outlet->tipe_outlet,
+    //                     'condition' => $item->condition,
+    //                     'channel' => $item->salesActivity->outlet->channel->name,
+    //                     'actions' => view('pages.visibility.action_activity', [
+    //                         'activityId' => $item->salesActivity->id
+    //                     ])->render()
+    //                 ];
+    //             }));
+    //         }
+    
+    //         return response()->json([
+    //             'draw' => intval($request->draw),
+    //             'recordsTotal' => $filteredRecords,
+    //             'recordsFiltered' => $filteredRecords,
+    //             'data' => $transformedData
+    //         ]);
+    
+    //     } catch (\Exception $e) {
+    //         \Log::error('Error in getDataActivity: ' . $e->getMessage());
+    //         return response()->json([
+    //             'error' => 'An error occurred while processing your request.'
+    //         ], 500);
+    //     }
+    // }
 
     /**
      * Show the form for creating a new resource.
