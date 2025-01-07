@@ -372,72 +372,96 @@ class ProductController extends Controller
 
 
     public function downloadAvailability(Request $request)
-    {
-        try {
-            DB::enableQueryLog();
+{
+    try {
+        DB::enableQueryLog();
 
-            // Ganti query yang lama dengan yang baru
-            $query = SalesAvailability::with([
+        // Base query with eager loading
+        $query = SalesAvailability::query()
+            ->with([
                 'salesActivity:id,time_availability',
                 'product:id,sku',
-                'outlet:id,name,code,tipe_outlet,TSO,city_id,channel_id,user_id,account',
                 'outlet.user:id,name',
                 'outlet.city:id,name',
-                'outlet.channel:id,name'
-            ]);
-            $query->where('status', 'SUBMITTED');
-
-            // Sisanya tetap sama
-            if ($request->filled('filter_date') && $request->filter_date !== 'Date Range') {
-                $dateParam = $request->filter_date;
-                if (str_contains($dateParam, ' to ')) {
-                    [$startDate, $endDate] = explode(' to ', $dateParam);
-                    $query->whereBetween('created_at', [
-                        Carbon::parse($startDate)->startOfDay(),
-                        Carbon::parse($endDate)->endOfDay()
-                    ]);
-                } else {
-                    $query->whereDate('created_at', Carbon::parse($dateParam));
+                'outlet.channel:id,name',
+                'outlet' => function ($query) {
+                    $query->select('id', 'name', 'code', 'tipe_outlet', 'TSO', 'city_id', 'channel_id', 'user_id', 'account');
                 }
-            }
-
-            if ($request->filled('filter_product') && $request->filter_product !== 'all') {
-                $query->where('product_id', $request->filter_product);
-            }
-
-            if ($request->filled('filter_area') && $request->filter_area !== 'all') {
-                $query->whereHas('outlet', function ($q) use ($request) {
-                    $q->where('city_id', $request->filter_area);
-                });
-            }
-
-            $data = $query->get();
-
-            // Log untuk debugging
-            Log::info('Availability Export Data', [
-                'filters' => $request->all(),
-                'query' => DB::getQueryLog(),
-                'record_count' => $data->count()
             ]);
 
-            return Excel::download(
-                new StockOnHandExport($data),
-                'availability_data_' . now()->format('Y-m-d_His') . '.xlsx',
-                \Maatwebsite\Excel\Excel::XLSX
-            );
-        } catch (\Exception $e) {
-            Log::error('Availability Export Error', [
-                'message' => $e->getMessage(),
-                'trace' => $e->getTraceAsString(),
+        // Remove status filter temporarily for testing
+        // $query->where('status', 'SUBMITTED');
+
+        // Apply date filter
+        if ($request->filled('filter_date') && $request->filter_date !== 'Date Range') {
+            $dateParam = $request->filter_date;
+            if (str_contains($dateParam, ' to ')) {
+                [$startDate, $endDate] = explode(' to ', $dateParam);
+                $query->whereBetween('created_at', [
+                    Carbon::parse($startDate)->startOfDay(),
+                    Carbon::parse($endDate)->endOfDay()
+                ]);
+            } else {
+                $query->whereDate('created_at', Carbon::parse($dateParam));
+            }
+        }
+
+        // Apply product filter
+        if ($request->filled('filter_product') && $request->filter_product !== 'all') {
+            $query->where('product_id', $request->filter_product);
+        }
+
+        // Apply area filter
+        if ($request->filled('filter_area') && $request->filter_area !== 'all') {
+            $query->whereHas('outlet', function ($q) use ($request) {
+                $q->where('city_id', $request->filter_area);
+            });
+        }
+
+        // Execute query and get data
+        $data = $query->get();
+
+        // Log query and data for debugging
+        Log::info('Availability Export Debug Info', [
+            'filters' => $request->all(),
+            'query' => DB::getQueryLog(),
+            'record_count' => $data->count(),
+            'first_record' => $data->first(),
+            'sql' => $query->toSql(),
+            'bindings' => $query->getBindings()
+        ]);
+
+        // Check if data exists
+        if ($data->isEmpty()) {
+            Log::warning('No data found for export', [
                 'filters' => $request->all()
             ]);
-
             return response()->json([
                 'error' => true,
-                'message' => 'Gagal mengunduh file: ' . $e->getMessage()
-            ], 500);
+                'message' => 'Tidak ada data yang tersedia untuk diexport'
+            ], 404);
         }
+
+        // Generate Excel file
+        return Excel::download(
+            new StockOnHandExport($data),
+            'availability_data_' . now()->format('Y-m-d_His') . '.xlsx',
+            \Maatwebsite\Excel\Excel::XLSX
+        );
+
+    } catch (\Exception $e) {
+        Log::error('Availability Export Error', [
+            'message' => $e->getMessage(),
+            'trace' => $e->getTraceAsString(),
+            'filters' => $request->all()
+        ]);
+
+        return response()->json([
+            'error' => true,
+            'message' => 'Gagal mengunduh file: ' . $e->getMessage()
+        ], 500);
     }
+}
 
     public function downloadAv3m()
     {

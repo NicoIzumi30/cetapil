@@ -32,7 +32,7 @@ class StockOnHandExport implements FromCollection, WithHeadings, WithMapping, Wi
         return [
             'Nama Sales',
             'Outlet',
-            'Kode Outlet',
+            'Kode Outlet', 
             'Tipe Outlet',
             'Kota/Area',
             'Account',
@@ -55,34 +55,49 @@ class StockOnHandExport implements FromCollection, WithHeadings, WithMapping, Wi
     public function map($row): array
     {
         try {
+            Log::info('Mapping row data', ['row' => $row->toArray()]);
+            
+            // Basic data validation
+            if (!$row->outlet || !$row->product || !$row->salesActivity) {
+                Log::warning('Missing relation in row', [
+                    'id' => $row->id,
+                    'has_outlet' => isset($row->outlet),
+                    'has_product' => isset($row->product),
+                    'has_sales_activity' => isset($row->salesActivity)
+                ]);
+            }
+
             return [
-                $row->outlet->user->name ?? '',
-                $row->outlet->name ?? '',
-                $row->outlet->code ?? '',
-                $row->outlet->tipe_outlet ?? '',
-                $row->outlet->city->name ?? '',
-                $row->outlet->account ?? '',
-                $row->outlet->channel->name ?? '',
-                $row->outlet->TSO ?? '',
-                $row->product->sku ?? '',
-                ($row->stock_on_hand !== null) ? (string)$row->stock_on_hand : '0',
-                ($row->stock_inventory !== null) ? (string)$row->stock_inventory : '0',
-                ($row->availability !== null) ? (string)$row->availability : '0',
-                ($row->av3m !== null) ? (string)$row->av3m : '0',
-                ($row->rekomendasi !== null) ? (string)$row->rekomendasi : '0',
-                $row->status_ideal ?? '',
-                gmdate('H:i:s', $row->salesActivity->time_availability),
-                $row->created_at->format('W'),
-                $row->created_at ? $row->created_at->format('Y-m-d H:i:s') : '',
-                $row->created_at->addSeconds($row->salesActivity->time_availability) ?? ''
+                $row->outlet->user->name ?? '-',
+                $row->outlet->name ?? '-',
+                $row->outlet->code ?? '-',
+                $row->outlet->tipe_outlet ?? '-',
+                $row->outlet->city->name ?? '-',
+                $row->outlet->account ?? '-',
+                $row->outlet->channel->name ?? '-',
+                $row->outlet->TSO ?? '-',
+                $row->product->sku ?? '-',
+                $row->stock_on_hand ?? '0',
+                $row->stock_inventory ?? '0',
+                $row->availability ?? '-',
+                $row->av3m ?? '0',
+                $row->rekomendasi ?? '0',
+                $row->status_ideal ?? '-',
+                $row->salesActivity ? gmdate('H:i:s', $row->salesActivity->time_availability) : '-',
+                $row->created_at ? $row->created_at->format('W') : '-',
+                $row->created_at ? $row->created_at->format('Y-m-d H:i:s') : '-',
+                $row->created_at && $row->salesActivity ? 
+                    $row->created_at->addSeconds($row->salesActivity->time_availability)->format('Y-m-d H:i:s') : '-'
             ];
+
         } catch (\Exception $e) {
-            Log::error('Error in StockOnHandExport mapping', [
+            Log::error('Error mapping row in StockOnHandExport', [
                 'error' => $e->getMessage(),
-                'row' => $row->id ?? 'unknown'
+                'row_id' => $row->id ?? 'unknown',
+                'trace' => $e->getTraceAsString()
             ]);
 
-            return array_fill(0, 12, 'Error');
+            return array_fill(0, 19, 'Error');
         }
     }
 
@@ -91,12 +106,11 @@ class StockOnHandExport implements FromCollection, WithHeadings, WithMapping, Wi
         $lastRow = $sheet->getHighestRow();
         $lastColumn = $sheet->getHighestColumn();
 
-        // Apply styling to entire worksheet (headers and content)
+        // Default style for all cells
         $sheet->getStyle("A1:{$lastColumn}{$lastRow}")->applyFromArray([
             'alignment' => [
-                'horizontal' => Alignment::HORIZONTAL_CENTER,
+                'horizontal' => Alignment::HORIZONTAL_LEFT,
                 'vertical' => Alignment::VERTICAL_CENTER,
-                'wrapText' => true,
             ],
             'borders' => [
                 'allBorders' => [
@@ -105,7 +119,7 @@ class StockOnHandExport implements FromCollection, WithHeadings, WithMapping, Wi
             ],
         ]);
 
-        // Additional header styling
+        // Header style
         $sheet->getStyle("A1:{$lastColumn}1")->applyFromArray([
             'font' => [
                 'bold' => true,
@@ -115,11 +129,19 @@ class StockOnHandExport implements FromCollection, WithHeadings, WithMapping, Wi
                 'fillType' => Fill::FILL_SOLID,
                 'startColor' => ['rgb' => '4A90E2'],
             ],
+            'alignment' => [
+                'horizontal' => Alignment::HORIZONTAL_CENTER,
+            ],
         ]);
+
+        // Set column width to auto
+        foreach (range('A', $lastColumn) as $column) {
+            $sheet->getColumnDimension($column)->setAutoSize(true);
+        }
 
         // Set row height
         $sheet->getDefaultRowDimension()->setRowHeight(25);
-
+        
         return [
             1 => ['font' => ['bold' => true]],
         ];
