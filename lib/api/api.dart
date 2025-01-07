@@ -558,7 +558,7 @@ class Api {
       return SubmitActivityResponse.fromJson(jsonDecode(responseJson.body));
     } else {
       print(responseJson.body);
-      throw "Unable to Submit Activity";
+      throw jsonDecode(responseJson.body)['message'];
     }
   }
 
