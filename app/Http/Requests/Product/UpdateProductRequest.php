@@ -29,10 +29,6 @@ class UpdateProductRequest extends FormRequest
                 'required',
                 Rule::unique('products', 'sku')->ignore($this->product),
             ],
-            'code' => [
-                'required',
-                Rule::unique('products', 'code')->ignore($this->product),
-            ],
             'price' => 'required|numeric|min:0'
         ]
         ;

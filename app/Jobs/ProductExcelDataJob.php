@@ -38,14 +38,12 @@ class ProductExcelDataJob implements ShouldQueue
                                 $product = Product::create([
                                     'category_id' => $category['id'],
                                     'sku' => $row['produk_sku'],
-                                    'code' => $row['sku_code'],
                                     'price' => $row['harga'] ?? 0,
                                 ]);
                             } else {
                                 $product->update([
                                     'category_id' => $category['id'],
                                     'sku' => $row['produk_sku'],
-                                    'code' => $row['sku_code'],
                                     'price' => $row['harga'] ?? 0,
                                 ]);
 

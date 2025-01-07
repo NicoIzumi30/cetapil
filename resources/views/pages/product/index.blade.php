@@ -52,12 +52,6 @@
                         <span id="sku-error" class="text-red-500 text-xs hidden"></span>
                     </div>
                     <div>
-                        <label for="sku-code" class="!text-black">SKU Code</label>
-                        <input id="sku-code" class="form-control @error('code') is-invalid @enderror" type="text"
-                            name="code" placeholder="Masukan SKU Code">
-                        <span id="code-error" class="text-red-500 text-xs hidden"></span>
-                    </div>
-                    <div>
                         <label for="price" class="!text-black">Harga</label>
                         <input id="price" class="form-control" type="number" name="price" placeholder="Masukan Harga">
                         <span id="price-error" class="text-red-500 text-xs hidden"></span>
@@ -98,12 +92,6 @@
                         <input id="edit-sku" class="form-control" type="text" name="sku"
                             placeholder="Masukan produk SKU">
                         <span id="edit-sku-error" class="text-red-500 text-xs hidden"></span>
-                    </div>
-                    <div>
-                        <label for="edit-code" class="!text-black">SKU Code</label>
-                        <input id="edit-code" class="form-control" type="text" name="code"
-                            placeholder="Masukan SKU Code">
-                        <span id="edit-code-error" class="text-red-500 text-xs hidden"></span>
                     </div>
                     <div>
                         <label for="edit-price" class="!text-black">Harga</label>
@@ -181,12 +169,7 @@
                             <x-icons.sort />
                         </a>
                     </th>
-                    <th scope="col" class="text-center">
-                        <a class="table-head">
-                            {{ __('SKU Code') }}
-                            <x-icons.sort />
-                        </a>
-                    </th>
+                    
                     <th scope="col" class="text-center">
                         <a class="table-head">
                             {{ __('Harga') }}
@@ -578,11 +561,7 @@
                         name: 'sku',
                         className: 'table-data',
                     },
-                    {
-                        data: 'code',
-                        name: 'code',
-                        className: 'table-data',
-                    },
+                   
                     {
                         data: 'price',
                         name: 'price',
@@ -744,7 +723,6 @@
                         $('#edit-category').val(response.category_id).trigger('change');
                         $('#edit-sku').val(response.sku);
                         $('#edit-price').val(response.price);
-                        $('#edit-code').val(response.code);
                         $('#editProductForm').data('id', response.id);
                         openModal('edit-produk');
                     },
@@ -761,7 +739,6 @@
                 const formData = {
                     category_id: $('#edit-category').val(),
                     sku: $('#edit-sku').val(),
-                    code: $('#edit-code').val(),
                     price: $('#edit-price').val().replace(/[^\d]/g, ''),
                 };
                 resetFormErrors();
