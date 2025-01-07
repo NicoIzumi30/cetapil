@@ -491,6 +491,7 @@ class _CompactProductCardState extends State<CompactProductCard> {
                                 fontWeight: FontWeight.w500,
                                 color: Color(0xFF0077BD),
                               ),
+                              readOnly: true,
                               textAlign: TextAlign.left,
                               decoration: InputDecoration(
                                 hintStyle: TextStyle(
