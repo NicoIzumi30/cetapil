@@ -2,19 +2,20 @@
 
 namespace App\Http\Controllers\Web;
 
-use App\Models\OutletFormAnswer;
 use Carbon\Carbon;
 use App\Models\OutletForm;
 use App\Models\SalesSurvey;
 use Illuminate\Http\Request;
+use App\Models\OutletRouting;
 use App\Models\SalesActivity;
+use App\Models\OutletFormAnswer;
 use App\Http\Controllers\Controller;
 
 class SalesActivityController extends Controller
 {
     public function getData(Request $request)
     {
-        $query = SalesActivity::with(['user:id,name', 'outlet:id,name,visit_day'])->orderBy('created_at', 'desc');
+        $query = SalesActivity::with(['user:id,name', 'outlet:id,name'])->orderBy('created_at', 'desc');
     
         if ($request->filled('search_term')) {
             $searchTerm = $request->search_term;
@@ -47,7 +48,9 @@ class SalesActivityController extends Controller
             if ($filter_day != 'all') {
                 $query->where(function ($q) use ($filter_day): void {
                     $q->WhereHas('outlet', function ($q) use ($filter_day) {
-                        $q->where('visit_day', $filter_day);
+                        $q->whereHas('outletRoutings', function ($q) use ($filter_day) {
+                            $q->where('visit_day', $filter_day);
+                        });
                     });
                 });
             }
@@ -75,11 +78,12 @@ class SalesActivityController extends Controller
             'recordsTotal' => $filteredRecords,
             'recordsFiltered' => $filteredRecords,
             'data' => $result->map(function ($item) {
+                $visitDays = getVisitDays($item->outlet_id);
                 return [
                     'id' => $item->id,
                     'outlet' => $item->outlet->name,
                     'sales' => $item->user->name,
-                    'visit_day' => getVisitDayByNumber($item->outlet->visit_day),
+                    'visit_day' => $visitDays,
                     'checkin' => $item->checked_in,
                     'checkout' => $item->checked_out,
                     'views' => $item->views_knowledge,
