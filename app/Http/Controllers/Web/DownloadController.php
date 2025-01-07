@@ -342,19 +342,9 @@ class DownloadController extends Controller
     public function downloadAv3m()
     {
         try {
-            $data = Av3m::with([
-                'product' => function ($query) {
-                    $query->select('id', 'sku', 'code');
-                },
-                'outlet' => function ($query) {
-                    $query->select('id', 'name', 'code');
-                }
-            ])
-                ->has('product')
-                ->has('outlet')
-                ->get();
+
             return Excel::download(
-                new Av3mExport($data),
+                new Av3mExport(),
                 'av3m_data_' . now()->format('Y-m-d_His') . '.xlsx',
                 \Maatwebsite\Excel\Excel::XLSX
             );
