@@ -97,7 +97,7 @@ class OrderExport implements FromQuery, WithHeadings, WithMapping, WithStyles, S
                 $order->total_items ?? 0,
                 $order->subtotal ?? 0,
                 $order->created_at ? Carbon::parse($order->created_at)->format('Y-m-d H:i:s') : '',
-                $order->salesActivity->week ?? ''
+                $order->created_at ? $order->created_at->format('W') : '-',
             ];
         } catch (\Exception $e) {
             Log::error('Error mapping order:', [

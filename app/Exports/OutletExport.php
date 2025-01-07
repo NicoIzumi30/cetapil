@@ -28,7 +28,7 @@ class OutletExport implements FromCollection, WithHeadings, WithMapping, WithSty
 
     public function collection()
     {
-        return Outlet::with(['user','city','channel_name'])->get();
+        return Outlet::with(['user','city','channel'])->get();
     }
 
     public function headings(): array
@@ -38,8 +38,7 @@ class OutletExport implements FromCollection, WithHeadings, WithMapping, WithSty
             'Nama Sales',
             'Kategori Outlet',
             'Hari Kunjungan',
-            'Cycle',
-            'Tipe Minggu',
+            'Week',
             'Channel',
             'Account',
             'Distributor',
@@ -59,10 +58,9 @@ class OutletExport implements FromCollection, WithHeadings, WithMapping, WithSty
                 $outlet->name,
                 $outlet->user->name,
                 $outlet->category,
-                getVisitDayByNumber($outlet->visit_day),
-                $outlet->cycle,
-                $outlet->week,
-                $outlet->channel_name->name ?? '',
+                getVisitDays($outlet->id),
+                getWeeks($outlet->id),
+                $outlet->channel->name ?? '',
                 $outlet->account,
                 $outlet->TSO,
                 $outlet->KAM,
@@ -72,7 +70,7 @@ class OutletExport implements FromCollection, WithHeadings, WithMapping, WithSty
                 $outlet->latitude,
             ];
         } catch (\Exception $e) {
-            Log::error('Error in ProductExport mapping', [
+            Log::error('Error in Outlet mapping', [
                 'message' => $e->getMessage(),
                 'outlet_id' => $outlet->id ?? 'unknown'
             ]);
@@ -82,7 +80,7 @@ class OutletExport implements FromCollection, WithHeadings, WithMapping, WithSty
 
     public function styles(Worksheet $sheet)
     {
-        $lastColumn = chr(65 + 10);
+        $lastColumn = $sheet->getHighestColumn();
         $lastRow = $sheet->getHighestRow();
 
         // Header styles
