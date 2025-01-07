@@ -77,7 +77,7 @@ class RoutingController extends Controller
             $query->where('name', 'like', "%{$searchTerm}%");
             $query->orWhereHas('user', function ($q) use ($searchTerm) {
                 $q->where('name', 'like', "%{$searchTerm}%");
-            })->where('status', '!=', 'APPROVED');
+            });
         }
         
         if ($request->filled('filter_day')) {
@@ -88,6 +88,7 @@ class RoutingController extends Controller
                 });
             }
         }
+        $query->where('status','APPROVED');
         $filteredRecords = (clone $query)->count();
 
         $result = $query->skip($request->start)
