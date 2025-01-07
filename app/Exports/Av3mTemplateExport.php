@@ -29,48 +29,36 @@ class Av3mTemplateExport implements FromCollection, WithHeadings, WithMapping, W
 
     public function headings(): array
     {
-        return [
+        $baseHeadings = [
             'Code Outlet',
             'Nama Outlet',
-            'Product SKU',
-            'SKU Code',
-            'Av3m',
-            '',
-            '',
-            '',
-            '',
-            'GIH SKU',
-            'Code',
-            'Product Category',
-            'Harga'
         ];
+
+        // Parse the JSON data
+        $products = json_decode(json_encode($this->data), true);
+
+        // Get all product SKUs
+        $productSkus = collect($products)->pluck('sku')->unique()->values()->toArray();
+
+        return array_merge($baseHeadings, $productSkus);
     }
 
     public function map($row): array
     {
         try {
-            return [
-                '',
-                '',
-                '',
-                '',
-                '',
-                '',
-                '',
-                '',
-                '',
-                $row->sku,
-                $row->code,
-                $row->category->name,
-                $row->price
-            ];
+            // Get the total number of columns from headings
+            $totalColumns = count($this->headings());
+
+            // Create array filled with empty strings
+            return array_fill(0, $totalColumns, '');
         } catch (\Exception $e) {
             Log::error('Error in Av3mExport mapping', [
                 'error' => $e->getMessage(),
                 'row' => $row->id ?? 'unknown'
             ]);
 
-            return array_fill(0, 12, 'Error');
+            // Return array of 'Error' with same length as headings
+            return array_fill(0, count($this->headings()), 'Error');
         }
     }
 
@@ -79,8 +67,8 @@ class Av3mTemplateExport implements FromCollection, WithHeadings, WithMapping, W
         $lastRow = $sheet->getHighestRow();
         $lastColumn = $sheet->getHighestColumn();
 
-        // Rest of your existing styling
-        $sheet->getStyle("A1:E1")->applyFromArray([
+        // Apply styles to all columns in header row and data
+        $sheet->getStyle("A1:{$lastColumn}{$lastRow}")->applyFromArray([
             'alignment' => [
                 'horizontal' => Alignment::HORIZONTAL_CENTER,
                 'vertical' => Alignment::VERTICAL_CENTER,
@@ -92,20 +80,9 @@ class Av3mTemplateExport implements FromCollection, WithHeadings, WithMapping, W
                 ],
             ],
         ]);
-        $sheet->getStyle("J1:M{$lastRow}")->applyFromArray([
-            'alignment' => [
-                'horizontal' => Alignment::HORIZONTAL_CENTER,
-                'vertical' => Alignment::VERTICAL_CENTER,
-                'wrapText' => true,
-            ],
-            'borders' => [
-                'allBorders' => [
-                    'borderStyle' => Border::BORDER_THIN,
-                ],
-            ],
-        ]);
-        // Additional header styling
-        $sheet->getStyle("A1:E1")->applyFromArray([
+
+        // Header styling (first row)
+        $sheet->getStyle("A1:{$lastColumn}1")->applyFromArray([
             'font' => [
                 'bold' => true,
                 'color' => ['rgb' => 'FFFFFF'],
