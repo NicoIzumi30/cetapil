@@ -2,16 +2,21 @@
 
 namespace Database\Seeders\MainData;
 
-use Illuminate\Database\Seeder;
-use Illuminate\Support\Facades\DB;
-use Illuminate\Support\Str;
+use App\Models\SalesVisibility;
 use Carbon\Carbon;
 use Faker\Factory as Faker;
+use Illuminate\Support\Str;
+use Illuminate\Database\Seeder;
+use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Schema;
 
 class SalesVisibilitySeeder extends Seeder
 {
     public function run()
     {
+        Schema::disableForeignKeyConstraints();
+        SalesVisibility::truncate();
+        Schema::enableForeignKeyConstraints();
         $faker = Faker::create('id_ID');
         
         $salesActivityIds = DB::table('sales_activities')->pluck('id')->toArray();
@@ -28,7 +33,7 @@ class SalesVisibilitySeeder extends Seeder
                         'sales_activity_id' => $faker->randomElement($salesActivityIds),
                         'category' => $faker->randomElement(['CORE', 'BABY', 'COMPETITOR']),
                         'type' => $faker->randomElement(['PRIMARY', 'SECONDARY', 'COMPETITOR']),
-                        'position' => $faker->numberBetween(1, 10),
+                        'position' => $faker->numberBetween(1, 3),
                         'posm_type_id' => $faker->randomElement($posmTypeIds),
                         'visual_type' => $faker->randomElement(['Poster', 'Banner', 'Shelf Display']),
                         'condition' => $faker->randomElement(['GOOD', 'BAD']),
@@ -37,7 +42,7 @@ class SalesVisibilitySeeder extends Seeder
                         'competitor_promo_start' => $faker->dateTimeBetween('-1 month', '+1 month'),
                         'competitor_promo_end' => $faker->dateTimeBetween('+1 month', '+2 months'),
                         'shelf_width' => $faker->numberBetween(50, 200),
-                        'shelving' => $faker->randomElement(['Top', 'Middle', 'Bottom']),
+                        'shelving' => $faker->numberBetween(0, 500),
                         'has_secondary_display' => $faker->randomElement(['Y', 'N']),
                         'display_photo' => $faker->imageUrl(),
                         'display_photo_2' => $faker->imageUrl(),
