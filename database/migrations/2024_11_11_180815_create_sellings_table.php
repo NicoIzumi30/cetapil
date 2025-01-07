@@ -19,7 +19,6 @@ return new class extends Migration
             $table->timestamp('checked_out')->nullable();
             $table->integer('duration')->nullable()
                 ->comment('Duration of the selling activity in seconds');
-            $table->string('outlet_name');
             $table->string('longitude');
             $table->string('latitude');
             $table->string('filename')->nullable();
