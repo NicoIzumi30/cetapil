@@ -43,22 +43,20 @@ class OrderExport implements FromQuery, WithHeadings, WithMapping, WithStyles, S
                 'outlet.channel',
                 'product.category'
             ]);
-    
+
         if ($this->startDate && $this->endDate) {
-            $query->whereHas('salesActivity', function($q) {
-                $q->whereBetween('created_at', [
-                    $this->startDate->startOfDay(),
-                    $this->endDate->endOfDay()
-                ]);
+            $query->whereHas('salesActivity', function ($q) {
+                $q->whereDate('created_at', '>=', $this->startDate)
+                    ->whereDate('created_at', '<=', $this->endDate);
             });
         }
-    
+
         if ($this->region && $this->region !== 'all') {
-            $query->whereHas('outlet.city.province', function($q) {
+            $query->whereHas('outlet.city.province', function ($q) {
                 $q->where('code', $this->region);
             });
         }
-    
+
         return $query;
     }
 

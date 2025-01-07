@@ -370,25 +370,34 @@ class DownloadController extends Controller
         }
     }
 
+
     public function downloadOrders(Request $request)
     {
         try {
+            $startDate = null;
+            $endDate = null;
+
             if ($request->filled('orders_date')) {
                 $dates = explode(' to ', $request->orders_date);
-                $startDate = isset($dates[0]) ? Carbon::parse(trim($dates[0])) : null;
-                $endDate = isset($dates[1]) ? Carbon::parse(trim($dates[1])) : null;
+                $startDate = trim($dates[0] ?? '');
+                $endDate = trim($dates[1] ?? '');
+
+                if (empty($startDate) || empty($endDate)) {
+                    throw new \Exception('Invalid date range format');
+                }
             }
-    
+
             return Excel::download(
                 new OrderExport($startDate, $endDate, $request->orders_region),
-                'orders_' . now()->format('Y-m-d_His') . '.xlsx',
-                \Maatwebsite\Excel\Excel::XLSX
+                'orders_' . now()->format('Y-m-d_His') . '.xlsx'
             );
         } catch (\Exception $e) {
             Log::error('Orders Download Error:', [
                 'message' => $e->getMessage(),
-                'trace' => $e->getTraceAsString()
+                'trace' => $e->getTraceAsString(),
+                'request' => $request->all()
             ]);
+
             return response()->json([
                 'status' => 'error',
                 'message' => 'Gagal mengunduh data orders'
