@@ -56,38 +56,42 @@ class DashboardController extends Controller
     {
         // Cache key dengan timestamp untuk invalidasi otomatis setiap jam
         $cacheKey = 'stock_availability_per_city_' . now()->format('Y-m-d_H');
-        
-        return Cache::remember($cacheKey, now()->addHour(), function() {
+
+        return Cache::remember($cacheKey, now()->addHour(), function () {
             $provinces = Province::select('id', 'name', 'maps_code')->get();
             $dataStock = [];
-            
+
             // Cache query untuk setiap provinsi
             foreach ($provinces as $province) {
                 $provinceStockKey = "province_stock_{$province->id}_" . now()->format('Y-m-d');
-                
-                $stock = Cache::remember($provinceStockKey, now()->addHours(1), function() use ($province) {
+
+                $stock = Cache::remember($provinceStockKey, now()->addHours(1), function () use ($province) {
                     $availability = DB::table('sales_availabilities')
                         ->join('outlets', 'sales_availabilities.outlet_id', '=', 'outlets.id')
                         ->join('cities', 'outlets.city_id', '=', 'cities.id')
                         ->join('provinces', 'provinces.code', '=', 'cities.province_code')
-                        ->select('provinces.id', 'provinces.name', 'provinces.maps_code', 
-                            DB::raw('SUM(sales_availabilities.stock_inventory) as total_stock'))
+                        ->select(
+                            'provinces.id',
+                            'provinces.name',
+                            'provinces.maps_code',
+                            DB::raw('SUM(sales_availabilities.stock_inventory) as total_stock')
+                        )
                         ->where('provinces.id', $province->id)
                         ->where('sales_availabilities.created_at', '>=', now()->subDays(30))
                         ->groupBy('cities.province_code')
                         ->first();
-    
+
                     return $availability ? (int) $availability->total_stock : 0;
                 });
-    
+
                 // Pastikan maps_code memiliki prefix 'id-'
                 $mapsCode = strpos($province->maps_code, 'id-') === 0
                     ? $province->maps_code
                     : 'id-' . strtolower($province->maps_code);
-    
+
                 $dataStock[] = [$mapsCode, $stock];
             }
-    
+
             return $dataStock;
         });
     }
@@ -117,31 +121,76 @@ class DashboardController extends Controller
     }
     public function getShelvingPerCity()
     {
-        $provinces = Province::select('id', 'name', 'maps_code')->get();
-        $dataStock = [];
+        // Cache key dengan timestamp dan periode
+        $cacheKey = 'shelving_per_city_30days_' . now()->format('Y-m-d_H');
+
+        return Cache::remember($cacheKey, now()->addHour(), function () {
+            $provinces = Province::select('id', 'name', 'maps_code')->get();
+            $dataStock = [];
+
+            foreach ($provinces as $province) {
+                $provinceShelvingKey = "province_shelving_30days_{$province->id}_" . now()->format('Y-m-d');
+
+                $shelving = Cache::remember($provinceShelvingKey, now()->addHours(1), function () use ($province) {
+                    $visibility = DB::table('sales_visibilities')
+                        ->join('sales_activities', function ($join) {
+                            $join->on('sales_visibilities.sales_activity_id', '=', 'sales_activities.id')
+                                ->whereNotNull('sales_activities.outlet_id')
+                                ->where('sales_activities.created_at', '>=', now()->subDays(30));
+                        })
+                        ->join('outlets', function ($join) {
+                            $join->on('sales_activities.outlet_id', '=', 'outlets.id')
+                                ->whereNotNull('outlets.city_id');
+                        })
+                        ->join('cities', function ($join) {
+                            $join->on('outlets.city_id', '=', 'cities.id')
+                                ->whereNotNull('cities.province_code');
+                        })
+                        ->join('provinces', 'provinces.code', '=', 'cities.province_code')
+                        ->select(
+                            'provinces.id',
+                            'provinces.name',
+                            'provinces.maps_code',
+                            DB::raw('SUM(sales_visibilities.shelving) as total_shelving')
+                        )
+                        ->where('provinces.id', $province->id)
+                        ->groupBy('cities.province_code')
+                        ->first();
+
+                    return $visibility ? (int) $visibility->total_shelving : 0;
+                });
+
+                $mapsCode = strpos($province->maps_code, 'id-') === 0
+                    ? $province->maps_code
+                    : 'id-' . strtolower($province->maps_code);
+
+                $dataStock[] = [$mapsCode, $shelving];
+            }
+
+            return $dataStock;
+        });
+    }
+    // Method untuk clear cache
+    public function clearShelvingCache()
+    {
+        $provinces = Province::select('id')->get();
 
         foreach ($provinces as $province) {
-            $visibility = DB::table('sales_visibilities')
-                ->join('sales_activities', 'sales_visibilities.sales_activity_id', '=', 'sales_activities.id')
-                ->join('outlets', 'sales_activities.outlet_id', '=', 'outlets.id')
-                ->join('cities', 'outlets.city_id', '=', 'cities.id')
-                ->join('provinces', 'provinces.code', '=', 'cities.province_code')
-                ->select('provinces.id', 'provinces.name', 'provinces.maps_code', DB::raw('SUM(sales_visibilities.shelving) as total_shelving'))
-                ->where('provinces.id', $province->id)
-                ->groupBy('cities.province_code')
-                ->first();
-
-            $shelving = $visibility ? (int) $visibility->total_shelving : 0;
-
-            // Pastikan maps_code memiliki prefix 'id-'
-            $mapsCode = strpos($province->maps_code, 'id-') === 0
-                ? $province->maps_code
-                : 'id-' . strtolower($province->maps_code);
-
-            $dataStock[] = [$mapsCode, $shelving];
+            $provinceShelvingKey = "province_shelving_30days_{$province->id}_" . now()->format('Y-m-d');
+            Cache::forget($provinceShelvingKey);
         }
 
-        return $dataStock;
+        Cache::forget('shelving_per_city_30days_' . now()->format('Y-m-d_H'));
+    }
+
+    // Method untuk update cache ketika ada perubahan
+    public function updateShelvingCache($provinceId)
+    {
+        $provinceShelvingKey = "province_shelving_30days_{$provinceId}_" . now()->format('Y-m-d');
+        Cache::forget($provinceShelvingKey);
+        Cache::forget('shelving_per_city_30days_' . now()->format('Y-m-d_H'));
+
+        return $this->getShelvingPerCity();
     }
     private function getAverageMetrics($timeField, Request $request)
     {
