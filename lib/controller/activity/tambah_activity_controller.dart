@@ -411,6 +411,19 @@ class TambahActivityController extends GetxController {
       print('Error submit data: $e');
       print('Stack trace: $stackTrace');
       CustomAlerts.showError(Get.context!, "Gagal Mengirim Data", "Failed to submit data: $e");
+      if (e.toString() == "This activity has already been submitted and cannot be modified") {
+        _timer?.cancel();
+
+        /// check apabila data ada di sqlite, maka hapus data
+        bool isExists = await db.checkSalesActivityExists(detailOutlet.value!.id!);
+        if (isExists) {
+          await db.deleteSalesActivity(detailOutlet.value!.id!);
+        }
+      
+        activityController.initGetActivity();
+        EasyLoading.dismiss();
+        Get.back();
+      }
     } finally {
       EasyLoading.dismiss();
     }
