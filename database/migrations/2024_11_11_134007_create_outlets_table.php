@@ -18,14 +18,12 @@ return new class extends Migration {
                 ->on('users');  // Opsional
             $table->foreignUuid('city_id')->references('id')->on('cities');
             $table->foreignUuid('channel_id')->nullable()->references('id')->on('channels');
-            $table->dropColumn('channel');
             $table->string('code')->nullable()->unique();
             $table->string('name');
             $table->text('tipe_outlet')->nullable();
             $table->text('account')->nullable();
             $table->string('category');
             $table->string('distributor')->nullable();
-            $table->string('channel')->nullable();
             $table->string('TSO')->nullable();
             $table->string('KAM')->nullable();
             $table->char('visit_day', 1);
