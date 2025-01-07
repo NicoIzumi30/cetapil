@@ -15,6 +15,7 @@ use Illuminate\Http\Request;
 use App\Exports\SurveyExport;
 use App\Models\SalesActivity;
 use App\Exports\ProductExport;
+use App\Exports\OrderExport;
 use App\Models\SalesAvailability;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Log;
@@ -365,6 +366,32 @@ class DownloadController extends Controller
             return response()->json([
                 'status' => 'error',
                 'message' => 'Gagal mengunduh data av3m: ' . $e->getMessage()
+            ], 500);
+        }
+    }
+
+    public function downloadOrders(Request $request)
+    {
+        try {
+            if ($request->filled('orders_date')) {
+                $dates = explode(' to ', $request->orders_date);
+                $startDate = isset($dates[0]) ? Carbon::parse(trim($dates[0])) : null;
+                $endDate = isset($dates[1]) ? Carbon::parse(trim($dates[1])) : null;
+            }
+    
+            return Excel::download(
+                new OrderExport($startDate, $endDate, $request->orders_region),
+                'orders_' . now()->format('Y-m-d_His') . '.xlsx',
+                \Maatwebsite\Excel\Excel::XLSX
+            );
+        } catch (\Exception $e) {
+            Log::error('Orders Download Error:', [
+                'message' => $e->getMessage(),
+                'trace' => $e->getTraceAsString()
+            ]);
+            return response()->json([
+                'status' => 'error',
+                'message' => 'Gagal mengunduh data orders'
             ], 500);
         }
     }
