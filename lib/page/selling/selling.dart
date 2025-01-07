@@ -10,6 +10,8 @@ import '../../controller/selling/selling_controller.dart';
 import '../../model/list_selling_response.dart';
 
 class SellingPage extends GetView<SellingController> {
+  const SellingPage({Key? key}) : super(key: key);
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -17,7 +19,7 @@ class SellingPage extends GetView<SellingController> {
       resizeToAvoidBottomInset: false,
       body: SafeArea(
         child: Padding(
-          padding: EdgeInsets.fromLTRB(15, 15, 15, 0),
+          padding: const EdgeInsets.fromLTRB(15, 15, 15, 0),
           child: Column(
             children: [
               SizedBox(
@@ -35,7 +37,7 @@ class SellingPage extends GetView<SellingController> {
                   ),
                 ),
               ),
-              SizedBox(height: 15),
+              const SizedBox(height: 15),
               Expanded(
                 child: Obx(() {
                   return RefreshIndicator(
@@ -44,53 +46,29 @@ class SellingPage extends GetView<SellingController> {
                     },
                     child: Stack(
                       children: [
-                        // Main Content
                         controller.filteredSellingData.isEmpty
                             ? _buildEmptyState()
                             : ListView.builder(
-                                physics: AlwaysScrollableScrollPhysics(),
+                                physics: const AlwaysScrollableScrollPhysics(),
                                 itemCount: controller.filteredSellingData.length,
                                 itemBuilder: (context, index) {
                                   final selling = controller.filteredSellingData[index];
+                                  if (selling == null) return const SizedBox.shrink();
+                                  
                                   return SellingCard(
                                     selling: selling,
                                     controller: controller,
                                     ontap: () {
                                       if (selling.isDrafted ?? false) {
-                                        // Load draft data into controller before navigating
                                         controller.loadDraftForEdit(selling);
-                                        // controller.checked_in = selling.checkedIn;
                                         Get.to(() => TambahSelling());
                                       } else {
-                                        // print("asd");
                                         Get.to(() => DetailSelling(selling));
                                       }
                                     },
                                   );
                                 },
                               ),
-
-                        // Loading Overlay
-                        // if (controller.isLoading.value)
-                        //   Container(
-                        //     color: Colors.black12,
-                        //     child: Center(
-                        //       child: Column(
-                        //         mainAxisSize: MainAxisSize.min,
-                        //         children: [
-                        //           CircularProgressIndicator(),
-                        //           SizedBox(height: 16),
-                        //           Text(
-                        //             'Menyinkronkan data...',
-                        //             style: TextStyle(
-                        //               fontSize: 14,
-                        //               color: Colors.black87,
-                        //             ),
-                        //           ),
-                        //         ],
-                        //       ),
-                        //     ),
-                        //   ),
                       ],
                     ),
                   );
@@ -114,9 +92,9 @@ class SellingPage extends GetView<SellingController> {
 
   Widget _buildEmptyState() {
     return ListView(
-      physics: AlwaysScrollableScrollPhysics(),
+      physics: const AlwaysScrollableScrollPhysics(),
       children: [
-        SizedBox(height: 100),
+        const SizedBox(height: 100),
         Center(
           child: Column(
             mainAxisAlignment: MainAxisAlignment.center,
@@ -126,7 +104,7 @@ class SellingPage extends GetView<SellingController> {
                 height: 64,
                 color: Colors.grey,
               ),
-              SizedBox(height: 16),
+              const SizedBox(height: 16),
               Text(
                 'Tidak ada data penjualan',
                 style: TextStyle(
@@ -135,7 +113,7 @@ class SellingPage extends GetView<SellingController> {
                   fontWeight: FontWeight.bold,
                 ),
               ),
-              SizedBox(height: 8),
+              const SizedBox(height: 8),
               Text(
                 'Tarik ke bawah untuk memuat data',
                 style: TextStyle(
@@ -163,15 +141,38 @@ class SellingCard extends StatelessWidget {
     required this.ontap,
   }) : super(key: key);
 
-  O.Outlet get outlet =>
-      controller.filteredOutlets.where((element) => element.id == selling.outlet!.id).first;
+  O.Outlet get outlet {
+    try {
+      return controller.filteredOutlets.firstWhere(
+        (element) => element.id == selling.outlet?.id,
+        orElse: () => O.Outlet(
+          id: selling.outlet?.id ?? "",
+          name: 'Unknown Outlet',
+          category: 'Unknown Category',
+        ),
+      );
+    } catch (e) {
+      debugPrint('Error getting outlet: $e');
+      return O.Outlet(
+        id: "",
+        name: 'Error Loading Outlet',
+        category: 'Unknown Category',
+      );
+    }
+  }
+
   @override
   Widget build(BuildContext context) {
+    final outletName = selling.outlet?.name ?? 'No Name';
+    final formattedDate = selling.createdAt != null
+        ? DateFormat('EEEE, dd/MM/yyyy').format(DateTime.parse(selling.createdAt!))
+        : '-';
+
     return Container(
       margin: const EdgeInsets.only(bottom: 16),
       decoration: BoxDecoration(
         borderRadius: BorderRadius.circular(10),
-        gradient: LinearGradient(
+        gradient: const LinearGradient(
           begin: Alignment.topCenter,
           end: Alignment.bottomCenter,
           colors: [
@@ -183,7 +184,7 @@ class SellingCard extends StatelessWidget {
           BoxShadow(
             color: Colors.black.withOpacity(0.05),
             blurRadius: 4,
-            offset: Offset(0, 2),
+            offset: const Offset(0, 2),
           ),
         ],
       ),
@@ -199,7 +200,7 @@ class SellingCard extends StatelessWidget {
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
                       Text(
-                        selling.outlet!.name ?? 'No Name',
+                        outletName,
                         style: const TextStyle(
                           fontWeight: FontWeight.bold,
                         ),
@@ -221,10 +222,11 @@ class SellingCard extends StatelessWidget {
                 ),
                 const SizedBox(width: 16),
                 Text(
-                  selling.createdAt != null
-                      ? DateFormat('EEEE, dd/MM/yyyy').format(DateTime.parse(selling.createdAt!))
-                      : '-',
-                  style: TextStyle(fontSize: 11, fontStyle: FontStyle.italic),
+                  formattedDate,
+                  style: const TextStyle(
+                    fontSize: 11,
+                    fontStyle: FontStyle.italic,
+                  ),
                 ),
               ],
             ),
@@ -232,85 +234,101 @@ class SellingCard extends StatelessWidget {
             Row(
               mainAxisAlignment: MainAxisAlignment.spaceBetween,
               children: [
-                Container(
-                  width: 80,
-                  padding: EdgeInsets.symmetric(vertical: 7),
-                  decoration: BoxDecoration(
-                    color: selling.isDrafted! ? Colors.white : AppColors.primary,
-                    borderRadius: BorderRadius.circular(4),
-                    border: selling.isDrafted! ? Border.all(color: AppColors.primary) : null,
-                  ),
-                  child: Center(
-                    child: Text(
-                      selling.isDrafted! ? 'Draft' : 'Terkirim',
-                      style: TextStyle(
-                        fontSize: 12,
-                        fontWeight: FontWeight.bold,
-                        color: selling.isDrafted! ? AppColors.primary : Colors.white,
-                      ),
-                    ),
-                  ),
-                ),
+                _buildStatusContainer(),
                 Row(
                   children: [
-                    if (selling.isDrafted!)
-                      OutlinedButton(
-                        onPressed: () {
-                          showDialog(
-                            context: context,
-                            builder: (context) => AlertDialog(
-                              title: Text('Hapus Draft'),
-                              content: Text('Apakah Anda yakin ingin menghapus draft ini?'),
-                              actions: [
-                                TextButton(
-                                  onPressed: () => Navigator.pop(context),
-                                  child: Text('Batal'),
-                                ),
-                                TextButton(
-                                  onPressed: () {
-                                    Navigator.pop(context);
-                                    Get.find<SellingController>().deleteDraft(selling.id!);
-                                  },
-                                  child: Text('Hapus'),
-                                  style: TextButton.styleFrom(
-                                    foregroundColor: Colors.red,
-                                  ),
-                                ),
-                              ],
-                            ),
-                          );
-                        },
-                        style: OutlinedButton.styleFrom(
-                          foregroundColor: Colors.white,
-                          backgroundColor: Colors.red[400],
-                          minimumSize: const Size(80, 30),
-                          shape: RoundedRectangleBorder(
-                            borderRadius: BorderRadius.circular(4),
-                          ),
-                        ),
-                        child: Text('Hapus'),
-                      ),
-                    SizedBox(width: 8),
-                    ElevatedButton(
-                      onPressed: ontap,
-                      style: ElevatedButton.styleFrom(
-                        backgroundColor: Colors.blue[600],
-                        minimumSize: const Size(80, 30),
-                        shape: RoundedRectangleBorder(
-                          borderRadius: BorderRadius.circular(4),
-                        ),
-                      ),
-                      child: const Text(
-                        'Lihat',
-                        style: TextStyle(color: Colors.white),
-                      ),
-                    ),
+                    if (selling.isDrafted ?? false) _buildDeleteButton(context),
+                    const SizedBox(width: 8),
+                    _buildViewButton(),
                   ],
                 ),
               ],
             ),
           ],
         ),
+      ),
+    );
+  }
+
+  Widget _buildStatusContainer() {
+    final isDrafted = selling.isDrafted ?? false;
+    return Container(
+      width: 80,
+      padding: const EdgeInsets.symmetric(vertical: 7),
+      decoration: BoxDecoration(
+        color: isDrafted ? Colors.white : AppColors.primary,
+        borderRadius: BorderRadius.circular(4),
+        border: isDrafted ? Border.all(color: AppColors.primary) : null,
+      ),
+      child: Center(
+        child: Text(
+          isDrafted ? 'Draft' : 'Terkirim',
+          style: TextStyle(
+            fontSize: 12,
+            fontWeight: FontWeight.bold,
+            color: isDrafted ? AppColors.primary : Colors.white,
+          ),
+        ),
+      ),
+    );
+  }
+
+  Widget _buildDeleteButton(BuildContext context) {
+    return OutlinedButton(
+      onPressed: () => _showDeleteConfirmation(context),
+      style: OutlinedButton.styleFrom(
+        foregroundColor: Colors.white,
+        backgroundColor: Colors.red[400],
+        minimumSize: const Size(80, 30),
+        shape: RoundedRectangleBorder(
+          borderRadius: BorderRadius.circular(4),
+        ),
+      ),
+      child: const Text('Hapus'),
+    );
+  }
+
+  Widget _buildViewButton() {
+    return ElevatedButton(
+      onPressed: ontap,
+      style: ElevatedButton.styleFrom(
+        backgroundColor: Colors.blue[600],
+        minimumSize: const Size(80, 30),
+        shape: RoundedRectangleBorder(
+          borderRadius: BorderRadius.circular(4),
+        ),
+      ),
+      child: const Text(
+        'Lihat',
+        style: TextStyle(color: Colors.white),
+      ),
+    );
+  }
+
+  void _showDeleteConfirmation(BuildContext context) {
+    showDialog(
+      context: context,
+      builder: (context) => AlertDialog(
+        title: const Text('Hapus Draft'),
+        content: const Text('Apakah Anda yakin ingin menghapus draft ini?'),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.pop(context),
+            child: const Text('Batal'),
+          ),
+          TextButton(
+            onPressed: () {
+              Navigator.pop(context);
+              if (selling.id != null) {
+                Get.find<SellingController>().deleteDraft(selling.id!);
+              }
+            },
+            style: TextButton.styleFrom(
+              foregroundColor: Colors.red,
+            ),
+            child: const Text('Hapus'),
+          ),
+        ],
       ),
     );
   }
