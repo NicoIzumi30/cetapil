@@ -388,8 +388,8 @@ class ClipImage extends StatelessWidget {
   });
 
   String _sanitizeUrl(String url) {
-    print("https://dev-cetaphil.i-am.host${url}");
-    return "https://dev-cetaphil.i-am.host${url}";
+    print("https://cetaphil.id${url}");
+    return "https://cetaphil.id${url}";
   }
 
   @override

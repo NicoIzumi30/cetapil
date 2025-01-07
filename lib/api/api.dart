@@ -29,7 +29,7 @@ import '../model/form_outlet_response.dart';
 import '../model/get_city_response.dart';
 import '../model/login_response.dart';
 
-const String baseUrl = 'https://dev-cetaphil.i-am.host';
+const String baseUrl = 'https://cetaphil.id';
 // const String baseUrl = 'https://c877-36-68-56-36.ngrok-free.app';
 final GetStorage storage = GetStorage();
 
@@ -45,6 +45,7 @@ class Api {
       var response = await http.Response.fromStream(streamedResponse);
 
       if (response.statusCode == 200) {
+        print(response.body);
         return LoginResponse.fromJson(json.decode(response.body));
       } else if (response.statusCode == 401) {
         throw 'Email atau password salah';

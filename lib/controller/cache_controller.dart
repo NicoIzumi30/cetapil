@@ -36,7 +36,7 @@ class CachedPdfController extends GetxController {
         return;
       }
 
-      final url = 'https://dev-cetaphil.i-am.host/storage${urlPdf.value}';
+      final url = 'https://cetaphil.id/storage${urlPdf.value}';
 
       // Try to get file from cache first
       final fileInfo = await _cacheManager.getFileFromCache(_cacheKey);
@@ -167,7 +167,7 @@ class CachedVideoController extends GetxController {
         throw Exception('Video URL is empty');
       }
 
-      final fullUrl = 'https://dev-cetaphil.i-am.host/storage$url';
+      final fullUrl = 'https://cetaphil.id/storage$url';
 
       // Reset cache if URL changed
       if (urlVideo.value != fullUrl) {

@@ -90,28 +90,6 @@ class OutletPage extends GetView<OutletController> {
                                     return OutletCard(outlet: outlet);
                                   },
                                 ),
-
-                          // Loading Overlay
-                          if (controller.isSyncing.value)
-                            Container(
-                              color: Colors.black12,
-                              child: Center(
-                                child: Column(
-                                  mainAxisSize: MainAxisSize.min,
-                                  children: [
-                                    CircularProgressIndicator(),
-                                    SizedBox(height: 16),
-                                    Text(
-                                      'Menyinkronkan data...',
-                                      style: TextStyle(
-                                        fontSize: 14,
-                                        color: Colors.black87,
-                                      ),
-                                    ),
-                                  ],
-                                ),
-                              ),
-                            ),
                         ],
                       ),
                     );
@@ -134,28 +112,6 @@ class OutletPage extends GetView<OutletController> {
                                     return OutletCard(outlet: outlet);
                                   },
                                 ),
-
-                          // Loading Overlay
-                          if (controller.isSyncing.value)
-                            Container(
-                              color: Colors.black12,
-                              child: Center(
-                                child: Column(
-                                  mainAxisSize: MainAxisSize.min,
-                                  children: [
-                                    CircularProgressIndicator(),
-                                    SizedBox(height: 16),
-                                    Text(
-                                      'Menyinkronkan data...',
-                                      style: TextStyle(
-                                        fontSize: 14,
-                                        color: Colors.black87,
-                                      ),
-                                    ),
-                                  ],
-                                ),
-                              ),
-                            ),
                         ],
                       ),
                     );
@@ -414,7 +370,7 @@ class OutletCard extends StatelessWidget {
                     borderRadius: BorderRadius.circular(8),
                     child: !outlet.images!.first.image!.contains("/data".toLowerCase())
                         ? Image.network(
-                            "https://dev-cetaphil.i-am.host${outlet.images!.first.image}",
+                            "https://cetaphil.id${outlet.images!.first.image}",
                             width: 100,
                             height: 100,
                             fit: BoxFit.cover,

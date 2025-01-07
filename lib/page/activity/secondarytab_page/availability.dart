@@ -121,40 +121,40 @@ class AvailabilityPage extends GetView<TambahActivityController> {
                       // Navigate to edit screen
                       await Get.to(() => const TambahAvailability());
                     },
-                    onDelete: () async{
-                      if (!Get.isRegistered<TambahAvailabilityController>()) {
-                        Get.put(TambahAvailabilityController());
-                      }
-                      showDialog(
-                        context: context,
-                        builder: (context) => AlertDialog(
-                          title: Text('Hapus Item'),
-                          content: Text(
-                              'Apakah Anda yakin ingin menghapus Item ini?'),
-                          actions: [
-                            TextButton(
-                              onPressed: () => Navigator.pop(context),
-                              child: Text('Batal'),
-                            ),
-                            TextButton(
-                              onPressed: () async {
-                                Navigator.pop(context);
-                                final prodController =
-                                Get.find<TambahAvailabilityController>();
-                                controller.availabilityDraftItems.removeWhere(
-                                        (item) => item['category'] == category);
-                                prodController.productValues.clear();
-                                prodController.selectedCategory.value = null;
-                              },
-                              child: Text('Hapus'),
-                              style: TextButton.styleFrom(
-                                foregroundColor: Colors.red,
-                              ),
-                            ),
-                          ],
-                        ),
-                      );
-                    },
+                    // onDelete: () async{
+                    //   if (!Get.isRegistered<TambahAvailabilityController>()) {
+                    //     Get.put(TambahAvailabilityController());
+                    //   }
+                    //   showDialog(
+                    //     context: context,
+                    //     builder: (context) => AlertDialog(
+                    //       title: Text('Hapus Item'),
+                    //       content: Text(
+                    //           'Apakah Anda yakin ingin menghapus Item ini?'),
+                    //       actions: [
+                    //         TextButton(
+                    //           onPressed: () => Navigator.pop(context),
+                    //           child: Text('Batal'),
+                    //         ),
+                    //         TextButton(
+                    //           onPressed: () async {
+                    //             Navigator.pop(context);
+                    //             final prodController =
+                    //             Get.find<TambahAvailabilityController>();
+                    //             controller.availabilityDraftItems.removeWhere(
+                    //                     (item) => item['category'] == category);
+                    //             prodController.productValues.clear();
+                    //             prodController.selectedCategory.value = null;
+                    //           },
+                    //           child: Text('Hapus'),
+                    //           style: TextButton.styleFrom(
+                    //             foregroundColor: Colors.red,
+                    //           ),
+                    //         ),
+                    //       ],
+                    //     ),
+                    //   );
+                    // },
                   ),
                 );
               }).toList(),
@@ -228,13 +228,14 @@ class CollapsibleCategoryGroup extends StatefulWidget {
   final String category;
   final List<Map<String, dynamic>> items;
   final VoidCallback onEdit;
-  final VoidCallback onDelete;
+  // final VoidCallback onDelete;
 
   const CollapsibleCategoryGroup({
     Key? key,
     required this.category,
     required this.items,
-    required this.onEdit, required this.onDelete,
+    required this.onEdit, 
+    // required this.onDelete,
   }) : super(key: key);
 
   @override
@@ -302,13 +303,13 @@ class _CollapsibleCategoryGroupState extends State<CollapsibleCategoryGroup> {
                       constraints: BoxConstraints(),
                       tooltip: 'Edit Category Products',
                     ),
-                    IconButton(
-                      onPressed: widget.onDelete,
-                      icon: Icon(Icons.delete, color: Colors.red, size: 20),
-                      padding: EdgeInsets.zero,
-                      constraints: BoxConstraints(),
-                      tooltip: 'Delete Category Products',
-                    ),
+                    // IconButton(
+                    //   onPressed: widget.onDelete,
+                    //   icon: Icon(Icons.delete, color: Colors.red, size: 20),
+                    //   padding: EdgeInsets.zero,
+                    //   constraints: BoxConstraints(),
+                    //   tooltip: 'Delete Category Products',
+                    // ),
                   ],
                 ),
               ),

@@ -34,7 +34,7 @@ class PdfController extends GetxController {
         return;
       }
 
-      final url = 'https://dev-cetaphil.i-am.host/storage${urlPdf.value}';
+      final url = 'https://cetaphil.id/storage${urlPdf.value}';
       final response = await http.get(Uri.parse(url));
 
       if (response.statusCode == 200) {

@@ -13,7 +13,7 @@ import '../../../widget/back_button.dart';
 import '../../../widget/dialog.dart';
 import '../../../widget/dropdown_textfield.dart';
 
-const String BASE_URL = 'https://dev-cetaphil.i-am.host/storage/';
+const String BASE_URL = 'https://cetaphil.id/storage/';
 
 class TambahPrimaryVisibility extends GetView<TambahVisibilityController> {
   final String id;

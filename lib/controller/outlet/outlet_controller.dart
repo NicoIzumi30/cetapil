@@ -148,18 +148,24 @@ class OutletController extends GetxController {
   }
 
   // SECTION: Data Loading and Sync
-  Future<void> loadOutlets() async {
+  Future<void> loadOutlets({stopLoop = false}) async {
     try {
       isLoading.value = true;
       final results = await _db.getAllOutlets();
       _sortOutlets(results);
 
-      if (results.isEmpty) {
-        await refreshOutlets();
+      if (results.isEmpty && !stopLoop) {
+        await refreshOutlets(stopLoop: true);
       }
     } catch (e) {
-      CustomAlerts.showError(
-          Get.context!, "Gagal", "Gagal mengambil data: Periksa koneksi Anda dan coba lagi");
+      final results = await _db.getAllOutlets();
+      if (results.isEmpty) {
+        CustomAlerts.showError(
+            Get.context!, "Gagal", "Gagal mengambil data: Karena data kosong");
+      } else {
+        CustomAlerts.showError(
+            Get.context!, "Gagal", "Gagal mengambil data: Periksa koneksi Anda dan coba lagi");
+      }
       print('Error loading outlets: $e');
     } finally {
       isLoading.value = false;
@@ -175,10 +181,10 @@ class OutletController extends GetxController {
     outlets.assignAll(results);
   }
 
-  Future<void> refreshOutlets() async {
+  Future<void> refreshOutlets({stopLoop = false}) async {
     try {
       isSyncing.value = true;
-      // CustomAlerts.showLoading(Get.context!, "Processing", "Mengambil data outlet...");
+      CustomAlerts.showLoading(Get.context!, "Processing", "Mengambil data outlet...");
 
       final apiResponse = await Api.getOutletList();
       if (apiResponse.status != "OK") {
@@ -186,12 +192,19 @@ class OutletController extends GetxController {
       }
 
       await _syncOutlets(apiResponse.data ?? []);
-      await loadOutlets();
+      await loadOutlets(stopLoop: stopLoop);
 
       CustomAlerts.showSuccess(Get.context!, "Berhasil", "Data outlet berhasil diperbarui");
     } catch (e) {
-      CustomAlerts.showError(
-          Get.context!, "Gagal", "Gagal mengambil data: Periksa koneksi Anda dan coba lagi");
+      print('Error refreshing outlets: $e');
+     final results = await _db.getAllOutlets();
+      if (results.isEmpty) {
+        CustomAlerts.showError(
+            Get.context!, "Gagal", "Gagal mengambil data: Karena data kosong");
+      } else {
+        CustomAlerts.showError(
+            Get.context!, "Gagal", "Gagal mengambil data: Periksa koneksi Anda dan coba lagi");
+      }
     } finally {
       isSyncing.value = false;
       CustomAlerts.dismissLoading();

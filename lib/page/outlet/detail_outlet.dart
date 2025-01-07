@@ -295,7 +295,7 @@ class ClipImage extends StatelessWidget {
   String? _sanitizeUrl(String? url) {
     if (url == null || url.isEmpty) return null;
     if (url.toLowerCase().contains("/data")) return url;
-    return "https://dev-cetaphil.i-am.host$url";
+    return "https://cetaphil.id$url";
   }
 
   Widget _buildErrorWidget(BuildContext context, Object? error, StackTrace? stackTrace) {
