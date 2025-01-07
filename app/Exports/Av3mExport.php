@@ -1,85 +1,96 @@
 <?php
-
 namespace App\Exports;
 
-use Maatwebsite\Excel\Concerns\FromCollection;
-use Maatwebsite\Excel\Concerns\WithHeadings;
-use Maatwebsite\Excel\Concerns\WithMapping;
-use Maatwebsite\Excel\Concerns\WithStyles;
-use PhpOffice\PhpSpreadsheet\Worksheet\Worksheet;
-use Maatwebsite\Excel\Concerns\ShouldAutoSize;
-use PhpOffice\PhpSpreadsheet\Style\Alignment;
-use PhpOffice\PhpSpreadsheet\Style\Border;
-use PhpOffice\PhpSpreadsheet\Style\Fill;
+use App\Models\Outlet;
+use App\Models\Product;
+use Illuminate\Support\Collection;
 use Illuminate\Support\Facades\Log;
+use Maatwebsite\Excel\Concerns\{
+    FromCollection,
+    WithHeadings,
+    WithMapping,
+    WithStyles,
+    ShouldAutoSize
+};
+use PhpOffice\PhpSpreadsheet\Style\{Fill, Border, Alignment};
+use PhpOffice\PhpSpreadsheet\Worksheet\Worksheet;
 
 class Av3mExport implements FromCollection, WithHeadings, WithMapping, WithStyles, ShouldAutoSize
 {
-    protected $data;
+    private Collection $products;
+    private Collection $data;
+    private array $baseHeadings = ['Code Outlet', 'Nama Outlet'];
 
-    public function __construct($data)
+    public function __construct()
     {
-        $this->data = $data;
+        $this->products = Product::select('id', 'sku')->get();
+        $this->data = Outlet::select('id', 'code', 'name')
+        ->whereExists(function ($query) {
+            $query->select('outlet_id')
+                  ->from('av3ms') // Adjust table name as needed
+                  ->whereColumn('outlet_id', 'outlets.id');
+        })
+        ->get();
     }
 
-    public function collection()
+    public function collection(): Collection
     {
         return $this->data;
     }
 
     public function headings(): array
     {
-        return [
-            'Kode Outlet',
-            'Nama Outlet',
-            'Product SKU',
-            'SKU Code',
-            'Av3m',
-            'Last Updated'
-        ];
+        return array_merge(
+            $this->baseHeadings, 
+            $this->products->pluck('sku')->unique()->values()->toArray()
+        );
     }
 
     public function map($row): array
     {
         try {
-            return [
-                $row->outlet->code ?? '',
-                $row->outlet->name ?? '',
-                $row->product->sku ?? '',
-                $row->product->code ?? '',
-                $row->av3m ?? '0',
-                $row->updated_at ?? '',
-            ];
+            return array_merge(
+                [$row->code ?? '', $row->name ?? ''],
+                $this->products->map(fn($product) => getAv3m($row->id, $product->id))->toArray()
+            );
         } catch (\Exception $e) {
             Log::error('Error in Av3mExport mapping', [
                 'error' => $e->getMessage(),
                 'row' => $row->id ?? 'unknown'
             ]);
-
-            return array_fill(0, 12, 'Error');
+            return array_fill(0, count($this->products) + 2, 'Error');
         }
     }
 
-    public function styles(Worksheet $sheet)
+    public function styles(Worksheet $sheet): array
     {
-        $lastRow = $sheet->getHighestRow();
-        $lastColumn = $sheet->getHighestColumn();
+        $lastCell = $sheet->getHighestRowAndColumn();
+        $range = "A1:{$lastCell['column']}{$lastCell['row']}";
 
-        // Apply styling to entire worksheet (headers and content)
-        $sheet->getStyle("A1:{$lastColumn}{$lastRow}")->applyFromArray([
+        $this->applyGlobalStyles($sheet, $range);
+        $this->applyHeaderStyles($sheet, $lastCell['column']);
+
+        return [1 => ['font' => ['bold' => true]]];
+    }
+
+    private function applyGlobalStyles(Worksheet $sheet, string $range): void
+    {
+        $sheet->getStyle($range)->applyFromArray([
             'alignment' => [
                 'horizontal' => Alignment::HORIZONTAL_CENTER,
                 'vertical' => Alignment::VERTICAL_CENTER,
                 'wrapText' => true,
             ],
             'borders' => [
-                'allBorders' => [
-                    'borderStyle' => Border::BORDER_THIN,
-                ],
+                'allBorders' => ['borderStyle' => Border::BORDER_THIN],
             ],
         ]);
 
-        // Additional header styling
+        $sheet->getDefaultRowDimension()->setRowHeight(20);
+    }
+
+    private function applyHeaderStyles(Worksheet $sheet, string $lastColumn): void
+    {
         $sheet->getStyle("A1:{$lastColumn}1")->applyFromArray([
             'font' => [
                 'bold' => true,
@@ -90,12 +101,5 @@ class Av3mExport implements FromCollection, WithHeadings, WithMapping, WithStyle
                 'startColor' => ['rgb' => '4A90E2'],
             ],
         ]);
-
-        // Set row height
-        $sheet->getDefaultRowDimension()->setRowHeight(20);
-
-        return [
-            1 => ['font' => ['bold' => true]],
-        ];
     }
 }
