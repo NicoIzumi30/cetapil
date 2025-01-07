@@ -26,7 +26,7 @@ return new class extends Migration
             $table->date('competitor_promo_start')->nullable();
             $table->date('competitor_promo_end')->nullable();
             $table->integer('shelf_width')->nullable();
-            $table->string('shelving')->nullable();
+            $table->integer('shelving')->nullable();
             $table->enum('has_secondary_display', ['Y', 'N'])->nullable();
             $table->string('display_photo')->nullable();
             $table->string('display_photo_2')->nullable();
