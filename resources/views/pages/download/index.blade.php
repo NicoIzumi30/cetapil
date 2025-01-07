@@ -41,6 +41,40 @@
             </x-button.info>
         </x-pages.download.download-card>
 
+        <x-pages.download.download-card iconName="fluent_box_20_filled">
+            <x-slot:cardTitle>
+                Orders
+            </x-slot:cardTitle>
+
+            <div class="mb-6">
+                <div>
+                    <label for="orders-start-date">Tanggal Mulai:</label>
+                    <input id="orders-start-date" class="form-control" type="text" name="orders-start-date"
+                        placeholder="DD/MM/YYYY" aria-describedby="name" />
+                </div>
+                <div>
+                    <label for="orders-end-date">Tanggal Selesai:</label>
+                    <input id="orders-end-date" class="form-control" type="text" name="orders-end-date"
+                        placeholder="DD/MM/YYYY" aria-describedby="name" />
+                </div>
+                <div>
+                    <label for="orders-region">Filter By Regional: </label>
+                    <select id="orders-region" name="orders-region" class="w-full">
+                        <option value="" selected disabled>-- Pilih Regional --</option>
+                        <option value="all">Semua Regional</option>
+                        @foreach ($provinces as $province)
+                            <option value="{{ $province->code }}">{{ $province->name }}</option>
+                        @endforeach
+                    </select>
+                </div>
+            </div>
+
+            <x-button.info class="w-full" data-orders-download>
+                <span id="downloadBtnText">Download</span>
+                <span id="downloadBtnLoading" class="hidden">Downloading...</span>
+            </x-button.info>
+        </x-pages.download.download-card>
+
         <x-pages.download.download-card iconName="fluent_clipboard">
             <x-slot:cardTitle>
                 Survey
@@ -205,10 +239,12 @@
 @push('scripts')
     <script>
         // Initialize Select and Datepicker Components
-        const downloadMenus = ["routing", "visibility", "activity", "survey", "selling", "availability"]
+        const downloadMenus = ["routing", "visibility", "activity", "survey", "selling", "availability", "orders"];
         downloadMenus.forEach(menu => {
             $(`#${menu}-region`).select2();
-            $(`#${menu}-start-date, #${menu}-end-date`).flatpickr();
+            $(`#${menu}-start-date, #${menu}-end-date`).flatpickr({
+                dateFormat: "Y-m-d"
+            });
         });
     </script>
 @endpush
@@ -217,72 +253,72 @@
     <script>
 $(document).ready(function () {
     function setupDownloadButton(selector, options) {
-        $(selector).off('click').on('click', function (e) {
-            e.preventDefault();
+    $(selector).off('click').on('click', function (e) {
+        e.preventDefault();
 
-            const $btn = $(this);
-            const $btnText = $btn.find('#downloadBtnText');
-            const $btnLoading = $btn.find('#downloadBtnLoading');
+        const $btn = $(this);
+        const $btnText = $btn.find('#downloadBtnText');
+        const $btnLoading = $btn.find('#downloadBtnLoading');
 
-            // Get queryParams if it's a function
-            const queryParams = typeof options.getQueryParams === 'function'
-                ? options.getQueryParams()
-                : options.queryParams || {};
+        // Get queryParams if it's a function
+        const queryParams = typeof options.getQueryParams === 'function'
+            ? options.getQueryParams()
+            : options.queryParams || {};
 
-            // Handle region validation if required
-            if (options.requireRegion) {
-                const regionValue = queryParams.region || queryParams[options.regionParam];
-                if (!regionValue || regionValue === '') {
-                    toast('error', 'Silakan pilih regional terlebih dahulu');
-                    return;
-                }
+        // Handle region validation if required, but allow 'all' as valid value
+        if (options.requireRegion) {
+            const regionValue = queryParams.region || queryParams[options.regionParam];
+            if (!regionValue) {  // Hanya check jika region kosong/null/undefined
+                toast('error', 'Silakan pilih regional terlebih dahulu');
+                return;
             }
+        }
 
-            // Toggle button state
-            $btnText.addClass('hidden');
-            $btnLoading.removeClass('hidden');
-            $btn.prop('disabled', true);
+        // Toggle button state
+        $btnText.addClass('hidden');
+        $btnLoading.removeClass('hidden');
+        $btn.prop('disabled', true);
 
-            const params = new URLSearchParams(queryParams);
-            const fullUrl = `${options.fetchUrl}?${params.toString()}`;
+        const params = new URLSearchParams(queryParams);
+        const fullUrl = `${options.fetchUrl}?${params.toString()}`;
 
-            // Create and append hidden form
-            const form = document.createElement('form');
-            form.method = 'GET';
-            form.action = options.formAction ? `${options.formAction}?${params.toString()}` : options.fetchUrl;
-            document.body.appendChild(form);
+        // Create and append hidden form
+        const form = document.createElement('form');
+        form.method = 'GET';
+        form.action = options.formAction ? `${options.formAction}?${params.toString()}` : options.fetchUrl;
+        document.body.appendChild(form);
 
-            fetch(fullUrl)
-                .then(response => {
-                    if (response.ok) {
-                        if (options.useForm) {
-                            form.submit();
-                        } else {
-                            window.location.href = fullUrl;
-                        }
-                        toast('success', "File sedang diunduh", 1000);
+        fetch(fullUrl)
+            .then(response => {
+                if (response.ok) {
+                    if (options.useForm) {
+                        form.submit();
                     } else {
-                        return response.json().then(data => {
-                            throw new Error(data.message || "Gagal mengunduh file");
-                        });
+                        window.location.href = fullUrl;
                     }
-                })
-                .catch(error => {
-                    console.error('Download error:', error);
-                    toast('error', error.message || "Gagal mengunduh file", 1000);
-                })
-                .finally(() => {
-                    setTimeout(() => {
-                        $btnText.removeClass('hidden');
-                        $btnLoading.addClass('hidden');
-                        $btn.prop('disabled', false);
-                        if (form && form.parentNode) {
-                            document.body.removeChild(form);
-                        }
-                    }, 1000);
-                });
-        });
-    }
+                    toast('success', "File sedang diunduh", 1000);
+                } else {
+                    return response.json().then(data => {
+                        throw new Error(data.message || "Gagal mengunduh file");
+                    });
+                }
+            })
+            .catch(error => {
+                console.error('Download error:', error);
+                toast('error', error.message || "Gagal mengunduh file", 1000);
+            })
+            .finally(() => {
+                setTimeout(() => {
+                    $btnText.removeClass('hidden');
+                    $btnLoading.addClass('hidden');
+                    $btn.prop('disabled', false);
+                    if (form && form.parentNode) {
+                        document.body.removeChild(form);
+                    }
+                }, 1000);
+            });
+    });
+}
 
     // Function to create date range params
     function createDateRangeParams(prefix) {
@@ -308,13 +344,6 @@ $(document).ready(function () {
             timer: duration,
             timerProgressBar: true
         });
-        setupDownloadButton('[data-kota-download]', {
-            fetchUrl: '{{ route('download.city') }}',
-        });
-        // Download untuk Pengguna
-        setupDownloadButton('[data-pengguna-download]', {
-            fetchUrl: '{{ route('download.pengguna') }}',
-        });
     }
 
     // Simple downloads (no filters)
@@ -338,6 +367,7 @@ $(document).ready(function () {
         { selector: '[data-visibility-download]', prefix: 'visibility', url: '{{ route("download.visibility") }}' },
         { selector: '[data-survey-download]', prefix: 'survey', url: '{{ route("download.survey") }}' },
         { selector: '[data-availability-download]', prefix: 'availability', url: '{{ route("download.availability") }}' },
+        { selector: '[data-orders-download]', prefix: 'orders', url: '{{ route("download.orders") }}', requireRegion: true, regionParam: 'orders_region' },
         { selector: '[data-selling-download]', prefix: 'selling', url: '{{ route("download.selling") }}', requireRegion: true, regionParam: 'selling_region' }
     ];
 
@@ -531,5 +561,43 @@ $(document).ready(function () {
                 });
         });
         //END PENGGUNA DOWNLOAD
+
+        //ORDERS DOOWNLAOD
+        $('[data-orders-download]').click(function(e) {
+            e.preventDefault();
+
+            const startDate = $('#orders-start-date').val();
+            const endDate = $('#orders-end-date').val();
+            const region = $('#orders-region').val();
+
+            if (!region) {
+                toast('error', 'Silakan pilih regional terlebih dahulu');
+                return;
+            }
+
+            const $btn = $(this);
+            const $btnText = $btn.find('#downloadBtnText');
+            const $btnLoading = $btn.find('#downloadBtnLoading');
+
+            $btnText.addClass('hidden');
+            $btnLoading.removeClass('hidden');
+            $btn.prop('disabled', true);
+
+            const params = new URLSearchParams();
+            if (startDate && endDate) {
+                params.append('orders_date', `${startDate} to ${endDate}`);
+            }
+            params.append('orders_region', region || 'all');
+
+            window.location.href = `{{ route('download.orders') }}?${params.toString()}`;
+            toast('success', 'File sedang diunduh');
+
+            setTimeout(() => {
+                $btnText.removeClass('hidden');
+                $btnLoading.addClass('hidden');
+                $btn.prop('disabled', false);
+            }, 1000);
+        });
+        //END ORDERS DOWNLOAD
     </script>
 @endpush
