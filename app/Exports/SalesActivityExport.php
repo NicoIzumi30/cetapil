@@ -75,11 +75,11 @@ class SalesActivityExport implements FromCollection, WithHeadings, WithMapping, 
                 $row->views_knowledge ?? '0',
                 $row->status ?? '',
                 $row->radius_status ?? '',
-                $row->time_availability ?? '0',
-                $row->time_visibility ?? '0',
-                $row->time_knowledge ?? '0',
-                $row->time_survey ?? '0',
-                $row->time_order ?? '0'
+                gmdate('H:i:s', $row->time_availability) ?? '0',
+                gmdate('H:i:s', $row->time_visibility) ?? '0',
+                gmdate('H:i:s', $row->time_knowledge) ?? '0',
+                gmdate('H:i:s', $row->time_survey) ?? '0',
+                gmdate('H:i:s', $row->time_order) ?? '0'
             ];
         } catch (\Exception $e) {
             Log::error('Error mapping row:', [
