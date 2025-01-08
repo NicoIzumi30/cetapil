@@ -20,4 +20,9 @@ class OutletImage extends Model
         }
         return "/storage$this->path";
     }
+
+    public function outlet()
+    {
+        return $this->belongsTo(Outlet::class);
+    }
 }

@@ -128,22 +128,19 @@ class RoutingController extends Controller
     {
         $salesUsers = User::role('sales')->get();
         $waktuKunjungan = $this->waktuKunjungan;
-        $cycles = ["1x1", "1x2", "1x4"];
         $cities = City::all();
         $channels = Channel::all();
         $category_product = Category::all();
         $outletForms = OutletForm::all();
         $categories = Category::with('products')->get();
-        $weekType = $this->weekOptions;
+
         return view("pages.routing.create", [
             "salesUsers" => $salesUsers,
             "waktuKunjungan" => $waktuKunjungan,
-            "cycles" => $cycles,
             "cities" => $cities,
             "channels" => $channels,
             "category_product" => $category_product,
             "outletForms" => $outletForms,
-            "weekType" => $weekType,
             'categories' => $categories
         ]);
     }
@@ -152,40 +149,39 @@ class RoutingController extends Controller
      * Store a newly created resource in storage.
      */
     public function store(CreateOutletRequest $request)
-    {
-        try {
-            DB::beginTransaction();
+{
+    try {
+        DB::beginTransaction();
 
-            // Create outlet
-            $outlet = new Outlet();
-            $outlet->status = 'APPROVED';
-            $outlet->user_id = $request->user_id;
-            $outlet->city_id = $request->city;
-            $outlet->channel_id = $request->channel;
-            $outlet->code = $request->code;
-            $outlet->name = $request->name;
-            $outlet->category = $request->category;
-            $outlet->visit_day = $request->visit_day;
-            $outlet->longitude = $request->longitude;
-            $outlet->latitude = $request->latitude;
-            $outlet->address = $request->address;
-            $outlet->cycle = $request->cycle;
-            $outlet->tipe_outlet = $request->outlet_type;
-            $outlet->account = $request->account_type;
+        // Create outlet
+        $outlet = new Outlet();
+        $outlet->status = 'APPROVED';
+        $outlet->user_id = $request->user_id;
+        $outlet->city_id = $request->city;
+        $outlet->channel_id = $request->channel;
+        $outlet->code = $request->code;
+        $outlet->name = $request->name;
+        $outlet->category = $request->category;
+        $outlet->longitude = $request->longitude;
+        $outlet->latitude = $request->latitude;
+        $outlet->address = $request->address;
+        $outlet->tipe_outlet = $request->outlet_type;
+        $outlet->account = $request->account_type;
 
-            if (in_array($request->cycle, ['1x2', '1x4'])) {
-                if (empty($request->week)) {
-                    throw new Exception('Week is required when cycle is 1x2 or 1x4');
-                }
-                $outlet->week = $request->cycle === '1x2' ?
-                    ($request->week === '13' ? '1&3' : '2&4') :
-                    $request->week;
-            }
+        $outlet->save();
 
-            $outlet->save();
+        // Store visit days and weeks
+        foreach($request->visit_day as $key => $visitDay) {
+            OutletRouting::create([
+                'id' => Str::uuid(),
+                'outlet_id' => $outlet->id,
+                'visit_day' => (string)$visitDay, // Cast to string
+                'week' => $request->week[$key]
+            ]);
+        }
 
-
-            // Store AV3M data
+        // Store AV3M data
+        if($request->has('product_category')) {
             foreach ($request->product_category as $category) {
                 $products = Product::where('category_id', $category)->get();
                 foreach ($products as $product) {
@@ -204,47 +200,47 @@ class RoutingController extends Controller
                     ]);
                 }
             }
+        }
 
-            // Handle images
-            $images = ['img_front', 'img_banner', 'img_main_road'];
-            foreach ($images as $key => $image) {
-                if ($request->hasFile($image)) {
-                    $file = $request->file($image);
-                    $media = saveFile($file, "outlets/$outlet->id");
-                    OutletImage::create([
-                        'outlet_id' => $outlet->id,
-                        'position' => $key + 1,
-                        'filename' => $media['filename'],
-                        'path' => $media['path']
-                    ]);
-                }
-            }
-
-            // Store survey answers
-            foreach ($request->survey as $formId => $answer) {
-                OutletFormAnswer::create([
+        // Handle images
+        $images = ['img_front', 'img_banner', 'img_main_road'];
+        foreach ($images as $key => $image) {
+            if ($request->hasFile($image)) {
+                $file = $request->file($image);
+                $media = saveFile($file, "outlets/$outlet->id");
+                OutletImage::create([
                     'outlet_id' => $outlet->id,
-                    'outlet_form_id' => $formId,
-                    'answer' => $answer,
+                    'position' => $key + 1,
+                    'filename' => $media['filename'],
+                    'path' => $media['path']
                 ]);
             }
-
-            DB::commit();
-
-            // Return success response for Ajax
-            return response()->json([
-                'status' => 'success',
-                'message' => 'Outlet berhasil ditambahkan'
-            ]);
-        } catch (Exception $e) {
-            DB::rollBack();
-            // Return error response for Ajax
-            return response()->json([
-                'status' => 'error',
-                'message' => 'Gagal menambahkan outlet: ' . $e->getMessage()
-            ], 422);
         }
+
+        // Store survey answers
+        foreach ($request->survey as $formId => $answer) {
+            OutletFormAnswer::create([
+                'outlet_id' => $outlet->id,
+                'outlet_form_id' => $formId,
+                'answer' => $answer,
+            ]);
+        }
+
+        DB::commit();
+
+        return response()->json([
+            'status' => 'success',
+            'message' => 'Outlet berhasil ditambahkan'
+        ]);
+
+    } catch (Exception $e) {
+        DB::rollBack();
+        return response()->json([
+            'status' => 'error',
+            'message' => 'Gagal menambahkan outlet: ' . $e->getMessage()
+        ], 422);
     }
+}
 
     /**
      * Display the specified resource.
@@ -259,45 +255,51 @@ class RoutingController extends Controller
      */
     public function edit(string $id)
     {
-        $outlet = Outlet::findOrFail($id);
+        $outlet = Outlet::with([
+            'user', 
+            'outletRoutings',
+            'outletImages',
+            'outletProducts.product',
+            'outletFormAnswers'
+        ])->findOrFail($id);
+
         $salesUsers = User::role('sales')->get();
         $waktuKunjungan = $this->waktuKunjungan;
-        $cycles = ["1x1", "1x2", "1x4"];
         $cities = City::all();
         $channels = Channel::all();
         $category_product = Category::all();
+        
         $outletForms = OutletForm::with([
             'answers' => function ($query) use ($id) {
                 $query->where('outlet_id', $id);
             }
         ])->get();
+        
         $categories = Category::with([
             'products' => function ($query) {
                 $query->select('products.id', 'products.sku', 'products.category_id');
             },
-            'products.outlets' => function ($query) use ($id) {
-                $query->where('outlets.id', $id)
-                    ->select('outlets.id');
+            'products.av3ms' => function ($query) use ($id) {
+                $query->where('outlet_id', $id);
             }
         ])->get();
+
         $categories->each(function ($category) {
             $category->hasProductInOutlet = $category->products->some(function ($product) {
-                return $product->outlets->isNotEmpty();
+                return $product->av3ms->isNotEmpty();
             });
         });
-        $weekType = $this->weekOptions;
-        return view("pages.routing.edit", [
-            "salesUsers" => $salesUsers,
-            "waktuKunjungan" => $waktuKunjungan,
-            "cycles" => $cycles,
-            "cities" => $cities,
-            "channels" => $channels,
-            "category_product" => $category_product,
-            "outletForms" => $outletForms,
-            "weekType" => $weekType,
-            'categories' => $categories,
-            "outlet" => $outlet
-        ]);
+
+        return view("pages.routing.edit", compact(
+            'outlet',
+            'salesUsers',
+            'waktuKunjungan',
+            'cities',
+            'channels',
+            'category_product',
+            'outletForms',
+            'categories'
+        ));
     }
 
     public function request()
@@ -314,37 +316,40 @@ class RoutingController extends Controller
             DB::beginTransaction();
 
             $outlet = Outlet::findOrFail($id);
-            $outlet->user_id = $request->user_id;
-            $outlet->city_id = $request->city;
-            $outlet->channel_id = $request->channel;
-            $outlet->code = $request->code;
-            $outlet->name = $request->name;
-            $outlet->category = $request->category;
-            $outlet->visit_day = $request->visit_day;
-            $outlet->longitude = $request->longitude;
-            $outlet->latitude = $request->latitude;
-            $outlet->address = $request->address;
-            $outlet->cycle = $request->cycle;
-            $outlet->tipe_outlet = $request->outlet_type;
-            $outlet->account = $request->account_type;
+            
+            // Update basic outlet information
+            $outlet->update([
+                'user_id' => $request->user_id,
+                'city_id' => $request->city,
+                'channel_id' => $request->channel,
+                'code' => $request->code,
+                'name' => $request->name,
+                'category' => $request->category,
+                'longitude' => $request->longitude,
+                'latitude' => $request->latitude,
+                'address' => $request->address,
+                'tipe_outlet' => $request->outlet_type,
+                'account' => $request->account_type
+            ]);
 
-            if (in_array($request->cycle, ['1x2', '1x4'])) {
-                if (empty($request->week)) {
-                    throw new Exception('Week is required when cycle is 1x2 or 1x4');
-                }
-                $outlet->week = $request->cycle === '1x2' ?
-                    ($request->week === '13' ? '1&3' : '2&4') :
-                    $request->week;
+            // Update visit days and weeks
+            OutletRouting::where('outlet_id', $id)->delete();
+            foreach($request->visit_day as $key => $visitDay) {
+                OutletRouting::create([
+                    'id' => Str::uuid(),
+                    'outlet_id' => $outlet->id,
+                    'visit_day' => (string)$visitDay,
+                    'week' => $request->week[$key]
+                ]);
             }
-
-            $outlet->save();
 
             // Update AV3M data
             if ($request->product_category) {
-                // Delete existing AV3M records
+                // Delete existing records
                 Av3m::where('outlet_id', $outlet->id)->delete();
+                OutletProduct::where('outlet_id', $outlet->id)->delete();
 
-                // Create new AV3M records
+                // Create new records
                 foreach ($request->product_category as $category) {
                     $products = Product::where('category_id', $category)->get();
                     foreach ($products as $product) {
@@ -354,16 +359,7 @@ class RoutingController extends Controller
                             'product_id' => $product->id,
                             'av3m' => $request->av3m[$product->sku] ?? 0,
                         ]);
-                    }
-                }
-            }
 
-            // Update outlet products
-            if ($request->product_category) {
-                OutletProduct::where('outlet_id', $outlet->id)->delete();
-                foreach ($request->product_category as $category) {
-                    $products = Product::where('category_id', $category)->get();
-                    foreach ($products as $product) {
                         OutletProduct::create([
                             'outlet_id' => $outlet->id,
                             'product_id' => $product->id,
@@ -379,7 +375,6 @@ class RoutingController extends Controller
                     $file = $request->file($image);
                     $media = saveFile($file, "outlets/$outlet->id");
 
-                    // Update or create image record
                     $imageRecord = OutletImage::where('outlet_id', $outlet->id)
                         ->where('position', $key + 1)
                         ->first();
@@ -402,7 +397,7 @@ class RoutingController extends Controller
             }
 
             // Update survey answers
-            if ($request->survey) {
+            if ($request->has('survey')) {
                 foreach ($request->survey as $formId => $answer) {
                     OutletFormAnswer::updateOrCreate(
                         [
@@ -420,6 +415,7 @@ class RoutingController extends Controller
                 'status' => 'success',
                 'message' => 'Outlet berhasil diperbarui'
             ]);
+            
         } catch (Exception $e) {
             DB::rollBack();
             return response()->json([

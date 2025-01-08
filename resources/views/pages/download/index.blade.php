@@ -396,15 +396,24 @@
                 });
             });
 
-            // Date range downloads
-            const dateRangeDownloads = [
-                { selector: '[data-activity-download]', prefix: 'activity', url: '{{ route("download.activity") }}' },
-                { selector: '[data-visibility-download]', prefix: 'visibility', url: '{{ route("download.visibility") }}' },
-                { selector: '[data-survey-download]', prefix: 'survey', url: '{{ route("download.survey") }}' },
-                { selector: '[data-availability-download]', prefix: 'availability', url: '{{ route("download.availability") }}' },
-                { selector: '[data-orders-download]', prefix: 'orders', url: '{{ route("download.orders") }}', requireRegion: true, regionParam: 'orders_region' },
-                { selector: '[data-selling-download]', prefix: 'selling', url: '{{ route("download.selling") }}', requireRegion: true, regionParam: 'selling_region' }
-            ];
+
+    // Function to create date range params
+    function createDateRangeParams(prefix) {
+        const startDate = $(`#${prefix}-start-date`).val();
+        const endDate = $(`#${prefix}-end-date`).val();
+        const region = $(`#${prefix}-region`).val() || 'all';
+        
+        const params = {
+            [`${prefix}_region`]: region
+        };
+
+        // Hanya tambahkan date parameter jika kedua tanggal diisi
+        if (startDate && endDate) {
+            params[`${prefix}_date`] = `${startDate} to ${endDate}`;
+        }
+        
+        return params;
+    }
 
             dateRangeDownloads.forEach(download => {
                 setupDownloadButton(download.selector, {

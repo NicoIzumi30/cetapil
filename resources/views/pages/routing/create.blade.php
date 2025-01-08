@@ -152,14 +152,12 @@
                     <div class="flex items-end gap-4">
                         <div class="flex-1">
                             <label for="visit_day">Waktu Kunjungan</label>
-                            <select id="visit_day" name="visit_day" class=" w-full">
+                            <select id="visit_day" name="visit_day[]" class="w-full">
                                 <option value="" selected disabled>
                                     -- Pilih waktu kunjungan --
                                 </option>
                                 @foreach ($waktuKunjungan as $hari)
-                                    <option value="{{ $hari['value'] }}"
-                                        {{ old('visit_day') == $hari['value'] ? 'selected' : '' }}>{{ $hari['name'] }}
-                                    </option>
+                                    <option value="{{ $hari['value'] }}">{{ $hari['name'] }}</option>
                                 @endforeach
                             </select>
                             @if ($errors->has('visit_day'))
@@ -169,13 +167,12 @@
                         </div>
                         <div class="flex-1">
                             <label for="week" class="form-label">Week</label>
-                            <select id="week" name="week"
-                                class="form-control @error('week') is-invalid @enderror">
+                            <select id="week" name="week[]" class="w-full">
                                 <option value="" selected disabled>-- Pilih Week --</option>
-                                <option value="week-1">Week 1</option>
-                                <option value="week-2">Week 2</option>
-                                <option value="week-3">Week 3</option>
-                                <option value="week-4">Week 4</option>
+                                <option value="1">Week 1</option>
+                                <option value="2">Week 2</option> 
+                                <option value="3">Week 3</option>
+                                <option value="4">Week 4</option>
                             </select>
                             @error('week')
                                 <span class="invalid-feedback" role="alert">
@@ -377,9 +374,6 @@
         $(document).ready(function() {
             $('#user_id').select2();
             $('#visit_day').select2();
-            $('#cycle').select2({
-                minimumResultsForSearch: Infinity
-            });
             $('#week_type').select2({
                 minimumResultsForSearch: Infinity
             });
@@ -530,68 +524,6 @@
 
             const weekContainer = document.getElementById('week-container');
 
-            const weekOptions = {
-                '1x4': [{
-                        name: 'Week 1',
-                        value: '1'
-                    },
-                    {
-                        name: 'Week 2',
-                        value: '2'
-                    },
-                    {
-                        name: 'Week 3',
-                        value: '3'
-                    },
-                    {
-                        name: 'Week 4',
-                        value: '4'
-                    }
-                ],
-                '1x2': [{
-                        name: 'Week 1 & 3',
-                        value: '13'
-                    },
-                    {
-                        name: 'Week 2 & 4',
-                        value: '24'
-                    }
-                ]
-            };
-
-            function updateWeekOptions(cycle) {
-                const weekSelect = $('#week');
-                weekSelect.empty();
-
-                // Destroy and reinitialize select2
-                if (weekSelect.data('select2')) {
-                    weekSelect.select2('destroy');
-                }
-
-                weekSelect.append(`<option value="" selected disabled>-- Pilih Week --</option>`);
-
-                if (cycle === '1x2' || cycle === '1x4') {
-                    weekContainer.classList.remove('hidden');
-                    const options = weekOptions[cycle];
-
-                    options.forEach(option => {
-                        weekSelect.append(new Option(option.name, option.value));
-                    });
-
-                    // Make week field required
-                    weekSelect.prop('required', true);
-                } else {
-                    weekContainer.classList.add('hidden');
-                    weekSelect.val('').prop('required', false);
-                }
-
-                // Reinitialize select2
-                weekSelect.select2({
-                    minimumResultsForSearch: Infinity,
-                    placeholder: "-- Pilih Week --",
-                    width: '100%'
-                });
-            }
 
             // Handle cycle change
             $('#cycle').on('change', function() {
@@ -625,28 +557,8 @@
                 gihChecked.classList.add("text-blue-400");
             });
             // Form submission validation
-            $('form').on('submit', function(e) {
-                const cycle = $('#cycle').val();
-                const week = $('#week').val();
 
-                if ((cycle === '1x2' || cycle === '1x4') && !week) {
-                    e.preventDefault();
-                    alert('Mohon pilih Week terlebih dahulu');
-                    return false;
-                }
-            });
 
-            // Initialize with current value if exists
-            const initialCycle = $('#cycle').val();
-            if (initialCycle) {
-                updateWeekOptions(initialCycle);
-
-                // Set initial week value if exists
-                const initialWeek = "{{ old('week') }}";
-                if (initialWeek) {
-                    $('#week').val(initialWeek).trigger('change');
-                }
-            }
         });
 
 
@@ -856,42 +768,40 @@
         let cycleCounter = 1;
 
         function addCycle() {
-            cycleCounter++;
+    cycleCounter++;
 
-            const template = `
-		<div class="flex items-end gap-4" data-cycle-id="${cycleCounter}">
-		<div class="form-group flex-1">
-			<label for="visit_day_${cycleCounter}">Waktu Kunjungan</label>
-			<select id="visit_day_${cycleCounter}" name="visit_day[]" class="form-select">
-				<option value="" selected disabled>-- Pilih waktu kunjungan --</option>
-				@foreach ($waktuKunjungan as $hari)
-					<option value="{{ $hari['value'] }}">{{ $hari['name'] }}</option>
-				@endforeach
-			</select>
-		</div>
+    const template = `
+        <div class="flex items-end gap-4" data-cycle-id="${cycleCounter}">
+            <div class="flex-1">
+                <label for="visit_day_${cycleCounter}">Waktu Kunjungan</label>
+                <select id="visit_day_${cycleCounter}" name="visit_day[]" class="w-full">
+                    <option value="" selected disabled>-- Pilih waktu kunjungan --</option>
+                    @foreach ($waktuKunjungan as $hari)
+                        <option value="{{ $hari['value'] }}">{{ $hari['name'] }}</option>
+                    @endforeach
+                </select>
+            </div>
+            <div class="flex-1">
+                <label for="week_${cycleCounter}">Week</label>
+                <select id="week_${cycleCounter}" name="week[]" class="w-full">
+                    <option value="" selected disabled>-- Pilih Week --</option>
+                    <option value="1">Week 1</option>
+                    <option value="2">Week 2</option>
+                    <option value="3">Week 3</option>
+                    <option value="4">Week 4</option>
+                </select>
+            </div>
+            <button type="button" class="px-6 py-4 bg-red-400 rounded-md hover:bg-red-500 transition-all" onclick="removeCycle(${cycleCounter})">
+                <svg width="24" height="24" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                    <path d="M19 4H15.5L14.5 3H9.5L8.5 4H5V6H19M6 19C6 19.5304 6.21071 20.0391 6.58579 20.4142C6.96086 20.7893 7.46957 21 8 21H16C16.5304 21 17.0391 20.7893 17.4142 20.4142C17.7893 20.0391 18 19.5304 18 19V7H6V19Z" fill="white"/>
+                </svg>
+            </button>
+        </div>
+    `;
 
-		<div class="form-group flex-1">
-			<label for="week_${cycleCounter}">Week</label>
-			<select id="week_${cycleCounter}" name="week[]" class="form-select">
-				<option value="" selected disabled>-- Pilih Week --</option>
-				<option value="week-1">Week 1</option>
-				<option value="week-2">Week 2</option>
-				<option value="week-3">Week 3</option>
-				<option value="week-4">Week 4</option>
-			</select>
-		</div>
-
-		<button type="button" class="px-6 py-4 bg-red-400 rounded-md hover:bg-red-500 transition-all" onclick="removeCycle(${cycleCounter})">
-			<svg width="24" height="24" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
-				<path d="M19 4H15.5L14.5 3H9.5L8.5 4H5V6H19M6 19C6 19.5304 6.21071 20.0391 6.58579 20.4142C6.96086 20.7893 7.46957 21 8 21H16C16.5304 21 17.0391 20.7893 17.4142 20.4142C17.7893 20.0391 18 19.5304 18 19V7H6V19Z" fill="white"/>
-			</svg>
-		</button>
-	   </div>
-	`;
-
-            document.querySelector('#cycles-wrapper').insertAdjacentHTML('beforeend', template);
-            $(`#visit_day_${cycleCounter}, #week_${cycleCounter}`).select2()
-        }
+    document.querySelector('#cycles-wrapper').insertAdjacentHTML('beforeend', template);
+    $(`#visit_day_${cycleCounter}, #week_${cycleCounter}`).select2();
+}
 
         function removeCycle(id) {
             const cycleToRemove = document.querySelector(`[data-cycle-id="${id}"]`);

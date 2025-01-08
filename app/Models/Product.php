@@ -20,6 +20,10 @@ class Product extends Model
     /**
      * Get the category that owns the product.
      */
+    public function outletProducts()
+    {
+        return $this->hasMany(OutletProduct::class);
+    }
     public function category(): BelongsTo
     {
         return $this->belongsTo(Category::class);

@@ -36,9 +36,25 @@ class Outlet extends Model
     {
         return $this->belongsTo(Outlet::class);
     }
-    public function outletRoutings(){
+    public function outletRoutings()
+    {
         return $this->hasMany(OutletRouting::class);
-    } 
+    }
+
+    public function outletProducts()
+    {
+        return $this->hasMany(OutletProduct::class);
+    }
+
+    public function outletFormAnswers()
+    {
+        return $this->hasMany(OutletFormAnswer::class);
+    }
+
+    public function outletImages()
+    {
+        return $this->hasMany(OutletImage::class);
+    }
     public function user()
     {
         return $this->belongsTo(User::class)->withTrashed();

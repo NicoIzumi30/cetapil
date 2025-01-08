@@ -56,6 +56,8 @@ Route::middleware('auth')->group(function () {
         Route::delete('/delete/', [RoutingRequestControler::class, 'destroy'])->name('delete');
     });
 
+    
+
     Route::get('/routing/download-filtered', [RoutingController::class, 'downloadFilteredExcel'])
         ->name('routing.download-filtered')
         ->middleware('permission:menu_routing');

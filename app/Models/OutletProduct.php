@@ -11,4 +11,14 @@ class OutletProduct extends Model
     use HasFactory, HasUuids;
 
     protected $guarded = [];
+
+    public function outlet()
+    {
+        return $this->belongsTo(Outlet::class);
+    }
+
+    public function product()
+    {
+        return $this->belongsTo(Product::class);
+    }
 }
