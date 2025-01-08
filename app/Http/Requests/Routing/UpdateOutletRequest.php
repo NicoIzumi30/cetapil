@@ -7,19 +7,11 @@ use Illuminate\Foundation\Http\FormRequest;
 
 class UpdateOutletRequest extends FormRequest
 {
-    /**
-     * Determine if the user is authorized to make this request.
-     */
     public function authorize(): bool
     {
         return true;
     }
 
-    /**
-     * Get the validation rules that apply to the request.
-     *
-     * @return array<string, \Illuminate\Contracts\Validation\ValidationRule|array<mixed>|string>
-     */
     public function rules(): array
     {
         $outletId = $this->route('routing');
@@ -27,6 +19,7 @@ class UpdateOutletRequest extends FormRequest
         return [
             'user_id' => 'required|exists:users,id',
             'city' => 'required|exists:cities,id',
+            'channel' => 'required|exists:channels,id',
             'code' => [
                 'required',
                 'string',
@@ -34,33 +27,37 @@ class UpdateOutletRequest extends FormRequest
             ],
             'name' => 'required|string',
             'category' => 'required|string|in:MT,GT',
+            'outlet_type' => 'required|string',
+            'account_type' => 'required|string',
+            
+            // Visit days and weeks - adjusted to match form structure
             'visit_day' => 'required|array',
-            'visit_day.*' => 'required|integer|between:1,7',
+            'visit_day.*' => 'required|integer|min:1|max:7',
             'week' => 'required|array',
-            'week.*' => 'required|string|in:1,2,3,4',
+            'week.*' => 'required|string',
+            
+            // Optional fields
             'longitude' => 'nullable|string',
             'latitude' => 'nullable|string',
             'address' => 'nullable|string',
-            'outlet_type' => 'required|string',
-            'account_type' => 'required|string',
-            'channel' => 'required|exists:channels,id',
+            
+            // Product categories and AV3M
             'product_category' => 'nullable|array',
             'product_category.*' => 'exists:categories,id',
-            'survey' => 'nullable|array',
-            'survey.*' => 'nullable|string',
             'av3m' => 'nullable|array',
             'av3m.*' => 'nullable|numeric|min:0',
+            
+            // Images - made optional
             'img_front' => 'nullable|file|mimes:png,jpg,jpeg|max:2048',
             'img_banner' => 'nullable|file|mimes:png,jpg,jpeg|max:2048',
             'img_main_road' => 'nullable|file|mimes:png,jpg,jpeg|max:2048',
+            
+            // Survey answers
+            'survey' => 'nullable|array',
+            'survey.*' => 'nullable|string',
         ];
     }
 
-    /**
-     * Get custom validation messages.
-     *
-     * @return array
-     */
     public function messages()
     {
         return [
@@ -68,24 +65,24 @@ class UpdateOutletRequest extends FormRequest
             'user_id.exists' => 'Sales tidak valid',
             'city.required' => 'Kota harus dipilih',
             'city.exists' => 'Kota tidak valid',
+            'channel.required' => 'Channel harus dipilih',
+            'channel.exists' => 'Channel tidak valid',
             'code.required' => 'Kode outlet harus diisi',
             'code.unique' => 'Kode outlet sudah digunakan',
             'name.required' => 'Nama outlet harus diisi',
             'category.required' => 'Kategori harus dipilih',
             'category.in' => 'Kategori harus MT atau GT',
+            'outlet_type.required' => 'Tipe outlet harus diisi',
+            'account_type.required' => 'Tipe akun harus diisi',
             'visit_day.required' => 'Waktu kunjungan harus dipilih',
             'visit_day.array' => 'Format waktu kunjungan tidak valid',
             'visit_day.*.required' => 'Setiap waktu kunjungan harus diisi',
             'visit_day.*.integer' => 'Format waktu kunjungan tidak valid',
-            'visit_day.*.between' => 'Waktu kunjungan harus antara hari 1-7',
+            'visit_day.*.min' => 'Waktu kunjungan minimal hari ke-1',
+            'visit_day.*.max' => 'Waktu kunjungan maksimal hari ke-7',
             'week.required' => 'Week harus dipilih',
             'week.array' => 'Format week tidak valid',
             'week.*.required' => 'Setiap week harus diisi',
-            'week.*.in' => 'Week harus bernilai 1-4',
-            'outlet_type.required' => 'Tipe outlet harus diisi',
-            'account_type.required' => 'Tipe akun harus diisi',
-            'channel.required' => 'Channel harus dipilih',
-            'channel.exists' => 'Channel tidak valid',
             'product_category.*.exists' => 'Kategori produk tidak valid',
             'av3m.*.numeric' => 'Nilai AV3M harus berupa angka',
             'av3m.*.min' => 'Nilai AV3M tidak boleh kurang dari 0',

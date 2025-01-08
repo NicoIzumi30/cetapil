@@ -466,85 +466,6 @@
 @endpush
 
 @push('scripts')
-    <script>
-        $(document).ready(function () {
-            const cycle = "{{ $outlet->cycle }}";
-            if (cycle === '1x2' || cycle === '1x4') {
-                $('#week-container').removeClass('hidden');
-            }
-
-            $('#cycle').on('change', function() {
-                const selectedCycle = $(this).val();
-                const weekContainer = $('#week-container');
-                const weekSelect = $('#week');
-                
-                weekSelect.empty().append('<option value="" disabled selected>-- Pilih Week --</option>');
-                
-                if (selectedCycle === '1x2') {
-                    weekContainer.removeClass('hidden');
-                    weekSelect.append(`
-                        <option value="13">Week 1 & 3</option>
-                        <option value="24">Week 2 & 4</option>
-                    `);
-                } else if (selectedCycle === '1x4') {
-                    weekContainer.removeClass('hidden');
-                    for(let i = 1; i <= 4; i++) {
-                        weekSelect.append(`<option value="${i}">Week ${i}</option>`);
-                    }
-                } else {
-                    weekContainer.addClass('hidden');
-                }
-            });
-
-            // Versi jQuery
-            $('#cycle').change(function () {
-                weekHandler($(this).val());
-            });
-
-            // Inisialisasi awal
-            // weekHandler($('#cycle').val());
-            const gihCheckbox = document.querySelector('#gih-checkbox');
-            const gihChecked = document.querySelector('#gih-checked');
-            const gihUnChecked = document.querySelector('#gih-unchecked');
-            
-            if(gihCheckbox.value == 'Sudah') {
-                $('#gih-checkbox').val('Sudah');
-                gihChecked.classList.add("bg-blue-400", "!text-white");
-                gihUnChecked.classList.remove("bg-blue-400", "!text-white");
-            }else{
-                $('#gih-checkbox').val('Belum');
-                gihUnChecked.classList.add("bg-blue-400", "!text-white");
-                gihChecked.classList.remove("bg-blue-400", "!text-white");
-                gihChecked.classList.add("text-blue-400");
-            }
-
-            gihChecked.addEventListener('click', function () {
-                $('#gih-checkbox').val('Sudah');
-                gihChecked.classList.add("bg-blue-400", "!text-white");
-                gihUnChecked.classList.remove("bg-blue-400", "!text-white");
-            });
-            gihUnChecked.addEventListener('click', function () {
-                $('#gih-checkbox').val('Belum');
-                gihUnChecked.classList.add("bg-blue-400", "!text-white");
-                gihChecked.classList.remove("bg-blue-400", "!text-white");
-                gihChecked.classList.add("text-blue-400");
-            });
-
-            // gihCheckbox.addEventListener('change', function () {
-            //     if (this.checked) {
-            //         gihChecked.classList.add("bg-blue-400", "!text-white");
-            //         gihUnChecked.classList.remove("bg-blue-400", "!text-white");
-            //     } else {
-            //         gihUnChecked.classList.add("bg-blue-400", "!text-white");
-            //         gihChecked.classList.remove("bg-blue-400", "!text-white");
-            //         gihChecked.classList.add("text-blue-400");
-            //     }
-            // });
-        });
-    </script>
-@endpush
-
-@push('scripts')
 <script>
 $(document).ready(function() {
     // Initialize current product categories
@@ -669,10 +590,10 @@ $(document).ready(function() {
 			<label for="week_${cycleCounter}">Week</label>
 			<select id="week_${cycleCounter}" name="week[]" class="form-select">
 				<option value="" selected disabled>-- Pilih Week --</option>
-				<option value="week-1">Week 1</option>
-				<option value="week-2">Week 2</option>
-				<option value="week-3">Week 3</option>
-				<option value="week-4">Week 4</option>
+				<option value="1">Week 1</option>
+				<option value="2">Week 2</option>
+				<option value="3">Week 3</option>
+				<option value="4">Week 4</option>
 			</select>
 		</div>
 
