@@ -83,55 +83,6 @@
                 @endif
             </div>
             <div>
-                <label for="visit_day">Waktu Kunjungan</label>
-                <select id="visit_day" name="visit_day" class=" w-full">
-                    <option value="" selected disabled>
-                        -- Pilih waktu kunjungan --
-                    </option>
-                    @foreach ($waktuKunjungan as $hari)
-                        <option value="{{$hari['value']}}" {{$hari['value'] == $outlet->visit_day ? 'selected' : ''}}>
-                            {{$hari['name']}}
-                        </option>
-                    @endforeach
-                </select>
-                @if ($errors->has('visit_day'))
-                    <span id="visit_day-error" class="text-sm text-red-600 mt-1">{{ $errors->first('visit_day') }}</span>
-                @endif
-            </div>
-            <div>
-                <label for="cycle">Cycle</label>
-                <select id="cycle" name="cycle" class="w-full">
-                    <option value="" selected disabled>
-                        -- Pilih cycle --
-                    </option>
-                    @foreach ($cycles as $cycle)
-                        <option value="{{$cycle}}" {{$cycle == $outlet->cycle ? 'selected' : ''}}>{{$cycle}}</option>
-                    @endforeach
-                </select>
-                @if ($errors->has('cycle'))
-                    <span id="cycle-error" class="text-sm text-red-600 mt-1">{{ $errors->first('cycle') }}</span>
-                @endif
-            </div>
-            <div id="week-container" class="@if(!in_array($outlet->cycle, ['1x2', '1x4'])) hidden @endif">
-                <label for="week" class="form-label">Week</label>
-                <select id="week" name="week" class="w-full form-control @error('week') is-invalid @enderror">
-                    <option value="" selected disabled>-- Pilih Week --</option>
-                    @if($outlet->cycle === '1x2')
-                        <option value="13" {{ $outlet->week === '1&3' ? 'selected' : '' }}>Week 1 & 3</option>
-                        <option value="24" {{ $outlet->week === '2&4' ? 'selected' : '' }}>Week 2 & 4</option>
-                    @elseif($outlet->cycle === '1x4')
-                        @for($i = 1; $i <= 4; $i++)
-                            <option value="{{ $i }}" {{ $outlet->week == $i ? 'selected' : '' }}>Week {{ $i }}</option>
-                        @endfor
-                    @endif
-                </select>
-                @error('week')
-                    <span class="invalid-feedback" role="alert">
-                        <strong>{{ $message }}</strong>
-                    </span>
-                @enderror
-            </div>
-            <div>
                 <label for="channel">Channel</label>
                 <select id="channel" name="channel" class="w-full">
                     <option value="" selected disabled>
@@ -149,6 +100,55 @@
                 @endif
             </div>
         </div>
+
+		<x-section-card :title="'Cycle'">
+			<div id="cycles-wrapper" class="grid gap-4">
+				<div class="flex items-end gap-4">
+					<div class="flex-1">
+						<label for="visit_day">Waktu Kunjungan</label>
+						<select id="visit_day" name="visit_day" class=" w-full">
+							<option value="" selected disabled>
+								-- Pilih waktu kunjungan --
+							</option>
+							@foreach ($waktuKunjungan as $hari)
+								<option value="{{ $hari['value'] }}"
+									{{ old('visit_day') == $hari['value'] ? 'selected' : '' }}>{{ $hari['name'] }}
+								</option>
+							@endforeach
+						</select>
+						@if ($errors->has('visit_day'))
+							<span id="visit_day-error"
+								class="text-sm text-red-600 mt-1">{{ $errors->first('visit_day') }}</span>
+						@endif
+					</div>
+					<div class="flex-1">
+						<label for="week" class="form-label">Week</label>
+						<select id="week" name="week"
+							class="form-control @error('week') is-invalid @enderror">
+							<option value="" selected disabled>-- Pilih Week --</option>
+							<option value="week-1">Week 1</option>
+							<option value="week-2">Week 2</option>
+							<option value="week-3">Week 3</option>
+							<option value="week-4">Week 4</option>
+						</select>
+						@error('week')
+							<span class="invalid-feedback" role="alert">
+								<strong>{{ $message }}</strong>
+							</span>
+						@enderror
+					</div>
+					<button type="button" class="px-6 py-4 bg-primary rounded-md hover:bg-blue-500 transition-all"
+						onclick="addCycle()">
+						<svg width="24" height="24" viewBox="0 0 24 24" fill="none"
+							xmlns="http://www.w3.org/2000/svg">
+							<path
+								d="M13 6C13 5.73478 12.8946 5.48043 12.7071 5.29289C12.5196 5.10536 12.2652 5 12 5C11.7348 5 11.4804 5.10536 11.2929 5.29289C11.1054 5.48043 11 5.73478 11 6V11H6C5.73478 11 5.48043 11.1054 5.29289 11.2929C5.10536 11.4804 5 11.7348 5 12C5 12.2652 5.10536 12.5196 5.29289 12.7071C5.48043 12.8946 5.73478 13 6 13H11V18C11 18.2652 11.1054 18.5196 11.2929 18.7071C11.4804 18.8946 11.7348 19 12 19C12.2652 19 12.5196 18.8946 12.7071 18.7071C12.8946 18.5196 13 18.2652 13 18V13H18C18.2652 13 18.5196 12.8946 18.7071 12.7071C18.8946 12.5196 19 12.2652 19 12C19 11.7348 18.8946 11.4804 18.7071 11.2929C18.5196 11.1054 18.2652 11 18 11H13V6Z"
+								fill="white" />
+						</svg>
+					</button>
+				</div>
+			</div>
+		</x-section-card>
 
         <x-section-card :title="'Produk'">
             <div class="grid grid-cols-2 gap-4">
@@ -618,3 +618,54 @@ $(document).ready(function() {
 </script>
 @endpush
 
+@push('scripts')
+    <script>
+        // add cycle row function
+        let cycleCounter = 1;
+
+        function addCycle() {
+            cycleCounter++;
+
+            const template = `
+		<div class="flex items-end gap-4" data-cycle-id="${cycleCounter}">
+		<div class="form-group flex-1">
+			<label for="visit_day_${cycleCounter}">Waktu Kunjungan</label>
+			<select id="visit_day_${cycleCounter}" name="visit_day[]" class="form-select">
+				<option value="" selected disabled>-- Pilih waktu kunjungan --</option>
+				@foreach ($waktuKunjungan as $hari)
+					<option value="{{ $hari['value'] }}">{{ $hari['name'] }}</option>
+				@endforeach
+			</select>
+		</div>
+
+		<div class="form-group flex-1">
+			<label for="week_${cycleCounter}">Week</label>
+			<select id="week_${cycleCounter}" name="week[]" class="form-select">
+				<option value="" selected disabled>-- Pilih Week --</option>
+				<option value="week-1">Week 1</option>
+				<option value="week-2">Week 2</option>
+				<option value="week-3">Week 3</option>
+				<option value="week-4">Week 4</option>
+			</select>
+		</div>
+
+		<button type="button" class="px-6 py-4 bg-red-400 rounded-md hover:bg-red-500 transition-all" onclick="removeCycle(${cycleCounter})">
+			<svg width="24" height="24" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+				<path d="M19 4H15.5L14.5 3H9.5L8.5 4H5V6H19M6 19C6 19.5304 6.21071 20.0391 6.58579 20.4142C6.96086 20.7893 7.46957 21 8 21H16C16.5304 21 17.0391 20.7893 17.4142 20.4142C17.7893 20.0391 18 19.5304 18 19V7H6V19Z" fill="white"/>
+			</svg>
+		</button>
+	   </div>
+	`;
+
+            document.querySelector('#cycles-wrapper').insertAdjacentHTML('beforeend', template);
+            $(`#visit_day_${cycleCounter}, #week_${cycleCounter}`).select2()
+        }
+
+        function removeCycle(id) {
+            const cycleToRemove = document.querySelector(`[data-cycle-id="${id}"]`);
+            if (cycleToRemove) {
+                cycleToRemove.remove();
+            }
+        }
+    </script>
+@endpush
