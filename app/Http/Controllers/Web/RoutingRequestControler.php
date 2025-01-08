@@ -54,10 +54,18 @@ class RoutingRequestControler extends Controller
     {
         $outlet = Outlet::with(['user', 'outletRoutings'])->where('id', $id)->first();
         $outletForms = OutletForm::with(['answers' => function ($query) use ($id) {
-            $query->where('outlet_id', $id);
+        $query->where('outlet_id', $id);
         }])->get();
-
-        return view('pages.routing.detail-request', compact('outlet', 'outletForms'));
+        $waktuKunjungan = [
+            ['name' => 'Senin', 'value' => 1],
+            ['name' => 'Selasa', 'value' => 2],
+            ['name' => 'Rabu', 'value' => 3],
+            ['name' => 'Kamis', 'value' => 4],
+            ['name' => 'Jumat', 'value' => 5],
+            ['name' => 'Sabtu', 'value' => 6],
+            ['name' => 'Minggu', 'value' => 7],
+        ];
+        return view('pages.routing.detail-request', compact('outlet', 'outletForms', 'waktuKunjungan'));
     }
     public function approve(Request $request, string $id)
     {
@@ -66,12 +74,9 @@ class RoutingRequestControler extends Controller
                 'outlet_code' => 'required|string',
                 'outlet_type' => 'required|string',
                 'account_type' => 'required|string',
-                'visit_day' => 'required|array',
-                'visit_day.*' => 'required|string|max:1',
-                'week' => 'required|array',
-                'week.*' => 'required|string'
+                'visit_days' => 'required|array',
+                'weeks' => 'required|array',
             ]);
-
             $outlet = Outlet::findOrFail($id);
             
             // Update basic outlet information
@@ -86,12 +91,12 @@ class RoutingRequestControler extends Controller
             OutletRouting::where('outlet_id', $id)->delete();
 
             // Create new routings
-            foreach($request->visit_day as $key => $visitDay) {
+            foreach($request->visit_days as $key => $visitDay) {
                 OutletRouting::create([
                     'id' => Str::uuid(),
                     'outlet_id' => $outlet->id,
                     'visit_day' => (string)$visitDay,
-                    'week' => $request->week[$key]
+                    'week' => $request->weeks[$key]
                 ]);
             }
 

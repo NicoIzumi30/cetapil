@@ -29,12 +29,9 @@ class CreateNOORequest extends FormRequest
             'city' => 'required|string',
             'name' => 'required|string',
             'category' => 'required|string',
-            'visit_day' => 'required|integer|between:1,7',
             'longitude' => 'required|string',
             'latitude' => 'required|string',
             'address' => 'nullable|string',
-            'cycle' => 'required|in:1x1,1x2',
-            'week_type' => 'required_if:cycle,1x2|in:ODD,EVEN',
             'img_front' => 'nullable|file|mimes:png,jpg,jpeg|max:1024',
             'img_banner' => 'nullable|file|mimes:png,jpg,jpeg|max:1024',
             'img_main_road' => 'nullable|file|mimes:png,jpg,jpeg|max:1024'

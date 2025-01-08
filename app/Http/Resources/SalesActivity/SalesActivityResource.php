@@ -19,7 +19,7 @@ class SalesActivityResource extends JsonResource
         $now = Carbon::now();
         return [
             'id' => $this->id,
-            'outlet' => $this->outlet->only('id', 'name', 'category', 'city_id', 'longitude', 'latitude', 'visit_day'),
+            'outlet' => $this->outlet->only('id', 'name', 'category', 'city_id', 'longitude', 'latitude'),
             'user' => $this->user->only('id', 'name'),
             'channel' => $this->outlet->channel ? $this->outlet->channel->only('id', 'name') : null,
             'av3m_products' => Av3m::where('outlet_id', $this->outlet_id)

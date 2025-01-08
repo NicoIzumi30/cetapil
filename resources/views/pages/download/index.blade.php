@@ -386,7 +386,8 @@
                 { selector: '[data-product-download]', url: '{{ route("download.product") }}' },
                 { selector: '[data-program-download]', url: '{{ route("download.program") }}' },
                 { selector: '[data-av3m-download]', url: '{{ route("download.av3m") }}' },
-                { selector: '[data-pengguna-download]', url: '{{ route("download.pengguna") }}' }
+                { selector: '[data-pengguna-download]', url: '{{ route("download.pengguna") }}' },
+                { selector: '[data-kota-download]', url: '{{ route("download.city") }}' }
             ];
 
             simpleDownloads.forEach(download => {

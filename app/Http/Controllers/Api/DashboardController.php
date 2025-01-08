@@ -19,7 +19,12 @@ use function PHPUnit\Framework\callback;
 
 class DashboardController extends Controller
 {
-    use  HasAuthUser;
+    use HasAuthUser;
+
+    public function __construct()
+    {
+        
+    }
     public function index()
     {
         $user = $this->getAuthUser();
@@ -33,33 +38,11 @@ class DashboardController extends Controller
 
         $outlet_query = Outlet::where('user_id', $user->id)
             ->whereNull('deleted_at')
-            ->approved()
-            ->where(function ($query) use ($currentDayNumber, $weekNumber) {
-                $query->orWhere(function ($q) use ($currentDayNumber) {
-                    $q->where('cycle', '1x1')
-                        ->where('visit_day', $currentDayNumber);
-                });
-
-                $query->orWhere(function ($q) use ($currentDayNumber, $weekNumber) {
-                    $q->where('cycle', '1x2')
-                        ->where('visit_day', $currentDayNumber)
-                        ->where(function ($w) use ($weekNumber) {
-                            $w->orWhere('week', (string)$weekNumber);
-                            if (in_array($weekNumber, [1, 3])) {
-                                $w->orWhere('week', '1&3');
-                            }
-                            if (in_array($weekNumber, [2, 4])) {
-                                $w->orWhere('week', '2&4');
-                            }
-                        });
-                });
-
-                $query->orWhere(function ($q) use ($currentDayNumber, $weekNumber) {
-                    $q->where('cycle', '1x4')
-                        ->where('visit_day', $currentDayNumber)
-                        ->where('week', (string)$weekNumber);
-                });
-            });
+            ->whereHas('outletRoutings', function ($q) use ($weekNumber, $currentDayNumber) {
+                $q->where('week', $weekNumber)
+                    ->where('visit_day', $currentDayNumber);
+            })
+            ->approved();
 
         $total_outlet = Outlet::where('user_id', $user->id)
             ->whereNull('deleted_at')
@@ -231,13 +214,8 @@ class DashboardController extends Controller
 
         if (!$current_outlet) {
             $current_outlet = Outlet::where('user_id', $user->id)
-                ->where('visit_day', $currentDayNumber)
-                ->where(function ($query) use ($week) {
-                    $query->where('cycle', '1x1')
-                        ->orWhere(function ($query) use ($week) {
-                            $query->where('cycle', '1x2')
-                                ->where('week', $week);
-                        });
+                ->whereHas('outletRoutings', function ($q) use ($week, $currentDayNumber) {
+                    $q->where('week', $week)->where('visit_day', $currentDayNumber);
                 })
                 ->where(function ($builder) use ($now) {
                     $builder
@@ -308,22 +286,20 @@ class DashboardController extends Controller
     {
         $user = $this->getAuthUser();
         $now = Carbon::now();
-        $outlet_query = Outlet::where('user_id', $user->id);
-
-        $total_1x1_cycle = (int) DB::table(DB::raw("({$outlet_query->toSql()}) as query"))
-            ->mergeBindings($outlet_query->getQuery())
-            ->where('cycle', '1x1')
-            ->count() * 4;
-
-        $total_1x2_cycle = (int) DB::table(DB::raw("({$outlet_query->toSql()}) as query"))
-            ->mergeBindings($outlet_query->getQuery())
-            ->where('cycle', '1x2')
-            ->count() * 2;
-
-        $total_call_plan = $total_1x1_cycle + $total_1x2_cycle;
+        $currentDayNumber = $now->dayOfWeek;
+        $currentDayNumber = $currentDayNumber === 0 ? 7 : $currentDayNumber;
+        $currentWeek = $now->weekOfMonth;
+        $weekNumber = $currentWeek > 4 ? $currentWeek % 4 : $currentWeek;
+        $outlet_query = Outlet::where('user_id', $user->id)
+            ->whereNull('deleted_at')
+            ->approved()
+            ->whereHas('outletRoutings', function ($q) use ($weekNumber, $currentDayNumber) {
+                $q->where('week', $weekNumber)->where('visit_day', $currentDayNumber);
+            });
+        $total_call_plan = $outlet_query->count();
 
         $actual_plan_query = SalesActivity::where('user_id', $user->id)
-            ->whereMonth('checked_in', $now->month)
+            ->whereDate('checked_in', $now)
             ->whereNotNull('checked_out');
 
         $last_updated_query = clone $actual_plan_query;

@@ -2,40 +2,78 @@
 
 namespace Database\Seeders;
 
-use App\Models\Permission;
+use Carbon\Carbon;
 use App\Models\Role;
 use App\Models\User;
-use Illuminate\Database\Seeder;
+use App\Models\Permission;
+use Faker\Factory as Faker;
 use Illuminate\Support\Arr;
+use Illuminate\Support\Str;
+use Illuminate\Database\Seeder;
+use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Facades\Schema;
-use Faker\Factory as Faker;
 
 class UserSeeder extends Seeder
 {
     /**
      * Run the database seeds.
      */
+    private function csvToArray($filename, $header)
+    {
+        if (!file_exists($filename)) {
+            $this->command->error("File tidak ditemukan: {$filename}");
+            return false;
+        }
+        
+        if (!is_readable($filename)) {
+            $this->command->error("File tidak bisa dibaca: {$filename}");
+            return false;
+        }
+        
+        $data = array();
+        
+        if (($handle = fopen($filename, 'r')) !== false) {
+            // Skip header row if exists
+            fgetcsv($handle);
+            
+            $rowCount = 0;
+            while (($row = fgetcsv($handle)) !== false) {
+                if (!empty($header)) {
+                    if (count($header) != count($row)) {
+                        $this->command->warn("Baris ke-{$rowCount}: Jumlah kolom tidak sesuai. Diharapkan: " . count($header) . ", Didapat: " . count($row));
+                        continue;
+                    }
+                    $row = array_combine($header, $row);
+                }
+                $data[] = $row;
+                $rowCount++;
+            }
+            fclose($handle);
+        }
+        
+        return $data;
+    }
     public function run(): void
     {
 
         //  TRUNCATE the users, roles and permissions table, comment this code if doesn't needed
         Schema::disableForeignKeyConstraints();
-        User::truncate();
-        Role::truncate();
-        Permission::truncate();
+        // User::truncate();
+        // Role::truncate();
+        // Permission::truncate();
         Schema::enableForeignKeyConstraints();
         // Reset cached roles and permissions
         app()[\Spatie\Permission\PermissionRegistrar::class]->forgetCachedPermissions();
 
-        $superadmin = Role::create([
+        $superadmin = Role::firstOrCreate([
             'name' => 'superadmin'
         ]);
-        $admin = Role::create([
+        $admin = Role::firstOrCreate([
             'name' => 'admin'
         ]);
-        $sales = Role::create(['name' => 'sales']);
-        $merchandiser = Role::create(['name' => 'merchandiser']);
+        $sales = Role::firstOrCreate(['name' => 'sales']);
+        $merchandiser = Role::firstOrCreate(['name' => 'merchandiser']);
         $permissions = [
             'menu_report',
             'menu_product',
@@ -49,15 +87,15 @@ class UserSeeder extends Seeder
         ];
        
         foreach ($permissions as $permission) {
-            Permission::create([
+            Permission::firstOrCreate([
                 'name' => $permission
             ]);
         }
         // Create User
         $users = [
             [
-                'name' => 'Yuki Me',
-                'email' => 'yuki@gmail.com',                
+                'name' => 'Teamate',
+                'email' => 'teamate@gmail.com',                
                 'password' => Hash::make('121233'),
                 'phone_number' => '+62859126462972',
                 'role' => $superadmin,
@@ -101,19 +139,49 @@ class UserSeeder extends Seeder
         $faker = Faker::create();
 
         foreach ($users as $user) {
+            $email = $user['email'];
+            $userCheck = User::where('email', $email)->first();
+            if ($userCheck) {
+                continue;
+            }else{
+                $newUser = User::create([
+                    'name' => $user['name'],
+                    'email' => $user['email'],
+                    'password' => $user['password'],
+                    'phone_number' => $user['phone_number'],
+                    'longitude' => $faker->longitude(),
+                    'latitude' => $faker->latitude()
+                ])->assignRole($user['role']);
+    
+                $newUser->givePermissionTo($user['permission']);
+                $newUser->save();
+            }
+            
+        }
+        $now = Carbon::now();
+        $file = public_path().'/assets/csv/pengguna.csv';
+        $header = ['name', 'email', 'phone_number', 'password','longitude','latitude','city','address'];
+        $data = $this->csvToArray($file, $header);
+        $data = array_map(function ($arr) use ($now) {
+            $arr['permission'] = ['menu_outlet', 'menu_routing', 'menu_activity', 'menu_selling'];
+            return $arr + ['created_at' => $now, 'updated_at' => $now];
+        }, $data);
+        foreach ($data as $user) {
             $newUser = User::create([
                 'name' => $user['name'],
                 'email' => $user['email'],
-                'password' => $user['password'],
+                'password' => Hash::make($user['password']),
                 'phone_number' => $user['phone_number'],
-                'longitude' => $faker->longitude(),
-                'latitude' => $faker->latitude()
-            ])->assignRole($user['role']);
-
+                'longitude' => $user['longitude'],
+                'latitude' => $user['latitude'],
+                'city' => $user['city'],
+                'address' => $user['address'],
+                'active' => 1,
+                'region' => ''
+            ])->assignRole($sales);
             $newUser->givePermissionTo($user['permission']);
             $newUser->save();
         }
-
         $this->command->info('User seeder run successfully');
     }
 }

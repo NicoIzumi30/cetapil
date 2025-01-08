@@ -30,61 +30,39 @@ class RoutingController extends Controller
         Carbon::setLocale('id');
         $now = Carbon::now('Asia/Jakarta');
 
-        $currentWeek = $now->weekOfMonth;
-        $currentDay = $now->dayOfWeek;
-        $currentDay = $currentDay === 0 ? '7' : (string) $currentDay;
-        $weekNumber = $currentWeek > 4 ? $currentWeek % 4 : $currentWeek;
-        $user = $this->getAuthUser();
+        $weekNumber = $now->weekOfMonth > 4 ? $now->weekOfMonth % 4 : $now->weekOfMonth;
+        $currentDay = $now->dayOfWeek === 0 ? 7 : $now->dayOfWeek;
+        $userId = $this->getAuthUser()->id;
 
         $outlets = Outlet::query()
             ->approved()
-            ->where('user_id', $user->id)
-            ->where(function ($query) use ($currentDay, $weekNumber, $user, $now) {
-                $query->where(function ($q) use ($currentDay, $weekNumber) {
-                    // 1x1 cycle
-                    $q->orWhere(function ($inner) use ($currentDay) {
-                        $inner->where('cycle', '1x1')
-                            ->where('visit_day', $currentDay);
-                    });
-
-                    // 1x2 cycle
-                    $q->orWhere(function ($inner) use ($currentDay, $weekNumber) {
-                        $inner->where('cycle', '1x2')
-                            ->where('visit_day', $currentDay)
-                            ->where(function ($w) use ($weekNumber) {
-                                $w->orWhere('week', (string)$weekNumber);
-                                if (in_array($weekNumber, [1, 3])) {
-                                    $w->orWhere('week', '1&3');
-                                }
-                                if (in_array($weekNumber, [2, 4])) {
-                                    $w->orWhere('week', '2&4');
-                                }
-                            });
-                    });
-
-                    // 1x4 cycle
-                    $q->orWhere(function ($inner) use ($currentDay, $weekNumber) {
-                        $inner->where([
-                            ['cycle', '1x4'],
-                            ['visit_day', $currentDay],
-                            ['week', (string)$weekNumber]
-                        ]);
-                    });
+            ->where('user_id', $userId)
+            ->where(function ($query) use ($weekNumber, $currentDay, $userId, $now) {
+                $query->whereHas('outletRoutings', function ($q) use ($weekNumber, $currentDay) {
+                    $q->where('week', $weekNumber)
+                        ->where('visit_day', $currentDay);
                 })
-                    ->orWhereHas('salesActivities', function ($q) use ($user, $now) {
-                        $q->where('user_id', $user->id)
+                    ->orWhereHas('salesActivities', function ($q) use ($userId, $now) {
+                        $q->where('user_id', $userId)
                             ->whereDate('checked_in', $now->toDateString());
                     });
             })
-            ->with(['salesActivities' => function ($query) use ($user, $now) {
-                $query->where('user_id', $user->id)
-                    ->whereDate('checked_in', $now->toDateString())
-                    ->select('id', 'outlet_id', 'checked_in', 'checked_out', 'status');
-            }]);
-
-        $result = $outlets->get();
-        return new RoutingCollection($result);
+            ->with([
+                'salesActivities' => function ($query) use ($userId, $now) {
+                    $query->where('user_id', $userId)
+                        ->whereDate('checked_in', $now->toDateString())
+                        ->select('id', 'outlet_id', 'checked_in', 'checked_out', 'status');
+                },
+                'outletRoutings' => function ($query) use ($weekNumber, $currentDay) {
+                    $query->where('week', $weekNumber)
+                        ->where('visit_day', $currentDay)
+                        ->select('id', 'outlet_id', 'week', 'visit_day');
+                }
+            ])
+            ->get();
+        return new RoutingCollection($outlets);
     }
+
 
     public function checkIn(CheckInRequest $request)
     {
@@ -111,10 +89,10 @@ class RoutingController extends Controller
             $outlet->latitude,
             $outlet->longitude
         );
-        if($outlet->latitude == null || $outlet->longitude == null){
+        if ($outlet->latitude == null || $outlet->longitude == null) {
             $radius = 0;
             $radius_status = 'ONSITE';
-        }else{
+        } else {
             $radius = $this->calculateDistance(
                 $data['latitude'],
                 $data['longitude'],

@@ -147,7 +147,7 @@
                 </div>
             </div>
 
-            <x-section-card :title="'Cycle'">
+            <x-section-card :title="'Routing'">
                 <div id="cycles-wrapper" class="grid gap-4">
                     <div class="flex items-end gap-4">
                         <div class="flex-1">
@@ -412,33 +412,40 @@
                 setTimeout(() => window.location.reload(), 300);
             }
             $('#importBtn').click(function() {
-                const file = $('#file_upload')[0].files[0];
-                if (!file) {
-                    return toast('error', 'Silakan pilih file terlebih dahulu', 200);
-                }
+    const file = $('#file_upload')[0].files[0];
+    if (!file) {
+        return toast('error', 'Silakan pilih file terlebih dahulu', 200);
+    }
 
-                const formData = new FormData();
-                formData.append('excel_file', file);
-                toggleLoading(true, 'import');
+    const formData = new FormData();
+    formData.append('excel_file', file);
+    toggleLoading(true, 'import');
 
-                $.ajax({
-                    url: '/routing/bulk',
-                    type: 'POST',
-                    data: formData,
-                    processData: false,
-                    contentType: false,
-                    success: function(response) {
-                        toggleLoading(false, 'import');
-                        closeModal('unggah-routing-bulk');
-                        toast('success', response.message, 400);
-                        setTimeout(() => window.location.replace('/routing'), 4000);
-                    },
-                    error: function(xhr) {
-                        toggleLoading(false, 'import');
-                        toast('error', xhr.responseJSON.message, 200);
-                    }
-                });
-            });
+    $.ajax({
+        url: '/routing/bulk',
+        type: 'POST',
+        data: formData,
+        processData: false,
+        contentType: false,
+        success: function(response) {
+            toggleLoading(false, 'import');
+            
+            if (response.status === 'error') {
+                toast('error', response.message, 200);
+                return;
+            }
+
+            closeModal('unggah-routing-bulk');
+            toast('success', response.message, 400);
+            setTimeout(() => window.location.replace('/routing'), 4000);
+        },
+        error: function(xhr) {
+            toggleLoading(false, 'import');
+            const errorMessage = xhr.responseJSON?.message || 'Terjadi kesalahan saat import';
+            toast('error', errorMessage, 200);
+        }
+    });
+});
         });
     </script>
 @endpush

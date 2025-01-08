@@ -22,14 +22,11 @@ class RoutingResource extends JsonResource
             'name' => $this->name,
             'category' => $this->category,
             'channel' => $this->channel?->only('id', 'name'),  // Already had null check
-            'visit_day' => $this->visit_day,
             'longitude' => $this->longitude,
             'latitude' => $this->latitude,
-            'city' => $this->city,
+            'city' => $this->city->only('id', 'name','code','province_code'),
             'address' => $this->address,
             'status' => $this->status,
-            'week_type' => $this->week_type,
-            'cycle' => $this->cycle,
             'sales_activity' => $this->salesActivities->first(),
             'images' => OutletImageResource::collection($this->images),
             'forms' => OutletFormResource::collection($this->forms)

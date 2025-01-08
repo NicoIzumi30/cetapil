@@ -212,7 +212,9 @@ class DashboardController extends Controller
                     ->whereHas('outlet', function ($q) use ($category, $request) {
                         $q->where('category', $category);
                         if ($request->visit_day) {
-                            $q->where('visit_day', $request->visit_day);
+                            $q->whereHas('outletRoutings', function ($q) use ($request) {
+                                $q->where('visit_day', $request->visit_day);
+                            });
                         }
                     })
                     ->avg($timeField) ?? 0

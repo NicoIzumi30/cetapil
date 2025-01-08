@@ -7,7 +7,6 @@ use Illuminate\Support\Collection;
 use Maatwebsite\Excel\Concerns\ToCollection;
 use Maatwebsite\Excel\Concerns\WithHeadingRow;
 
-// ProductImport.php
 class RoutingImport implements ToCollection, WithHeadingRow
 {
     public $response;
@@ -20,7 +19,9 @@ class RoutingImport implements ToCollection, WithHeadingRow
 
     public function collection(Collection $rows)
     {
-        dispatch(new RoutingExcelDataJob($rows, $this->fileName))->onConnection('sync');
-        $this->response = ["status" => 'success', "message" => 'Success import.'];
+        $job = new RoutingExcelDataJob($rows, $this->fileName);
+        $result = $job->handle(); // Panggil handle() langsung daripada menggunakan dispatch_sync
+        
+        $this->response = $result; // Simpan seluruh response
     }
 }

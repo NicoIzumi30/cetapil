@@ -20,10 +20,11 @@ class ChannelSeeder extends Seeder
         Schema::enableForeignKeyConstraints();
 
         $channel_name = [
-            'Chain Pharmacy',
-            'Minimarket',
-            'HFS/GT',
-            'HSM (Hyper Suparmarket)'
+            'Baby Special Stores',
+            'Chain Pharmacy Store',
+            'HFS (High frequency Store)/ GT Retailer Stores',
+            'HSM',
+            'IP'
         ];
 
         foreach ($channel_name as $channel) {
