@@ -59,9 +59,9 @@ class UserSeeder extends Seeder
 
         //  TRUNCATE the users, roles and permissions table, comment this code if doesn't needed
         Schema::disableForeignKeyConstraints();
-        // User::truncate();
-        // Role::truncate();
-        // Permission::truncate();
+        User::truncate();
+        Role::truncate();
+        Permission::truncate();
         Schema::enableForeignKeyConstraints();
         // Reset cached roles and permissions
         app()[\Spatie\Permission\PermissionRegistrar::class]->forgetCachedPermissions();
@@ -160,7 +160,7 @@ class UserSeeder extends Seeder
         }
         $now = Carbon::now();
         $file = public_path().'/assets/csv/pengguna.csv';
-        $header = ['name', 'email', 'phone_number', 'password','longitude','latitude','city','address'];
+        $header = ['name', 'email', 'city'];
         $data = $this->csvToArray($file, $header);
         $data = array_map(function ($arr) use ($now) {
             $arr['permission'] = ['menu_outlet', 'menu_routing', 'menu_activity', 'menu_selling'];
@@ -168,14 +168,14 @@ class UserSeeder extends Seeder
         }, $data);
         foreach ($data as $user) {
             $newUser = User::create([
-                'name' => $user['name'],
+                'name' => ucwords($user['name']),
                 'email' => $user['email'],
-                'password' => Hash::make($user['password']),
-                'phone_number' => $user['phone_number'],
-                'longitude' => $user['longitude'],
-                'latitude' => $user['latitude'],
+                'password' => Hash::make('12345678'),
+                'phone_number' => '',
+                'longitude' => null,
+                'latitude' => null,
                 'city' => $user['city'],
-                'address' => $user['address'],
+                'address' => null,
                 'active' => 1,
                 'region' => ''
             ])->assignRole($sales);

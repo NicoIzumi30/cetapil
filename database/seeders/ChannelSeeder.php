@@ -22,9 +22,15 @@ class ChannelSeeder extends Seeder
         $channel_name = [
             'Baby Special Stores',
             'Chain Pharmacy Store',
+            'CLINIC',
+            'Cosmetic Special Stores',
             'HFS (High frequency Store)/ GT Retailer Stores',
+            'HOSPITAL',
             'HSM',
-            'IP'
+            'IP',
+            'Minimart',
+            'OTHERS',
+            'Pure Players/Market Place'
         ];
 
         foreach ($channel_name as $channel) {
