@@ -71,9 +71,9 @@ class ProductController extends Controller
             'data' => $result->map(function ($item) {
                 return [
                     'id' => $item->id,
-                    'category' => $item->category->name,
-                    'sku' => $item->sku,
-                    'price' => number_format($item->price, 0, ',', '.'),
+                    'category' => htmlspecialchars($item->category->name),
+                    'sku' => htmlspecialchars($item->sku),
+                    'price' => htmlspecialchars(number_format($item->price, 0, ',', '.')),
                     'actions' => view('pages.product.action', [
                         'productId' => $item->id,
                         'sku' => $item->sku,
@@ -180,7 +180,7 @@ class ProductController extends Controller
         return response()->json([
             'id' => $product->id,
             'category_id' => $product->category_id,
-            'sku' => $product->sku,
+            'sku' =>$product->sku,
             'price' => $product->price
         ]);
     }
