@@ -82,14 +82,14 @@ class DetailSelling extends GetView<SellingController> {
                         title: "Nama Outlet",
                         value: selling.outlet!.name,
                       ),
-                      UnderlineTextField.readOnly(
-                        title: "Kategori Outlet",
-                        value: controller.filteredOutlets
-                            .where(
-                                (element) => element.id == selling.outlet!.id)
-                            .first
-                            .category,
-                      ),
+                      // UnderlineTextField.readOnly(
+                      //   title: "Kategori Outlet",
+                      //   value: controller.filteredOutlets
+                      //       .where(
+                      //           (element) => element.id == selling.outlet!.id)
+                      //       .first
+                      //       .category,
+                      // ),
                       // Column(
                       //   children: selling.products!.map((product) {
                       //
@@ -388,8 +388,8 @@ class ClipImage extends StatelessWidget {
   });
 
   String _sanitizeUrl(String url) {
-    print("https://cetaphil.id${url}");
-    return "https://cetaphil.id${url}";
+    print("https://dev.cetaphil.id${url}");
+    return "https://dev.cetaphil.id${url}";
   }
 
   @override

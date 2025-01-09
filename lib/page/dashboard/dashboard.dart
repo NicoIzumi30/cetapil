@@ -183,7 +183,7 @@ class DashboardPage extends GetView<DashboardController> {
                             itemBuilder: (context, index, realIndex) {
                               final program = controller.programUrls[index];
                               final imageUrl =
-                                  'https://cetaphil.id/storage${program.path ?? ''}';
+                                  'https://dev.cetaphil.id/storage${program.path ?? ''}';
 
                               return Padding(
                                 padding: const EdgeInsets.symmetric(horizontal: 5),

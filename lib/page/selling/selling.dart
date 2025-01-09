@@ -141,25 +141,25 @@ class SellingCard extends StatelessWidget {
     required this.ontap,
   }) : super(key: key);
 
-  O.Outlet get outlet {
-    try {
-      return controller.filteredOutlets.firstWhere(
-        (element) => element.id == selling.outlet?.id,
-        orElse: () => O.Outlet(
-          id: selling.outlet?.id ?? "",
-          name: 'Unknown Outlet',
-          category: 'Unknown Category',
-        ),
-      );
-    } catch (e) {
-      debugPrint('Error getting outlet: $e');
-      return O.Outlet(
-        id: "",
-        name: 'Error Loading Outlet',
-        category: 'Unknown Category',
-      );
-    }
-  }
+  // O.Outlet get outlet {
+  //   try {
+  //     return controller.filteredOutlets.firstWhere(
+  //       (element) => element.id == selling.outlet?.id,
+  //       orElse: () => O.Outlet(
+  //         id: selling.outlet?.id ?? "",
+  //         name: 'Unknown Outlet',
+  //         category: 'Unknown Category',
+  //       ),
+  //     );
+  //   } catch (e) {
+  //     debugPrint('Error getting outlet: $e');
+  //     return O.Outlet(
+  //       id: "",
+  //       name: 'Error Loading Outlet',
+  //       category: 'Unknown Category',
+  //     );
+  //   }
+  // }
 
   @override
   Widget build(BuildContext context) {
@@ -205,18 +205,18 @@ class SellingCard extends StatelessWidget {
                           fontWeight: FontWeight.bold,
                         ),
                       ),
-                      const SizedBox(height: 8),
-                      if (outlet.category != null)
-                        Padding(
-                          padding: const EdgeInsets.only(top: 4),
-                          child: Text(
-                            'Kategori Outlet: ${outlet.category}',
-                            style: TextStyle(
-                              color: Colors.grey[600],
-                              fontSize: 13,
-                            ),
-                          ),
-                        ),
+                      // const SizedBox(height: 8),
+                      // if (outlet.category != null)
+                      //   Padding(
+                      //     padding: const EdgeInsets.only(top: 4),
+                      //     child: Text(
+                      //       'Kategori Outlet: ${outlet.category}',
+                      //       style: TextStyle(
+                      //         color: Colors.grey[600],
+                      //         fontSize: 13,
+                      //       ),
+                      //     ),
+                      //   ),
                     ],
                   ),
                 ),

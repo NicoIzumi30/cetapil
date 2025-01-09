@@ -15,7 +15,7 @@ import 'package:get/get.dart';
 
 import '../../../utils/colors.dart';
 
-const String BASE_URL = 'https://cetaphil.id/storage/';
+const String BASE_URL = 'https://dev.cetaphil.id/storage/';
 
 class VisibilityPage extends GetView<ActivityController> {
   final supportController = Get.find<SupportDataController>();
