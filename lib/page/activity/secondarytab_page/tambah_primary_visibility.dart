@@ -64,7 +64,8 @@ class TambahPrimaryVisibility extends GetView<TambahVisibilityController> {
                         crossAxisAlignment: CrossAxisAlignment.start,
                         children: [
                           EnhancedBackButton(
-                            onPressed: () => Alerts.showConfirmDialog(context, useGetBack: false),
+                            onPressed: () => Alerts.showConfirmDialog(
+                                context, useGetBack: false),
                             backgroundColor: Colors.white,
                             iconColor: Colors.blue,
                             useGetBack: false,
@@ -73,32 +74,41 @@ class TambahPrimaryVisibility extends GetView<TambahVisibilityController> {
                           Expanded(
                             child: ListView(
                               children: [
-                                CustomDropdown(
-                                  hint: "-- Pilih Jenis Display --",
-                                  value: controller.posmTypeId.value.isEmpty
-                                      ? null
-                                      : controller.posmTypeId.value,
-                                  items: supportController.getPosmTypes().map((item) {
-                                    return DropdownMenuItem<String>(
-                                      value: item['id'],
-                                      child: Text(item['name']),
-                                    );
-                                  }).toList(),
-                                  onChanged: (value) {
-                                    controller.posmTypeId.value = value!;
-                                    controller.posmType.value = supportController
-                                        .getPosmTypes()
-                                        .firstWhere((element) => element['id'] == value)['name'];
-                                  },
-                                  title: "Jenis Display",
-                                ),
+                                Obx(() {
+                                  return CustomDropdown(
+                                    hint: "-- Pilih Jenis Display --",
+                                    value: controller.posmTypeId.value.isEmpty
+                                        ? null
+                                        : controller.posmTypeId.value,
+                                    items: supportController.getPosmTypes()
+                                        .map((item) {
+                                      return DropdownMenuItem<String>(
+                                        value: item['id'],
+                                        child: Text(item['name']),
+                                      );
+                                    }).toList(),
+                                    onChanged: (value) {
+                                      controller.posmTypeId.value = value!;
+                                      controller.posmType.value =
+                                      supportController
+                                          .getPosmTypes()
+                                          .firstWhere((element) =>
+                                      element['id'] == value)['name'];
+
+                                      print(" id : ${controller.posmTypeId
+                                          .value}");
+                                    },
+                                    title: "Jenis Display",
+                                  );
+                                }),
                                 Obx(() {
                                   return CustomDropdown(
                                     hint: "-- Pilih Jenis Visual --",
                                     value: controller.visualTypeId.value.isEmpty
                                         ? null
                                         : controller.visualTypeId.value,
-                                    items: supportController.getVisualTypes().map((item) {
+                                    items: supportController.getVisualTypes()
+                                        .map((item) {
                                       return DropdownMenuItem<String>(
                                         value: item['id'],
                                         child: Text(item['name']),
@@ -106,11 +116,14 @@ class TambahPrimaryVisibility extends GetView<TambahVisibilityController> {
                                     }).toList(),
                                     onChanged: (value) {
                                       controller.visualTypeId.value = value!;
-                                      controller.visualType.value = supportController
+                                      controller.visualType.value =
+                                      supportController
                                           .getVisualTypes()
-                                          .firstWhere((element) => element['id'] == value)['name'];
+                                          .firstWhere((element) =>
+                                      element['id'] == value)['name'];
                                       print(controller.visualType.value);
-                                      if (controller.visualType.value == "Others") {
+                                      if (controller.visualType.value ==
+                                          "Others") {
                                         controller.isOtherVisual.value = true;
                                       } else {
                                         controller.isOtherVisual.value = false;
@@ -124,13 +137,15 @@ class TambahPrimaryVisibility extends GetView<TambahVisibilityController> {
                                     visible: controller.isOtherVisual.value,
                                     child: ModernTextField(
                                       title: "Others Visual",
-                                      controller: controller.otherVisualController.value,
+                                      controller: controller
+                                          .otherVisualController.value,
                                     ),
                                   );
                                 }),
                                 Text(
                                   "Planogram",
-                                  style: TextStyle(fontSize: 13, fontWeight: FontWeight.w700),
+                                  style: TextStyle(fontSize: 13,
+                                      fontWeight: FontWeight.w700),
                                 ),
                                 SizedBox(height: 10),
                                 Container(
@@ -138,17 +153,23 @@ class TambahPrimaryVisibility extends GetView<TambahVisibilityController> {
                                   height: 200,
                                   child: ClipRRect(
                                     borderRadius: BorderRadius.circular(10),
-                                    child: FutureBuilder<List<Map<String, dynamic>>>(
-                                      future: supportController.getPlanogramsByChannel(controller
-                                              .activityController.detailOutlet.value!.channel!.id ??
+                                    child: FutureBuilder<
+                                        List<Map<String, dynamic>>>(
+                                      future: supportController
+                                          .getPlanogramsByChannel(controller
+                                          .activityController.detailOutlet
+                                          .value!.channel!.id ??
                                           ''),
                                       builder: (context, snapshot) {
                                         print(controller
-                                            .activityController.detailOutlet.value!.channel!.id);
-                                        if (snapshot.connectionState == ConnectionState.waiting) {
+                                            .activityController.detailOutlet
+                                            .value!.channel!.id);
+                                        if (snapshot.connectionState ==
+                                            ConnectionState.waiting) {
                                           return Container(
                                             color: Colors.grey[200],
-                                            child: Center(child: CircularProgressIndicator()),
+                                            child: Center(
+                                                child: CircularProgressIndicator()),
                                           );
                                         }
 
@@ -160,7 +181,8 @@ class TambahPrimaryVisibility extends GetView<TambahVisibilityController> {
                                             child: Center(
                                               child: Text(
                                                 "No planogram available for this channel",
-                                                style: TextStyle(color: Colors.grey[600]),
+                                                style: TextStyle(
+                                                    color: Colors.grey[600]),
                                               ),
                                             ),
                                           );
@@ -169,14 +191,16 @@ class TambahPrimaryVisibility extends GetView<TambahVisibilityController> {
                                         final planogram = snapshot.data!.first;
                                         final planogramPath = planogram['path'];
 
-                                        if (planogramPath != null && planogramPath.isNotEmpty) {
+                                        if (planogramPath != null &&
+                                            planogramPath.isNotEmpty) {
                                           final imageUrl = '$BASE_URL$planogramPath';
                                           return GestureDetector(
                                             onTap: () {
                                               Navigator.of(context).push(
                                                 MaterialPageRoute(
                                                   builder: (_) =>
-                                                      FullScreenImageViewer(imageUrl: imageUrl),
+                                                      FullScreenImageViewer(
+                                                          imageUrl: imageUrl),
                                                 ),
                                               );
                                             },
@@ -185,14 +209,18 @@ class TambahPrimaryVisibility extends GetView<TambahVisibilityController> {
                                               child: CachedNetworkImage(
                                                 imageUrl: imageUrl,
                                                 fit: BoxFit.cover,
-                                                placeholder: (context, url) => Container(
-                                                  color: Colors.grey[200],
-                                                  child: Center(child: CircularProgressIndicator()),
-                                                ),
-                                                errorWidget: (context, url, error) => Container(
-                                                  color: Colors.grey[200],
-                                                  child: Icon(Icons.error),
-                                                ),
+                                                placeholder: (context, url) =>
+                                                    Container(
+                                                      color: Colors.grey[200],
+                                                      child: Center(
+                                                          child: CircularProgressIndicator()),
+                                                    ),
+                                                errorWidget: (context, url,
+                                                    error) =>
+                                                    Container(
+                                                      color: Colors.grey[200],
+                                                      child: Icon(Icons.error),
+                                                    ),
                                               ),
                                             ),
                                           );
@@ -202,7 +230,8 @@ class TambahPrimaryVisibility extends GetView<TambahVisibilityController> {
                                             child: Center(
                                               child: Text(
                                                 "Invalid planogram image",
-                                                style: TextStyle(color: Colors.grey[600]),
+                                                style: TextStyle(
+                                                    color: Colors.grey[600]),
                                               ),
                                             ),
                                           );
@@ -214,7 +243,8 @@ class TambahPrimaryVisibility extends GetView<TambahVisibilityController> {
                                 SizedBox(height: 15),
                                 CustomDropdown(
                                     hint: "-- Pilih Condition --",
-                                    value: controller.selectedCondition.value.isEmpty
+                                    value: controller.selectedCondition.value
+                                        .isEmpty
                                         ? null
                                         : controller.selectedCondition.value,
                                     items: ["Good", "Bad"].map((item) {
@@ -224,13 +254,16 @@ class TambahPrimaryVisibility extends GetView<TambahVisibilityController> {
                                       );
                                     }).toList(),
                                     onChanged: (value) {
-                                      controller.selectedCondition.value = value!;
+                                      controller.selectedCondition.value =
+                                      value!;
                                     },
                                     title: "Condition"),
                                 ModernTextField(
                                   title: "Lebar Rak (cm)",
                                   keyboardType: TextInputType.number,
-                                  inputFormatters: [FilteringTextInputFormatter.digitsOnly],
+                                  inputFormatters: [
+                                    FilteringTextInputFormatter.digitsOnly
+                                  ],
                                   controller: controller.lebarRak.value,
                                 ),
                                 ModernTextField(
@@ -254,7 +287,8 @@ class TambahPrimaryVisibility extends GetView<TambahVisibilityController> {
                           color: Colors.white.withOpacity(0.3),
                           borderRadius: BorderRadius.circular(10)),
                       child: Padding(
-                        padding: const EdgeInsets.symmetric(horizontal: 15, vertical: 10),
+                        padding: const EdgeInsets.symmetric(
+                            horizontal: 15, vertical: 10),
                         child: ElevatedButton(
                           style: ElevatedButton.styleFrom(
                             backgroundColor: AppColors.primary,
@@ -291,24 +325,29 @@ class TambahPrimaryVisibility extends GetView<TambahVisibilityController> {
       return CachedNetworkImage(
         imageUrl: imageUrl,
         fit: BoxFit.cover,
-        placeholder: (context, url) => Container(
-          color: Colors.grey[200],
-          child: Center(child: CircularProgressIndicator()),
-        ),
-        errorWidget: (context, url, error) => Container(
-          color: Colors.grey[200],
-          child: Icon(Icons.error),
-        ),
+        placeholder: (context, url) =>
+            Container(
+              color: Colors.grey[200],
+              child: Center(child: CircularProgressIndicator()),
+            ),
+        errorWidget: (context, url, error) =>
+            Container(
+              color: Colors.grey[200],
+              child: Icon(Icons.error),
+            ),
       );
     } else if (image!.startsWith('data:image') || image.startsWith('/9j/')) {
       try {
         return Image.memory(
-          base64Decode(image.split(',').last),
+          base64Decode(image
+              .split(',')
+              .last),
           fit: BoxFit.cover,
-          errorBuilder: (context, error, stackTrace) => Container(
-            color: Colors.grey[200],
-            child: Icon(Icons.error),
-          ),
+          errorBuilder: (context, error, stackTrace) =>
+              Container(
+                color: Colors.grey[200],
+                child: Icon(Icons.error),
+              ),
         );
       } catch (e) {
         print('Error loading base64 image: $e');
@@ -381,12 +420,13 @@ class TambahPrimaryVisibility extends GetView<TambahVisibilityController> {
             onTap: isUploading.value
                 ? null
                 : () async {
-                    final File? result = await ImageUploadUtils.showImageSourceSelection(context,
-                        currentImage: image);
-                    if (result != null) {
-                      controller.updateImage(result);
-                    }
-                  },
+              final File? result = await ImageUploadUtils
+                  .showImageSourceSelection(context,
+                  currentImage: image);
+              if (result != null) {
+                controller.updateImage(result);
+              }
+            },
             child: Container(
               width: double.infinity,
               height: 150,
@@ -397,52 +437,52 @@ class TambahPrimaryVisibility extends GetView<TambahVisibilityController> {
                 borderRadius: BorderRadius.circular(8),
                 image: image != null
                     ? DecorationImage(
-                        image: FileImage(image),
-                        fit: BoxFit.cover,
-                      )
+                  image: FileImage(image),
+                  fit: BoxFit.cover,
+                )
                     : null,
               ),
               child: isUploading.value
                   ? Center(child: CircularProgressIndicator())
                   : image == null
-                      ? Column(
-                          mainAxisAlignment: MainAxisAlignment.center,
-                          children: [
-                            Icon(Icons.camera_alt, color: Colors.black),
-                            Text(
-                              "Klik disini untuk ambil foto dengan kamera",
-                              style: TextStyle(
-                                fontSize: 8,
-                                fontWeight: FontWeight.bold,
-                                color: Colors.blue,
-                              ),
-                            ),
-                            Text(
-                              "Kualitas foto harus jelas dan tidak blur",
-                              style: TextStyle(fontSize: 7, color: Colors.blue),
-                            ),
-                          ],
-                        )
-                      : Stack(
-                          alignment: Alignment.topRight,
-                          children: [
-                            Positioned(
-                              right: 4,
-                              top: 4,
-                              child: GestureDetector(
-                                onTap: () => controller.updateImage(null),
-                                child: Container(
-                                  padding: EdgeInsets.all(4),
-                                  decoration: BoxDecoration(
-                                    color: Colors.white.withOpacity(0.8),
-                                    shape: BoxShape.circle,
-                                  ),
-                                  child: Icon(Icons.close, size: 16, color: Colors.red),
-                                ),
-                              ),
-                            ),
-                          ],
+                  ? Column(
+                mainAxisAlignment: MainAxisAlignment.center,
+                children: [
+                  Icon(Icons.camera_alt, color: Colors.black),
+                  Text(
+                    "Klik disini untuk ambil foto dengan kamera",
+                    style: TextStyle(
+                      fontSize: 8,
+                      fontWeight: FontWeight.bold,
+                      color: Colors.blue,
+                    ),
+                  ),
+                  Text(
+                    "Kualitas foto harus jelas dan tidak blur",
+                    style: TextStyle(fontSize: 7, color: Colors.blue),
+                  ),
+                ],
+              )
+                  : Stack(
+                alignment: Alignment.topRight,
+                children: [
+                  Positioned(
+                    right: 4,
+                    top: 4,
+                    child: GestureDetector(
+                      onTap: () => controller.updateImage(null),
+                      child: Container(
+                        padding: EdgeInsets.all(4),
+                        decoration: BoxDecoration(
+                          color: Colors.white.withOpacity(0.8),
+                          shape: BoxShape.circle,
                         ),
+                        child: Icon(Icons.close, size: 16, color: Colors.red),
+                      ),
+                    ),
+                  ),
+                ],
+              ),
             ),
           );
         }),
@@ -454,7 +494,8 @@ class TambahPrimaryVisibility extends GetView<TambahVisibilityController> {
 class FullScreenImageViewer extends StatelessWidget {
   final String imageUrl;
 
-  const FullScreenImageViewer({Key? key, required this.imageUrl}) : super(key: key);
+  const FullScreenImageViewer({Key? key, required this.imageUrl})
+      : super(key: key);
 
   @override
   Widget build(BuildContext context) {
@@ -473,13 +514,15 @@ class FullScreenImageViewer extends StatelessWidget {
                   child: CachedNetworkImage(
                     imageUrl: imageUrl,
                     fit: BoxFit.contain,
-                    placeholder: (context, url) => Center(
-                      child: CircularProgressIndicator(color: Colors.white),
-                    ),
-                    errorWidget: (context, url, error) => Icon(
-                      Icons.error,
-                      color: Colors.white,
-                    ),
+                    placeholder: (context, url) =>
+                        Center(
+                          child: CircularProgressIndicator(color: Colors.white),
+                        ),
+                    errorWidget: (context, url, error) =>
+                        Icon(
+                          Icons.error,
+                          color: Colors.white,
+                        ),
                   ),
                 ),
               ),

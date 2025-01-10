@@ -218,7 +218,8 @@ class VisibilityPage extends GetView<ActivityController> {
                   .firstWhere((item) => item['id'] == id, orElse: () => {});
               return VisibilityCard(
                 isPrimary: false,
-                secondarydisplay: data['secondary_exist'] ?? "-",
+                secondarydisplay: data['secondary_exist'] == null ? "-" :
+                data['secondary_exist'] == "true" ? "ada" : "tidak ada",
                 typeDisplay: data['display_type'] ?? "-",
                 imagePath: data['display_image'],
                 isSubmitted: data.isNotEmpty,
@@ -239,7 +240,8 @@ class VisibilityPage extends GetView<ActivityController> {
                   .firstWhere((item) => item['id'] == id, orElse: () => {});
               return VisibilityCard(
                 isPrimary: false,
-                secondarydisplay: data['secondary_exist'] ?? "-",
+                secondarydisplay: data['secondary_exist'] == null ? "-" :
+                data['secondary_exist'] == "true" ? "ada" : "tidak ada",
                 typeDisplay: data['display_type'] ?? "-",
                 imagePath: data['display_image'],
                 isSubmitted: data.isNotEmpty,
@@ -266,7 +268,8 @@ class VisibilityPage extends GetView<ActivityController> {
                   .firstWhere((item) => item['id'] == id, orElse: () => {});
               return VisibilityCard(
                 isPrimary: false,
-                secondarydisplay: data['secondary_exist'] ?? "-",
+                secondarydisplay: data['secondary_exist'] == null ? "-" :
+                data['secondary_exist'] == "true" ? "ada" : "tidak ada",
                 typeDisplay: data['display_type'] ?? "-",
                 imagePath: data['display_image'],
                 isSubmitted: data.isNotEmpty,
@@ -287,7 +290,8 @@ class VisibilityPage extends GetView<ActivityController> {
                   .firstWhere((item) => item['id'] == id, orElse: () => {});
               return VisibilityCard(
                 isPrimary: false,
-                secondarydisplay: data['secondary_exist'] ?? "-",
+                secondarydisplay: data['secondary_exist'] == null ? "-" :
+                data['secondary_exist'] == "true" ? "ada" : "tidak ada",
                 typeDisplay: data['display_type'] ?? "-",
                 imagePath: data['display_image'],
                 isSubmitted: data.isNotEmpty,
