@@ -25,7 +25,7 @@ class SellingController extends Controller
         $query = Selling::with('user');
         
         if ($request->filled('search_term')) {
-            $searchTerm = $request->search_term;
+            $searchTerm = htmlspecialchars(trim($request->search_term));
             $query->where(function($q) use ($searchTerm) {
                 $q->WhereHas('user', function($q) use ($searchTerm) {
                       $q->where('name', 'like', "%{$searchTerm}%");
@@ -48,14 +48,14 @@ class SellingController extends Controller
             'data' => $result->map(function($item) {
                 $totalSelling = SellingProduct::where('selling_id', $item->id)->sum('total');
                 return [
-                    'id' => $item->id, // Tambahkan id product
-                    'waktu' => Carbon::parse($item->created_at)->format('d-m-Y H:i:s'),
-                    'sales' => $item->user->name,
-                    'outlet' => $item->outlet->name,
-                    'total' => number_format($totalSelling, 0, ',', '.'),
-                    'actions' => view('pages.selling.action', [
+                    'id' => (int)$item->id,
+                    'waktu' => htmlspecialchars(Carbon::parse($item->created_at)->format('d-m-Y H:i:s')),
+                    'sales' => htmlspecialchars($item->user->name),
+                    'outlet' => htmlspecialchars($item->outlet->name),
+                    'total' => htmlspecialchars(number_format($totalSelling, 0, ',', '.')),
+                    'actions' => (view('pages.selling.action', [
                         'sellingId' => $item->id
-                    ])->render()
+                    ])->render())
                 ];
             })
         ]);

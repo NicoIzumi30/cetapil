@@ -21,31 +21,31 @@ class RoutingRequestControler extends Controller
         $query = Outlet::with('user:id,name')
             ->whereIn('status', ['PENDING', 'REJECTED'])
             ->orderBy('created_at', 'desc');
-
+    
         $totalRecords = Outlet::count();
         $filteredRecords = (clone $query)->count();
-
+    
         $result = $query->skip($request->start)
             ->take($request->length)
             ->get();
-
+    
         return response()->json([
             'draw' => intval($request->draw),
             'recordsTotal' => $totalRecords,
             'recordsFiltered' => $filteredRecords,
             'data' => $result->map(function ($item) {
                 return [
-                    'id' => $item->id,
-                    'outlet' => $item->name,
-                    'sales' => $item->user->name,
-                    'area' => $item->longitude . ', ' . $item->latitude,
-                    'visit_day' => getVisitDays($item->id), // Modified to use helper function
-                    'visit_week' => getWeeks($item->id),    // Added to show weeks
-                    'status' => getStatusBadge($item->status),
-                    'actions' => view('pages.routing.action_request', [
+                    'id' => (int)$item->id,
+                    'outlet' => htmlspecialchars($item->name),
+                    'sales' => htmlspecialchars($item->user->name),
+                    'area' => htmlspecialchars($item->longitude . ', ' . $item->latitude),
+                    'visit_day' => htmlspecialchars(getVisitDays($item->id)),
+                    'visit_week' => htmlspecialchars(getWeeks($item->id)),
+                    'status' => htmlspecialchars(getStatusBadge($item->status)),
+                    'actions' => (view('pages.routing.action_request', [
                         'item' => $item,
                         'outletId' => $item->id
-                    ])->render()
+                    ])->render())
                 ];
             })
         ]);

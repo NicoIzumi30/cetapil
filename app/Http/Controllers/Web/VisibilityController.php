@@ -10,7 +10,6 @@ use App\Models\Channel;
 use App\Models\Product;
 use App\Models\Category;
 use App\Models\PosmType;
-use App\Models\PosmImage;
 use App\Models\Visibility;
 use App\Models\VisualType;
 use Illuminate\Http\Request;
@@ -38,10 +37,11 @@ class VisibilityController extends Controller
 
     public function getData(Request $request)
     {
-        $query = Visibility::with(['user:id,name', 'product:id,sku', 'visualType:id,name', 'posmType:id,name', 'outlet:id,name'])->orderBy('created_at', 'desc');
-
+        $query = Visibility::with(['user:id,name', 'product:id,sku', 'visualType:id,name', 'posmType:id,name', 'outlet:id,name'])
+            ->orderBy('created_at', 'desc');
+    
         if ($request->filled('search_term')) {
-            $searchTerm = $request->search_term;
+            $searchTerm = htmlspecialchars(trim($request->search_term));
             $query->where(function ($q) use ($searchTerm) {
                 $q->WhereHas('outlet', function ($q) use ($searchTerm) {
                     $q->where('name', 'like', "%{$searchTerm}%");
@@ -54,36 +54,37 @@ class VisibilityController extends Controller
                 });
             });
         }
+    
         if ($request->filled('filter_visibility')) {
-            $filter_visibility = $request->filter_visibility;
+            $filter_visibility = htmlspecialchars($request->filter_visibility);
             if ($filter_visibility != 'all') {
                 $query->where('posm_type_id', $filter_visibility);
             }
         }
-
+    
         $filteredRecords = (clone $query)->count();
-
+    
         $result = $query->skip($request->start)
             ->take($request->length)
             ->get();
-
+    
         return response()->json([
             'draw' => intval($request->draw),
             'recordsTotal' => $filteredRecords,
             'recordsFiltered' => $filteredRecords,
             'data' => $result->map(function ($item) {
                 return [
-                    'id' => $item->id,
-                    'outlet' => $item->outlet->name,
-                    'sales' => $item->user->name,
-                    'product' => $item->product->sku,
-                    'visual' => $item->visualType->name,
-                    'status' => $item->status,
-                    'periode' =>  Carbon::parse($item->started_at)->format('d F Y')  . ' - ' . Carbon::parse($item->ended_at)->format('d F Y'),
-                    'actions' => view('pages.visibility.action', [
+                    'id' => (int)$item->id,
+                    'outlet' => htmlspecialchars($item->outlet->name),
+                    'sales' => htmlspecialchars($item->user->name),
+                    'product' => htmlspecialchars($item->product->sku),
+                    'visual' => htmlspecialchars($item->visualType->name),
+                    'status' => htmlspecialchars($item->status),
+                    'periode' => htmlspecialchars(Carbon::parse($item->started_at)->format('d F Y') . ' - ' . Carbon::parse($item->ended_at)->format('d F Y')),
+                    'actions' => (view('pages.visibility.action', [
                         'item' => $item,
                         'visibilityId' => $item
-                    ])->render()
+                    ])->render())
                 ];
             })
         ]);

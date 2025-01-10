@@ -20,11 +20,19 @@ class SellingProduct extends Model
         return $this->belongsTo(Selling::class, 'selling_id');
     }
 
-    public function product(): BelongsTo
-    {
+    public function product() {
         return $this->belongsTo(Product::class);
     }
-
+    
+    // Model Sell
+    public function outlet() {
+        return $this->belongsTo(Outlet::class);
+    }
+    
+    public function user() {
+        return $this->belongsTo(User::class);
+    }
+    
     public function scopeCompleteRelation(Builder $query)
     {
         $query->has('sell')

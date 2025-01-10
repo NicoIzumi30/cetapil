@@ -74,7 +74,7 @@ class RoutingController extends Controller
         $query = Outlet::with('user');
 
         if ($request->filled('search_term')) {
-            $searchTerm = trim($request->search_term);
+            $searchTerm = htmlspecialchars(trim($request->search_term));
             $query->where('name', 'like', "%{$searchTerm}%");
             $query->orWhere('code', 'like', "%{$searchTerm}%");
             $query->orWhereHas('user', function ($q) use ($searchTerm) {
@@ -83,7 +83,7 @@ class RoutingController extends Controller
         }
 
         if ($request->filled('filter_day')) {
-            $filter_day = $request->filter_day;
+            $filter_day = htmlspecialchars($request->filter_day);
             if ($filter_day != 'all') {
                 $query->whereHas('outletRoutings', function ($q) use ($filter_day) {
                     $q->where('visit_day', $filter_day);
@@ -103,20 +103,20 @@ class RoutingController extends Controller
             'recordsTotal' => $filteredRecords,
             'recordsFiltered' => $filteredRecords,
             'data' => $result->map(function ($item) {
-                $visitDays = getVisitDays($item->id);
-                $visitWeeks = getWeeks($item->id);
+                $visitDays = htmlspecialchars(getVisitDays($item->id));
+                $visitWeeks = htmlspecialchars(getWeeks($item->id));
                 return [
-                    'id' => $item->id,
-                    'sales' => $item->user->name,
-                    'outlet' => $item->name,
-                    'code' => $item->code,
-                    'area' => $item->longitude ? $item->longitude . ', ' . $item->latitude : '',
+                    'id' => (int)$item->id,
+                    'sales' => htmlspecialchars($item->user->name),
+                    'outlet' => htmlspecialchars($item->name),
+                    'code' => htmlspecialchars($item->code),
+                    'area' => $item->longitude ? htmlspecialchars($item->longitude . ', ' . $item->latitude) : '',
                     'visit_day' => $visitDays,
                     'visit_week' => $visitWeeks,
-                    'actions' => view('pages.routing.action', [
+                    'actions' => (view('pages.routing.action', [
                         'item' => $item,
                         'outletId' => $item->id
-                    ])->render()
+                    ])->render())
                 ];
             })
         ]);
@@ -232,7 +232,6 @@ class RoutingController extends Controller
                 'status' => 'success',
                 'message' => 'Outlet berhasil ditambahkan'
             ]);
-
         } catch (Exception $e) {
             DB::rollBack();
             return response()->json([
@@ -415,7 +414,6 @@ class RoutingController extends Controller
                 'status' => 'success',
                 'message' => 'Outlet berhasil diperbarui'
             ]);
-
         } catch (Exception $e) {
             DB::rollBack();
             return response()->json([
@@ -453,7 +451,7 @@ class RoutingController extends Controller
             $fileName = $file->getClientOriginalName();
             $import = new RoutingImport($fileName);
             Excel::import($import, $file);
-dd($import);
+            dd($import);
             // Periksa response dari import
             if (isset($import->response['status']) && $import->response['status'] === 'error') {
                 return response()->json([
@@ -466,7 +464,6 @@ dd($import);
                 'status' => 'success',
                 'message' => 'Import success'
             ], 200);
-
         } catch (\Exception $e) {
             return response()->json([
                 'status' => 'error',

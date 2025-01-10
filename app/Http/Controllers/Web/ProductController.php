@@ -49,7 +49,7 @@ class ProductController extends Controller
         $query = Product::with('category');
 
         if ($request->filled('search_term')) {
-            $searchTerm = $request->search_term;
+            $searchTerm = htmlspecialchars($request->search_term, ENT_QUOTES, 'UTF-8');
             $query->where(function ($q) use ($searchTerm) {
                 $q->where('sku', 'like', "%{$searchTerm}%")
                     ->orWhereHas('category', function ($q) use ($searchTerm) {
@@ -71,13 +71,18 @@ class ProductController extends Controller
             'data' => $result->map(function ($item) {
                 return [
                     'id' => $item->id,
-                    'category' => $item->category->name,
-                    'sku' => $item->sku,
+                    'category' => htmlspecialchars($item->category->name, ENT_QUOTES, 'UTF-8'),
+                    'sku' => htmlspecialchars($item->sku, ENT_QUOTES, 'UTF-8'),
                     'price' => number_format($item->price, 0, ',', '.'),
                     'actions' => view('pages.product.action', [
                         'productId' => $item->id,
-                        'sku' => $item->sku,
-                        'categories' => Category::all()
+                        'sku' => htmlspecialchars($item->sku, ENT_QUOTES, 'UTF-8'),
+                        'categories' => Category::all()->map(function($category) {
+                            return [
+                                'id' => $category->id,
+                                'name' => htmlspecialchars($category->name, ENT_QUOTES, 'UTF-8')
+                            ];
+                        })
                     ])->render()
                 ];
             })

@@ -57,44 +57,44 @@ class UserController extends Controller
     }
 
     public function getData(Request $request)
-    {
-        $query = User::with('roles')
-        ->where('id', '!=', Auth::id())
-        ->orderBy('created_at', 'desc');
-        
-        if ($request->filled('search_term')) {
-            $searchTerm = $request->search_term;
-            $query->where(function($q) use ($searchTerm) {
-                $q->where('name', 'like', "%{$searchTerm}%")
-                ->orWhere('email', 'like', "%{$searchTerm}%");
-            });
-        }
-        $filteredRecords = (clone $query)->count();
-        
-        $result = $query->skip($request->start)
-                       ->take($request->length)
-                       ->get();
-        
-        return response()->json([
-            'draw' => intval($request->draw),
-            'recordsTotal' => $filteredRecords,
-            'recordsFiltered' => $filteredRecords,
-            'data' => $result->map(function($item) {
-                return [
-                    'id' => $item->id, // Tambahkan id product
-                    'name' => $item->name,
-                    'email' => $item->email,
-                    'role' => ucwords($item->roles[0]->name),
-                    'outlet_area' => $item->longitude . ', ' . $item->latitude,
-                    'status' => $item->active == 1 ? 'Aktif' : 'Tidak Aktif',
-                    'actions' => view('pages.users.action', [
-                        'item' => $item,
-                        'userId' => $item->id // Pass product id ke view actions
-                    ])->render()
-                ];
-            })
-        ]);
+{
+    $query = User::with('roles')
+    ->where('id', '!=', Auth::id())
+    ->orderBy('created_at', 'desc');
+    
+    if ($request->filled('search_term')) {
+        $searchTerm = htmlspecialchars(trim($request->search_term));
+        $query->where(function($q) use ($searchTerm) {
+            $q->where('name', 'like', "%{$searchTerm}%")
+            ->orWhere('email', 'like', "%{$searchTerm}%");
+        });
     }
+    $filteredRecords = (clone $query)->count();
+    
+    $result = $query->skip($request->start)
+                   ->take($request->length)
+                   ->get();
+    
+    return response()->json([
+        'draw' => intval($request->draw),
+        'recordsTotal' => $filteredRecords,
+        'recordsFiltered' => $filteredRecords,
+        'data' => $result->map(function($item) {
+            return [
+                'id' => (int)$item->id,
+                'name' => htmlspecialchars($item->name),
+                'email' => htmlspecialchars($item->email),
+                'role' => htmlspecialchars(ucwords($item->roles[0]->name)),
+                'outlet_area' => htmlspecialchars($item->longitude . ', ' . $item->latitude),
+                'status' => htmlspecialchars($item->active == 1 ? 'Aktif' : 'Tidak Aktif'),
+                'actions' => (view('pages.users.action', [
+                    'item' => $item,
+                    'userId' => $item->id
+                ])->render())
+            ];
+        })
+    ]);
+}
     public function create()
     {
         $cities = City::all();

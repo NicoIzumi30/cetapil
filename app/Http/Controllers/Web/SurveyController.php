@@ -21,7 +21,7 @@ class SurveyController extends Controller
         $query = SalesActivity::with('outlet', 'user');
         
         if ($request->filled('search_term')) {
-            $searchTerm = $request->search_term;
+            $searchTerm = htmlspecialchars(trim($request->search_term));
             $query->where(function($q) use ($searchTerm) {
                 $q->whereHas('outlet', function($q) use ($searchTerm) {
                     $q->where('name', 'like', "%{$searchTerm}%");
@@ -43,16 +43,16 @@ class SurveyController extends Controller
             'recordsFiltered' => $filteredRecords,
             'data' => $result->map(function($item) {
                 return [
-                    'id' => $item->id, // Tambahkan id product
-                    'sales' => $item->user->name,
-                    'outlet' => $item->outlet->name,
-                    'visit_day' => getVisitDayByNumber($item->outlet->visit_day),
-                    'checkin' => $item->checked_in,
-                    'checkout' => $item->checked_out,
-                    'views' => $item->views_knowledge,
-                    'actions' => view('pages.survey.action', [
+                    'id' => (int)$item->id,
+                    'sales' => htmlspecialchars($item->user->name),
+                    'outlet' => htmlspecialchars($item->outlet->name),
+                    'visit_day' => htmlspecialchars(getVisitDayByNumber($item->outlet->visit_day)),
+                    'checkin' => htmlspecialchars($item->checked_in),
+                    'checkout' => htmlspecialchars($item->checked_out),
+                    'views' => (int)$item->views_knowledge,
+                    'actions' => (view('pages.survey.action', [
                         'surveyId' => $item->id
-                    ])->render()
+                    ])->render())
                 ];
             })
         ]);

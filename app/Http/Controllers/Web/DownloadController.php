@@ -19,16 +19,20 @@ use App\Exports\OrderExport;
 use App\Models\SalesAvailability;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Log;
-use App\Exports\SalesActivityExport;
 use App\Http\Controllers\Controller;
 use Maatwebsite\Excel\Facades\Excel;
 use App\Exports\RoutingDownloadExport;
 use App\Exports\SellingDownloadExport;
 use App\Exports\PenggunaDownloadExport;
 use App\Exports\VisibilityActivityExport;
+use App\Traits\Downloadable;
+use App\Exports\SalesActivityExport;
+
 
 class DownloadController extends Controller
 {
+    use Downloadable;
+
     public function index()
     {
         $provinces = Province::orderBy('name')->get();
@@ -39,359 +43,242 @@ class DownloadController extends Controller
 
     public function downloadProduct()
     {
-        try {
-            return Excel::download(
-                new ProductExport(),
-                'products_' . date('Y-m-d_His') . '.xlsx'
-            );
-        } catch (\Exception $e) {
-            return response()->json([
-                'message' => 'Gagal mengunduh data produk',
-                'error' => $e->getMessage()
-            ], 500);
-        }
+        return $this->handleDownload(
+            ProductExport::class,
+            'products'
+        );
     }
     public function downloadProgram()
     {
-        try {
-            return Excel::download(
-                new ProgramExport(),
-                'Program_' . date('Y-m-d_His') . '.xlsx'
-            );
-        } catch (\Exception $e) {
-            return response()->json([
-                'message' => 'Gagal mengunduh data program',
-                'error' => $e->getMessage()
-            ], 500);
-        }
+        return $this->handleDownload(
+            ProgramExport::class,
+            'program'
+        );
     }
     public function downloadCity()
     {
-        try {
-            return Excel::download(
-                new CityExport(),
-                'Kota_' . date('Y-m-d_His') . '.xlsx'
-            );
-        } catch (\Exception $e) {
-            return response()->json([
-                'message' => 'Gagal mengunduh data kota',
-                'error' => $e->getMessage()
-            ], 500);
-        }
+        return $this->handleDownload(
+            CityExport::class,
+            'kota'
+        );
     }
     public function downloadRouting(Request $request)
     {
-        try {
-            $filename = 'routing_' . now()->format('Y-m-d_His') . '.xlsx';
-            return Excel::download(
-                new RoutingDownloadExport(
-                    $request->routing_week,
-                    $request->routing_region
-                ),
-                $filename,
-                \Maatwebsite\Excel\Excel::XLSX
-            );
-        } catch (\Exception $e) {
-            Log::error('Routing Download Error:', [
-                'message' => $e->getMessage(),
-                'trace' => $e->getTraceAsString()
-            ]);
-            return response()->json([
-                'status' => 'error',
-                'message' => 'Gagal mengunduh data routing: ' . $e->getMessage()
-            ], 500);
-        }
+        return $this->handleDownload(
+            RoutingDownloadExport::class,
+            'routing',
+            [$request->routing_week, $request->routing_region]
+        );
     }
-    public function downloadActivity(Request $request)
+
+   // In DownloadController.php
+   public function downloadActivity(Request $request)
+   {
+       try {
+           // Initialize query with proper joins and eager loading
+           $query = SalesActivity::with([
+               'outlet' => function($q) {
+                   $q->select('id', 'name', 'city_id')
+                     ->with(['outletRoutings' => function($q) {
+                         $q->select('outlet_id', 'visit_day', 'week');
+                     }]);
+               },
+               'user' => function($q) {
+                   $q->select('id', 'name');
+               }
+           ])->where('status', 'SUBMITTED');
+   
+           // Process date range if provided
+           if ($request->has('activity_date') && !empty($request->activity_date)) {
+               [$startDate, $endDate] = $this->processDateRange($request->activity_date);
+               
+               $query->whereBetween('checked_in', [
+                   Carbon::parse($startDate)->startOfDay(),
+                   Carbon::parse($endDate)->endOfDay()
+               ]);
+           }
+   
+           // Apply region filter if provided
+           if ($request->has('activity_region') && $request->activity_region !== 'all') {
+               $query->whereHas('outlet', function($q) use ($request) {
+                   $q->whereHas('city', function($q) use ($request) {
+                       $q->where('province_code', $request->activity_region);
+                   });
+               });
+           }
+   
+           $data = $query->get();
+   
+           return $this->handleDownload(
+               SalesActivityExport::class,
+               'sales_activity',
+               [$data]
+           );
+   
+       } catch (\Exception $e) {
+           Log::error('Activity download failed', [
+               'error' => $e->getMessage(),
+               'trace' => $e->getTraceAsString()
+           ]);
+   
+           return response()->json([
+               'message' => 'Terjadi kesalahan saat mengunduh data aktivitas: ' . $e->getMessage()
+           ], 500);
+       }
+   }
+    public function downloadVisibility(Request $request) 
     {
-        try {
-            $query = SalesActivity::with(['outlet:id,name,visit_day,city_id', 'user:id,name']);
-            $dates = explode(' to ', $request->activity_date);
-            $startDate = isset($dates[0]) ? trim($dates[0]) : null;
-            $endDate = isset($dates[1]) ? trim($dates[1]) : null;
-            if ($request->activity_date != '') {
-                $query->whereBetween('checked_in', [
-                    Carbon::parse($startDate)->startOfDay(),
-                    Carbon::parse($endDate)->endOfDay()
-                ]);
-            }
+        [$startDate, $endDate] = $this->processDateRange($request->visibility_date);
 
-            // Apply region filter
-            if ($request->filled('activity_region') && $request->activity_region !== 'all') {
-                $query->whereHas('outlet', function ($q) use ($request) {
-                    $q->whereHas('city', function ($q) use ($request) {
-                        $q->where('province_code', $request->activity_region);
-                    });
-                });
-            }
-            $query->where('status', 'SUBMITTED');
+        $query = SalesActivity::with([
+            'outlet',
+            'user',
+            'salesVisibilities',
+            'salesVisibilities.posmType'
+        ])->where('status', 'SUBMITTED');
 
-            // Get data
-            $data = $query->get();
-            // Generate filename with timestamp
-            $filename = 'Sales_Activity_' . now()->format('Y-m-d_His') . '.xlsx';
-            // Return Excel download
-            return Excel::download(
-                new SalesActivityExport($data),
-                $filename,
-                \Maatwebsite\Excel\Excel::XLSX
-            );
-        } catch (\Exception $e) {
-            Log::error('Download Error:', [
-                'message' => $e->getMessage(),
-                'trace' => $e->getTraceAsString()
-            ]);
+        $query = $this->applyFilters(
+            $query,
+            'checked_in',
+            $startDate,
+            $endDate,
+            $request->visibility_region
+        );
 
-            return response()->json([
-                'status' => 'error',
-                'message' => 'Gagal mengunduh file: ' . $e->getMessage()
-            ], 500);
-        }
-    }
-    public function downloadVisibility(Request $request)
-    {
-        try {
-            $query = SalesActivity::with([
-                'outlet',
-                'user',
-                'salesVisibilities',
-                'salesVisibilities.posmType', // Load the posm_type relationship
-            ]);
-            $dates = explode(' to ', $request->visibility_date);
-            $startDate = isset($dates[0]) ? trim($dates[0]) : null;
-            $endDate = isset($dates[1]) ? trim($dates[1]) : null;
-            if ($request->visibility_date != '') {
-                $query->whereBetween('checked_in', [
-                    Carbon::parse($startDate)->startOfDay(),
-                    Carbon::parse($endDate)->endOfDay()
-                ]);
-            }
-            // Apply region filter
-            if ($request->filled('visibility_region') && $request->visibility_region !== 'all') {
-                $query->whereHas('outlet', function ($q) use ($request) {
-                    $q->whereHas('city', function ($q) use ($request) {
-                        $q->where('province_code', $request->visibility_region);
-                    });
-                });
-            }
-            $query->where('status', 'SUBMITTED');
-            // Get data
-            $data = $query->get();
-            // Generate filename with timestamp
-            $filename = 'Visibility_Activity_' . now()->format('Y-m-d_His') . '.xlsx';
-            // Return Excel download
-            return Excel::download(
-                new VisibilityActivityExport($data),
-                $filename,
-                \Maatwebsite\Excel\Excel::XLSX
-            );
-        } catch (\Exception $e) {
-            Log::error('Download Error:', [
-                'message' => $e->getMessage(),
-                'trace' => $e->getTraceAsString()
-            ]);
+        $data = $query->get();
 
-            return response()->json([
-                'status' => 'error',
-                'message' => 'Gagal mengunduh file: ' . $e->getMessage()
-            ], 500);
-        }
+        return $this->handleDownload(
+            VisibilityActivityExport::class,
+            'visibility_activity',
+            [$data]
+        );
     }
     public function downloadAvailability(Request $request)
     {
-        try {
-            $query = SalesAvailability::with([
-                'salesActivity:id,time_availability',
-                'product:id,sku',
-                'outlet:id,name,code,tipe_outlet,TSO,city_id,channel_id,user_id,account',
-                'outlet.user:id,name',
-                'outlet.city:id,name',
-                'outlet.channel:id,name'
-            ]);
-            $dates = explode(' to ', $request->availability_date);
-            $startDate = isset($dates[0]) ? trim($dates[0]) : null;
-            $endDate = isset($dates[1]) ? trim($dates[1]) : null;
-            if ($request->availability_date != '') {
-                $query->whereBetween('created_at', [
-                    Carbon::parse($startDate)->startOfDay(),
-                    Carbon::parse($endDate)->endOfDay()
-                ]);
-            }
-            // Apply region filter
-            if ($request->filled('availability_region') && $request->availability_region !== 'all') {
-                $query->whereHas('outlet', function ($q) use ($request) {
-                    $q->whereHas('city', function ($q) use ($request) {
-                        $q->where('province_code', $request->availability_region);
-                    });
-                });
-            }
-            // Get data
-            $data = $query->get();
-            // Generate filename with timestamp
-            $filename = 'Availability_' . now()->format('Y-m-d_His') . '.xlsx';
-            // Return Excel download
-            return Excel::download(
-                new StockOnHandExport($data),
-                $filename,
-                \Maatwebsite\Excel\Excel::XLSX
-            );
-        } catch (\Exception $e) {
-            Log::error('Download Error:', [
-                'message' => $e->getMessage(),
-                'trace' => $e->getTraceAsString()
-            ]);
+        [$startDate, $endDate] = $this->processDateRange($request->availability_date);
 
-            return response()->json([
-                'status' => 'error',
-                'message' => 'Gagal mengunduh file: ' . $e->getMessage()
-            ], 500);
-        }
+        $query = SalesAvailability::with([
+            'salesActivity:id,time_availability',
+            'product:id,sku',
+            'outlet:id,name,code,tipe_outlet,TSO,city_id,channel_id,user_id,account',
+            'outlet.user:id,name',
+            'outlet.city:id,name',
+            'outlet.channel:id,name'
+        ]);
+
+        $query = $this->applyFilters(
+            $query,
+            'created_at',
+            $startDate,
+            $endDate,
+            $request->availability_region
+        );
+
+        $data = $query->get();
+
+        return $this->handleDownload(
+            StockOnHandExport::class,
+            'availability',
+            [$data]
+        );
     }
+
     public function downloadSurvey(Request $request)
     {
         try {
-            $query = SalesActivity::with([
-                'user:id,name',
-                'outlet:id,name,TSO,code,account,tipe_outlet,channel_id,visit_day',
-                'outlet.channel:id,name',
-                'surveys.survey'
+            [$startDate, $endDate] = $this->processDateRange($request->survey_date);
+    
+            Log::info('Survey download requested:', [
+                'startDate' => $startDate?->format('Y-m-d'),
+                'endDate' => $endDate?->format('Y-m-d'),
+                'region' => $request->survey_region
             ]);
-            $dates = explode(' to ', $request->survey_date);
-            $startDate = isset($dates[0]) ? trim($dates[0]) : null;
-            $endDate = isset($dates[1]) ? trim($dates[1]) : null;
-            if ($request->survey_date != '') {
-                $query->whereBetween('checked_in', [
-                    Carbon::parse($startDate)->startOfDay(),
-                    Carbon::parse($endDate)->endOfDay()
-                ]);
-            }
-            // Apply region filter
-            if ($request->filled('survey_region') && $request->survey_region !== 'all') {
-                $query->whereHas('outlet', function ($q) use ($request) {
-                    $q->whereHas('city', function ($q) use ($request) {
-                        $q->where('province_code', $request->survey_region);
-                    });
-                });
-            }
-            // Get data
-            $data = $query->get();
-            // Generate filename with timestamp
-            $filename = 'Market_Survey_' . now()->format('Y-m-d_His') . '.xlsx';
-            // Return Excel download
-            return Excel::download(
-                new SurveyExport($data),
-                $filename,
-                \Maatwebsite\Excel\Excel::XLSX
+            
+            return $this->handleDownload(
+                SurveyExport::class,
+                'market_survey',
+                [$startDate, $endDate, $request->survey_region]
             );
+    
         } catch (\Exception $e) {
-            Log::error('Download Error:', [
-                'message' => $e->getMessage(),
+            Log::error('Survey download failed', [
+                'error' => $e->getMessage(),
                 'trace' => $e->getTraceAsString()
             ]);
-
+            
             return response()->json([
                 'status' => 'error',
-                'message' => 'Gagal mengunduh file: ' . $e->getMessage()
+                'message' => 'Gagal mengunduh data market_survey'
             ], 500);
         }
     }
+
     public function downloadSelling(Request $request)
     {
         try {
-            if ($request->filled('selling_date')) {
-                $dates = explode(' to ', $request->selling_date);
-                $startDate = isset($dates[0]) ? Carbon::parse(trim($dates[0])) : null;
-                $endDate = isset($dates[1]) ? Carbon::parse(trim($dates[1])) : null;
+            Log::info('Selling download request', [
+                'date_range' => $request->selling_date,
+                'region' => $request->selling_region
+            ]);
+    
+            // Handle dates
+            $dates = explode(' to ', $request->selling_date);
+            $startDate = Carbon::parse(trim($dates[0]));
+            $endDate = Carbon::parse(trim($dates[1]));
+    
+            Log::info('Parsed dates', [
+                'start' => $startDate->format('Y-m-d'),
+                'end' => $endDate->format('Y-m-d')
+            ]);
+    
+            // Handle region
+            $region = $request->selling_region;
+            if ($region === 'Semua Regional' || $region === 'all') {
+                $region = 'all';
             }
-
-            return Excel::download(
-                new SellingDownloadExport($startDate, $endDate, $request->selling_region),
-                'selling_' . now()->format('Y-m-d_His') . '.xlsx'
+    
+            return $this->handleDownload(
+                SellingDownloadExport::class,
+                'selling',
+                [$startDate, $endDate, $region]
             );
+    
         } catch (\Exception $e) {
-            Log::error('Selling Download Error:', [
-                'message' => $e->getMessage(),
+            Log::error('Selling download failed', [
+                'error' => $e->getMessage(),
                 'trace' => $e->getTraceAsString()
             ]);
+    
             return response()->json([
                 'status' => 'error',
-                'message' => 'Gagal mengunduh data penjualan'
+                'message' => 'Gagal mengunduh data selling'
             ], 500);
         }
     }
 
     public function downloadPengguna()
     {
-        try {
-            return Excel::download(
-                new PenggunaDownloadExport(),
-                'users_' . now()->format('Y-m-d_His') . '.xlsx',
-                \Maatwebsite\Excel\Excel::XLSX
-            );
-        } catch (\Exception $e) {
-            Log::error('User Download Error:', [
-                'message' => $e->getMessage(),
-                'trace' => $e->getTraceAsString()
-            ]);
-            return response()->json([
-                'status' => 'error',
-                'message' => 'Gagal mengunduh data pengguna'
-            ], 500);
-        }
+        return $this->handleDownload(
+            PenggunaDownloadExport::class,
+            'users'
+        );
     }
     public function downloadAv3m()
     {
-        try {
-
-            return Excel::download(
-                new Av3mExport(),
-                'av3m_data_' . now()->format('Y-m-d_His') . '.xlsx',
-                \Maatwebsite\Excel\Excel::XLSX
-            );
-        } catch (\Exception $e) {
-            Log::error('Av3m Download Error:', [
-                'message' => $e->getMessage(),
-                'trace' => $e->getTraceAsString()
-            ]);
-            return response()->json([
-                'status' => 'error',
-                'message' => 'Gagal mengunduh data av3m: ' . $e->getMessage()
-            ], 500);
-        }
+        return $this->handleDownload(
+            Av3mExport::class,
+            'av3m_data'
+        );
     }
-
 
     public function downloadOrders(Request $request)
     {
-        try {
-            $startDate = null;
-            $endDate = null;
+        [$startDate, $endDate] = $this->processDateRange($request->orders_date);
 
-            if ($request->filled('orders_date')) {
-                $dates = explode(' to ', $request->orders_date);
-                $startDate = trim($dates[0] ?? '');
-                $endDate = trim($dates[1] ?? '');
-
-                if (empty($startDate) || empty($endDate)) {
-                    throw new \Exception('Invalid date range format');
-                }
-            }
-
-            return Excel::download(
-                new OrderExport($startDate, $endDate, $request->orders_region),
-                'orders_' . now()->format('Y-m-d_His') . '.xlsx'
-            );
-        } catch (\Exception $e) {
-            Log::error('Orders Download Error:', [
-                'message' => $e->getMessage(),
-                'trace' => $e->getTraceAsString(),
-                'request' => $request->all()
-            ]);
-
-            return response()->json([
-                'status' => 'error',
-                'message' => 'Gagal mengunduh data orders'
-            ], 500);
-        }
+        return $this->handleDownload(
+            OrderExport::class,
+            'orders',
+            [$startDate, $endDate, $request->orders_region]
+        );
     }
 }
