@@ -2,39 +2,30 @@
 
 namespace App\Exports;
 
+use App\Traits\ExcelExportable;
 use Maatwebsite\Excel\Concerns\FromCollection;
 use Maatwebsite\Excel\Concerns\WithHeadings;
 use Maatwebsite\Excel\Concerns\WithMapping;
 use Maatwebsite\Excel\Concerns\WithStyles;
-use PhpOffice\PhpSpreadsheet\Worksheet\Worksheet;
 use Maatwebsite\Excel\Concerns\ShouldAutoSize;
+use PhpOffice\PhpSpreadsheet\Worksheet\Worksheet;
 use PhpOffice\PhpSpreadsheet\Style\Alignment;
-use PhpOffice\PhpSpreadsheet\Style\Border;
-use PhpOffice\PhpSpreadsheet\Style\Fill;
 use Carbon\Carbon;
 use Illuminate\Support\Facades\Log;
 
 class SalesActivityExport implements FromCollection, WithHeadings, WithMapping, WithStyles, ShouldAutoSize
 {
+    use ExcelExportable;
+
     protected $data;
 
     public function __construct($data)
     {
         $this->data = $data;
-        
-        // Log data received in constructor
-        Log::info('SalesActivityExport constructed with data:', [
-            'count' => $data->count(),
-            'first_record' => $data->first()
-        ]);
     }
 
     public function collection()
     {
-        Log::info('Collection method called with data count:', [
-            'count' => $this->data->count()
-        ]);
-
         return $this->data;
     }
 
@@ -44,6 +35,7 @@ class SalesActivityExport implements FromCollection, WithHeadings, WithMapping, 
             'Nama Sales',
             'Nama Outlet', 
             'Hari Kunjungan',
+            'Week',
             'Check-In',
             'Check-Out',
             'Views',
@@ -51,99 +43,84 @@ class SalesActivityExport implements FromCollection, WithHeadings, WithMapping, 
             'Radius Status',
             'Time Availability',
             'Time Visibility',
-            'Time Knowledge',
+            'Time Knowledge', 
             'Time Survey',
             'Time Order'
         ];
     }
 
+    protected function formatTime($seconds)
+    {
+        if (!$seconds) return '';
+        try {
+            return gmdate('H:i:s', (int)$seconds);
+        } catch (\Exception $e) {
+            return '';
+        }
+    }
+
+    protected function getVisitDay($day)
+    {
+        $days = [
+            '1' => 'Senin',
+            '2' => 'Selasa', 
+            '3' => 'Rabu',
+            '4' => 'Kamis',
+            '5' => 'Jumat',
+            '6' => 'Sabtu',
+            '7' => 'Minggu'
+        ];
+        return $days[$day] ?? '';
+    }
+
     public function map($row): array
     {
         try {
-            Log::info('Mapping row:', [
-                'id' => $row->id,
-                'user' => $row->user,
-                'outlet' => $row->outlet
-            ]);
-
+            $routing = optional($row->outlet)->outletRoutings->first();
+            
             return [
-                $row->user ? $row->user->name : 'N/A',
-                $row->outlet ? $row->outlet->name : 'N/A',
-                $row->outlet ? getVisitDayByNumber($row->outlet->visit_day ?? 0) : 'N/A',
-                $row->checked_in ? Carbon::parse($row->checked_in)->format('Y-m-d H:i:s') : 'N/A',
-                $row->checked_out ? Carbon::parse($row->checked_out)->format('Y-m-d H:i:s') : 'N/A',
+                optional($row->user)->name ?? '',
+                optional($row->outlet)->name ?? '',
+                $routing ? $this->getVisitDay($routing->visit_day) : '',
+                $routing ? "Week {$routing->week}" : '',
+                $row->checked_in ? Carbon::parse($row->checked_in)->format('Y-m-d H:i:s') : '',
+                $row->checked_out ? Carbon::parse($row->checked_out)->format('Y-m-d H:i:s') : '',
                 $row->views_knowledge ?? '0',
                 $row->status ?? '',
                 $row->radius_status ?? '',
-                gmdate('H:i:s', $row->time_availability) ?? '0',
-                gmdate('H:i:s', $row->time_visibility) ?? '0',
-                gmdate('H:i:s', $row->time_knowledge) ?? '0',
-                gmdate('H:i:s', $row->time_survey) ?? '0',
-                gmdate('H:i:s', $row->time_order) ?? '0'
+                $this->formatTime($row->time_availability),
+                $this->formatTime($row->time_visibility),
+                $this->formatTime($row->time_knowledge),
+                $this->formatTime($row->time_survey),
+                $this->formatTime($row->time_order)
             ];
         } catch (\Exception $e) {
-            Log::error('Error mapping row:', [
-                'error' => $e->getMessage(),
-                'trace' => $e->getTraceAsString(),
-                'row' => $row
+            Log::error('Error mapping row', [
+                'row_id' => $row->id ?? 'unknown',
+                'error' => $e->getMessage()
             ]);
-
-            // Return default values if mapping fails
-            return [
-                '', '', '', '', '', '', 
-                '', '', '', '', '', '', ''
-            ];
+            return array_fill(0, 14, '');
         }
     }
 
     public function styles(Worksheet $sheet)
     {
-        $lastColumn = 'M';  // 13 columns (A to M)
+        $this->applyDefaultStyles($sheet);
+        
         $lastRow = $sheet->getHighestRow();
 
-        // Header styles
-        $sheet->getStyle("A1:{$lastColumn}1")->applyFromArray([
-            'font' => [
-                'bold' => true,
-                'color' => ['rgb' => 'FFFFFF'],
-            ],
-            'fill' => [
-                'fillType' => Fill::FILL_SOLID,
-                'startColor' => ['rgb' => '4A90E2'],
-            ],
-            'alignment' => [
-                'horizontal' => Alignment::HORIZONTAL_CENTER,
-                'vertical' => Alignment::VERTICAL_CENTER,
-            ],
-        ]);
+        // Center align most columns
+        $sheet->getStyle("C2:N{$lastRow}")
+            ->getAlignment()
+            ->setHorizontal(Alignment::HORIZONTAL_CENTER);
 
-        // Data styles
-        $sheet->getStyle("A2:{$lastColumn}{$lastRow}")->applyFromArray([
-            'alignment' => [
-                'vertical' => Alignment::VERTICAL_CENTER,
-            ],
-            'borders' => [
-                'allBorders' => [
-                    'borderStyle' => Border::BORDER_THIN,
-                    'color' => ['rgb' => '000000'],
-                ],
-            ],
-        ]);
-
-        // Text alignment for specific columns
-        $sheet->getStyle("A2:B{$lastRow}")->getAlignment()
-              ->setHorizontal(Alignment::HORIZONTAL_LEFT);
-        $sheet->getStyle("C2:{$lastColumn}{$lastRow}")->getAlignment()
-              ->setHorizontal(Alignment::HORIZONTAL_CENTER);
-
-        // Row height
-        $sheet->getDefaultRowDimension()->setRowHeight(25);
-        
-        // Freeze panes
-        $sheet->freezePane('A2');
+        // Left align name columns
+        $sheet->getStyle("A2:B{$lastRow}")
+            ->getAlignment()
+            ->setHorizontal(Alignment::HORIZONTAL_LEFT);
 
         return [
-            1 => ['font' => ['bold' => true]],
+            1 => ['font' => ['bold' => true]]
         ];
     }
 }

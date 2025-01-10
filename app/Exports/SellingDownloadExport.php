@@ -2,59 +2,67 @@
 
 namespace App\Exports;
 
-use App\Models\SellingProduct;
-use Carbon\Carbon;
+use App\Models\Selling; // Changed from SellingProduct
+use App\Traits\ExcelExportable;
 use Maatwebsite\Excel\Concerns\FromQuery;
 use Maatwebsite\Excel\Concerns\WithHeadings;
 use Maatwebsite\Excel\Concerns\WithMapping;
 use Maatwebsite\Excel\Concerns\WithStyles;
-use Maatwebsite\Excel\Concerns\ShouldAutoSize;
+use Maatwebsite\Excel\Concerns\WithChunkReading;
 use PhpOffice\PhpSpreadsheet\Worksheet\Worksheet;
-use PhpOffice\PhpSpreadsheet\Style\Alignment;
-use PhpOffice\PhpSpreadsheet\Style\Border;
-use PhpOffice\PhpSpreadsheet\Style\Fill;
 use Illuminate\Support\Facades\Log;
 
-class SellingDownloadExport implements FromQuery, WithHeadings, WithMapping, WithStyles, ShouldAutoSize
+class SellingDownloadExport implements FromQuery, WithHeadings, WithMapping, WithStyles, WithChunkReading
 {
+    use ExcelExportable;
+
     protected $startDate;
     protected $endDate;
     protected $region;
+    protected int $chunkSize = 1000;
 
     public function __construct($startDate = null, $endDate = null, $region = null)
     {
         $this->startDate = $startDate;
         $this->endDate = $endDate;
         $this->region = $region;
-
-        Log::info('SellingDownloadExport params:', [
-            'startDate' => $startDate,
-            'endDate' => $endDate,
-            'region' => $region
-        ]);
+        $this->useAlternatingRows = true;
     }
 
     public function query()
     {
-        $query = SellingProduct::query()
-            ->with(['product.category', 'sell.user', 'sell.outlet.city.province', 'sell.outlet.channel']);
-    
+        $query = Selling::query()
+            ->select([
+                'sellings.id',
+                'sellings.user_id',
+                'sellings.outlet_id',
+                'sellings.checked_in',
+                'sellings.checked_out',
+                'sellings.duration',
+                'sellings.created_at'
+            ])
+            ->with([
+                'user:id,name',
+                'outlet:id,name,code,tipe_outlet,account,TSO,channel_id,city_id',
+                'outlet.channel:id,name',
+                'outlet.city:id,name,province_id',
+                'outlet.city.province:id,code'
+            ]);
+
         if ($this->startDate && $this->endDate) {
-            $query->whereHas('sell', function($q) {
-                $q->whereBetween('checked_in', [
-                    $this->startDate->startOfDay(),
-                    $this->endDate->endOfDay()
-                ]);
-            });
+            $query->whereBetween('checked_in', [
+                $this->startDate->startOfDay(),
+                $this->endDate->endOfDay()
+            ]);
         }
-    
+
         if ($this->region && $this->region !== 'all') {
-            $query->whereHas('sell.outlet.city.province', function($q) {
+            $query->whereHas('outlet.city.province', function($q) {
                 $q->where('code', $this->region);
             });
         }
-    
-        return $query;
+
+        return $query->orderBy('created_at', 'desc');
     }
 
     public function headings(): array
@@ -68,13 +76,8 @@ class SellingDownloadExport implements FromQuery, WithHeadings, WithMapping, Wit
             'Account',
             'Channel',
             'Kota',
-            'Category',
-            'SKU Name',
-            'Qty Order',
-            'Harga',
-            'Total',
-            'Created At',
-            'Ended At',
+            'Checked In',
+            'Checked Out',
             'Duration',
             'Week'
         ];
@@ -82,83 +85,31 @@ class SellingDownloadExport implements FromQuery, WithHeadings, WithMapping, Wit
 
     public function map($selling): array
     {
-        try {
+        return $this->safeMap(function ($selling) {
             return [
-                $selling->sell->user->name ?? 'N/A',
-                $selling->sell->outlet->TSO ?? 'N/A',
-                $selling->sell->outlet->name ?? 'N/A',
-                $selling->sell->outlet->code ?? 'N/A',
-                $selling->sell->outlet->tipe_outlet ?? 'N/A',
-                $selling->sell->outlet->account ?? 'N/A',
-                $selling->sell->outlet->channel->name ?? 'N/A',
-                $selling->sell->outlet->city->name ?? 'N/A',
-                $selling->product->category->name ?? 'N/A',
-                $selling->product->sku ?? 'N/A',
-                $selling->qty ?? 0,
-                $selling->price ?? 0,
-                $selling->total ?? 0,
-                $selling->sell->checked_in ? Carbon::parse($selling->sell->checked_in)->format('Y-m-d H:i:s') : 'N/A',
-                $selling->sell->checked_out ? Carbon::parse($selling->sell->checked_out)->format('Y-m-d H:i:s') : 'N/A',
-                $selling->sell->duration ?? 'N/A',
+                $selling->user->name ?? '',
+                $selling->outlet->TSO ?? '',
+                $selling->outlet->name ?? '',
+                $selling->outlet->code ?? '',
+                $selling->outlet->tipe_outlet ?? '',
+                $selling->outlet->account ?? '',
+                $selling->outlet->channel->name ?? '',
+                $selling->outlet->city->name ?? '',
+                $this->formatDateTime($selling->checked_in),
+                $this->formatDateTime($selling->checked_out),
+                $selling->duration ?? '',
                 $selling->created_at ? $selling->created_at->format('W') : '-',
             ];
-        } catch (\Exception $e) {
-            Log::error('Error mapping selling:', [
-                'error' => $e->getMessage(),
-                'selling_id' => $selling->id
-            ]);
-            return array_fill(0, 17, 'N/A');
-        }
+        }, $selling, 'Selling Export');
     }
 
     public function styles(Worksheet $sheet)
     {
-        $lastColumn = 'Q';
-        $lastRow = $sheet->getHighestRow();
+        $this->applyDefaultStyles($sheet);
+    }
 
-        $sheet->getStyle("A1:{$lastColumn}1")->applyFromArray([
-            'font' => [
-                'bold' => true,
-                'color' => ['rgb' => 'FFFFFF'],
-            ],
-            'fill' => [
-                'fillType' => Fill::FILL_SOLID,
-                'startColor' => ['rgb' => '4A90E2'],
-            ],
-            'alignment' => [
-                'horizontal' => Alignment::HORIZONTAL_CENTER,
-                'vertical' => Alignment::VERTICAL_CENTER,
-            ],
-        ]);
-
-        $sheet->getStyle("A2:{$lastColumn}{$lastRow}")->applyFromArray([
-            'alignment' => [
-                'vertical' => Alignment::VERTICAL_CENTER,
-            ],
-            'borders' => [
-                'allBorders' => [
-                    'borderStyle' => Border::BORDER_THIN,
-                    'color' => ['rgb' => '000000'],
-                ],
-            ],
-        ]);
-
-        for ($row = 2; $row <= $lastRow; $row++) {
-            if ($row % 2 == 0) {
-                $sheet->getStyle("A{$row}:{$lastColumn}{$row}")->applyFromArray([
-                    'fill' => [
-                        'fillType' => Fill::FILL_SOLID,
-                        'startColor' => ['rgb' => 'F8F9FA'],
-                    ],
-                ]);
-            }
-        }
-
-        $sheet->getDefaultRowDimension()->setRowHeight(25);
-        $sheet->freezePane('A2');
-
-        return [
-            1 => ['font' => ['bold' => true]],
-        ];
+    public function chunkSize(): int
+    {
+        return $this->chunkSize;
     }
 }

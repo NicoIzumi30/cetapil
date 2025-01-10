@@ -1,41 +1,42 @@
 <?php
+
 namespace App\Exports;
 
 use App\Models\Outlet;
 use App\Models\Product;
+use App\Traits\ExcelExportable;
 use Illuminate\Support\Collection;
-use Illuminate\Support\Facades\Log;
-use Maatwebsite\Excel\Concerns\{
-    FromCollection,
-    WithHeadings,
-    WithMapping,
-    WithStyles,
-    ShouldAutoSize
-};
-use PhpOffice\PhpSpreadsheet\Style\{Fill, Border, Alignment};
+use Maatwebsite\Excel\Concerns\FromQuery;
+use Maatwebsite\Excel\Concerns\WithHeadings;
+use Maatwebsite\Excel\Concerns\WithMapping;
+use Maatwebsite\Excel\Concerns\WithStyles;
+use Maatwebsite\Excel\Concerns\WithChunkReading;
 use PhpOffice\PhpSpreadsheet\Worksheet\Worksheet;
 
-class Av3mExport implements FromCollection, WithHeadings, WithMapping, WithStyles, ShouldAutoSize
+class Av3mExport implements FromQuery, WithHeadings, WithMapping, WithStyles, WithChunkReading
 {
+    use ExcelExportable;
+
     private Collection $products;
-    private Collection $data;
     private array $baseHeadings = ['Code Outlet', 'Nama Outlet'];
+    protected int $chunkSize = 1000;
 
     public function __construct()
     {
-        $this->products = Product::select('id', 'sku')->get();
-        $this->data = Outlet::select('id', 'code', 'name')
-        ->whereExists(function ($query) {
-            $query->select('outlet_id')
-                  ->from('av3ms') // Adjust table name as needed
-                  ->whereColumn('outlet_id', 'outlets.id');
-        })
-        ->get();
+        $this->products = Product::select('id', 'sku')->orderBy('sku')->get();
+        $this->useAlternatingRows = true;
     }
 
-    public function collection(): Collection
+    public function query()
     {
-        return $this->data;
+        return Outlet::query()
+            ->select('outlets.id', 'outlets.code', 'outlets.name')
+            ->whereExists(function ($query) {
+                $query->select('outlet_id')
+                    ->from('av3ms')
+                    ->whereColumn('outlet_id', 'outlets.id');
+            })
+            ->orderBy('code');
     }
 
     public function headings(): array
@@ -48,58 +49,21 @@ class Av3mExport implements FromCollection, WithHeadings, WithMapping, WithStyle
 
     public function map($row): array
     {
-        try {
+        return $this->safeMap(function ($outlet) {
             return array_merge(
-                [$row->code ?? '', $row->name ?? ''],
-                $this->products->map(fn($product) => getAv3m($row->id, $product->id))->toArray()
+                [$outlet->code ?? '', $outlet->name ?? ''],
+                $this->products->map(fn($product) => getAv3m($outlet->id, $product->id))->toArray()
             );
-        } catch (\Exception $e) {
-            Log::error('Error in Av3mExport mapping', [
-                'error' => $e->getMessage(),
-                'row' => $row->id ?? 'unknown'
-            ]);
-            return array_fill(0, count($this->products) + 2, 'Error');
-        }
+        }, $row, 'AV3M Export');
     }
 
-    public function styles(Worksheet $sheet): array
+    public function styles(Worksheet $sheet)
     {
-        $lastCell = $sheet->getHighestRowAndColumn();
-        $range = "A1:{$lastCell['column']}{$lastCell['row']}";
-
-        $this->applyGlobalStyles($sheet, $range);
-        $this->applyHeaderStyles($sheet, $lastCell['column']);
-
-        return [1 => ['font' => ['bold' => true]]];
+        $this->applyDefaultStyles($sheet);
     }
 
-    private function applyGlobalStyles(Worksheet $sheet, string $range): void
+    public function chunkSize(): int
     {
-        $sheet->getStyle($range)->applyFromArray([
-            'alignment' => [
-                'horizontal' => Alignment::HORIZONTAL_CENTER,
-                'vertical' => Alignment::VERTICAL_CENTER,
-                'wrapText' => true,
-            ],
-            'borders' => [
-                'allBorders' => ['borderStyle' => Border::BORDER_THIN],
-            ],
-        ]);
-
-        $sheet->getDefaultRowDimension()->setRowHeight(20);
-    }
-
-    private function applyHeaderStyles(Worksheet $sheet, string $lastColumn): void
-    {
-        $sheet->getStyle("A1:{$lastColumn}1")->applyFromArray([
-            'font' => [
-                'bold' => true,
-                'color' => ['rgb' => 'FFFFFF'],
-            ],
-            'fill' => [
-                'fillType' => Fill::FILL_SOLID,
-                'startColor' => ['rgb' => '4A90E2'],
-            ],
-        ]);
+        return $this->chunkSize;
     }
 }

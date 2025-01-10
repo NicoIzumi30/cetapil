@@ -2,23 +2,71 @@
 
 namespace App\Exports;
 
-use App\Models\Selling;
 use App\Models\SellingProduct;
+use App\Traits\ExcelExportable;
 use Maatwebsite\Excel\Concerns\FromQuery;
 use Maatwebsite\Excel\Concerns\WithHeadings;
 use Maatwebsite\Excel\Concerns\WithMapping;
 use Maatwebsite\Excel\Concerns\WithStyles;
-use Maatwebsite\Excel\Concerns\ShouldAutoSize;
+use Maatwebsite\Excel\Concerns\WithChunkReading;
 use PhpOffice\PhpSpreadsheet\Worksheet\Worksheet;
-use PhpOffice\PhpSpreadsheet\Style\Alignment;
-use PhpOffice\PhpSpreadsheet\Style\Border;
-use PhpOffice\PhpSpreadsheet\Style\Fill;
 
-class SellingExport implements FromQuery, WithHeadings, WithMapping, WithStyles, ShouldAutoSize
+class SellingDownloadExport implements FromQuery, WithHeadings, WithMapping, WithStyles, WithChunkReading
 {
+    use ExcelExportable;
+
+    protected $startDate;
+    protected $endDate;
+    protected $region;
+    protected int $chunkSize = 1000;
+
+    public function __construct($startDate = null, $endDate = null, $region = null)
+    {
+        $this->startDate = $startDate;
+        $this->endDate = $endDate;
+        $this->region = $region;
+        $this->useAlternatingRows = true;
+    }
+
     public function query()
     {
-        return SellingProduct::query()->where('qty', '>', 0)->with(['product', 'sell'])->completeRelation();
+        $query = SellingProduct::query()
+            ->select([
+                'selling_products.id',
+                'selling_products.qty',
+                'selling_products.price',
+                'selling_products.total',
+                'selling_products.created_at',
+                'selling_products.sell_id',
+                'selling_products.product_id'
+            ])
+            ->with([
+                'product:id,sku,category_id',
+                'product.category:id,name',
+                'sell:id,user_id,outlet_id,checked_in,checked_out,duration',
+                'sell.user:id,name',
+                'sell.outlet:id,name,code,tipe_outlet,account,TSO,channel_id,city_id',
+                'sell.outlet.city:id,name,province_id',
+                'sell.outlet.channel:id,name',
+                'sell.outlet.city.province:id,code'
+            ]);
+    
+        if ($this->startDate && $this->endDate) {
+            $query->whereHas('sell', function($q) {
+                $q->whereBetween('checked_in', [
+                    $this->startDate->startOfDay(),
+                    $this->endDate->endOfDay()
+                ]);
+            });
+        }
+    
+        if ($this->region && $this->region !== 'all') {
+            $query->whereHas('sell.outlet.city.province', function($q) {
+                $q->where('code', $this->region);
+            });
+        }
+    
+        return $query->orderBy('created_at', 'desc');
     }
 
     public function headings(): array
@@ -46,87 +94,36 @@ class SellingExport implements FromQuery, WithHeadings, WithMapping, WithStyles,
 
     public function map($selling): array
     {
-        return [
-            $selling->sell->user->name,
-            $selling->sell->outlet->TSO,
-            $selling->sell->outlet->name,
-            $selling->sell->outlet->code,
-            $selling->sell->outlet->tipe_outlet,
-            $selling->sell->outlet->account,
-            $selling->sell->outlet->channel->name,
-            $selling->sell->outlet->city->name,
-            $selling->product->category->name,
-            $selling->product->sku,
-            $selling->qty,
-            $selling->price,
-            $selling->total,
-            $selling->sell->checked_in,
-            $selling->sell->checked_out,
-            $selling->sell->duration,
-            $selling->created_at->format('W'),
-        ];
+        return $this->safeMap(function ($selling) {
+            return [
+                $selling->sell->user->name ?? '',
+                $selling->sell->outlet->TSO ?? '',
+                $selling->sell->outlet->name ?? '',
+                $selling->sell->outlet->code ?? '',
+                $selling->sell->outlet->tipe_outlet ?? '',
+                $selling->sell->outlet->account ?? '',
+                $selling->sell->outlet->channel->name ?? '',
+                $selling->sell->outlet->city->name ?? '',
+                $selling->product->category->name ?? '',
+                $selling->product->sku ?? '',
+                $selling->qty ?? 0,
+                $selling->price ?? 0,
+                $selling->total ?? 0,
+                $this->formatDateTime($selling->sell->checked_in),
+                $this->formatDateTime($selling->sell->checked_out),
+                $selling->sell->duration ?? '',
+                $selling->created_at ? $selling->created_at->format('W') : '-',
+            ];
+        }, $selling, 'Selling Export');
     }
 
     public function styles(Worksheet $sheet)
     {
-        $lastColumn = 'Q'; // Last column in our dataset
-        $lastRow = $sheet->getHighestRow();
+        $this->applyDefaultStyles($sheet);
+    }
 
-        // Header styles
-        $sheet->getStyle("A1:{$lastColumn}1")->applyFromArray([
-            'font' => [
-                'bold' => true,
-                'color' => ['rgb' => 'FFFFFF'],
-            ],
-            'fill' => [
-                'fillType' => Fill::FILL_SOLID,
-                'startColor' => ['rgb' => '4A90E2'],
-            ],
-            'alignment' => [
-                'horizontal' => Alignment::HORIZONTAL_CENTER,
-                'vertical' => Alignment::VERTICAL_CENTER,
-            ],
-        ]);
-
-        // Data styles
-        $sheet->getStyle("A2:{$lastColumn}{$lastRow}")->applyFromArray([
-            'alignment' => [
-                'vertical' => Alignment::VERTICAL_CENTER,
-            ],
-            'borders' => [
-                'allBorders' => [
-                    'borderStyle' => Border::BORDER_THIN,
-                    'color' => ['rgb' => '000000'],
-                ],
-            ],
-        ]);
-
-        // Specific column alignments
-        $sheet->getStyle("A2:A{$lastRow}")->getAlignment()->setHorizontal(Alignment::HORIZONTAL_LEFT); // Product
-        $sheet->getStyle("B2:C{$lastRow}")->getAlignment()->setHorizontal(Alignment::HORIZONTAL_LEFT); // Outlet, Sales
-        $sheet->getStyle("D2:F{$lastRow}")->getAlignment()->setHorizontal(Alignment::HORIZONTAL_CENTER); // Stock, Selling, Balance
-        $sheet->getStyle("G2:G{$lastRow}")->getAlignment()->setHorizontal(Alignment::HORIZONTAL_LEFT); // Image URL
-
-        // Alternate row colors for better readability
-        for ($row = 2; $row <= $lastRow; $row++) {
-            if ($row % 2 == 0) {
-                $sheet->getStyle("A{$row}:{$lastColumn}{$row}")->applyFromArray([
-                    'fill' => [
-                        'fillType' => Fill::FILL_SOLID,
-                        'startColor' => ['rgb' => 'F8F9FA'],
-                    ],
-                ]);
-            }
-        }
-
-        // Set row height
-        $sheet->getDefaultRowDimension()->setRowHeight(25);
-
-        // Freeze panes
-        $sheet->freezePane('A2');
-
-        return [
-            1 => ['font' => ['bold' => true]],
-        ];
+    public function chunkSize(): int
+    {
+        return $this->chunkSize;
     }
 }
