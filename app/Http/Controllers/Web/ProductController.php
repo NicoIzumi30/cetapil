@@ -373,96 +373,75 @@ class ProductController extends Controller
 
 
     public function downloadAvailability(Request $request)
-{
-    try {
-        DB::enableQueryLog();
-
-        // Base query with eager loading
-        $query = SalesAvailability::query()
-            ->with([
-                'salesActivity:id,time_availability',
-                'product:id,sku',
-                'outlet.user:id,name',
-                'outlet.city:id,name',
-                'outlet.channel:id,name',
-                'outlet' => function ($query) {
-                    $query->select('id', 'name', 'code', 'tipe_outlet', 'TSO', 'city_id', 'channel_id', 'user_id', 'account');
+    {
+        try {
+            // Base query with selective loading
+            $query = SalesAvailability::query()
+                ->select('id', 'product_id', 'created_at', 'status', 'outlet_id', 'stock_on_hand', 'stock_inventory', 'availability', 'av3m', 'rekomendasi')
+                ->with([
+                    'product:id,sku',
+                    'outlet' => function ($query) {
+                        $query->select('id', 'name', 'code', 'tipe_outlet', 'TSO', 'city_id', 'channel_id', 'user_id', 'account')
+                            ->with([
+                                'user:id,name',
+                                'city:id,name',
+                                'channel:id,name'
+                            ]);
+                    },
+                    'salesActivity:id,sales_availability_id,status as status_ideal,time_availability'
+                ])
+                ->whereHas('salesActivity', function ($query) {
+                    $query->where('status', 'SUBMITTED'); // Kondisi pada tabel sales_activity
+                });
+    
+            // Apply filters
+            if ($request->filled('filter_date') && $request->filter_date !== 'Date Range') {
+                $dateParam = $request->filter_date;
+                if (str_contains($dateParam, ' to ')) {
+                    [$startDate, $endDate] = explode(' to ', $dateParam);
+                    $query->whereBetween('created_at', [
+                        Carbon::parse($startDate)->startOfDay(),
+                        Carbon::parse($endDate)->endOfDay()
+                    ]);
+                } else {
+                    $query->whereDate('created_at', Carbon::parse($dateParam));
                 }
-            ]);
-
-        // Remove status filter temporarily for testing
-        // $query->where('status', 'SUBMITTED');
-
-        // Apply date filter
-        if ($request->filled('filter_date') && $request->filter_date !== 'Date Range') {
-            $dateParam = $request->filter_date;
-            if (str_contains($dateParam, ' to ')) {
-                [$startDate, $endDate] = explode(' to ', $dateParam);
-                $query->whereBetween('created_at', [
-                    Carbon::parse($startDate)->startOfDay(),
-                    Carbon::parse($endDate)->endOfDay()
-                ]);
-            } else {
-                $query->whereDate('created_at', Carbon::parse($dateParam));
             }
-        }
-
-        // Apply product filter
-        if ($request->filled('filter_product') && $request->filter_product !== 'all') {
-            $query->where('product_id', $request->filter_product);
-        }
-
-        // Apply area filter
-        if ($request->filled('filter_area') && $request->filter_area !== 'all') {
-            $query->whereHas('outlet', function ($q) use ($request) {
-                $q->where('city_id', $request->filter_area);
-            });
-        }
-
-        // Execute query and get data
-        $data = $query->get();
-
-        // Log query and data for debugging
-        Log::info('Availability Export Debug Info', [
-            'filters' => $request->all(),
-            'query' => DB::getQueryLog(),
-            'record_count' => $data->count(),
-            'first_record' => $data->first(),
-            'sql' => $query->toSql(),
-            'bindings' => $query->getBindings()
-        ]);
-
-        // Check if data exists
-        if ($data->isEmpty()) {
-            Log::warning('No data found for export', [
+    
+            if ($request->filled('filter_product') && $request->filter_product !== 'all') {
+                $query->where('product_id', $request->filter_product);
+            }
+    
+            if ($request->filled('filter_area') && $request->filter_area !== 'all') {
+                $query->whereHas('outlet', function ($q) use ($request) {
+                    $q->where('city_id', $request->filter_area);
+                });
+            }
+    
+            // Prepare export using chunked query
+            $export = new StockOnHandExport($query);
+    
+            // Generate Excel file
+            return Excel::download(
+                $export,
+                'availability_data_' . now()->format('Y-m-d_His') . '.xlsx',
+                \Maatwebsite\Excel\Excel::XLSX
+            );
+    
+        } catch (\Exception $e) {
+            Log::error('Availability Export Error', [
+                'message' => $e->getMessage(),
+                'trace' => $e->getTraceAsString(),
                 'filters' => $request->all()
             ]);
+    
             return response()->json([
                 'error' => true,
-                'message' => 'Tidak ada data yang tersedia untuk diexport'
-            ], 404);
+                'message' => 'Gagal mengunduh file: ' . $e->getMessage()
+            ], 500);
         }
-
-        // Generate Excel file
-        return Excel::download(
-            new StockOnHandExport($data),
-            'availability_data_' . now()->format('Y-m-d_His') . '.xlsx',
-            \Maatwebsite\Excel\Excel::XLSX
-        );
-
-    } catch (\Exception $e) {
-        Log::error('Availability Export Error', [
-            'message' => $e->getMessage(),
-            'trace' => $e->getTraceAsString(),
-            'filters' => $request->all()
-        ]);
-
-        return response()->json([
-            'error' => true,
-            'message' => 'Gagal mengunduh file: ' . $e->getMessage()
-        ], 500);
     }
-}
+    
 
     public function downloadAv3m()
     {
