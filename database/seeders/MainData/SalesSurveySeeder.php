@@ -20,9 +20,9 @@ class SalesSurveySeeder extends Seeder
         DB::beginTransaction();
         try {
             // Process in chunks of 1000
-            for($i = 0; $i < 1000000; $i += 1000) {
+            for($i = 0; $i < 400000; $i += 1000) {
                 $surveys = [];
-                foreach(range(1, min(1000, 1000000 - $i)) as $index) {
+                foreach(range(1, min(1000, 400000 - $i)) as $index) {
                     $surveys[] = [
                         'id' => Str::uuid(),
                         'sales_activity_id' => $faker->randomElement($salesActivityIds),
@@ -43,7 +43,7 @@ class SalesSurveySeeder extends Seeder
             }
             
             DB::commit();
-            $this->command->info('1,000,000 Sales Surveys seeded successfully');
+            $this->command->info('400000 Sales Surveys seeded successfully');
         } catch (\Exception $e) {
             DB::rollback();
             throw $e;

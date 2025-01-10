@@ -1,122 +1,233 @@
 @extends('layouts.main')
 
 @section('banner-content')
-<x-banner-content :title="'Produk'" />
+    <x-banner-content :title="'Produk'" />
 @endsection
 
 
 @section('dashboard-content')
-<main class="w-full">
-    {{-- Daftar Produk --}}
-    <x-card>
-        <x-slot:cardTitle>
-            Daftar Produk
-        </x-slot:cardTitle>
+    <main class="w-full">
+        {{-- Daftar Produk --}}
+        <x-card>
+            <x-slot:cardTitle>
+                Daftar Produk
+            </x-slot:cardTitle>
 
-        {{-- Product Action --}}
-        <x-slot:cardAction>
-            <x-input.search class="border-0" placeholder="Cari data produk" id="global-search"></x-input.search>
-            <x-button.light id="downloadBtn">
-                <span id="downloadBtnText">Download</span>
-                <span id="downloadBtnLoadingProduct" class="hidden">Downloading...</span>
-            </x-button.light>
-            <x-button.info onclick="openModal('tambah-produk')">
-                Tambah Daftar Produk
-            </x-button.info>
-            {{-- Tambah Produk Modal --}}
-            <x-modal id="tambah-produk">
-                <x-slot:title>
-                    Tambah Produk
-                </x-slot:title>
-                <form id="createProductForm" class="grid grid-cols-2 gap-6">
-                    @csrf
-                    <div>
-                        <label for="categories" class="!text-black">Kategori Produk</label>
+            {{-- Product Action --}}
+            <x-slot:cardAction>
+                <x-input.search class="border-0" placeholder="Cari data produk" id="global-search"></x-input.search>
+                <x-button.light id="downloadBtn">
+                    <span id="downloadBtnText">Download</span>
+                    <span id="downloadBtnLoadingProduct" class="hidden">Downloading...</span>
+                </x-button.light>
+                <x-button.info onclick="openModal('tambah-produk')">
+                    Tambah Daftar Produk
+                </x-button.info>
+                {{-- Tambah Produk Modal --}}
+                <x-modal id="tambah-produk">
+                    <x-slot:title>
+                        Tambah Produk
+                    </x-slot:title>
+                    <form id="createProductForm" class="grid grid-cols-2 gap-6">
+                        @csrf
                         <div>
-                            <select id="categories" name="category_id"
-                                class="categories w-full form-control @error('category_id') is-invalid @enderror">
-                                <option value="" selected disabled>-- Pilih Category Product --</option>
-                                @foreach ($categories as $category)
-                                    <option value="{{ $category->id }}">
-                                        {{ $category->name }}
-                                    </option>
-                                @endforeach
-                            </select>
-                            <span id="category_id-error" class="text-red-500 text-xs hidden"></span>
+                            <label for="categories" class="!text-black">Kategori Produk</label>
+                            <div>
+                                <select id="categories" name="category_id"
+                                    class="categories w-full form-control @error('category_id') is-invalid @enderror">
+                                    <option value="" selected disabled>-- Pilih Category Product --</option>
+                                    @foreach ($categories as $category)
+                                        <option value="{{ $category->id }}">
+                                            {{ $category->name }}
+                                        </option>
+                                    @endforeach
+                                </select>
+                                <span id="category_id-error" class="text-red-500 text-xs hidden"></span>
+                            </div>
                         </div>
-                    </div>
-                    <div>
-                        <label for="sku" class="!text-black">Produk SKU</label>
-                        <input id="sku" class="form-control @error('sku') is-invalid @enderror" type="text" name="sku"
-                            placeholder="Masukan produk SKU">
-                        <span id="sku-error" class="text-red-500 text-xs hidden"></span>
-                    </div>
-                    <div>
-                        <label for="price" class="!text-black">Harga</label>
-                        <input id="price" class="form-control" type="number" name="price" placeholder="Masukan Harga">
-                        <span id="price-error" class="text-red-500 text-xs hidden"></span>
-                    </div>
+                        <div>
+                            <label for="sku" class="!text-black">Produk SKU</label>
+                            <input id="sku" class="form-control @error('sku') is-invalid @enderror" type="text"
+                                name="sku" placeholder="Masukan produk SKU">
+                            <span id="sku-error" class="text-red-500 text-xs hidden"></span>
+                        </div>
+                        <div>
+                            <label for="price" class="!text-black">Harga</label>
+                            <input id="price" class="form-control" type="number" name="price"
+                                placeholder="Masukan Harga">
+                            <span id="price-error" class="text-red-500 text-xs hidden"></span>
+                        </div>
+                        <x-slot:footer>
+                            <x-button.primary type="submit" id="saveBtn" class="w-full">
+                                <span id="saveBtnText">Tambah Produk</span>
+                                <span id="saveBtnLoading" class="hidden">Menyimpan...</span>
+                            </x-button.primary>
+                        </x-slot:footer>
+                    </form>
+
+                </x-modal>
+                {{-- Tambah Produk Modal End --}}
+
+                {{-- Edit Produk Modal --}}
+                <x-modal id="edit-produk">
+                    <x-slot:title>Ubah Produk</x-slot:title>
+                    <form id="editProductForm" class="grid grid-cols-2 gap-6">
+                        @csrf
+                        @method('PUT')
+                        <div>
+                            <label for="edit-category" class="!text-black">Kategori Produk</label>
+                            <div>
+                                <select id="edit-category" name="category_id" class="edit-category w-full form-control">
+                                    <option value="" selected disabled>-- Pilih Category Product --</option>
+                                    @foreach ($categories as $category)
+                                        <option value="{{ $category->id }}">
+                                            {{ $category->name }}
+                                        </option>
+                                    @endforeach
+                                </select>
+                                <span id="edit-category_id-error" class="text-red-500 text-xs hidden"></span>
+                            </div>
+                        </div>
+                        <div>
+                            <label for="edit-sku" class="!text-black">Produk SKU</label>
+                            <input id="edit-sku" class="form-control" type="text" name="sku"
+                                placeholder="Masukan produk SKU">
+                            <span id="edit-sku-error" class="text-red-500 text-xs hidden"></span>
+                        </div>
+                        <div>
+                            <label for="edit-price" class="!text-black">Harga</label>
+                            <input id="edit-price" class="form-control" type="number" name="price"
+                                placeholder="Masukan Harga">
+                            <span id="edit-price-error" class="text-red-500 text-xs hidden"></span>
+                        </div>
+                    </form>
                     <x-slot:footer>
-                        <x-button.primary type="submit" id="saveBtn" class="w-full">
-                            <span id="saveBtnText">Tambah Produk</span>
-                            <span id="saveBtnLoading" class="hidden">Menyimpan...</span>
+                        <x-button.primary type="submit" id="updateBtn" class="w-full">
+                            <span id="updateBtnText">Simpan Perubahan</span>
+                            <span id="updateBtnLoading" class="hidden">Menyimpan...</span>
                         </x-button.primary>
                     </x-slot:footer>
-                </form>
+                </x-modal>
 
-            </x-modal>
-            {{-- Tambah Produk Modal End --}}
-
-            {{-- Edit Produk Modal --}}
-            <x-modal id="edit-produk">
-                <x-slot:title>Ubah Produk</x-slot:title>
-                <form id="editProductForm" class="grid grid-cols-2 gap-6">
-                    @csrf
-                    @method('PUT')
-                    <div>
-                        <label for="edit-category" class="!text-black">Kategori Produk</label>
-                        <div>
-                            <select id="edit-category" name="category_id" class="edit-category w-full form-control">
-                                <option value="" selected disabled>-- Pilih Category Product --</option>
-                                @foreach ($categories as $category)
-                                    <option value="{{ $category->id }}">
-                                        {{ $category->name }}
-                                    </option>
-                                @endforeach
-                            </select>
-                            <span id="edit-category_id-error" class="text-red-500 text-xs hidden"></span>
+                {{-- Edit Produk Modal End --}}
+                <x-button.info onclick="openModal('unggah-produk-bulk')">Unggah Secara Bulk</x-button.info>
+                <x-modal id="unggah-produk-bulk">
+                    <div class="flex flex-col items-center w-full">
+                        <div class="relative w-full mx-3">
+                            {{-- Upload Area --}}
+                            <div class="cursor-pointer w-full h-[300px] text-center grid place-items-center rounded-md border-2 border-dashed border-blue-400 bg-[#EFF9FF]rounded-lg p-4"
+                                id="upload-area">
+                                <div id="upload-helptext" class="flex flex-col items-center text-center">
+                                    <svg width="30" height="63" viewBox="0 0 64 63" fill="none"
+                                        xmlns="http://www.w3.org/2000/svg">
+                                        <path
+                                            d="M28 43.2577C28 45.4323 29.7909 47.1952 32 47.1952C34.2091 47.1952 36 45.4323 36 43.2577V15.074L48.971 27.8423L54.6279 22.2739L32.0005 0L9.37305 22.2739L15.0299 27.8423L28 15.0749V43.2577Z"
+                                            fill="#39B5FF" />
+                                        <path
+                                            d="M0 39.375H8V55.125H56V39.375H64V55.125C64 59.4742 60.4183 63 56 63H8C3.58172 63 0 59.4742 0 55.125V39.375Z"
+                                            fill="#39B5FF" />
+                                    </svg>
+                                    <h5 class="text-primary font-medium mt-2">Tarik atau klik disini untuk mulai unggah
+                                        dokumen berformat .XLSX</h5>
+                                    <p class="text-primary font-light text-sm">
+                                        Ukuran maksimal file <strong>5MB</strong>
+                                    </p>
+                                </div>
+                                <p class="hidden text-primary font-bold text-xl" id="filename-display"></p>
+                            </div>
+                            {{-- Hidden File Input --}}
+                            <input type="file" name="file_upload" id="file_upload" class="hidden">
                         </div>
                     </div>
-                    <div>
-                        <label for="edit-sku" class="!text-black">Produk SKU</label>
-                        <input id="edit-sku" class="form-control" type="text" name="sku"
-                            placeholder="Masukan produk SKU">
-                        <span id="edit-sku-error" class="text-red-500 text-xs hidden"></span>
-                    </div>
-                    <div>
-                        <label for="edit-price" class="!text-black">Harga</label>
-                        <input id="edit-price" class="form-control" type="number" name="price"
-                            placeholder="Masukan Harga">
-                        <span id="edit-price-error" class="text-red-500 text-xs hidden"></span>
-                    </div>
-                </form>
-                <x-slot:footer>
-                    <x-button.primary type="submit" id="updateBtn" class="w-full">
-                        <span id="updateBtnText">Simpan Perubahan</span>
-                        <span id="updateBtnLoading" class="hidden">Menyimpan...</span>
-                    </x-button.primary>
-                </x-slot:footer>
-            </x-modal>
+                    <x-slot:footer>
+                        <div class="flex gap-4">
+                            <x-button.light onclick="closeModal('unggah-produk-bulk')"
+                                class="w-full border rounded-md ">Batalkan</x-button.light>
+                            <x-button.light class="w-full !text-white !bg-primary" id="importBtn"> <span
+                                    id="importBtnText">Mulai Unggah</span>
+                                <span id="importBtnLoading" class="hidden">Memproses...</span></x-button.light>
+                            <x-button.light class="w-full !text-white !bg-primary" id="downloadTemplate">Download
+                                Template</x-button.light>
+                        </div>
+                    </x-slot:footer>
+                </x-modal>
+            </x-slot:cardAction>
+            {{-- Product Action End --}}
 
-            {{-- Edit Produk Modal End --}}
-            <x-button.info onclick="openModal('unggah-produk-bulk')">Unggah Secara Bulk</x-button.info>
-            <x-modal id="unggah-produk-bulk">
+            {{-- Tabel Daftar Produk --}}
+            <table id="product-table" class="table">
+                <thead>
+                    <tr>
+                        <th scope="col" class="text-center">
+                            <a class="table-head">
+                                {{ __('Kategori Produk') }}
+                                <x-icons.sort />
+                            </a>
+                        </th>
+                        <th scope="col" class="text-center">
+                            <a class="table-head">
+                                {{ __('SKU') }}
+                                <x-icons.sort />
+                            </a>
+                        </th>
+
+                        <th scope="col" class="text-center">
+                            <a class="table-head">
+                                {{ __('Harga') }}
+                                <x-icons.sort />
+                            </a>
+                        </th>
+                        <th scope="col" class="text-center">
+                            <a class="table-head">
+                                Aksi
+                            </a>
+                        </th>
+                    </tr>
+                </thead>
+            </table>
+        </x-card>
+        {{-- Daftar Produk End --}}
+
+        {{-- Availability --}}
+        <x-card>
+            <x-slot:cardTitle>
+                Availability
+            </x-slot:cardTitle>
+
+            {{-- Availability Action --}}
+            <x-slot:cardAction>
+                <x-button.light id="downloadAvailabilityBtn">
+                    <span id="downloadBtnText">Download</span>
+                    <span id="downloadBtnLoading" class="hidden">Downloading...</span>
+                </x-button.light>
+                <x-button.info onclick="openModal('unggah-av3m-bulk')">
+                    Upload AV3M
+                </x-button.info>
+                <x-select.light :title="'Filter Produk'" id="filter_product">
+                    <option value="all">Semua</option>
+                    @foreach ($products as $product)
+                        <option value="{{ $product->id }}">{{ $product->sku }}</option>
+                    @endforeach
+                </x-select.light>
+                <x-select.light :title="'Filter Area'" id="filter_area">
+                    <option value="all">Semua</option>
+                    @foreach ($cities as $city)
+                        <option value="{{ $city->id }}">{{ $city->name }}</option>
+                    @endforeach
+                </x-select.light>
+                <x-input.datepicker id="stock-date-range"></x-input.datepicker>
+                {{-- <input type='text' id="basic-date" placeholder="Select Date..."> --}}
+            </x-slot:cardAction>
+            {{-- Availability Action End --}}
+
+            {{-- Upload AV3M Bulk --}}
+            <x-modal id="unggah-av3m-bulk">
                 <div class="flex flex-col items-center w-full">
                     <div class="relative w-full mx-3">
                         {{-- Upload Area --}}
                         <div class="cursor-pointer w-full h-[300px] text-center grid place-items-center rounded-md border-2 border-dashed border-blue-400 bg-[#EFF9FF]rounded-lg p-4"
-                            id="upload-area">
-                            <div id="upload-helptext" class="flex flex-col items-center text-center">
+                            id="upload-area-av3m">
+                            <div id="upload-helptext-av3m" class="flex flex-col items-center text-center">
                                 <svg width="30" height="63" viewBox="0 0 64 63" fill="none"
                                     xmlns="http://www.w3.org/2000/svg">
                                     <path
@@ -127,384 +238,276 @@
                                         fill="#39B5FF" />
                                 </svg>
                                 <h5 class="text-primary font-medium mt-2">Tarik atau klik disini untuk mulai unggah
-                                    dokumen berformat .XLSX</h5>
+                                    dokumen berformat CSV/XLS</h5>
                                 <p class="text-primary font-light text-sm">
                                     Ukuran maksimal file <strong>5MB</strong>
                                 </p>
                             </div>
-                            <p class="hidden text-primary font-bold text-xl" id="filename-display"></p>
+                            <p class="hidden text-primary font-bold text-xl" id="filename-display-av3m"></p>
                         </div>
                         {{-- Hidden File Input --}}
-                        <input type="file" name="file_upload" id="file_upload" class="hidden">
+                        <input type="file" name="file_upload-av3m" id="file_upload-av3m" class="hidden">
                     </div>
                 </div>
                 <x-slot:footer>
                     <div class="flex gap-4">
-                        <x-button.light onclick="closeModal('unggah-produk-bulk')"
+                        <x-button.light onclick="closeModal('unggah-av3m-bulk')"
                             class="w-full border rounded-md ">Batalkan</x-button.light>
-                        <x-button.light class="w-full !text-white !bg-primary" id="importBtn"> <span
-                                id="importBtnText">Mulai Unggah</span>
-                            <span id="importBtnLoading" class="hidden">Memproses...</span></x-button.light>
-                        <x-button.light class="w-full !text-white !bg-primary" id="downloadTemplate">Download
+                        <x-button.light class="w-full !text-white !bg-primary " id="importBtnAv3m">Mulai
+                            Unggah</x-button.light>
+                        <x-button.light id="downloadTemplateAv3m" class="w-full !text-white !bg-primary ">Download
                             Template</x-button.light>
                     </div>
                 </x-slot:footer>
             </x-modal>
-        </x-slot:cardAction>
-        {{-- Product Action End --}}
+            {{-- END Upload AV3M Bulk --}}
 
-        {{-- Tabel Daftar Produk --}}
-        <table id="product-table" class="table">
-            <thead>
-                <tr>
-                    <th scope="col" class="text-center">
-                        <a class="table-head">
-                            {{ __('Kategori Produk') }}
-                            <x-icons.sort />
-                        </a>
-                    </th>
-                    <th scope="col" class="text-center">
-                        <a class="table-head">
-                            {{ __('SKU') }}
-                            <x-icons.sort />
-                        </a>
-                    </th>
-                    
-                    <th scope="col" class="text-center">
-                        <a class="table-head">
-                            {{ __('Harga') }}
-                            <x-icons.sort />
-                        </a>
-                    </th>
-                    <th scope="col" class="text-center">
-                        <a class="table-head">
-                            Aksi
-                        </a>
-                    </th>
-                </tr>
-            </thead>
-        </table>
-    </x-card>
-    {{-- Daftar Produk End --}}
+            {{-- Tabel Availability --}}
+            <table id="stock-on-hand-table" class="table">
+                <thead>
+                    <tr>
+                        <th scope="col" class="text-center">
+                            <a class="table-head">
+                                {{ __('Nama Outlet') }}
+                                <x-icons.sort />
+                            </a>
+                        </th>
+                        <th scope="col" class="text-center">
+                            <a class="table-head">
+                                {{ __('SKU') }}
+                                <x-icons.sort />
+                            </a>
+                        </th>
+                        <th scope="col" class="text-center">
+                            <a class="table-head">
+                                {{ __('Stock On Shelf (Pcs)') }}
+                                <x-icons.sort />
+                            </a>
+                        </th>
+                        <th scope="col" class="text-center">
+                            <a class="table-head">
+                                {{ __('Stock Inventory (PCS)') }}
+                                <x-icons.sort />
+                            </a>
+                        </th>
+                        <th scope="col" class="text-center">
+                            <a class="table-head">
+                                {{ __('AV3M (Pcs)') }}
+                                <x-icons.sort />
+                            </a>
+                        </th>
+                        <th scope="col" class="text-center">
+                            <a class="table-head">
+                                {{ __('Rekomendasi') }}
+                                <x-icons.sort />
+                            </a>
+                        </th>
+                        <th scope="col" class="text-center">
+                            <a class="table-head">
+                                {{ __('Status') }}
+                                <x-icons.sort />
+                            </a>
+                        </th>
+                        <th scope="col" class="text-center">
+                            <a class="table-head">
+                                {{ __('Tersedia') }}
+                                <x-icons.sort />
+                            </a>
+                        </th>
 
-    {{-- Availability --}}
-    <x-card>
-        <x-slot:cardTitle>
-            Availability
-        </x-slot:cardTitle>
+                    </tr>
+                </thead>
+            </table>
+            {{-- Tabel Availability End --}}
 
-        {{-- Availability Action --}}
-        <x-slot:cardAction>
-            <x-button.light id="downloadAvailabilityBtn">
-                <span id="downloadBtnText">Download</span>
-                <span id="downloadBtnLoading" class="hidden">Downloading...</span>
-            </x-button.light>
-            <x-button.info onclick="openModal('unggah-av3m-bulk')">
-                Upload AV3M
-            </x-button.info>
-            <x-select.light :title="'Filter Produk'" id="filter_product">
-                <option value="all">Semua</option>
-                @foreach ($products as $product)
-                    <option value="{{ $product->id }}">{{ $product->sku }}</option>
-                @endforeach
-            </x-select.light>
-            <x-select.light :title="'Filter Area'" id="filter_area">
-                <option value="all">Semua</option>
-                @foreach ($cities as $city)
-                    <option value="{{ $city->id }}">{{ $city->name }}</option>
-                @endforeach
-            </x-select.light>
-            <x-input.datepicker id="stock-date-range"></x-input.datepicker>
-            {{-- <input type='text' id="basic-date" placeholder="Select Date..."> --}}
-        </x-slot:cardAction>
-        {{-- Availability Action End --}}
+        </x-card>
+        {{-- Availability End --}}
 
-        {{-- Upload AV3M Bulk --}}
-        <x-modal id="unggah-av3m-bulk">
-            <div class="flex flex-col items-center w-full">
-                <div class="relative w-full mx-3">
-                    {{-- Upload Area --}}
-                    <div class="cursor-pointer w-full h-[300px] text-center grid place-items-center rounded-md border-2 border-dashed border-blue-400 bg-[#EFF9FF]rounded-lg p-4"
-                        id="upload-area-av3m">
-                        <div id="upload-helptext-av3m" class="flex flex-col items-center text-center">
-                            <svg width="30" height="63" viewBox="0 0 64 63" fill="none"
-                                xmlns="http://www.w3.org/2000/svg">
-                                <path
-                                    d="M28 43.2577C28 45.4323 29.7909 47.1952 32 47.1952C34.2091 47.1952 36 45.4323 36 43.2577V15.074L48.971 27.8423L54.6279 22.2739L32.0005 0L9.37305 22.2739L15.0299 27.8423L28 15.0749V43.2577Z"
-                                    fill="#39B5FF" />
-                                <path
-                                    d="M0 39.375H8V55.125H56V39.375H64V55.125C64 59.4742 60.4183 63 56 63H8C3.58172 63 0 59.4742 0 55.125V39.375Z"
-                                    fill="#39B5FF" />
-                            </svg>
-                            <h5 class="text-primary font-medium mt-2">Tarik atau klik disini untuk mulai unggah
-                                dokumen berformat CSV/XLS</h5>
-                            <p class="text-primary font-light text-sm">
-                                Ukuran maksimal file <strong>5MB</strong>
-                            </p>
-                        </div>
-                        <p class="hidden text-primary font-bold text-xl" id="filename-display-av3m"></p>
-                    </div>
-                    {{-- Hidden File Input --}}
-                    <input type="file" name="file_upload-av3m" id="file_upload-av3m" class="hidden">
-                </div>
-            </div>
-            <x-slot:footer>
-                <div class="flex gap-4">
-                    <x-button.light onclick="closeModal('unggah-av3m-bulk')"
-                        class="w-full border rounded-md ">Batalkan</x-button.light>
-                    <x-button.light class="w-full !text-white !bg-primary " id="importBtnAv3m">Mulai
-                        Unggah</x-button.light>
-                    <x-button.light id="downloadTemplateAv3m" class="w-full !text-white !bg-primary ">Download
-                        Template</x-button.light>
-                </div>
-            </x-slot:footer>
-        </x-modal>
-        {{-- END Upload AV3M Bulk --}}
+        {{-- Power SKU & Competitor Hand --}}
+        <x-card>
+            <x-slot:cardTitle>
+                Power SKU & Competitor
+            </x-slot:cardTitle>
 
-        {{-- Tabel Availability --}}
-        <table id="stock-on-hand-table" class="table">
-            <thead>
-                <tr>
-                    <th scope="col" class="text-center">
-                        <a class="table-head">
-                            {{ __('Nama Outlet') }}
-                            <x-icons.sort />
-                        </a>
-                    </th>
-                    <th scope="col" class="text-center">
-                        <a class="table-head">
-                            {{ __('SKU') }}
-                            <x-icons.sort />
-                        </a>
-                    </th>
-                    <th scope="col" class="text-center">
-                        <a class="table-head">
-                            {{ __('Stock On Shelf (Pcs)') }}
-                            <x-icons.sort />
-                        </a>
-                    </th>
-                    <th scope="col" class="text-center">
-                        <a class="table-head">
-                            {{ __('Stock Inventory (PCS)') }}
-                            <x-icons.sort />
-                        </a>
-                    </th>
-                    <th scope="col" class="text-center">
-                        <a class="table-head">
-                            {{ __('AV3M (Pcs)') }}
-                            <x-icons.sort />
-                        </a>
-                    </th>
-                    <th scope="col" class="text-center">
-                        <a class="table-head">
-                            {{ __('Rekomendasi') }}
-                            <x-icons.sort />
-                        </a>
-                    </th>
-                    <th scope="col" class="text-center">
-                        <a class="table-head">
-                            {{ __('Status') }}
-                            <x-icons.sort />
-                        </a>
-                    </th>
-                    <th scope="col" class="text-center">
-                        <a class="table-head">
-                            {{ __('Tersedia') }}
-                            <x-icons.sort />
-                        </a>
-                    </th>
-
-                </tr>
-            </thead>
-        </table>
-        {{-- Tabel Availability End --}}
-
-    </x-card>
-    {{-- Availability End --}}
-
-    {{-- Power SKU & Competitor Hand --}}
-    <x-card>
-        <x-slot:cardTitle>
-            Power SKU & Competitor
-        </x-slot:cardTitle>
-
-        {{-- Power SKU & Competitor Action --}}
-        <x-slot:cardAction>
-            <x-input.search class="border-0" placeholder="Cari data Power SKU & Competitor..."
-                id="power-sku-search"></x-input.search>
-            <x-button.info onclick="openModal('tambah-power-sku')">
-                Tambah Power SKU & Competitor
-            </x-button.info>
-            {{-- Tambah Power SKU & Competitor Modal --}}
-            <x-modal id="tambah-power-sku">
-                <x-slot:title>
+            {{-- Power SKU & Competitor Action --}}
+            <x-slot:cardAction>
+                <x-input.search class="border-0" placeholder="Cari data Power SKU & Competitor..."
+                    id="power-sku-search"></x-input.search>
+                <x-button.info onclick="openModal('tambah-power-sku')">
                     Tambah Power SKU & Competitor
+                </x-button.info>
+                {{-- Tambah Power SKU & Competitor Modal --}}
+                <x-modal id="tambah-power-sku">
+                    <x-slot:title>
+                        Tambah Power SKU & Competitor
+                    </x-slot:title>
+                    <form id="createPowerSkuForm">
+                        @csrf
+                        <div>
+                            <label for="select-input-survey-data" class="!text-black">Kategori Survey</label>
+                            <div>
+                                <select id="select-input-survey-data" name="survey_id" class="w-full form-control">
+                                    <option value="" selected disabled>-- Pilih Category Survey --</option>
+                                    <option value="power-sku">
+                                        Power SKU
+                                    </option>
+                                    <option value="harga-kompetitor">
+                                        Harga Kompetitor
+                                    </option>
+                                </select>
+                            </div>
+                        </div>
+                        <div id="product-competitor-container" class="hidden mt-4">
+                            <div>
+                                <label for="product-competitor" class="!text-black">Nama Produk</label>
+                                <input id="product-competitor" class="form-control" type="text"
+                                    name="product-competitor" placeholder="Masukan Nama Produk">
+                                <span id="product-competitor-error" class="text-red-500 text-xs hidden"></span>
+                            </div>
+                        </div>
+                        <div id="power-sku-container" class="hidden grid-cols-2 gap-6 mt-4">
+                            <div>
+                                <label for="power-sku-product-categories" class="!text-black">Kategori Produk</label>
+                                <div>
+                                    <select id="power-sku-product-categories" name="power-sku-category_id"
+                                        class="w-full form-control @error('power-sku-category_id') is-invalid @enderror">
+                                        <option value="" selected disabled>-- Pilih Category Product --</option>
+                                        @foreach ($categories as $category)
+                                            <option value="{{ $category->id }}">
+                                                {{ $category->name }}
+                                            </option>
+                                        @endforeach
+                                    </select>
+                                    <span id="power-sku-product-category_id-error"
+                                        class="text-red-500 text-xs hidden"></span>
+                                </div>
+                            </div>
+                            <div>
+                                <label for="power-sku" class="!text-black">Power SKU</label>
+                                <div>
+                                    <select id="power-sku" name="power-sku"
+                                        class="w-full form-control @error('power-sku') is-invalid @enderror">
+                                        <option value="" selected disabled>-- Pilih Power SKU --</option>
+                                        @foreach ($products as $product)
+                                            <option value="{{ $product->id }}">{{ $product->sku }}</option>
+                                        @endforeach
+                                    </select>
+                                    <span id="power-sku-error" class="text-red-500 text-xs hidden"></span>
+                                </div>
+                            </div>
+                        </div>
+                        <x-slot:footer>
+                            <div class="col-span-2">
+                                <button type="button" id="savePowerSkuBtn"
+                                    class="w-full bg-blue-500 text-white px-4 py-2 rounded">
+                                    <span id="savePowerSkuBtnText">Konfirmasi</span>
+                                    <span id="savePowerSkuBtnLoading" class="hidden">Menyimpan...</span>
+                                </button>
+                            </div>
+                        </x-slot:footer>
+                    </form>
+                </x-modal>
+                {{-- Tambah Power SKU & Competitor End --}}
+            </x-slot:cardAction>
+            {{-- Power SKU & Competitor Action End --}}
+
+            {{-- Tabel Power SKU & Competitor --}}
+            <table id="power-sku-table" class="table">
+                <thead>
+                    <tr>
+                        <th scope="col" class="text-center">
+                            <a class="table-head">
+                                {{ __('Power SKU & Competitor') }}
+                                <x-icons.sort />
+                            </a>
+                        </th>
+                        <th scope="col" class="text-right">
+                            <a class="table-head">
+                                Aksi
+                            </a>
+                        </th>
+                    </tr>
+                </thead>
+            </table>
+            {{-- Tabel Power SKU & Competitor End --}}
+
+            {{-- Edit Power SKU Modal --}}
+            <x-modal id="edit-power-sku-modal">
+                <x-slot:title>
+                    Edit Power SKU & Competitor
                 </x-slot:title>
-                <form id="createPowerSkuForm">
+                <form id="editPowerSkuForm">
                     @csrf
                     <div>
-                        <label for="select-input-survey-data" class="!text-black">Kategori Survey</label>
+                        <label for="edit-select-input-survey-data" class="!text-black">Kategori Survey</label>
                         <div>
-                            <select id="select-input-survey-data" name="survey_id" class="w-full form-control">
+                            <select id="edit-select-input-survey-data" name="edit-select-survey-data"
+                                class="w-full form-control">
                                 <option value="" selected disabled>-- Pilih Category Survey --</option>
-                                <option value="power-sku">
-                                    Power SKU
-                                </option>
-                                <option value="harga-kompetitor">
-                                    Harga Kompetitor
-                                </option>
+                                <option value="power-sku">Power SKU</option>
+                                <option value="harga-kompetitor">Harga Kompetitor</option>
                             </select>
                         </div>
                     </div>
-                    <div id="product-competitor-container" class="hidden mt-4">
+                    <div id="edit-product-competitor-container" class="hidden mt-4">
                         <div>
-                            <label for="product-competitor" class="!text-black">Nama Produk</label>
-                            <input id="product-competitor" class="form-control" type="text" name="product-competitor"
-                                placeholder="Masukan Nama Produk">
-                            <span id="product-competitor-error" class="text-red-500 text-xs hidden"></span>
+                            <label for="edit-product-competitor" class="!text-black">Nama Produk</label>
+                            <input id="edit-product-competitor" class="form-control" type="text"
+                                name="edit-product-competitor" placeholder="Masukan nama produk">
+                            <span id="edit-product-competitor-error" class="text-red-500 text-xs hidden"></span>
                         </div>
                     </div>
-                    <div id="power-sku-container" class="hidden grid-cols-2 gap-6 mt-4">
+                    <div id="edit-power-sku-container" class="hidden grid-cols-2 gap-6 mt-4">
                         <div>
-                            <label for="power-sku-product-categories" class="!text-black">Kategori Produk</label>
+                            <label for="edit-power-sku-product-categories" class="!text-black">Kategori Produk</label>
                             <div>
-                                <select id="power-sku-product-categories" name="power-sku-category_id"
-                                    class="w-full form-control @error('power-sku-category_id') is-invalid @enderror">
-                                    <option value="" selected disabled>-- Pilih Category Product --</option>
+                                <select id="edit-power-sku-product-categories" name="edit-power-sku-category_id"
+                                    class="w-full form-control">
+                                    <option value="" disabled>-- Pilih Category Product --</option>
                                     @foreach ($categories as $category)
-                                        <option value="{{ $category->id }}">
+                                        <option value="{{ $category->id }}"
+                                            {{ isset($productToEdit) && $productToEdit->category_id == $category->id ? 'selected' : '' }}>
                                             {{ $category->name }}
                                         </option>
                                     @endforeach
                                 </select>
-                                <span id="power-sku-product-category_id-error"
-                                    class="text-red-500 text-xs hidden"></span>
+                                <span id="edit-power-sku-category_id-error" class="text-red-500 text-xs hidden"></span>
                             </div>
                         </div>
                         <div>
-                            <label for="power-sku" class="!text-black">Power SKU</label>
+                            <label for="edit-power-sku" class="!text-black">Power SKU</label>
                             <div>
-                                <select id="power-sku" name="power-sku"
-                                    class="w-full form-control @error('power-sku') is-invalid @enderror">
-                                    <option value="" selected disabled>-- Pilih Power SKU --</option>
+                                <select id="edit-power-sku" name="edit-power-sku" class="w-full form-control">
+                                    <option value="" disabled>-- Pilih Power SKU --</option>
                                     @foreach ($products as $product)
-                                        <option value="{{ $product->id }}">{{ $product->sku }}</option>
+                                        <option value="{{ $product->id }}"
+                                            {{ isset($productToEdit) && $productToEdit->id == $product->id ? 'selected' : '' }}>
+                                            {{ $product->sku }}
+                                        </option>
                                     @endforeach
                                 </select>
-                                <span id="power-sku-error" class="text-red-500 text-xs hidden"></span>
+                                <span id="edit-power-sku-error" class="text-red-500 text-xs hidden"></span>
                             </div>
                         </div>
                     </div>
                     <x-slot:footer>
-                        <div class="col-span-2">
-                            <button type="button" id="savePowerSkuBtn"
-                                class="w-full bg-blue-500 text-white px-4 py-2 rounded">
-                                <span id="savePowerSkuBtnText">Konfirmasi</span>
-                                <span id="savePowerSkuBtnLoading" class="hidden">Menyimpan...</span>
-                            </button>
-                        </div>
+                        <x-button.primary type="button" id="saveEditedPowerSkuBtn" class="w-full">
+                            <span id="saveEditedPowerSkuBtnText">Simpan Perubahan</span>
+                            <span id="saveEditedPowerSkuBtnLoading" class="hidden">Menyimpan...</span>
+                        </x-button.primary>
                     </x-slot:footer>
                 </form>
             </x-modal>
-            {{-- Tambah Power SKU & Competitor End --}}
-        </x-slot:cardAction>
-        {{-- Power SKU & Competitor Action End --}}
+            {{-- Edit Power SKU Modal End --}}
 
-        {{-- Tabel Power SKU & Competitor --}}
-        <table id="power-sku-table" class="table">
-            <thead>
-                <tr>
-                    <th scope="col" class="text-center">
-                        <a class="table-head">
-                            {{ __('Power SKU & Competitor') }}
-                            <x-icons.sort />
-                        </a>
-                    </th>
-                    <th scope="col" class="text-right">
-                        <a class="table-head">
-                            Aksi
-                        </a>
-                    </th>
-                </tr>
-            </thead>
-        </table>
-        {{-- Tabel Power SKU & Competitor End --}}
-
-        {{-- Edit Power SKU Modal --}}
-        <x-modal id="edit-power-sku-modal">
-            <x-slot:title>
-                Edit Power SKU & Competitor
-            </x-slot:title>
-            <form id="editPowerSkuForm">
-                @csrf
-                <div>
-                    <label for="edit-select-input-survey-data" class="!text-black">Kategori Survey</label>
-                    <div>
-                        <select id="edit-select-input-survey-data" name="edit-select-survey-data"
-                            class="w-full form-control">
-                            <option value="" selected disabled>-- Pilih Category Survey --</option>
-                            <option value="power-sku">Power SKU</option>
-                            <option value="harga-kompetitor">Harga Kompetitor</option>
-                        </select>
-                    </div>
-                </div>
-                <div id="edit-product-competitor-container" class="hidden mt-4">
-                    <div>
-                        <label for="edit-product-competitor" class="!text-black">Nama Produk</label>
-                        <input id="edit-product-competitor" class="form-control" type="text"
-                            name="edit-product-competitor" placeholder="Masukan nama produk">
-                        <span id="edit-product-competitor-error" class="text-red-500 text-xs hidden"></span>
-                    </div>
-                </div>
-                <div id="edit-power-sku-container" class="hidden grid-cols-2 gap-6 mt-4">
-                    <div>
-                        <label for="edit-power-sku-product-categories" class="!text-black">Kategori Produk</label>
-                        <div>
-                            <select id="edit-power-sku-product-categories" name="edit-power-sku-category_id"
-                                class="w-full form-control">
-                                <option value="" disabled>-- Pilih Category Product --</option>
-                                @foreach ($categories as $category)
-                                    <option value="{{ $category->id }}" {{ isset($productToEdit) && $productToEdit->category_id == $category->id ? 'selected' : '' }}>
-                                        {{ $category->name }}
-                                    </option>
-                                @endforeach
-                            </select>
-                            <span id="edit-power-sku-category_id-error" class="text-red-500 text-xs hidden"></span>
-                        </div>
-                    </div>
-                    <div>
-                        <label for="edit-power-sku" class="!text-black">Power SKU</label>
-                        <div>
-                            <select id="edit-power-sku" name="edit-power-sku" class="w-full form-control">
-                                <option value="" disabled>-- Pilih Power SKU --</option>
-                                @foreach ($products as $product)
-                                    <option value="{{ $product->id }}" {{ isset($productToEdit) && $productToEdit->id == $product->id ? 'selected' : '' }}>
-                                        {{ $product->sku }}
-                                    </option>
-                                @endforeach
-                            </select>
-                            <span id="edit-power-sku-error" class="text-red-500 text-xs hidden"></span>
-                        </div>
-                    </div>
-                </div>
-                <x-slot:footer>
-                    <x-button.primary type="button" id="saveEditedPowerSkuBtn" class="w-full">
-                        <span id="saveEditedPowerSkuBtnText">Simpan Perubahan</span>
-                        <span id="saveEditedPowerSkuBtnLoading" class="hidden">Menyimpan...</span>
-                    </x-button.primary>
-                </x-slot:footer>
-            </form>
-        </x-modal>
-        {{-- Edit Power SKU Modal End --}}
-
-    </x-card>
-    {{-- Power SKU & Competitor End --}}
-</main>
+        </x-card>
+        {{-- Power SKU & Competitor End --}}
+    </main>
 @endsection
 
 @push('scripts')
     <script>
-        $(document).ready(function () {
+        $(document).ready(function() {
             // Inisialisasi komponen
             $('#categories, #edit-category, #power-sku-product-categories, #edit-power-sku-product-categories')
                 .select2();
@@ -534,10 +537,10 @@
                 },
                 ajax: {
                     url: "{{ route('products.data') }}",
-                    data: function (d) {
+                    data: function(d) {
                         d.search_term = $('#global-search').val();
                     },
-                    dataSrc: function (json) {
+                    dataSrc: function(json) {
                         const $labelElement = $('label[for="dt-length-0"]');
                         $labelElement.find('span').remove();
                         const recordInfo = `dari ${json.recordsFiltered} data`;
@@ -550,8 +553,7 @@
                     }
 
                 },
-                columns: [
-                    {
+                columns: [{
                         data: 'category',
                         name: 'category.name',
                         className: 'table-data',
@@ -561,7 +563,7 @@
                         name: 'sku',
                         className: 'table-data',
                     },
-                   
+
                     {
                         data: 'price',
                         name: 'price',
@@ -579,7 +581,7 @@
 
             // Search dengan debounce
             let searchTimer;
-            $('#global-search').on('input', function () {
+            $('#global-search').on('input', function() {
                 clearTimeout(searchTimer);
                 searchTimer = setTimeout(() => table.ajax.reload(null, false), 500);
             });
@@ -607,13 +609,13 @@
                 ajax: {
                     url: "{{ route('products.data-availability') }}",
                     type: 'GET',
-                    data: function (d) {
+                    data: function(d) {
                         d.date = $('#stock-date-range').val() == 'Date Range' ? '' : $(
                             '#stock-date-range').val();
                         d.filter_area = $('#filter_area').val();
                         d.filter_product = $('#filter_product').val();
                     },
-                    dataSrc: function (json) {
+                    dataSrc: function(json) {
                         const $labelElement = $('label[for="dt-length-1"]');
                         $labelElement.find('span').remove();
                         const recordInfo = `dari ${json.recordsFiltered} data`;
@@ -626,76 +628,76 @@
                     }
                 },
                 columns: [{
-                    data: 'outlet',
-                    name: 'outlet',
-                    class: 'table-data'
-                },
-                {
-                    data: 'sku',
-                    name: 'sku',
-                    class: 'table-data'
-                },
-                {
-                    data: 'sod',
-                    name: 'sod',
-                    class: 'table-data'
-                },
-                {
-                    data: 'si',
-                    name: 'si',
-                    class: 'table-data'
-                },
-                {
-                    data: 'av3m',
-                    name: 'av3m',
-                    class: 'table-data'
-                },
-                {
-                    data: 'rekomendasi',
-                    name: 'rekomendasi',
-                    class: 'table-data'
-                },
+                        data: 'outlet',
+                        name: 'outlet',
+                        class: 'table-data'
+                    },
+                    {
+                        data: 'sku',
+                        name: 'sku',
+                        class: 'table-data'
+                    },
+                    {
+                        data: 'sod',
+                        name: 'sod',
+                        class: 'table-data'
+                    },
+                    {
+                        data: 'si',
+                        name: 'si',
+                        class: 'table-data'
+                    },
+                    {
+                        data: 'av3m',
+                        name: 'av3m',
+                        class: 'table-data'
+                    },
+                    {
+                        data: 'rekomendasi',
+                        name: 'rekomendasi',
+                        class: 'table-data'
+                    },
 
-                {
-                    data: 'status',
-                    name: 'status',
-                    class: 'table-data'
-                },
+                    {
+                        data: 'status',
+                        name: 'status',
+                        class: 'table-data'
+                    },
 
-                {
-                    data: 'availability',
-                    name: 'availability',
-                    class: 'table-data'
-                }
+                    {
+                        data: 'availability',
+                        name: 'availability',
+                        class: 'table-data'
+                    }
                 ],
                 order: [
                     [0, 'asc']
                 ]
             });
             // Event Handlers for Sales Table
-            $(document).on('change', '#dt-length-stock-on-hand', function () {
+            $(document).on('change', '#dt-length-stock-on-hand', function() {
                 var length = $(this).val();
                 tableSOD.page.len(length).draw();
             });
 
-            $('#stock-date-range').on('change', function () {
+            $('#stock-date-range').on('change', function() {
                 tableSOD.ajax.reload(null, false);
             });
 
-            $('#filter_area').on('change', function () {
+            $('#filter_area').on('change', function() {
                 tableSOD.ajax.reload(null, false);
             });
-            $('#filter_product').on('change', function () {
+            $('#filter_product').on('change', function() {
                 tableSOD.ajax.reload(null, false);
             });
-            $(document).on('click', '#product-table .delete-btn', function (e) {
+            $(document).on('click', '#product-table .delete-btn', function(e) {
                 e.preventDefault();
                 const url = $(this).attr('href');
                 const name = $(this).data('name');
                 deleteData(url, name);
             });
             // Create Product
-            $('#saveBtn').click(function () {
+            $('#saveBtn').click(function() {
                 resetFormErrors();
                 toggleLoading(true, 'save');
 
@@ -703,7 +705,7 @@
                     type: 'POST',
                     url: '{{ route('products.store') }}',
                     data: $('#createProductForm').serialize(),
-                    success: function (response) {
+                    success: function(response) {
                         handleSuccess('tambah-produk', response.message);
                     },
                     error: handleFormErrors
@@ -711,7 +713,7 @@
             });
 
             // Edit product handler
-            $(document).on('click', '#view-product', function (e) {
+            $(document).on('click', '#view-product', function(e) {
                 e.preventDefault();
                 const productId = $(this).data('id');
                 resetFormErrors();
@@ -719,21 +721,21 @@
                 $.ajax({
                     url: `/products/${productId}/edit`,
                     type: 'GET',
-                    success: function (response) {
+                    success: function(response) {
                         $('#edit-category').val(response.category_id).trigger('change');
                         $('#edit-sku').val(response.sku);
                         $('#edit-price').val(response.price);
                         $('#editProductForm').data('id', response.id);
                         openModal('edit-produk');
                     },
-                    error: function () {
+                    error: function() {
                         toast('error', 'Terjadi kesalahan saat mengambil data produk', 200);
                     }
                 });
             });
 
             // Update product handler
-            $('#updateBtn').click(function (e) {
+            $('#updateBtn').click(function(e) {
                 e.preventDefault();
                 const productId = $('#editProductForm').data('id');
                 const formData = {
@@ -748,7 +750,7 @@
                     url: `/products/${productId}`,
                     type: 'PUT',
                     data: formData,
-                    success: function (response) {
+                    success: function(response) {
                         handleSuccess('edit-produk', response.message);
                     },
                     error: handleFormErrors
@@ -756,7 +758,7 @@
             });
 
             // AV3M update handler
-            $(document).on('click', '#view-av3m', function (e) {
+            $(document).on('click', '#view-av3m', function(e) {
                 e.preventDefault();
                 const productId = $(this).data('id');
                 resetFormErrors();
@@ -765,7 +767,7 @@
                 $.ajax({
                     url: `/products/${productId}/av3m`,
                     type: 'GET',
-                    success: function (response) {
+                    success: function(response) {
                         @foreach ($channels as $channel)
                             $('#channel-{{ $channel->id }}').val(response
                                 .channel_{{ $loop->iteration }});
@@ -776,7 +778,7 @@
             });
 
             // Save AV3M handler
-            $('#saveAv3mBtn').click(function (e) {
+            $('#saveAv3mBtn').click(function(e) {
                 e.preventDefault();
                 const productId = $('#av3mForm').data('id');
 
@@ -784,10 +786,10 @@
                     url: `/products/${productId}/av3m`,
                     type: 'POST',
                     data: $('#av3mForm').serialize(),
-                    success: function (response) {
+                    success: function(response) {
                         handleSuccess('update-av3m', response.message);
                     },
-                    error: function (xhr) {
+                    error: function(xhr) {
                         if (xhr.status === 422) {
                             toast('error', xhr.responseJSON.message, 200);
                             handleFieldErrors(xhr.responseJSON.errors, true);
@@ -797,14 +799,14 @@
             });
 
             // Import/Upload handlers
-            $('#downloadTemplate').click(function () {
+            $('#downloadTemplate').click(function() {
                 window.location.href = "{{ asset('assets/template/template_bulk_product.xlsx') }}";
             });
-            $('#downloadTemplateAv3m').click(function () {
+            $('#downloadTemplateAv3m').click(function() {
                 window.location.href = "{{ route('products.av3ms.template') }}";
             });
 
-            $('#importBtnAv3m').click(function () {
+            $('#importBtnAv3m').click(function() {
                 const file = $('#file_upload-av3m')[0].files[0];
                 if (!file) {
                     return toast('error', 'Silakan pilih file terlebih dahulu', 200);
@@ -820,16 +822,16 @@
                     data: formData,
                     processData: false,
                     contentType: false,
-                    success: function (response) {
+                    success: function(response) {
                         handleSuccess('unggah-av3m-bulk', response.message);
                     },
-                    error: function (xhr) {
+                    error: function(xhr) {
                         toggleLoading(false, 'import');
                         toast('error', xhr.responseJSON.message, 200);
                     }
                 });
             });
-            $('#importBtn').click(function () {
+            $('#importBtn').click(function() {
                 const file = $('#file_upload')[0].files[0];
                 if (!file) {
                     return toast('error', 'Silakan pilih file terlebih dahulu', 200);
@@ -845,10 +847,10 @@
                     data: formData,
                     processData: false,
                     contentType: false,
-                    success: function (response) {
+                    success: function(response) {
                         handleSuccess('unggah-produk-bulk', response.message);
                     },
-                    error: function (xhr) {
+                    error: function(xhr) {
                         toggleLoading(false, 'import');
                         toast('error', xhr.responseJSON.message, 200);
                     }
@@ -856,7 +858,7 @@
             });
 
             // Download Excel handler
-            $('#downloadBtn').click(function (e) {
+            $('#downloadBtn').click(function(e) {
                 e.preventDefault();
 
                 // Show loading state
@@ -940,6 +942,10 @@
                         return;
                     }
 
+					const dataTransfer = new DataTransfer();
+                    dataTransfer.items.add(file);
+                    $('#file_upload')[0].files = dataTransfer.files;
+
                     displayFileName.classList.remove('hidden');
                     uploadHelptext.classList.add('hidden');
                     displayFileName.innerText = file.name;
@@ -969,7 +975,7 @@
             }
 
             function handleFieldErrors(errors, isAv3m = false) {
-                $.each(errors, function (key, value) {
+                $.each(errors, function(key, value) {
                     const prefix = isAv3m ? '.' : '#edit-';
                     const suffix = isAv3m ? '' : '-error';
                     $(`${prefix}${key}${suffix}`).text(value[0]).removeClass('hidden');
@@ -978,7 +984,7 @@
             }
         });
 
-        $('#downloadAvailabilityBtn').click(function (e) {
+        $('#downloadAvailabilityBtn').click(function(e) {
             e.preventDefault();
 
             // Get current filter values
@@ -999,8 +1005,8 @@
 
             // Gunakan fetch untuk download
             fetch('/products/download-availability?' + new URLSearchParams(filters), {
-                method: 'GET',
-            })
+                    method: 'GET',
+                })
                 .then(response => {
                     if (!response.ok) throw new Error('Network response was not ok');
                     return response.blob();
@@ -1010,7 +1016,8 @@
                     const url = window.URL.createObjectURL(blob);
                     const a = document.createElement('a');
                     a.href = url;
-                    a.download = 'availability_data' + new Date().toISOString().slice(0, 19).replace(/[:]/g, '-') +
+                    a.download = 'availability_data' + new Date().toISOString().slice(0, 19).replace(/[:]/g,
+                            '-') +
                         '.xlsx';
                     document.body.appendChild(a);
                     a.click();
@@ -1031,7 +1038,7 @@
         });
 
         // Initialize DataTable for Power SKU
-        $(document).ready(function () {
+        $(document).ready(function() {
             const powerSkuTable = $('#power-sku-table').DataTable({
                 processing: true,
                 serverSide: true,
@@ -1054,10 +1061,10 @@
                 },
                 ajax: {
                     url: "/products/power-skus/data",
-                    data: function (d) {
+                    data: function(d) {
                         d.search_term = $('#power-sku-search').val();
                     },
-                    dataSrc: function (json) {
+                    dataSrc: function(json) {
                         const $labelElement = $('label[for="dt-length-2"]');
                         $labelElement.find('span').remove();
                         const recordInfo = `dari ${json.recordsFiltered} data`;
@@ -1070,17 +1077,17 @@
                     }
                 },
                 columns: [{
-                    data: 'sku',
-                    name: 'sku',
-                    className: 'table-data'
-                },
-                {
-                    data: 'actions',
-                    name: 'actions',
-                    orderable: false,
-                    searchable: false,
-                    className: 'table-data'
-                }
+                        data: 'sku',
+                        name: 'sku',
+                        className: 'table-data'
+                    },
+                    {
+                        data: 'actions',
+                        name: 'actions',
+                        orderable: false,
+                        searchable: false,
+                        className: 'table-data'
+                    }
                 ],
                 order: [
                     [0, 'asc']
@@ -1089,33 +1096,33 @@
 
             // Search functionality with debounce
             let searchTimer;
-            $('#power-sku-search').on('input', function () {
+            $('#power-sku-search').on('input', function() {
                 clearTimeout(searchTimer);
                 searchTimer = setTimeout(() => powerSkuTable.ajax.reload(null, false), 500);
             });
 
             // Handle pagination length change
-            $(document).on('change', '#dt-length-power-sku', function () {
+            $(document).on('change', '#dt-length-power-sku', function() {
                 const length = $(this).val();
                 powerSkuTable.page.len(length).draw();
             });
 
-            $(document).on('click', '.edit-btn', function (e) {
+            $(document).on('click', '.edit-btn', function(e) {
                 e.preventDefault();
                 const id = $(this).data('id');
                 getPowerSkuData(id);
             });
 
 
-            $(document).ready(function () {
+            $(document).ready(function() {
                 // Function to get and display Power SKU data
-                window.getPowerSkuData = function (powerSkuId) {
+                window.getPowerSkuData = function(powerSkuId) {
                     resetFormErrors();
 
                     $.ajax({
                         url: `/products/power-skus/${powerSkuId}/edit`,
                         type: 'GET',
-                        success: function (response) {
+                        success: function(response) {
                             // Set form ID for update
                             $('#editPowerSkuForm').data('id', response.id);
 
@@ -1148,7 +1155,7 @@
                                 if (response.product) {
                                     // Initialize select2 if not already initialized
                                     if (!$('#edit-power-sku-product-categories').data(
-                                        'select2')) {
+                                            'select2')) {
                                         $('#edit-power-sku-product-categories').select2();
                                     }
 
@@ -1174,14 +1181,14 @@
                                 'cursor': 'not-allowed'
                             });
                         },
-                        error: function (xhr) {
+                        error: function(xhr) {
                             toast('error', 'Gagal mengambil data: ' + xhr.responseJSON
                                 .message, 200);
                         }
                     });
                 };
 
-                $(document).on('shown.bs.modal', '#edit-power-sku-modal', function () {
+                $(document).on('shown.bs.modal', '#edit-power-sku-modal', function() {
                     if (!$('#edit-select-input-survey-data').data('select2')) {
                         $('#edit-select-input-survey-data').select2({
                             minimumResultsForSearch: Infinity,
@@ -1191,7 +1198,7 @@
                 });
 
                 // Tambahkan event listener untuk perubahan survey type
-                $('#edit-select-input-survey-data').on('change', function () {
+                $('#edit-select-input-survey-data').on('change', function() {
                     const selectedValue = $(this).val();
 
                     // Sembunyikan semua container
@@ -1214,7 +1221,7 @@
                 }
 
                 // Update event handler untuk perubahan kategori
-                $('#edit-power-sku-product-categories').on('change', function () {
+                $('#edit-power-sku-product-categories').on('change', function() {
                     const categoryId = $(this).val();
                     if (categoryId) {
                         $('#edit-power-sku').prop('disabled', true).html(
@@ -1223,7 +1230,7 @@
                         $.ajax({
                             url: `/products/get-products-by-category/${categoryId}`,
                             type: 'GET',
-                            success: function (products) {
+                            success: function(products) {
                                 let options =
                                     '<option value="" disabled>-- Pilih Power SKU --</option>';
                                 products.forEach(product => {
@@ -1243,7 +1250,7 @@
                                         'change');
                                 }
                             },
-                            error: function () {
+                            error: function() {
                                 toast('error', 'Gagal memuat daftar SKU', 200);
                                 $('#edit-power-sku')
                                     .html(
@@ -1256,7 +1263,7 @@
                 });
 
                 // Tambahkan event listener untuk category change pada form edit
-                $('#edit-power-sku-product-categories').change(function () {
+                $('#edit-power-sku-product-categories').change(function() {
                     const categoryId = $(this).val();
                     if (!categoryId) return;
 
@@ -1268,7 +1275,7 @@
                     $.ajax({
                         url: `/products/get-products-by-category/${categoryId}`,
                         type: 'GET',
-                        success: function (products) {
+                        success: function(products) {
                             let options =
                                 '<option value="" disabled>-- Pilih Power SKU --</option>';
                             products.forEach(product => {
@@ -1288,7 +1295,7 @@
                                     'change');
                             }
                         },
-                        error: function () {
+                        error: function() {
                             toast('error', 'Gagal memuat daftar SKU', 200);
                             $('#edit-power-sku')
                                 .html(
@@ -1301,7 +1308,7 @@
             });
 
             // Handle delete action
-            $(document).on('click', '.delete-btn', function (e) {
+            $(document).on('click', '.delete-btn', function(e) {
                 e.preventDefault();
                 const url = $(this).attr('href');
                 const name = $(this).data('name');
@@ -1323,13 +1330,13 @@
                             data: {
                                 _token: $('meta[name="csrf-token"]').attr('content')
                             },
-                            success: function (response) {
+                            success: function(response) {
                                 toast('success', response.message, 300);
                                 setTimeout(() => {
                                     window.location.reload();
                                 }, 3000);
                             },
-                            error: function (xhr) {
+                            error: function(xhr) {
                                 toast('error', xhr.responseJSON.message ||
                                     'Terjadi kesalahan saat menghapus data', 200);
                             }
@@ -1363,7 +1370,7 @@
                 })
 
                 // Handle category change for add modal
-                $('#power-sku-product-categories').on('change', function () {
+                $('#power-sku-product-categories').on('change', function() {
                     const categoryId = $(this).val();
                     if (categoryId) {
                         // Show loading in the SKU select
@@ -1372,7 +1379,7 @@
                         $.ajax({
                             url: `/products/get-products-by-category/${categoryId}`,
                             type: 'GET',
-                            success: function (products) {
+                            success: function(products) {
                                 let options =
                                     '<option value="" selected disabled>-- Pilih Power SKU --</option>';
                                 if (products && products.length > 0) {
@@ -1386,7 +1393,7 @@
                                     .prop('disabled', false)
                                     .trigger('change');
                             },
-                            error: function () {
+                            error: function() {
                                 toast('error', 'Gagal memuat daftar SKU', 200);
                                 $('#power-sku')
                                     .html(
@@ -1399,7 +1406,7 @@
                 });
 
                 // Handle category change for edit modal
-                $('#edit-power-sku-product-categories').on('change', function () {
+                $('#edit-power-sku-product-categories').on('change', function() {
                     const categoryId = $(this).val();
                     if (categoryId) {
                         $('#edit-power-sku').prop('disabled', true).html('<option>Loading...</option>');
@@ -1407,7 +1414,7 @@
                         $.ajax({
                             url: `/products/get-products-by-category/${categoryId}`,
                             type: 'GET',
-                            success: function (products) {
+                            success: function(products) {
                                 let options =
                                     '<option value="" disabled>-- Pilih Power SKU --</option>';
                                 products.forEach(product => {
@@ -1426,7 +1433,7 @@
                                     $('#edit-power-sku').val(selectedValue).trigger('change');
                                 }
                             },
-                            error: function () {
+                            error: function() {
                                 toast('error', 'Gagal memuat daftar SKU', 200);
                                 $('#edit-power-sku')
                                     .html(
@@ -1439,7 +1446,7 @@
                 });
             }
 
-            $('#select-input-survey-data').change(function (e) {
+            $('#select-input-survey-data').change(function(e) {
                 if (e.target.value == 'harga-kompetitor') {
                     $('#product-competitor-container').removeClass('hidden');
                     $('#product-competitor-container').addClass('block');
@@ -1452,7 +1459,7 @@
                 }
             })
 
-            $('#edit-select-input-survey-data').change(function (e) {
+            $('#edit-select-input-survey-data').change(function(e) {
                 if (e.target.value == 'harga-kompetitor') {
                     $('#edit-product-competitor-container').removeClass('hidden');
                     $('#edit-product-competitor-container').addClass('block');
@@ -1469,7 +1476,7 @@
         });
 
         // Create Power SKU
-        $('#savePowerSkuBtn').click(function (e) {
+        $('#savePowerSkuBtn').click(function(e) {
             e.preventDefault();
 
             // Reset previous error states
@@ -1504,7 +1511,7 @@
                     withCredentials: true
                 },
                 data: formData,
-                success: function (response) {
+                success: function(response) {
                     toast('success', response.message, 300);
                     closeModal('tambah-power-sku');
                     // Refresh the data table
@@ -1523,7 +1530,7 @@
                     $('#savePowerSkuBtnLoading').addClass('hidden');
                     $('#savePowerSkuBtn').prop('disabled', false);
                 },
-                error: function (xhr) {
+                error: function(xhr) {
                     // Reset loading state
                     $('#savePowerSkuBtnText').removeClass('hidden');
                     $('#savePowerSkuBtnLoading').addClass('hidden');
@@ -1531,7 +1538,7 @@
 
                     if (xhr.status === 422) {
                         const errors = xhr.responseJSON.errors;
-                        Object.keys(errors).forEach(function (key) {
+                        Object.keys(errors).forEach(function(key) {
                             // Show error messages
                             $(`#${key}-error`).text(errors[key][0]).removeClass('hidden');
                             $(`[name="${key}"]`).addClass('border-red-500');
@@ -1587,7 +1594,7 @@
         function initializePowerSkuEdit() {
 
             // Handle form submission for editing Power SKU
-            $('#saveEditedPowerSkuBtn').click(function (e) {
+            $('#saveEditedPowerSkuBtn').click(function(e) {
                 e.preventDefault();
                 const id = $('#editPowerSkuForm').data('id');
                 const surveyType = $('#edit-select-input-survey-data').val();
@@ -1614,12 +1621,12 @@
                     url: `/products/power-skus/${id}`,
                     type: 'PUT',
                     data: formData,
-                    success: function (response) {
+                    success: function(response) {
                         toast('success', response.message, 300);
                         closeModal('edit-power-sku-modal');
                         $('#power-sku-table').DataTable().ajax.reload();
                     },
-                    error: function (xhr) {
+                    error: function(xhr) {
                         // Reset loading state
                         $('#saveEditedPowerSkuBtnText').removeClass('hidden');
                         $('#saveEditedPowerSkuBtnLoading').addClass('hidden');
@@ -1627,7 +1634,7 @@
 
                         if (xhr.status === 422) {
                             const errors = xhr.responseJSON.errors;
-                            Object.keys(errors).forEach(function (key) {
+                            Object.keys(errors).forEach(function(key) {
                                 $(`#edit-${key}-error`).text(errors[key][0]).removeClass(
                                     'hidden');
                                 $(`[name="edit-${key}"]`).addClass('border-red-500');
@@ -1646,16 +1653,16 @@
             $('input, select').removeClass('border-red-500');
         }
 
-        $(document).ready(function () {
+        $(document).ready(function() {
             initializePowerSkuEdit();
         });
     </script>
 @endpush
 
-
+{{-- Bulk Upload AV3M --}}
 @push('scripts')
     <script>
-        document.addEventListener('DOMContentLoaded', function () {
+        document.addEventListener('DOMContentLoaded', function() {
             const uploadArea = document.getElementById('upload-area-av3m');
             const fileInput = document.getElementById('file_upload-av3m');
             const displayFileName = document.getElementById('filename-display-av3m');
@@ -1681,7 +1688,7 @@
             uploadArea.addEventListener('drop', (e) => {
                 e.preventDefault();
                 uploadArea.classList.remove('drag-over');
-
+                console.log($('#file_upload-av3m')[0].files[0]);
                 const files = e.dataTransfer.files;
                 handleFiles(files);
             });
@@ -1719,12 +1726,16 @@
                 }
 
                 const reader = new FileReader();
-                reader.onload = function (e) {
+                reader.onload = function(e) {
                     displayFileName.classList.remove('hidden')
                     uploadHelptext.classList.add('hidden')
                     displayFileName.innerText = file.name
                 };
                 reader.readAsText(file);
+
+                const dataTransfer = new DataTransfer();
+                dataTransfer.items.add(file);
+                $('#file_upload-av3m')[0].files = dataTransfer.files;
             }
         });
     </script>

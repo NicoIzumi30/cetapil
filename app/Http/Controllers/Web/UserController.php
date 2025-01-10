@@ -108,9 +108,10 @@ class UserController extends Controller
      */
     public function store(CreateUserRequest $request)
     {
-        $data = Arr::except($request->validated(), ['city', 'permissions', 'role_id', 'password']);
+        $data = Arr::except($request->validated(), ['city','name', 'permissions', 'role_id', 'password']);
         $user = new User($data);
         $user->city = $request->input('city', null);
+        $user->name = ucwords($request->name);
         $user->password = Hash::make($request->password);
         $user->givePermissionTo($request->permissions);
         $user->assignRole($request->role_id);
@@ -147,8 +148,9 @@ class UserController extends Controller
     public function update(UpdateUserRequest $request, string $id)
     {
         $user = User::findOrFail($id);
-        $data = Arr::except($request->validated(), ['city', 'permissions', 'role_id', 'password']);
+        $data = Arr::except($request->validated(), ['city','name', 'permissions', 'role_id', 'password']);
         $user->city = $request->input('city', null);
+        $user->name = ucwords($request->name);
         $user->fill($data);
         if ($request->input('password')) {
             $user->password = Hash::make($request->password);

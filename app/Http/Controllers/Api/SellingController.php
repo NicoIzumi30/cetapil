@@ -21,8 +21,10 @@ class SellingController extends Controller
     use HasAuthUser;
     public function index(Request $request): SellingCollection
     {
+        $user_id = $this->getAuthUserId();
         $selling = Selling::query()
             ->with(['products.product'])
+            ->where('user_id', $user_id)  // Add this line to filter by user_id
             ->where('created_at', '>=', Carbon::today()->subDays(10))
             ->latest()
             ->get();
@@ -45,7 +47,7 @@ class SellingController extends Controller
 
         foreach ($request->products as $product) {
             $prod = Product::find($product['id']);
-            if($product['qty'] > 0) {
+            if ($product['qty'] > 0) {
                 SellingProduct::create([
                     'selling_id' => $selling->id,
                     'product_id' => $prod->id,

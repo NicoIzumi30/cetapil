@@ -1,26 +1,42 @@
-name,email,phone_number,password,longitude,latitude,city,address
-Ilham Adi Santoso,ilhamadisantoso@cetaphil.id,,12345678,,,KOTA SEMARANG,
-Satriani,satriani@cetaphil.id,,12345678,,,KOTA MAKASSAR,
-Win Haryanto,winharyanto@cetaphil.id,,12345678,,,KOTA SURAKARTA,
-Tri febrianto,trifebrianto@cetaphil.id,,12345678,,,KOTA SIDOARJO,
-Irma wati,irmawati@cetaphil.id,,12345678,,,KOTA SURABAYA,
-Andri Yuditia,andriyuditia@cetaphil.id,,12345678,,,KOTA BANDUNG,
-Alya Sofiatul Aini,alyasofiatulaini@cetaphil.id,,12345678,,,KOTA BANDUNG,
-Dian Ratna Sari,dianratnasari@cetaphil.id,,12345678,,,KOTA SURABAYA,
-Dewa Made Pande Juniartawan,dewamadepandejuniartawan@cetaphil.id,,12345678,,,KOTA MATARAM,
-Sariti ningsih,saritiningsih@cetaphil.id,,12345678,,,KOTA BANJARMASIN,
-Glaudia Ameilia Sari,glaudiaameiliasari@cetaphil.id,,12345678,,,KOTA BATAM,
-Sri Jumiati,srijumiati@cetaphil.id,,12345678,,,KOTA YOGYAKARTA,
-Trisna Sanjaya,trisnasanjaya@cetaphil.id,,12345678,,,KOTA PONTIANAK,
-Putu eka permata sari dewi,putuekapermatasaridewi@cetaphil.id,,12345678,,,KOTA DENPASAR,
-Ni Komang Ita Sintya Dewi,nikomangitasintyadewi@cetaphil.id,,12345678,,,KOTA DENPASAR,
-Fredy Pranajaya,fredypranajaya@cetaphil.id,,12345678,,,KABUPATEN MALANG,
-Joko Susilo,jokosusilo@cetaphil.id,,12345678,,,KOTA TANGERANG SELATAN,
-Melia Faskawati,meliafaskawati@cetaphil.id,,12345678,,,KOTA ADM. JAKARTA SELATAN,
-Deddy purnama,deddypurnama@cetaphil.id,,12345678,,,KOTA ADM. JAKARTA UTARA,
-Suswati,suswati@cetaphil.id,,12345678,,,KOTA ADM. JAKARTA PUSAT,
-Dian Listiasari,dianlistiasari@cetaphil.id,,12345678,,,KOTA BOGOR,
-Surya juanda,suryajuanda@cetaphil.id,,12345678,,,KOTA MEDAN,
-Mia Agustini,miaagustini@cetaphil.id,,12345678,,,KOTA LAMPUNG,
-Weni Silvia,wenisilvia@cetaphil.id,,12345678,,,KOTA PADANG,
-SYEFTIANI,syeftiani@cetaphil.id,,12345678,,,KOTA PEKANBARU,
+name,email,city
+Mia Agustina Santoso,miaagustinasantoso@gmail.com,KOTA BANDAR LAMPUNG
+Melia Faskawati ,iif25776@gmail.com,KOTA ADM. JAKARTA SELATAN
+Trisna Sanjaya,trisjaya112233@gmail.com,KOTA PONTIANAK
+Win Haryanto ,winharyanto57@gmail.com,KOTA SURAKARTA
+Suswati,susialmira26@gmail.com,KOTA ADM. JAKARTA PUSAT
+Indah Utari Haq,indahutari2001@gmail.com,KOTA MEDAN
+Sariti Ningsih,sariti3091@gmail.com,KOTA BANJARMASIN
+Syeftiani,syeftiani27@gmail.com,KOTA PEKANBARU
+Eli Soleha ,elysho719@gmail.com,KOTA ADM. JAKARTA PUSAT
+Dian Listiasari,dianlistia93@gmail.com,KOTA BOGOR
+Fredy Pranajaya,fredyprana19@gmail.com,KOTA MALANG
+Tri Febrianto,trifebrianto220409@gmail.com,KOTA SIDOARJO
+Deddy Purnama,dedypur777@gmail.com,KOTA ADM. JAKARTA SELATAN
+Juneng Mosu,junengmosu24@gmail.com,KOTA BATAM
+Joko Susilo,joko.galderma@gmail.com,KOTA TANGERANG SELATAN
+Andri Yuditia,andriyuditia24@gmail.com,KOTA BANDUNG
+Dian Darliah,dian280593@gmail.com,KOTA BANDUNG
+Desiliana Juanita,echyjuanita@gmail.com,KOTA ADM. JAKARTA PUSAT
+Ilham Adi Santoso ,iamadisantoso@gmail.com,KOTA SEMARANG
+Glaudia Ameilia Sari,glaudhia92@gmail.com,KOTA BATAM
+Sri Jumiati ,miacantika.mm@gmail.com,KOTA YOGYAKARTA
+Putu Eka Permata Sari Dewi,ekapermataasari@gmail.com,KOTA DENPASAR
+Ni Komang Suriyati Candra Dewi,nikomngsuriyaticandradewi@gmail.com,KOTA DENPASAR
+Dena Indani,denaindani32@gmail.com,KOTA ADM. JAKARTA PUSAT
+Dea Ayu Fahrunisa,deaayufahrunisa@gmail.com,KOTA ADM. JAKARTA PUSAT
+Alya Sofiatul Aini,alyaaini26@gmail.com,KOTA BANDUNG
+Nurul Alfiyah,nurul.amay@gmail.com,KOTA ADM. JAKARTA PUSAT
+Ninik Ariyanti,ariyantininik61@gmail.com,KOTA SEMARANG
+Sri Rejeki,srirezekkiii02@gmail.com,KOTA MEDAN
+Satriani,yhanisatriani@gmail.com,KOTA MAKASSAR
+Weni Silvia,silviaweni005@gmail.com,KOTA PADANG
+Surya Juanda,suryajuanda011@gmail.com,KOTA MEDAN
+Ni Komang Ita Sintya Dewi,itasintya01@gmail.com,KOTA DENPASAR
+Dian Ratna Sari,dian.ratna816@gmail.com,KOTA SURABAYA
+Dinda Septiani Wardhani ,dindaseptiani.wardhani21@gmail.com,KOTA BANDUNG
+Nova Yulianty,nova.yulianty1983@gmail.com,KOTA ADM. JAKARTA PUSAT
+Pujiati,pujierafone@gmail.com,KOTA SURABAYA
+Miftahul Jana,clarissadeamita@gmail.com,KOTA SURABAYA
+Ratih Ardiani,ratihardiani2@gmail.com,KOTA YOGYAKARTA
+Irma Wati,azzamirma50830@gmailcom,KOTA SURABAYA
+Dewa Made Pande Juniartawan,dewamadepande@gmail.com,KOTA MATARAM
