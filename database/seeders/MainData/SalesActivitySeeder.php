@@ -24,8 +24,8 @@ class SalesActivitySeeder extends Seeder
             for($i = 0; $i < 10000; $i += 1000) {
                 $activities = [];
                 foreach(range(1, min(1000, 10000 - $i)) as $index) {
-                    $checkedIn = $faker->dateTimeBetween('-1 year', 'now');
-                    $checkedOut = Carbon::parse($checkedIn)->addHours($faker->numberBetween(1, 4));
+                    $checkedIn = $faker->dateTimeBetween('-1 month', 'now');
+                    $checkedOut = Carbon::parse($checkedIn)->addHours($faker->numberBetween(0, 1));
                     
                     $activities[] = [
                         'id' => Str::uuid(),
