@@ -28,7 +28,9 @@ Route::middleware('guest')->group(function () {
     Route::get('/login', [LoginController::class, 'index'])->name('login');
     Route::post('/login', [LoginController::class, 'login']);
 });
-
+Route::get('/info', function () {
+    return phpinfo();
+});
 // Authenticated Routes
 Route::middleware('auth')->group(function () {
     // Dashboard
