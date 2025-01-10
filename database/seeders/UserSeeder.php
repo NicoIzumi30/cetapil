@@ -169,7 +169,7 @@ class UserSeeder extends Seeder
         foreach ($data as $user) {
             $newUser = User::create([
                 'name' => ucwords($user['name']),
-                'email' => $user['email'],
+                'email' => strtolower($user['email']),
                 'password' => Hash::make('12345678'),
                 'phone_number' => '',
                 'longitude' => null,

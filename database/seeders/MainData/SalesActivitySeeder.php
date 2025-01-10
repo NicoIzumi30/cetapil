@@ -2,11 +2,12 @@
 
 namespace Database\Seeders\MainData;
 
+use Carbon\Carbon;
+use App\Models\User;
+use Faker\Factory as Faker;
+use Illuminate\Support\Str;
 use Illuminate\Database\Seeder;
 use Illuminate\Support\Facades\DB;
-use Illuminate\Support\Str;
-use Carbon\Carbon;
-use Faker\Factory as Faker;
 
 class SalesActivitySeeder extends Seeder
 {
@@ -15,18 +16,14 @@ class SalesActivitySeeder extends Seeder
         $faker = Faker::create('id_ID');
         
         $outletIds = DB::table('outlets')->pluck('id')->toArray();
-        $userIds = DB::table('users')
-    ->where('email', 'sales1@gmail.com')
-    ->orWhere('email', 'sales2@gmail.com')
-    ->pluck('id')
-    ->toArray();
+        $userIds = User::role('sales')->get()->pluck('id')->toArray();
         
         DB::beginTransaction();
         try {
             // Process in chunks of 1000
-            for($i = 0; $i < 50000; $i += 1000) {
+            for($i = 0; $i < 10000; $i += 1000) {
                 $activities = [];
-                foreach(range(1, min(1000, 50000 - $i)) as $index) {
+                foreach(range(1, min(1000, 10000 - $i)) as $index) {
                     $checkedIn = $faker->dateTimeBetween('-1 year', 'now');
                     $checkedOut = Carbon::parse($checkedIn)->addHours($faker->numberBetween(1, 4));
                     
@@ -58,7 +55,7 @@ class SalesActivitySeeder extends Seeder
             }
             
             DB::commit();
-            $this->command->info('50,000 Sales Activities seeded successfully');
+            $this->command->info('10,000 Sales Activities seeded successfully');
         } catch (\Exception $e) {
             DB::rollback();
             throw $e;

@@ -25,9 +25,9 @@ class SalesVisibilitySeeder extends Seeder
         DB::beginTransaction();
         try {
             // Process in chunks of 1000
-            for($i = 0; $i < 1000000; $i += 1000) {
+            for($i = 0; $i < 400000; $i += 1000) {
                 $visibilities = [];
-                foreach(range(1, min(1000, 1000000 - $i)) as $index) {
+                foreach(range(1, min(1000, 400000 - $i)) as $index) {
                     $visibilities[] = [
                         'id' => Str::uuid(),
                         'sales_activity_id' => $faker->randomElement($salesActivityIds),
@@ -35,7 +35,7 @@ class SalesVisibilitySeeder extends Seeder
                         'type' => $faker->randomElement(['PRIMARY', 'SECONDARY', 'COMPETITOR']),
                         'position' => $faker->numberBetween(1, 3),
                         'posm_type_id' => $faker->randomElement($posmTypeIds),
-                        'visual_type' => $faker->randomElement(['Poster', 'Banner', 'Shelf Display']),
+                        'visual_type' => $faker->randomElement(['New soothing foam wash', 'Gentle skin cleanser', 'Moisturizing lotion','Baby wash','Display stand','End cap']),
                         'condition' => $faker->randomElement(['GOOD', 'BAD']),
                         'competitor_brand_name' => $faker->company,
                         'competitor_promo_mechanism' => $faker->text(100),
@@ -61,7 +61,7 @@ class SalesVisibilitySeeder extends Seeder
             }
             
             DB::commit();
-            $this->command->info('1,000,000 Sales Visibilities seeded successfully');
+            $this->command->info('400,000 Sales Visibilities seeded successfully');
         } catch (\Exception $e) {
             DB::rollback();
             throw $e;

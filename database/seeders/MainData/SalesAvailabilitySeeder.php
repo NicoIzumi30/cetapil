@@ -21,9 +21,9 @@ class SalesAvailabilitySeeder extends Seeder
         DB::beginTransaction();
         try {
             // Process in chunks of 1000
-            for($i = 0; $i < 600000; $i += 1000) {
+            for($i = 0; $i < 200000; $i += 1000) {
                 $availabilities = [];
-                foreach(range(1, min(1000, 600000 - $i)) as $index) {
+                foreach(range(1, min(1000, 200000 - $i)) as $index) {
                     $stock = $faker->numberBetween(0, 100);
                     $av3m = $faker->numberBetween(10, 50);
                     
@@ -53,7 +53,7 @@ class SalesAvailabilitySeeder extends Seeder
             }
             
             DB::commit();
-            $this->command->info('600,000 Sales Availabilities seeded successfully');
+            $this->command->info('200,000 Sales Availabilities seeded successfully');
         } catch (\Exception $e) {
             DB::rollback();
             throw $e;
