@@ -21,23 +21,23 @@ class DatabaseSeeder extends Seeder
     public function run(): void
     {
     $this->call([
-        // ProvinceSeeder::class,
-        // CitySeeder::class,
-        // UserSeeder::class,
-        // CategorySeeder::class,
-        // ProductSeeder::class,
-        // OutletFormSeeder::class,
-        // VisibilitySeeder::class,
-        // SurveySeeder::class,
-        // ChannelSeeder::class,
-        // PowerSkuSeeder::class
+        ProvinceSeeder::class,
+        CitySeeder::class,
+        UserSeeder::class,
+        CategorySeeder::class,
+        ProductSeeder::class,
+        OutletFormSeeder::class,
+        VisibilitySeeder::class,
+        SurveySeeder::class,
+        ChannelSeeder::class,
+        PowerSkuSeeder::class
     ]);
         $this->call([
             // OutletSeeder::class,
-            SalesActivitySeeder::class,
-            SalesAvailabilitySeeder::class,
-            SalesSurveySeeder::class,
-            SalesVisibilitySeeder::class,
+            // SalesActivitySeeder::class,
+            // SalesAvailabilitySeeder::class,
+            // SalesSurveySeeder::class,
+            // SalesVisibilitySeeder::class,
         ]);
     }
 }
