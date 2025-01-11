@@ -4,6 +4,7 @@ namespace App\Http\Controllers\Web;
 
 use App\Exports\CityExport;
 use App\Exports\ProgramExport;
+use App\Exports\SellingExport;
 use App\Exports\StockOnHandExport;
 use Carbon\Carbon;
 use App\Models\Av3m;
@@ -174,8 +175,7 @@ class DownloadController extends Controller
             $request->availability_region
         );
 
-        $data = $query->get();
-
+        $data = $query;
         return $this->handleDownload(
             StockOnHandExport::class,
             'availability',
@@ -238,7 +238,7 @@ class DownloadController extends Controller
             }
     
             return $this->handleDownload(
-                SellingDownloadExport::class,
+                SellingExport::class,
                 'selling',
                 [$startDate, $endDate, $region]
             );

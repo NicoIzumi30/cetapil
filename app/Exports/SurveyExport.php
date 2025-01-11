@@ -40,12 +40,12 @@ class SurveyExport implements FromQuery, WithHeadings, WithMapping, WithStyles
             $query = SalesActivity::query()
                 ->with([
                     'user:id,name',
-                    'outlet:id,name,TSO,code,account,tipe_outlet,channel_id,visit_day',
+                    'outlet:id,name,TSO,code,account,tipe_outlet,channel_id',
                     'outlet.channel:id,name',
                     'surveys.survey.category'
                 ])
                 ->where('status', 'SUBMITTED');
-
+                $query->limit(10);
             if ($this->startDate && $this->endDate) {
                 $query->whereBetween('checked_in', [
                     $this->startDate->startOfDay(),

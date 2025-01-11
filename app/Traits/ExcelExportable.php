@@ -108,9 +108,6 @@ trait ExcelExportable
     protected function applyDataStyles(Worksheet $sheet, string $lastColumn, int $lastRow): void
     {
         $sheet->getStyle("A2:{$lastColumn}{$lastRow}")->applyFromArray([
-            'alignment' => [
-                'vertical' => Alignment::VERTICAL_CENTER,
-            ],
             'borders' => [
                 'allBorders' => [
                     'borderStyle' => Border::BORDER_THIN,
@@ -125,7 +122,14 @@ trait ExcelExportable
      */
     protected function optimizeColumnWidths(Worksheet $sheet, string $lastColumn): void
     {
-        foreach (range('A', $lastColumn) as $column) {
+        $columnLetters = array();
+        $column = 'A';
+        while ($column !== $lastColumn) {
+            $columnLetters[] = $column;
+            $column = ++$column;
+        }
+        $columnLetters[] = $lastColumn;
+        foreach ($columnLetters as $column) {
             $sheet->getColumnDimension($column)->setAutoSize(true);
             $columnWidth = $sheet->getColumnDimension($column)->getWidth();
 
@@ -167,6 +171,7 @@ trait ExcelExportable
      */
     protected function safeMap(callable $mapper, $row, string $context): array
     {
+        
         try {
             return $mapper($row);
         } catch (\Exception $e) {

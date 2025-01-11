@@ -41,7 +41,9 @@ class VisibilityActivityExport implements FromCollection, WithHeadings, WithMapp
 
     protected function formatPhotoUrl($photoPath): string
     {
-        return !empty($photoPath) ? config('app.storage_url') . $photoPath : '';
+        if(empty($photoPath)) return '';
+        if($photoPath == null) return '';
+        return  config('app.storage_url') . $photoPath;
     }
 
     public function map($row): array
@@ -49,7 +51,6 @@ class VisibilityActivityExport implements FromCollection, WithHeadings, WithMapp
         return $this->safeMap(function ($row) {
             $data = [];
             $categories = ['CORE', 'BABY'];
-
             // Primary display data
             foreach ($categories as $category) {
                 for ($position = 1; $position <= 3; $position++) {
@@ -58,7 +59,7 @@ class VisibilityActivityExport implements FromCollection, WithHeadings, WithMapp
                         @$visibility->posmType->name ?: '',
                         @$visibility->visual_type ?: '',
                         @$visibility->condition ?: '',
-                        $this->formatPhotoUrl($visibility->display_photo),
+                        $this->formatPhotoUrl($visibility->display_photo ?? null),
                         @$visibility->shelf_width ?: '',
                         @$visibility->shelving ?: '',
                     ]);
@@ -72,7 +73,7 @@ class VisibilityActivityExport implements FromCollection, WithHeadings, WithMapp
                     $data = array_merge($data, [
                         @$visibility->visual_type ?: '',
                         @$visibility->has_secondary_display ? 'Yes' : 'No',
-                        $this->formatPhotoUrl($visibility->display_photo),
+                        $this->formatPhotoUrl($visibility->display_photo ?? null),
                     ]);
                 }
             }
@@ -84,8 +85,8 @@ class VisibilityActivityExport implements FromCollection, WithHeadings, WithMapp
                     @$visibility->competitor_brand_name ?: '',
                     @$visibility->competitor_promo_mechanism ?: '',
                     @$visibility->competitor_promo_start . "" . @$visibility->competitor_promo_end ?: '',
-                    $this->formatPhotoUrl($visibility->display_photo),
-                    $this->formatPhotoUrl($visibility->display_photo_2),
+                    $this->formatPhotoUrl($visibility->display_photo ?? null),
+                    $this->formatPhotoUrl($visibility->display_photo_2 ?? null),
                 ]);
             }
 
@@ -102,11 +103,12 @@ class VisibilityActivityExport implements FromCollection, WithHeadings, WithMapp
             return array_merge([
                 @$row->outlet->name ?: '',
                 @$row->outlet->code ?: '',
-                @$row->outlet->type ?: '',
+                @$row->outlet->tipe_outlet ?: '',
                 @$row->outlet->account ?: '',
                 @$row->outlet->channel->name ?: '',
                 @$row->user->name ?: '',
             ], $data);
+
         }, $row, 'visibility');
     }
 

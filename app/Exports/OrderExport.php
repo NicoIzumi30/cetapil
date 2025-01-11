@@ -41,12 +41,14 @@ class OrderExport implements FromQuery, WithHeadings, WithMapping, WithStyles, S
         return $this->safeQuery(function () {
             $query = SalesOrder::query()
                 ->with([
+                    'salesActivity:id,time_order,created_at,status,user_id',
                     'salesActivity.user',
                     'outlet.city.province',
                     'outlet.channel',
                     'product.category'
-                ]);
-
+                ])->where('total_items', '>', 0)->whereHas('salesActivity', function ($q) {
+                    $q->where('status', 'SUBMITTED');
+                });
             if ($this->startDate && $this->endDate) {
                 $query->whereHas('salesActivity', function ($q) {
                     $q->whereDate('created_at', '>=', $this->startDate)
@@ -79,7 +81,9 @@ class OrderExport implements FromQuery, WithHeadings, WithMapping, WithStyles, S
             'SKU Name',
             'Total Items',
             'Subtotal',
+            'Duration',
             'Created At',
+            'Ended At',
             'Week'
         ];
     }
@@ -100,7 +104,11 @@ class OrderExport implements FromQuery, WithHeadings, WithMapping, WithStyles, S
                 $order->product->sku ?? '',
                 $order->total_items ?? 0,
                 $order->subtotal ?? 0,
-                $this->formatDateTime($order->created_at),
+                $order->salesActivity ? gmdate('H:i:s', $order->salesActivity->time_order) : '-',
+                $this->formatDateTime($order->salesActivity->created_at),
+                $this->formatDateTime(  $order->salesActivity && $order->salesActivity->created_at
+                ? $order->salesActivity->created_at->addSeconds($order->salesActivity->time_order)->format('Y-m-d H:i:s')
+                : '-'),
                 $order->created_at ? $order->created_at->format('W') : '-',
             ];
         }, $order, 'order');

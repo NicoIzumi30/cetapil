@@ -37,7 +37,7 @@ class SellingExport implements FromQuery, WithHeadings, WithMapping, WithStyles,
                 'selling_products.price',
                 'selling_products.total',
                 'selling_products.created_at',
-                'selling_products.sell_id',
+                'selling_products.selling_id',
                 'selling_products.product_id'
             ])
             ->with([
@@ -46,10 +46,10 @@ class SellingExport implements FromQuery, WithHeadings, WithMapping, WithStyles,
                 'sell:id,user_id,outlet_id,checked_in,checked_out,duration',
                 'sell.user:id,name',
                 'sell.outlet:id,name,code,tipe_outlet,account,TSO,channel_id,city_id',
-                'sell.outlet.city:id,name,province_id',
+                'sell.outlet.city:id,name',
                 'sell.outlet.channel:id,name',
                 'sell.outlet.city.province:id,code'
-            ]);
+            ])->where('qty', '>', 0)->whereNull('deleted_at');
     
         if ($this->startDate && $this->endDate) {
             $query->whereHas('sell', function($q) {

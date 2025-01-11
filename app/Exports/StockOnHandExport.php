@@ -1,15 +1,20 @@
 <?php 
 namespace App\Exports;
 
+use App\Traits\ExcelExportable;
 use Maatwebsite\Excel\Concerns\FromQuery;
-use Maatwebsite\Excel\Concerns\WithHeadings;
+use Maatwebsite\Excel\Concerns\WithStyles;
 use Maatwebsite\Excel\Concerns\WithMapping;
+use Maatwebsite\Excel\Concerns\WithHeadings;
 use Maatwebsite\Excel\Concerns\WithChunkReading;
 use PhpOffice\PhpSpreadsheet\Worksheet\Worksheet;
 
-class StockOnHandExport implements FromQuery, WithHeadings, WithMapping, WithChunkReading
+class StockOnHandExport implements FromQuery, WithHeadings, WithMapping, WithChunkReading,WithStyles
 {
+    use ExcelExportable;
     protected $query;
+    protected int $chunkSize = 1000;
+
 
     public function __construct($query)
     {
@@ -61,12 +66,11 @@ class StockOnHandExport implements FromQuery, WithHeadings, WithMapping, WithChu
 
     public function chunkSize(): int
     {
-        return 2000; // Adjust chunk size based on server capacity
+        return $this->chunkSize;
     }
 
     public function styles(Worksheet $sheet)
     {
-        // Apply styles if needed
-        $sheet->getStyle('A1:Z1')->getFont()->setBold(true);
+        $this->applyDefaultStyles($sheet);
     }
 }

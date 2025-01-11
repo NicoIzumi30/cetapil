@@ -377,7 +377,7 @@ class ProductController extends Controller
         try {
             // Base query with selective loading
             $query = SalesAvailability::query()
-                ->select('id', 'product_id', 'created_at', 'status', 'outlet_id', 'stock_on_hand', 'stock_inventory', 'availability', 'av3m', 'rekomendasi')
+                ->select('id', 'product_id', 'created_at', 'status', 'outlet_id', 'stock_on_hand', 'stock_inventory', 'availability', 'av3m', 'rekomendasi','sales_activity_id')
                 ->with([
                     'product:id,sku',
                     'outlet' => function ($query) {
@@ -388,7 +388,7 @@ class ProductController extends Controller
                                 'channel:id,name'
                             ]);
                     },
-                    'salesActivity:id,sales_availability_id,status as status_ideal,time_availability'
+                    'salesActivity:id,status as status_ideal,time_availability'
                 ])
                 ->whereHas('salesActivity', function ($query) {
                     $query->where('status', 'SUBMITTED'); // Kondisi pada tabel sales_activity
@@ -417,7 +417,7 @@ class ProductController extends Controller
                     $q->where('city_id', $request->filter_area);
                 });
             }
-    
+            $query->limit(10);
             // Prepare export using chunked query
             $export = new StockOnHandExport($query);
     

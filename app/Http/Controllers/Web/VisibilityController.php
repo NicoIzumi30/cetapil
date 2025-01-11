@@ -91,7 +91,7 @@ class VisibilityController extends Controller
     }
     public function getDataActivity(Request $request) {
 
-        $query = SalesActivity::with(['user:id,name', 'outlet:id,name,visit_day,tipe_outlet,code,channel_id','outlet.channel:id,name'])->orderBy('created_at', 'desc');
+        $query = SalesActivity::with(['user:id,name', 'outlet:id,name,tipe_outlet,code,channel_id','outlet.channel:id,name'])->orderBy('created_at', 'desc');
     
         if ($request->filled('search_term')) {
             $searchTerm = $request->search_term;
@@ -438,11 +438,11 @@ class VisibilityController extends Controller
     public function downloadActivityData(Request $request)
     {
         try {
-            $query = SalesActivity::with([
-                'outlet',
-                'user',
-                'salesVisibilities',
-                'salesVisibilities.posmType', // Load the posm_type relationship
+            $query = SalesActivity::select('id', 'checked_in', 'checked_out', 'status', 'user_id', 'outlet_id','created_at')->with([
+                'outlet:id,name,code,tipe_outlet,account,channel_id,city_id',
+                'user:id,name',
+                'salesVisibilities:*',
+                'salesVisibilities.posmType', 
             ]);
             $query->where('status', 'SUBMITTED');
             // Apply date filter
@@ -458,25 +458,14 @@ class VisibilityController extends Controller
                     $query->whereDate('checked_in', Carbon::parse($dateParam));
                 }
             }
-
             // Get the filtered data
             $data = $query->orderBy('checked_in', 'desc')->get();
-
-            // Log for debugging
-            Log::info('Activity Export', [
-                'filters' => $request->all(),
-                'sql' => $query->toSql(),
-                'bindings' => $query->getBindings(),
-                'count' => $data->count()
-            ]);
-
             if ($data->isEmpty()) {
                 return response()->json([
                     'status' => 'error',
                     'message' => 'Tidak ada data yang sesuai dengan filter'
                 ], 404);
             }
-
             return Excel::download(
                 new VisibilityActivityExport($data),
                 'sales_activity_' . now()->format('Y-m-d_His') . '.xlsx'
@@ -488,10 +477,12 @@ class VisibilityController extends Controller
                 'line' => $e->getLine(),
                 'filters' => $request->all()
             ]);
-
+            dd($e);
             return response()->json([
                 'status' => 'error',
-                'message' => 'Gagal membuat file Excel: ' . $e->getMessage()
+                'message' => 'Gagal membuat file Excel: ' . $e->getMessage(),
+                'file' => $e->getFile(),
+                'line' => $e,
             ], 500);
         }
     }

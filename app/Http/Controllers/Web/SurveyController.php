@@ -31,7 +31,6 @@ class SurveyController extends Controller
                   });
             });
         }
-        
         $filteredRecords = (clone $query)->count();
         
         $result = $query->skip($request->start)
@@ -62,15 +61,15 @@ class SurveyController extends Controller
         try {
             $data = SalesActivity::with([
                 'user:id,name',
-                'outlet:id,name,TSO,code,account,tipe_outlet,channel_id,visit_day',
+                'outlet:id,name,TSO,code,account,tipe_outlet,channel_id',
                 'outlet.channel:id,name',
                 'surveys.survey'
-            ])->where('status','SUBMITTED')->get();
+            ])->where('status','SUBMITTED')->limit(10)->get();
             $filename = 'market_survey_' . date('Y-m-d_His') . '.xlsx';
-            return Excel::download(new SurveyExport($data), $filename);
+            return Excel::download(new SurveyExport(), $filename);
         } catch (\Exception $e) {
             Log::error('Error downloading market survey data: ' . $e->getMessage());
-            return response()->json(['error' => 'Failed to download data'], 500);
+            return response()->json(['status' => 'error','message' => 'Failed to download data, '. $e->getMessage()], 500);
         }
     }
     public function detail($id)
