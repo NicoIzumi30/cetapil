@@ -553,7 +553,7 @@ class RoutingController extends Controller
             DB::enableQueryLog();
             $query = SalesActivity::with([
                 'outlet' => function ($q) {
-                    $q->select('id', 'name', 'visit_day', 'city_id');
+                    $q->select('id', 'name', 'city_id');
                 },
                 'user' => function ($q) {
                     $q->select('id', 'name');

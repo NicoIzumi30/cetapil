@@ -46,7 +46,7 @@ class SurveyController extends Controller
                     'id' => (int)$item->id,
                     'sales' => htmlspecialchars($item->user->name),
                     'outlet' => htmlspecialchars($item->outlet->name),
-                    'visit_day' => htmlspecialchars(getVisitDayByNumber($item->outlet->visit_day)),
+                    'visit_day' => htmlspecialchars(getVisitDays($item->outlet_id)),
                     'checkin' => htmlspecialchars($item->checked_in),
                     'checkout' => htmlspecialchars($item->checked_out),
                     'views' => (int)$item->views_knowledge,

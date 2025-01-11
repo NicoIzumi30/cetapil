@@ -11,7 +11,7 @@ use Maatwebsite\Excel\Concerns\WithStyles;
 use Maatwebsite\Excel\Concerns\WithChunkReading;
 use PhpOffice\PhpSpreadsheet\Worksheet\Worksheet;
 
-class SellingDownloadExport implements FromQuery, WithHeadings, WithMapping, WithStyles, WithChunkReading
+class SellingExport implements FromQuery, WithHeadings, WithMapping, WithStyles, WithChunkReading
 {
     use ExcelExportable;
 
