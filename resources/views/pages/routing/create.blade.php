@@ -170,7 +170,7 @@
                             <select id="week" name="week[]" class="w-full">
                                 <option value="" selected disabled>-- Pilih Week --</option>
                                 <option value="1">Week 1</option>
-                                <option value="2">Week 2</option> 
+                                <option value="2">Week 2</option>
                                 <option value="3">Week 3</option>
                                 <option value="4">Week 4</option>
                             </select>
@@ -345,7 +345,7 @@
                                         </span>
                                     </div>
                                     <!-- <label for="gih-checkbox"
-                                                                class="flex w-[160px] cursor-pointer items-center rounded-md bg-gray-200 p-1"> -->
+                                                                    class="flex w-[160px] cursor-pointer items-center rounded-md bg-gray-200 p-1"> -->
 
                                     <!-- </label> -->
                                 </div>
@@ -412,40 +412,41 @@
                 setTimeout(() => window.location.reload(), 300);
             }
             $('#importBtn').click(function() {
-    const file = $('#file_upload')[0].files[0];
-    if (!file) {
-        return toast('error', 'Silakan pilih file terlebih dahulu', 200);
-    }
+                const file = $('#file_upload')[0].files[0];
+                if (!file) {
+                    return toast('error', 'Silakan pilih file terlebih dahulu', 200);
+                }
 
-    const formData = new FormData();
-    formData.append('excel_file', file);
-    toggleLoading(true, 'import');
+                const formData = new FormData();
+                formData.append('excel_file', file);
+                toggleLoading(true, 'import');
 
-    $.ajax({
-        url: '/routing/bulk',
-        type: 'POST',
-        data: formData,
-        processData: false,
-        contentType: false,
-        success: function(response) {
-            toggleLoading(false, 'import');
-            
-            if (response.status === 'error') {
-                toast('error', response.message, 200);
-                return;
-            }
+                $.ajax({
+                    url: '/routing/bulk',
+                    type: 'POST',
+                    data: formData,
+                    processData: false,
+                    contentType: false,
+                    success: function(response) {
+                        toggleLoading(false, 'import');
 
-            closeModal('unggah-routing-bulk');
-            toast('success', response.message, 400);
-            setTimeout(() => window.location.replace('/routing'), 4000);
-        },
-        error: function(xhr) {
-            toggleLoading(false, 'import');
-            const errorMessage = xhr.responseJSON?.message || 'Terjadi kesalahan saat import';
-            toast('error', errorMessage, 200);
-        }
-    });
-});
+                        if (response.status === 'error') {
+                            toast('error', response.message, 200);
+                            return;
+                        }
+
+                        closeModal('unggah-routing-bulk');
+                        toast('success', response.message, 400);
+                        setTimeout(() => window.location.replace('/routing'), 4000);
+                    },
+                    error: function(xhr) {
+                        toggleLoading(false, 'import');
+                        const errorMessage = xhr.responseJSON?.message ||
+                            'Terjadi kesalahan saat import';
+                        toast('error', errorMessage, 200);
+                    }
+                });
+            });
         });
     </script>
 @endpush
@@ -759,6 +760,10 @@
                     return;
                 }
 
+                const dataTransfer = new DataTransfer();
+                dataTransfer.items.add(file);
+                $('#file_upload')[0].files = dataTransfer.files;
+
                 displayFileName.classList.remove('hidden');
                 uploadHelptext.classList.add('hidden');
                 displayFileName.innerText = file.name;
@@ -775,9 +780,9 @@
         let cycleCounter = 1;
 
         function addCycle() {
-    cycleCounter++;
+            cycleCounter++;
 
-    const template = `
+            const template = `
         <div class="flex items-end gap-4" data-cycle-id="${cycleCounter}">
             <div class="flex-1">
                 <label for="visit_day_${cycleCounter}">Waktu Kunjungan</label>
@@ -806,9 +811,9 @@
         </div>
     `;
 
-    document.querySelector('#cycles-wrapper').insertAdjacentHTML('beforeend', template);
-    $(`#visit_day_${cycleCounter}, #week_${cycleCounter}`).select2();
-}
+            document.querySelector('#cycles-wrapper').insertAdjacentHTML('beforeend', template);
+            $(`#visit_day_${cycleCounter}, #week_${cycleCounter}`).select2();
+        }
 
         function removeCycle(id) {
             const cycleToRemove = document.querySelector(`[data-cycle-id="${id}"]`);
