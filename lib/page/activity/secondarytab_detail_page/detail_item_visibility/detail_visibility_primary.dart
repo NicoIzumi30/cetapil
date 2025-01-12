@@ -15,7 +15,7 @@ import '../../../../widget/back_button.dart';
 import '../../../../widget/dialog.dart';
 import '../../secondarytab_page/tambah_primary_visibility.dart';
 
-const String BASE_URL = 'https://dev.cetaphil.id/storage/';
+const String BASE_URL = 'https://cetaphil.id/storage/';
 
 class DetailVisibilityPrimary extends GetView<DetailActivityController> {
   final Map<String, dynamic> data;

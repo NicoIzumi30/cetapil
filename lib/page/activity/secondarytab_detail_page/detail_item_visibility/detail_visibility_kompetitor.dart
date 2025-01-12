@@ -14,7 +14,7 @@ import '../../../../widget/custom_switch.dart';
 import '../../../../widget/dialog.dart';
 import '../../secondarytab_page/tambah_primary_visibility.dart';
 
-const String BASE_URL = 'https://dev.cetaphil.id/storage/';
+const String BASE_URL = 'https://cetaphil.id/storage/';
 
 class DetailVisibilityKompetitor extends GetView<TambahVisibilityController> {
   final Map<String, dynamic> data;
@@ -119,7 +119,7 @@ class ClipImage extends StatelessWidget {
   });
 
   String _sanitizeUrl(String url) {
-    return "https://dev.cetaphil.id/storage${url}";
+    return "https://cetaphil.id/storage${url}";
   }
 
   @override
