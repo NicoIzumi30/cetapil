@@ -187,17 +187,24 @@ class DownloadController extends Controller
     {
         try {
             [$startDate, $endDate] = $this->processDateRange($request->survey_date);
+            $query = SalesActivity::with([
+                'user:id,name',
+                'outlet:id,name,TSO,code,account,tipe_outlet,channel_id',
+                'outlet.channel:id,name',
+                'surveys.survey'
+            ])->where('status','SUBMITTED');
     
-            Log::info('Survey download requested:', [
-                'startDate' => $startDate?->format('Y-m-d'),
-                'endDate' => $endDate?->format('Y-m-d'),
-                'region' => $request->survey_region
-            ]);
-            
+            $query = $this->applyFilters(
+                $query,
+                'checked_in',
+                $startDate,
+                $endDate,
+                $request->survey_region
+            );
             return $this->handleDownload(
                 SurveyExport::class,
-                'market_survey',
-                [$startDate, $endDate, $request->survey_region]
+                'Market_Survey',
+                [$query]
             );
     
         } catch (\Exception $e) {

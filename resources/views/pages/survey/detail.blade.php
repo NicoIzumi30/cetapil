@@ -23,7 +23,7 @@
 				<tr>
 					<td class="detail-title">Hari Kunjungan</td>
 					<td class="colon">:</td>
-					<td class="detail">{{getVisitDayByNumber($salesActivity->outlet->visit_day)}}</td>
+					<td class="detail">{{$salesActivity->day_name}}</td>
 					<td class="detail-title">Views</td>
 					<td class="colon">:</td>
 					<td class="detail">{{$salesActivity->views_knowledge}}</td>
