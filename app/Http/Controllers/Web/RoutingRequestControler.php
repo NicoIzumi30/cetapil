@@ -41,7 +41,7 @@ class RoutingRequestControler extends Controller
                     'area' => htmlspecialchars($item->longitude . ', ' . $item->latitude),
                     'visit_day' => htmlspecialchars(getVisitDays($item->id)),
                     'visit_week' => htmlspecialchars(getWeeks($item->id)),
-                    'status' => htmlspecialchars(getStatusBadge($item->status)),
+                    'status' => getStatusBadge($item->status),
                     'actions' => (view('pages.routing.action_request', [
                         'item' => $item,
                         'outletId' => $item->id
