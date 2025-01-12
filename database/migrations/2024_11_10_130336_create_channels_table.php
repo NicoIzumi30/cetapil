@@ -11,12 +11,17 @@ return new class extends Migration
      */
     public function up(): void
     {
-        Schema::create('channels', function (Blueprint $table) {
-            $table->uuid('id')->primary()->unique();
-            $table->string('name');
-            $table->timestamps();
-            $table->softDeletes();
-        });
+        if(Schema::hasTable('channels')) {
+            return;
+        }else{
+            Schema::create('channels', function (Blueprint $table) {
+                $table->uuid('id')->primary()->unique();
+                $table->string('name');
+                $table->timestamps();
+                $table->softDeletes();
+            });
+        }
+        
     }
 
     /**

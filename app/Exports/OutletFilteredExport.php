@@ -29,46 +29,44 @@ class OutletFilteredExport implements FromCollection, WithHeadings, WithMapping,
     public function headings(): array
     {
         return [
-            'Nama Outlet',
             'Nama Sales',
+            'Kota',
+            'Nama Outlet',
             'Kode Outlet',
-            'Kategori Outlet',
-            'Hari Kunjungan',
             'Week',
+            'Hari',
+            'Kategori Outlet',
+            'Tipe Outlet',
             'Channel',
             'Account',
             'Distributor',
             'TSO',
             'KAM',
-            'Kota',
             'Alamat',
             'Longitude',
             'Latitude',
-            'Created At',
-            'Updated At'
         ];
     }
 
     public function map($outlet): array
     {
         return [
+            $outlet->user->name ?? '-',
+            $outlet->city->name ?? '-',
             $outlet->name,
-            $outlet->user->name,
             $outlet->code,
-            $outlet->category,
-            getVisitDays($outlet->id),
             getWeeks($outlet->id),
+            getVisitDays($outlet->id),
+            $outlet->category,
+            $outlet->tipe_outlet,
             $outlet->channel->name ?? '',
             $outlet->account,
             $outlet->distributor,
             $outlet->TSO,
             $outlet->KAM,
-            $outlet->city->name ?? '',
             $outlet->address,
             $outlet->longitude,
             $outlet->latitude,
-            $outlet->created_at->format('Y-m-d H:i:s'),
-            $outlet->updated_at->format('Y-m-d H:i:s')
         ];
     }
 
@@ -80,7 +78,6 @@ class OutletFilteredExport implements FromCollection, WithHeadings, WithMapping,
         // Apply styling to entire worksheet (headers and content)
         $sheet->getStyle("A1:{$lastColumn}{$lastRow}")->applyFromArray([
             'alignment' => [
-                'horizontal' => Alignment::HORIZONTAL_CENTER,
                 'vertical' => Alignment::VERTICAL_CENTER,
                 'wrapText' => true,
             ],

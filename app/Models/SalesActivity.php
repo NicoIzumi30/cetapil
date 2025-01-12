@@ -10,14 +10,23 @@ use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\HasMany;
 use Illuminate\Database\Eloquent\SoftDeletes;
-
+use Carbon\Carbon;
 class SalesActivity extends Model
 {
     use HasFactory, HasUuids, SoftDeletes, Excludable;
 
     protected $guarded = [];
-
-
+    public function getDayNameAttribute()
+    {
+        $checkedIn = Carbon::parse($this->checked_in); 
+        return $checkedIn->locale('id')->isoFormat('dddd'); // Bahasa Indonesia
+    }
+    public function getWeekAttribute()
+    {
+        $checkedIn = Carbon::parse($this->checked_in); 
+        $weekOfMonth = $checkedIn->weekOfMonth; // Mengambil minggu ke-berapa
+        return $weekOfMonth > 4 ? $weekOfMonth % 4 : $weekOfMonth; // Ulang ke minggu ke-1 setelah minggu ke-4
+    }
     // app/Models/SalesActivity.php
 
     public function user()

@@ -28,8 +28,7 @@
             <div>
                 <label for="selling-region">Filter By Regional: </label>
                 <select id="selling-region" name="selling_region" class="w-full">
-                    <option value="" selected disabled>-- Pilih Regional --</option>
-                    <option value="all">Semua Regional</option>
+                    <option value="all" selected>Semua Regional</option>
                     @foreach ($provinces as $province)
                         <option value="{{ $province->code }}">{{ $province->name }}</option>
                     @endforeach
@@ -62,8 +61,7 @@
             <div>
                 <label for="orders-region">Filter By Regional: </label>
                 <select id="orders-region" name="orders-region" class="w-full">
-                    <option value="" selected disabled>-- Pilih Regional --</option>
-                    <option value="all">Semua Regional</option>
+                    <option value="all" selected>Semua Regional</option>
                     @foreach ($provinces as $province)
                         <option value="{{ $province->code }}">{{ $province->name }}</option>
                     @endforeach

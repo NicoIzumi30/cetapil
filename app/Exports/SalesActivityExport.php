@@ -59,19 +59,7 @@ class SalesActivityExport implements FromCollection, WithHeadings, WithMapping, 
         }
     }
 
-    protected function getVisitDay($day)
-    {
-        $days = [
-            '1' => 'Senin',
-            '2' => 'Selasa', 
-            '3' => 'Rabu',
-            '4' => 'Kamis',
-            '5' => 'Jumat',
-            '6' => 'Sabtu',
-            '7' => 'Minggu'
-        ];
-        return $days[$day] ?? '';
-    }
+
 
     public function map($row): array
     {
@@ -81,8 +69,8 @@ class SalesActivityExport implements FromCollection, WithHeadings, WithMapping, 
             return [
                 optional($row->user)->name ?? '',
                 optional($row->outlet)->name ?? '',
-                $routing ? $this->getVisitDay($routing->visit_day) : '',
-                $routing ? "Week {$routing->week}" : '',
+                $row->checked_in ? $row->day_name : '',
+                $row->checked_in ? $row->week : '',
                 $row->checked_in ? Carbon::parse($row->checked_in)->format('Y-m-d H:i:s') : '',
                 $row->checked_out ? Carbon::parse($row->checked_out)->format('Y-m-d H:i:s') : '',
                 $row->views_knowledge ?? '0',

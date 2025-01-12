@@ -50,17 +50,19 @@ class RoutingDownloadExport implements FromCollection, WithHeadings, WithMapping
     {
         return $this->safeMap(function ($outlet) {
             return [
+                $outlet->user->name ?? '-',
+                $outlet->city->name ?? '-',
                 $outlet->name,
-                $outlet->user->name ?? 'N/A',
-                $outlet->category,
-                getVisitDays($outlet->id),
+                $outlet->code,
                 getWeeks($outlet->id),
+                getVisitDays($outlet->id),
+                $outlet->category,
+                $outlet->tipe_outlet,
                 $outlet->channel->name ?? '',
                 $outlet->account,
                 $outlet->distributor,
                 $outlet->TSO,
                 $outlet->KAM,
-                $outlet->city->name ?? 'N/A',
                 $outlet->address,
                 $outlet->longitude,
                 $outlet->latitude,
@@ -71,17 +73,19 @@ class RoutingDownloadExport implements FromCollection, WithHeadings, WithMapping
     public function headings(): array
     {
         return [
-            'Nama Outlet',
             'Nama Sales',
-            'Kategori Outlet',
-            'Hari Kunjungan',
+            'Kota',
+            'Nama Outlet',
+            'Kode Outlet',
             'Week',
+            'Hari',
+            'Kategori Outlet',
+            'Tipe Outlet',
             'Channel',
             'Account',
             'Distributor',
             'TSO',
             'KAM',
-            'Kota',
             'Alamat',
             'Longitude',
             'Latitude',
@@ -95,17 +99,17 @@ class RoutingDownloadExport implements FromCollection, WithHeadings, WithMapping
         $lastRow = $sheet->getHighestRow();
 
         // Specific column alignments
-        $sheet->getStyle("B2:B{$lastRow}")
-            ->getAlignment()
-            ->setHorizontal(Alignment::HORIZONTAL_CENTER);
+        // $sheet->getStyle("B2:B{$lastRow}")
+        //     ->getAlignment()
+        //     ->setHorizontal(Alignment::HORIZONTAL_CENTER);
         
-        $sheet->getStyle("C2:C{$lastRow}")
-            ->getAlignment()
-            ->setHorizontal(Alignment::HORIZONTAL_CENTER);
+        // $sheet->getStyle("C2:C{$lastRow}")
+        //     ->getAlignment()
+        //     ->setHorizontal(Alignment::HORIZONTAL_CENTER);
         
-        $sheet->getStyle("E2:O{$lastRow}")
-            ->getAlignment()
-            ->setHorizontal(Alignment::HORIZONTAL_CENTER);
+        // $sheet->getStyle("E2:O{$lastRow}")
+        //     ->getAlignment()
+        //     ->setHorizontal(Alignment::HORIZONTAL_CENTER);
 
         return [
             1 => ['font' => ['bold' => true]],

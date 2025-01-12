@@ -4,6 +4,7 @@ namespace App\Http\Controllers\Web;
 
 use App\Exports\CityExport;
 use App\Exports\ProgramExport;
+use App\Exports\SellingExport;
 use App\Exports\StockOnHandExport;
 use Carbon\Carbon;
 use App\Models\Av3m;
@@ -205,8 +206,7 @@ class DownloadController extends Controller
             $request->availability_region
         );
 
-        $data = $query->get();
-
+        $data = $query;
         return $this->handleDownload(
             StockOnHandExport::class,
             'availability',
@@ -218,17 +218,24 @@ class DownloadController extends Controller
     {
         try {
             [$startDate, $endDate] = $this->processDateRange($request->survey_date);
+            $query = SalesActivity::with([
+                'user:id,name',
+                'outlet:id,name,TSO,code,account,tipe_outlet,channel_id',
+                'outlet.channel:id,name',
+                'surveys.survey'
+            ])->where('status','SUBMITTED');
     
-            Log::info('Survey download requested:', [
-                'startDate' => $startDate?->format('Y-m-d'),
-                'endDate' => $endDate?->format('Y-m-d'),
-                'region' => $request->survey_region
-            ]);
-            
+            $query = $this->applyFilters(
+                $query,
+                'checked_in',
+                $startDate,
+                $endDate,
+                $request->survey_region
+            );
             return $this->handleDownload(
                 SurveyExport::class,
-                'market_survey',
-                [$startDate, $endDate, $request->survey_region]
+                'Market_Survey',
+                [$query]
             );
     
         } catch (\Exception $e) {
@@ -269,7 +276,7 @@ class DownloadController extends Controller
             }
     
             return $this->handleDownload(
-                SellingDownloadExport::class,
+                SellingExport::class,
                 'selling',
                 [$startDate, $endDate, $region]
             );

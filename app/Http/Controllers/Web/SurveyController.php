@@ -31,7 +31,6 @@ class SurveyController extends Controller
                   });
             });
         }
-        
         $filteredRecords = (clone $query)->count();
         
         $result = $query->skip($request->start)
@@ -46,7 +45,7 @@ class SurveyController extends Controller
                     'id' => (int)$item->id,
                     'sales' => htmlspecialchars($item->user->name),
                     'outlet' => htmlspecialchars($item->outlet->name),
-                    'visit_day' => htmlspecialchars(getVisitDayByNumber($item->outlet->visit_day)),
+                    'visit_day' => htmlspecialchars($item->day_name),
                     'checkin' => htmlspecialchars($item->checked_in),
                     'checkout' => htmlspecialchars($item->checked_out),
                     'views' => (int)$item->views_knowledge,
@@ -60,22 +59,22 @@ class SurveyController extends Controller
     public function downloadData()
     {
         try {
-            $data = SalesActivity::with([
+            $query = SalesActivity::with([
                 'user:id,name',
-                'outlet:id,name,TSO,code,account,tipe_outlet,channel_id,visit_day',
+                'outlet:id,name,TSO,code,account,tipe_outlet,channel_id',
                 'outlet.channel:id,name',
                 'surveys.survey'
-            ])->where('status','SUBMITTED')->get();
+            ])->where('status','SUBMITTED');
             $filename = 'market_survey_' . date('Y-m-d_His') . '.xlsx';
-            return Excel::download(new SurveyExport($data), $filename);
+            return Excel::download(new SurveyExport($query), $filename);
         } catch (\Exception $e) {
             Log::error('Error downloading market survey data: ' . $e->getMessage());
-            return response()->json(['error' => 'Failed to download data'], 500);
+            return response()->json(['status' => 'error','message' => 'Failed to download data, '. $e->getMessage()], 500);
         }
     }
     public function detail($id)
     {
-        $salesActivity = SalesActivity::with(['user:id,name', 'outlet:id,name,visit_day'])->find($id);
+        $salesActivity = SalesActivity::with(['user:id,name', 'outlet:id,name'])->find($id);
         
         // Fetch surveys with related survey question and its category
         $surveys = SalesSurvey::with(['survey.category'])
