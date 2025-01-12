@@ -143,6 +143,41 @@
         </x-button.info>
     </x-pages.download.download-card>
 
+    <x-pages.download.download-card iconName="fluent_box_20_filled">
+    <x-slot:cardTitle>
+        Visibility
+    </x-slot:cardTitle>
+
+    <div class="mb-6">
+        <div>
+            <label for="visibility-start-date">Tanggal Mulai:</label>
+            <input id="visibility-start-date" class="form-control" type="text" name="visibility-start-date"
+                placeholder="DD/MM/YYYY" aria-describedby="name" />
+        </div>
+        <div>
+            <label for="visibility-end-date">Tanggal Selesai:</label>
+            <input id="visibility-end-date" class="form-control" type="text" name="visibility-end-date"
+                placeholder="DD/MM/YYYY" aria-describedby="name" />
+        </div>
+        <div>
+            <label for="visibility-region">Filter By Regional: </label>
+            <select id="visibility-region" name="visibility_region" class="w-full">
+                <option value="" selected disabled>-- Pilih Regional --</option>
+                <option value="all">Semua Regional</option>
+                @foreach ($provinces as $province)
+                    <option value="{{ $province->code }}">{{ $province->name }}</option>
+                @endforeach
+            </select>
+        </div>
+    </div>
+
+    <x-button.info class="w-full" data-visibility-download>
+        <span id="downloadBtnText">Download</span>
+        <span id="downloadBtnLoading" class="hidden">Downloading...</span>
+    </x-button.info>
+</x-pages.download.download-card>
+
+
     <x-pages.download.download-card iconName="fluent_clipboard">
         <x-slot:cardTitle>
             Activity
@@ -312,12 +347,15 @@ $(document).ready(function() {
             {
                 id: 'activity',
                 route: '{{ route("download.activity") }}',
-                requireDateRange: true,  // Add this flag
+                requireDateRange: true, 
                 dateParam: 'activity_date' 
             },
             {
                 id: 'visibility',
-                route: '{{ route("download.visibility") }}'
+                route: '{{ route("download.visibility") }}',
+                requireRegion: true,
+                regionParam: 'visibility_region',
+                dateParam: 'visibility_date' 
             },
             {
                 id: 'availability',

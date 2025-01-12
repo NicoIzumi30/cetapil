@@ -2,16 +2,21 @@
 
 namespace Database\Seeders\MainData;
 
-use Illuminate\Database\Seeder;
-use Illuminate\Support\Facades\DB;
-use Illuminate\Support\Str;
+use App\Models\SalesAvailability;
 use Carbon\Carbon;
 use Faker\Factory as Faker;
+use Illuminate\Support\Str;
+use Illuminate\Database\Seeder;
+use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Schema;
 
 class SalesAvailabilitySeeder extends Seeder
 {
     public function run()
     {
+        Schema::disableForeignKeyConstraints();
+        SalesAvailability::truncate();
+        Schema::enableForeignKeyConstraints();
         $faker = Faker::create('id_ID');
         
         $salesActivityIds = DB::table('sales_activities')->pluck('id')->toArray();

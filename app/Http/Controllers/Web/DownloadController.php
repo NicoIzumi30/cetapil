@@ -24,9 +24,10 @@ use Maatwebsite\Excel\Facades\Excel;
 use App\Exports\RoutingDownloadExport;
 use App\Exports\SellingDownloadExport;
 use App\Exports\PenggunaDownloadExport;
-use App\Exports\VisibilityActivityExport;
 use App\Traits\Downloadable;
 use App\Exports\SalesActivityExport;
+use App\Exports\VisibilityActivityExport;
+
 
 
 class DownloadController extends Controller
@@ -126,33 +127,63 @@ class DownloadController extends Controller
            ], 500);
        }
    }
-    public function downloadVisibility(Request $request) 
-    {
-        [$startDate, $endDate] = $this->processDateRange($request->visibility_date);
-
+   public function downloadVisibility(Request $request) 
+{
+    try {
+        // Initialize query with proper joins and eager loading
         $query = SalesActivity::with([
-            'outlet',
-            'user',
-            'salesVisibilities',
-            'salesVisibilities.posmType'
+            'outlet' => function($q) {
+                $q->select('id', 'name', 'code', 'tipe_outlet', 'account', 'city_id', 'channel_id')
+                    ->with(['channel' => function($q) {
+                        $q->select('id', 'name');
+                    }]);
+            },
+            'user' => function($q) {
+                $q->select('id', 'name');
+            },
+            'salesVisibilities' => function($q) {
+                $q->with(['displays', 'competitors']);
+            }
         ])->where('status', 'SUBMITTED');
 
-        $query = $this->applyFilters(
-            $query,
-            'checked_in',
-            $startDate,
-            $endDate,
-            $request->visibility_region
-        );
+        // Process date range if provided
+        if ($request->has('visibility_date') && !empty($request->visibility_date)) {
+            [$startDate, $endDate] = $this->processDateRange($request->visibility_date);
+            
+            $query->whereBetween('checked_in', [
+                Carbon::parse($startDate)->startOfDay(),
+                Carbon::parse($endDate)->endOfDay()
+            ]);
+        }
+
+        // Apply region filter if provided
+        if ($request->has('visibility_region') && $request->visibility_region !== 'all') {
+            $query->whereHas('outlet', function($q) use ($request) {
+                $q->whereHas('city', function($q) use ($request) {
+                    $q->where('province_code', $request->visibility_region);
+                });
+            });
+        }
 
         $data = $query->get();
 
         return $this->handleDownload(
             VisibilityActivityExport::class,
             'visibility_activity',
-            [$data]
+            [$startDate, $endDate, $request->visibility_region]
         );
+
+    } catch (\Exception $e) {
+        Log::error('Visibility download failed', [
+            'error' => $e->getMessage(),
+            'trace' => $e->getTraceAsString()
+        ]);
+
+        return response()->json([
+            'message' => 'Terjadi kesalahan saat mengunduh data visibility: ' . $e->getMessage()
+        ], 500);
     }
+}
     public function downloadAvailability(Request $request)
     {
         [$startDate, $endDate] = $this->processDateRange($request->availability_date);
