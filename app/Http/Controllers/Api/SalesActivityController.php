@@ -377,4 +377,45 @@ class SalesActivityController extends Controller
             ], Response::HTTP_INTERNAL_SERVER_ERROR);
         }
     }
+    public function cancelActivity($id)
+    {
+        $activity = SalesActivity::find($id);
+        if(!$activity){
+            return response()->json([
+               'status' => 'ERROR',
+               'message' => 'Activity not found'
+            ], Response::HTTP_NOT_FOUND);
+        }
+        if ($activity->user_id !== $this->getAuthUserId()) {
+            return $this->failedResponse(
+                'You are not authorized to cancel this activity',
+                Response::HTTP_FORBIDDEN
+            );
+        }
+        if ($activity->status === 'SUBMITTED') {
+            return $this->failedResponse(
+                'This activity has already been submitted and cannot be canceled',
+                Response::HTTP_BAD_REQUEST
+            );
+        }
+        DB::beginTransaction();
+        try {
+            SalesAvailability::where('sales_activity_id', $id)->forceDelete();
+            SalesVisibility::where('sales_activity_id', $id)->forceDelete();
+            SalesSurvey::where('sales_activity_id', $id)->forceDelete();
+            SalesOrder::where('sales_activity_id', $id)->forceDelete();
+            $activity->forceDelete();
+            DB::commit();
+            return response()->json([
+                'status' => 'OK',
+                'message' => 'Activity cancel successfully',
+            ], Response::HTTP_OK);
+        } catch (\Exception $e) {
+            DB::rollBack();
+            return response()->json([
+                'status' => 'ERROR',
+                'message' => 'Failed cancel activity : ' . $e->getMessage()
+            ], Response::HTTP_INTERNAL_SERVER_ERROR);
+        }
+    }
 }
