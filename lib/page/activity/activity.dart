@@ -108,6 +108,7 @@ class ActivityPage extends GetView<ActivityController> {
                                           Get.find<TambahActivityController>();
                                       final outlet_id = activity.outlet!.id;
                                       tambahActivityController.selectedTab.value = 0;
+                                      tambahActivityController.clearAllDraftItems();
                                       tambahActivityController.setOutletId(outlet_id!);
                                       tambahActivityController.setDetailOutlet(activity);
                                       tambahActivityController.firstInitializeData();

@@ -80,9 +80,8 @@ class RoutingController extends GetxController {
     } on TimeoutException catch (e) {
       print("error $e");
       CustomAlerts.dismissLoading();
-        _handleError('Gagal mengambil data: Periksa koneksi Anda dan coba lagi');
-    }
-    finally {
+      _handleError('Gagal mengambil data: Periksa koneksi Anda dan coba lagi');
+    } finally {
       isSyncing.value = false;
       CustomAlerts.dismissLoading();
     }
@@ -99,6 +98,47 @@ class RoutingController extends GetxController {
       throw 'Failed to get routing data from server';
     }
     return response;
+  }
+
+  Future<bool> cancelActivity(String activityId) async {
+    try {
+      isLoading.value = true;
+
+      // Show loading dialog
+      if (Get.context != null && Get.context!.mounted) {
+        CustomAlerts.showLoading(Get.context!, "Cancel Activity", "Canceling activity...");
+      }
+
+      final response = await Api.cancelActivity(activityId);
+
+      // Dismiss loading dialog
+      if (Get.context != null && Get.context!.mounted) {
+        CustomAlerts.dismissLoading();
+      }
+
+      if (response.status == "OK") {
+        // Refresh routing data after successful cancellation
+        await _clearExistingData();
+        final responses = await _fetchRoutingData();
+        await _processRoutingData(responses);
+
+        if (Get.context != null && Get.context!.mounted) {
+          CustomAlerts.showSuccess(Get.context!, "Success", "Activity cancelled successfully");
+        }
+        return true;
+      } else {
+        _handleError(response.message ?? "Failed to cancel activity");
+        return false;
+      }
+    } catch (e) {
+      if (Get.context != null && Get.context!.mounted) {
+        CustomAlerts.dismissLoading();
+      }
+      _handleError('Failed to cancel activity: $e');
+      return false;
+    } finally {
+      isLoading.value = false;
+    }
   }
 
   Future<void> _processRoutingData(ListRoutingResponse response) async {
@@ -139,7 +179,7 @@ class RoutingController extends GetxController {
   void _addSalesActivityData(Map<String, dynamic> data, Data result) {
     if (result.salesActivity != null) {
       data.addAll({
-        'activities_id': _uuid.v4(),
+        'activities_id': result.salesActivity?.id ?? "",
         'outlet_id': result.id,
         'user_id': result.user?.id ?? "",
         'checked_in': result.salesActivity?.checkedIn,

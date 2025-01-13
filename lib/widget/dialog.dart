@@ -471,6 +471,7 @@ class Alerts {
       ),
     );
   }
+
   static Future<bool?> showSubmitCheckInDialog(
     BuildContext context, {
     bool useGetBack = true,
@@ -577,6 +578,128 @@ class Alerts {
                               child: Text(
                                 'Kirim',
                                 style: TextStyle(color: AppColors.primary),
+                              ),
+                            ),
+                          ),
+                        ),
+                      ),
+                    ],
+                  );
+                },
+              ),
+            ],
+          ),
+        ),
+      ),
+    );
+  }
+
+  static Future<bool?> showCancelActivityDialog(
+    BuildContext context, {
+    bool useGetBack = true,
+    Function? onContinue,
+  }) async {
+    return showDialog<bool>(
+      context: context,
+      builder: (dialogContext) => Dialog(
+        shape: RoundedRectangleBorder(
+          borderRadius: BorderRadius.circular(20),
+        ),
+        child: Padding(
+          padding: const EdgeInsets.all(20),
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              Text(
+                'BATALKAN AKTIVITAS',
+                style: TextStyle(
+                  fontSize: 24,
+                  fontWeight: FontWeight.bold,
+                ),
+              ),
+              SizedBox(height: 20),
+              Text(
+                'Apakah anda yakin ingin membatalkan aktivitas ini?',
+                style: TextStyle(fontSize: 13),
+                textAlign: TextAlign.center,
+              ),
+              Text(
+                'Aktivitas yang sudah dibatalkan tidak dapat dikembalikan',
+                style: TextStyle(fontSize: 13),
+                textAlign: TextAlign.center,
+              ),
+              SizedBox(height: 24),
+              LayoutBuilder(
+                builder: (context, constraints) {
+                  final horizontalPadding = (constraints.maxWidth < 300)
+                      ? 15.0
+                      : (constraints.maxWidth < 400)
+                          ? 20.0
+                          : 30.0;
+
+                  return Row(
+                    mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+                    children: [
+                      Flexible(
+                        child: SizedBox(
+                          width: constraints.maxWidth * 0.4,
+                          child: ElevatedButton(
+                            style: ElevatedButton.styleFrom(
+                              backgroundColor: AppColors.primary,
+                              padding: EdgeInsets.symmetric(
+                                horizontal: horizontalPadding,
+                                vertical: 12,
+                              ),
+                              shape: RoundedRectangleBorder(
+                                borderRadius: BorderRadius.circular(10),
+                              ),
+                            ),
+                            onPressed: () {
+                              if (useGetBack) {
+                                Get.back(result: false);
+                              } else {
+                                Navigator.pop(dialogContext, false);
+                              }
+                            },
+                            child: FittedBox(
+                              fit: BoxFit.scaleDown,
+                              child: Text(
+                                'Kembali',
+                                style: TextStyle(color: Colors.white),
+                              ),
+                            ),
+                          ),
+                        ),
+                      ),
+                      SizedBox(width: 8),
+                      Flexible(
+                        child: SizedBox(
+                          width: constraints.maxWidth * 0.4,
+                          child: ElevatedButton(
+                            style: ElevatedButton.styleFrom(
+                              backgroundColor: Colors.white,
+                              padding: EdgeInsets.symmetric(
+                                horizontal: horizontalPadding,
+                                vertical: 12,
+                              ),
+                              shape: RoundedRectangleBorder(
+                                borderRadius: BorderRadius.circular(10),
+                                side: BorderSide(color: Colors.red, width: 1),
+                              ),
+                            ),
+                            onPressed: () {
+                              onContinue?.call();
+                              if (useGetBack) {
+                                Get.back(result: true);
+                              } else {
+                                Navigator.pop(dialogContext, true);
+                              }
+                            },
+                            child: FittedBox(
+                              fit: BoxFit.scaleDown,
+                              child: Text(
+                                'Batalkan',
+                                style: TextStyle(color: Colors.red),
                               ),
                             ),
                           ),

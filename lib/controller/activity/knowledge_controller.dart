@@ -36,8 +36,11 @@ class KnowledgeController extends GetxController {
     ever(activityController.selectedTab, (tab) {
       if (tab != 2) {
         // Use the correct method - pause() instead of pauseVideo()
-        if (_cachedVideoController.videoController.value.isPlaying) {
-          _cachedVideoController.videoController.pause();
+        if(_cachedVideoController.videoController == null) {
+          return;
+        }
+        if (_cachedVideoController.videoController!.value.isPlaying) {
+          _cachedVideoController.videoController?.pause();
         }
       }
     });
@@ -57,8 +60,8 @@ class KnowledgeController extends GetxController {
   @override
   void onClose() {
     if (Get.isRegistered<CachedVideoController>()) {
-      if (_cachedVideoController.videoController.value.isPlaying) {
-        _cachedVideoController.videoController.pause();
+      if (_cachedVideoController.videoController!.value.isPlaying) {
+        _cachedVideoController.videoController?.pause();
       }
     }
     super.onClose();

@@ -100,7 +100,10 @@ class CachedVideoController extends GetxController {
   static const _cacheKey = 'video_cache';
   final _cacheManager = DefaultCacheManager();
 
-  late VideoPlayerController videoController;
+  // Make controller nullable instead of late
+  VideoPlayerController? _videoController;
+  VideoPlayerController? get videoController => _videoController;
+
   final isInitialized = false.obs;
   final isPlaying = false.obs;
   final duration = const Duration().obs;
@@ -125,31 +128,47 @@ class CachedVideoController extends GetxController {
     try {
       isLoading.value = true;
       hasError.value = false;
+      errorMessage.value = '';
 
       final url = 'https://dev-cetaphil.id/storage'; // Replace with actual URL
 
       // Check cache first
-      final fileInfo = await _cacheManager.getFileFromCache(_cacheKey);
-      if (fileInfo != null && await fileInfo.file.exists()) {
-        _cachedVideoFile = fileInfo.file;
-      } else {
-        final downloadedFile = await _cacheManager.downloadFile(
-          url,
-          key: _cacheKey,
-          force: true,
-        );
-        _cachedVideoFile = downloadedFile.file;
+      try {
+        final fileInfo = await _cacheManager.getFileFromCache(_cacheKey);
+        if (fileInfo != null && await fileInfo.file.exists()) {
+          _cachedVideoFile = fileInfo.file;
+        } else {
+          final downloadedFile = await _cacheManager.downloadFile(
+            url,
+            key: _cacheKey,
+            force: true,
+          );
+          _cachedVideoFile = downloadedFile.file;
+        }
+      } catch (e) {
+        throw Exception('Failed to load video from cache: ${e.toString()}');
+      }
+
+      if (_cachedVideoFile == null) {
+        throw Exception('Failed to load video file');
       }
 
       await _cleanup();
-      videoController = VideoPlayerController.file(_cachedVideoFile!);
-      await videoController.initialize();
 
-      if (videoController.value.isInitialized) {
-        duration.value = videoController.value.duration;
-        videoController.addListener(_videoListener);
+      try {
+        _videoController = VideoPlayerController.file(_cachedVideoFile!);
+        await _videoController!.initialize();
+      } catch (e) {
+        throw Exception('Failed to initialize video player: ${e.toString()}');
+      }
+
+      if (_videoController?.value.isInitialized ?? false) {
+        duration.value = _videoController!.value.duration;
+        _videoController!.addListener(_videoListener);
         _startPositionTimer();
         isInitialized.value = true;
+      } else {
+        throw Exception('Video player initialization failed');
       }
     } catch (e) {
       hasError.value = true;
@@ -162,8 +181,10 @@ class CachedVideoController extends GetxController {
   }
 
   void _videoListener() {
-    isPlaying.value = videoController.value.isPlaying;
-    position.value = videoController.value.position;
+    if (_videoController == null) return;
+
+    isPlaying.value = _videoController!.value.isPlaying;
+    position.value = _videoController!.value.position;
 
     if (isPlaying.value && showControls.value) {
       _hideControlsTimer?.cancel();
@@ -174,6 +195,8 @@ class CachedVideoController extends GetxController {
   }
 
   void toggleControls() {
+    if (!isInitialized.value) return;
+
     showControls.value = !showControls.value;
     _hideControlsTimer?.cancel();
     if (showControls.value && isPlaying.value) {
@@ -186,21 +209,21 @@ class CachedVideoController extends GetxController {
   void _startPositionTimer() {
     _positionTimer?.cancel();
     _positionTimer = Timer.periodic(const Duration(milliseconds: 200), (timer) {
-      if (isInitialized.value && !videoController.value.isCompleted) {
-        position.value = videoController.value.position;
+      if (isInitialized.value && !(_videoController?.value.isCompleted ?? true)) {
+        position.value = _videoController!.value.position;
       }
     });
   }
 
   void playPause() {
-    if (!isInitialized.value) return;
+    if (!isInitialized.value || _videoController == null) return;
 
-    if (videoController.value.isPlaying) {
-      videoController.pause();
+    if (_videoController!.value.isPlaying) {
+      _videoController!.pause();
       showControls.value = true;
       _hideControlsTimer?.cancel();
     } else {
-      videoController.play();
+      _videoController!.play();
       _hideControlsTimer?.cancel();
       _hideControlsTimer = Timer(const Duration(seconds: 3), () {
         showControls.value = false;
@@ -209,16 +232,17 @@ class CachedVideoController extends GetxController {
   }
 
   void seekTo(Duration position) {
-    if (!isInitialized.value) return;
-    videoController.seekTo(position);
+    if (!isInitialized.value || _videoController == null) return;
+    _videoController!.seekTo(position);
     this.position.value = position;
   }
 
   Future<void> _cleanup() async {
     _positionTimer?.cancel();
     _hideControlsTimer?.cancel();
-    if (isInitialized.value) {
-      await videoController.dispose();
+    if (_videoController != null) {
+      await _videoController!.dispose();
+      _videoController = null;
       isInitialized.value = false;
       isPlaying.value = false;
     }

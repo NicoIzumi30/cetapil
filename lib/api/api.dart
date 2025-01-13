@@ -202,6 +202,26 @@ class Api {
     throw SubmitCheckinRouting.fromJson(jsonDecode(response.body)).message!;
   }
 
+  static Future<SubmitCheckinRouting> cancelActivity(String activityId) async {
+    var url = "$baseUrl/api/activity/$activityId/cancel";
+    var token = await storage.read('token');
+
+    var response = await http.get(
+      Uri.parse(url),
+      headers: {
+        'Content-type': 'application/json',
+        'Authorization': 'Bearer $token',
+      },
+    );
+
+    if (response.statusCode == 200) {
+      return SubmitCheckinRouting.fromJson(jsonDecode(response.body));
+    }
+
+    final errorResponse = SubmitCheckinRouting.fromJson(jsonDecode(response.body));
+    throw errorResponse.message ?? "Failed to cancel activity";
+  }
+
   static Future<SubmitOutletResponse> submitOutlet(
       Map<String, dynamic> data, List<FormOutletResponse> question) async {
     var url = "$baseUrl/api/outlet/forms/create-with-forms";
@@ -544,7 +564,9 @@ class Api {
     }
 
     ///Order Section
+    print("orderList.length ${orderList.length}");
     for (var i = 0; i < orderList.length; i++) {
+    print("orderList.length ${orderList.length}");
       request.fields["order[$i][product_id]"] = orderList[i]["id"]?.toString() ?? '0';
       request.fields["order[$i][total_items]"] = orderList[i]["jumlah"]?.toString() ?? '0';
       request.fields["order[$i][subtotal]"] = orderList[i]["harga"]?.toString() ?? '0';
@@ -553,7 +575,6 @@ class Api {
     var response = await request.send();
     var responseJson = await http.Response.fromStream(response);
 
-    print("statuscode ${response.statusCode}");
     if (response.statusCode == 200) {
       return SubmitActivityResponse.fromJson(jsonDecode(responseJson.body));
     } else {

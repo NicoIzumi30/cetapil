@@ -6,30 +6,32 @@ import 'package:flutter_pdfview/flutter_pdfview.dart';
 import 'package:get/get.dart';
 import 'package:video_player/video_player.dart';
 
+import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
+import 'package:flutter_pdfview/flutter_pdfview.dart';
+import 'package:get/get.dart';
+import 'package:video_player/video_player.dart';
+
 class KnowledgePage extends GetView<KnowledgeController> {
   @override
   Widget build(BuildContext context) {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        // Video Section
         _buildSectionHeader('Video'),
         _buildVideoCard(),
-
-        // PDF Section
         _buildSectionHeader('PDF'),
         _buildPdfCard(),
       ],
     );
   }
 
-  // Helper method for section headers
   Widget _buildSectionHeader(String title) {
     return Padding(
       padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
       child: Text(
         title,
-        style: TextStyle(
+        style: const TextStyle(
           fontSize: 18,
           fontWeight: FontWeight.bold,
           color: Colors.blue,
@@ -38,7 +40,6 @@ class KnowledgePage extends GetView<KnowledgeController> {
     );
   }
 
-  // Video Card widget using video_player
   Widget _buildVideoCard() {
     return Card(
       margin: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
@@ -52,13 +53,25 @@ class KnowledgePage extends GetView<KnowledgeController> {
           if (controller.videoPath.value == null || controller.videoPath.value!.isEmpty) {
             return _buildNoMediaAvailableWidget('No video available', Icons.videocam_off);
           }
-          return CachedVideoPlayerWidget();
+          return GetBuilder<CachedVideoController>(
+            init: KnowledgeController.cachedVideoController,
+            builder: (videoController) {
+              if (videoController.hasError.value) {
+                return _buildErrorWidget(videoController.errorMessage.value);
+              }
+
+              if (!videoController.isInitialized.value || videoController.videoController == null) {
+                return const _LoadingWidget();
+              }
+
+              return CachedVideoPlayerWidget(controller: videoController);
+            },
+          );
         }),
       ),
     );
   }
 
-  // PDF Card widget
   Widget _buildPdfCard() {
     return Card(
       margin: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
@@ -72,13 +85,15 @@ class KnowledgePage extends GetView<KnowledgeController> {
           if (controller.pdfPath.value == null || controller.pdfPath.value!.isEmpty) {
             return _buildNoMediaAvailableWidget('No PDF available', Icons.picture_as_pdf);
           }
-          return CachedPDFViewerWidget();
+          return GetBuilder<CachedPdfController>(
+            init: KnowledgeController.cachedPdfController,
+            builder: (pdfController) => CachedPDFViewerWidget(),
+          );
         }),
       ),
     );
   }
 
-  // Widget for handling no media available case
   Widget _buildNoMediaAvailableWidget(String message, IconData icon) {
     return Container(
       height: 240,
@@ -97,70 +112,80 @@ class KnowledgePage extends GetView<KnowledgeController> {
       ),
     );
   }
+
+  Widget _buildErrorWidget(String message) {
+    return Container(
+      height: 240,
+      child: Center(
+        child: Column(
+          mainAxisAlignment: MainAxisAlignment.center,
+          children: [
+            Icon(Icons.error_outline, size: 48, color: Colors.red),
+            SizedBox(height: 16),
+            Text(
+              message,
+              style: TextStyle(color: Colors.red[600]),
+              textAlign: TextAlign.center,
+            ),
+          ],
+        ),
+      ),
+    );
+  }
 }
 
 class CachedVideoPlayerWidget extends StatelessWidget {
+  final CachedVideoController controller;
+
+  const CachedVideoPlayerWidget({
+    Key? key,
+    required this.controller,
+  }) : super(key: key);
+
   @override
   Widget build(BuildContext context) {
-    return Obx(() {
-      if (!KnowledgeController.cachedVideoController.isInitialized.value) {
-        return const _LoadingWidget();
-      }
-
-      return Container(
-        margin: EdgeInsets.symmetric(horizontal: 16, vertical: 8),
-        child: AspectRatio(
-          aspectRatio: 16 / 9,
-          child: ClipRRect(
-            borderRadius: BorderRadius.circular(8),
-            child: Stack(
-              alignment: Alignment.center,
-              children: [
-                // Video Player
-                GestureDetector(
-                  onTap: () => KnowledgeController.cachedVideoController.toggleControls(),
-                  child: VideoPlayer(KnowledgeController.cachedVideoController.videoController),
-                ),
-
-                // Loading Indicator
-                if (KnowledgeController.cachedVideoController.isLoading.value)
-                  const CircularProgressIndicator(),
-
-                // Video Controls Overlay
-                Obx(() => Visibility(
-                      visible: KnowledgeController.cachedVideoController.showControls.value,
-                      child: _buildControls(context),
-                    )),
-
-                // Center Play/Pause Button
-                Obx(() => AnimatedOpacity(
-                      opacity:
-                          KnowledgeController.cachedVideoController.showControls.value ? 1.0 : 0.0,
-                      duration: const Duration(milliseconds: 300),
-                      child: GestureDetector(
-                        onTap: () => KnowledgeController.cachedVideoController.playPause(),
-                        child: Container(
-                          padding: const EdgeInsets.all(12),
-                          decoration: BoxDecoration(
-                            color: Colors.black54,
-                            shape: BoxShape.circle,
-                          ),
-                          child: Icon(
-                            KnowledgeController.cachedVideoController.isPlaying.value
-                                ? Icons.pause
-                                : Icons.play_arrow,
-                            color: Colors.white,
-                            size: 32,
-                          ),
+    return Container(
+      margin: EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+      child: AspectRatio(
+        aspectRatio: 16 / 9,
+        child: ClipRRect(
+          borderRadius: BorderRadius.circular(8),
+          child: Stack(
+            alignment: Alignment.center,
+            children: [
+              GestureDetector(
+                onTap: controller.toggleControls,
+                child: VideoPlayer(controller.videoController!),
+              ),
+              if (controller.isLoading.value) const CircularProgressIndicator(),
+              Obx(() => Visibility(
+                    visible: controller.showControls.value,
+                    child: _buildControls(context),
+                  )),
+              Obx(() => AnimatedOpacity(
+                    opacity: controller.showControls.value ? 1.0 : 0.0,
+                    duration: const Duration(milliseconds: 300),
+                    child: GestureDetector(
+                      onTap: controller.playPause,
+                      child: Container(
+                        padding: const EdgeInsets.all(12),
+                        decoration: BoxDecoration(
+                          color: Colors.black54,
+                          shape: BoxShape.circle,
+                        ),
+                        child: Icon(
+                          controller.isPlaying.value ? Icons.pause : Icons.play_arrow,
+                          color: Colors.white,
+                          size: 32,
                         ),
                       ),
-                    )),
-              ],
-            ),
+                    ),
+                  )),
+            ],
           ),
         ),
-      );
-    });
+      ),
+    );
   }
 
   Widget _buildControls(BuildContext context) {
@@ -178,57 +203,20 @@ class CachedVideoPlayerWidget extends StatelessWidget {
       child: Column(
         mainAxisAlignment: MainAxisAlignment.end,
         children: [
-          // Progress Bar
           _buildProgressBar(),
-
-          // Bottom Controls Row
           Padding(
             padding: const EdgeInsets.all(16.0),
             child: Row(
               children: [
-                // Current Time
                 _buildTimeText(),
                 const SizedBox(width: 8),
-
-                // Duration
                 Obx(() => Text(
-                      ' / ${_formatDuration(KnowledgeController.cachedVideoController.duration.value)}',
+                      ' / ${_formatDuration(controller.duration.value)}',
                       style: const TextStyle(color: Colors.white70),
                     )),
-
                 const Spacer(),
-
-                // Volume Control
-                IconButton(
-                  icon: Icon(
-                    KnowledgeController.cachedVideoController.videoController.value.volume > 0
-                        ? Icons.volume_up
-                        : Icons.volume_off,
-                    color: Colors.white,
-                  ),
-                  onPressed: () {
-                    final controller = KnowledgeController.cachedVideoController;
-                    if (controller.videoController.value.volume > 0) {
-                      controller.videoController.setVolume(0);
-                    } else {
-                      controller.videoController.setVolume(1.0);
-                    }
-                  },
-                ),
-
-                // Fullscreen Toggle
-                IconButton(
-                  icon: const Icon(Icons.fullscreen, color: Colors.white),
-                  onPressed: () {
-                    Navigator.of(context).push(
-                      MaterialPageRoute(
-                        builder: (context) => FullScreenVideoPage(
-                          controller: KnowledgeController.cachedVideoController,
-                        ),
-                      ),
-                    );
-                  },
-                ),
+                _buildVolumeButton(),
+                _buildFullscreenButton(context),
               ],
             ),
           ),
@@ -239,7 +227,6 @@ class CachedVideoPlayerWidget extends StatelessWidget {
 
   Widget _buildProgressBar() {
     return Obx(() {
-      final controller = KnowledgeController.cachedVideoController;
       final duration = controller.duration.value.inMilliseconds.toDouble();
       final position = controller.position.value.inMilliseconds.toDouble();
 
@@ -250,7 +237,7 @@ class CachedVideoPlayerWidget extends StatelessWidget {
           overlayShape: const RoundSliderOverlayShape(overlayRadius: 12),
         ),
         child: Slider(
-          value: position,
+          value: position.clamp(0, duration),
           min: 0,
           max: duration,
           onChanged: (value) {
@@ -265,9 +252,36 @@ class CachedVideoPlayerWidget extends StatelessWidget {
 
   Widget _buildTimeText() {
     return Obx(() => Text(
-          _formatDuration(KnowledgeController.cachedVideoController.position.value),
+          _formatDuration(controller.position.value),
           style: const TextStyle(color: Colors.white),
         ));
+  }
+
+  Widget _buildVolumeButton() {
+    return Obx(() => IconButton(
+          icon: Icon(
+            controller.videoController?.value.volume != 0 ? Icons.volume_up : Icons.volume_off,
+            color: Colors.white,
+          ),
+          onPressed: () {
+            if (controller.videoController == null) return;
+            final newVolume = controller.videoController!.value.volume > 0 ? 0.0 : 1.0;
+            controller.videoController!.setVolume(newVolume);
+          },
+        ));
+  }
+
+  Widget _buildFullscreenButton(BuildContext context) {
+    return IconButton(
+      icon: const Icon(Icons.fullscreen, color: Colors.white),
+      onPressed: () {
+        Navigator.of(context).push(
+          MaterialPageRoute(
+            builder: (context) => FullScreenVideoPage(controller: controller),
+          ),
+        );
+      },
+    );
   }
 
   String _formatDuration(Duration duration) {
@@ -275,6 +289,27 @@ class CachedVideoPlayerWidget extends StatelessWidget {
     final minutes = twoDigits(duration.inMinutes.remainder(60));
     final seconds = twoDigits(duration.inSeconds.remainder(60));
     return '$minutes:$seconds';
+  }
+}
+
+class _LoadingWidget extends StatelessWidget {
+  const _LoadingWidget();
+
+  @override
+  Widget build(BuildContext context) {
+    return Container(
+      height: 240,
+      child: const Center(
+        child: Column(
+          mainAxisAlignment: MainAxisAlignment.center,
+          children: [
+            CircularProgressIndicator(),
+            SizedBox(height: 16),
+            Text('Loading video...'),
+          ],
+        ),
+      ),
+    );
   }
 }
 
@@ -336,14 +371,14 @@ class _FullScreenVideoPageState extends State<FullScreenVideoPage> {
               // Video Player
               Center(
                 child: AspectRatio(
-                  aspectRatio: widget.controller.videoController.value.aspectRatio,
+                  aspectRatio: widget.controller.videoController!.value.aspectRatio,
                   child: Stack(
                     alignment: Alignment.center,
                     children: [
                       // Video Player
                       GestureDetector(
                         onTap: () => widget.controller.toggleControls(),
-                        child: VideoPlayer(widget.controller.videoController),
+                        child: VideoPlayer(widget.controller.videoController!),
                       ),
 
                       // Loading Indicator
@@ -449,16 +484,16 @@ class _FullScreenVideoPageState extends State<FullScreenVideoPage> {
                 // Volume Control
                 IconButton(
                   icon: Icon(
-                    widget.controller.videoController.value.volume > 0
+                    widget.controller.videoController!.value.volume > 0
                         ? Icons.volume_up
                         : Icons.volume_off,
                     color: Colors.white,
                   ),
                   onPressed: () {
-                    if (widget.controller.videoController.value.volume > 0) {
-                      widget.controller.videoController.setVolume(0);
+                    if (widget.controller.videoController!.value.volume > 0) {
+                      widget.controller.videoController!.setVolume(0);
                     } else {
-                      widget.controller.videoController.setVolume(1.0);
+                      widget.controller.videoController!.setVolume(1.0);
                     }
                   },
                 ),
@@ -516,27 +551,6 @@ class _FullScreenVideoPageState extends State<FullScreenVideoPage> {
     final minutes = twoDigits(duration.inMinutes.remainder(60));
     final seconds = twoDigits(duration.inSeconds.remainder(60));
     return '$minutes:$seconds';
-  }
-}
-
-class _LoadingWidget extends StatelessWidget {
-  const _LoadingWidget();
-
-  @override
-  Widget build(BuildContext context) {
-    return Container(
-      height: 240,
-      child: const Center(
-        child: Column(
-          mainAxisAlignment: MainAxisAlignment.center,
-          children: [
-            CircularProgressIndicator(),
-            SizedBox(height: 16),
-            Text('Loading video...'),
-          ],
-        ),
-      ),
-    );
   }
 }
 

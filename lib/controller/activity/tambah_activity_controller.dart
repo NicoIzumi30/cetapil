@@ -623,7 +623,7 @@ class TambahActivityController extends GetxController {
               // Schedule text update for next frame
               Future.microtask(() {
                 if (priceControllers.containsKey(priceId)) {
-                  priceControllers[priceId]?.text = detail.isNotEmpty ? detail[0]['answer'] : '0';
+                  // priceControllers[priceId]?.text = detail.isNotEmpty ? detail[0]['answer'] : '0';
                 }
               });
             } catch (e) {
@@ -900,15 +900,6 @@ class TambahActivityController extends GetxController {
     visibilitySecondaryDraftItems.clear();
     visibilityKompetitorDraftItems.clear();
 
-    // Clear Data Detail Draft
-
-    // Clear visibility related fields
-    // visibilityPrimaryImages.value = null;
-    // visibilitySecondaryImages.value = null;
-    //
-    // isImageUploading.value = [false, false];
-
-    // Clear product related fields
     selectedProducts.value.clear();
     productInputs.value.clear();
     products.value.clear();
@@ -920,15 +911,7 @@ class TambahActivityController extends GetxController {
       }
     }
 
-    // Clear survey fields
-    // for (var controller in priceControllers.values) {
-    //   controller.dispose();
-    // }
-
     priceControllers.clear();
-
-    // Rest of the code remains same
-    availabilityDraftItems.clear();
 
     for (var switchState in switchStates.values) {
       switchState.value = true;

@@ -1,3 +1,5 @@
+import 'dart:convert';
+
 import 'package:cetapil_mobile/controller/routing/routing_controller.dart';
 import 'package:cetapil_mobile/model/list_routing_response.dart';
 import 'package:cetapil_mobile/page/routing/detail_routing.dart';
@@ -82,7 +84,6 @@ class RoutingPage extends GetView<RoutingController> {
                           if (salesActivity.checkedOut != null) {
                             checkInStatus = false;
                           } else if (salesActivity.checkedIn != null) {
-                            checkInStatus = true;
                           }
                         }
 
@@ -126,8 +127,11 @@ class RoutingPage extends GetView<RoutingController> {
             child: Column(
               mainAxisAlignment: MainAxisAlignment.center,
               children: [
-                 SvgPicture.asset("assets/icon/Vector1.svg",height: 64,
-                  color: Colors.grey,),
+                SvgPicture.asset(
+                  "assets/icon/Vector1.svg",
+                  height: 64,
+                  color: Colors.grey,
+                ),
                 const SizedBox(height: 16),
                 Text(
                   'Tidak ada Routing',

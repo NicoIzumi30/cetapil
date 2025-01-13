@@ -652,4 +652,38 @@ class ActivityDatabaseHelper {
       }
     });
   }
+
+  Future<Map<String, dynamic>?> getActivityById(String id) async {
+    final db = await database;
+    try {
+      final List<Map<String, dynamic>> result = await db.query(
+        'sales_activity',
+        where: 'id = ?',
+        whereArgs: [id],
+        limit: 1,
+      );
+
+      if (result.isEmpty) return null;
+      return result.first;
+    } catch (e) {
+      print('Error getting activity by ID: $e');
+      return null;
+    }
+  }
+
+  Future<void> deleteDraft(String id) async {
+    final db = await database;
+    await db.transaction((txn) async {
+      // Delete related records from all tables
+      await txn.delete('availability', where: 'sales_activity_id = ?', whereArgs: [id]);
+      await txn.delete('visibility_primary', where: 'sales_activity_id = ?', whereArgs: [id]);
+      await txn.delete('visibility_secondary', where: 'sales_activity_id = ?', whereArgs: [id]);
+      await txn.delete('visibility_kompetitor', where: 'sales_activity_id = ?', whereArgs: [id]);
+      await txn.delete('survey', where: 'sales_activity_id = ?', whereArgs: [id]);
+      await txn.delete('orders', where: 'sales_activity_id = ?', whereArgs: [id]);
+
+      // Finally delete the main record
+      await txn.delete('sales_activity', where: 'id = ?', whereArgs: [id]);
+    });
+  }
 }
