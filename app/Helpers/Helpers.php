@@ -49,7 +49,11 @@ if (!function_exists('getAv3m')) {
         if (empty($av3m)) {
             return '0';
         }
-        return $av3m->av3m;
+        $av3mValue = $av3m->av3m;
+        if($av3mValue == 0){
+            $av3mValue = '0';
+        }
+        return $av3mValue;
     }
 }
 if (!function_exists('getChannelByName')) {
