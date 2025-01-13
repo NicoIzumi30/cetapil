@@ -1,33 +1,46 @@
 <?php
 
-use App\Http\Controllers\Api\Auth\AuthController;
-use App\Http\Controllers\Api\OutletController;
-use App\Http\Controllers\Api\DashboardController;
-use App\Http\Controllers\Api\RoutingController;
-use App\Http\Controllers\Api\SalesActivityController;
-use App\Http\Controllers\Api\SurveyController;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Route;
+use App\Http\Controllers\Api\Auth\AuthController;
+use App\Http\Controllers\Api\DashboardController;
+use App\Http\Controllers\Api\OutletController;
 use App\Http\Controllers\Api\ProductKnowledgeController;
+use App\Http\Controllers\Api\RoutingController;
+use App\Http\Controllers\Api\SalesActivityController;
 use App\Http\Controllers\Api\SellingController;
+use App\Http\Controllers\Api\SurveyController;
 
-// Route::get('/user', function (Request $request) {
-//     return $request->user();
-// })->middleware('auth_api');
-
+/*
+|--------------------------------------------------------------------------
+| API Authentication Routes
+|--------------------------------------------------------------------------
+|
+| Routes for handling user authentication including login, password reset,
+| and user information retrieval
+|
+*/
 Route::controller(AuthController::class)->group(function () {
     Route::post('/login', 'login');
     Route::post('/forgot-password', 'forgotPassword');
     Route::post('/reset-password', 'resetPassword');
 });
 
-
-
-// Protected routes
+/*
+|--------------------------------------------------------------------------
+| Protected Sales Routes
+|--------------------------------------------------------------------------
+|
+| All routes that require authentication and the 'sales' role
+| Grouped by feature/module for better organization
+|
+*/
 Route::middleware(['auth_api', 'role:sales'])->group(function () {
+    // User Management Routes
     Route::get('/user', [AuthController::class, 'detailUser']);
     Route::post('/logout', [AuthController::class, 'logout']);
 
+    // Dashboard Routes
     Route::controller(DashboardController::class)
         ->prefix('dashboard')
         ->group(function () {
@@ -37,45 +50,51 @@ Route::middleware(['auth_api', 'role:sales'])->group(function () {
             Route::get('/calendar', 'getCalendarActivities');
         });
 
-    Route::prefix("outlet")->group(function () {
+    // Outlet Management Routes
+    Route::prefix('outlet')->group(function () {
         Route::get('/', [OutletController::class, 'index']);
         Route::get('/detail/{id}', [OutletController::class, 'show']);
         Route::get('/cities', [OutletController::class, 'getCityList']);
 
-        Route::prefix("forms")->group(function () {
+        // Outlet Forms Routes
+        Route::prefix('forms')->group(function () {
             Route::get('/', [OutletController::class, 'forms']);
             Route::post('/create-with-forms', [OutletController::class, 'createOutletWithForms'])
                 ->name('create');
         });
     });
-    Route::prefix("routing")->group(function () {
+
+    // Routing Management Routes
+    Route::prefix('routing')->group(function () {
         Route::get('/', [RoutingController::class, 'index']);
         Route::post('/check_in', [RoutingController::class, 'checkIn']);
         Route::post('/check_out', [RoutingController::class, 'checkOut']);
         Route::get('/detail/{id}', [OutletController::class, 'show']);
     });
-    Route::prefix("activity")->group(function () {
+
+    // Sales Activity Routes
+    Route::prefix('activity')->group(function () {
+        // Activity Management
         Route::get('/', [SalesActivityController::class, 'getSalesAcitivityList']);
         Route::get('/{activity_id}/detail', [SalesActivityController::class, 'getActivityById']);
         Route::get('/{activity_id}/cancel', [SalesActivityController::class, 'cancelActivity']);
+        Route::post('/submit', [SalesActivityController::class, 'storeActivity']);
+
+        // Product Related Routes
         Route::get('/product-categories', [SalesActivityController::class, 'categoryList']);
         Route::post('/product', [SalesActivityController::class, 'productByCategoryList']);
+        Route::get('/get-all-product', [SalesActivityController::class, 'getAllProducts']);
+
+        // Store Display Routes
         Route::get('/{outlet_id}/visibilities', [SalesActivityController::class, 'getVisibilityList']);
         Route::get('/visual', [SalesActivityController::class, 'getVisualTypeList']);
         Route::get('/posm', [SalesActivityController::class, 'getPosmTypeList']);
-
-        Route::get('/get-all-product', [SalesActivityController::class, 'getAllProducts']);
-
-        Route::get('/channels', [SalesActivityController::class, 'getAllChannels']);
         Route::get('/planogram', [SalesActivityController::class, 'getPlanogram']);
-        // Route::post('products', 'productByCategoryList');
 
-        // Route::get('/cities', 'getCityList');
-        // Route::get('/outlets', 'getOutletList');
-        // Route::get('/visual', 'getVisualTypeList');
-        // Route::get('/posm', 'getPosmTypeList');
-        Route::post('/submit', [SalesActivityController::class, 'storeActivity']);
+        // Channel Routes
+        Route::get('/channels', [SalesActivityController::class, 'getAllChannels']);
 
+        // Survey Routes
         Route::controller(SurveyController::class)
             ->prefix('surveys')
             ->group(function () {
@@ -83,9 +102,16 @@ Route::middleware(['auth_api', 'role:sales'])->group(function () {
                 Route::post('/', 'saveSurvey');
             });
     });
+
+    // Product Knowledge Routes
     Route::get('/product-knowledge', [ProductKnowledgeController::class, 'index']);
+
+    // Selling Routes
     Route::get('/selling', [SellingController::class, 'index']);
     Route::post('/selling/create', [SellingController::class, 'store']);
 
-    Route::middleware('permission:menu_outlet')->group(function () {});
+    // Routes requiring specific permissions
+    // Route::middleware('permission:menu_outlet')->group(function () {
+    //     // Add outlet-specific routes here
+    // });
 });
