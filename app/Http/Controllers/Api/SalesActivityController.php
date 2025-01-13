@@ -307,15 +307,18 @@ class SalesActivityController extends Controller
             }
 
             // Store order data
-            foreach ($data['order'] as $item) {
-                SalesOrder::create([
-                    'sales_activity_id' => $activity->id,
-                    'outlet_id' => $data['outlet_id'],
-                    'product_id' => $item['product_id'],
-                    'total_items' => $item['total_items'],
-                    'subtotal' => $item['subtotal']
-                ]);
+            if (!empty($data['order'])) {
+                foreach ($data['order'] as $item) {
+                    SalesOrder::create([
+                        'sales_activity_id' => $activity->id,
+                        'outlet_id' => $data['outlet_id'],
+                        'product_id' => $item['product_id'],
+                        'total_items' => $item['total_items'],
+                        'subtotal' => $item['subtotal']
+                    ]);
+                }
             }
+
 
             // Update SalesActivity status and times
             $activity->update([
@@ -380,10 +383,10 @@ class SalesActivityController extends Controller
     public function cancelActivity($id)
     {
         $activity = SalesActivity::find($id);
-        if(!$activity){
+        if (!$activity) {
             return response()->json([
-               'status' => 'ERROR',
-               'message' => 'Activity not found'
+                'status' => 'ERROR',
+                'message' => 'Activity not found'
             ], Response::HTTP_NOT_FOUND);
         }
         if ($activity->user_id !== $this->getAuthUserId()) {
