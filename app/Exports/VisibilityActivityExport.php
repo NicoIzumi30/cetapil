@@ -2,30 +2,32 @@
 
 namespace App\Exports;
 
+use Carbon\Carbon;
 use App\Traits\ExcelExportable;
-use Maatwebsite\Excel\Concerns\FromCollection;
-use Maatwebsite\Excel\Concerns\WithHeadings;
-use Maatwebsite\Excel\Concerns\WithMapping;
+use Maatwebsite\Excel\Concerns\FromQuery;
 use Maatwebsite\Excel\Concerns\WithStyles;
+use Maatwebsite\Excel\Concerns\WithMapping;
+use Maatwebsite\Excel\Concerns\WithHeadings;
+use Maatwebsite\Excel\Concerns\FromCollection;
 use Maatwebsite\Excel\Concerns\ShouldAutoSize;
 use PhpOffice\PhpSpreadsheet\Worksheet\Worksheet;
-use Carbon\Carbon;
 
-class VisibilityActivityExport implements FromCollection, WithHeadings, WithMapping, WithStyles, ShouldAutoSize
+class VisibilityActivityExport implements FromQuery, WithHeadings, WithMapping, WithStyles, ShouldAutoSize
 {
     use ExcelExportable;
+    protected int $chunkSize = 1000;
 
-    protected $data;
+    protected $query;
     protected $photoCols = ['J', 'P', 'V', 'AB', 'AH', 'AN', 'AS', 'AV', 'AY', 'BB', 'BF', 'BG', 'BK', 'BL'];
 
-    public function __construct($data)
+    public function __construct($query)
     {
-        $this->data = $data;
+        $this->query = $query;
     }
 
-    public function collection()
+    public function query()
     {
-        return collect($this->data);
+        return $this->query;
     }
 
     protected function mapVisibilityData($row, $type, $category, $position)
@@ -227,6 +229,9 @@ class VisibilityActivityExport implements FromCollection, WithHeadings, WithMapp
 
         return $hours . ' hours ' . $minutes . ' minutes';
     }
-
+    public function chunkSize(): int
+    {
+        return $this->chunkSize;
+    }
 
 }

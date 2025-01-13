@@ -458,16 +458,9 @@ class VisibilityController extends Controller
                     $query->whereDate('checked_in', Carbon::parse($dateParam));
                 }
             }
-            // Get the filtered data
-            $data = $query->orderBy('checked_in', 'desc')->get();
-            if ($data->isEmpty()) {
-                return response()->json([
-                    'status' => 'error',
-                    'message' => 'Tidak ada data yang sesuai dengan filter'
-                ], 404);
-            }
+            $query->orderBy('checked_in', 'desc');
             return Excel::download(
-                new VisibilityActivityExport($data),
+                new VisibilityActivityExport($query),
                 'sales_activity_' . now()->format('Y-m-d_His') . '.xlsx'
             );
         } catch (\Exception $e) {

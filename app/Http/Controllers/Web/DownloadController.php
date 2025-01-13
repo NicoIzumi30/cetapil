@@ -149,12 +149,11 @@ class DownloadController extends Controller
             $endDate,
             $request->visibility_region
         );
-        $data = $query->get();
 
         return $this->handleDownload(
             VisibilityActivityExport::class,
             'visibility_activity',
-            [$data]
+            [$query]
         );
 
     } catch (\Exception $e) {
