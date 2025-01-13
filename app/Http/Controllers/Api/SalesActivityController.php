@@ -307,7 +307,7 @@ class SalesActivityController extends Controller
             }
 
             // Store order data
-            if (!empty($data['order'])) {
+            if (isset($data['order']) && !empty($data['order'])) {
                 foreach ($data['order'] as $item) {
                     SalesOrder::create([
                         'sales_activity_id' => $activity->id,
