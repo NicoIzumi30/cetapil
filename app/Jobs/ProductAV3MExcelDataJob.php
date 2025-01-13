@@ -43,8 +43,9 @@ class ProductAV3MExcelDataJob implements ShouldQueue
 
    public function handle(): void
    {
-       collect($this->excelData)->chunk(50)->take(3)->each(function ($chunk) {
+       collect($this->excelData)->chunk(50)->each(function ($chunk) {
            foreach ($chunk as $key => $row) {
+
                try {
                    if (!isset($row['code_outlet'])) {
                        throw new Exception("Code outlet is missing");

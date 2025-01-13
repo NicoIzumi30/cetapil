@@ -20,7 +20,6 @@ class DatabaseSeeder extends Seeder
      */
     public function run(): void
     {
-<<<<<<< HEAD
     $this->call([
         ProvinceSeeder::class,
         CitySeeder::class,
@@ -40,26 +39,6 @@ class DatabaseSeeder extends Seeder
         //     SalesSurveySeeder::class,
         //     SalesVisibilitySeeder::class,
         // ]);
-=======
-    // $this->call([
-    //     ProvinceSeeder::class,
-    //     CitySeeder::class,
-    //     UserSeeder::class,
-    //     CategorySeeder::class,
-    //     ProductSeeder::class,
-    //     OutletFormSeeder::class,
-    //     VisibilitySeeder::class,
-    //     SurveySeeder::class,
-    //     ChannelSeeder::class,
-    //     PowerSkuSeeder::class
-    // ]);
-        $this->call([
-            // OutletSeeder::class,
-            SalesActivitySeeder::class,
-            SalesAvailabilitySeeder::class,
-            SalesSurveySeeder::class,
-            SalesVisibilitySeeder::class,
-        ]);
->>>>>>> a7ab0a3913bcae5620e5b046b5fb1d7ff438a563
+
     }
 }
