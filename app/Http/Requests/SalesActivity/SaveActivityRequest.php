@@ -74,10 +74,10 @@ class SaveActivityRequest extends FormRequest
             'survey.*.answer' => 'required|string',
 
             // Sales Order
-            'order' => 'required|array',
-            'order.*.product_id' => 'required|exists:products,id',
-            'order.*.total_items' => 'required|numeric',
-            'order.*.subtotal' => 'required|numeric',
+            // 'order' => 'required|array',
+            // 'order.*.product_id' => 'required|exists:products,id',
+            // 'order.*.total_items' => 'required|numeric',
+            // 'order.*.subtotal' => 'required|numeric',
         ];
     }
     protected function failedValidation(Validator $validator)
