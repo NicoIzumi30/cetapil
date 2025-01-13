@@ -132,46 +132,29 @@ class DownloadController extends Controller
 {
     try {
         // Initialize query with proper joins and eager loading
-        $query = SalesActivity::with([
-            'outlet' => function($q) {
-                $q->select('id', 'name', 'code', 'tipe_outlet', 'account', 'city_id', 'channel_id')
-                    ->with(['channel' => function($q) {
-                        $q->select('id', 'name');
-                    }]);
-            },
-            'user' => function($q) {
-                $q->select('id', 'name');
-            },
-            'salesVisibilities' => function($q) {
-                $q->with(['displays', 'competitors']);
-            }
-        ])->where('status', 'SUBMITTED');
+        $query = SalesActivity::select('id', 'checked_in', 'checked_out', 'status', 'user_id', 'outlet_id','created_at')->with([
+            'outlet:id,name,code,tipe_outlet,account,channel_id,city_id',
+            'user:id,name',
+            'salesVisibilities:*',
+            'salesVisibilities.posmType', 
+        ]);
+        $query->where('status', 'SUBMITTED');
 
-        // Process date range if provided
-        if ($request->has('visibility_date') && !empty($request->visibility_date)) {
-            [$startDate, $endDate] = $this->processDateRange($request->visibility_date);
-            
-            $query->whereBetween('checked_in', [
-                Carbon::parse($startDate)->startOfDay(),
-                Carbon::parse($endDate)->endOfDay()
-            ]);
-        }
-
-        // Apply region filter if provided
-        if ($request->has('visibility_region') && $request->visibility_region !== 'all') {
-            $query->whereHas('outlet', function($q) use ($request) {
-                $q->whereHas('city', function($q) use ($request) {
-                    $q->where('province_code', $request->visibility_region);
-                });
-            });
-        }
-
+        [$startDate, $endDate] = $this->processDateRange($request->visibility_date);
+        
+        $query = $this->applyFilters(
+            $query,
+            'checked_in',
+            $startDate,
+            $endDate,
+            $request->visibility_region
+        );
         $data = $query->get();
 
         return $this->handleDownload(
             VisibilityActivityExport::class,
             'visibility_activity',
-            [$startDate, $endDate, $request->visibility_region]
+            [$data]
         );
 
     } catch (\Exception $e) {
@@ -264,10 +247,6 @@ class DownloadController extends Controller
             $startDate = Carbon::parse(trim($dates[0]));
             $endDate = Carbon::parse(trim($dates[1]));
     
-            Log::info('Parsed dates', [
-                'start' => $startDate->format('Y-m-d'),
-                'end' => $endDate->format('Y-m-d')
-            ]);
     
             // Handle region
             $region = $request->selling_region;

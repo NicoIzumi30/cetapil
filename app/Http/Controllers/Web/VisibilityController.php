@@ -471,13 +471,12 @@ class VisibilityController extends Controller
                 'sales_activity_' . now()->format('Y-m-d_His') . '.xlsx'
             );
         } catch (\Exception $e) {
-            Log::error('Activity Download Error', [
-                'message' => $e->getMessage(),
-                'file' => $e->getFile(),
-                'line' => $e->getLine(),
-                'filters' => $request->all()
-            ]);
-            dd($e);
+            // Log::error('Activity Download Error', [
+            //     'message' => $e->getMessage(),
+            //     'file' => $e->getFile(),
+            //     'line' => $e->getLine(),
+            //     'filters' => $request->all()
+            // ]);
             return response()->json([
                 'status' => 'error',
                 'message' => 'Gagal membuat file Excel: ' . $e->getMessage(),

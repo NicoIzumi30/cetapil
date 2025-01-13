@@ -160,8 +160,7 @@
         <div>
             <label for="visibility-region">Filter By Regional: </label>
             <select id="visibility-region" name="visibility_region" class="w-full">
-                <option value="" selected disabled>-- Pilih Regional --</option>
-                <option value="all">Semua Regional</option>
+                <option value="all" selected>Semua Regional</option>
                 @foreach ($provinces as $province)
                     <option value="{{ $province->code }}">{{ $province->name }}</option>
                 @endforeach
