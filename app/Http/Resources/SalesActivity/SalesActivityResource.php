@@ -28,7 +28,7 @@ class SalesActivityResource extends JsonResource
                 ->map(function ($av3m) {
                     return [
                         'product_id' => $av3m->product_id,
-                        'av3m' => round($av3m->av3m)
+                        'av3m' => $av3m->av3m
                     ];
                 }),
             'checked_in' => $this->checked_in,
