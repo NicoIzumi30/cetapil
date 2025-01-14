@@ -8,6 +8,7 @@ import 'package:cetapil_mobile/controller/activity/tambah_visibility_controller.
 import 'package:cetapil_mobile/controller/cache_controller.dart';
 import 'package:cetapil_mobile/controller/support_data_controller.dart';
 import 'package:cetapil_mobile/model/survey_question_response.dart';
+import 'package:cetapil_mobile/utils/temp_images.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_easyloading/flutter_easyloading.dart';
 import 'package:get/get.dart';
@@ -350,7 +351,34 @@ class TambahActivityController extends GetxController {
         'current_time': detailDraft['checked_out'] ?? DateTime.now().toIso8601String(),
       };
 
-      // Use the same logic as saveDraftActivity to ensure all fields are included
+      // Collect all image paths for cleanup later
+      List<String?> imagesToCleanup = [];
+
+      // Collect all visibility primary images
+      for (var item in visibilityPrimaryDraftItems) {
+        if (item['image_visibility'] != null && item['image_visibility'] is File) {
+          imagesToCleanup.add(item['image_visibility'].path);
+        }
+      }
+
+      // Collect all visibility secondary images
+      for (var item in visibilitySecondaryDraftItems) {
+        if (item['display_image'] != null && item['display_image'] is File) {
+          imagesToCleanup.add(item['display_image'].path);
+        }
+      }
+
+      // Collect all kompetitor images
+      for (var item in visibilityKompetitorDraftItems) {
+        if (item['program_image1'] != null && item['program_image1'] is File) {
+          imagesToCleanup.add(item['program_image1'].path);
+        }
+        if (item['program_image2'] != null && item['program_image2'] is File) {
+          imagesToCleanup.add(item['program_image2'].path);
+        }
+      }
+
+      // Process surveys and other data...
       final allSurveys = supportController.getSurvey();
       List<Map<String, dynamic>> surveyList = [];
 
@@ -393,11 +421,20 @@ class TambahActivityController extends GetxController {
 
       if (response.status != "OK") {
         throw Exception('Failed to get outlets from API');
+      } // After successful submission, clean up all images
+      final tempImageStorage = TempImageStorage();
+      for (String? imagePath in imagesToCleanup) {
+        if (imagePath != null) {
+          await tempImageStorage.deleteImage(imagePath);
+        }
       }
+
+      // Clean up all temporary images in the visibility category
+      await tempImageStorage.cleanupTempCategory('visibility');
 
       _timer?.cancel();
 
-      /// check apabila data ada di sqlite, maka hapus data
+      /// Delete SQLite data if exists
       bool isExists = await db.checkSalesActivityExists(detailOutlet.value!.id!);
       if (isExists) {
         await db.deleteSalesActivity(detailOutlet.value!.id!);
@@ -419,7 +456,7 @@ class TambahActivityController extends GetxController {
         if (isExists) {
           await db.deleteSalesActivity(detailOutlet.value!.id!);
         }
-      
+
         activityController.initGetActivity();
         EasyLoading.dismiss();
         Get.back();

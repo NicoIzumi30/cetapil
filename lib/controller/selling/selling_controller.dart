@@ -6,6 +6,7 @@ import 'package:cetapil_mobile/controller/support_data_controller.dart';
 import 'package:cetapil_mobile/database/selling_database.dart';
 import 'package:cetapil_mobile/model/list_selling_response.dart';
 import 'package:cetapil_mobile/model/outlet.dart' as O;
+import 'package:cetapil_mobile/utils/temp_images.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:intl/intl.dart';
@@ -252,6 +253,11 @@ class SellingController extends GetxController {
       await _validateDraftData();
 
       CustomAlerts.showLoading(Get.context!, "Menyimpan", "Menyimpan data ke draft...");
+      if (sellingImage.value != null && TempImageStorage().isTempPath(sellingImage.value!.path)) {
+        final draftPath =
+            await TempImageStorage().moveToTempDraft(sellingImage.value!.path, 'selling');
+        sellingImage.value = File(draftPath);
+      }
 
       final data = _prepareDraftData();
       await _saveDraftToDatabase(data);
@@ -322,7 +328,7 @@ class SellingController extends GetxController {
       // Store the draft ID early
       final draftIdToDelete = currentDraftId.value;
 
-      // Validate required data before showing loading
+      // Validation checks
       if (selectedOutlet.value == null) {
         throw 'Nama outlet harus diisi';
       }
@@ -331,7 +337,9 @@ class SellingController extends GetxController {
         throw 'Lokasi tidak ditemukan, pastikan GPS aktif';
       }
 
-      if (sellingImage.value == null) {
+      // Get and validate image path
+      final imagePath = await TempImageStorage().getImagePathForUpload(sellingImage.value?.path);
+      if (imagePath == null) {
         throw 'Gambar harus diisi';
       }
 
@@ -341,6 +349,8 @@ class SellingController extends GetxController {
 
       CustomAlerts.showLoading(Get.context!, "Mengirim", "Mengirim data ke server...");
       DateFormat formatter = DateFormat('yyyy-MM-dd HH:mm:ss');
+
+      // Prepare request data
       final requestData = {
         'outlet_id': selectedOutlet.value!.id,
         'longitude': _gpsController.currentPosition.value!.longitude.toString(),
@@ -348,36 +358,34 @@ class SellingController extends GetxController {
         'checked_in': formatter.format(checkedIn.value),
         'checked_out': formatter.format(DateTime.now()),
         'duration': duration.value.toString(),
-        'image': sellingImage.value!.path,
+        'image': imagePath, // Using the validated image path
       };
 
-      // Convert draftItems to listProduct format if needed
+      // Convert draftItems to listProduct format
       listProduct.clear();
       listProduct.addAll(draftItems);
 
       final response = await Api.submitSelling(requestData, listProduct);
 
-      // Dismiss loading before processing response
-      CustomAlerts.dismissLoading();
-
       if (response.status != "OK") {
         throw 'Gagal mengirim data ke server: ${response.message ?? "Unknown error"}';
       }
 
-      // Delete the draft if it exists
+      // After successful submission:
+      // 1. Delete the image file
+      if (imagePath != null) {
+        await TempImageStorage().deleteImage(imagePath);
+      }
+
+      // 2. Delete the draft if it exists
       if (draftIdToDelete.isNotEmpty) {
-        print('Deleting draft with ID: $draftIdToDelete');
         await _dbHelper.deleteSellingData(draftIdToDelete);
       }
 
-      // Clear form and navigate back
       clearForm();
-
-      // Show success message
       CustomAlerts.showSuccess(Get.context!, "Data Berhasil Disimpan",
           "Anda baru menyimpan Data. Silahkan periksa status Outlet pada aplikasi.");
 
-      // Refresh data to reflect changes
       await loadInitialData();
       return true;
     } catch (e) {
@@ -438,8 +446,35 @@ class SellingController extends GetxController {
     }
   }
 
-  void updateImage(File? newImage) {
-    sellingImage.value = newImage;
+  void updateImage(File? newImage) async {
+    try {
+      setImageUploading(true);
+
+      if (sellingImage.value != null && newImage == null) {
+        // If we're deleting the image
+        await TempImageStorage().deleteImage(sellingImage.value!.path);
+        sellingImage.value = null;
+      } else if (newImage != null) {
+        // If there's an existing image, delete it first
+        if (sellingImage.value != null) {
+          await TempImageStorage().deleteImage(sellingImage.value!.path);
+        }
+
+        // Save the new image
+        final imagePath = await TempImageStorage()
+            .saveImage(newImage, category: 'selling', isDraft: currentDraftId.value.isNotEmpty);
+        sellingImage.value = File(imagePath);
+      }
+    } catch (e) {
+      print('Error updating image: $e');
+      Get.snackbar(
+        'Error',
+        'Failed to process image: $e',
+        snackPosition: SnackPosition.BOTTOM,
+      );
+    } finally {
+      setImageUploading(false);
+    }
   }
 
   void updateSearchQuery(String query) {
@@ -450,15 +485,22 @@ class SellingController extends GetxController {
         return data.outlet?.name?.toLowerCase().contains(searchQuery.value.toLowerCase()) ?? false;
       }).toList();
 
-  void clearForm() {
+  void clearForm() async {
     selectedOutletName.value = '';
     clearDraftItems();
-    sellingImage.value = null;
+
+    // Delete the temporary image if it exists
+    if (sellingImage.value != null) {
+      TempImageStorage().cleanupTempCategory('selling');
+      sellingImage.value = null;
+    }
+
     currentDraftId.value = '';
   }
 
   @override
   void onClose() {
+    TempImageStorage().cleanupTempCategory('selling');
     outletName.value.dispose();
     _durationTimer?.cancel();
     super.onClose();

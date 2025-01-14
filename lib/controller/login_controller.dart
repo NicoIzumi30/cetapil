@@ -33,7 +33,6 @@ import 'connectivity_controller.dart';
 class LoginController extends GetxController {
   // Dependencies
   final GetStorage _storage = GetStorage();
-  final Api _api = Api();
 
   // Observable states
   final RxBool isLoading = false.obs;
@@ -57,7 +56,7 @@ class LoginController extends GetxController {
       // Add check and reset databases
       await checkAndResetDatabases();
 
-      final authResponse = await _api.checkAuth();
+      final authResponse = await Api.checkAuth();
 
       if (authResponse.status == "OK" && authResponse.data != null) {
         currentUser.value = authResponse.data;
@@ -186,7 +185,7 @@ class LoginController extends GetxController {
         throw 'Tidak ada koneksi internet';
       }
 
-      final response = await _api.login(email, password);
+      final response = await Api.login(email, password);
       loginResponse.value = response;
 
       if (response.status == true && response.data != null) {
@@ -198,7 +197,7 @@ class LoginController extends GetxController {
         await _saveInitialLoginData(response.data!);
 
         // Validate and get complete user data
-        final authResponse = await _api.checkAuth();
+        final authResponse = await Api.checkAuth();
         if (authResponse.status == "OK" && authResponse.data != null) {
           currentUser.value = authResponse.data;
           await _updateStoredUserData(authResponse.data!);
@@ -341,7 +340,7 @@ class LoginController extends GetxController {
     if (token == null) return false;
 
     try {
-      final authResponse = await _api.checkAuth();
+      final authResponse = await Api.checkAuth();
       return authResponse.status == "OK" && authResponse.data != null;
     } catch (e) {
       print('Login check error: $e');

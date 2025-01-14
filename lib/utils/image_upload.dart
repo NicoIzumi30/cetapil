@@ -55,13 +55,6 @@ class ImageUploadUtils {
                   Navigator.pop(context, ImageSource.camera);
                 },
               ),
-              // ListTile(
-              //   leading: Icon(Icons.photo_library, color: Colors.blue),
-              //   title: Text('Choose from Gallery'),
-              //   onTap: () {
-              //     Navigator.pop(context, ImageSource.gallery);
-              //   },
-              // ),
               if (currentImage != null)
                 ListTile(
                   leading: Icon(Icons.image, color: Colors.blue),
@@ -76,11 +69,12 @@ class ImageUploadUtils {
         );
       },
     );
+    print("object : ${result}");
 
     if (result == null) return null;
     if (result == 'view') {
       showImageViewer(context, currentImage!);
-      return currentImage;
+      return null;
     }
 
     try {
@@ -208,9 +202,8 @@ class ImageViewerScreen extends StatelessWidget {
       ),
       body: image != null
           ? PhotoView(
-              imageProvider: image is File 
-                  ? FileImage(image) 
-                  : NetworkImage(image) as ImageProvider,
+              imageProvider:
+                  image is File ? FileImage(image) : NetworkImage(image) as ImageProvider,
               minScale: PhotoViewComputedScale.contained,
               maxScale: PhotoViewComputedScale.covered * 2,
               initialScale: PhotoViewComputedScale.contained,

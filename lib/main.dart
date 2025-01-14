@@ -11,9 +11,6 @@ import 'package:flutter/material.dart';
 import 'package:flutter_easyloading/flutter_easyloading.dart';
 import 'package:geolocator/geolocator.dart';
 import 'package:get/get.dart';
-import 'package:get/get_core/src/get_main.dart';
-import 'package:get/get_navigation/src/root/get_material_app.dart';
-import 'package:package_info_plus/package_info_plus.dart';
 import 'package:permission_handler/permission_handler.dart';
 import 'package:get_storage/get_storage.dart';
 import 'package:intl/intl.dart';
@@ -24,72 +21,70 @@ import 'controller/dashboard/dashboard_controller.dart';
 import 'controller/login_controller.dart';
 import 'controller/pdf_controller.dart';
 
+/// Application entry point
+/// Initializes essential services and launches the app
 void main() async {
+  // Ensure Flutter bindings are initialized
   WidgetsFlutterBinding.ensureInitialized();
+
+  // Request necessary storage permissions
   await [
     Permission.storage,
     Permission.manageExternalStorage,
   ].request();
 
   try {
+    // Set default locale to Indonesian
     Intl.defaultLocale = 'id';
 
-    // Use parallel initialization for better performance
+    // Initialize core services in parallel for better performance
     await Future.wait([
-      DashboardDatabaseHelper.instance.database,
-      GetStorage.init(),
-      initializeGPS(),
+      DashboardDatabaseHelper.instance.database, // Local database
+      GetStorage.init(), // Local storage
+      initializeGPS(), // GPS services
     ]);
 
     configureApp();
-    // bool isLoggedIn = await checkLoginStatus(); // Check login status
-    // if (isLoggedIn) {
-    //   // If logged in, load all controllers
-    //   await initializeControllers(true); // Load all controllers
-    // } else {
-    //   // If not logged in, load only login related controllers
-    //   await initializeControllers(false); // Load only login related controllers
-    // }
     runApp(const MyApp());
   } catch (e) {
     print('App Initialization Error: $e');
   }
 }
 
+/// Checks if user is currently logged in by verifying token existence
+/// Returns true if valid token exists, false otherwise
 Future<bool> checkLoginStatus() async {
   final token = await GetStorage().read('token');
   return token != null;
 }
 
+/// Initializes and validates GPS services
+/// Handles permission requests and checks location service status
 Future<void> initializeGPS() async {
   try {
-    // Check if location service is enabled
+    // Verify if device location services are enabled
     bool serviceEnabled = await Geolocator.isLocationServiceEnabled();
     if (!serviceEnabled) {
-      // Handle case where location service is disabled
       print('Location services are disabled.');
       return;
     }
 
-    // Check and request permissions with more detailed handling
+    // Handle location permissions
     LocationPermission permission = await Geolocator.checkPermission();
     if (permission == LocationPermission.denied) {
       permission = await Geolocator.requestPermission();
-
       if (permission == LocationPermission.denied) {
-        // Permissions are denied, handle accordingly
         print('Location permissions are denied');
         return;
       }
     }
 
     if (permission == LocationPermission.deniedForever) {
-      // Permissions are permanently denied, handle accordingly
       print('Location permissions are permanently denied');
       return;
     }
 
-    // Optional: Get current position to validate GPS
+    // Validate GPS by getting initial position
     Position? position =
         await Geolocator.getCurrentPosition(desiredAccuracy: LocationAccuracy.best);
     print('Initial GPS Position: $position');
@@ -98,48 +93,20 @@ Future<void> initializeGPS() async {
   }
 }
 
-// Future<void> initializeControllers(bool isLoggedIn) async {
-//   try {
-//     if (isLoggedIn) {
-//       // Load all controllers if logged in
-//       Get.put(LoginController());
-//       Get.lazyPut(() => ConnectivityController());
-//       Get.put(GPSLocationController());
-//       Get.lazyPut(() => BottomNavController());
-//       Get.lazyPut(() => DashboardController());
-//       Get.put(OutletController());
-//       Get.lazyPut(() => ActivityController());
-//       Get.put(RoutingController());
-//       Get.lazyPut(() => SellingController());
-//       Get.lazyPut(() => TambahActivityController());
-//       Get.lazyPut(() => VideoController());
-//       Get.lazyPut(() => TambahRoutingController());
-//       Get.lazyPut(() => TambahAvailabilityController());
-//       Get.lazyPut(() => TambahVisibilityController());
-//       Get.put(SupportDataController());
-//       Get.lazyPut(() => TambahProdukSellingController());
-//     } else {
-//       // Load only login related controllers
-//       Get.lazyPut(() => LoginController());
-//       Get.lazyPut(() => ConnectivityController());
-//       Get.lazyPut(() => KnowledgeController());
-//     }
-//   } catch (e) {
-//     print('Controller Initialization Error: $e');
-//   }
-// }
-
+/// Configures global app settings and behavior
 void configureApp() {
-  // This will prevent the app from closing when the back button is pressed
+  // Android-specific back button handling
   GetPlatform.isAndroid ? Get.addKey(GlobalKey<NavigatorState>()) : null;
 
-  // Override the default back button behavior
+  // Configure GetX default behaviors
   Get.config(
     defaultTransition: Transition.fade,
     defaultPopGesture: false,
   );
 }
 
+/// Root widget of the application
+/// Configures theme, routing, and global app settings
 class MyApp extends StatelessWidget {
   const MyApp({super.key});
 
@@ -163,28 +130,21 @@ class MyApp extends StatelessWidget {
             fontSize: 16,
             fontWeight: FontWeight.normal,
           ),
-          // ... other styles
         ),
       ),
       builder: EasyLoading.init(),
-      // Consider adding additional GetMaterialApp configurations
       defaultTransition: Transition.fadeIn,
       transitionDuration: const Duration(milliseconds: 300),
     );
   }
 }
 
+/// Handles dependency injection and controller initialization
+/// Registers all controllers needed throughout the app lifecycle
 class InitialBindings extends Bindings {
   @override
   void dependencies() {
-    // Controllers that should be available throughout the app
-    // Get.put(() => GPSLocationController(), permanent: true);
-    // Get.put(() => ConnectivityController(),permanent: true);
-    // Get.lazyPut(()=>TambahActivityController() , permanent: true);
-    // Get.put(()=>TambahActivityController() , permanent: true);
-    // Get.put(()=>TambahAvailabilityController(), permanent: true);
-    // Get.lazyPut(()=>TambahVisibilityController());
-    // Get.lazyPut(()=>TambahOrderController());
+    // Register controllers with GetX dependency injection
     Get.lazyPut(() => SupportDataController());
     Get.lazyPut(() => LoginController());
     Get.lazyPut(() => BottomNavController());
@@ -197,6 +157,5 @@ class InitialBindings extends Bindings {
     Get.lazyPut(() => PdfController());
     Get.lazyPut(() => TambahRoutingController());
     Get.lazyPut(() => TambahProdukSellingController());
-    // Add other controllers...
   }
 }

@@ -45,7 +45,6 @@ class TambahSelling extends GetView<SellingController> {
                         EnhancedBackButton(
                           onPressed: () => Alerts.showConfirmDialog(context).then((shouldPop) {
                             if (shouldPop == true) {
-                              
                               controller.onReset();
                             }
                           }),
@@ -437,7 +436,8 @@ class CollapsibleCategoryGroup extends StatefulWidget {
     Key? key,
     required this.category,
     required this.items,
-    this.onEdit, required this.isEdit,
+    this.onEdit,
+    required this.isEdit,
   }) : super(key: key);
 
   @override
@@ -499,13 +499,13 @@ class _CollapsibleCategoryGroupState extends State<CollapsibleCategoryGroup> {
                       ),
                     ),
                     widget.isEdit
-                    ? IconButton(
-                      onPressed: widget.onEdit,
-                      icon: Icon(Icons.edit_outlined, color: Colors.blue, size: 20),
-                      padding: EdgeInsets.zero,
-                      constraints: BoxConstraints(),
-                      tooltip: 'Edit Category Products',
-                    )
+                        ? IconButton(
+                            onPressed: widget.onEdit,
+                            icon: Icon(Icons.edit_outlined, color: Colors.blue, size: 20),
+                            padding: EdgeInsets.zero,
+                            constraints: BoxConstraints(),
+                            tooltip: 'Edit Category Products',
+                          )
                         : SizedBox()
                   ],
                 ),

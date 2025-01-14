@@ -12,6 +12,7 @@ import '../widget/logo_animation.dart';
 import 'index.dart';
 import 'login.dart';
 
+/// Splash screen widget that handles initial app loading and navigation
 class SplashScreen extends StatefulWidget {
   const SplashScreen({super.key});
 
@@ -20,34 +21,46 @@ class SplashScreen extends StatefulWidget {
 }
 
 class _SplashScreenState extends State<SplashScreen> {
-  final loginController = Get.find<LoginController>();
-  String version = '';
+  final LoginController loginController = Get.find<LoginController>();
+  final RxString version = ''.obs; // Convert to reactive
 
   @override
   void initState() {
     super.initState();
-    _navigateToNextScreen();
-    _getVersion();
+    _initializeApp();
   }
 
+  /// Handles all initialization tasks
+  Future<void> _initializeApp() async {
+    await Future.wait([
+      _getVersion(),
+      _initializeControllers(),
+      _navigateToNextScreen(),
+    ]);
+  }
+
+  /// Fetches app version information
   Future<void> _getVersion() async {
-    PackageInfo packageInfo = await PackageInfo.fromPlatform();
-    setState(() {
-      version = "${packageInfo.version}+${packageInfo.buildNumber}";
-    });
+    try {
+      final PackageInfo packageInfo = await PackageInfo.fromPlatform();
+      version.value = "${packageInfo.version}+${packageInfo.buildNumber}";
+    } catch (e) {
+      version.value = "Version unavailable";
+      debugPrint('Error fetching version: $e');
+    }
   }
 
-  Future<void> _navigateToNextScreen() async {
-    bool isLoggedIn = await loginController.isLoggedIn();
-    Future.delayed(const Duration(seconds: 3), () {
-      Get.put(ConnectivityController(), permanent: true);
-      Get.put(GPSLocationController(), permanent: true);
+  /// Initializes core controllers
+  Future<void> _initializeControllers() async {
+    Get.put(ConnectivityController(), permanent: true);
+    Get.put(GPSLocationController(), permanent: true);
+  }
 
-      // Get.put(SupportDataController(), permanent: true);
-      Get.offAll(
-        () => isLoggedIn ? MainPage() : LoginPage(),
-      );
-    });
+  /// Handles navigation based on authentication status
+  Future<void> _navigateToNextScreen() async {
+    await Future.delayed(const Duration(seconds: 3));
+    final bool isLoggedIn = await loginController.isLoggedIn();
+    Get.offAll(() => isLoggedIn ? MainPage() : LoginPage());
   }
 
   @override

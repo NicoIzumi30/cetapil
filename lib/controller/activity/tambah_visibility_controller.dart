@@ -1,5 +1,6 @@
 import 'dart:io';
 import 'package:cetapil_mobile/database/activity_database.dart';
+import 'package:cetapil_mobile/utils/temp_images.dart';
 import 'package:get/get.dart';
 import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
@@ -10,6 +11,7 @@ class TambahVisibilityController extends GetxController {
   late TambahActivityController activityController = Get.find<TambahActivityController>();
   final ActivityDatabaseHelper dbHelper = ActivityDatabaseHelper.instance;
   final supportDataController = Get.find<SupportDataController>();
+  final _tempImageStorage = TempImageStorage();
 
   final posmType = ''.obs;
   final posmTypeId = ''.obs;
@@ -34,12 +36,10 @@ class TambahVisibilityController extends GetxController {
     var data = activityController.visibilityPrimaryDraftItems
         .firstWhere((item) => item['id'] == id, orElse: () => {});
     if (data.isEmpty) {
-      print("posmTypeId.value");
       return;
     } else {
       posmTypeId.value = data['posm_type_id'];
-      print(data['posm_type_name']);
-      print(posmTypeId.value);
+      posmType.value = data['posm_type_name'];
       visualTypeId.value = data['visual_type_id'];
       var visualName = supportDataController
           .getVisualTypes()
@@ -92,9 +92,39 @@ class TambahVisibilityController extends GetxController {
     }
   }
 
-  void updateImage(File? file) {
-    visibilityImages.value = file;
-    // activityController.updateVisibilityImage(file);
+  void updateImage(File? file) async {
+    try {
+      isVisibilityImageUploading.value = true;
+
+      // Delete existing image if any
+      if (visibilityImages.value != null) {
+        await _tempImageStorage.deleteImage(visibilityImages.value!.path);
+      }
+
+      if (file != null) {
+        // Check if we're in draft mode by checking if detailOutlet exists in activityController
+        final isDraft = activityController.detailOutlet.value != null;
+
+        // Save to temp storage
+        final imagePath = await _tempImageStorage.saveImage(
+          file,
+          category: 'visibility',
+          isDraft: isDraft,
+        );
+        visibilityImages.value = File(imagePath);
+      } else {
+        visibilityImages.value = null;
+      }
+    } catch (e) {
+      print('Error updating visibility image: $e');
+      Get.snackbar(
+        'Error',
+        'Failed to process image: $e',
+        snackPosition: SnackPosition.BOTTOM,
+      );
+    } finally {
+      isVisibilityImageUploading.value = false;
+    }
     update();
   }
 
@@ -204,17 +234,89 @@ class TambahVisibilityController extends GetxController {
   final isprogramImages1 = false.obs;
   final isprogramImages2 = false.obs;
 
-  void updatedisplayImage(File? file) {
-    displayImages.value = file;
-    // activityController.updateVisibilitySecondaryImage(file);
+  void updatedisplayImage(File? file) async {
+    try {
+      isdisplayImageUploading.value = true;
+
+      // Delete existing image if any
+      if (displayImages.value != null) {
+        await _tempImageStorage.deleteImage(displayImages.value!.path);
+      }
+
+      if (file != null) {
+        // Check if we're in draft mode
+        final isDraft = activityController.detailOutlet.value != null;
+
+        // Save to temp storage
+        final imagePath =
+            await _tempImageStorage.saveImage(file, category: 'visibility', isDraft: isDraft);
+        displayImages.value = File(imagePath);
+      } else {
+        displayImages.value = null;
+      }
+    } catch (e) {
+      print('Error updating display image: $e');
+      Get.snackbar(
+        'Error',
+        'Failed to process image: $e',
+        snackPosition: SnackPosition.BOTTOM,
+      );
+    } finally {
+      isdisplayImageUploading.value = false;
+    }
     update();
   }
 
-  void updatekompetitorImage(File? file, String title) {
-    if (title == "Foto Program Kompetitor 1") {
-      programImages1.value = file;
-    } else {
-      programImages2.value = file;
+  void updatekompetitorImage(File? file, String title) async {
+    try {
+      if (title == "Foto Program Kompetitor 1") {
+        isprogramImages1.value = true;
+
+        // Delete existing image if any
+        if (programImages1.value != null) {
+          await _tempImageStorage.deleteImage(programImages1.value!.path);
+        }
+
+        if (file != null) {
+          // Check if we're in draft mode
+          final isDraft = activityController.detailOutlet.value != null;
+
+          // Save to temp storage
+          final imagePath =
+              await _tempImageStorage.saveImage(file, category: 'visibility', isDraft: isDraft);
+          programImages1.value = File(imagePath);
+        } else {
+          programImages1.value = null;
+        }
+        isprogramImages1.value = false;
+      } else {
+        isprogramImages2.value = true;
+
+        // Delete existing image if any
+        if (programImages2.value != null) {
+          await _tempImageStorage.deleteImage(programImages2.value!.path);
+        }
+
+        if (file != null) {
+          // Check if we're in draft mode
+          final isDraft = activityController.detailOutlet.value != null;
+
+          // Save to temp storage
+          final imagePath =
+              await _tempImageStorage.saveImage(file, category: 'visibility', isDraft: isDraft);
+          programImages2.value = File(imagePath);
+        } else {
+          programImages2.value = null;
+        }
+        isprogramImages2.value = false;
+      }
+    } catch (e) {
+      print('Error updating kompetitor image: $e');
+      Get.snackbar(
+        'Error',
+        'Failed to process image: $e',
+        snackPosition: SnackPosition.BOTTOM,
+      );
     }
     update();
   }
@@ -286,9 +388,6 @@ class TambahVisibilityController extends GetxController {
     if (promoMechanism.value.text.isEmpty) {
       missingFields.add('Mekanisme Promo');
     }
-    // if (selectedDateRange.value == null) {
-    //   missingFields.add('Promo Periode');
-    // }
     if (programImages1.value == null) {
       missingFields.add('Foto Program 1');
     }
@@ -334,61 +433,9 @@ class TambahVisibilityController extends GetxController {
       'program_image2': programImages2.value,
     };
 
-    // try {
-    //   final db = await dbHelper.database;
-    //   final salesActivityId = activityController.detailOutlet.value!.id;
-    //   if (salesActivityId == null) {
-    //     throw Exception('Sales Activity ID is not available');
-    //   }
-    //
-    //   await db.transaction((txn) async {
-    //     // Check if a draft already exists
-    //     final existingDraft = await txn.query(
-    //       'visibility_kompetitor',
-    //       where: 'id = ? AND sales_activity_id = ?',
-    //       whereArgs: [id, salesActivityId],
-    //     );
-    //
-    //     if (existingDraft.isEmpty) {
-    //       // Insert new draft
-    //       await txn.insert('visibility_kompetitor', {
-    //         'id': id,
-    //         'sales_activity_id': salesActivityId,
-    //         'category': id_part[1].toUpperCase(),
-    //         'position': id_part[2],
-    //         'brand_name': brandName.value.text,
-    //         'promo_mechanism': promoMechanism.value.text,
-    //         'promo_periode_start': formattedStart,
-    //         'promo_periode_end': formattedEnd,
-    //         'program_image1': programImages1.value?.path,
-    //         'program_image2': programImages2.value?.path,
-    //       });
-    //     } else {
-    //       // Update existing draft
-    //       await txn.update(
-    //         'visibility_kompetitor',
-    //         {
-    //           'category': id_part[1].toUpperCase(),
-    //           'position': id_part[2],
-    //           'brand_name': brandName.value.text,
-    //           'promo_mechanism': promoMechanism.value.text,
-    //           'promo_periode_start': formattedStart,
-    //           'promo_periode_end': formattedEnd,
-    //           'program_image1': programImages1.value?.path,
-    //           'program_image2': programImages2.value?.path,
-    //         },
-    //         where: 'id = ? AND sales_activity_id = ?',
-    //         whereArgs: [id, salesActivityId],
-    //       );
-    //     }
-    //   });
-
-      activityController.addKompetitorVisibilityItem(data);
-      clearKompetitorForm();
-      Get.back();
-    // } catch (e) {
-    //   print('Error saving draft: $e');
-    // }
+    activityController.addKompetitorVisibilityItem(data);
+    clearKompetitorForm();
+    Get.back();
   }
 
   Future<void> loadKompetitorDraft(String id) async {
@@ -481,6 +528,7 @@ class TambahVisibilityController extends GetxController {
 
   @override
   void onClose() {
+    _tempImageStorage.cleanupTempCategory('visibility');
     super.onClose();
   }
 }
