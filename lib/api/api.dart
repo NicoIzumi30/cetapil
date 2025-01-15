@@ -86,6 +86,48 @@ class ApiWrapper {
     return 'Terjadi kesalahan yang tidak diketahui';
   }
 
+  static Future<T> loginWithTimeout<T>({
+    required String url,
+    required Future<http.MultipartRequest> Function() requestBuilder,
+    required T Function(String body) parser,
+  }) async {
+    try {
+      final connectivityResult = await Connectivity().checkConnectivity();
+      if (connectivityResult == ConnectivityResult.none) {
+        throw 'Tidak ada koneksi internet';
+      }
+
+      final request = await requestBuilder();
+      
+      final streamedResponse = await request.send().timeout(Duration(seconds: timeoutDuration));
+      final response = await http.Response.fromStream(streamedResponse);
+
+      if (response.statusCode == 200) {
+        return parser(response.body);
+      }
+
+      // Try to parse error response
+      try {
+        final errorBody = json.decode(response.body);
+        throw _formatErrorMessage(errorBody);
+      } catch (e) {
+        if (e is String) throw e;
+
+        if (response.statusCode == 401) {
+          throw 'Email atau password salah';
+        } else if (response.statusCode >= 500) {
+          throw 'Server Error';
+        }
+        throw 'Gagal request: ${response.statusCode}';
+      }
+    } on TimeoutException {
+      throw 'Request timeout setelah $timeoutDuration detik';
+    } catch (e) {
+      if (e is String) throw e;
+      throw e.toString();
+    }
+  }
+
   static Future<T> getWithTimeout<T>({
     required String url,
     required T Function(String body) parser,
@@ -233,7 +275,7 @@ class Api {
   static const String baseUrl = 'https://dev.cetaphil.id';
 
   static Future<LoginResponse> login(String email, String password) async {
-    return ApiWrapper.multipartWithTimeout<LoginResponse>(
+    return ApiWrapper.loginWithTimeout<LoginResponse>(
       url: '$baseUrl/api/login',
       requestBuilder: () async {
         var request = http.MultipartRequest('POST', Uri.parse('$baseUrl/api/login'))
