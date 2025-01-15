@@ -30,131 +30,132 @@ class TambahActivity extends GetView<TambahActivityController> {
       },
       child: SafeArea(
           child: Stack(children: [
-            Image.asset(
-              'assets/background.png',
-              fit: BoxFit.cover,
-              width: double.infinity,
-              height: double.infinity,
-            ),
-            Padding(
-                padding: const EdgeInsets.fromLTRB(15, 30, 15, 10),
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    EnhancedBackButton(
-                      onPressed: () {
-                        Alerts.showConfirmDialog(
-                          context,
-                          onContinue: () async {
-                            Get.back();
-                            final controller = Get.find<
-                                TambahActivityController>();
-                            controller.clearAllDraftItems();
-                            controller.onClose();
-                          },
-                        );
+        Image.asset(
+          'assets/background.png',
+          fit: BoxFit.cover,
+          width: double.infinity,
+          height: double.infinity,
+        ),
+        Padding(
+            padding: const EdgeInsets.fromLTRB(15, 30, 15, 10),
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                EnhancedBackButton(
+                  onPressed: () {
+                    Alerts.showConfirmDialog(
+                      context,
+                      onContinue: () async {
+                        Get.back();
+                        final controller = Get.find<TambahActivityController>();
+                        controller.clearAllDraftItems();
+                        controller.onClose();
                       },
-                      backgroundColor: Colors.white,
-                      iconColor: Colors.blue,
-                    ),
-                    SizedBox(
-                      height: 20,
-                    ),
-                    UnderlineTextField.readOnly(
-                      title: "Nama Outlet",
-                      value:
-                      detailDraft.isNotEmpty ? detailDraft['name'] : detailApi
-                          .value!.outlet!.name,
-                    ),
-                    UnderlineTextField.readOnly(
-                      title: "Kategori Outlet",
-                      value: detailDraft.isNotEmpty
-                          ? detailDraft['category']
-                          : detailApi.value!.outlet!.name,
-                    ),
-                    Obx(() {
-                      return SecondaryTabbar(
-                        selectedIndex: controller.selectedTab.value,
-                        onTabChanged: controller.changeTab,
-                        controller: controller,
-                      );
+                    );
+                  },
+                  backgroundColor: Colors.white,
+                  iconColor: Colors.blue,
+                ),
+                SizedBox(
+                  height: 20,
+                ),
+                UnderlineTextField.readOnly(
+                  title: "Nama Outlet",
+                  value:
+                      detailDraft.isNotEmpty ? detailDraft['name'] : detailApi.value!.outlet!.name,
+                ),
+                UnderlineTextField.readOnly(
+                  title: "Kategori Outlet",
+                  value: detailDraft.isNotEmpty
+                      ? detailDraft['category']
+                      : detailApi.value!.outlet!.name,
+                ),
+                Obx(() {
+                  return SecondaryTabbar(
+                    selectedIndex: controller.selectedTab.value,
+                    onTabChanged: controller.changeTab,
+                    controller: controller,
+                  );
+                }),
+                SizedBox(
+                  height: 10,
+                ),
+                Expanded(
+                  child: SingleChildScrollView(
+                    child: Obx(() {
+                      switch (controller.selectedTab.value) {
+                        case 0:
+                          return AvailabilityPage();
+                        case 1:
+                          return VisibilityPage();
+                        case 2:
+                          return KnowledgePage();
+                        case 3:
+                          return SurveyPage();
+                        default:
+                          return OrderPage();
+                      }
                     }),
-                    SizedBox(
-                      height: 10,
-                    ),
-                    Expanded(
-                      child: SingleChildScrollView(
-                        child: Obx(() {
-                          switch (controller.selectedTab.value) {
-                            case 0:
-                              return AvailabilityPage();
-                            case 1:
-                              return VisibilityPage();
-                            case 2:
-                              return KnowledgePage();
-                            case 3:
-                              return SurveyPage();
-                            default:
-                              return OrderPage();
-                          }
-                        }),
-                      ),
-                    ),
-                    SizedBox(
-                      height: 3,
-                    ),
-                    Container(
-                      width: double.infinity,
-                      decoration: BoxDecoration(
-                          color: Colors.white.withOpacity(0.3),
-                          borderRadius: BorderRadius.circular(10)),
-                      child: Padding(
-                        padding: const EdgeInsets.symmetric(
-                            horizontal: 15, vertical: 10),
-                        child: Row(
-                          children: [
-                            _buildButton(
-                              false,
-                              "Simpan Draft",
-                                  () => controller.saveDraftActivity(),
-                            ),
-                            SizedBox(width: 10),
-                            _buildButton(
-                              true,
-                              "Kirim",
-                                  () => controller.submitApiActivity(),
-                              // controller.submitOutlet(),
-                            ),
-                          ],
+                  ),
+                ),
+                SizedBox(
+                  height: 3,
+                ),
+                Container(
+                  width: double.infinity,
+                  decoration: BoxDecoration(
+                      color: Colors.white.withOpacity(0.3),
+                      borderRadius: BorderRadius.circular(10)),
+                  child: Padding(
+                    padding: const EdgeInsets.symmetric(horizontal: 15, vertical: 10),
+                    child: Row(
+                      children: [
+                        _buildButton(
+                          false,
+                          "Simpan Draft",
+                          () => controller.saveDraftActivity(),
                         ),
-                      ),
+                        SizedBox(width: 10),
+                        _buildButton(
+                          true,
+                          "Kirim",
+                          () => controller.submitApiActivity(),
+                        ),
+                      ],
                     ),
-                  ],
-                ))
-          ])),
+                  ),
+                ),
+              ],
+            ))
+      ])),
     );
   }
 
   Expanded _buildButton(bool isSubmit, String title, VoidCallback onTap) {
     return Expanded(
-      child: ElevatedButton(
-        style: ElevatedButton.styleFrom(
-          backgroundColor: isSubmit ? AppColors.primary : Colors.white,
-          shape: RoundedRectangleBorder(
-            borderRadius: BorderRadius.circular(10),
-            side: isSubmit ? BorderSide.none : BorderSide(
-                color: AppColors.primary),
+      child: Obx(() {
+        bool isEnabled =
+            isSubmit ? controller.canSubmit() : true; // Only check conditions for submit button
+
+        return ElevatedButton(
+          style: ElevatedButton.styleFrom(
+            backgroundColor:
+                isSubmit ? (isEnabled ? AppColors.primary : Colors.grey) : Colors.white,
+            shape: RoundedRectangleBorder(
+              borderRadius: BorderRadius.circular(10),
+              side: isSubmit ? BorderSide.none : BorderSide(color: AppColors.primary),
+            ),
           ),
-        ),
-        onPressed: onTap,
-        child: Text(
-          title,
-          style: TextStyle(
-            color: isSubmit ? Colors.white : AppColors.primary,
-            fontWeight: FontWeight.bold,
+          onPressed: isEnabled ? onTap : null,
+          child: Text(
+            title,
+            style: TextStyle(
+              color: isSubmit ? (isEnabled ? Colors.white : Colors.white70) : AppColors.primary,
+              fontWeight: FontWeight.bold,
+            ),
           ),
-        ),
-      ),
+        );
+      }),
     );
   }
 }
@@ -167,7 +168,8 @@ class SecondaryTabbar extends StatelessWidget {
   SecondaryTabbar({
     Key? key,
     required this.selectedIndex,
-    required this.onTabChanged, this.controller,
+    required this.onTabChanged,
+    this.controller,
   }) : super(key: key);
 
   @override
@@ -206,14 +208,18 @@ class SecondaryTabbar extends StatelessWidget {
               color: !isEnable
                   ? Colors.grey
                   : (selectedIndex == index)
-                  ? Colors.blue
-                  : Colors.white),
+                      ? Colors.blue
+                      : Colors.white),
           child: Center(
             child: Text(
               label,
               style: TextStyle(
                   fontSize: 11,
-                  color: !isEnable ? Colors.white : (selectedIndex == index) ? Colors.white : Colors.blue),
+                  color: !isEnable
+                      ? Colors.white
+                      : (selectedIndex == index)
+                          ? Colors.white
+                          : Colors.blue),
             ),
           ),
         ),

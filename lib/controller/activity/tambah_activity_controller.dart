@@ -150,6 +150,18 @@ class TambahActivityController extends GetxController {
     return false;
   }
 
+  bool canSubmit() {
+    bool areAllControllersNotEmpty = priceControllers.values
+        .any((controller) => controller.text.isNotEmpty && controller.text != "");
+
+    return availabilityDraftItems.isNotEmpty &&
+        visibilityPrimaryDraftItems.length == 6 &&
+        visibilitySecondaryDraftItems.length == 4 &&
+        visibilityKompetitorDraftItems.length == 2 &&
+        knowledgeTime.value >= 180 &&
+        areAllControllersNotEmpty;
+  }
+
   initDetailDraftAvailability() {
     if (detailDraft.isNotEmpty) {
       for (var data in detailDraft["availabilityItems"]) {
