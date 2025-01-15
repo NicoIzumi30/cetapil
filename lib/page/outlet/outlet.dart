@@ -377,7 +377,7 @@ class OutletCard extends StatelessWidget {
                     borderRadius: BorderRadius.circular(8),
                     child: !outlet.images!.first.image!.contains("/data".toLowerCase())
                         ? Image.network(
-                            "https://cetaphil.id${outlet.images!.first.image}",
+                            "https://dev.cetaphil.id${outlet.images!.first.image}",
                             width: 100,
                             height: 100,
                             fit: BoxFit.cover,

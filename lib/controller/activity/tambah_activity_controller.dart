@@ -101,7 +101,11 @@ class TambahActivityController extends GetxController {
   final orderTime = 0.obs;
   Timer? _timer;
 
+  final RxBool _canSubmitState = false.obs;
+  bool get canSubmitState => _canSubmitState.value;
+
   bool disableSecondaryTab(int indexTab) {
+    _updateSubmitState();
     bool areAllControllersNotEmpty = priceControllers.values
         .any((controller) => controller.text.isNotEmpty && controller.text != "");
     if (indexTab == 0) {
@@ -126,7 +130,7 @@ class TambahActivityController extends GetxController {
         if (visibilityPrimaryDraftItems.length == 6 &&
             visibilitySecondaryDraftItems.length == 4 &&
             visibilityKompetitorDraftItems.length == 2) {
-          if (knowledgeTime.value >= 180) {
+          if (knowledgeTime.value >= 120) {
             /// minimal duration 3 menit
             return true;
           }
@@ -138,7 +142,7 @@ class TambahActivityController extends GetxController {
         if (visibilityPrimaryDraftItems.length == 6 &&
             visibilitySecondaryDraftItems.length == 4 &&
             visibilityKompetitorDraftItems.length == 2) {
-          if (knowledgeTime.value >= 180) {
+          if (knowledgeTime.value >= 120) {
             /// minimal duration 3 menit
             if (areAllControllersNotEmpty) {
               return true;
@@ -150,15 +154,15 @@ class TambahActivityController extends GetxController {
     return false;
   }
 
-  bool canSubmit() {
-    bool areAllControllersNotEmpty = priceControllers.values
+  void _updateSubmitState() {
+    bool areAllControllersNotEmpty = priceControllers.value.values
         .any((controller) => controller.text.isNotEmpty && controller.text != "");
 
-    return availabilityDraftItems.isNotEmpty &&
+    _canSubmitState.value = availabilityDraftItems.isNotEmpty &&
         visibilityPrimaryDraftItems.length == 6 &&
         visibilitySecondaryDraftItems.length == 4 &&
         visibilityKompetitorDraftItems.length == 2 &&
-        knowledgeTime.value >= 180 &&
+        knowledgeTime.value >= 120 &&
         areAllControllersNotEmpty;
   }
 

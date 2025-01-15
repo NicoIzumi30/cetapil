@@ -53,6 +53,7 @@ class TambahVisibilityController extends GetxController {
         visualType.value = data['visual_type_name'];
       }
 
+      print(data['condition']);
       selectedCondition.value = data['condition'];
       lebarRak.value.text = data['shelf_width'].toString();
       shelving.value.text = data['shelving'].toString();

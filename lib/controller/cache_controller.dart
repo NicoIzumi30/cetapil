@@ -130,7 +130,7 @@ class CachedVideoController extends GetxController {
       hasError.value = false;
       errorMessage.value = '';
 
-      final url = 'https://cetaphil.id/storage'; // Replace with actual URL
+      final url = 'https://dev.cetaphil.id/storage'; // Replace with actual URL
 
       // Check cache first
       try {
