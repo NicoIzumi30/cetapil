@@ -2,16 +2,21 @@
 
 namespace Database\Seeders\MainData;
 
-use Illuminate\Database\Seeder;
-use Illuminate\Support\Facades\DB;
-use Illuminate\Support\Str;
+use App\Models\Outlet;
 use Carbon\Carbon;
 use Faker\Factory as Faker;
+use Illuminate\Support\Str;
+use Illuminate\Database\Seeder;
+use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Schema;
 
 class OutletSeeder extends Seeder
 {
     public function run()
     {
+        Schema::disableForeignKeyConstraints();
+        Outlet::truncate();
+        Schema::enableForeignKeyConstraints();
         $faker = Faker::create('id_ID');
         
         $userIds = DB::table('users')
