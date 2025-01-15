@@ -29,67 +29,66 @@ class ValidateVisibilityEntries implements ValidationRule
             }
         }
 
-        // Validate CORE and BABY categories as before
+        // Validate PRIMARY entries for CORE and BABY categories
         foreach (['CORE', 'BABY'] as $category) {
-            $entries = collect($value)->filter(function ($item) use ($category) {
+            $primaryEntries = collect($value)->filter(function ($item) use ($category) {
                 return $item['type'] === 'PRIMARY' && $item['category'] === $category;
             });
 
-            if ($entries->count() !== 3) {
+            if ($primaryEntries->count() !== 3) {
                 $fail("Must have exactly 3 PRIMARY {$category} entries.");
                 return;
             }
 
-            $positions = $entries->pluck('position')->sort()->values()->toArray();
-            $missingPositions = array_diff([1, 2, 3], $positions);
+            $primaryPositions = $primaryEntries->pluck('position')->sort()->values()->toArray();
+            $missingPrimaryPositions = array_diff([1, 2, 3], $primaryPositions);
 
-            if (!empty($missingPositions)) {
-                $missing = implode(', ', $missingPositions);
+            if (!empty($missingPrimaryPositions)) {
+                $missing = implode(', ', $missingPrimaryPositions);
                 $fail("PRIMARY {$category} is missing positions: {$missing}");
                 return;
             }
         }
 
-        // Validate COMPETITOR category
+        // Validate SECONDARY entries for CORE and BABY categories
+        foreach (['CORE', 'BABY'] as $category) {
+            $secondaryEntries = collect($value)->filter(function ($item) use ($category) {
+                return $item['type'] === 'SECONDARY' && $item['category'] === $category;
+            });
+
+            if ($secondaryEntries->count() !== 2) {
+                $fail("Must have exactly 2 SECONDARY {$category} entries.");
+                return;
+            }
+
+            $secondaryPositions = $secondaryEntries->pluck('position')->sort()->values()->toArray();
+            $missingSecondaryPositions = array_diff([1, 2], $secondaryPositions);
+
+            if (!empty($missingSecondaryPositions)) {
+                $missing = implode(', ', $missingSecondaryPositions);
+                $fail("SECONDARY {$category} is missing positions: {$missing}");
+                return;
+            }
+        }
+
+        // Validate COMPETITOR category (required 2 entries)
         $competitorEntries = collect($value)->filter(function ($item) {
             return $item['category'] === 'COMPETITOR';
         });
 
         $competitorCount = $competitorEntries->count();
 
-        if ($competitorCount > 0) {
-            // Check maximum entries
-            if ($competitorCount > 2) {
-                $fail("Cannot have more than 2 COMPETITOR entries.");
-                return;
-            }
+        if ($competitorCount !== 2) {
+            $fail("Must have exactly 2 COMPETITOR entries.");
+            return;
+        }
 
-            $positions = $competitorEntries->pluck('position')->sort()->values()->toArray();
+        $positions = $competitorEntries->pluck('position')->sort()->values()->toArray();
+        $missingPositions = array_diff([1, 2], $positions);
 
-            // Debug log the positions
-            Log::info('Competitor positions:', [
-                'count' => $competitorCount,
-                'positions' => $positions,
-                'raw_entries' => $competitorEntries->toArray()
-            ]);
-
-            if ($competitorCount === 1) {
-                if (!in_array(1, $positions)) {
-                    $fail("Single COMPETITOR entry must use position 1.");
-                    return;
-                }
-            }
-
-            if ($competitorCount === 2) {
-                // More lenient check - just ensure we have positions 1 and 2
-                $requiredPositions = [1, 2];
-                $missingPositions = array_diff($requiredPositions, $positions);
-
-                if (!empty($missingPositions)) {
-                    $fail("Two COMPETITOR entries must include positions 1 and 2.");
-                    return;
-                }
-            }
+        if (!empty($missingPositions)) {
+            $fail("COMPETITOR entries must use positions 1 and 2.");
+            return;
         }
     }
 }
