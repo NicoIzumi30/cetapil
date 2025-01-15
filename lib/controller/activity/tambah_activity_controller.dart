@@ -354,6 +354,35 @@ class TambahActivityController extends GetxController {
   // Also update submitApiActivity to use the same logic
   Future<void> submitApiActivity() async {
     try {
+      // Validate all required conditions first
+      bool areAllControllersNotEmpty = priceControllers.value.values
+          .any((controller) => controller.text.isNotEmpty && controller.text != "");
+
+      // Validate each condition separately to show specific error messages
+      if (availabilityDraftItems.isEmpty) {
+        throw 'Mohon lengkapi data Availability';
+      }
+
+      if (visibilityPrimaryDraftItems.length != 6) {
+        throw 'Mohon lengkapi 6 data Visibility Primary. Saat ini terisi ${visibilityPrimaryDraftItems.length} data';
+      }
+
+      if (visibilitySecondaryDraftItems.length != 4) {
+        throw 'Mohon lengkapi 4 data Visibility Secondary. Saat ini terisi ${visibilitySecondaryDraftItems.length} data';
+      }
+
+      if (visibilityKompetitorDraftItems.length != 2) {
+        throw 'Mohon lengkapi 2 data Visibility Competitor. Saat ini terisi ${visibilityKompetitorDraftItems.length} data';
+      }
+
+      if (knowledgeTime.value < 120) {
+        throw 'Waktu minimum untuk Knowledge adalah 2 menit (120 detik). Saat ini: ${knowledgeTime.value} detik';
+      }
+
+      if (!areAllControllersNotEmpty) {
+        throw 'Mohon lengkapi semua data survey';
+      }
+      
       EasyLoading.show(status: 'Submit Data...');
 
       Map<String, dynamic> data = {
@@ -365,7 +394,7 @@ class TambahActivityController extends GetxController {
         'time_knowledge': knowledgeTime.value.toString(),
         'time_survey': surveyTime.value.toString(),
         'time_order': orderTime.value.toString(),
-        'current_time': detailDraft['checked_out'] ?? DateTime.now().toIso8601String(),
+        'current_time': DateTime.now().toIso8601String(),
       };
 
       // Collect all image paths for cleanup later
@@ -462,49 +491,7 @@ class TambahActivityController extends GetxController {
       CustomAlerts.showSuccess(Get.context!, "Data Berhasil Disimpan",
           "Anda baru menyimpan Data. Silahkan periksa status Outlet pada aplikasi.");
     } catch (e, stackTrace) {
-      print('Error submit data: $e');
-      print('Stack trace: $stackTrace');
-
-      String errorMessage = 'Failed to submit data';
-
-      if (e is Exception) {
-        final errorString = e.toString();
-        // Parse the error message if it's JSON
-        if (errorString.contains('{') && errorString.contains('}')) {
-          try {
-            // Extract JSON string from Exception message
-            final jsonStr =
-                errorString.substring(errorString.indexOf('{'), errorString.lastIndexOf('}') + 1);
-            final errorData = json.decode(jsonStr);
-
-            // Get detailed error message
-            errorMessage = errorData['message'] ?? errorString;
-
-            // If there are detailed validation errors, log them
-            if (errorData['errors'] != null) {
-              print('Validation Errors: ${errorData['errors']}');
-            }
-          } catch (jsonError) {
-            errorMessage = errorString;
-          }
-        } else {
-          errorMessage = errorString;
-        }
-      }
-
-      if (errorMessage.contains("This activity has already been submitted")) {
-        _timer?.cancel();
-        bool isExists = await db.checkSalesActivityExists(detailOutlet.value!.id!);
-        if (isExists) {
-          await db.deleteSalesActivity(detailOutlet.value!.id!);
-        }
-        activityController.initGetActivity();
-        EasyLoading.dismiss();
-        Get.back();
-      } else {
-        CustomAlerts.showError(
-            Get.context!, "Gagal Mengirim Data", errorMessage.replaceAll('Exception: ', ''));
-      }
+      CustomAlerts.showError(Get.context!, "Gagal Mengirim Data", e.toString());
     } finally {
       EasyLoading.dismiss();
     }
