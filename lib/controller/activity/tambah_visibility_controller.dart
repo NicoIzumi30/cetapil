@@ -178,20 +178,19 @@ class TambahVisibilityController extends GetxController {
     if (!validatePrimaryForm()) return;
     var id_part = id.split('-');
 
-    /// (primary, core , 1)
     final data = {
       'id': id,
-      'category': id_part[1].toUpperCase(),
-
-      /// (CORE)
-      'position': id_part[2],
-
-      /// (1)
+      'category': id_part[1].toUpperCase(), // (CORE)
+      'position': id_part[2], // (1)
       'posm_type_id': posmTypeId.value,
       'posm_type_name': posmType.value,
       'visual_type_id': visualTypeId.value,
-      'visual_type_name':
-          visualType.value == "Others" ? otherVisualController.value.text : visualType.value,
+      'visual_type': visualType.value == "Others"
+          ? otherVisualController.value.text
+          : visualType.value, // Changed from visual_type_name to match API
+      'visual_type_name': visualType.value == "Others"
+          ? otherVisualController.value.text
+          : visualType.value, // Keep this for backward compatibility
       'condition': selectedCondition.value,
       'shelf_width': lebarRak.value.text,
       'shelving': shelving.value.text,
