@@ -31,6 +31,8 @@ class TambahActivity extends GetView<TambahActivityController> {
       },
       child: SafeArea(
         child: Scaffold(
+          resizeToAvoidBottomInset: false,
+
           // Wrap with Scaffold for proper layout
           body: Stack(
             children: [
