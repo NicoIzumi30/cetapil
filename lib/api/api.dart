@@ -39,6 +39,53 @@ class ApiWrapper {
   static const int timeoutDuration = 120; // 2 minutes
   static final GetStorage storage = GetStorage();
 
+  static String _formatErrorMessage(dynamic errorBody) {
+    if (errorBody == null) return 'Terjadi kesalahan';
+
+    if (errorBody is String) return errorBody;
+
+    if (errorBody['message'] != null) {
+      var message = errorBody['message'];
+
+      if (message is String) return message;
+
+      if (message is Map) {
+        // Collect all error messages
+        List<String> errors = [];
+
+        message.forEach((key, value) {
+          if (value is List && value.isNotEmpty) {
+            // Clean up the field name for better readability
+            var fieldName = key
+                .toString()
+                .replaceAll('_', ' ')
+                .replaceAll('.', ' ')
+                .replaceAll('visibility', 'Visibilitas');
+
+            // Special handling for indexed fields (e.g., visibility.1.category)
+            if (fieldName.contains('Visibilitas')) {
+              // Skip adding the full message if it's a sub-field error
+              if (!fieldName.contains('type') &&
+                  !fieldName.contains('category') &&
+                  !fieldName.contains('position') &&
+                  !fieldName.contains('visual')) {
+                errors.add(value.first.toString());
+              }
+            } else {
+              // For other fields, show field name and error
+              errors.add('$fieldName: ${value.first}');
+            }
+          }
+        });
+
+        // Remove duplicates and join with newlines
+        return errors.toSet().join('\n');
+      }
+    }
+
+    return 'Terjadi kesalahan yang tidak diketahui';
+  }
+
   static Future<T> getWithTimeout<T>({
     required String url,
     required T Function(String body) parser,
@@ -62,16 +109,27 @@ class ApiWrapper {
 
       if (response.statusCode == 200) {
         return parser(response.body);
-      } else if (response.statusCode == 401) {
-        throw 'Sesi anda telah berakhir. Silakan login kembali';
-      } else if (response.statusCode >= 500) {
-        throw 'Server Error';
       }
-      throw 'Gagal request: ${response.statusCode}';
+
+      // Try to parse error response
+      try {
+        final errorBody = json.decode(response.body);
+        throw _formatErrorMessage(errorBody);
+      } catch (e) {
+        if (e is String) throw e;
+
+        if (response.statusCode == 401) {
+          throw 'Sesi anda telah berakhir. Silakan login kembali';
+        } else if (response.statusCode >= 500) {
+          throw 'Server Error';
+        }
+        throw 'Gagal request: ${response.statusCode}';
+      }
     } on TimeoutException {
       throw 'Request timeout setelah $timeoutDuration detik';
     } catch (e) {
-      throw 'Gagal request: $e';
+      if (e is String) throw e;
+      throw e.toString();
     }
   }
 
@@ -83,10 +141,12 @@ class ApiWrapper {
     try {
       final connectivityResult = await Connectivity().checkConnectivity();
       if (connectivityResult == ConnectivityResult.none) {
-        throw Exception('No internet connection');
+        throw 'Tidak ada koneksi internet';
       }
 
       var token = await storage.read('token');
+      if (token == null) throw 'Token tidak ditemukan';
+
       final response = await http.post(
         Uri.parse(url),
         body: json.encode(body),
@@ -99,11 +159,26 @@ class ApiWrapper {
       if (response.statusCode == 200) {
         return parser(response.body);
       }
-      throw Exception('Request failed with status: ${response.statusCode}');
+
+      // Try to parse error response
+      try {
+        final errorBody = json.decode(response.body);
+        throw _formatErrorMessage(errorBody);
+      } catch (e) {
+        if (e is String) throw e;
+
+        if (response.statusCode == 401) {
+          throw 'Sesi anda telah berakhir. Silakan login kembali';
+        } else if (response.statusCode >= 500) {
+          throw 'Server Error';
+        }
+        throw 'Gagal request: ${response.statusCode}';
+      }
     } on TimeoutException {
       throw 'Request timeout setelah $timeoutDuration detik';
     } catch (e) {
-      throw Exception('Request failed: $e');
+      if (e is String) throw e;
+      throw e.toString();
     }
   }
 
@@ -115,33 +190,41 @@ class ApiWrapper {
     try {
       final connectivityResult = await Connectivity().checkConnectivity();
       if (connectivityResult == ConnectivityResult.none) {
-        throw Exception('No internet connection');
+        throw 'Tidak ada koneksi internet';
       }
 
       final request = await requestBuilder();
       var token = await storage.read('token');
+      if (token == null) throw 'Token tidak ditemukan';
+
       request.headers["Authorization"] = 'Bearer $token';
 
       final streamedResponse = await request.send().timeout(Duration(seconds: timeoutDuration));
       final response = await http.Response.fromStream(streamedResponse);
 
-      // Add handling for 422 status code
-      if (response.statusCode == 422) {
-        final errorResponse = json.decode(response.body);
-        print('Validation Error: ${response.body}'); // For debugging
-        throw Exception(errorResponse['message'] ?? 'Validation error occurred');
-      }
-
       if (response.statusCode == 200) {
         return parser(response.body);
       }
 
-      throw Exception(
-          'Request failed with status: ${response.statusCode}, message: ${response.body}');
+      // Try to parse error response
+      try {
+        final errorBody = json.decode(response.body);
+        throw _formatErrorMessage(errorBody);
+      } catch (e) {
+        if (e is String) throw e;
+
+        if (response.statusCode == 401) {
+          throw 'Sesi anda telah berakhir. Silakan login kembali';
+        } else if (response.statusCode >= 500) {
+          throw 'Server Error';
+        }
+        throw 'Gagal request: ${response.statusCode}';
+      }
     } on TimeoutException {
       throw 'Request timeout setelah $timeoutDuration detik';
     } catch (e) {
-      throw Exception('Request failed: $e');
+      if (e is String) throw e;
+      throw e.toString();
     }
   }
 }
