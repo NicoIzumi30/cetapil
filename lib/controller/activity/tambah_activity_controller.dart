@@ -1,4 +1,5 @@
 import 'dart:async';
+import 'dart:convert';
 
 import 'package:cetapil_mobile/api/api.dart';
 import 'package:cetapil_mobile/controller/activity/activity_controller.dart';
@@ -447,19 +448,46 @@ class TambahActivityController extends GetxController {
     } catch (e, stackTrace) {
       print('Error submit data: $e');
       print('Stack trace: $stackTrace');
-      CustomAlerts.showError(Get.context!, "Gagal Mengirim Data", "Failed to submit data: $e");
-      if (e.toString() == "This activity has already been submitted and cannot be modified") {
-        _timer?.cancel();
 
-        /// check apabila data ada di sqlite, maka hapus data
+      String errorMessage = 'Failed to submit data';
+
+      if (e is Exception) {
+        final errorString = e.toString();
+        // Parse the error message if it's JSON
+        if (errorString.contains('{') && errorString.contains('}')) {
+          try {
+            // Extract JSON string from Exception message
+            final jsonStr =
+                errorString.substring(errorString.indexOf('{'), errorString.lastIndexOf('}') + 1);
+            final errorData = json.decode(jsonStr);
+
+            // Get detailed error message
+            errorMessage = errorData['message'] ?? errorString;
+
+            // If there are detailed validation errors, log them
+            if (errorData['errors'] != null) {
+              print('Validation Errors: ${errorData['errors']}');
+            }
+          } catch (jsonError) {
+            errorMessage = errorString;
+          }
+        } else {
+          errorMessage = errorString;
+        }
+      }
+
+      if (errorMessage.contains("This activity has already been submitted")) {
+        _timer?.cancel();
         bool isExists = await db.checkSalesActivityExists(detailOutlet.value!.id!);
         if (isExists) {
           await db.deleteSalesActivity(detailOutlet.value!.id!);
         }
-
         activityController.initGetActivity();
         EasyLoading.dismiss();
         Get.back();
+      } else {
+        CustomAlerts.showError(
+            Get.context!, "Gagal Mengirim Data", errorMessage.replaceAll('Exception: ', ''));
       }
     } finally {
       EasyLoading.dismiss();

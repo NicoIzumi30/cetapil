@@ -125,10 +125,19 @@ class ApiWrapper {
       final streamedResponse = await request.send().timeout(Duration(seconds: timeoutDuration));
       final response = await http.Response.fromStream(streamedResponse);
 
+      // Add handling for 422 status code
+      if (response.statusCode == 422) {
+        final errorResponse = json.decode(response.body);
+        print('Validation Error: ${response.body}'); // For debugging
+        throw Exception(errorResponse['message'] ?? 'Validation error occurred');
+      }
+
       if (response.statusCode == 200) {
         return parser(response.body);
       }
-      throw Exception('Request failed with status: ${response.statusCode}');
+
+      throw Exception(
+          'Request failed with status: ${response.statusCode}, message: ${response.body}');
     } on TimeoutException {
       throw 'Request timeout setelah $timeoutDuration detik';
     } catch (e) {
@@ -420,64 +429,68 @@ class Api {
     List<Map<String, dynamic>> visibilitySecondaryList,
     List<Map<String, dynamic>> visibilityKompetitorList,
   ) async {
+    var index = 0;
+
     // Primary visibility
-    for (var i = 0; i < visibilityPrimaryList.length; i++) {
-      request.fields["visibility[$i][category]"] = visibilityPrimaryList[i]['category'].toString();
-      request.fields["visibility[$i][type]"] = "PRIMARY";
-      request.fields["visibility[$i][position]"] = visibilityPrimaryList[i]['position'].toString();
-      request.fields["visibility[$i][posm_type_id]"] =
+    for (var i = 0; i < visibilityPrimaryList.length; i++, index++) {
+      request.fields["visibility[$index][category]"] =
+          visibilityPrimaryList[i]['category'].toString();
+      request.fields["visibility[$index][type]"] = "PRIMARY";
+      request.fields["visibility[$index][position]"] =
+          visibilityPrimaryList[i]['position'].toString();
+      request.fields["visibility[$index][posm_type_id]"] =
           visibilityPrimaryList[i]['posm_type_id'].toString();
-      request.fields["visibility[$i][visual_type]"] =
+      request.fields["visibility[$index][visual_type]"] =
           visibilityPrimaryList[i]['visual_type_name'].toString().toUpperCase();
-      request.fields["visibility[$i][condition]"] =
+      request.fields["visibility[$index][condition]"] =
           visibilityPrimaryList[i]['condition'].toString().toUpperCase();
-      request.fields["visibility[$i][shelf_width]"] =
+      request.fields["visibility[$index][shelf_width]"] =
           visibilityPrimaryList[i]['shelf_width'].toString().toUpperCase();
-      request.fields["visibility[$i][shelving]"] =
+      request.fields["visibility[$index][shelving]"] =
           visibilityPrimaryList[i]['shelving'].toString().toUpperCase();
       request.files.add(await http.MultipartFile.fromPath(
-        'visibility[$i][display_photo]',
+        'visibility[$index][display_photo]',
         visibilityPrimaryList[i]['image_visibility'].path,
       ));
     }
 
     // Secondary visibility
-    for (var i = 0; i < visibilitySecondaryList.length; i++) {
-      request.fields["visibility[${i + 6}][category]"] =
+    for (var i = 0; i < visibilitySecondaryList.length; i++, index++) {
+      request.fields["visibility[$index][category]"] =
           visibilitySecondaryList[i]['category'].toString();
-      request.fields["visibility[${i + 6}][type]"] = "SECONDARY";
-      request.fields["visibility[${i + 6}][position]"] =
+      request.fields["visibility[$index][type]"] = "SECONDARY";
+      request.fields["visibility[$index][position]"] =
           visibilitySecondaryList[i]['position'].toString();
-      request.fields["visibility[${i + 6}][visual_type]"] =
+      request.fields["visibility[$index][visual_type]"] =
           visibilitySecondaryList[i]['display_type'].toString().toUpperCase();
-      request.fields["visibility[${i + 6}][has_secondary_display]"] =
+      request.fields["visibility[$index][has_secondary_display]"] =
           visibilitySecondaryList[i]['secondary_exist'].toString() == "true" ? "Y" : "N";
       request.files.add(await http.MultipartFile.fromPath(
-        'visibility[${i + 6}][display_photo]',
+        'visibility[$index][display_photo]',
         visibilitySecondaryList[i]['display_image'].path,
       ));
     }
 
     // Competitor visibility
-    for (var i = 0; i < visibilityKompetitorList.length; i++) {
-      request.fields["visibility[${i + 10}][category]"] = "COMPETITOR";
-      request.fields["visibility[${i + 10}][type]"] = "COMPETITOR";
-      request.fields["visibility[${i + 10}][position]"] =
+    for (var i = 0; i < visibilityKompetitorList.length; i++, index++) {
+      request.fields["visibility[$index][category]"] = "COMPETITOR";
+      request.fields["visibility[$index][type]"] = "COMPETITOR";
+      request.fields["visibility[$index][position]"] =
           visibilityKompetitorList[i]['position'].toString();
-      request.fields["visibility[${i + 10}][competitor_brand_name]"] =
+      request.fields["visibility[$index][competitor_brand_name]"] =
           visibilityKompetitorList[i]['brand_name'].toString().toUpperCase();
-      request.fields["visibility[${i + 10}][competitor_promo_mechanism]"] =
+      request.fields["visibility[$index][competitor_promo_mechanism]"] =
           visibilityKompetitorList[i]['promo_mechanism'].toString();
-      request.fields["visibility[${i + 10}][competitor_promo_start]"] =
+      request.fields["visibility[$index][competitor_promo_start]"] =
           visibilityKompetitorList[i]['promo_periode_start'].toString();
-      request.fields["visibility[${i + 10}][competitor_promo_end]"] =
+      request.fields["visibility[$index][competitor_promo_end]"] =
           visibilityKompetitorList[i]['promo_periode_end'].toString();
       request.files.add(await http.MultipartFile.fromPath(
-        'visibility[${i + 10}][display_photo]',
+        'visibility[$index][display_photo]',
         visibilityKompetitorList[i]['program_image1'].path,
       ));
       request.files.add(await http.MultipartFile.fromPath(
-        'visibility[${i + 10}][display_photo_2]',
+        'visibility[$index][display_photo_2]',
         visibilityKompetitorList[i]['program_image2'].path,
       ));
     }
