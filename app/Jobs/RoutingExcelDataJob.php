@@ -57,6 +57,7 @@ class RoutingExcelDataJob implements ShouldQueue
 
             // If validation passes, process the data
             collect($this->excelData)->chunk(50)->each(function ($chunk) {
+                $dataId = [];
                 foreach ($chunk as $row) {
                     $user = getUserByName(ucwords($row['nama_sales']));
                     $city = getCityByName($row['kota']);
