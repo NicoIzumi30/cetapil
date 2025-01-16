@@ -13,7 +13,7 @@ import '../../../widget/custom_switch.dart';
 import '../../../widget/text_field.dart';
 import '../../../widget/textfield_daterange_picker.dart';
 
-const String BASE_URL = 'https://cetaphil.id/storage/';
+const String BASE_URL = 'https://dev.cetaphil.id/storage/';
 
 class TambahKompetitorVisibility extends GetView<TambahVisibilityController> {
   final String id;

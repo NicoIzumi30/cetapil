@@ -108,6 +108,7 @@ class TambahActivityController extends GetxController {
     _updateSubmitState();
     bool areAllControllersNotEmpty = priceControllers.values
         .any((controller) => controller.text.isNotEmpty && controller.text != "");
+        return true;
     if (indexTab == 0) {
       return true;
     }
@@ -382,7 +383,7 @@ class TambahActivityController extends GetxController {
       if (!areAllControllersNotEmpty) {
         throw 'Mohon lengkapi semua data survey';
       }
-      
+
       EasyLoading.show(status: 'Submit Data...');
 
       Map<String, dynamic> data = {
@@ -466,8 +467,9 @@ class TambahActivityController extends GetxController {
       );
 
       if (response.status != "OK") {
-        throw Exception('Failed to get outlets from API');
-      } // After successful submission, clean up all images
+        throw 'Gagal mengirim data: ${response.message ?? 'Unknown error'}';
+      }
+
       final tempImageStorage = TempImageStorage();
       for (String? imagePath in imagesToCleanup) {
         if (imagePath != null) {

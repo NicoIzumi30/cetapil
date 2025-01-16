@@ -12,7 +12,7 @@ import 'detail_item_visibility/detail_visibility_kompetitor.dart';
 import 'detail_item_visibility/detail_visibility_primary.dart';
 import 'detail_item_visibility/detail_visibility_secondary.dart';
 
-const String BASE_URL = 'https://cetaphil.id/storage';
+const String BASE_URL = 'https://dev.cetaphil.id/storage';
 
 class DetailVisibilityPage extends GetView<DetailActivityController> {
   final supportController = Get.find<SupportDataController>();
@@ -340,8 +340,8 @@ class VisibilityCard extends StatelessWidget {
   }) : super(key: key);
 
   String _sanitizeUrl(String url) {
-    print("https://cetaphil.id/storage${url}");
-    return "https://cetaphil.id/storage${url}";
+    print("https://dev.cetaphil.id/storage${url}");
+    return "https://dev.cetaphil.id/storage${url}";
   }
 
   @override
@@ -482,8 +482,8 @@ class KompetitorCard extends StatelessWidget {
   }) : super(key: key);
 
   String _sanitizeUrl(String url) {
-    print("https://cetaphil.id/storage${url}");
-    return "https://cetaphil.id/storage${url}";
+    print("https://dev.cetaphil.id/storage${url}");
+    return "https://dev.cetaphil.id/storage${url}";
   }
 
   @override

@@ -62,6 +62,7 @@ class ActivityPage extends GetView<ActivityController> {
                                   statusDraft: activity.status!,
                                   statusCheckin: true,
                                   ontap: () async {
+                                    // Register all required controllers
                                     if (!Get.isRegistered<TambahAvailabilityController>()) {
                                       Get.lazyPut(() => TambahAvailabilityController());
                                     }
@@ -71,13 +72,17 @@ class ActivityPage extends GetView<ActivityController> {
                                     if (!Get.isRegistered<TambahOrderController>()) {
                                       Get.lazyPut(() => TambahOrderController());
                                     }
-                                    if (!Get.isRegistered<KnowledgeController>()) {
-                                      Get.lazyPut(() => KnowledgeController());
-                                    }
                                     if (!Get.isRegistered<TambahActivityController>()) {
-                                      print("Initializing TambahActivityController");
-                                      Get.lazyPut(() => TambahActivityController());
+                                      Get.put(TambahActivityController());
                                     }
+                                    if (!Get.isRegistered<KnowledgeController>()) {
+                                      Get.put(KnowledgeController());
+                                    }
+
+                                    // Make sure TambahActivityController is registered before using it
+                                    final tambahActivityController =
+                                        Get.find<TambahActivityController>();
+
                                     if (activity.status! == "SUBMITTED") {
                                       if (!Get.isRegistered<DetailActivityController>()) {
                                         Get.lazyPut(() => DetailActivityController());
@@ -94,8 +99,6 @@ class ActivityPage extends GetView<ActivityController> {
                                       Get.to(() => DetailActivity(activity.id!));
                                     } else if (activity.status! == "DRAFTED") {
                                       final dbActivity = ActivityDatabaseHelper.instance;
-                                      final tambahActivityController =
-                                          Get.find<TambahActivityController>();
                                       var fetchedData =
                                           await dbActivity.getDetailSalesActivity(activity.id!);
                                       tambahActivityController.selectedTab.value = 0;
@@ -104,8 +107,6 @@ class ActivityPage extends GetView<ActivityController> {
                                       tambahActivityController.initializeData();
                                       Get.to(() => TambahActivity());
                                     } else {
-                                      final tambahActivityController =
-                                          Get.find<TambahActivityController>();
                                       final outlet_id = activity.outlet!.id;
                                       tambahActivityController.selectedTab.value = 0;
                                       tambahActivityController.clearAllDraftItems();
