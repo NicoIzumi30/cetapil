@@ -1,5 +1,4 @@
 <?php
-
 namespace App\Jobs;
 
 use App\Models\OutletRouting;
@@ -37,22 +36,22 @@ class RoutingExcelDataJob implements ShouldQueue
 
                 $user = getUserByName($row['nama_sales']);
                 if (!$user) {
-                    throw new Exception('Sales dengan nama : ' . $row['nama_sales'] . ' tidak ditemukan di baris ' . ($key + 2));
+                    throw new Exception('Sales dengan nama : ' . $row['nama_sales'] .' tidak ditemukan di baris '. ($key + 2));
                 }
 
                 $city = getCityByName($row['kota']);
                 if (!$city) {
-                    throw new Exception('Kota dengan nama : ' . $row['kota'] . ' tidak ditemukan di baris ' . ($key + 2));
+                    throw new Exception('Kota dengan nama : ' . $row['kota'] .' tidak ditemukan di baris '. ($key + 2));
                 }
 
                 $channel = getChannelByName($row['channel']);
                 if (!$channel) {
-                    throw new Exception('Channel dengan nama : ' . $row['channel'] . ' tidak ditemukan di baris ' . ($key + 2));
+                    throw new Exception('Channel dengan nama : ' . $row['channel'] .' tidak ditemukan di baris '. ($key + 2));
                 }
 
                 $visitDay = getVisitDayByDay(strtoupper($row['hari']));
                 if ($visitDay == null) {
-                    throw new Exception('Hari Kunjungan dengan nama hari : ' . $row['hari'] . ' tidak ditemukan di baris ' . ($key + 2));
+                    throw new Exception('Hari Kunjungan dengan nama hari : ' . $row['hari'] .' tidak ditemukan di baris '. ($key + 2));
                 }
             }
 
@@ -64,34 +63,15 @@ class RoutingExcelDataJob implements ShouldQueue
                     $channel = getChannelByName($row['channel']);
                     $visitDay = getVisitDayByDay(strtoupper($row['hari']));
 
-                    // Check if outlet exists with same code and user
-                    $outlet = Outlet::where('code', $row['kode_outlet'])
-                        ->where('user_id', $user->id)
-                        ->first();
-
-                    if ($outlet) {
-                        // Update existing outlet if same code and user
-                        $outlet->update([
-                            'city_id' => $city->id,
-                            'name' => $row['nama_outlet'],
-                            'category' => $row['kategori_outlet'],
-                            'channel_id' => $channel->id,
-                            'address' => $row['alamat'],
-                            'account' => $row['account'],
-                            'distributor' => $row['distributor'],
-                            'tipe_outlet' => $row['tipe_outlet'],
-                            'TSO' => $row['tso'],
-                            'KAM' => $row['kam'],
-                        ]);
-                    } else {
-                        // Create new outlet if different user or outlet doesn't exist
+                    $outlet = getOutletByCode($row['kode_outlet']);
+                    if (!$outlet) {
                         $outlet = Outlet::create([
                             'user_id' => $user->id,
                             'city_id' => $city->id,
                             'code' => $row['kode_outlet'],
                             'name' => $row['nama_outlet'],
                             'category' => $row['kategori_outlet'],
-                            'channel_id' => $channel->id,
+                            'channel_id'=> $channel->id,
                             'longitude' => null,
                             'latitude' => null,
                             'address' => $row['alamat'],
@@ -119,14 +99,15 @@ class RoutingExcelDataJob implements ShouldQueue
                 "message" => "Import berhasil",
                 'data' => $this->excelData
             ];
+
         } catch (\Exception $e) {
             DB::rollBack();
 
             $data = [
                 'FILE_NAME' => $this->fileName,
                 'ERROR_MESSAGE' => $e->getMessage(),
-                'ROW_DATA' => $row ?? null,
-                'ROW_NUMBER' => isset($key) ? $key + 2 : null
+                'ROW_DATA' => $row, // Tambahkan data row yang error
+                'ROW_NUMBER' => $key + 2
             ];
             Log::channel('routingErrorLog')->error(json_encode($data));
 
