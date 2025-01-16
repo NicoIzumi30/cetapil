@@ -1,4 +1,5 @@
 import 'package:cetapil_mobile/controller/login_controller.dart';
+import 'package:cetapil_mobile/model/auth_check_response.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_svg/flutter_svg.dart';
 import 'package:get/get.dart';
@@ -7,21 +8,54 @@ import 'package:get/get_state_manager/src/simple/get_view.dart';
 import '../controller/bottom_nav_controller.dart';
 
 class CustomBottomNavigationBar extends GetView<BottomNavController> {
-  CustomBottomNavigationBar() {
-    // Check and initialize BottomNavController if not registered
+  // Map of menu items and their corresponding icons
+  final Map<String, String> menuIcons = {
+    'dashboard': "assets/icon/Vector.svg",
+    'menu_outlet': "assets/icon/Vector2.svg",
+    'menu_routing': "assets/icon/Vector1.svg",
+    'menu_activity': "assets/icon/Vector3.svg",
+    'menu_selling': "assets/icon/Vector4.svg",
+  };
+
+  // Map of menu items and their display labels
+  final Map<String, String> menuLabels = {
+    'dashboard': 'Home',
+    'menu_outlet': 'Outlet',
+    'menu_routing': 'Routing',
+    'menu_activity': 'Activity',
+    'menu_selling': 'Selling',
+  };
+
+  final List<Permission> permissions;
+
+  CustomBottomNavigationBar({
+    Key? key,
+    required this.permissions, // Make it required
+  }) : super(key: key) {
     if (!Get.isRegistered<BottomNavController>()) {
       Get.put(BottomNavController(), permanent: true);
     }
   }
+  List<String> _getAvailableMenus(List<Permission> permissions) {
+    // Start with dashboard which is always available
+    List<String> menus = ['dashboard'];
+
+    // Add other menus based on permissions
+    menus.addAll(permissions
+        .where((p) => p.name != null && menuIcons.containsKey(p.name!))
+        .map((p) => p.name!)
+        .toList());
+    return menus;
+  }
+
   @override
   Widget build(BuildContext context) {
     final bottomNavController = Get.find<BottomNavController>();
-    // Get screen width to make responsive calculations
     final screenWidth = MediaQuery.of(context).size.width;
 
     return Container(
       margin: EdgeInsets.symmetric(
-        horizontal: screenWidth * 0.04, // Responsive margin
+        horizontal: screenWidth * 0.04,
         vertical: 12,
       ),
       padding: const EdgeInsets.symmetric(vertical: 5, horizontal: 8),
@@ -40,38 +74,24 @@ class CustomBottomNavigationBar extends GetView<BottomNavController> {
         builder: (context, constraints) {
           return Obx(() {
             final loginController = Get.find<LoginController>();
-            final user = loginController.currentUser.value;
-            final permissions = user?.permissions ?? [];
+            final permissions = loginController.currentUser.value?.permissions ?? [];
+            final availableMenus = _getAvailableMenus(permissions);
 
-            // Calculate item width including the home button (+1)
-            final itemWidth = constraints.maxWidth / (permissions.length + 1);
+            final itemWidth = constraints.maxWidth / availableMenus.length;
 
             return Row(
               mainAxisAlignment: MainAxisAlignment.spaceAround,
-              children: [
-                // Home is always shown
-                _buildNavItem(0, 'Home', Color(0xFF39B5FF), "assets/icon/Vector.svg", itemWidth,bottomNavController),
-
-                // Outlet
-                if (permissions.any((p) => p.name?.trim().toLowerCase() == 'menu_outlet'))
-                  _buildNavItem(
-                      1, 'Outlet', Color(0xFF39B5FF), "assets/icon/Vector2.svg", itemWidth,bottomNavController),
-
-                // Routing
-                if (permissions.any((p) => p.name?.trim().toLowerCase() == 'menu_routing'))
-                  _buildNavItem(
-                      2, 'Routing', Color(0xFF39B5FF), "assets/icon/Vector1.svg", itemWidth,bottomNavController),
-
-                // Activity
-                if (permissions.any((p) => p.name?.trim().toLowerCase() == 'menu_activity'))
-                  _buildNavItem(
-                      3, 'Activity', Color(0xFF39B5FF), "assets/icon/Vector3.svg", itemWidth,bottomNavController),
-
-                // Selling
-                if (permissions.any((p) => p.name?.trim().toLowerCase() == 'menu_selling'))
-                  _buildNavItem(
-                      4, 'Selling', Color(0xFF39B5FF), "assets/icon/Vector4.svg", itemWidth,bottomNavController),
-              ],
+              children: List.generate(
+                availableMenus.length,
+                (index) => _buildNavItem(
+                  index,
+                  menuLabels[availableMenus[index]] ?? '',
+                  Color(0xFF39B5FF),
+                  menuIcons[availableMenus[index]] ?? '',
+                  itemWidth,
+                  bottomNavController,
+                ),
+              ),
             );
           });
         },
@@ -79,7 +99,8 @@ class CustomBottomNavigationBar extends GetView<BottomNavController> {
     );
   }
 
-  Widget _buildNavItem(int index, String label, Color color, String pathIcon, double itemWidth, BottomNavController navController) {
+  Widget _buildNavItem(int index, String label, Color color, String pathIcon, double itemWidth,
+      BottomNavController navController) {
     return Obx(() {
       return TweenAnimationBuilder<double>(
         tween: Tween<double>(begin: 0, end: navController.selectedIndex.value == index ? -8 : 0),
@@ -99,7 +120,8 @@ class CustomBottomNavigationBar extends GetView<BottomNavController> {
                       padding: const EdgeInsets.all(6),
                       decoration: BoxDecoration(
                         borderRadius: BorderRadius.circular(12),
-                        color: navController.selectedIndex.value == index ? color : Colors.transparent,
+                        color:
+                            navController.selectedIndex.value == index ? color : Colors.transparent,
                         boxShadow: navController.selectedIndex.value == index
                             ? [
                                 BoxShadow(
@@ -116,7 +138,7 @@ class CustomBottomNavigationBar extends GetView<BottomNavController> {
                         color: navController.selectedIndex.value == index
                             ? Colors.white
                             : const Color(0xFF054F7B),
-                        height: navController .selectedIndex.value == index ? 24 : 20,
+                        height: navController.selectedIndex.value == index ? 24 : 20,
                         fit: BoxFit.contain,
                       ),
                     ),
@@ -126,8 +148,8 @@ class CustomBottomNavigationBar extends GetView<BottomNavController> {
                         fit: BoxFit.scaleDown,
                         child: Text(
                           label,
-                          style: TextStyle(
-                            color: const Color(0xFF054F7B),
+                          style: const TextStyle(
+                            color: Color(0xFF054F7B),
                             fontSize: 11,
                             fontWeight: FontWeight.normal,
                           ),

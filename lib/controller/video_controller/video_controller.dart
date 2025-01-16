@@ -36,7 +36,7 @@ class VideoController extends GetxController {
         return;
       }
 
-      urlVideo.value = 'https://dev.cetaphil.id/storage${urlVideo.value}';
+      urlVideo.value = 'https://cetaphil.id/storage${urlVideo.value}';
 
       final uri = Uri.parse(urlVideo.value);
       if (!uri.isAbsolute) {
