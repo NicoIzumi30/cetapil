@@ -94,7 +94,7 @@ class SalesActivityController extends Controller
     ]);
 }
     public function detail($id){
-        $salesActivity = SalesActivity::with(['user:id,name', 'outlet:id,name,visit_day'])->find($id);
+        $salesActivity = SalesActivity::with(['user:id,name', 'outlet:id,name'])->find($id);
         $outletId = $salesActivity->outlet_id;
         $outletForms = OutletFormAnswer::with('outletForm')->where('outlet_id', $outletId)->get();
         return view('pages.routing.sales-activity', [
