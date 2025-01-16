@@ -1,4 +1,4 @@
-<?php 
+<?php
 namespace App\Jobs;
 
 use App\Models\OutletRouting;
@@ -38,17 +38,17 @@ class RoutingExcelDataJob implements ShouldQueue
                 if (!$user) {
                     throw new Exception('Sales dengan nama : ' . $row['nama_sales'] .' tidak ditemukan di baris '. ($key + 2));
                 }
-                
+
                 $city = getCityByName($row['kota']);
                 if (!$city) {
                     throw new Exception('Kota dengan nama : ' . $row['kota'] .' tidak ditemukan di baris '. ($key + 2));
                 }
-                
+
                 $channel = getChannelByName($row['channel']);
                 if (!$channel) {
                     throw new Exception('Channel dengan nama : ' . $row['channel'] .' tidak ditemukan di baris '. ($key + 2));
                 }
-                
+
                 $visitDay = getVisitDayByDay(strtoupper($row['hari']));
                 if ($visitDay == null) {
                     throw new Exception('Hari Kunjungan dengan nama hari : ' . $row['hari'] .' tidak ditemukan di baris '. ($key + 2));
@@ -62,7 +62,7 @@ class RoutingExcelDataJob implements ShouldQueue
                     $city = getCityByName($row['kota']);
                     $channel = getChannelByName($row['channel']);
                     $visitDay = getVisitDayByDay(strtoupper($row['hari']));
-                    
+
                     $outlet = getOutletByCode($row['kode_outlet']);
                     if (!$outlet) {
                         $outlet = Outlet::create([
@@ -93,7 +93,7 @@ class RoutingExcelDataJob implements ShouldQueue
             });
 
             DB::commit();
-            
+
             return [
                 "status" => "success",
                 "message" => "Import berhasil",
@@ -102,7 +102,7 @@ class RoutingExcelDataJob implements ShouldQueue
 
         } catch (\Exception $e) {
             DB::rollBack();
-            
+
             $data = [
                 'FILE_NAME' => $this->fileName,
                 'ERROR_MESSAGE' => $e->getMessage(),
@@ -110,11 +110,11 @@ class RoutingExcelDataJob implements ShouldQueue
                 'ROW_NUMBER' => $key + 2
             ];
             Log::channel('routingErrorLog')->error(json_encode($data));
-            
+
             return [
                 "status" => "error",
                 "message" => $e->getMessage(),
-                "debug_data" => $data 
+                "debug_data" => $data
             ];
         }
     }

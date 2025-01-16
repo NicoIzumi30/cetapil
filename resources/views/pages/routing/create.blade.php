@@ -412,6 +412,8 @@
                 setTimeout(() => window.location.reload(), 300);
             }
             $('#importBtn').click(function() {
+				$(this).text("Mengunggah...")
+				$(this).prop('disabled', true);
                 const file = $('#file_upload')[0].files[0];
                 if (!file) {
                     return toast('error', 'Silakan pilih file terlebih dahulu', 200);
@@ -434,7 +436,8 @@
                             toast('error', response.message, 200);
                             return;
                         }
-
+						$(this).text("Mulai Unggah")
+						$(this).prop('disabled', false);
                         closeModal('unggah-routing-bulk');
                         toast('success', response.message, 400);
                         setTimeout(() => window.location.replace('/routing'), 4000);
