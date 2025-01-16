@@ -1,6 +1,7 @@
 import 'dart:async';
 import 'dart:io';
 
+import 'package:cetapil_mobile/controller/activity/knowledge_controller.dart';
 import 'package:cetapil_mobile/controller/support_data_controller.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
@@ -32,7 +33,7 @@ class CachedPdfController extends GetxController {
       isLoading.value = true;
       hasError.value = false;
 
-      final url = 'YOUR_PDF_URL'; // Replace with actual URL
+      final url = 'https://dev.cetaphil.id/storage${Get.find<KnowledgeController>().pdfPath}';
 
       // Check cache first
       final fileInfo = await _cacheManager.getFileFromCache(_cacheKey);
@@ -130,7 +131,8 @@ class CachedVideoController extends GetxController {
       hasError.value = false;
       errorMessage.value = '';
 
-      final url = 'https://cetaphil.id/storage'; // Replace with actual URL
+      final url =
+          'https://dev.cetaphil.id/storage${Get.find<KnowledgeController>().videoPath}'; // Replace with actual URL
 
       // Check cache first
       try {

@@ -31,7 +31,7 @@ import '../model/form_outlet_response.dart';
 import '../model/get_city_response.dart';
 import '../model/login_response.dart';
 
-const String baseUrl = 'https://cetaphil.id';
+const String baseUrl = 'https://dev.cetaphil.id';
 // const String baseUrl = 'https://c877-36-68-56-36.ngrok-free.app';
 final GetStorage storage = GetStorage();
 
@@ -40,8 +40,9 @@ class ApiWrapper {
   static final GetStorage storage = GetStorage();
 
   static String _formatErrorMessage(dynamic errorBody) {
-    if (errorBody == null) return 'Terjadi kesalahan';
+    print('DEBUG: Formatting error body: $errorBody'); // Debug log
 
+    if (errorBody == null) return 'Terjadi kesalahan';
     if (errorBody is String) return errorBody;
 
     if (errorBody['message'] != null) {
@@ -50,37 +51,55 @@ class ApiWrapper {
       if (message is String) return message;
 
       if (message is Map) {
-        // Collect all error messages
         List<String> errors = [];
 
         message.forEach((key, value) {
+          print('DEBUG: Processing key: $key, value: $value'); // Debug log
+
           if (value is List && value.isNotEmpty) {
-            // Clean up the field name for better readability
             var fieldName = key
                 .toString()
                 .replaceAll('_', ' ')
                 .replaceAll('.', ' ')
                 .replaceAll('visibility', 'Visibilitas');
 
-            // Special handling for indexed fields (e.g., visibility.1.category)
+            // Always add the error message, but format it appropriately
             if (fieldName.contains('Visibilitas')) {
-              // Skip adding the full message if it's a sub-field error
-              if (!fieldName.contains('type') &&
-                  !fieldName.contains('category') &&
-                  !fieldName.contains('position') &&
-                  !fieldName.contains('visual')) {
-                errors.add(value.first.toString());
+              // Extract index for visibility items
+              var matches = RegExp(r'Visibilitas (\d+)').firstMatch(fieldName);
+              var index = matches?.group(1) ?? '';
+
+              if (fieldName.contains('type')) {
+                errors.add('Tipe Visibilitas ${index}: ${value.first}');
+              } else if (fieldName.contains('category')) {
+                errors.add('Kategori Visibilitas ${index}: ${value.first}');
+              } else if (fieldName.contains('position')) {
+                errors.add('Posisi Visibilitas ${index}: ${value.first}');
+              } else if (fieldName.contains('visual')) {
+                errors.add('Visual Visibilitas ${index}: ${value.first}');
+              } else {
+                errors.add('Visibilitas: ${value.first}');
               }
             } else {
-              // For other fields, show field name and error
+              // For non-visibility fields
               errors.add('$fieldName: ${value.first}');
             }
           }
         });
 
+        // Check if we have any errors
+        if (errors.isEmpty) {
+          return 'Terjadi kesalahan pada validasi data';
+        }
+
         // Remove duplicates and join with newlines
         return errors.toSet().join('\n');
       }
+    }
+
+    // Check if there's a general message in the error body
+    if (errorBody['error'] != null) {
+      return errorBody['error'].toString();
     }
 
     return 'Terjadi kesalahan yang tidak diketahui';
@@ -98,7 +117,7 @@ class ApiWrapper {
       }
 
       final request = await requestBuilder();
-      
+
       final streamedResponse = await request.send().timeout(Duration(seconds: timeoutDuration));
       final response = await http.Response.fromStream(streamedResponse);
 
@@ -272,7 +291,7 @@ class ApiWrapper {
 }
 
 class Api {
-  static const String baseUrl = 'https://cetaphil.id';
+  static const String baseUrl = 'https://dev.cetaphil.id';
 
   static Future<LoginResponse> login(String email, String password) async {
     return ApiWrapper.loginWithTimeout<LoginResponse>(
