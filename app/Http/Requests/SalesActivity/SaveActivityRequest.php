@@ -28,15 +28,15 @@ class SaveActivityRequest extends FormRequest
     {
         return [
             // // Sales Activity
-            // 'sales_activity_id' => 'required|exists:sales_activities,id',
-            // 'outlet_id' => 'required|exists:outlets,id',
-            // 'views_knowledge' => 'required|numeric',
-            // 'time_availability' => 'required|numeric',
-            // 'time_visibility' => 'required|numeric',
-            // 'time_knowledge' => 'required|numeric',
-            // 'time_survey' => 'required|numeric',
-            // 'time_order' => 'required|numeric',
-            // 'current_time' => 'required|date',
+            'sales_activity_id' => 'required|exists:sales_activities,id',
+            'outlet_id' => 'required|exists:outlets,id',
+            'views_knowledge' => 'required|numeric',
+            'time_availability' => 'required|numeric',
+            'time_visibility' => 'required|numeric',
+            'time_knowledge' => 'required|numeric',
+            'time_survey' => 'required|numeric',
+            'time_order' => 'required|numeric',
+            'current_time' => 'required|date',
 
             // // Sales Availability
             // 'availability' => 'required|array',
