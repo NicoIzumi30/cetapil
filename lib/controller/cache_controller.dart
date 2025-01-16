@@ -33,7 +33,7 @@ class CachedPdfController extends GetxController {
       isLoading.value = true;
       hasError.value = false;
 
-      final url = 'https://dev.cetaphil.id/storage${Get.find<KnowledgeController>().pdfPath}';
+      final url = 'https://cetaphil.id/storage${Get.find<KnowledgeController>().pdfPath}';
 
       // Check cache first
       final fileInfo = await _cacheManager.getFileFromCache(_cacheKey);
@@ -145,17 +145,13 @@ class CachedVideoController extends GetxController {
 
   Future<void> initializeVideo() async {
     try {
+      // Ensure the KnowledgeController is registered
       isLoading.value = true;
       hasError.value = false;
       errorMessage.value = '';
 
-      // print("---------------- $urlVideo");
-      // final url =
-      //     'https://dev.cetaphil.id/storage${Get.find<KnowledgeController>().videoPath.value}'; // Replace with actual URL
-
-
       final url =
-          'https://dev.cetaphil.id/storage/video/product-knowledge//whatsapp_video_2025_01_13_at_152619_2_1736757887_1737014378.mp4';
+          'https://cetaphil.id/storage${Get.find<SupportDataController>().knowledge.first['path_video']}';
       // Check cache first
       try {
         final fileInfo = await _cacheManager.getFileFromCache(_cacheKey);
@@ -210,6 +206,7 @@ class CachedVideoController extends GetxController {
     isPlaying.value = _videoController!.value.isPlaying;
     position.value = _videoController!.value.position;
 
+    // Auto-hide controls after video starts playing
     if (isPlaying.value && showControls.value) {
       _hideControlsTimer?.cancel();
       _hideControlsTimer = Timer(const Duration(seconds: 3), () {
@@ -218,15 +215,41 @@ class CachedVideoController extends GetxController {
     }
   }
 
+  void handleVideoTap() {
+    if (!isInitialized.value) return;
+
+    // Cancel any existing timer
+    _hideControlsTimer?.cancel();
+
+    // Toggle controls
+    showControls.value = !showControls.value;
+
+    // If showing controls and video is playing, start hide timer
+    if (showControls.value && isPlaying.value) {
+      _hideControlsTimer = Timer(const Duration(seconds: 3), () {
+        if (isPlaying.value) {
+          // Double check if still playing
+          showControls.value = false;
+        }
+      });
+    }
+  }
+
+  void startHideControlsTimer() {
+    _hideControlsTimer?.cancel();
+    _hideControlsTimer = Timer(const Duration(seconds: 3), () {
+      showControls.value = false;
+    });
+  }
+
   void toggleControls() {
     if (!isInitialized.value) return;
 
-    showControls.value = !showControls.value;
-    _hideControlsTimer?.cancel();
+    showControls.toggle();
     if (showControls.value && isPlaying.value) {
-      _hideControlsTimer = Timer(const Duration(seconds: 3), () {
-        showControls.value = false;
-      });
+      startHideControlsTimer();
+    } else {
+      _hideControlsTimer?.cancel();
     }
   }
 
@@ -241,18 +264,22 @@ class CachedVideoController extends GetxController {
 
   void playPause() {
     if (!isInitialized.value || _videoController == null) return;
-showControls.toggle();
+
     if (_videoController!.value.isPlaying) {
       _videoController!.pause();
-      // showControls.value = true;
       _hideControlsTimer?.cancel();
+      showControls.value = true; // Always show controls when paused
     } else {
       _videoController!.play();
-      _hideControlsTimer?.cancel();
-      _hideControlsTimer = Timer(const Duration(seconds: 3), () {
-        // showControls.value = false;
-      });
+      if (showControls.value) {
+        // Start timer only if controls are visible
+        _hideControlsTimer?.cancel();
+        _hideControlsTimer = Timer(const Duration(seconds: 3), () {
+          showControls.value = false;
+        });
+      }
     }
+    update();
   }
 
   void seekTo(Duration position) {

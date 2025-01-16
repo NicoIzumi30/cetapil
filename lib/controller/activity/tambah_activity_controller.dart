@@ -29,9 +29,6 @@ class TambahActivityController extends GetxController {
       Get.find<TambahVisibilityController>();
   late TambahOrderController tambahOrderController = Get.find<TambahOrderController>();
   late SupportDataController supportController = Get.find<SupportDataController>();
-  // final activityController = Get.find<ActivityController>();
-  // final tambahAvailabilityController = Get.find<TambahAvailabilityController>();
-  // final tambahOrderController = Get.find<TambahOrderController>();
   final TextEditingController controller = TextEditingController();
   final db = ActivityDatabaseHelper.instance;
   final api = Api();
@@ -108,7 +105,6 @@ class TambahActivityController extends GetxController {
     _updateSubmitState();
     bool areAllControllersNotEmpty = priceControllers.values
         .any((controller) => controller.text.isNotEmpty && controller.text != "");
-        return true;
     if (indexTab == 0) {
       return true;
     }
@@ -635,12 +631,6 @@ class TambahActivityController extends GetxController {
           orderTime.value++;
           break;
       }
-
-      // print("Availability: ${getFormattedTime(availabilityTime.value)}");
-      // print("Visibility: ${getFormattedTime(visibilityTime.value)}");
-      // print("Knowledge: ${getFormattedTime(knowledgeTime.value)}");
-      // print("Survey: ${getFormattedTime(surveyTime.value)}");
-      // print("Order: ${getFormattedTime(orderTime.value)}");
     });
   }
 

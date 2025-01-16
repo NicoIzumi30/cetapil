@@ -168,6 +168,7 @@ class SellingController extends GetxController {
   Future<void> refreshData() async {
     try {
       isLoading.value = true;
+      supportDataController.refreshData();
       CustomAlerts.showLoading(Get.context!, "Processing", "Mengambil data selling...");
       await loadInitialData();
       CustomAlerts.showSuccess(Get.context!, "Berhasil", "Data selling berhasil diperbarui");
