@@ -107,6 +107,7 @@ class CachedVideoController extends GetxController {
 
   final isInitialized = false.obs;
   final isPlaying = false.obs;
+  final isMute = false.obs;
   final duration = const Duration().obs;
   final position = const Duration().obs;
   final showControls = false.obs;
@@ -119,11 +120,28 @@ class CachedVideoController extends GetxController {
   Timer? _hideControlsTimer;
   File? _cachedVideoFile;
 
+  // late KnowledgeController knowledgeController;
+  // String? urlVideo;
+
   @override
   void onInit() {
     super.onInit();
+    // _initializeController();
     initializeVideo();
   }
+
+  // void _initializeController() {
+  //   // Find the existing controller
+  //   if (Get.isRegistered<KnowledgeController>()) {
+  //     knowledgeController = Get.find<KnowledgeController>();
+  //   } else {
+  //     // Register a new instance if not already registered
+  //     knowledgeController = Get.put(KnowledgeController());
+  //   }
+  //
+  //   // Get the video path
+  //   urlVideo = knowledgeController.videoPath.value;
+  // }
 
   Future<void> initializeVideo() async {
     try {
@@ -131,9 +149,13 @@ class CachedVideoController extends GetxController {
       hasError.value = false;
       errorMessage.value = '';
 
-      final url =
-          'https://dev.cetaphil.id/storage${Get.find<KnowledgeController>().videoPath}'; // Replace with actual URL
+      // print("---------------- $urlVideo");
+      // final url =
+      //     'https://dev.cetaphil.id/storage${Get.find<KnowledgeController>().videoPath.value}'; // Replace with actual URL
 
+
+      final url =
+          'https://dev.cetaphil.id/storage/video/product-knowledge//whatsapp_video_2025_01_13_at_152619_2_1736757887_1737014378.mp4';
       // Check cache first
       try {
         final fileInfo = await _cacheManager.getFileFromCache(_cacheKey);

@@ -50,6 +50,7 @@ class KnowledgeController extends GetxController {
     try {
       pdfPath.value = supportDataController.knowledge.first['path_pdf'];
       videoPath.value = supportDataController.knowledge.first['path_video'];
+      print("asdasdasd ------------------- : ${videoPath.value}");
     } catch (e) {
       print('Error initializing paths: $e');
     }

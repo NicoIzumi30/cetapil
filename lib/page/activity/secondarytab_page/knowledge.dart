@@ -50,17 +50,21 @@ class KnowledgePage extends GetView<KnowledgeController> {
       child: ClipRRect(
         borderRadius: BorderRadius.circular(12),
         child: Obx(() {
-          if (controller.videoPath.value == null || controller.videoPath.value!.isEmpty) {
-            return _buildNoMediaAvailableWidget('No video available', Icons.videocam_off);
+          if (controller.videoPath.value == null ||
+              controller.videoPath.value!.isEmpty) {
+            return _buildNoMediaAvailableWidget(
+                'No video available', Icons.videocam_off);
           }
           return GetBuilder<CachedVideoController>(
             init: KnowledgeController.cachedVideoController,
             builder: (videoController) {
               if (videoController.hasError.value) {
+                print(videoController.errorMessage.value);
                 return _buildErrorWidget(videoController.errorMessage.value);
               }
 
-              if (!videoController.isInitialized.value || videoController.videoController == null) {
+              if (!videoController.isInitialized.value ||
+                  videoController.videoController == null) {
                 return const _LoadingWidget();
               }
 
@@ -82,8 +86,10 @@ class KnowledgePage extends GetView<KnowledgeController> {
       child: ClipRRect(
         borderRadius: BorderRadius.circular(12),
         child: Obx(() {
-          if (controller.pdfPath.value == null || controller.pdfPath.value!.isEmpty) {
-            return _buildNoMediaAvailableWidget('No PDF available', Icons.picture_as_pdf);
+          if (controller.pdfPath.value == null ||
+              controller.pdfPath.value!.isEmpty) {
+            return _buildNoMediaAvailableWidget(
+                'No PDF available', Icons.picture_as_pdf);
           }
           return GetBuilder<CachedPdfController>(
             init: KnowledgeController.cachedPdfController,
@@ -158,11 +164,13 @@ class CachedVideoPlayerWidget extends StatelessWidget {
                 child: VideoPlayer(controller.videoController!),
               ),
               if (controller.isLoading.value) const CircularProgressIndicator(),
-              Obx(() => Visibility(
+              Obx(() =>
+                  Visibility(
                     visible: controller.showControls.value,
                     child: _buildControls(context),
                   )),
-              Obx(() => AnimatedOpacity(
+              Obx(() =>
+                  AnimatedOpacity(
                     opacity: controller.showControls.value ? 1.0 : 0.0,
                     duration: const Duration(milliseconds: 300),
                     child: GestureDetector(
@@ -174,7 +182,8 @@ class CachedVideoPlayerWidget extends StatelessWidget {
                           shape: BoxShape.circle,
                         ),
                         child: Icon(
-                          controller.isPlaying.value ? Icons.pause : Icons.play_arrow,
+                          controller.isPlaying.value ? Icons.pause : Icons
+                              .play_arrow,
                           color: Colors.white,
                           size: 32,
                         ),
@@ -210,7 +219,8 @@ class CachedVideoPlayerWidget extends StatelessWidget {
               children: [
                 _buildTimeText(),
                 const SizedBox(width: 8),
-                Obx(() => Text(
+                Obx(() =>
+                    Text(
                       ' / ${_formatDuration(controller.duration.value)}',
                       style: const TextStyle(color: Colors.white70),
                     )),
@@ -251,24 +261,38 @@ class CachedVideoPlayerWidget extends StatelessWidget {
   }
 
   Widget _buildTimeText() {
-    return Obx(() => Text(
+    return Obx(() =>
+        Text(
           _formatDuration(controller.position.value),
           style: const TextStyle(color: Colors.white),
         ));
   }
 
   Widget _buildVolumeButton() {
-    return Obx(() => IconButton(
-          icon: Icon(
-            controller.videoController?.value.volume != 0 ? Icons.volume_up : Icons.volume_off,
-            color: Colors.white,
-          ),
-          onPressed: () {
-            if (controller.videoController == null) return;
-            final newVolume = controller.videoController!.value.volume > 0 ? 0.0 : 1.0;
-            controller.videoController!.setVolume(newVolume);
-          },
-        ));
+    return Obx(() {
+      return IconButton(
+        icon: Icon(
+          // controller.videoController?.value.volume != 0 ? Icons.volume_up : Icons.volume_off,
+          controller.isMute.value ? Icons.volume_off : Icons.volume_up,
+          color: Colors.white,
+        ),
+        onPressed: () {
+          controller.isMute.toggle();
+          if (controller.videoController == null) return;
+          var newVolume = controller.videoController!.value.volume > 0 ? 0.0 : 1.0;
+          // var newVolume;
+          //
+          // if (controller.videoController!.value.volume > 0) {
+          //   newVolume = 0.0;
+          //   icon = false;
+          // } else {
+          //   newVolume = 1.0;
+          //   icon = true;
+          // }
+          controller.videoController!.setVolume(newVolume);
+        },
+      );
+    });
   }
 
   Widget _buildFullscreenButton(BuildContext context) {
@@ -371,7 +395,8 @@ class _FullScreenVideoPageState extends State<FullScreenVideoPage> {
               // Video Player
               Center(
                 child: AspectRatio(
-                  aspectRatio: widget.controller.videoController!.value.aspectRatio,
+                  aspectRatio: widget.controller.videoController!.value
+                      .aspectRatio,
                   child: Stack(
                     alignment: Alignment.center,
                     children: [
@@ -382,36 +407,40 @@ class _FullScreenVideoPageState extends State<FullScreenVideoPage> {
                       ),
 
                       // Loading Indicator
-                      if (widget.controller.isLoading.value) const CircularProgressIndicator(),
+                      if (widget.controller.isLoading
+                          .value) const CircularProgressIndicator(),
 
                       // Video Controls Overlay
-                      Obx(() => Visibility(
+                      Obx(() =>
+                          Visibility(
                             visible: widget.controller.showControls.value,
                             child: _buildControls(context),
                           )),
 
                       // Center Play/Pause Button
-                      Obx(() => AnimatedOpacity(
-                            opacity: widget.controller.showControls.value ? 1.0 : 0.0,
-                            duration: const Duration(milliseconds: 300),
-                            child: GestureDetector(
-                              onTap: () => widget.controller.playPause(),
-                              child: Container(
-                                padding: const EdgeInsets.all(12),
-                                decoration: BoxDecoration(
-                                  color: Colors.black54,
-                                  shape: BoxShape.circle,
-                                ),
-                                child: Icon(
-                                  widget.controller.isPlaying.value
-                                      ? Icons.pause
-                                      : Icons.play_arrow,
-                                  color: Colors.white,
-                                  size: 32,
-                                ),
-                              ),
+                      AnimatedOpacity(
+                        opacity: widget.controller.showControls.value
+                            ? 1.0
+                            : 0.0,
+                        duration: const Duration(milliseconds: 300),
+                        child: GestureDetector(
+                          onTap: () => widget.controller.playPause(),
+                          child: Container(
+                            padding: const EdgeInsets.all(12),
+                            decoration: BoxDecoration(
+                              color: Colors.black54,
+                              shape: BoxShape.circle,
                             ),
-                          )),
+                            child: Icon(
+                              widget.controller.isPlaying.value
+                                  ? Icons.pause
+                                  : Icons.play_arrow,
+                              color: Colors.white,
+                              size: 32,
+                            ),
+                          ),
+                        ),
+                      ),
                     ],
                   ),
                 ),
@@ -421,7 +450,8 @@ class _FullScreenVideoPageState extends State<FullScreenVideoPage> {
               Positioned(
                 top: 16,
                 left: 16,
-                child: Obx(() => AnimatedOpacity(
+                child: Obx(() =>
+                    AnimatedOpacity(
                       opacity: widget.controller.showControls.value ? 1.0 : 0.0,
                       duration: const Duration(milliseconds: 300),
                       child: Container(
@@ -430,7 +460,8 @@ class _FullScreenVideoPageState extends State<FullScreenVideoPage> {
                           borderRadius: BorderRadius.circular(24),
                         ),
                         child: IconButton(
-                          icon: const Icon(Icons.arrow_back, color: Colors.white),
+                          icon: const Icon(Icons.arrow_back, color: Colors
+                              .white),
                           onPressed: () async {
                             await _setPortraitOrientation();
                             Navigator.pop(context);
@@ -474,7 +505,8 @@ class _FullScreenVideoPageState extends State<FullScreenVideoPage> {
                 const SizedBox(width: 8),
 
                 // Duration
-                Obx(() => Text(
+                Obx(() =>
+                    Text(
                       ' / ${_formatDuration(widget.controller.duration.value)}',
                       style: const TextStyle(color: Colors.white70),
                     )),
@@ -516,8 +548,10 @@ class _FullScreenVideoPageState extends State<FullScreenVideoPage> {
 
   Widget _buildProgressBar() {
     return Obx(() {
-      final duration = widget.controller.duration.value.inMilliseconds.toDouble();
-      final position = widget.controller.position.value.inMilliseconds.toDouble();
+      final duration = widget.controller.duration.value.inMilliseconds
+          .toDouble();
+      final position = widget.controller.position.value.inMilliseconds
+          .toDouble();
 
       return SliderTheme(
         data: SliderThemeData(
@@ -540,7 +574,8 @@ class _FullScreenVideoPageState extends State<FullScreenVideoPage> {
   }
 
   Widget _buildTimeText() {
-    return Obx(() => Text(
+    return Obx(() =>
+        Text(
           _formatDuration(widget.controller.position.value),
           style: const TextStyle(color: Colors.white),
         ));
@@ -571,12 +606,14 @@ class CachedPDFViewerWidget extends StatelessWidget {
           if (controller.localPath.value.isEmpty) {
             return Container(
               height: 400,
-              child: const Center(child: Text('No training material available')),
+              child: const Center(
+                  child: Text('No training material available')),
             );
           }
 
           return GestureDetector(
-            onTap: () => _showFullScreenPDF(context, controller.localPath.value),
+            onTap: () =>
+                _showFullScreenPDF(context, controller.localPath.value),
             child: Container(
               height: 400,
               child: Stack(
@@ -611,7 +648,8 @@ class CachedPDFViewerWidget extends StatelessWidget {
   }
 
   // PDF overlay controls
-  Widget _buildPdfOverlayControls(BuildContext context, CachedPdfController controller) {
+  Widget _buildPdfOverlayControls(BuildContext context,
+      CachedPdfController controller) {
     return Positioned(
       bottom: 0,
       left: 0,
@@ -631,13 +669,16 @@ class CachedPDFViewerWidget extends StatelessWidget {
         child: Row(
           mainAxisAlignment: MainAxisAlignment.spaceBetween,
           children: [
-            Obx(() => Text(
-                  'Page ${controller.currentPage.value + 1} of ${controller.totalPages.value}',
+            Obx(() =>
+                Text(
+                  'Page ${controller.currentPage.value + 1} of ${controller
+                      .totalPages.value}',
                   style: const TextStyle(color: Colors.white),
                 )),
             IconButton(
               icon: const Icon(Icons.fullscreen, color: Colors.white),
-              onPressed: () => _showFullScreenPDF(context, controller.localPath.value),
+              onPressed: () =>
+                  _showFullScreenPDF(context, controller.localPath.value),
             ),
           ],
         ),
@@ -658,7 +699,8 @@ class CachedPDFViewerWidget extends StatelessWidget {
 class FullScreenPDFViewer extends StatefulWidget {
   final String filePath;
 
-  const FullScreenPDFViewer({Key? key, required this.filePath}) : super(key: key);
+  const FullScreenPDFViewer({Key? key, required this.filePath})
+      : super(key: key);
 
   @override
   _FullScreenPDFViewerState createState() => _FullScreenPDFViewerState();
