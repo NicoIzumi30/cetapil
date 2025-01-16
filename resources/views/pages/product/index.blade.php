@@ -807,6 +807,8 @@
             });
 
             $('#importBtnAv3m').click(function() {
+				$(this).text("Mengunggah...")
+				$(this).prop('disabled', true);
                 const file = $('#file_upload-av3m')[0].files[0];
                 if (!file) {
                     return toast('error', 'Silakan pilih file terlebih dahulu', 200);
@@ -824,6 +826,8 @@
                     contentType: false,
                     success: function(response) {
                         handleSuccess('unggah-av3m-bulk', response.message);
+						$(this).text("Mulai Unggah")
+						$(this).prop('disabled', false);
                     },
                     error: function(xhr) {
                         toggleLoading(false, 'import');
@@ -832,6 +836,8 @@
                 });
             });
             $('#importBtn').click(function() {
+				$(this).text("Mengunggah...")
+				$(this).prop('disabled', true);
                 const file = $('#file_upload')[0].files[0];
                 if (!file) {
                     return toast('error', 'Silakan pilih file terlebih dahulu', 200);
@@ -849,6 +855,8 @@
                     contentType: false,
                     success: function(response) {
                         handleSuccess('unggah-produk-bulk', response.message);
+						$(this).text("Mulai Unggah")
+						$(this).prop('disabled', false);
                     },
                     error: function(xhr) {
                         toggleLoading(false, 'import');
