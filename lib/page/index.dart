@@ -1,3 +1,4 @@
+import 'package:cetapil_mobile/model/auth_check_response.dart';
 import 'package:cetapil_mobile/page/routing/routing.dart';
 import 'package:cetapil_mobile/page/selling/selling.dart';
 import 'package:flutter/material.dart';
@@ -16,83 +17,76 @@ class MainPage extends GetView<BottomNavController> {
   final LoginController loginController = Get.find<LoginController>();
 
   MainPage() {
-    // Ensure BottomNavController is initialized
     if (!Get.isRegistered<BottomNavController>()) {
       Get.put(BottomNavController(), permanent: true);
     }
   }
 
-  final permissionPages = {
+  // Define the order of menu items and their corresponding pages
+  final Map<String, Widget> menuOrder = {
+    'dashboard': DashboardPage(), // Always available
     'menu_outlet': OutletPage(),
     'menu_routing': RoutingPage(),
     'menu_activity': ActivityPage(),
     'menu_selling': SellingPage(),
   };
 
+  Widget _getPageForIndex(int index, List<Permission> permissions) {
+    // Dashboard is always the first item
+    if (index == 0) return menuOrder['dashboard']!;
+
+    // Get available menu items based on permissions
+    final availableMenus =
+        permissions.map((p) => p.name).where((name) => menuOrder.containsKey(name)).toList();
+
+    // If index is within available menus range, show corresponding page
+    if (index - 1 < availableMenus.length) {
+      return menuOrder[availableMenus[index - 1]] ?? DashboardPage();
+    }
+
+    return DashboardPage(); // Fallback to dashboard
+  }
+
   @override
   Widget build(BuildContext context) {
     final bottomNavController = Get.find<BottomNavController>();
+
     return WillPopScope(
       onWillPop: () async {
         bool isLoggedIn = await loginController.isLoggedIn();
         if (isLoggedIn) {
-          if (bottomNavController.selectedIndex.value != 2) {
-            // If not on home page, navigate to home
-            bottomNavController.changeIndex(2);
+          if (bottomNavController.selectedIndex.value != 0) {
+            // If not on dashboard, navigate to dashboard
+            bottomNavController.changeIndex(0);
             return false;
           } else {
-            // If on home page, show exit confirmation dialog
             return await showExitConfirmationDialog(context);
           }
         }
-        // If not logged in, allow default back button behavior
         return true;
       },
       child: GPSAwareScaffold(
         requiresGPS: true,
         body: SafeArea(
           child: Obx(() {
-            final loginController = Get.find<LoginController>();
             final user = loginController.currentUser.value;
-            final permissions = user?.permissions;
+            final permissions = user?.permissions ?? [];
 
-            // If no user or permissions, show dashboard
-            if (user == null || permissions == null || permissions.isEmpty) {
-              return DashboardPage();
-            }
-
-            // Determine which page to show based on selected index
-            switch (bottomNavController.selectedIndex.value) {
-              case 0:
-                return DashboardPage(); // Fixed tab
-              case 1:
-                return permissions.length > 0
-                    ? (permissionPages[permissions[0].name] ?? DashboardPage())
-                    : DashboardPage();
-              case 2:
-                return permissions.length > 1
-                    ? (permissionPages[permissions[1].name] ?? DashboardPage())
-                    : DashboardPage();
-              case 3:
-                return permissions.length > 2
-                    ? (permissionPages[permissions[2].name] ?? DashboardPage())
-                    : DashboardPage();
-              case 4:
-                return permissions.length > 3
-                    ? (permissionPages[permissions[3].name] ?? DashboardPage())
-                    : DashboardPage();
-              default:
-                return DashboardPage();
-            }
+            return _getPageForIndex(
+              bottomNavController.selectedIndex.value,
+              permissions,
+            );
           }),
         ),
-        bottomNavigationBar: CustomBottomNavigationBar(),
+        bottomNavigationBar: CustomBottomNavigationBar(
+          permissions: loginController.currentUser.value?.permissions ?? [],
+        ),
       ),
     );
   }
 
   Future<bool> showExitConfirmationDialog(BuildContext context) async {
-    return await showDialog(
+    return await showDialog<bool>(
           context: context,
           builder: (BuildContext context) {
             return AlertDialog(

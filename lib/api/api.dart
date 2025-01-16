@@ -31,7 +31,7 @@ import '../model/form_outlet_response.dart';
 import '../model/get_city_response.dart';
 import '../model/login_response.dart';
 
-const String baseUrl = 'https://dev.cetaphil.id';
+const String baseUrl = 'https://cetaphil.id';
 // const String baseUrl = 'https://c877-36-68-56-36.ngrok-free.app';
 final GetStorage storage = GetStorage();
 
@@ -272,7 +272,7 @@ class ApiWrapper {
 }
 
 class Api {
-  static const String baseUrl = 'https://dev.cetaphil.id';
+  static const String baseUrl = 'https://cetaphil.id';
 
   static Future<LoginResponse> login(String email, String password) async {
     return ApiWrapper.loginWithTimeout<LoginResponse>(
