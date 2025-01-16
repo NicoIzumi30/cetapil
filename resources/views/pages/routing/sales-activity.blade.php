@@ -23,7 +23,7 @@
                 <tr>
                     <td class="detail-title">Hari Kunjungan</td>
                     <td class="colon">:</td>
-                    <td class="detail">{{ getVisitDayByNumber($salesActivity->outlet->visit_day) }}</td>
+                    <td class="detail">{{ getVisitDays($salesActivity->outlet_id)}}</td>
                     <td class="detail-title">Views</td>
                     <td class="colon">:</td>
                     <td class="detail">{{ $salesActivity->views_knowledge }}</td>
@@ -34,7 +34,7 @@
                     <td class="detail">{{ $salesActivity->checked_in }}</td>
                     <td class="detail-title">Check-Out</td>
                     <td class="colon">:</td>
-                    <td class="detail">Senin</td>
+                    <td class="detail">{{$salesActivity->checked_out}}</td>
                 </tr>
             </tbody>
         </table>
