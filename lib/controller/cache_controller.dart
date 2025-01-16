@@ -241,16 +241,16 @@ class CachedVideoController extends GetxController {
 
   void playPause() {
     if (!isInitialized.value || _videoController == null) return;
-
+showControls.toggle();
     if (_videoController!.value.isPlaying) {
       _videoController!.pause();
-      showControls.value = true;
+      // showControls.value = true;
       _hideControlsTimer?.cancel();
     } else {
       _videoController!.play();
       _hideControlsTimer?.cancel();
       _hideControlsTimer = Timer(const Duration(seconds: 3), () {
-        showControls.value = false;
+        // showControls.value = false;
       });
     }
   }
