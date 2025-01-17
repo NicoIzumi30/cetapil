@@ -22,7 +22,7 @@ if (!function_exists('getOutletByName')) {
 if (!function_exists('getOutletByCode')) {
     function getOutletByCode($code)
     {
-        return Outlet::where('code', $code)->first();
+        return Outlet::withTrashed()->where('code', $code)->first();
     }
 }
 
