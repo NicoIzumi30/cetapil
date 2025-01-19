@@ -56,10 +56,10 @@ class ValidateVisibilityEntries implements ValidationRule
                 return $item['type'] === 'SECONDARY' && $item['category'] === $category;
             });
 
-            if ($secondaryEntries->count() !== 2) {
-                $fail("Must have exactly 2 SECONDARY {$category} entries.");
-                return;
-            }
+            // if ($secondaryEntries->count() !== 2) {
+            //     $fail("Must have exactly 2 SECONDARY {$category} entries.");
+            //     return;
+            // }
 
             $secondaryPositions = $secondaryEntries->pluck('position')->sort()->values()->toArray();
             $missingSecondaryPositions = array_diff([1, 2], $secondaryPositions);
