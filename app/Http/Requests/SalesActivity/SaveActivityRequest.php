@@ -54,7 +54,7 @@ class SaveActivityRequest extends FormRequest
             'visibility.*.type' => 'required|in:PRIMARY,SECONDARY,COMPETITOR',
             'visibility.*.position' => 'required|integer|min:1|max:3',
             'visibility.*.posm_type_id' => 'required_if:type,PRIMARY|exists:posm_types,id',
-            // 'visibility.*.visual_type' => 'required_unless:visibility.*.category,COMPETITOR|string|max:255|nullable',
+            'visibility.*.visual_type' => 'required_unless:visibility.*.category,COMPETITOR|string|max:255|nullable',
             'visibility.*.condition' => 'required_if:type,PRIMARY|in:GOOD,BAD',
             'visibility.*.display_photo' => 'required|image|mimes:jpeg,png,jpg',
             'visibility.*.display_photo_2' => 'required_if:category,COMPETITOR|nullable|image|mimes:jpeg,png,jpg',
