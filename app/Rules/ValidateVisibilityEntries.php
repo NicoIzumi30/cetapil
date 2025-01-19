@@ -51,25 +51,25 @@ class ValidateVisibilityEntries implements ValidationRule
         }
 
         // Validate SECONDARY entries for CORE and BABY categories
-        // foreach (['CORE', 'BABY'] as $category) {
-        //     $secondaryEntries = collect($value)->filter(function ($item) use ($category) {
-        //         return $item['type'] === 'SECONDARY' && $item['category'] === $category;
-        //     });
+        foreach (['CORE', 'BABY'] as $category) {
+            $secondaryEntries = collect($value)->filter(function ($item) use ($category) {
+                return $item['type'] === 'SECONDARY' && $item['category'] === $category;
+            });
 
-        //     // if ($secondaryEntries->count() !== 2) {
-        //     //     $fail("Must have exactly 2 SECONDARY {$category} entries.");
-        //     //     return;
-        //     // }
+            if ($secondaryEntries->count() !== 2) {
+                $fail("Must have exactly 2 SECONDARY {$category} entries.");
+                return;
+            }
 
-        //     $secondaryPositions = $secondaryEntries->pluck('position')->sort()->values()->toArray();
-        //     $missingSecondaryPositions = array_diff([1, 2], $secondaryPositions);
+            $secondaryPositions = $secondaryEntries->pluck('position')->sort()->values()->toArray();
+            $missingSecondaryPositions = array_diff([1, 2], $secondaryPositions);
 
-        //     if (!empty($missingSecondaryPositions)) {
-        //         $missing = implode(', ', $missingSecondaryPositions);
-        //         $fail("SECONDARY {$category} is missing positions: {$missing}");
-        //         return;
-        //     }
-        // }
+            if (!empty($missingSecondaryPositions)) {
+                $missing = implode(', ', $missingSecondaryPositions);
+                $fail("SECONDARY {$category} is missing positions: {$missing}");
+                return;
+            }
+        }
 
         // Validate COMPETITOR category (required 2 entries)
         $competitorEntries = collect($value)->filter(function ($item) {
