@@ -138,8 +138,12 @@ class TambahVisibilityController extends GetxController {
     if (visualTypeId.value.isEmpty) {
       missingFields.add('Jenis Visual');
     }
-    if (visualType == "Others") {
-      if (otherVisualController.value.text.isEmpty) {
+    // Add validation for Others visual type
+    if (visualTypeId.value.isNotEmpty) {
+      final visualTypeData = supportDataController
+          .getVisualTypes()
+          .firstWhere((element) => element['id'] == visualTypeId.value);
+      if (visualTypeData['name'] == "Others" && otherVisualController.value.text.isEmpty) {
         missingFields.add('Others Visual');
       }
     }
@@ -179,19 +183,27 @@ class TambahVisibilityController extends GetxController {
     if (!validatePrimaryForm()) return;
     var id_part = id.split('-');
 
+    // Get the visual type name from support controller using the selected ID
+    String visualTypeName = '';
+    if (visualTypeId.value.isNotEmpty) {
+      final visualTypeData = supportDataController
+          .getVisualTypes()
+          .firstWhere((element) => element['id'] == visualTypeId.value);
+      visualTypeName = visualTypeData['name'];
+    }
+
+    final visualTypeValue =
+        visualTypeName == "Others" ? otherVisualController.value.text : visualTypeName;
+
     final data = {
       'id': id,
-      'category': id_part[1].toUpperCase(), // (CORE)
-      'position': id_part[2], // (1)
+      'category': id_part[1].toUpperCase(),
+      'position': id_part[2],
       'posm_type_id': posmTypeId.value,
       'posm_type_name': posmType.value,
       'visual_type_id': visualTypeId.value,
-      'visual_type': visualType.value == "Others"
-          ? otherVisualController.value.text
-          : visualType.value, // Changed from visual_type_name to match API
-      'visual_type_name': visualType.value == "Others"
-          ? otherVisualController.value.text
-          : visualType.value, // Keep this for backward compatibility
+      'visual_type': visualTypeValue,
+      'visual_type_name': visualTypeValue,
       'condition': selectedCondition.value,
       'shelf_width': lebarRak.value.text,
       'shelving': shelving.value.text,
