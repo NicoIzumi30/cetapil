@@ -127,7 +127,7 @@ class TambahActivityController extends GetxController {
         if (visibilityPrimaryDraftItems.length == 6 &&
             visibilitySecondaryDraftItems.length == 4 &&
             visibilityKompetitorDraftItems.length == 2) {
-          if (knowledgeTime.value >= 120) {
+          if (knowledgeTime.value >= 10) {
             /// minimal duration 3 menit
             return true;
           }
@@ -139,7 +139,7 @@ class TambahActivityController extends GetxController {
         if (visibilityPrimaryDraftItems.length == 6 &&
             visibilitySecondaryDraftItems.length == 4 &&
             visibilityKompetitorDraftItems.length == 2) {
-          if (knowledgeTime.value >= 120) {
+          if (knowledgeTime.value >= 10) {
             /// minimal duration 3 menit
             if (areAllControllersNotEmpty) {
               return true;
@@ -159,7 +159,7 @@ class TambahActivityController extends GetxController {
         visibilityPrimaryDraftItems.length == 6 &&
         visibilitySecondaryDraftItems.length == 4 &&
         visibilityKompetitorDraftItems.length == 2 &&
-        knowledgeTime.value >= 120 &&
+        knowledgeTime.value >= 10 &&
         areAllControllersNotEmpty;
   }
 
@@ -328,7 +328,6 @@ class TambahActivityController extends GetxController {
   firstInitializeData() {
     startTabTimer();
     initializeControllers();
-    clearAllDraftItems();
   }
 
   void initializeControllers() {
@@ -372,8 +371,8 @@ class TambahActivityController extends GetxController {
         throw 'Mohon lengkapi 2 data Visibility Competitor. Saat ini terisi ${visibilityKompetitorDraftItems.length} data';
       }
 
-      if (knowledgeTime.value < 120) {
-        throw 'Waktu minimum untuk Knowledge adalah 2 menit (120 detik). Saat ini: ${knowledgeTime.value} detik';
+      if (knowledgeTime.value < 10) {
+        throw 'Waktu minimum untuk Knowledge adalah 2 menit (10 detik). Saat ini: ${knowledgeTime.value} detik';
       }
 
       if (!areAllControllersNotEmpty) {
@@ -953,6 +952,9 @@ class TambahActivityController extends GetxController {
 
   // Add this method to TambahActivityController
   void clearAllDraftItems() {
+    // Cancel any existing timer
+    _timer?.cancel();
+
     // Clear all draft items
     availabilityDraftItems.clear();
     orderDraftItems.clear();
@@ -960,22 +962,30 @@ class TambahActivityController extends GetxController {
     visibilitySecondaryDraftItems.clear();
     visibilityKompetitorDraftItems.clear();
 
+    // Clear product-related data
     selectedProducts.value.clear();
     productInputs.value.clear();
     products.value.clear();
 
-    // Clear controllers
+    // Clear all controllers
     for (var controllerMap in productControllers.values) {
       for (var controller in controllerMap.values) {
         controller.clear();
       }
     }
+    productControllers.clear(); // Add this line
 
-    priceControllers.clear();
+    // Clear survey controllers
+    for (var controller in priceControllers.values) {
+      controller.clear();
+    }
+    priceControllers.clear(); // Add this line
 
+    // Reset switch states
     for (var switchState in switchStates.values) {
       switchState.value = true;
     }
+    switchStates.clear(); // Add this line
 
     // Reset all timers to 0
     availabilityTime.value = 0;
@@ -984,11 +994,16 @@ class TambahActivityController extends GetxController {
     surveyTime.value = 0;
     orderTime.value = 0;
 
+    // Clear detail draft map
+    detailDraft.clear();
+
     // Refresh all observable lists
     availabilityDraftItems.refresh();
     orderDraftItems.refresh();
     visibilityPrimaryDraftItems.refresh();
     visibilitySecondaryDraftItems.refresh();
+    visibilityKompetitorDraftItems.refresh();
+
     update();
   }
 

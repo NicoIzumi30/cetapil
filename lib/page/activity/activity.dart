@@ -108,10 +108,32 @@ class ActivityPage extends GetView<ActivityController> {
                                       Get.to(() => TambahActivity());
                                     } else {
                                       final outlet_id = activity.outlet!.id;
-                                      tambahActivityController.selectedTab.value = 0;
+
+                                      // First reset all controllers
+                                      final tambahAvailabilityController =
+                                          Get.find<TambahAvailabilityController>();
+                                      final tambahVisibilityController =
+                                          Get.find<TambahVisibilityController>();
+                                      final tambahOrderController =
+                                          Get.find<TambahOrderController>();
+
+                                      // Clear all controllers first
+                                      tambahAvailabilityController.clearForm();
+                                      tambahVisibilityController.clearPrimaryForm();
+                                      tambahVisibilityController.clearSecondaryForm();
+                                      tambahVisibilityController.clearKompetitorForm();
+                                      tambahOrderController.clearForm();
+
+                                      // Then clear all draft items and related data
+                                      tambahActivityController.detailDraft.clear();
                                       tambahActivityController.clearAllDraftItems();
+
+                                      // Reset values
+                                      tambahActivityController.selectedTab.value = 0;
                                       tambahActivityController.setOutletId(outlet_id!);
                                       tambahActivityController.setDetailOutlet(activity);
+
+                                      // Initialize with clean state
                                       tambahActivityController.firstInitializeData();
                                       Get.to(() => TambahActivity());
                                     }

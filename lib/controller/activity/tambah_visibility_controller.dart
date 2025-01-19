@@ -179,41 +179,42 @@ class TambahVisibilityController extends GetxController {
     return true;
   }
 
-  void savePrimaryVisibility(String id) {
-    if (!validatePrimaryForm()) return;
-    var id_part = id.split('-');
+  
+void savePrimaryVisibility(String id) {
+  if (!validatePrimaryForm()) return;
+  var id_part = id.split('-');
 
-    // Get the visual type name from support controller using the selected ID
-    String visualTypeName = '';
-    if (visualTypeId.value.isNotEmpty) {
-      final visualTypeData = supportDataController
-          .getVisualTypes()
-          .firstWhere((element) => element['id'] == visualTypeId.value);
-      visualTypeName = visualTypeData['name'];
-    }
-
-    final visualTypeValue =
-        visualTypeName == "Others" ? otherVisualController.value.text : visualTypeName;
-
-    final data = {
-      'id': id,
-      'category': id_part[1].toUpperCase(),
-      'position': id_part[2],
-      'posm_type_id': posmTypeId.value,
-      'posm_type_name': posmType.value,
-      'visual_type_id': visualTypeId.value,
-      'visual_type': visualTypeValue,
-      'visual_type_name': visualTypeValue,
-      'condition': selectedCondition.value,
-      'shelf_width': lebarRak.value.text,
-      'shelving': shelving.value.text,
-      'image_visibility': visibilityImages.value,
-    };
-
-    activityController.addPrimaryVisibilityItem(data);
-    clearPrimaryForm();
-    Get.back();
+  // Always ensure visual_type has a value
+  String visualTypeValue;
+  if (visualType.value == "Others") {
+    visualTypeValue = otherVisualController.value.text;
+  } else {
+    // Get it directly from support controller as fallback
+    final visualTypeData = supportDataController
+        .getVisualTypes()
+        .firstWhere((element) => element['id'] == visualTypeId.value);
+    visualTypeValue = visualTypeData['name'];
   }
+
+  final data = {
+    'id': id,
+    'category': id_part[1].toUpperCase(),
+    'position': id_part[2],
+    'posm_type_id': posmTypeId.value,
+    'posm_type_name': posmType.value,
+    'visual_type_id': visualTypeId.value,
+    'visual_type': visualTypeValue.toString().toUpperCase(), // Ensure it's uppercase
+    'visual_type_name': visualTypeValue.toString().toUpperCase(),
+    'condition': selectedCondition.value,
+    'shelf_width': lebarRak.value.text,
+    'shelving': shelving.value.text,
+    'image_visibility': visibilityImages.value,
+  };
+
+  activityController.addPrimaryVisibilityItem(data);
+  clearPrimaryForm();
+  Get.back();
+}
 
   void clearPrimaryForm() {
     posmType.value = '';
