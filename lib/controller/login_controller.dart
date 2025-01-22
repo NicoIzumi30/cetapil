@@ -1,3 +1,5 @@
+import 'dart:io';
+
 import 'package:cetapil_mobile/controller/activity/activity_controller.dart';
 import 'package:cetapil_mobile/controller/activity/tambah_activity_controller.dart';
 import 'package:cetapil_mobile/controller/activity/tambah_availibility_controller.dart';
@@ -21,6 +23,7 @@ import 'package:cetapil_mobile/database/support_database.dart';
 import 'package:get/get.dart';
 import 'package:get_storage/get_storage.dart';
 import 'package:path/path.dart';
+import 'package:path_provider/path_provider.dart';
 import 'package:sqflite/sqflite.dart';
 import '../widget/custom_alert.dart';
 import '../api/api.dart';
@@ -136,19 +139,26 @@ class LoginController extends GetxController {
           DateTime(currentDate.year, currentDate.month, currentDate.day).toIso8601String();
 
       if (lastResetDate == null || lastResetDate != today) {
-        print('Resetting databases for new day: $today');
+        print('Starting daily cleanup: $today');
 
-        // 1. Reset controller states
+        // 1. Reset controllers first to prevent any ongoing operations
         await resetControllersState();
 
-        // 2. Clean up all databases
+        // 2. Clear app cache
+        await _clearAppCache();
+
+        // 3. Clean databases with error handling
         await _clearAllDatabasesData();
 
-        // 3. Update the reset date
+        // 4. Update reset date only if cleanup was successful
         await _storage.write('last_db_reset_date', today);
+
+        print('Daily cleanup completed successfully');
       }
     } catch (e) {
-      print('Error checking/resetting databases: $e');
+      print('Error during daily cleanup: $e');
+      // Attempt recovery if cleanup fails
+      await _attemptRecoveryCleanup();
     }
   }
 
@@ -176,6 +186,10 @@ class LoginController extends GetxController {
     try {
       isLoading.value = true;
       errorMessage.value = '';
+
+      if (!await _checkDiskSpace()) {
+        throw 'Insufficient storage space. Please clear some space on your device.';
+      }
 
       if (email.isEmpty || password.isEmpty) {
         throw 'Email & Password tidak boleh kosong';
@@ -661,6 +675,82 @@ class LoginController extends GetxController {
       print('All databases cleared successfully');
     } catch (e) {
       print('Error in database cleanup: $e');
+    }
+  }
+
+  Future<bool> _checkDiskSpace() async {
+    try {
+      final directory = await getApplicationDocumentsDirectory();
+      final statResult = await directory.stat();
+
+      // Get total size of files in app directory
+      int totalSize = 0;
+      await for (var entity in directory.list(recursive: true, followLinks: false)) {
+        if (entity is File) {
+          totalSize += await entity.length();
+        }
+      }
+
+      // If using more than 80% of typical mobile storage quota (let's say 500MB), trigger cleanup
+      const storageLimit = 500 * 1024 * 1024; // 500MB in bytes
+      if (totalSize > (storageLimit * 0.8)) {
+        // 80% threshold
+        // Trigger urgent cleanup
+        await _attemptRecoveryCleanup();
+
+        // Check size again after cleanup
+        int newSize = 0;
+        await for (var entity in directory.list(recursive: true, followLinks: false)) {
+          if (entity is File) {
+            newSize += await entity.length();
+          }
+        }
+        return newSize < (storageLimit * 0.8);
+      }
+
+      return true;
+    } catch (e) {
+      print('Error checking disk space: $e');
+      return false;
+    }
+  }
+
+  Future<void> _attemptRecoveryCleanup() async {
+    try {
+      // Clear only essential data to prevent app crashes
+      final supportDb = await SupportDatabaseHelper.instance.database;
+      final mainDb = await DatabaseHelper.instance.database;
+
+      await supportDb.execute('VACUUM');
+      await mainDb.execute('VACUUM');
+
+      // Clear temporary files
+      final tempDir = await getTemporaryDirectory();
+      if (await tempDir.exists()) {
+        final files = await tempDir.list().toList();
+        for (var file in files) {
+          try {
+            await file.delete();
+          } catch (e) {
+            // Skip if file can't be deleted
+            continue;
+          }
+        }
+      }
+    } catch (e) {
+      print('Recovery cleanup failed: $e');
+    }
+  }
+
+  Future<void> _clearAppCache() async {
+    try {
+      final cacheDir = await getTemporaryDirectory();
+      if (await cacheDir.exists()) {
+        await cacheDir.delete(recursive: true);
+        await cacheDir.create();
+      }
+    } catch (e) {
+      print('Error clearing cache: $e');
     }
   }
 
