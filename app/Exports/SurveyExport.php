@@ -165,7 +165,7 @@ class SurveyExport implements FromCollection, WithMapping, WithStyles, ShouldAut
             $activity->outlet->account ?? '-',
             $activity->outlet->channel->name ?? '-',
             $activity->outlet->code ?? '-',
-            $activity->outlet->tipe_outlet,
+            $activity->outlet->tipe_outlet ?? '-',
             $activity->day_name,
             $activity->checked_in,
             $activity->checked_out,
