@@ -53,8 +53,8 @@ class SellingController extends Controller
                     'product_id' => $prod->id,
                     'product_name' => $prod->sku,
                     'qty' => $product['qty'],
-                    'price' => $product['price'],
-                    'total' => $product['qty'] * $product['price']
+                    'price' => $prod->price,
+                    'total' => $product['qty'] * $prod->price
                 ]);
             }
         }
