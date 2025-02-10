@@ -159,11 +159,11 @@ class SurveyExport implements FromCollection, WithMapping, WithStyles, ShouldAut
                     $activity->time_order;
 
         $mappedData = [
-            $activity->user->name,
+            $activity->user->name ?? '-',
             $activity->outlet->TSO ?? '-',
-            $activity->outlet->name,
+            $activity->outlet->name ?? '-',
             $activity->outlet->account,
-            $activity->outlet->channel->name,
+            $activity->outlet->channel->name ?? '-',
             $activity->outlet->code,
             $activity->outlet->tipe_outlet,
             $activity->day_name,
