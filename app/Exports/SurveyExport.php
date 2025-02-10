@@ -160,7 +160,7 @@ class SurveyExport implements FromCollection, WithMapping, WithStyles, ShouldAut
 
         $mappedData = [
             $activity->user->name,
-            $activity->outlet->TSO,
+            $activity->outlet->TSO ?? '-',
             $activity->outlet->name,
             $activity->outlet->account,
             $activity->outlet->channel->name,
