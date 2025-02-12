@@ -177,6 +177,7 @@ class TambahOrderController extends GetxController {
 
   void clearForm() {
     productValues.clear();
+    productValues.value = {};
     selectedCategory.value = null;
   }
 
