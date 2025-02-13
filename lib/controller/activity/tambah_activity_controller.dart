@@ -482,6 +482,8 @@ class TambahActivityController extends GetxController {
       if (isExists) {
         await db.deleteSalesActivity(detailOutlet.value!.id!);
       }
+      // Clear all controller data
+      clearAllControllerData();
       activityController.initGetActivity();
       EasyLoading.dismiss();
       Get.back();
@@ -1004,6 +1006,69 @@ class TambahActivityController extends GetxController {
     visibilitySecondaryDraftItems.refresh();
     visibilityKompetitorDraftItems.refresh();
 
+    update();
+  }
+
+  void clearAllControllerData() {
+    // Clear all observables
+    availabilityDraftItems.clear();
+    visibilityPrimaryDraftItems.clear();
+    visibilitySecondaryDraftItems.clear();
+    visibilityKompetitorDraftItems.clear();
+    orderDraftItems.clear();
+
+    // Reset all timers
+    availabilityTime.value = 0;
+    visibilityTime.value = 0;
+    knowledgeTime.value = 0;
+    surveyTime.value = 0;
+    orderTime.value = 0;
+
+    // Clear all text controllers
+    for (var controller in priceControllers.values) {
+      controller.clear();
+    }
+    priceControllers.clear();
+
+    // Reset all switch states
+    for (var switchState in switchStates.values) {
+      switchState.value = true;
+    }
+    switchStates.clear();
+
+    // Clear product values
+    if (Get.isRegistered<TambahAvailabilityController>()) {
+      final availabilityController = Get.find<TambahAvailabilityController>();
+      availabilityController.clearForm();
+      availabilityController.productValues.clear();
+      availabilityController.savedProductValues.clear();
+    }
+
+    // Clear visibility controller data
+    if (Get.isRegistered<TambahVisibilityController>()) {
+      final visibilityController = Get.find<TambahVisibilityController>();
+      visibilityController.clearPrimaryForm();
+      visibilityController.clearSecondaryForm();
+      visibilityController.clearKompetitorForm();
+    }
+
+    // Clear order controller data
+    if (Get.isRegistered<TambahOrderController>()) {
+      final orderController = Get.find<TambahOrderController>();
+      orderController.clearForm();
+    }
+
+    // Clear draft data
+    detailDraft.clear();
+
+    // Refresh all observables
+    availabilityDraftItems.refresh();
+    visibilityPrimaryDraftItems.refresh();
+    visibilitySecondaryDraftItems.refresh();
+    visibilityKompetitorDraftItems.refresh();
+    orderDraftItems.refresh();
+
+    // Force UI update
     update();
   }
 

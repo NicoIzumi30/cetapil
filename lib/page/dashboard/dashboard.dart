@@ -182,8 +182,7 @@ class DashboardPage extends GetView<DashboardController> {
                             itemCount: controller.programUrls.length,
                             itemBuilder: (context, index, realIndex) {
                               final program = controller.programUrls[index];
-                              final imageUrl =
-                                  'https://cetaphil.id/storage${program.path ?? ''}';
+                              final imageUrl = 'https://cetaphil.id/storage${program.path ?? ''}';
 
                               return Padding(
                                 padding: const EdgeInsets.symmetric(horizontal: 5),
@@ -566,7 +565,7 @@ class PowerSkuItem extends StatelessWidget {
                     child: Text(
                       '${(progress * 100).toInt()}%',
                       style: TextStyle(
-                        color: progress > 0.5 ? Colors.white : Colors.black,
+                        color: Colors.black,
                         fontSize: 10,
                         fontWeight: FontWeight.bold,
                       ),
