@@ -2,7 +2,11 @@ name: cetapil_mobile
 description: "A new Flutter project."
 publish_to: 'none' # Remove this line if you wish to publish to pub.dev
 
+<<<<<<< HEAD
 version: 1.1.6+11
+=======
+version: 1.1.6+2
+>>>>>>> 2860051d0e64c7923165f3e1a141c1bf49ef101e
 
 environment:
   sdk: ^3.5.4
@@ -41,6 +45,7 @@ dependencies:
   dio: ^5.7.0
   permission_handler: ^11.3.1
   package_info_plus: ^8.1.2
+  upgrader: ^11.3.1
 
 
 dev_dependencies:

@@ -26,7 +26,7 @@ import 'controller/pdf_controller.dart';
 void main() async {
   // Ensure Flutter bindings are initialized
   WidgetsFlutterBinding.ensureInitialized();
-
+  // await Upgrader.clearSavedSettings();
   // Request necessary storage permissions
   await [
     Permission.storage,
@@ -116,7 +116,7 @@ class MyApp extends StatelessWidget {
       initialBinding: InitialBindings(),
       debugShowCheckedModeBanner: false,
       title: 'Cetaphil App',
-      home: const SplashScreen(),
+      home: SplashScreen(),
       theme: ThemeData(
         fontFamily: 'PlusJakartaSans',
         textTheme: const TextTheme(

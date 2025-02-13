@@ -127,6 +127,7 @@ class ActivityPage extends GetView<ActivityController> {
                                       // Then clear all draft items and related data
                                       tambahActivityController.detailDraft.clear();
                                       tambahActivityController.clearAllDraftItems();
+                                      tambahActivityController.onClose();
 
                                       // Reset values
                                       tambahActivityController.selectedTab.value = 0;

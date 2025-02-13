@@ -3,6 +3,7 @@ import 'package:cetapil_mobile/page/routing/routing.dart';
 import 'package:cetapil_mobile/page/selling/selling.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
+import 'package:upgrader/upgrader.dart';
 
 import '../controller/bottom_nav_controller.dart';
 import '../controller/login_controller.dart';
@@ -51,35 +52,47 @@ class MainPage extends GetView<BottomNavController> {
   Widget build(BuildContext context) {
     final bottomNavController = Get.find<BottomNavController>();
 
-    return WillPopScope(
-      onWillPop: () async {
-        bool isLoggedIn = await loginController.isLoggedIn();
-        if (isLoggedIn) {
-          if (bottomNavController.selectedIndex.value != 0) {
-            // If not on dashboard, navigate to dashboard
-            bottomNavController.changeIndex(0);
-            return false;
-          } else {
-            return await showExitConfirmationDialog(context);
+    return UpgradeAlert(
+      dialogStyle: UpgradeDialogStyle.material,
+      showIgnore: false,  // Hides the "Ignore" button
+      showLater: true,
+      upgrader: Upgrader(
+          languageCode: 'id',
+          storeController: UpgraderStoreController(
+            onAndroid: () => UpgraderPlayStore(),
+          ),
+          // debugDisplayAlways: true
+          ),
+      child: WillPopScope(
+        onWillPop: () async {
+          bool isLoggedIn = await loginController.isLoggedIn();
+          if (isLoggedIn) {
+            if (bottomNavController.selectedIndex.value != 0) {
+              // If not on dashboard, navigate to dashboard
+              bottomNavController.changeIndex(0);
+              return false;
+            } else {
+              return await showExitConfirmationDialog(context);
+            }
           }
-        }
-        return true;
-      },
-      child: GPSAwareScaffold(
-        requiresGPS: true,
-        body: SafeArea(
-          child: Obx(() {
-            final user = loginController.currentUser.value;
-            final permissions = user?.permissions ?? [];
+          return true;
+        },
+        child: GPSAwareScaffold(
+          requiresGPS: true,
+          body: SafeArea(
+            child: Obx(() {
+              final user = loginController.currentUser.value;
+              final permissions = user?.permissions ?? [];
 
-            return _getPageForIndex(
-              bottomNavController.selectedIndex.value,
-              permissions,
-            );
-          }),
-        ),
-        bottomNavigationBar: CustomBottomNavigationBar(
-          permissions: loginController.currentUser.value?.permissions ?? [],
+              return _getPageForIndex(
+                bottomNavController.selectedIndex.value,
+                permissions,
+              );
+            }),
+          ),
+          bottomNavigationBar: CustomBottomNavigationBar(
+            permissions: loginController.currentUser.value?.permissions ?? [],
+          ),
         ),
       ),
     );
