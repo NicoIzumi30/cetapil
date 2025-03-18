@@ -274,10 +274,10 @@ class _CompactProductCardState extends State<CompactProductCard> {
 
   void _setupListeners() {
     void updateValues() {
-      toggleAvailabilityYesNo.value = stockOnInventoryController.text.isNotEmpty &&
-              int.parse(stockOnInventoryController.text) > 0
-          ? true
-          : false;
+      // toggleAvailabilityYesNo.value = stockOnInventoryController.text.isNotEmpty &&
+      //         int.parse(stockOnInventoryController.text) > 0
+      //     ? true
+      //     : false;
       widget.onChanged({
         'availability_exist': toggleAvailabilityYesNo.value ? 'true' : 'false',
         'stock_on_hand': stockOnHandController.text.isEmpty ? '0' : stockOnHandController.text,
@@ -397,7 +397,7 @@ class _CompactProductCardState extends State<CompactProductCard> {
                       value: toggleAvailabilityYesNo.value,
                       onChanged: (value) {
                         setState(() {
-                          toggleAvailabilityYesNo.value = !toggleAvailabilityYesNo.value;
+                          toggleAvailabilityYesNo.value = value;
                         });
                       },
                       activeColor: Colors.blue,

@@ -127,7 +127,7 @@ class TambahActivityController extends GetxController {
         if (visibilityPrimaryDraftItems.length == 6 &&
             visibilitySecondaryDraftItems.length == 4 &&
             visibilityKompetitorDraftItems.length == 2) {
-          if (knowledgeTime.value >= 10) {
+          if (knowledgeTime.value >= 120) {
             /// minimal duration 3 menit
             return true;
           }
@@ -139,7 +139,7 @@ class TambahActivityController extends GetxController {
         if (visibilityPrimaryDraftItems.length == 6 &&
             visibilitySecondaryDraftItems.length == 4 &&
             visibilityKompetitorDraftItems.length == 2) {
-          if (knowledgeTime.value >= 10) {
+          if (knowledgeTime.value >= 120) {
             /// minimal duration 3 menit
             if (areAllControllersNotEmpty) {
               return true;
@@ -159,7 +159,7 @@ class TambahActivityController extends GetxController {
         visibilityPrimaryDraftItems.length == 6 &&
         visibilitySecondaryDraftItems.length == 4 &&
         visibilityKompetitorDraftItems.length == 2 &&
-        knowledgeTime.value >= 10 &&
+        knowledgeTime.value >= 120 &&
         areAllControllersNotEmpty;
   }
 
@@ -371,8 +371,8 @@ class TambahActivityController extends GetxController {
         throw 'Mohon lengkapi 2 data Visibility Competitor. Saat ini terisi ${visibilityKompetitorDraftItems.length} data';
       }
 
-      if (knowledgeTime.value < 10) {
-        throw 'Waktu minimum untuk Knowledge adalah 2 menit (10 detik). Saat ini: ${knowledgeTime.value} detik';
+      if (knowledgeTime.value < 120) {
+        throw 'Waktu minimum untuk Knowledge adalah 2 menit (120 detik). Saat ini: ${knowledgeTime.value} detik';
       }
 
       if (!areAllControllersNotEmpty) {
