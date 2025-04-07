@@ -668,7 +668,7 @@ class TambahActivityController extends GetxController {
 
           bool isAvailable = availabilityDraftItems.any((item) =>
               item['id'] == productId &&
-              item['availability_exist'] == true &&
+              // item['availability_exist'] == true &&
               (int.parse(item['stock_on_inventory'].toString()) > 0));
 
           toggleSwitch(id, isAvailable);
