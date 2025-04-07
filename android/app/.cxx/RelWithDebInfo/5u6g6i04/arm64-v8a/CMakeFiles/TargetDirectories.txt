@@ -1,0 +1,2 @@
+D:/2024/project/project_client/cetapil_mobile/android/app/.cxx/RelWithDebInfo/5u6g6i04/arm64-v8a/CMakeFiles/edit_cache.dir
+D:/2024/project/project_client/cetapil_mobile/android/app/.cxx/RelWithDebInfo/5u6g6i04/arm64-v8a/CMakeFiles/rebuild_cache.dir
