@@ -231,7 +231,7 @@ class TambahActivityController extends GetxController {
           'id': 'secondary-${data["category"].toString().toLowerCase()}-${data["position"]}',
           'category': data['category'],
           'position': data['position'],
-          'secondary_exist': data['secondary_exist'] == "true" ? "ada" : "tidak",
+          'secondary_exist': data['secondary_exist'],
           'display_type': data['display_type'],
           'display_image': File(data['display_image']),
         };

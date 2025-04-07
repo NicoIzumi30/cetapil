@@ -68,6 +68,7 @@ class TambahVisibilityController extends GetxController {
     if (data.isEmpty) {
       return;
     } else {
+      print("Secondary exist: ${data['secondary_exist']}");
       toggleSecondaryYesNo.value = data['secondary_exist'] == "true" ? true : false;
       tipeDisplay.value.text = data['display_type'];
       displayImages.value = data['display_image'];
@@ -376,7 +377,7 @@ void savePrimaryVisibility(String id) {
       'position': id_part[2],
 
       /// (1)
-      'secondary_exist': toggleSecondaryYesNo.toString(),
+      'secondary_exist': toggleSecondaryYesNo.value.toString(),
       'display_type': tipeDisplay.value.text,
       'display_image': displayImages.value,
     };
